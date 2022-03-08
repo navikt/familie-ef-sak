@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -48,6 +49,7 @@ internal class BehandlingsstatistikkTaskTest {
         val personIdent = "123456789012"
         val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
         val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, type = FØRSTEGANGSBEHANDLING)
+        val saksbehandling = saksbehandling(fagsak, behandling)
         val hendelse = Hendelse.BESLUTTET
         val hendelseTidspunkt = ZonedDateTime.now()
         val søknadstidspunkt = ZonedDateTime.now().minusDays(5)
@@ -81,7 +83,7 @@ internal class BehandlingsstatistikkTaskTest {
         val oppgaveService = mockk<OppgaveService>()
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
-        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()

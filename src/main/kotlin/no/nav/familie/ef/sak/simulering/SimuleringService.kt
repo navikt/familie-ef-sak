@@ -1,11 +1,8 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
-import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -23,8 +20,6 @@ import java.util.UUID
 
 @Service
 class SimuleringService(private val iverksettClient: IverksettClient,
-                        private val behandlingService: BehandlingService,
-                        private val fagsakService: FagsakService,
                         private val vedtakService: VedtakService,
                         private val blankettSimuleringsService: BlankettSimuleringsService,
                         private val simuleringsresultatRepository: SimuleringsresultatRepository,
@@ -32,12 +27,10 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                         private val tilgangService: TilgangService) {
 
 
-    fun simuler(behandlingId: UUID): Simuleringsoppsummering {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-
-        return when (behandling.type) {
-            BehandlingType.BLANKETT -> simulerForBlankett(behandling)
-            else -> simulerForBehandling(behandling)
+    fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
+        return when (saksbehandling.type) {
+            BehandlingType.BLANKETT -> simulerForBlankett(saksbehandling)
+            else -> simulerForBehandling(saksbehandling)
         }
     }
 
@@ -50,11 +43,10 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         simuleringsresultatRepository.deleteById(behandlingId)
     }
 
-    fun hentOgLagreSimuleringsresultat(behandling: Behandling): Simuleringsresultat {
+    fun hentOgLagreSimuleringsresultat(behandling: Saksbehandling): Simuleringsresultat {
         tilgangService.validerHarSaksbehandlerrolle()
-        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
         simuleringsresultatRepository.deleteById(behandling.id)
-        val beriketSimuleringsresultat = simulerMedTilkjentYtelse(behandling, fagsak)
+        val beriketSimuleringsresultat = simulerMedTilkjentYtelse(behandling)
         return simuleringsresultatRepository.insert(Simuleringsresultat(
                 behandlingId = behandling.id,
                 data = beriketSimuleringsresultat.detaljer,
@@ -62,9 +54,10 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         ))
     }
 
-    private fun simulerForBehandling(behandling: Behandling): Simuleringsoppsummering {
+    private fun simulerForBehandling(behandling: Saksbehandling): Simuleringsoppsummering {
 
-        if (behandling.status.behandlingErLåstForVidereRedigering() || !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)) {
+        if (behandling.status.behandlingErLåstForVidereRedigering()
+            || !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)) {
             val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
             return simuleringsresultat.beriketData.oppsummering
         }
@@ -72,19 +65,19 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         return simuleringsresultat.beriketData.oppsummering
     }
 
-    private fun simulerMedTilkjentYtelse(behandling: Behandling, fagsak: Fagsak): BeriketSimuleringsresultat {
-        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
+    private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
+        val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
 
         val tilkjentYtelseMedMedtadata =
                 tilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                                                            eksternBehandlingId = behandling.eksternId.id,
-                                                            stønadstype = fagsak.stønadstype,
-                                                            eksternFagsakId = fagsak.eksternId.id)
+                                                            eksternBehandlingId = saksbehandling.eksternId,
+                                                            stønadstype = saksbehandling.stønadstype,
+                                                            eksternFagsakId = saksbehandling.eksternFagsakId)
 
         try {
             return iverksettClient.simuler(SimuleringDto(
                     nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
-                    forrigeBehandlingId = behandling.forrigeBehandlingId
+                    forrigeBehandlingId = saksbehandling.forrigeBehandlingId
             ))
         } catch (exception: Exception) {
             throw Feil(message = "Kunne ikke utføre simulering",
@@ -94,10 +87,9 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun simulerForBlankett(behandling: Behandling): Simuleringsoppsummering {
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+    private fun simulerForBlankett(behandling: Saksbehandling): Simuleringsoppsummering {
         val vedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
-        val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, behandling, fagsak)
+        val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, behandling)
         val simuleringDto = SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
                 forrigeBehandlingId = null

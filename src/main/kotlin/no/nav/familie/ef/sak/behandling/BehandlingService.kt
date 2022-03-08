@@ -59,9 +59,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-            ?: hentBehandlinger(fagsakId)
-                    .filter { it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT }
-                    .lastOrNull()
+            ?: hentBehandlinger(fagsakId).lastOrNull {
+                it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT
+            }
 
 
     fun finnGjeldendeIverksatteBehandlinger(stonadstype: Stønadstype) =
@@ -127,6 +127,11 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
+    fun hentSaksbehandling(behandlingId: UUID): Saksbehandling = behandlingRepository.finnSaksbehandling(behandlingId)
+
+    fun hentSaksbehandling(eksternBehandlingId: Long): Saksbehandling =
+            behandlingRepository.finnSaksbehandling(eksternBehandlingId)
+
     fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(
             eksternBehandlingId) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
 
@@ -167,7 +172,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                 resultat = HENLAGT,
                                                 steg = BEHANDLING_FERDIGSTILT,
                                                 status = FERDIGSTILT)
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
+        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = henlagtBehandling.id,
+                                                            stegtype = henlagtBehandling.steg,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)
         return behandlingRepository.update(henlagtBehandling)

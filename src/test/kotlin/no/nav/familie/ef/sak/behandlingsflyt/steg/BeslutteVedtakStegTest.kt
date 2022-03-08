@@ -7,6 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -31,6 +32,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -163,13 +165,15 @@ internal class BeslutteVedtakStegTest {
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean): StegType {
-        return beslutteVedtakSteg.utførOgReturnerNesteSteg(Behandling(id = behandlingId,
-                                                                      fagsakId = fagsak.id,
-                                                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                      status = BehandlingStatus.FATTER_VEDTAK,
-                                                                      steg = beslutteVedtakSteg.stegType(),
-                                                                      resultat = BehandlingResultat.IKKE_SATT,
-                                                                      årsak = BehandlingÅrsak.SØKNAD),
-                                                           BeslutteVedtakDto(godkjent = godkjent))
+
+        return beslutteVedtakSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak,
+                                                                          Behandling(id = behandlingId,
+                                                                                     fagsakId = fagsak.id,
+                                                                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                                     status = BehandlingStatus.FATTER_VEDTAK,
+                                                                                     steg = beslutteVedtakSteg.stegType(),
+                                                                                     resultat = BehandlingResultat.IKKE_SATT,
+                                                                                     årsak = BehandlingÅrsak.SØKNAD)),
+                                                                          BeslutteVedtakDto(godkjent = godkjent))
     }
 }

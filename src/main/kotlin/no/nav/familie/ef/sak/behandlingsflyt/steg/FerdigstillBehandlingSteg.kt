@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
@@ -18,15 +18,15 @@ class FerdigstillBehandlingSteg(private val behandlingService: BehandlingService
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        logger.info("Ferdigstiller behandling [${behandling.id}]")
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.FERDIGSTILT)
+    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+        logger.info("Ferdigstiller behandling [${saksbehandling.id}]")
+        behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FERDIGSTILT)
 
-        when (behandling.type) {
+        when (saksbehandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
-                taskRepository.save(PubliserVedtakshendelseTask.opprettTask(behandling.id))
-                if (!behandling.erMigrering()) {
-                    taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
+                taskRepository.save(PubliserVedtakshendelseTask.opprettTask(saksbehandling.id))
+                if (!saksbehandling.erMigrering()) {
+                    taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = saksbehandling.id))
                 }
             }
             BehandlingType.BLANKETT, BehandlingType.TEKNISK_OPPHØR -> {

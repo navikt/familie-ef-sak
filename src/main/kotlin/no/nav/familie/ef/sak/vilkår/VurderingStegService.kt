@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
@@ -80,7 +80,7 @@ class VurderingStegService(private val behandlingService: BehandlingService,
     }
 
     private fun oppdaterStegPåBehandling(behandlingId: UUID) {
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
         val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
             if (it.key == VilkårType.ALENEOMSORG) {
@@ -100,14 +100,14 @@ class VurderingStegService(private val behandlingService: BehandlingService,
         }
     }
 
-    private fun opprettBehandlingsstatistikkTask(behandling: Behandling) {
+    private fun opprettBehandlingsstatistikkTask(behandling: Saksbehandling) {
         if (behandling.type != BehandlingType.BLANKETT) {
             taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = behandling.id))
         }
 
     }
 
-    private fun erInitiellVurderingAvVilkår(behandling: Behandling): Boolean {
+    private fun erInitiellVurderingAvVilkår(behandling: Saksbehandling): Boolean {
         return behandling.status == BehandlingStatus.OPPRETTET
     }
 

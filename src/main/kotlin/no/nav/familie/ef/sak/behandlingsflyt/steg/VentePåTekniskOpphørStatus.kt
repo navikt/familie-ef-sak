@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
@@ -11,16 +11,16 @@ import org.springframework.stereotype.Service
 class VentePåTekniskOpphørStatus(private val iverksettClient: IverksettClient,
                                  private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        return iverksettClient.hentStatus(behandling.id).let {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+        return iverksettClient.hentStatus(saksbehandling.id).let {
             when (it) {
-                IverksettStatus.OK_MOT_OPPDRAG -> opprettFerdigstillOppgave(behandling)
-                else -> error("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
+                IverksettStatus.OK_MOT_OPPDRAG -> opprettFerdigstillOppgave(saksbehandling)
+                else -> error("Mottok status $it fra iverksett for behandlingId=${saksbehandling.id}")
             }
         }
     }
 
-    fun opprettFerdigstillOppgave(behandling: Behandling) {
+    fun opprettFerdigstillOppgave(behandling: Saksbehandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
     }
 

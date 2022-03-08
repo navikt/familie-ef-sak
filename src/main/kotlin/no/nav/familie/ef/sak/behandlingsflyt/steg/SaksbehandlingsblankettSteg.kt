@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
 import no.nav.familie.ef.sak.blankett.BlankettHelper.lagArkiverBlankettRequestMotNyLøsning
 import no.nav.familie.ef.sak.blankett.BlankettService
@@ -26,18 +26,18 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        if (behandling.erMigrering()) {
-            logger.info("Oppretter ikke saksbehandlingsblankett for behandling=${behandling.id}, behandling er migrering")
+    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+        if (saksbehandling.erMigrering()) {
+            logger.info("Oppretter ikke saksbehandlingsblankett for behandling=${saksbehandling.id}, behandling er migrering")
         } else {
-            val blankettPdf = blankettService.lagBlankett(behandling.id)
-            logger.info("Journalfører blankett for behandling=${behandling.id}")
-            journalførSaksbehandlingsblankett(behandling, blankettPdf)
+            val blankettPdf = blankettService.lagBlankett(saksbehandling.id)
+            logger.info("Journalfører blankett for behandling=${saksbehandling.id}")
+            journalførSaksbehandlingsblankett(saksbehandling, blankettPdf)
         }
-        opprettFerdigstillBehandlingTask(behandling)
+        opprettFerdigstillBehandlingTask(saksbehandling)
     }
 
-    private fun journalførSaksbehandlingsblankett(behandling: Behandling, blankettPdf: ByteArray) {
+    private fun journalførSaksbehandlingsblankett(behandling: Saksbehandling, blankettPdf: ByteArray) {
         val arkiverDokumentRequest = opprettArkiverDokumentRequest(behandling, blankettPdf)
         val beslutter = totrinnskontrollService.hentBeslutter(behandling.id)
 
@@ -46,7 +46,7 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
         behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
     }
 
-    private fun opprettArkiverDokumentRequest(behandling: Behandling,
+    private fun opprettArkiverDokumentRequest(behandling: Saksbehandling,
                                               blankettPdf: ByteArray): ArkiverDokumentRequest {
         val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
         val personIdent = fagsak.hentAktivIdent()
@@ -58,7 +58,7 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
         return StegType.LAG_SAKSBEHANDLINGSBLANKETT
     }
 
-    private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
+    private fun opprettFerdigstillBehandlingTask(behandling: Saksbehandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
     }
 

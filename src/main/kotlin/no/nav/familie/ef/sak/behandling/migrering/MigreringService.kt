@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -141,7 +142,8 @@ class MigreringService(
 
         val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
-        beregnYtelseSteg.utførSteg(behandling, Innvilget(resultatType = ResultatType.INNVILGE,
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+        beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(resultatType = ResultatType.INNVILGE,
                                                          periodeBegrunnelse = null,
                                                          inntektBegrunnelse = null,
                                                          perioder = vedtaksperioder,
@@ -151,7 +153,8 @@ class MigreringService(
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
+
+        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(saksbehandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 

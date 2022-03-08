@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
@@ -33,11 +32,9 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     @GetMapping("{behandlingId}")
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        val behandling: Behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak: Fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val behandlingDto = behandling.tilDto(fagsak.stønadstype)
-        return Ressurs.success(behandlingDto)
+        val behandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilPersonMedBarn(behandling.ident, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(behandling.tilDto())
     }
 
     @PostMapping("{behandlingId}/reset/{steg}")
@@ -72,10 +69,8 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     @GetMapping("/ekstern/{eksternBehandlingId}")
     fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
-        val behandling: Behandling = behandlingService.hentBehandlingPåEksternId(eksternBehandlingId)
-        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        val fagsak: Fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val behandlingDto = behandling.tilDto(fagsak.stønadstype)
-        return Ressurs.success(behandlingDto)
+        val saksbehandling = behandlingService.hentSaksbehandling(eksternBehandlingId)
+        tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(saksbehandling.tilDto())
     }
 }

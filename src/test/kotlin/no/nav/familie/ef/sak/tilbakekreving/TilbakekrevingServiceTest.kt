@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -155,14 +156,14 @@ internal class TilbakekrevingServiceTest {
         @Test
         internal fun `Varselbrev må lages med riktig varseltekst`() {
             val requestSlot = mockHentDataForGenereringAvVarselbrev()
-            tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel")
+            tilbakekrevingService.genererBrev(saksbehandling(), "Varsel, varsel")
             assertThat(requestSlot.captured.varseltekst).isEqualTo("Varsel, varsel")
         }
 
         @Test
         internal fun `Varselbrev feiler hvis behandling er låst`() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
-            val assertFails = assertFailsWith<ApiFeil> { tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel") }
+            val assertFails = assertFailsWith<ApiFeil> { tilbakekrevingService.genererBrev(saksbehandling(), "Varsel, varsel") }
             assertThat(assertFails.feil).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
         }
 

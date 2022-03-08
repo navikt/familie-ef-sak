@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -58,7 +59,7 @@ internal class SaksbehandlingsblankettStegTest {
 
     @Test
     internal fun `skal opprette, lagre og arkivere blankett for førstegangsbehandling`() {
-        val behandling = behandling(type = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = saksbehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING)
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
         verify(exactly = 1) { blankettServiceMock.lagBlankett(any()) }
         verify(exactly = 1) { journalpostClientMock.arkiverDokument(any(), any()) }
@@ -66,7 +67,7 @@ internal class SaksbehandlingsblankettStegTest {
 
     @Test
     internal fun `skal journalføre blankett hvis det er revurdering`() {
-        val behandling = behandling(type = BehandlingType.REVURDERING)
+        val behandling = saksbehandling(type = BehandlingType.REVURDERING)
         saksbehandlingsblankettSteg.utførSteg(behandling, null)
         verify(exactly = 1) { blankettServiceMock.lagBlankett(any()) }
         verify(exactly = 1) { journalpostClientMock.arkiverDokument(any(), any()) }

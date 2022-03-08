@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.blankett
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -64,10 +65,10 @@ class BlankettService(private val tilgangService: TilgangService,
     }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(
                 BlankettPdfBehandling(årsak = behandling.årsak),
-                lagPersonopplysningerDto(behandlingId),
+                lagPersonopplysningerDto(behandling),
                 hentVilkårDto(behandlingId),
                 hentVedtak(behandlingId),
                 lagSøknadsdatoer(behandlingId)
@@ -96,9 +97,8 @@ class BlankettService(private val tilgangService: TilgangService,
 
     }
 
-    private fun lagPersonopplysningerDto(behandlingId: UUID): PersonopplysningerDto {
-        val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
-        return PersonopplysningerDto(hentGjeldendeNavn(aktivIdent), aktivIdent)
+    private fun lagPersonopplysningerDto(behandling: Saksbehandling): PersonopplysningerDto {
+        return PersonopplysningerDto(hentGjeldendeNavn(behandling.ident), behandling.ident)
     }
 
     private fun hentVedtak(behandlingId: UUID): VedtakDto {

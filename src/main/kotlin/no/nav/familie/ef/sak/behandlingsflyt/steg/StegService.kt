@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
@@ -46,60 +47,60 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
     @Transactional
-    fun håndterVilkår(behandling: Behandling): Behandling {
+    fun håndterVilkår(behandling: Saksbehandling): Behandling {
         val behandlingSteg: VilkårSteg = hentBehandlingSteg(StegType.VILKÅR)
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterBeregnYtelseForStønad(behandling: Behandling, vedtak: VedtakDto): Behandling {
+    fun håndterBeregnYtelseForStønad(behandling: Saksbehandling, vedtak: VedtakDto): Behandling {
         val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
         return håndterSteg(behandling, behandlingSteg, vedtak)
     }
 
     @Transactional
-    fun håndterVedtaBlankett(behandling: Behandling, vedtak: VedtakDto): Behandling {
+    fun håndterVedtaBlankett(behandling: Saksbehandling, vedtak: VedtakDto): Behandling {
         val behandlingSteg: VedtaBlankettSteg = hentBehandlingSteg(VEDTA_BLANKETT)
         return håndterSteg(behandling, behandlingSteg, vedtak)
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Behandling): Behandling {
+    fun håndterSendTilBeslutter(behandling: Saksbehandling): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(behandling: Behandling, data: BeslutteVedtakDto): Behandling {
+    fun håndterBeslutteVedtak(behandling: Saksbehandling, data: BeslutteVedtakDto): Behandling {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
         return håndterSteg(behandling, behandlingSteg, data)
     }
 
     @Transactional
-    fun håndterBlankett(behandling: Behandling): Behandling {
+    fun håndterBlankett(behandling: Saksbehandling): Behandling {
         val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterLagSaksbehandlingsblankett(behandling: Behandling): Behandling {
+    fun håndterLagSaksbehandlingsblankett(behandling: Saksbehandling): Behandling {
         val behandlingSteg: SaksbehandlingsblankettSteg = hentBehandlingSteg(LAG_SAKSBEHANDLINGSBLANKETT)
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
 
     @Transactional
-    fun håndterPollStatusFraIverksett(behandling: Behandling): Behandling {
+    fun håndterPollStatusFraIverksett(behandling: Saksbehandling): Behandling {
         val behandlingSteg: VentePåStatusFraIverksett = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_IVERKSETT)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterPollStatusTekniskOpphør(behandling: Behandling): Behandling {
+    fun håndterPollStatusTekniskOpphør(behandling: Saksbehandling): Behandling {
         val behandlingSteg: VentePåTekniskOpphørStatus = hentBehandlingSteg(VENTE_PÅ_TEKNISK_OPPHØR_STATUS)
 
         return håndterSteg(behandling, behandlingSteg, null)
@@ -107,14 +108,14 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
     @Transactional
     fun publiserVedtakshendelse(behandlingId: UUID): Behandling {
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val behandlingSteg: PubliserVedtakshendelseSteg = hentBehandlingSteg(PUBLISER_VEDTAKSHENDELSE)
 
         return håndterSteg(behandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterFerdigstillBehandling(behandling: Behandling): Behandling {
+    fun håndterFerdigstillBehandling(behandling: Saksbehandling): Behandling {
         val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
 
         return håndterSteg(behandling, behandlingSteg, null)
@@ -149,7 +150,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     // Generelle stegmetoder
-    private fun <T> håndterSteg(behandling: Behandling,
+    private fun <T> håndterSteg(behandling: Saksbehandling,
                                 behandlingSteg: BehandlingSteg<T>,
                                 data: T): Behandling {
         val stegType = behandlingSteg.stegType()
@@ -169,14 +170,14 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         }
     }
 
-    private fun validerNesteSteg(nesteSteg: StegType, behandling: Behandling) {
+    private fun validerNesteSteg(nesteSteg: StegType, behandling: Saksbehandling) {
         if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
             error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
                   "på behandling i kombinasjon med status ${behandling.status}")
         }
     }
 
-    private fun <T> valider(behandling: Behandling,
+    private fun <T> valider(behandling: Saksbehandling,
                             stegType: StegType,
                             saksbehandlerIdent: String,
                             behandlingSteg: BehandlingSteg<T>) {
@@ -204,14 +205,14 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     private fun <T> utførBehandlingsvalidering(behandlingSteg: BehandlingSteg<T>,
-                                               behandling: Behandling) {
+                                               behandling: Saksbehandling) {
         if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(behandling.status)) {
             error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${behandling.status}")
         }
         behandlingSteg.validerSteg(behandling)
     }
 
-    private fun validerGyldigTilstand(behandling: Behandling,
+    private fun validerGyldigTilstand(behandling: Saksbehandling,
                                       stegType: StegType,
                                       saksbehandlerIdent: String) {
         if (behandling.steg == BEHANDLING_FERDIGSTILT) {
@@ -228,7 +229,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         }
     }
 
-    private fun validerHarTilgang(behandling: Behandling,
+    private fun validerHarTilgang(behandling: Saksbehandling,
                                   stegType: StegType,
                                   saksbehandlerIdent: String) {
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
@@ -237,7 +238,9 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         secureLogger.info("Starter håndtering av $stegType på behandling " +
                           "${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
 
-        feilHvis(!harTilgangTilSteg) { "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle." }
+        feilHvis(!harTilgangTilSteg) {
+            "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."
+        }
     }
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {

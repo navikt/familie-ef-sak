@@ -2,13 +2,12 @@ package no.nav.familie.ef.sak.iverksett
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -74,31 +73,30 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val grunnlagsdataService: GrunnlagsdataService,
                             private val brevmottakereRepository: BrevmottakereRepository) {
 
-    fun tilDto(behandling: Behandling, beslutter: String): IverksettDto {
+    fun tilDto(behandling: Saksbehandling, beslutter: String): IverksettDto {
         val saksbehandler =
                 behandlingshistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         return tilDto(behandling, saksbehandler, beslutter)
     }
 
-    fun tilMigreringDto(behandling: Behandling): IverksettDto {
+    fun tilMigreringDto(behandling: Saksbehandling): IverksettDto {
         return tilDto(behandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
     }
 
-    private fun tilDto(behandling: Behandling,
+    private fun tilDto(saksbehandling: Saksbehandling,
                        saksbehandler: String,
                        beslutter: String): IverksettDto {
-        val fagsak = fagsakService.hentFagsakForBehandling(behandling.id)
-        val vedtak = vedtakService.hentVedtak(behandling.id)
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val tilkjentYtelse =
-                if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(behandling.id) else null
-        val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
+                if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
+        val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(saksbehandling.id)
 
-        val behandlingsdetaljer = mapBehandlingsdetaljer(behandling, vilkårsvurderinger)
-        val fagsakdetaljerDto = mapFagsakdetaljer(fagsak)
-        val søkerDto = mapSøkerDto(fagsak, behandling)
-        val tilbakekreving = mapTilbakekreving(behandling.id)
-        val brevmottakere = mapBrevmottakere(behandling.id)
+        val behandlingsdetaljer = mapBehandlingsdetaljer(saksbehandling, vilkårsvurderinger)
+        val fagsakdetaljerDto = mapFagsakdetaljer(saksbehandling)
+        val søkerDto = mapSøkerDto(saksbehandling)
+        val tilbakekreving = mapTilbakekreving(saksbehandling.id)
+        val brevmottakere = mapBrevmottakere(saksbehandling.id)
         val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse, tilbakekreving, brevmottakere)
 
         return IverksettDto(behandling = behandlingsdetaljer,
@@ -135,17 +133,17 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
             }
 
 
-    private fun mapFagsakdetaljer(fagsak: Fagsak) = FagsakdetaljerDto(fagsakId = fagsak.id,
-                                                                      eksternId = fagsak.eksternId.id,
-                                                                      stønadstype = StønadType.OVERGANGSSTØNAD)
+    private fun mapFagsakdetaljer(saksbehandling: Saksbehandling) = FagsakdetaljerDto(fagsakId = saksbehandling.id,
+                                                                                      eksternId = saksbehandling.eksternId,
+                                                                                      stønadstype = StønadType.OVERGANGSSTØNAD)
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
-    private fun mapBehandlingsdetaljer(behandling: Behandling,
+    private fun mapBehandlingsdetaljer(behandling: Saksbehandling,
                                        vilkårsvurderinger: List<Vilkårsvurdering>) =
             BehandlingsdetaljerDto(behandlingId = behandling.id,
                                    behandlingType = BehandlingType.valueOf(behandling.type.name),
                                    behandlingÅrsak = behandling.årsak,
-                                   eksternId = behandling.eksternId.id,
+                                   eksternId = behandling.eksternId,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
                                    forrigeBehandlingId = behandling.forrigeBehandlingId,
                                    kravMottatt = behandling.kravMottatt)
@@ -167,10 +165,10 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                tilbakekreving = tilbakekreving,
                                brevmottakere = brevmottakere)
 
-    private fun mapSøkerDto(fagsak: Fagsak, behandling: Behandling): SøkerDto {
-        val personIdent = fagsak.hentAktivIdent()
-        val barn = barnService.finnBarnPåBehandling(behandling.id)
-        val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(behandling.id)
+    private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
+        val personIdent = saksbehandling.ident
+        val barn = barnService.finnBarnPåBehandling(saksbehandling.id)
+        val (grunnlagsdata) = grunnlagsdataService.hentGrunnlagsdata(saksbehandling.id)
         val alleBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barn, grunnlagsdata.barn)
         val navEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
 

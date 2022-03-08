@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.vedtak
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -38,7 +38,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
      * og returnerer navIdent til saksbehandleren som sendte behandling til beslutter
      */
     @Transactional
-    fun lagreTotrinnskontrollOgReturnerBehandler(behandling: Behandling, beslutteVedtak: BeslutteVedtakDto): String {
+    fun lagreTotrinnskontrollOgReturnerBehandler(behandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
         val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
 
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
@@ -54,7 +54,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         val nyStatus = if (beslutteVedtak.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
         val utfall = if (beslutteVedtak.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
 
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling = behandling,
+        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = behandling.id,
+                                                            stegtype = behandling.steg,
                                                             utfall = utfall,
                                                             metadata = beslutteVedtak)
 

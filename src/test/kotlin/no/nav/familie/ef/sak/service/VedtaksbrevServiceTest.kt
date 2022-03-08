@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.BrevClient
@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
-import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -31,23 +32,19 @@ import org.junit.jupiter.api.assertThrows
 
 internal class VedtaksbrevServiceTest {
 
-    private val fagsak = fagsak(setOf(PersonIdent("")))
+    private val fagsak = fagsak(setOf(PersonIdent("12345678910")))
     private val behandling = behandling(fagsak)
 
     private val brevClient = mockk<BrevClient>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
-    private val behandlingService = mockk<BehandlingService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val brevsignaturService = mockk<BrevsignaturService>()
-    private val fagsakService = mockk<FagsakService>()
 
     private val vedtaksbrevService =
             VedtaksbrevService(brevClient,
                                vedtaksbrevRepository,
-                               behandlingService,
                                personopplysningerService,
-                               brevsignaturService,
-                               fagsakService)
+                               brevsignaturService)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
 
@@ -55,31 +52,27 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `skal legge på signatur og lage pdf ved lagBeslutterBrev`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val beslutterNavn = "456"
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { brevClient.genererBrev(any()) } returns "enPdf".toByteArray()
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
-        every { fagsakService.hentFagsak(any()) } returns fagsak
         val signaturDto = SignaturDto(beslutterNavn, "enhet", false)
-        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
+        every { brevsignaturService.lagSignaturMedEnhet(any<Saksbehandling>()) } returns signaturDto
 
         mockBrukerContext(beslutterNavn)
-        vedtaksbrevService.lagBeslutterBrev(behandling.id)
+        vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
         clearBrukerContext()
 
         assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(beslutterNavn)
         assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison()
                 .ignoringFields("besluttersignatur", "beslutterPdf", "beslutterident", "enhet")
                 .isEqualTo(vedtaksbrev)
-
     }
 
     @Test
     internal fun `skal legge på signatur og lage pdf ved lagSaksbehandlerFritekstbrev`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForSaksbehandler()
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val saksbehandlerNavn = "Saksbehandler Saksbehandlersen"
@@ -88,16 +81,14 @@ internal class VedtaksbrevServiceTest {
         val navnMap = mapOf(ident to gjeldendeNavn)
 
         mockBrukerContext(saksbehandlerNavn)
-        every { behandlingService.hentAktivIdent(any()) } returns ident
         every { personopplysningerService.hentGjeldeneNavn(any()) } returns navnMap
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { brevClient.genererBrev(any()) } returns "123".toByteArray()
-        every { fagsakService.hentFagsak(any()) } returns fagsak
         val signaturDto = SignaturDto(saksbehandlerNavn, "enhet", false)
-        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
+        every { brevsignaturService.lagSignaturMedEnhet(any<Saksbehandling>()) } returns signaturDto
 
-        vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto)
+        vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto, saksbehandling(fagsak, behandlingForSaksbehandler))
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(saksbehandlerNavn)
 
         clearBrukerContext()
@@ -105,43 +96,54 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `lagFritekstSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
-
-        val feil = assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto) }
+        val feil = assertThrows<Feil> {
+            vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto,
+                                                            saksbehandling(fagsak, behandlingForBeslutter))
+        }
         assertThat(feil.message).contains("Behandling er i feil steg")
     }
 
     @Test
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig steg`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter().copy(steg = StegType.VILKÅR)
-        assertThrows<Feil> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
+        assertThrows<Feil> {
+            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak,
+                                                               behandlingForBeslutter.copy(steg = StegType.VILKÅR)))
+        }
     }
 
     @Test
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig status`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
-                .copy(status = BehandlingStatus.FERDIGSTILT)
-        assertThrows<Feil> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
+        assertThrows<Feil> {
+            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak,
+                                                               behandlingForBeslutter.copy(status =
+                                                                                           BehandlingStatus.FERDIGSTILT)))
+        }
 
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
-                .copy(status = BehandlingStatus.UTREDES)
-        assertThrows<Feil> { vedtaksbrevService.lagBeslutterBrev(behandling.id) }
+        assertThrows<Feil> {
+            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak,
+                                                               behandling.copy(status = BehandlingStatus.UTREDES)))
+        }
     }
 
     @Test
     internal fun `lagSaksbehandlerBrev skal kaste feil når behandling er låst for videre behandling`() {
-        every { behandlingService.hentBehandling(any()) } returns lagBehandlingForBeslutter()
-                .copy(status = BehandlingStatus.FERDIGSTILT)
-        assertThrows<Feil> { vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, TextNode(""), "") }
+        assertThrows<Feil> {
+            vedtaksbrevService
+                    .lagSaksbehandlerSanitybrev(saksbehandling(fagsak,
+                                                               behandlingForBeslutter.copy(status =
+                                                                                           BehandlingStatus.FERDIGSTILT)),
+                                                TextNode(""),
+                                                "")
+        }
     }
 
-    private fun lagBehandlingForBeslutter() = behandling(fagsak(),
-                                                         status = BehandlingStatus.FATTER_VEDTAK,
-                                                         steg = StegType.BESLUTTE_VEDTAK)
+    private val behandlingForBeslutter = behandling(fagsak,
+                                                    status = BehandlingStatus.FATTER_VEDTAK,
+                                                    steg = StegType.BESLUTTE_VEDTAK)
 
-    private fun lagBehandlingForSaksbehandler() = behandling(fagsak(),
-                                                             status = BehandlingStatus.UTREDES,
-                                                             steg = StegType.SEND_TIL_BESLUTTER)
+    private val behandlingForSaksbehandler = behandling(fagsak,
+                                                        status = BehandlingStatus.UTREDES,
+                                                        steg = StegType.SEND_TIL_BESLUTTER)
 
     private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(behandling.id,
                                                                                                   "123",

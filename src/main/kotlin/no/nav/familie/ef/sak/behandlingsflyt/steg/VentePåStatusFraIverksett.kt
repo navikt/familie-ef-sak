@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -14,17 +14,17 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
                                 private val tilkjentYtelseService: TilkjentYtelseService,
                                 private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        iverksettClient.hentStatus(behandling.id).let {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+        iverksettClient.hentStatus(saksbehandling.id).let {
             when {
-                erMigreringOgOk(behandling, it) -> opprettLagSaksbehandlingsblankettTask(behandling)
-                it == IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(behandling)
-                else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${behandling.id}")
+                erMigreringOgOk(saksbehandling, it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
+                it == IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
+                else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${saksbehandling.id}")
             }
         }
     }
 
-    private fun erMigreringOgOk(behandling: Behandling,
+    private fun erMigreringOgOk(behandling: Saksbehandling,
                                 it: IverksettStatus): Boolean {
         val erMigrering = behandling.erMigrering()
         if (!erMigrering) {
@@ -34,10 +34,10 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
                (it == IverksettStatus.SENDT_TIL_OPPDRAG && gjelderBehandlingMed0beløp(behandling))
     }
 
-    private fun gjelderBehandlingMed0beløp(behandling: Behandling) =
+    private fun gjelderBehandlingMed0beløp(behandling: Saksbehandling) =
             tilkjentYtelseService.hentForBehandling(behandling.id).andelerTilkjentYtelse.all { it.beløp == 0 }
 
-    fun opprettLagSaksbehandlingsblankettTask(behandling: Behandling) {
+    fun opprettLagSaksbehandlingsblankettTask(behandling: Saksbehandling) {
         taskRepository.save(LagSaksbehandlingsblankettTask.opprettTask(behandling.id))
     }
 

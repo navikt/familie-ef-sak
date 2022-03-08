@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTa
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
@@ -27,6 +28,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.patch.PatchAktivitetService
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -96,14 +98,16 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private val til = YearMonth.now().plusMonths(1)
     private val forventetInntekt = BigDecimal.ZERO
     private val samordningsfradrag = BigDecimal.ZERO
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     internal fun setUp() {
         //Vid migrering forventer vi OK_MOT_OPPDRAG, vid revurdering forventer vi OK
-        val responseFraInfotrygd: Queue<IverksettStatus> = LinkedList(listOf(IverksettStatus.OK_MOT_OPPDRAG, IverksettStatus.OK))
-        every { iverksettClient.hentStatus(any()) } answers {
+                val responseFraInfotrygd: Queue<IverksettStatus> = LinkedList(listOf(IverksettStatus.OK_MOT_OPPDRAG, IverksettStatus.OK))
+                every { iverksettClient.hentStatus(any()) } answers {
             responseFraInfotrygd.poll()
         }
+        fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         mockSimulering()
     }
 
@@ -409,9 +413,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                 samordningsfradrag = 5
                         )
                 ), emptyList(), emptyList())
-        val fagsakPerson = testoppsettService.opprettPerson("1")
 
-        val migreringInfo = migreringService.hentMigreringInfo(fagsakPerson.id)
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isTrue
     }
@@ -446,8 +449,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                             kravMottatt = LocalDate.now(),
                                             emptyList())
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
-        innvilgOgSendTilBeslutter(revurdering)
-        godkjennTotrinnskontroll(revurdering)
+        val saksbehandling = saksbehandling(fagsak, revurdering)
+        innvilgOgSendTilBeslutter(saksbehandling)
+        godkjennTotrinnskontroll(behandlingService.hentSaksbehandling(revurdering.id))
         kjørTasks(erMigrering = false)
         return revurdering
     }
@@ -459,7 +463,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertRevurdering.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
     }
 
-    private fun innvilgOgSendTilBeslutter(behandling: Behandling) {
+    private fun innvilgOgSendTilBeslutter(behandling: Saksbehandling) {
         val vedtaksperiode = VedtaksperiodeDto(årMånedFra = migrerFraDato,
                                                årMånedTil = til,
                                                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
@@ -476,15 +480,15 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             stegService.håndterBeregnYtelseForStønad(behandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
                                                       behandling.id)
-            vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, brevrequest, "brevMal")
-            stegService.håndterSendTilBeslutter(behandlingService.hentBehandling(behandling.id))
+            vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling, brevrequest, "brevMal")
+            stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(behandling.id))
         }
     }
 
-    private fun godkjennTotrinnskontroll(behandling: Behandling) {
+    private fun godkjennTotrinnskontroll(behandling: Saksbehandling) {
         testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
-            vedtaksbrevService.lagBeslutterBrev(behandling.id)
-            stegService.håndterBeslutteVedtak(behandlingService.hentBehandling(behandling.id), BeslutteVedtakDto(true))
+            vedtaksbrevService.lagBeslutterBrev(behandling)
+            stegService.håndterBeslutteVedtak(behandlingService.hentSaksbehandling(behandling.id), BeslutteVedtakDto(true))
         }
     }
 
@@ -497,7 +501,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         mockPerioder()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak("1", Stønadstype.OVERGANGSSTØNAD)
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
             migreringService.opprettMigrering(fagsak,
                                               migrerFraDato,

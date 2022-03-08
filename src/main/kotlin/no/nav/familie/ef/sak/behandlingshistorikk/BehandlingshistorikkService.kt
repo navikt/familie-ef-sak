@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandlingshistorikk
 
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
@@ -15,7 +15,7 @@ import java.util.UUID
 @Service
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
 
-    fun finnHendelseshistorikk(behandling: Behandling): List<HendelseshistorikkDto> {
+    fun finnHendelseshistorikk(behandling: Saksbehandling): List<HendelseshistorikkDto> {
         val (hendelserOpprettet, andreHendelser) = behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).map {
             it.tilHendelseshistorikkDto(behandling)
         }.filter {
@@ -40,10 +40,13 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
     /**
      * @param metadata json object that will be serialized
      */
-    fun opprettHistorikkInnslag(behandling: Behandling, utfall: StegUtfall?, metadata: Any?) {
+    fun opprettHistorikkInnslag(behandlingId: UUID,
+                                stegtype: StegType,
+                                utfall: StegUtfall?,
+                                metadata: Any?) {
         opprettHistorikkInnslag(Behandlingshistorikk(
-                behandlingId = behandling.id,
-                steg = behandling.steg,
+                behandlingId = behandlingId,
+                steg = stegtype,
                 utfall = utfall,
                 metadata = metadata?.let {
                     JsonWrapper(objectMapper.writeValueAsString(it))

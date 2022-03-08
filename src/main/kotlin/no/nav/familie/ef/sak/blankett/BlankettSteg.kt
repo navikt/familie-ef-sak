@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.blankett
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillBehandlingTask
@@ -28,36 +28,36 @@ class BlankettSteg(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun validerSteg(behandling: Behandling) {
-        if (behandling.steg != stegType()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg}")
+    override fun validerSteg(saksbehandling: Saksbehandling) {
+        if (saksbehandling.steg != stegType()) {
+            throw Feil("Behandling er i feil steg=${saksbehandling.steg}")
         }
     }
 
-    override fun utførSteg(behandling: Behandling, data: Void?) {
-        val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
+    override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
+        val journalposter = behandlingService.hentBehandlingsjournalposter(saksbehandling.id)
         val journalpostForBehandling = journalpostClient.hentJournalpost(journalposter.first().journalpostId)
-        val personIdent = behandlingRepository.finnAktivIdent(behandling.id)
+        val personIdent = behandlingRepository.finnAktivIdent(saksbehandling.id)
         val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
-        val blankettPdf = blankettRepository.findByIdOrThrow(behandling.id).pdf.bytes
-        val beslutter = totrinnskontrollService.hentBeslutter(behandling.id)
+        val blankettPdf = blankettRepository.findByIdOrThrow(saksbehandling.id).pdf.bytes
+        val beslutter = totrinnskontrollService.hentBeslutter(saksbehandling.id)
         if (beslutter == null) {
-            logger.info("steg=${stegType()} fant ikke beslutter på behandling=$behandling")
+            logger.info("steg=${stegType()} fant ikke beslutter på behandling=$saksbehandling")
         }
 
         val arkiverDokumentRequest = BlankettHelper.lagArkiverBlankettRequestMotInfotrygd(personIdent,
                                                                                           blankettPdf,
                                                                                           enhet,
                                                                                           journalpostForBehandling.sak?.fagsakId,
-                                                                                          behandling.id)
+                                                                                          saksbehandling.id)
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter)
-        behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, saksbehandling.id)
 
-        ferdigstillBehandling(behandling)
+        ferdigstillBehandling(saksbehandling)
     }
 
 
-    private fun ferdigstillBehandling(behandling: Behandling) {
+    private fun ferdigstillBehandling(behandling: Saksbehandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
     }
 

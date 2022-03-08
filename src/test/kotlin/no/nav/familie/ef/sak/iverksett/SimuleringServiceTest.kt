@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService
@@ -56,8 +57,6 @@ internal class SimuleringServiceTest {
     private val tilgangService = mockk<TilgangService>()
 
     private val simuleringService = SimuleringService(iverksettClient = iverksettClient,
-                                                      behandlingService = behandlingService,
-                                                      fagsakService = fagsakService,
                                                       vedtakService = vedtakService,
                                                       blankettSimuleringsService = blankettSimuleringsService,
                                                       simuleringsresultatRepository = simuleringsresultatRepository,
@@ -96,7 +95,7 @@ internal class SimuleringServiceTest {
         every {
             iverksettClient.simuler(capture(simulerSlot))
         } returns BeriketSimuleringsresultat(mockk(), mockk())
-        simuleringService.simuler(behandling.id)
+        simuleringService.simuler(saksbehandling(fagsak, behandling))
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
@@ -142,7 +141,7 @@ internal class SimuleringServiceTest {
             iverksettClient.simuler(capture(simulerSlot))
         } returns BeriketSimuleringsresultat(mockk(), mockk())
 
-        simuleringService.simuler(behandling.id)
+        simuleringService.simuler(saksbehandling(fagsak, behandling))
 
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed)
                 .isEqualTo(årMånedFraStart.atDay(1))
@@ -166,7 +165,7 @@ internal class SimuleringServiceTest {
                 behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
         every { behandlingService.hentBehandling(any()) } returns behandling
         assertThrows<RuntimeException> {
-            simuleringService.simuler(behandling.id)
+            simuleringService.simuler(saksbehandling(id = behandling.id))
         }
     }
 
@@ -180,7 +179,7 @@ internal class SimuleringServiceTest {
         } returns Simuleringsresultat(behandlingId = behandling.id,
                                       data = DetaljertSimuleringResultat(emptyList()),
                                       beriketData = BeriketSimuleringsresultat(mockk(), mockk()))
-        val simuleringsresultatDto = simuleringService.simuler(behandling.id)
+        val simuleringsresultatDto = simuleringService.simuler(saksbehandling(fagsak, behandling))
         assertThat(simuleringsresultatDto).isNotNull
     }
 
@@ -203,7 +202,7 @@ internal class SimuleringServiceTest {
         val simulerSlot = slot<Simuleringsresultat>()
         every { simuleringsresultatRepository.insert(capture(simulerSlot)) } answers { firstArg() }
 
-        simuleringService.simuler(behandling.id)
+        simuleringService.simuler(saksbehandling(id = behandling.id))
 
         assertThat(simulerSlot.captured.beriketData.oppsummering.fom)
                 .isEqualTo(LocalDate.of(2021, 2, 1))

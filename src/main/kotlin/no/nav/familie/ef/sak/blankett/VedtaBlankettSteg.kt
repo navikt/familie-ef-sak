@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -15,19 +16,19 @@ import org.springframework.stereotype.Service
 class VedtaBlankettSteg(private val vedtakService: VedtakService, private val blankettRepository: BlankettRepository) :
         BehandlingSteg<VedtakDto> {
 
-    override fun validerSteg(behandling: Behandling) {
+    override fun validerSteg(behandling: Saksbehandling) {
     }
 
     override fun stegType(): StegType {
         return StegType.VEDTA_BLANKETT
     }
 
-    override fun utførSteg(behandling: Behandling, data: VedtakDto) {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
         when (data) {
             is Innvilget, is Avslå -> {
-                vedtakService.slettVedtakHvisFinnes(behandling.id)
-                vedtakService.lagreVedtak(vedtakDto = data, behandlingId = behandling.id)
-                blankettRepository.deleteById(behandling.id)
+                vedtakService.slettVedtakHvisFinnes(saksbehandling.id)
+                vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandling.id)
+                blankettRepository.deleteById(saksbehandling.id)
             }
             else -> {
                 val feilmelding = "Kan ikke sette vedtaksresultat som $data - ikke implementert"

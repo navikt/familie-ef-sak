@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
@@ -58,6 +59,7 @@ internal class IverksettingDtoMapperTest {
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
+    private val saksbehandling = saksbehandling(fagsak, behandling)
 
     @BeforeEach
     internal fun setUp() {
@@ -102,8 +104,10 @@ internal class IverksettingDtoMapperTest {
     @Test
     internal fun `tilDto - skal kunne mappe person uten barn`() {
         every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), false, LocalDateTime.now())
-        iverksettingDtoMapper.tilDto(behandling, "bes")
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(opprettGrunnlagsdata(),
+                                                                                                 false,
+                                                                                                 LocalDateTime.now())
+        iverksettingDtoMapper.tilDto(saksbehandling, "bes")
 
         verify(exactly = 1) { grunnlagsdataService.hentGrunnlagsdata(any()) }
         verify(exactly = 1) { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) }

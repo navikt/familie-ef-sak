@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -61,9 +62,7 @@ internal class BeregnYtelseStegTest {
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
-                                        tilbakekrevingService,
-                                        fagsakService,
-                                        featureToggleService)
+                                        tilbakekrevingService)
 
     private val slot = slot<TilkjentYtelse>()
 
@@ -1206,6 +1205,8 @@ internal class BeregnYtelseStegTest {
                                                         periodeBegrunnelse = "",
                                                         inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
+        val fagsak = fagsak()
+        steg.utførSteg(saksbehandling(fagsak, behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId)),
+                       data = vedtak)
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -22,13 +23,13 @@ class FerdigstillBehandlingTask(private val stegService: StegService,
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         stegService.håndterFerdigstillBehandling(behandling)
     }
 
     companion object {
 
-        fun opprettTask(behandling: Behandling): Task =
+        fun opprettTask(behandling: Saksbehandling): Task =
                 Task(type = TYPE,
                      payload = behandling.id.toString(),
                      properties = Properties().apply {
