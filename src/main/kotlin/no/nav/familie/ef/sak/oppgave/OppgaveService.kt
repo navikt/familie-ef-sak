@@ -105,8 +105,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         return oppgaveClient.fordelOppgave(gsakOppgaveId, null)
     }
 
-    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, behandling: Saksbehandling): EfOppgave? {
-        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgavetype)
+    fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, saksbehandling: Saksbehandling): EfOppgave? {
+        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(saksbehandling.id, oppgavetype)
     }
 
     fun hentOppgave(gsakOppgaveId: Long): Oppgave {

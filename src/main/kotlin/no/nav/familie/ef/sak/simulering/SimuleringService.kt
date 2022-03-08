@@ -43,25 +43,25 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         simuleringsresultatRepository.deleteById(behandlingId)
     }
 
-    fun hentOgLagreSimuleringsresultat(behandling: Saksbehandling): Simuleringsresultat {
+    fun hentOgLagreSimuleringsresultat(saksbehandling: Saksbehandling): Simuleringsresultat {
         tilgangService.validerHarSaksbehandlerrolle()
-        simuleringsresultatRepository.deleteById(behandling.id)
-        val beriketSimuleringsresultat = simulerMedTilkjentYtelse(behandling)
+        simuleringsresultatRepository.deleteById(saksbehandling.id)
+        val beriketSimuleringsresultat = simulerMedTilkjentYtelse(saksbehandling)
         return simuleringsresultatRepository.insert(Simuleringsresultat(
-                behandlingId = behandling.id,
+                behandlingId = saksbehandling.id,
                 data = beriketSimuleringsresultat.detaljer,
                 beriketData = beriketSimuleringsresultat
         ))
     }
 
-    private fun simulerForBehandling(behandling: Saksbehandling): Simuleringsoppsummering {
+    private fun simulerForBehandling(saksbehandling: Saksbehandling): Simuleringsoppsummering {
 
-        if (behandling.status.behandlingErLåstForVidereRedigering()
+        if (saksbehandling.status.behandlingErLåstForVidereRedigering()
             || !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)) {
-            val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
+            val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(saksbehandling.id)
             return simuleringsresultat.beriketData.oppsummering
         }
-        val simuleringsresultat = hentOgLagreSimuleringsresultat(behandling)
+        val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
         return simuleringsresultat.beriketData.oppsummering
     }
 
@@ -87,9 +87,9 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun simulerForBlankett(behandling: Saksbehandling): Simuleringsoppsummering {
-        val vedtak = vedtakService.hentVedtakHvisEksisterer(behandling.id)
-        val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, behandling)
+    private fun simulerForBlankett(saksbehandling: Saksbehandling): Simuleringsoppsummering {
+        val vedtak = vedtakService.hentVedtakHvisEksisterer(saksbehandling.id)
+        val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, saksbehandling)
         val simuleringDto = SimuleringDto(
                 nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
                 forrigeBehandlingId = null

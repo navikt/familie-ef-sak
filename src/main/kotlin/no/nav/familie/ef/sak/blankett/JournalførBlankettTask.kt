@@ -25,12 +25,12 @@ class JournalførBlankettTask(private val stegService: StegService,
 
     companion object {
 
-        fun opprettTask(behandling: Saksbehandling): Task {
+        fun opprettTask(saksbehandling: Saksbehandling): Task {
             return Task(type = TYPE,
-                        payload = behandling.id.toString(),
+                        payload = saksbehandling.id.toString(),
                         properties = Properties().apply {
-                            this["personIdent"] = behandling.ident
-                            this["behandlingId"] = behandling.id.toString()
+                            this["personIdent"] = saksbehandling.ident
+                            this["behandlingId"] = saksbehandling.id.toString()
                             this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
                         })
         }

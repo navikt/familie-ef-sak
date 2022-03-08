@@ -15,10 +15,10 @@ import java.util.UUID
 @Service
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
 
-    fun finnHendelseshistorikk(behandling: Saksbehandling): List<HendelseshistorikkDto> {
+    fun finnHendelseshistorikk(saksbehandling: Saksbehandling): List<HendelseshistorikkDto> {
         val (hendelserOpprettet, andreHendelser) =
-                behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).map {
-            it.tilHendelseshistorikkDto(behandling)
+                behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(saksbehandling.id).map {
+            it.tilHendelseshistorikkDto(saksbehandling)
         }.filter {
             it.hendelse != Hendelse.UKJENT
         }.partition { it.hendelse == Hendelse.OPPRETTET }

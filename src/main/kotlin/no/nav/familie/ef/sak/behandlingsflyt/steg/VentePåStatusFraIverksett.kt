@@ -24,21 +24,21 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun erMigreringOgOk(behandling: Saksbehandling,
+    private fun erMigreringOgOk(saksbehandling: Saksbehandling,
                                 it: IverksettStatus): Boolean {
-        val erMigrering = behandling.erMigrering()
+        val erMigrering = saksbehandling.erMigrering()
         if (!erMigrering) {
             return false
         }
         return it == IverksettStatus.OK_MOT_OPPDRAG ||
-               (it == IverksettStatus.SENDT_TIL_OPPDRAG && gjelderBehandlingMed0beløp(behandling))
+               (it == IverksettStatus.SENDT_TIL_OPPDRAG && gjelderBehandlingMed0beløp(saksbehandling))
     }
 
-    private fun gjelderBehandlingMed0beløp(behandling: Saksbehandling) =
-            tilkjentYtelseService.hentForBehandling(behandling.id).andelerTilkjentYtelse.all { it.beløp == 0 }
+    private fun gjelderBehandlingMed0beløp(saksbehandling: Saksbehandling) =
+            tilkjentYtelseService.hentForBehandling(saksbehandling.id).andelerTilkjentYtelse.all { it.beløp == 0 }
 
-    fun opprettLagSaksbehandlingsblankettTask(behandling: Saksbehandling) {
-        taskRepository.save(LagSaksbehandlingsblankettTask.opprettTask(behandling.id))
+    fun opprettLagSaksbehandlingsblankettTask(saksbehandling: Saksbehandling) {
+        taskRepository.save(LagSaksbehandlingsblankettTask.opprettTask(saksbehandling.id))
     }
 
     override fun stegType(): StegType {

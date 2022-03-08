@@ -114,11 +114,11 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun finnHenvendelsestidspunkt(behandling: Saksbehandling): LocalDateTime {
-        return when (behandling.type) {
-            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
-            REVURDERING -> behandling.opprettetTid
-            else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
+    private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
+        return when (saksbehandling.type) {
+            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
+            REVURDERING -> saksbehandling.opprettetTid
+            else -> error("Støtter ikke uthenting av mottatt-dato for ${saksbehandling.type}")
         }
     }
 

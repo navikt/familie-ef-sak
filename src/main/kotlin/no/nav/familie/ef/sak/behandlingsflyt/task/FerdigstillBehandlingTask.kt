@@ -28,11 +28,11 @@ class FerdigstillBehandlingTask(private val stegService: StegService,
 
     companion object {
 
-        fun opprettTask(behandling: Saksbehandling): Task =
+        fun opprettTask(saksbehandling: Saksbehandling): Task =
                 Task(type = TYPE,
-                     payload = behandling.id.toString(),
+                     payload = saksbehandling.id.toString(),
                      properties = Properties().apply {
-                         this["behandlingId"] = behandling.id.toString()
+                         this["behandlingId"] = saksbehandling.id.toString()
                      })
 
         const val TYPE = "ferdigstillBehandling"

@@ -37,29 +37,29 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
         opprettFerdigstillBehandlingTask(saksbehandling)
     }
 
-    private fun journalførSaksbehandlingsblankett(behandling: Saksbehandling, blankettPdf: ByteArray) {
-        val arkiverDokumentRequest = opprettArkiverDokumentRequest(behandling, blankettPdf)
-        val beslutter = totrinnskontrollService.hentBeslutter(behandling.id)
+    private fun journalførSaksbehandlingsblankett(saksbehandling: Saksbehandling, blankettPdf: ByteArray) {
+        val arkiverDokumentRequest = opprettArkiverDokumentRequest(saksbehandling, blankettPdf)
+        val beslutter = totrinnskontrollService.hentBeslutter(saksbehandling.id)
 
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter)
 
-        behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, saksbehandling.id)
     }
 
-    private fun opprettArkiverDokumentRequest(behandling: Saksbehandling,
+    private fun opprettArkiverDokumentRequest(saksbehandling: Saksbehandling,
                                               blankettPdf: ByteArray): ArkiverDokumentRequest {
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
         val personIdent = fagsak.hentAktivIdent()
         val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
-        return lagArkiverBlankettRequestMotNyLøsning(personIdent, blankettPdf, enhet, fagsak.eksternId.id, behandling.id)
+        return lagArkiverBlankettRequestMotNyLøsning(personIdent, blankettPdf, enhet, fagsak.eksternId.id, saksbehandling.id)
     }
 
     override fun stegType(): StegType {
         return StegType.LAG_SAKSBEHANDLINGSBLANKETT
     }
 
-    private fun opprettFerdigstillBehandlingTask(behandling: Saksbehandling) {
-        taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
+    private fun opprettFerdigstillBehandlingTask(saksbehandling: Saksbehandling) {
+        taskRepository.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))
     }
 
 }

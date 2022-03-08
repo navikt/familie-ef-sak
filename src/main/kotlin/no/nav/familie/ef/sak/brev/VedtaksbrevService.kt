@@ -110,9 +110,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter))
     }
 
-    private fun validerRedigerbarBehandling(behandling: Saksbehandling) {
-        if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
+    private fun validerRedigerbarBehandling(saksbehandling: Saksbehandling) {
+        if (saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            throw Feil("Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
     }

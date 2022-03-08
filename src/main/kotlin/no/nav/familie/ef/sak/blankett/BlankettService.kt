@@ -97,8 +97,8 @@ class BlankettService(private val tilgangService: TilgangService,
 
     }
 
-    private fun lagPersonopplysningerDto(behandling: Saksbehandling): PersonopplysningerDto {
-        return PersonopplysningerDto(hentGjeldendeNavn(behandling.ident), behandling.ident)
+    private fun lagPersonopplysningerDto(saksbehandling: Saksbehandling): PersonopplysningerDto {
+        return PersonopplysningerDto(hentGjeldendeNavn(saksbehandling.ident), saksbehandling.ident)
     }
 
     private fun hentVedtak(behandlingId: UUID): VedtakDto {

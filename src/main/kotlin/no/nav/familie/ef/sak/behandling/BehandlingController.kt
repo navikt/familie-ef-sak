@@ -32,9 +32,9 @@ class BehandlingController(private val behandlingService: BehandlingService,
 
     @GetMapping("{behandlingId}")
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
-        val behandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        tilgangService.validerTilgangTilPersonMedBarn(behandling.ident, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(behandling.tilDto())
+        val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(saksbehandling.tilDto())
     }
 
     @PostMapping("{behandlingId}/reset/{steg}")

@@ -57,8 +57,8 @@ class BlankettSteg(
     }
 
 
-    private fun ferdigstillBehandling(behandling: Saksbehandling) {
-        taskRepository.save(FerdigstillBehandlingTask.opprettTask(behandling))
+    private fun ferdigstillBehandling(saksbehandling: Saksbehandling) {
+        taskRepository.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))
     }
 
     override fun stegType(): StegType = StegType.JOURNALFØR_BLANKETT

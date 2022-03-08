@@ -57,32 +57,32 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     }
 
-    private fun validerRiktigTilstandVedInvilgelse(behandling: Saksbehandling) {
-        val vedtak = vedtakService.hentVedtak(behandling.id)
+    private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         if (vedtak.resultatType == INNVILGE) {
-            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandling.id)) {
-                "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${behandling.id}"
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(saksbehandling.id)) {
+                "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${saksbehandling.id}"
             }
         }
     }
 
-    private fun saksbehandlerMåTaStilingTilTilbakekreving(behandling: Saksbehandling): Boolean {
-        if (erIkkeRelevantForTilbakekreving(behandling)) {
+    private fun saksbehandlerMåTaStilingTilTilbakekreving(saksbehandling: Saksbehandling): Boolean {
+        if (erIkkeRelevantForTilbakekreving(saksbehandling)) {
             return false
         }
-        val feilutbetaling = simuleringService.hentLagretSimuleringsresultat(behandling.id).feilutbetaling > BigDecimal.ZERO
-        val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(behandling.id)
+        val feilutbetaling = simuleringService.hentLagretSimuleringsresultat(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
+        val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
         if (feilutbetaling && harIkkeTattStillingTil) {
-            return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandling.id)
+            return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(saksbehandling.id)
         }
 
         return false
     }
 
-    private fun erIkkeRelevantForTilbakekreving(behandling: Saksbehandling): Boolean {
-        val resultatType = vedtakService.hentVedtak(behandling.id).resultatType
-        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
-               || behandling.type == BehandlingType.BLANKETT
+    private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
+        val resultatType = vedtakService.hentVedtak(saksbehandling.id).resultatType
+        return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
+               || saksbehandling.type == BehandlingType.BLANKETT
                || resultatType == ResultatType.AVSLÅ
                || resultatType == ResultatType.HENLEGGE
     }
@@ -100,10 +100,10 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
             taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
 
-    private fun ferdigstillOppgave(behandling: Saksbehandling, oppgavetype: Oppgavetype) {
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
-        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id,
+    private fun ferdigstillOppgave(saksbehandling: Saksbehandling, oppgavetype: Oppgavetype) {
+        val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
+        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = saksbehandling.id,
                                                                    oppgavetype,
                                                                    it.gsakOppgaveId,
                                                                    aktivIdent))
@@ -111,16 +111,16 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
 
-    private fun opprettGodkjennVedtakOppgave(behandling: Saksbehandling) {
+    private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
-                OpprettOppgaveTaskData(behandlingId = behandling.id,
+                OpprettOppgaveTaskData(behandlingId = saksbehandling.id,
                                        oppgavetype = Oppgavetype.GodkjenneVedtak,
                                        beskrivelse = "Sendt til godkjenning av " +
                                                      "${SikkerhetContext.hentSaksbehandlerNavn(true)}.")))
     }
 
-    private fun validerSaksbehandlersignatur(behandling: Saksbehandling) {
-        val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+    private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
+        val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 
 
         brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) {

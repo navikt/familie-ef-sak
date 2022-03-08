@@ -113,11 +113,11 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun ferdigstillOppgave(behandling: Saksbehandling): Long? {
+    private fun ferdigstillOppgave(saksbehandling: Saksbehandling): Long? {
         val oppgavetype = Oppgavetype.GodkjenneVedtak
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
-        return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id,
+        val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
+        return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = saksbehandling.id,
                                                                    oppgavetype = oppgavetype,
                                                                    oppgaveId = it.gsakOppgaveId,
                                                                    personIdent = aktivIdent))
@@ -125,15 +125,15 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Saksbehandling, navIdent: String) {
+    private fun opprettBehandleUnderkjentVedtakOppgave(saksbehandling: Saksbehandling, navIdent: String) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
-                OpprettOppgaveTaskData(behandlingId = behandling.id,
+                OpprettOppgaveTaskData(behandlingId = saksbehandling.id,
                                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                                        tilordnetNavIdent = navIdent)))
     }
 
-    private fun opprettTaskForJournalførBlankett(behandling: Saksbehandling) {
-        taskRepository.save(JournalførBlankettTask.opprettTask(behandling))
+    private fun opprettTaskForJournalførBlankett(saksbehandling: Saksbehandling) {
+        taskRepository.save(JournalførBlankettTask.opprettTask(saksbehandling))
     }
 
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {

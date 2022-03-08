@@ -100,15 +100,15 @@ class VurderingStegService(private val behandlingService: BehandlingService,
         }
     }
 
-    private fun opprettBehandlingsstatistikkTask(behandling: Saksbehandling) {
-        if (behandling.type != BehandlingType.BLANKETT) {
-            taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = behandling.id))
+    private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
+        if (saksbehandling.type != BehandlingType.BLANKETT) {
+            taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
         }
 
     }
 
-    private fun erInitiellVurderingAvVilkår(behandling: Saksbehandling): Boolean {
-        return behandling.status == BehandlingStatus.OPPRETTET
+    private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {
+        return saksbehandling.status == BehandlingStatus.OPPRETTET
     }
 
     private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,

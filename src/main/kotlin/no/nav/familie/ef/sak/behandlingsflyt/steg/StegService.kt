@@ -47,63 +47,63 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
 
     @Transactional
-    fun håndterVilkår(behandling: Saksbehandling): Behandling {
+    fun håndterVilkår(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: VilkårSteg = hentBehandlingSteg(StegType.VILKÅR)
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterBeregnYtelseForStønad(behandling: Saksbehandling, vedtak: VedtakDto): Behandling {
+    fun håndterBeregnYtelseForStønad(saksbehandling: Saksbehandling, vedtak: VedtakDto): Behandling {
         val behandlingSteg: BeregnYtelseSteg = hentBehandlingSteg(BEREGNE_YTELSE)
-        return håndterSteg(behandling, behandlingSteg, vedtak)
+        return håndterSteg(saksbehandling, behandlingSteg, vedtak)
     }
 
     @Transactional
-    fun håndterVedtaBlankett(behandling: Saksbehandling, vedtak: VedtakDto): Behandling {
+    fun håndterVedtaBlankett(saksbehandling: Saksbehandling, vedtak: VedtakDto): Behandling {
         val behandlingSteg: VedtaBlankettSteg = hentBehandlingSteg(VEDTA_BLANKETT)
-        return håndterSteg(behandling, behandlingSteg, vedtak)
+        return håndterSteg(saksbehandling, behandlingSteg, vedtak)
     }
 
     @Transactional
-    fun håndterSendTilBeslutter(behandling: Saksbehandling): Behandling {
+    fun håndterSendTilBeslutter(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterBeslutteVedtak(behandling: Saksbehandling, data: BeslutteVedtakDto): Behandling {
+    fun håndterBeslutteVedtak(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): Behandling {
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
-        return håndterSteg(behandling, behandlingSteg, data)
+        return håndterSteg(saksbehandling, behandlingSteg, data)
     }
 
     @Transactional
-    fun håndterBlankett(behandling: Saksbehandling): Behandling {
+    fun håndterBlankett(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterLagSaksbehandlingsblankett(behandling: Saksbehandling): Behandling {
+    fun håndterLagSaksbehandlingsblankett(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: SaksbehandlingsblankettSteg = hentBehandlingSteg(LAG_SAKSBEHANDLINGSBLANKETT)
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
 
     @Transactional
-    fun håndterPollStatusFraIverksett(behandling: Saksbehandling): Behandling {
+    fun håndterPollStatusFraIverksett(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: VentePåStatusFraIverksett = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_IVERKSETT)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
-    fun håndterPollStatusTekniskOpphør(behandling: Saksbehandling): Behandling {
+    fun håndterPollStatusTekniskOpphør(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: VentePåTekniskOpphørStatus = hentBehandlingSteg(VENTE_PÅ_TEKNISK_OPPHØR_STATUS)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional
@@ -115,10 +115,10 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     @Transactional
-    fun håndterFerdigstillBehandling(behandling: Saksbehandling): Behandling {
+    fun håndterFerdigstillBehandling(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
 
-        return håndterSteg(behandling, behandlingSteg, null)
+        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
 
@@ -150,42 +150,42 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     // Generelle stegmetoder
-    private fun <T> håndterSteg(behandling: Saksbehandling,
+    private fun <T> håndterSteg(saksbehandling: Saksbehandling,
                                 behandlingSteg: BehandlingSteg<T>,
                                 data: T): Behandling {
         val stegType = behandlingSteg.stegType()
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         try {
-            valider(behandling, stegType, saksbehandlerIdent, behandlingSteg)
-            val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(behandling, data)
-            oppdaterHistorikk(behandlingSteg, behandling.id, saksbehandlerIdent)
+            valider(saksbehandling, stegType, saksbehandlerIdent, behandlingSteg)
+            val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(saksbehandling, data)
+            oppdaterHistorikk(behandlingSteg, saksbehandling.id, saksbehandlerIdent)
             oppdaterMetrikk(stegType, stegSuksessMetrics)
-            validerNesteSteg(nesteSteg, behandling)
-            logger.info("$stegType på behandling ${behandling.id} er håndtert")
-            return behandlingService.oppdaterStegPåBehandling(behandlingId = behandling.id, steg = nesteSteg)
+            validerNesteSteg(nesteSteg, saksbehandling)
+            logger.info("$stegType på behandling ${saksbehandling.id} er håndtert")
+            return behandlingService.oppdaterStegPåBehandling(behandlingId = saksbehandling.id, steg = nesteSteg)
         } catch (exception: Exception) {
             oppdaterMetrikk(stegType, stegFeiletMetrics)
-            logger.warn("Håndtering av stegtype '$stegType' feilet på behandling ${behandling.id}.")
+            logger.warn("Håndtering av stegtype '$stegType' feilet på behandling ${saksbehandling.id}.")
             throw exception
         }
     }
 
-    private fun validerNesteSteg(nesteSteg: StegType, behandling: Saksbehandling) {
-        if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(behandling.id).status)) {
+    private fun validerNesteSteg(nesteSteg: StegType, saksbehandling: Saksbehandling) {
+        if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(saksbehandling.id).status)) {
             error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
-                  "på behandling i kombinasjon med status ${behandling.status}")
+                  "på behandling i kombinasjon med status ${saksbehandling.status}")
         }
     }
 
-    private fun <T> valider(behandling: Saksbehandling,
+    private fun <T> valider(saksbehandling: Saksbehandling,
                             stegType: StegType,
                             saksbehandlerIdent: String,
                             behandlingSteg: BehandlingSteg<T>) {
-        validerHarTilgang(behandling, stegType, saksbehandlerIdent)
+        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
 
-        validerGyldigTilstand(behandling, stegType, saksbehandlerIdent)
+        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
 
-        utførBehandlingsvalidering(behandlingSteg, behandling)
+        utførBehandlingsvalidering(behandlingSteg, saksbehandling)
     }
 
     private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
@@ -205,38 +205,38 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
     }
 
     private fun <T> utførBehandlingsvalidering(behandlingSteg: BehandlingSteg<T>,
-                                               behandling: Saksbehandling) {
-        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(behandling.status)) {
-            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${behandling.status}")
+                                               saksbehandling: Saksbehandling) {
+        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
+            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${saksbehandling.status}")
         }
-        behandlingSteg.validerSteg(behandling)
+        behandlingSteg.validerSteg(saksbehandling)
     }
 
-    private fun validerGyldigTilstand(behandling: Saksbehandling,
+    private fun validerGyldigTilstand(saksbehandling: Saksbehandling,
                                       stegType: StegType,
                                       saksbehandlerIdent: String) {
-        if (behandling.steg == BEHANDLING_FERDIGSTILT) {
+        if (saksbehandling.steg == BEHANDLING_FERDIGSTILT) {
             error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
         }
 
-        if (stegType.kommerEtter(behandling.steg)) {
+        if (stegType.kommerEtter(saksbehandling.steg)) {
             error("$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
-                  "men behandlingen er på steg '${behandling.steg.displayName()}'")
+                  "men behandlingen er på steg '${saksbehandling.steg.displayName()}'")
         }
 
-        if (behandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
-            error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
+        if (saksbehandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
+            error("Behandlingen er på steg '${saksbehandling.steg.displayName()}', og er da låst for alle andre type endringer.")
         }
     }
 
-    private fun validerHarTilgang(behandling: Saksbehandling,
+    private fun validerHarTilgang(saksbehandling: Saksbehandling,
                                   stegType: StegType,
                                   saksbehandlerIdent: String) {
-        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
+        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, saksbehandling.steg.tillattFor)
 
-        logger.info("Starter håndtering av $stegType på behandling ${behandling.id}")
+        logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
         secureLogger.info("Starter håndtering av $stegType på behandling " +
-                          "${behandling.id} med saksbehandler=[$saksbehandlerIdent]")
+                          "${saksbehandling.id} med saksbehandler=[$saksbehandlerIdent]")
 
         feilHvis(!harTilgangTilSteg) {
             "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."

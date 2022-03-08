@@ -71,15 +71,15 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val grunnlagsdataService: GrunnlagsdataService,
                             private val brevmottakereRepository: BrevmottakereRepository) {
 
-    fun tilDto(behandling: Saksbehandling, beslutter: String): IverksettDto {
+    fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
         val saksbehandler =
-                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
-        return tilDto(behandling, saksbehandler, beslutter)
+        return tilDto(saksbehandling, saksbehandler, beslutter)
     }
 
-    fun tilMigreringDto(behandling: Saksbehandling): IverksettDto {
-        return tilDto(behandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
+    fun tilMigreringDto(saksbehandling: Saksbehandling): IverksettDto {
+        return tilDto(saksbehandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
     }
 
     private fun tilDto(saksbehandling: Saksbehandling,
@@ -137,15 +137,15 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                                                                       stønadstype = StønadType.OVERGANGSSTØNAD)
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
-    private fun mapBehandlingsdetaljer(behandling: Saksbehandling,
+    private fun mapBehandlingsdetaljer(saksbehandling: Saksbehandling,
                                        vilkårsvurderinger: List<Vilkårsvurdering>) =
-            BehandlingsdetaljerDto(behandlingId = behandling.id,
-                                   behandlingType = BehandlingType.valueOf(behandling.type.name),
-                                   behandlingÅrsak = behandling.årsak,
-                                   eksternId = behandling.eksternId,
+            BehandlingsdetaljerDto(behandlingId = saksbehandling.id,
+                                   behandlingType = BehandlingType.valueOf(saksbehandling.type.name),
+                                   behandlingÅrsak = saksbehandling.årsak,
+                                   eksternId = saksbehandling.eksternId,
                                    vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
-                                   forrigeBehandlingId = behandling.forrigeBehandlingId,
-                                   kravMottatt = behandling.kravMottatt)
+                                   forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
+                                   kravMottatt = saksbehandling.kravMottatt)
 
     @Improvement("Opphørårsak må utledes ved revurdering")
     private fun mapVedtaksdetaljerDto(vedtak: Vedtak,

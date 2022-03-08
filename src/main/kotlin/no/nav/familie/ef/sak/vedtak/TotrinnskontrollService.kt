@@ -38,8 +38,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
      * og returnerer navIdent til saksbehandleren som sendte behandling til beslutter
      */
     @Transactional
-    fun lagreTotrinnskontrollOgReturnerBehandler(behandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
-        val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id)
+    fun lagreTotrinnskontrollOgReturnerBehandler(saksbehandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
+        val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
 
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
             throw Feil(message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
@@ -54,12 +54,12 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
         val nyStatus = if (beslutteVedtak.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
         val utfall = if (beslutteVedtak.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
 
-        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = behandling.id,
-                                                            stegtype = behandling.steg,
+        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = saksbehandling.id,
+                                                            stegtype = saksbehandling.steg,
                                                             utfall = utfall,
                                                             metadata = beslutteVedtak)
 
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, nyStatus)
+        behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, nyStatus)
         return sisteBehandlingshistorikk.opprettetAv
     }
 
