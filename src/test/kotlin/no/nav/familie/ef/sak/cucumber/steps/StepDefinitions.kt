@@ -14,8 +14,6 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser.lagDefaultTilkjentYtelseFraAndel
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser.lagDefaultTilkjentYtelseUtenAndel
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
@@ -44,7 +42,6 @@ class StepDefinitions {
 
     private var vedtak = listOf<Vedtak>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
-    private var tilkjentYtelse = mutableListOf<TilkjentYtelse>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
@@ -73,16 +70,6 @@ class StepDefinitions {
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
         inntekter = VedtakDomeneParser.mapInntekter(dataTable)
-    }
-
-    @Gitt("følgende andeler tilkjent ytelse")
-    fun `følgende andeler tilkjent ytelse`(dataTable: DataTable) {
-        tilkjentYtelse = lagDefaultTilkjentYtelseFraAndel(dataTable)
-    }
-
-    @Gitt("følgende tilkjent ytelse uten andel")
-    fun `følgende tilkjent ytelse uten andel`(dataTable: DataTable) {
-        tilkjentYtelse.addAll(lagDefaultTilkjentYtelseUtenAndel(dataTable))
     }
 
     @Når("lag andelhistorikk kjøres")

@@ -6,9 +6,9 @@ Egenskap: Andelhistorikk: Nytt vedtak sletter andel og en ny periode
   Scenario: Endring i vedtaksperiode fører til sletting og en ny periode
 
     Gitt følgende vedtak
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato |
-      | 1            | INNVILGE        | 01.2021         | 02.2021         |
-      | 2            | INNVILGE        | 02.2021         | 03.2021         |
+      | BehandlingId | Fra og med dato | Til og med dato |
+      | 1            | 01.2021         | 02.2021         |
+      | 2            | 02.2021         | 03.2021         |
 
     Og følgende inntekter
       | BehandlingId | Fra og med dato | Inntekt |
