@@ -36,9 +36,9 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
 
     companion object {
 
-        val NAV_ANONYM_NAVN = "NAV anonym"
-        val ENHET_VIKAFOSSEN = "NAV Vikafossen"
-        val ENHET_NAY = "NAV Arbeid og ytelser"
+        const val NAV_ANONYM_NAVN = "NAV anonym"
+        const val ENHET_VIKAFOSSEN = "NAV Vikafossen"
+        const val ENHET_NAY = "NAV Arbeid og ytelser"
     }
 
 }

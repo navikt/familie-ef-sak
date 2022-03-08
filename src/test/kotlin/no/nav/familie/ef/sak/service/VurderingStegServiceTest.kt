@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
@@ -47,7 +46,6 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.alleVilkårsregler
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
-import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -63,14 +61,17 @@ internal class VurderingStegServiceTest {
     private val søknadService = mockk<SøknadService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val barnService = mockk<BarnService>()
-    private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
     private val taskRepository = mockk<TaskRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
-    private val vurderingService = VurderingService(behandlingService, søknadService, vilkårsvurderingRepository, barnService,
-                                                    vilkårGrunnlagService, grunnlagsdataService)
+    private val vurderingService = VurderingService(behandlingService,
+                                                    søknadService,
+                                                    vilkårsvurderingRepository,
+                                                    barnService,
+                                                    vilkårGrunnlagService,
+                                                    grunnlagsdataService)
     private val vurderingStegService = VurderingStegService(behandlingService = behandlingService,
                                                             vurderingService = vurderingService,
                                                             vilkårsvurderingRepository = vilkårsvurderingRepository,
@@ -96,11 +97,6 @@ internal class VurderingStegServiceTest {
         every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { taskRepository.save(any()) } answers { firstArg() }
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
-                .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
-                                         gyldigePerioder = emptyList(),
-                                         uavklartePerioder = emptyList(),
-                                         avvistePerioder = emptyList()))
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))

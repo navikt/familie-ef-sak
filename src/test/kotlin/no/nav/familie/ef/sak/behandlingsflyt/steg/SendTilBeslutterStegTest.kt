@@ -7,7 +7,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
@@ -34,7 +33,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -63,7 +61,6 @@ internal class SendTilBeslutterStegTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtakService = mockk<VedtakService>()
-    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val vurderingService = mockk<VurderingService>()
@@ -99,11 +96,11 @@ internal class SendTilBeslutterStegTest {
                                           saksbehandlerident = saksbehandlerNavn)
 
     private val behandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
-                                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                           status = BehandlingStatus.UTREDES,
-                                                           steg = beslutteVedtakSteg.stegType(),
-                                                           resultat = BehandlingResultat.IKKE_SATT,
-                                                           årsak = BehandlingÅrsak.SØKNAD))
+                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                               status = BehandlingStatus.UTREDES,
+                                                               steg = beslutteVedtakSteg.stegType(),
+                                                               resultat = BehandlingResultat.IKKE_SATT,
+                                                               årsak = BehandlingÅrsak.SØKNAD))
 
     private val revurdering = behandling.copy(type = BehandlingType.REVURDERING, resultat = INNVILGET)
 
@@ -258,8 +255,8 @@ internal class SendTilBeslutterStegTest {
     private fun mockTilbakekrevingValideringsfeil() {
         // tilbakekrevingService.
         every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
-        every { simuleringService.hentLagretSimuleringsresultat(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
-                1000))
+        every { simuleringService.hentLagretSimuleringsresultat(any()) }
+                .returns(simuleringsoppsummering.copy(feilutbetaling = BigDecimal(1000)))
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false

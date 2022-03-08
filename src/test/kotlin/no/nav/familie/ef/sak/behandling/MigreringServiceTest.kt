@@ -103,7 +103,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     internal fun setUp() {
         //Vid migrering forventer vi OK_MOT_OPPDRAG, vid revurdering forventer vi OK
-                val responseFraInfotrygd: Queue<IverksettStatus> = LinkedList(listOf(IverksettStatus.OK_MOT_OPPDRAG, IverksettStatus.OK))
+                val responseFraInfotrygd: Queue<IverksettStatus> =
+                        LinkedList(listOf(IverksettStatus.OK_MOT_OPPDRAG, IverksettStatus.OK))
                 every { iverksettClient.hentStatus(any()) } answers {
             responseFraInfotrygd.poll()
         }

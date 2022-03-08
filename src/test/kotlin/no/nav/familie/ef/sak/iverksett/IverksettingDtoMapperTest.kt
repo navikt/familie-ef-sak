@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -36,7 +35,6 @@ internal class IverksettingDtoMapperTest {
 
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
-    private val fagsakService = mockk<FagsakService>()
     private val vedtakService = mockk<VedtakService>()
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>()
     private val barnService = mockk<BarnService>()
@@ -47,7 +45,6 @@ internal class IverksettingDtoMapperTest {
     private val iverksettingDtoMapper =
             IverksettingDtoMapper(arbeidsfordelingService = arbeidsfordelingService,
                                   behandlingshistorikkService = behandlingshistorikkService,
-                                  fagsakService = fagsakService,
                                   grunnlagsdataService = grunnlagsdataService,
                                   simuleringService = simuleringService,
                                   barnService = barnService,
@@ -63,7 +60,6 @@ internal class IverksettingDtoMapperTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { fagsakService.hentFagsakForBehandling(behandling.id) } returns fagsak
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.INNVILGE)
         val behandlingshistorikk =
                 Behandlingshistorikk(behandlingId = behandling.id, opprettetAv = "", steg = StegType.SEND_TIL_BESLUTTER)

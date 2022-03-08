@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
@@ -38,7 +37,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<VedtakDto> {
 
 
-    override fun validerSteg(behandling: Saksbehandling) {
+    override fun validerSteg(saksbehandling: Saksbehandling) {
 
     }
 

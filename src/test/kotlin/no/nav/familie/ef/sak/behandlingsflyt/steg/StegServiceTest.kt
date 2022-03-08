@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.beregning.Inntekt
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -26,7 +25,6 @@ import java.time.YearMonth
 internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var stegService: StegService
-    @Autowired lateinit var fagsakRepository: FagsakRepository
     @Autowired lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
     @Autowired lateinit var behandlingRepository: BehandlingRepository
 

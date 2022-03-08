@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlingSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service
 class VedtaBlankettSteg(private val vedtakService: VedtakService, private val blankettRepository: BlankettRepository) :
         BehandlingSteg<VedtakDto> {
 
-    override fun validerSteg(behandling: Saksbehandling) {
+    override fun validerSteg(saksbehandling: Saksbehandling) {
     }
 
     override fun stegType(): StegType {

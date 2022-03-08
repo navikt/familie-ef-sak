@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -67,7 +66,6 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val barnService: BarnService,
                             private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
-                            private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
                             private val tilbakekrevingService: TilbakekrevingService,
                             private val grunnlagsdataService: GrunnlagsdataService,
@@ -89,7 +87,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                        beslutter: String): IverksettDto {
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val tilkjentYtelse =
-                if (vedtak.resultatType != ResultatType.AVSLÅ) tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
+                if (vedtak.resultatType != ResultatType.AVSLÅ)
+                    tilkjentYtelseService.hentForBehandling(saksbehandling.id) else null
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(saksbehandling.id)
 
         val behandlingsdetaljer = mapBehandlingsdetaljer(saksbehandling, vilkårsvurderinger)

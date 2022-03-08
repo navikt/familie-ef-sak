@@ -83,7 +83,10 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun erIkkeRelevantForTilbakekreving(behandling: Saksbehandling): Boolean {
         val resultatType = vedtakService.hentVedtak(behandling.id).resultatType
-        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || behandling.type == BehandlingType.BLANKETT || resultatType == ResultatType.AVSLÅ || resultatType == ResultatType.HENLEGGE
+        return behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
+               || behandling.type == BehandlingType.BLANKETT
+               || resultatType == ResultatType.AVSLÅ
+               || resultatType == ResultatType.HENLEGGE
     }
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
@@ -114,7 +117,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         taskRepository.save(OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(behandlingId = behandling.id,
                                        oppgavetype = Oppgavetype.GodkjenneVedtak,
-                                       beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.")))
+                                       beskrivelse = "Sendt til godkjenning av " +
+                                                     "${SikkerhetContext.hentSaksbehandlerNavn(true)}.")))
     }
 
     private fun validerSaksbehandlersignatur(behandling: Saksbehandling) {
@@ -128,12 +132,13 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSammeIdent(vedtaksbrev: Vedtaksbrev) {
-        brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) { "En annen saksbehandler har signert vedtaksbrevet" }
+        brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) {
+            "En annen saksbehandler har signert vedtaksbrevet"
+        }
     }
 
     private fun validerSammeSignatur(vedtaksbrev: Vedtaksbrev) {
-        brukerfeilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(
-                strict = true)) {
+        brukerfeilHvis(vedtaksbrev.saksbehandlersignatur != SikkerhetContext.hentSaksbehandlerNavn(strict = true)) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
     }

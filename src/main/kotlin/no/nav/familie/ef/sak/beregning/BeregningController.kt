@@ -61,7 +61,9 @@ class BeregningController(private val stegService: StegService,
 
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
         if (vedtak is Innvilget) {
-            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) {
+                "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt"
+            }
         }
     }
 

@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
@@ -33,7 +32,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                      @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    val ENHET_NAY = "4489"
+    private val enhetNay = "4489"
 
     fun opprettOppgave(behandlingId: UUID,
                        oppgavetype: Oppgavetype,
@@ -67,7 +66,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                 oppgaveClient.opprettOppgave(opprettOppgave)
             } catch (e: Exception) {
                 if (finnerIkkeGyldigArbeidsfordeling(e)) {
-                    oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
+                    oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = enhetNay))
                 } else {
                     throw e
                 }

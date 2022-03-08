@@ -63,8 +63,6 @@ class JournalførBlankettStegTest {
                                             totrinnskontrollService = totrinnskontrollService,
                                             taskRepository = taskRepository)
 
-    private lateinit var taskSlot: MutableList<Task>
-
     private val fnr = "12345678901"
     private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
                                 identer = setOf(PersonIdent(ident = fnr)))

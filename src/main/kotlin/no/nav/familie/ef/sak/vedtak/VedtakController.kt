@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -35,8 +34,6 @@ class VedtakController(private val stegService: StegService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
                        private val vedtakService: VedtakService) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {

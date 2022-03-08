@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -39,7 +38,6 @@ import java.util.UUID
 
 class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val behandlingService: BehandlingService,
-                                private val fagsakService: FagsakService,
                                 private val søknadService: SøknadService,
                                 private val vedtakRepository: VedtakRepository,
                                 private val oppgaveService: OppgaveService,

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.økonomi
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.innvilgetOgFerdigstilt
@@ -22,9 +21,6 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
-
-    @Autowired
-    private lateinit var fagsakRepository: FagsakRepository
 
     @Test
     fun `Opprett og hent tilkjent ytelse`() {
@@ -71,7 +67,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnTilkjentYtelserTilKonsistensAvstemming`() {
+    internal fun finnTilkjentYtelserTilKonsistensAvstemming() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
 

@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -56,7 +55,6 @@ internal class BeregnYtelseStegTest {
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
-    private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
@@ -872,7 +870,8 @@ internal class BeregnYtelseStegTest {
                 utførSteg(BehandlingType.REVURDERING,
                           innvilget(listOf(opphørsperiode(opphørFom, opphørFom),
                                            innvilgetPeriode(innvilgetMåned, innvilgetMåned)), listOf(inntekt(opphørFom))))
-            }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, når man mangler tidligere behandling å opphøre")
+            }.hasMessageContaining("Har ikke støtte for å innvilge med opphør først, " +
+                                   "når man mangler tidligere behandling å opphøre")
         }
 
         @Test
@@ -947,7 +946,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal kunne innvilge med opphør før andeler sitt startdato, med ny innvilget periode - setter nytt opphørsdato`() {
+        internal fun `skal kunne innvilge med opphør før andelers startdato, med ny innvilget periode - setter ny opphørsdato`() {
             val opphørFom = YearMonth.of(2021, 1)
             val nyttInnvilgetFom = opphørFom.plusMonths(1)
             val andelFom = YearMonth.of(2021, 6).atDay(1)
@@ -972,7 +971,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `finnes tidligere opphørsdato fra før, og vurderer med opphør etter det datoet - beholder tidligere opphørsdato`() {
+        internal fun `finnes tidligere opphørsdato, og vurderer med opphør etter det datoet - beholder tidligere opphørsdato`() {
             val tidligereOpphør = YearMonth.of(2020, 1).atDay(1)
             val nyttOpphørsdato = YearMonth.of(2021, 1)
             val nyttInnvilgetFom = nyttOpphørsdato.plusMonths(1)
@@ -1133,7 +1132,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal opphøre etter datoet for ett tidligere opphør, men før tidligere andeler - beholder tidligere opphørsdato`() {
+        fun `skal opphøre etter dato for ett tidligere opphør, men før tidligere andeler - beholder tidligere opphørsdato`() {
             val tidligereOpphør = YearMonth.of(2021, 1).atDay(1)
             val opphørFom = YearMonth.of(2022, 1)
             val andelFom = YearMonth.of(2022, 6).atDay(1)
@@ -1151,7 +1150,7 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal opphøre etter datoet for ett tidligere opphør, men etter tidligere andeler - beholder tidligere opphørsdato`() {
+        fun `skal opphøre etter datoet for ett tidligere opphør, men etter tidligere andeler - beholder tidligere opphørsdato`() {
             val tidligereOpphør = YearMonth.of(2021, 1).atDay(1)
             val opphørFom = YearMonth.of(2022, 8)
             val andelFom = YearMonth.of(2022, 6).atDay(1)

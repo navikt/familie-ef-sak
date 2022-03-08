@@ -1,13 +1,12 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 
 interface BehandlingSteg<T> {
 
-    fun validerSteg(behandling: Saksbehandling) {}
+    fun validerSteg(saksbehandling: Saksbehandling) {}
 
     /**
      * Hvis man trenger å overridea vanlige flytet og returnere en annen stegtype kan man overridea denne metoden,

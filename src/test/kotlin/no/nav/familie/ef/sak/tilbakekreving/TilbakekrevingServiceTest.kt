@@ -141,7 +141,7 @@ internal class TilbakekrevingServiceTest {
     @Nested
     inner class GenererBrev {
 
-        val simuleringsoppsummering = Simuleringsoppsummering(
+        private val simuleringsoppsummering = Simuleringsoppsummering(
                 perioder = listOf(),
                 fomDatoNestePeriode = null,
                 etterbetaling = BigDecimal.valueOf(5000),
@@ -164,7 +164,8 @@ internal class TilbakekrevingServiceTest {
         internal fun `Varselbrev feiler hvis behandling er låst`() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
             val assertFails = assertFailsWith<ApiFeil> { tilbakekrevingService.genererBrev(saksbehandling(), "Varsel, varsel") }
-            assertThat(assertFails.feil).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
+            assertThat(assertFails.feil)
+                    .isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
         }
 
         private fun mockHentDataForGenereringAvVarselbrev(): CapturingSlot<ForhåndsvisVarselbrevRequest> {

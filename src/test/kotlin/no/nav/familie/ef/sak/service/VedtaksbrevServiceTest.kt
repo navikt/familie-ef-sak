@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext

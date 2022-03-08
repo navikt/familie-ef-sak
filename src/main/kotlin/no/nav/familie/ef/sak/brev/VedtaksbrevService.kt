@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType

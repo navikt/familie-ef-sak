@@ -42,9 +42,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val behandlingService: BehandlingService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
-    override fun validerSteg(behandling: Saksbehandling) {
-        if (behandling.steg != stegType()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg}")
+    override fun validerSteg(saksbehandling: Saksbehandling) {
+        if (saksbehandling.steg != stegType()) {
+            throw Feil("Behandling er i feil steg=${saksbehandling.steg}")
         }
 
     }
@@ -108,7 +108,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSammeBeslutterIdent(vedtaksbrev: Vedtaksbrev) {
-        brukerfeilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
+        brukerfeilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) {
+            "En annen beslutter har signert vedtaksbrevet"
+        }
     }
 
     private fun ferdigstillOppgave(behandling: Saksbehandling): Long? {
@@ -142,7 +144,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         return StegType.BESLUTTE_VEDTAK
     }
 
-    override fun utførSteg(behandling: Saksbehandling, data: BeslutteVedtakDto) {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto) {
         error("Bruker utførOgReturnerNesteSteg")
     }
 

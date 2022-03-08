@@ -8,7 +8,6 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -18,8 +17,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.StønadType
@@ -77,14 +76,12 @@ internal class BehandlingsstatistikkTaskTest {
         val iverksettClient = mockk<IverksettClient>()
         val behandlingService = mockk<BehandlingService>()
         val søknadService = mockk<SøknadService>()
-        val fagsakService = mockk<FagsakService>()
         val grunnlagsdataService = mockk<GrunnlagsdataService>()
         val vedtakRepository = mockk<VedtakRepository>()
         val oppgaveService = mockk<OppgaveService>()
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
-        every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
         every { grunnlagsdataService.hentGrunnlagsdata(behandling.id) } returns grunnlagsdataMock
@@ -101,7 +98,6 @@ internal class BehandlingsstatistikkTaskTest {
 
         val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient = iverksettClient,
                                                                   behandlingService = behandlingService,
-                                                                  fagsakService = fagsakService,
                                                                   søknadService = søknadService,
                                                                   vedtakRepository = vedtakRepository,
                                                                   oppgaveService = oppgaveService,

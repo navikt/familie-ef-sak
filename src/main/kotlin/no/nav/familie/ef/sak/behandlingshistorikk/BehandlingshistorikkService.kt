@@ -16,7 +16,8 @@ import java.util.UUID
 class BehandlingshistorikkService(private val behandlingshistorikkRepository: BehandlingshistorikkRepository) {
 
     fun finnHendelseshistorikk(behandling: Saksbehandling): List<HendelseshistorikkDto> {
-        val (hendelserOpprettet, andreHendelser) = behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).map {
+        val (hendelserOpprettet, andreHendelser) =
+                behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).map {
             it.tilHendelseshistorikkDto(behandling)
         }.filter {
             it.hendelse != Hendelse.UKJENT
