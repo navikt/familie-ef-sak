@@ -193,13 +193,16 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
                                                               behandling: Behandling,
                                                               aktivIdent: String) {
-
-        val andelerTilkjentYtelse = andelerForSanksjonertRevurdering(behandling, vedtak.periode.tilPeriode())
-        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        feilHvis(behandling.forrigeBehandlingId == null) {
+            "Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling"
+        }
+        val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
+        val andelerTilkjentYtelse = andelerForSanksjonertRevurdering(forrigeTilkjenteYtelse, vedtak)
 
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = aktivIdent,
                                                                    behandlingId = behandling.id,
-                                                                   andelerTilkjentYtelse = andelerTilkjentYtelse))
+                                                                   andelerTilkjentYtelse = andelerTilkjentYtelse,
+                                                                   startdato = forrigeTilkjenteYtelse.startdato))
     }
 
     private fun finnOpphørsperioder(vedtak: Innvilget) =
@@ -234,12 +237,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     }
 
-    private fun andelerForSanksjonertRevurdering(behandling: Behandling,
-                                                 opphørsperiode: Periode): List<AndelTilkjentYtelse> {
-        return behandling.forrigeBehandlingId?.let {
-            val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
-            return vurderPeriodeForOpphør(forrigeTilkjenteYtelse.andelerTilkjentYtelse, listOf(opphørsperiode))
-        } ?: throw Feil("Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling")
+    private fun andelerForSanksjonertRevurdering(forrigeTilkjenteYtelse: TilkjentYtelse,
+                                                 vedtak: Sanksjonert): List<AndelTilkjentYtelse> {
+        val andelerTilkjentYtelse = vurderPeriodeForOpphør(forrigeTilkjenteYtelse.andelerTilkjentYtelse,
+                                                           listOf(vedtak.periode.tilPeriode()))
+        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+        return andelerTilkjentYtelse
     }
 
     fun vurderPeriodeForOpphør(andelTilkjentYtelser: List<AndelTilkjentYtelse>,
