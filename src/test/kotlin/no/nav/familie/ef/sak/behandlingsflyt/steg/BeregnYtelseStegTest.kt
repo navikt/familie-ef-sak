@@ -30,6 +30,8 @@ import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
@@ -1173,6 +1175,36 @@ internal class BeregnYtelseStegTest {
 
     }
 
+    @Nested
+    inner class Sanksjon {
+
+        @Test
+        internal fun `skal splitte tidligere periode og beholde startdato når man utfør sanksjon`() {
+            val startMåned = YearMonth.of(2021, 6)
+            val andelFom = startMåned.atDay(1)
+            val andelTom = YearMonth.of(2021, 8).atEndOfMonth()
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)),
+                                      startdato = andelFom)
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+            }
+
+            utførSteg(BehandlingType.REVURDERING,
+                      sanksjon(startMåned.plusMonths(1)),
+                      forrigeBehandlingId = UUID.randomUUID())
+
+            assertThat(slot.captured.startdato).isEqualTo(andelFom)
+            assertThat(slot.captured.andelerTilkjentYtelse).hasSize(2)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadFom).isEqualTo(andelFom)
+            assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(startMåned.atEndOfMonth())
+            assertThat(slot.captured.andelerTilkjentYtelse[1].stønadFom).isEqualTo(andelFom.plusMonths(2))
+            assertThat(slot.captured.andelerTilkjentYtelse[1].stønadTom).isEqualTo(andelTom)
+        }
+
+    }
+
     private fun innvilget(perioder: List<VedtaksperiodeDto>,
                           inntekter: List<Inntekt>) =
             Innvilget(resultatType = ResultatType.INNVILGE,
@@ -1180,6 +1212,14 @@ internal class BeregnYtelseStegTest {
                       inntekter = inntekter,
                       inntektBegrunnelse = "null",
                       periodeBegrunnelse = "null")
+
+    private fun sanksjon(årMåned: YearMonth) =
+            Sanksjonert(sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+                        periode = VedtaksperiodeDto(årMånedFra = årMåned,
+                                                    årMånedTil = årMåned,
+                                                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                                                    periodeType = VedtaksperiodeType.SANKSJON),
+                        internBegrunnelse = "")
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
