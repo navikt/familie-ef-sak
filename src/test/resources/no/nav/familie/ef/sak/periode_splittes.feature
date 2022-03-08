@@ -1,16 +1,11 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Andelhistorikk: Vedtak opphører midt i periode
+Egenskap: Andelhistorikk: En periode splittes og en periode fjernes som følge av nytt vedtak
 
-  Scenario: En periode splittes og en periode fjernes som følge av opphør
+  Scenario: En periode splittes og en periode fjernes som følge av nytt vedtak
 
     Gitt følgende vedtak
-      | BehandlingId | Fra og med dato | Til og med dato |
-      | 1            | 01.2021         | 01.2021         |
-      | 2            | 02.2021         |                 |
-
-    Og følgende andeler tilkjent ytelse
       | BehandlingId | Fra og med dato | Til og med dato |
       | 1            | 01.2021         | 03.2021         |
       | 2            | 01.2021         | 01.2021         |
