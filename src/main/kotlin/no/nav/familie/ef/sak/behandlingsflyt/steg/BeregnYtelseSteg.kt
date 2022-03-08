@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.min
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -193,7 +192,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
                                                               behandling: Behandling,
                                                               aktivIdent: String) {
-        feilHvis(behandling.forrigeBehandlingId == null) {
+        brukerfeilHvis(behandling.forrigeBehandlingId == null) {
             "Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling"
         }
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
