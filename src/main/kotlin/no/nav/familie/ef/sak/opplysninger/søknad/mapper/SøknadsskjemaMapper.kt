@@ -196,9 +196,9 @@ object SøknadsskjemaMapper {
             }
 
     private fun tilBarnepass(list: List<KontraktBarnepassOrdning>): Set<Barnepassordning> = list.map {
-        Barnepassordning(hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.svarId,
+        Barnepassordning(hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.svarId ?: error("Mangler verdi for hvaSlagsbarnepassOrdning"),
                          navn = it.navn.verdi,
-                         datoperiode = tilDomene(it.datoperiode?.verdi),
+                         datoperiode = it.datoperiode?.let { datoperiode -> tilDomene(datoperiode.verdi) } ?: error("Mangler verdi for datoperiode i barnepassordningen"),
                          beløp = it.belop.verdi.roundToInt())
     }.toSet()
 

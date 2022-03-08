@@ -35,7 +35,8 @@ object AktivitetMapper {
                 tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet?.tidligereUtdanninger),
                 gjelderDeg = situasjon?.gjelderDetteDeg?.verdier ?: emptyList(),
                 særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),
-                datoOppstartJobb = situasjon?.oppstartNyJobb
+                datoOppstartJobb = situasjon?.oppstartNyJobb,
+                erIArbeid = aktivitet?.erIArbeid
         )
     }
 
