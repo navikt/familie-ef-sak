@@ -7,22 +7,23 @@ Egenskap: Andelhistorikk: Splitting og fjerning av periode
 
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato |
-      | 1            | 01.01.2021      | 31.08.2021      |
-      | 2            | 01.01.2021      | 31.05.2021      |
-      | 3            | 01.03.2021      | 31.05.2021      |
+      | 1            | 01.2021         | 04.2021         |
+      | 2            | 03.2021         | 04.2021         |
+      | 3            | 01.2021         | 04.2021         |
 
-    Og følgende andeler tilkjent ytelse
+    Og følgende inntekter
       | BehandlingId | Fra og med dato | Til og med dato |
-      | 1            | 01.01.2021      | 31.08.2021      |
-      | 2            | 01.01.2021      | 28.02.2021      |
-      | 2            | 01.03.2021      | 31.05.2021      |
-      | 3            | 01.03.2021      | 31.05.2021      |
+      | 1            | 01.2021         | 02.2021         |
+      | 1            | 03.2021         | 04.2021         |
+      | 3            | 01.2021         | 02.2021         |
+      | 3            | 03.2021         | 04.2021         |
 
     Når lag andelhistorikk kjøres
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |
-      | 1            | 01.01.2021      | 28.02.2021      | FJERNET      | 3                     |
-      | 1            | 01.03.2021      | 31.08.2021      | FJERNET      | 2                     |
-      | 2            | 01.03.2021      | 31.05.2021      | FJERNET      | 3                     |
-      | 3            | 01.03.2021      | 31.05.2021      |              |                       |
+      | 1            | 01.2021         | 02.2021         | FJERNET      | 3                     |
+      | 3            | 01.2021         | 02.2021         |              |                       |
+      | 1            | 03.2021         | 04.2021         | FJERNET      | 2                     |
+      | 2            | 03.2021         | 04.2021         | FJERNET      | 3                     |
+      | 3            | 03.2021         | 04.2021         |              |                       |
