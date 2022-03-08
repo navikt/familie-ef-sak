@@ -30,7 +30,8 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
 
     @Query("""
         SELECT b.id behandling_id, pi.ident fodselsnummer_soker, 
-        JSON_ARRAY_ELEMENTS(data -> 'barn') ->> 'personIdent' fodselsnummer_barn, null
+         JSON_ARRAY_ELEMENTS(data -> 'barn') ->> 'personIdent' fodselsnummer_barn, 
+         null as termindato_barn
         FROM gjeldende_iverksatte_behandlinger b
          JOIN fagsak f ON b.fagsak_id = f.id
          JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = f.fagsak_person_id

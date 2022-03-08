@@ -142,6 +142,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             val behandling = lagreInnvilgetBehandling(fagsak)
             val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent(fnrBarn)))
             grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+            lagreFremtidligAndel(behandling, beløp = 1)
 
             assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
             val resultat = finnBarnTilMigrerteBehandlinger()
@@ -153,6 +154,20 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         }
 
         @Test
+        internal fun `finner ikke barn når det finnes behandlingbarn på personen`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910")), migrert = true))
+            val behandling = lagreInnvilgetBehandling(fagsak)
+            val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent("1")))
+            grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+            lagreFremtidligAndel(behandling, beløp = 1)
+
+            barnRepository.insert(barn(behandlingId = behandling.id, personIdent = "1"))
+
+            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).hasSize(1)
+            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
+        }
+
+        @Test
         internal fun `skal ikke finne barn til de som ikke er migrert og ikke har behandlingBarn`() {
             val fnrSøker = "12345678910"
             val fnrBarn = "1"
@@ -160,21 +175,9 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             val behandling = lagreInnvilgetBehandling(fagsak)
             val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent(fnrBarn)))
             grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
+            lagreFremtidligAndel(behandling, beløp = 1)
 
             assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).isEmpty()
-            assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
-        }
-
-        @Test
-        internal fun `finner ikke barn når det finnes behandlingbarn på personen`() {
-            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910")), migrert = true))
-            val behandling = lagreInnvilgetBehandling(fagsak)
-            val grunnlagsdataDomene = opprettGrunnlagsdata().copy(barn = listOf(opprettBarnMedIdent("1")))
-            grunnlagsdataRepository.insert(Grunnlagsdata(behandling.id, grunnlagsdataDomene))
-
-            barnRepository.insert(barn(behandlingId = behandling.id, personIdent = "1"))
-
-            assertThat(finnBarnAvGjeldendeIverksatteBehandlinger()).hasSize(1)
             assertThat(finnBarnTilMigrerteBehandlinger()).isEmpty()
         }
     }
