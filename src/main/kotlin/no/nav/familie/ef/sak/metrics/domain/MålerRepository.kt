@@ -46,14 +46,12 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               GROUP BY stonadstype, resultat, år, uke""")
     fun finnVedtakPerUke(): List<VedtakPerUke>
 
-    @Query("""
-        SELECT COUNT(*)
-        FROM gjeldende_iverksatte_behandlinger gib
-        JOIN fagsak fs ON fs.id = gib.fagsak_id
-        JOIN behandling b ON b.fagsak_id = fs.id
-        JOIN vedtak v ON v.behandling_id = b.id
-        WHERE gib.stonadstype = 'OVERGANGSSTØNAD' AND gib.arsak='SANKSJON_1_MND'
-    """)
+    @Query("""SELECT count(*) 
+              FROM behandling b
+              JOIN vedtak v ON v.behandling_id = b.id
+              WHERE v.resultat_type = 'SANKSJONERE'
+              AND b.status = 'FERDIGSTILT'
+              AND b.resultat = 'INNVILGET'""")
     fun finnAntallSanksjoner(): Int
 
 
