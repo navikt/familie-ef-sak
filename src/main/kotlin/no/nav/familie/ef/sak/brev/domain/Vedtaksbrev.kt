@@ -20,10 +20,6 @@ data class Vedtaksbrev(@Id
 
 }
 
-object VedtaksbrevKonstanter {
-    const val IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV = "IKKE_SATT"
-}
-
 fun Vedtaksbrev.tilDto(skjulBeslutterSignatur: Boolean): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,
                                                                                          brevmal = this.brevmal,
                                                                                          saksbehandlersignatur = this.saksbehandlersignatur,

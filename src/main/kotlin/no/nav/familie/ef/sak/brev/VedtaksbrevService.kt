@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
-import no.nav.familie.ef.sak.brev.domain.VedtaksbrevKonstanter.IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV
 import no.nav.familie.ef.sak.brev.domain.tilDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
@@ -122,17 +121,8 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         brukerfeilHvis(vedtaksbrev.beslutterident.isNullOrBlank()) {
             "Vedtaksbrevet er ikke signert av beslutter"
         }
-        when (vedtaksbrev.saksbehandlerident) {
-            IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV -> validerUlikeSignaturnavn(vedtaksbrev)
-            else -> validerUlikeIdenter(vedtaksbrev)
-        }
-    }
 
-    private fun validerUlikeSignaturnavn(vedtaksbrev: Vedtaksbrev) {
-        if (vedtaksbrev.saksbehandlersignatur == vedtaksbrev.besluttersignatur) {
-            throw ApiFeil("Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
-                          HttpStatus.BAD_REQUEST)
-        }
+        validerUlikeIdenter(vedtaksbrev)
     }
 
     private fun validerUlikeIdenter(vedtaksbrev: Vedtaksbrev) {

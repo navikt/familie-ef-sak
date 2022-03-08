@@ -10,9 +10,8 @@ Egenskap: Andelhistorikk: Endring i aktivitet
       | 1            | INNVILGE        | BARN_UNDER_ETT_ÅR  |
       | 2            | INNVILGE        | FORSØRGER_I_ARBEID |
 
-    Og følgende andeler tilkjent ytelse
+    Og følgende inntekter
       | BehandlingId | Inntekt |
-      | 1            | 0       |
       | 2            | 1       |
 
     Når lag andelhistorikk kjøres
