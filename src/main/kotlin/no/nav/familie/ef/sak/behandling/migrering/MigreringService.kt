@@ -95,8 +95,8 @@ class MigreringService(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun migrerOvergangsstønadAutomatisk(ident: String) {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(ident, Stønadstype.OVERGANGSSTØNAD)
+    fun migrerOvergangsstønadAutomatisk(personIdent: String) {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId)
     }
 

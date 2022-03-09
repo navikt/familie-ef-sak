@@ -24,16 +24,18 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         logger.info("Automatisk migrering utført")
     }
 
-    private fun migrerPerson(it: String) {
+    private fun migrerPerson(personIdent: String) {
         try {
-            migreringService.migrerOvergangsstønadAutomatisk(it)
-            migreringsstatusRepository.insert(Migreringsstatus(it, MigreringResultat.OK))
+            secureLogger.info("Automatisk migrering av ident=$personIdent")
+            migreringService.migrerOvergangsstønadAutomatisk(personIdent)
+            migreringsstatusRepository.insert(Migreringsstatus(personIdent, MigreringResultat.OK))
+            secureLogger.info("Automatisk migrering av ident=$personIdent utført=OK")
         } catch (e: MigreringException) {
-            secureLogger.warn("Kan ikke migrere ident=$it årsak=${e.type}")
-            migreringsstatusRepository.insert(Migreringsstatus(it, MigreringResultat.FEILET, årsak = e.type))
+            secureLogger.warn("Kan ikke migrere ident=$personIdent årsak=${e.type} msg=${e.årsak}")
+            migreringsstatusRepository.insert(Migreringsstatus(personIdent, MigreringResultat.FEILET, årsak = e.type))
         } catch (e: Exception) {
-            secureLogger.warn("Feilet migrering av ident=$it årsak=UKJENT", e)
-            migreringsstatusRepository.insert(Migreringsstatus(it, MigreringResultat.FEILET))
+            secureLogger.warn("Feilet migrering av ident=$personIdent årsak=UKJENT", e)
+            migreringsstatusRepository.insert(Migreringsstatus(personIdent, MigreringResultat.FEILET))
         }
     }
 }
