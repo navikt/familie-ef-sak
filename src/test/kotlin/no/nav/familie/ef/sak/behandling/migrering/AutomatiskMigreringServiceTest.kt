@@ -7,7 +7,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.Optional
 
-internal class AutomatiskMigreringServiceTest : OppslagSpringRunnerTest() {
+internal class AutomatiskMigreringServiceTest {
 
     private val migreringsstatusRepository = mockk<MigreringsstatusRepository>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()

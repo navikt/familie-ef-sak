@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
+import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock.Companion.mockSimulering
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -50,9 +51,6 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
@@ -79,6 +77,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var vedtakService: VedtakService
     @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
     @Autowired private lateinit var taskRepository: TaskRepository
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private lateinit var taskWorker: TaskWorker
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
@@ -104,7 +103,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         every { iverksettClient.hentStatus(any()) } answers {
             responseFraInfotrygd.poll()
         }
-        mockSimulering()
+        mockSimulering(iverksettClient)
     }
 
     @AfterEach
@@ -180,14 +179,15 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `migrering feiler når man har etterbetaling`() {
-        mockSimulering(etterbetaling = 1)
+        mockSimulering(iverksettClient, etterbetaling = 1)
         assertThatThrownBy { opprettOgIverksettMigrering() }
                 .hasMessageContaining("Etterbetaling er 1")
     }
 
     @Test
     internal fun `migrering feiler når man har feilutbetaling`() {
-        mockSimulering(feilutbetaling = 2)
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+        mockSimulering(iverksettClient, feilutbetaling = 2)
         assertThatThrownBy { opprettOgIverksettMigrering() }
                 .hasMessageContaining("Feilutbetaling er 2")
     }
@@ -529,20 +529,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
                 InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
-    }
-
-    private fun mockSimulering(etterbetaling: Int = 0, feilutbetaling: Int = 0) {
-        val oppsummering = Simuleringsoppsummering(perioder = emptyList(),
-                                                   fomDatoNestePeriode = null,
-                                                   etterbetaling = BigDecimal(etterbetaling),
-                                                   feilutbetaling = BigDecimal(feilutbetaling),
-                                                   fom = null,
-                                                   tomDatoNestePeriode = null,
-                                                   forfallsdatoNestePeriode = null,
-                                                   tidSimuleringHentet = null,
-                                                   tomSisteUtbetaling = null)
-        every { iverksettClient.simuler(any()) } returns
-                BeriketSimuleringsresultat(DetaljertSimuleringResultat(emptyList()), oppsummering)
     }
 
     private fun kjørTasks(erMigrering: Boolean = true) {

@@ -43,6 +43,7 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
             val callId = UUID.randomUUID()
             // setter nytt callId, sånn att alle nye tasker ikke har samme callId som batch-migrerings-tasken
             MDC.put(MDCConstants.MDC_CALL_ID, callId.toString())
+            MDC.put("task_call_id", taskCallId)
             secureLogger.info("Automatisk migrering av ident=$personIdent nyttCallId=${callId} taskCallId=${taskCallId}")
             migreringService.migrerOvergangsstønadAutomatisk(personIdent)
             migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.OK))
