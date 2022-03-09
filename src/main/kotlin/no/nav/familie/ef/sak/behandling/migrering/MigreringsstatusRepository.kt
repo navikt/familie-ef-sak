@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
+import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 import org.springframework.stereotype.Repository
 import java.util.UUID
 
@@ -17,7 +19,9 @@ enum class MigreringResultat {
     FEILET
 }
 
-data class Migreringsstatus(val ident: String,
+@Table("migrering")
+data class Migreringsstatus(@Id
+                            val ident: String,
                             val status: MigreringResultat,
                             @Column("arsak")
                             val årsak: MigreringExceptionType? = null)
