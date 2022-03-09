@@ -39,7 +39,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
      */
     @Transactional
     fun lagreTotrinnskontrollOgReturnerBehandler(saksbehandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
-        val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
+        val sisteBehandlingshistorikk =
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
 
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
             throw Feil(message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",

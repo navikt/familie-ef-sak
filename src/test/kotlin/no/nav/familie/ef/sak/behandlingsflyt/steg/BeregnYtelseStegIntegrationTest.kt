@@ -66,7 +66,7 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
         innvilg(saksbehandling, listOf(vedtaksperiode2))
         settBehandlingTilIverksatt(behandling)
         innvilg(saksbehandling2, listOf(vedtaksperiode), listOf(Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
-                                                            Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
+                                                                Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
         settBehandlingTilIverksatt(behandling2)
 
         assertThat(hentAndeler(behandling.id)).hasSize(1)

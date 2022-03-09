@@ -73,7 +73,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
         val saksbehandler =
-                behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id, StegType.SEND_TIL_BESLUTTER)?.opprettetAv
+                behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id,
+                                                                          StegType.SEND_TIL_BESLUTTER)?.opprettetAv
                 ?: error("Kan ikke finne saksbehandler på behandlingen")
         return tilDto(saksbehandling, saksbehandler, beslutter)
     }

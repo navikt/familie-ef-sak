@@ -154,10 +154,10 @@ class MigreringService(
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
         beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(resultatType = ResultatType.INNVILGE,
-                                                         periodeBegrunnelse = null,
-                                                         inntektBegrunnelse = null,
-                                                         perioder = vedtaksperioder,
-                                                         inntekter = inntekter))
+                                                             periodeBegrunnelse = null,
+                                                             inntektBegrunnelse = null,
+                                                             perioder = vedtaksperioder,
+                                                             inntekter = inntekter))
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)

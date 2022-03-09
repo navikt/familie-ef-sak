@@ -173,6 +173,6 @@ internal class BeslutteVedtakStegTest {
                                                                                      steg = beslutteVedtakSteg.stegType(),
                                                                                      resultat = BehandlingResultat.IKKE_SATT,
                                                                                      årsak = BehandlingÅrsak.SØKNAD)),
-                                                                          BeslutteVedtakDto(godkjent = godkjent))
+                                                           BeslutteVedtakDto(godkjent = godkjent))
     }
 }

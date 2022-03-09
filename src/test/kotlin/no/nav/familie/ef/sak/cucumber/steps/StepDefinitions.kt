@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
@@ -48,12 +49,14 @@ class StepDefinitions {
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
+    private val fagsakService = mockk<FagsakService>(relaxed = true)
 
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
                                                     beregningService,
                                                     simuleringService,
                                                     vedtakService,
-                                                    tilbakekrevingService)
+                                                    tilbakekrevingService,
+                                                    fagsakService)
 
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
@@ -83,7 +86,7 @@ class StepDefinitions {
         }
 
         vedtakMedInntekt.forEach {
-            val behandling = behandlinger.getValue (it.behandlingId)
+            val behandling = behandlinger.getValue(it.behandlingId)
             val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId), behandling)
             beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
         }
@@ -144,7 +147,8 @@ class StepDefinitions {
             if (forventetBehandlingMedHistorikkEndring.historikkEndring == null) {
                 Assertions.assertThat(andelHistorikkDto.endring).isNull()
                 if (forventetBehandlingMedHistorikkEndring.inntekt > 0) {
-                    Assertions.assertThat(andelHistorikkDto.andel.inntekt).isEqualTo(forventetBehandlingMedHistorikkEndring.inntekt)
+                    Assertions.assertThat(andelHistorikkDto.andel.inntekt)
+                        .isEqualTo(forventetBehandlingMedHistorikkEndring.inntekt)
                 }
             } else {
                 Assertions.assertThat(forventetBehandlingMedHistorikkEndring.historikkEndring.behandlingId)

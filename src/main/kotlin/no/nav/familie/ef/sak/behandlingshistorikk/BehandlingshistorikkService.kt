@@ -18,10 +18,10 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
     fun finnHendelseshistorikk(saksbehandling: Saksbehandling): List<HendelseshistorikkDto> {
         val (hendelserOpprettet, andreHendelser) =
                 behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(saksbehandling.id).map {
-            it.tilHendelseshistorikkDto(saksbehandling)
-        }.filter {
-            it.hendelse != Hendelse.UKJENT
-        }.partition { it.hendelse == Hendelse.OPPRETTET }
+                    it.tilHendelseshistorikkDto(saksbehandling)
+                }.filter {
+                    it.hendelse != Hendelse.UKJENT
+                }.partition { it.hendelse == Hendelse.OPPRETTET }
         val sisteOpprettetHendelse = hendelserOpprettet.lastOrNull()
         return if (sisteOpprettetHendelse != null) andreHendelser + sisteOpprettetHendelse
         else andreHendelser

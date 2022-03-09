@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -33,7 +34,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
-                       private val tilbakekrevingService: TilbakekrevingService) : BehandlingSteg<VedtakDto> {
+                       private val tilbakekrevingService: TilbakekrevingService,
+                       private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
 
 
     override fun stegType(): StegType {
@@ -42,24 +44,26 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
         validerGyldigeVedtaksperioder(saksbehandling, data)
-        nullstillEksisterendeVedtakPåBehandling(saksbehandling.id)
-        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandling.id)
+        val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId).hentAktivIdent()
+        val saksbehandlingMedOppdatertIdent = saksbehandling.copy(ident = aktivIdent)
+        nullstillEksisterendeVedtakPåBehandling(saksbehandlingMedOppdatertIdent.id)
+        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandlingMedOppdatertIdent.id)
 
         when (data) {
             is Innvilget -> {
-                opprettTilkjentYtelseForInnvilgetBehandling(data, saksbehandling)
-                simuleringService.hentOgLagreSimuleringsresultat(saksbehandling)
+                opprettTilkjentYtelseForInnvilgetBehandling(data, saksbehandlingMedOppdatertIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Opphør -> {
-                opprettTilkjentYtelseForOpphørtBehandling(saksbehandling, data)
-                simuleringService.hentOgLagreSimuleringsresultat(saksbehandling)
+                opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
+                simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Avslå -> {
-                simuleringService.slettSimuleringForBehandling(saksbehandling.id)
-                tilbakekrevingService.slettTilbakekreving(saksbehandling.id)
+                simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent.id)
+                tilbakekrevingService.slettTilbakekreving(saksbehandlingMedOppdatertIdent.id)
             }
             is Sanksjonert -> {
-                opprettTilkjentYtelseForSanksjonertBehandling(data, saksbehandling)
+                opprettTilkjentYtelseForSanksjonertBehandling(data, saksbehandlingMedOppdatertIdent)
             }
         }
     }
