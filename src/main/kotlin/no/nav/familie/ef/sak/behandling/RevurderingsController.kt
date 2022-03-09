@@ -33,7 +33,9 @@ class RevurderingsController(
         }
         brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
             "Systemet har ikke støtte for å revurdere med årsak “Søknad” for øyeblikket. " +
-            "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, eller med revurderingsårsak “Nye opplysninger”."
+            "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +
+            "eller med revurderingsårsak \"Nye opplysninger\". " +
+            "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
         }
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)

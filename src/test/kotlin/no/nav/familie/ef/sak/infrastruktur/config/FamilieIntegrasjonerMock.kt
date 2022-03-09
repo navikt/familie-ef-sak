@@ -22,7 +22,6 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostResponse
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
@@ -30,6 +29,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -183,6 +183,16 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                                 brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                                 dokumentvarianter =
                                                 listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                                   ),
+                                   DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Manuelt skannet dokument",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
+                                                logiskeVedlegg = listOf(LogiskVedlegg(logiskVedleggId = "1",
+                                                                                      tittel = "Manuelt skannet samværsavtale"),
+                                                                        LogiskVedlegg(logiskVedleggId = "2",
+                                                                                      tittel = "Annen fritekst fra gosys"))
                                    ),
                                    DokumentInfo(dokumentInfoId = "12345",
                                                 tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
