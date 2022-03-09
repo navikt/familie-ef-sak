@@ -3,12 +3,15 @@ package no.nav.familie.ef.sak.behandling.migrering
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.jboss.logging.MDC
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @Service
 class AutomatiskMigreringService(private val migreringsstatusRepository: MigreringsstatusRepository,
@@ -36,7 +39,11 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         val migreringStatus = migreringsstatusRepository.findByIdOrThrow(personIdent)
         if (migreringStatus.status != MigreringResultat.IKKE_KONTROLLERT) return
         try {
-            secureLogger.info("Automatisk migrering av ident=$personIdent")
+            val taskCallId = MDC.get(MDCConstants.MDC_CALL_ID)
+            val callId = UUID.randomUUID()
+            // setter nytt callId, sånn att alle nye tasker ikke har samme callId som batch-migrerings-tasken
+            MDC.put(MDCConstants.MDC_CALL_ID, callId.toString())
+            secureLogger.info("Automatisk migrering av ident=$personIdent nyttCallId=${callId} taskCallId=${taskCallId}")
             migreringService.migrerOvergangsstønadAutomatisk(personIdent)
             migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.OK))
             secureLogger.info("Automatisk migrering av ident=$personIdent utført=OK")
