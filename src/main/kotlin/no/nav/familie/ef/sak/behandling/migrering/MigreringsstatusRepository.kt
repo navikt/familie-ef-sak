@@ -9,14 +9,15 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface MigreringsstatusRepository : RepositoryInterface<Migreringsstatus, UUID>, InsertUpdateRepository<Migreringsstatus> {
+interface MigreringsstatusRepository : RepositoryInterface<Migreringsstatus, String>, InsertUpdateRepository<Migreringsstatus> {
 
     fun findAllByIdentIn(identer: Set<String>): Set<Migreringsstatus>
 }
 
 enum class MigreringResultat {
     OK,
-    FEILET
+    FEILET,
+    IKKE_KONTROLLERT
 }
 
 @Table("migrering")
