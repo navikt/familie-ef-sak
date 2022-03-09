@@ -57,7 +57,7 @@ internal class AutomatiskMigreringServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `migrer person automatisk`() {
         val ident = "1"
-        service.migrerAutomatisk(setOf(ident))
+        service.migrerPersonAutomatisk(ident)
         assertThat(updateSlots).hasSize(1)
         assertThat(updateSlots[0].ident).isEqualTo(ident)
         assertThat(updateSlots[0].status).isEqualTo(MigreringResultat.OK)
@@ -69,7 +69,7 @@ internal class AutomatiskMigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringException = MigreringException("Feilet", MigreringExceptionType.ALLEREDE_MIGRERT)
         every { migreringService.migrerOvergangsstønadAutomatisk(any()) } throws migreringException
 
-        service.migrerAutomatisk(setOf(ident))
+        service.migrerPersonAutomatisk(ident)
         assertThat(updateSlots).hasSize(1)
         assertThat(updateSlots[0].ident).isEqualTo(ident)
         assertThat(updateSlots[0].status).isEqualTo(MigreringResultat.FEILET)
@@ -80,7 +80,7 @@ internal class AutomatiskMigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `har allerede migrert person`() {
         val ident = "1"
         mockFindById(MigreringResultat.OK)
-        service.migrerAutomatisk(setOf(ident))
+        service.migrerPersonAutomatisk(ident)
         assertThat(updateSlots).isEmpty()
         verify(exactly = 0) { migreringService.migrerOvergangsstønadAutomatisk(any()) }
     }

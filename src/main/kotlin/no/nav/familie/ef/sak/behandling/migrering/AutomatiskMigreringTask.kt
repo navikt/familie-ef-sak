@@ -26,7 +26,7 @@ class AutomatiskMigreringTask(private val automatiskMigreringService: Automatisk
         var antallFeil = 0
         personIdenter.forEach { personIdent ->
             try {
-                automatiskMigreringService.migrerPerson(personIdent)
+                automatiskMigreringService.migrerPersonAutomatisk(personIdent)
             } catch (e: Exception) {
                 secureLogger.warn("Feilet migrering av $personIdent ${e.message}", e)
                 antallFeil++

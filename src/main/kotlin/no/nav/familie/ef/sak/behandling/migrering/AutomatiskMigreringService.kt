@@ -32,7 +32,7 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun migrerPerson(personIdent: String) {
+    fun migrerPersonAutomatisk(personIdent: String) {
         val migreringStatus = migreringsstatusRepository.findByIdOrThrow(personIdent)
         if (migreringStatus.status != MigreringResultat.IKKE_KONTROLLERT) return
         try {
