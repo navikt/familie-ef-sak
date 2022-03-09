@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -30,12 +31,10 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         taskRepository.save(AutomatiskMigreringTask.opprettTask(filtrerteIdenter.toSet()))
     }
 
-    fun migrerAutomatisk(personIdenter: Set<String>) {
-        personIdenter.forEach { personIdent -> migrerPerson(personIdent) }
-    }
-
-    private fun migrerPerson(personIdent: String) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun migrerPerson(personIdent: String) {
         val migreringStatus = migreringsstatusRepository.findByIdOrThrow(personIdent)
+        if (migreringStatus.status != MigreringResultat.IKKE_KONTROLLERT) return
         try {
             secureLogger.info("Automatisk migrering av ident=$personIdent")
             migreringService.migrerOvergangsstønadAutomatisk(personIdent)
@@ -44,9 +43,6 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         } catch (e: MigreringException) {
             secureLogger.warn("Kan ikke migrere ident=$personIdent årsak=${e.type} msg=${e.årsak}")
             migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.FEILET, årsak = e.type))
-        } catch (e: Exception) {
-            secureLogger.warn("Feilet migrering av ident=$personIdent årsak=UKJENT", e)
-            migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.FEILET))
         }
     }
 }

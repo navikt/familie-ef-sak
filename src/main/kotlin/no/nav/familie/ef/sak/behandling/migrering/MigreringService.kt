@@ -94,7 +94,7 @@ class MigreringService(
                              beløpsperioder = beregnYtelse)
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.MANDATORY)
     fun migrerOvergangsstønadAutomatisk(personIdent: String) {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId)
