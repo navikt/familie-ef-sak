@@ -52,7 +52,7 @@ class BlankettService(private val tilgangService: TilgangService,
         opprettEfOppgave(behandling.id, oppgaveId)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn, fagsak.stønadstype)
         return behandling
     }
 

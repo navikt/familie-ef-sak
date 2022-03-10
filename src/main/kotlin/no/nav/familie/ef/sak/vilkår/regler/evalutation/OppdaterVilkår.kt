@@ -145,7 +145,7 @@ object OppdaterVilkår {
         return vilkårsreglerForStønad(stønadstype)
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-                        metadata.barn.map {
+                        metadata.barn.map { // TODO: Filtrer kun aktuelle barn (OS: Alle, BT: Har barnepass)
                             lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
                         }
                     } else {

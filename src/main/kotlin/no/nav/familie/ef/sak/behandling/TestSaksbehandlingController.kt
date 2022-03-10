@@ -86,7 +86,10 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
             iverksettService.startBehandling(behandling, fagsak)
             val grunnlagsdata =
                     grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
-            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id,
+                                                              fagsak.id,
+                                                              grunnlagsdata.grunnlagsdata.barn,
+                                                              fagsak.stønadstype)
             behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
                                                                                      steg = StegType.VILKÅR))
             val oppgaveId = oppgaveService.opprettOppgave(behandling.id,

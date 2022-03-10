@@ -153,7 +153,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId = behandling.id,
+                                                          fagsakId = fagsak.id,
+                                                          grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
+                                                          stønadstype = fagsak.stønadstype)
         return behandling
     }
 

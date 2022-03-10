@@ -114,7 +114,7 @@ internal class JournalføringServiceTest {
 
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
 
-        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any()) } just Runs
+        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any()) } just Runs
 
         every { behandlingService.hentBehandling(behandlingId) }
                 .returns(Behandling(id = behandlingId,
@@ -262,4 +262,6 @@ internal class JournalføringServiceTest {
                                                                                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
         }
     }
+
+    // Test barnetilsyn!!!
 }

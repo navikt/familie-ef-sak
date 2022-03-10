@@ -45,13 +45,12 @@ object BarnMedSamværMapper {
     fun mapBarnepass(behandlingBarn: List<BehandlingBarn>, søknadBarn: Collection<SøknadBarn>): List<BarnepassDto> {
         val søknadsbarn = søknadBarn.associateBy { it.id }
         return behandlingBarn.map { barn -> mapBarnepass(barn, barn.søknadBarnId?.let { søknadsbarn[it] }) }
-
     }
 
     private fun mapBarnepass(behandlingBarn: BehandlingBarn, søknadBarn: SøknadBarn?): BarnepassDto {
         val barnepass = søknadBarn?.barnepass
         return BarnepassDto(id = behandlingBarn.id,
-                            skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: true,
+                            skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: false,
                             barnepassordninger = barnepass?.barnepassordninger?.map(this::mapBarnepassordning) ?: emptyList(),
                             årsakBarnepass = barnepass?.årsakBarnepass)
     }
