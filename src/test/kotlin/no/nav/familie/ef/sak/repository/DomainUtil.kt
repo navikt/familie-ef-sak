@@ -77,21 +77,23 @@ fun fagsak(identer: Set<PersonIdent> = setOf(),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()): Fagsak {
-    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar)
+           sporbar: Sporbar = Sporbar(),
+           migrert: Boolean = false): Fagsak {
+    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar, migrert = migrert)
 }
 
 fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            person: FagsakPerson,
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()): Fagsak {
+           sporbar: Sporbar = Sporbar(),
+           migrert: Boolean = false): Fagsak {
     return Fagsak(id = id,
                   fagsakPersonId = person.id,
                   personIdenter = person.identer,
                   stønadstype = stønadstype,
                   eksternId = eksternId,
-                  migrert = false,
+                  migrert = migrert,
                   sporbar = sporbar)
 }
 
