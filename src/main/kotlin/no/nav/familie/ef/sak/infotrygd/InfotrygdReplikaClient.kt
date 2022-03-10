@@ -47,7 +47,7 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
     fun hentPersonerForMigrering(antall: Int): Set<String> {
         val response = getForEntity<Map<String, Any>>(migreringspersonerUri(antall))
         @Suppress("UNCHECKED_CAST")
-        return response.getValue("personIdenter") as Set<String>
+        return (response.getValue("personIdenter") as List<String>).toSet()
     }
 
     /**
