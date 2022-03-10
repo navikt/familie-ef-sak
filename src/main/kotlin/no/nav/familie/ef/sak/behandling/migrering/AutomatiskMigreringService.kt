@@ -3,15 +3,14 @@ package no.nav.familie.ef.sak.behandling.migrering
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.jboss.logging.MDC
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Service
 class AutomatiskMigreringService(private val migreringsstatusRepository: MigreringsstatusRepository,
@@ -31,13 +30,15 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })
-        taskRepository.saveAll(filtrerteIdenter.map { AutomatiskMigreringTask.opprettTask(it) })
+        taskRepository.saveAll(filtrerteIdenter.map {
+            AutomatiskMigreringTask.opprettTask(it).apply { this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId() }
+        })
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerPersonAutomatisk(personIdent: String) {
         val migreringStatus = migreringsstatusRepository.findByIdOrThrow(personIdent)
-        if (migreringStatus.status == MigreringResultat.OK){
+        if (migreringStatus.status == MigreringResultat.OK) {
             secureLogger.info("Allerede migrert")
             return
         }
