@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
@@ -28,6 +29,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
@@ -385,9 +387,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     private fun opprettdata() {
         opprettBehandlinger()
-        innvilg(behandling, listOf(vedtaksperiode))
+        innvilg(fagsak, behandling, listOf(vedtaksperiode))
         ferdigstillBehandling(behandling)
-        innvilg(behandling2,
+        innvilg(fagsak,
+                behandling2,
                 listOf(vedtaksperiode2, vedtaksperiode3),
                 listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(10_000))))
         ferdigstillBehandling(behandling2)
@@ -400,7 +403,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                            type = BehandlingType.REVURDERING,
                            forrigeBehandlingId = behandling2.id,
                            opprettetTid = behandling2.sporbar.opprettetTid.plusDays(1)))
-        innvilg(behandling,
+        innvilg(fagsak,
+                behandling,
                 listOf(vedtaksperiode2, vedtaksperiode3),
                 listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(15_000))))
         ferdigstillBehandling(behandling)
@@ -416,7 +420,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                       aktivitetType: AktivitetType = AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER) =
             VedtaksperiodeDto(fra, til, aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
-    private fun innvilg(behandling: Behandling,
+    private fun innvilg(fagsak: Fagsak,
+                        behandling: Behandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
         val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
@@ -424,7 +429,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                inntekter = inntekter,
                                periodeBegrunnelse = null,
                                inntektBegrunnelse = null)
-        beregnYtelseSteg.utførSteg(behandling, vedtak)
+        beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
     }
 
     fun opprettBehandlinger() {

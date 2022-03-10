@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.CustomKeyValue
 import no.nav.familie.ef.sak.Sporingsdata
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -59,6 +60,14 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         if (!harTilgangTilPersonMedRelasjoner(personIdent)) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til behandling=$behandlingId")
+        }
+    }
+
+    fun validerTilgangTilBehandling(saksbehandling: Saksbehandling, event: AuditLoggerEvent) {
+        auditLogger.log(Sporingsdata(event, saksbehandling.ident, CustomKeyValue("behandling", saksbehandling.id.toString())))
+        if (!harTilgangTilPersonMedRelasjoner(saksbehandling.ident)) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                 "har ikke tilgang til behandling=${saksbehandling.id}behandlingId")
         }
     }
 

@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.metrics.domain.BehandlingerPerStatus
 import no.nav.familie.ef.sak.metrics.domain.ForekomsterPerUke
@@ -32,9 +33,9 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        val fagsakBarneTilsyn = fagsak(stønadstype = Stønadstype.BARNETILSYN)
-        val fagsakOvergangsstønad = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD)
-        val fagsakSkolepenger = fagsak(stønadstype = Stønadstype.SKOLEPENGER)
+        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("1")), stønadstype = Stønadstype.BARNETILSYN)
+        val fagsakOvergangsstønad = fagsak(setOf(PersonIdent("2")), stønadstype = Stønadstype.OVERGANGSSTØNAD)
+        val fagsakSkolepenger = fagsak(setOf(PersonIdent("3")), stønadstype = Stønadstype.SKOLEPENGER)
         val fagsaker = listOf(fagsakBarneTilsyn, fagsakOvergangsstønad, fagsakSkolepenger)
 
         fagsaker.forEach(testoppsettService::lagreFagsak)
@@ -58,7 +59,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnAntallBehandlingerAvÅrsak - finner riktig antall`() {
         assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(0)
-        val fagsakBarneTilsyn = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD)
+        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("4")), stønadstype = Stønadstype.OVERGANGSSTØNAD)
 
         testoppsettService.lagreFagsak(fagsakBarneTilsyn)
 

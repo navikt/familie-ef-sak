@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTa
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
@@ -29,6 +30,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.patch.PatchAktivitetService
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -98,6 +100,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private val til = YearMonth.now().plusMonths(1)
     private val forventetInntekt = BigDecimal.ZERO
     private val samordningsfradrag = BigDecimal.ZERO
+    private lateinit var fagsak: Fagsak
 
     @BeforeEach
     internal fun setUp() {
@@ -106,6 +109,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         every { iverksettClient.hentStatus(any()) } answers {
             responseFraInfotrygd.poll()
         }
+        fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
         mockSimulering(iverksettClient)
     }
 
@@ -412,9 +416,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                 samordningsfradrag = 5
                         )
                 ), emptyList(), emptyList())
-        val fagsakPerson = testoppsettService.opprettPerson("1")
 
-        val migreringInfo = migreringService.hentMigreringInfo(fagsakPerson.id)
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isTrue
     }
@@ -473,8 +476,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                             kravMottatt = LocalDate.now(),
                                             emptyList())
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
-        innvilgOgSendTilBeslutter(revurdering)
-        godkjennTotrinnskontroll(revurdering)
+        val saksbehandling = saksbehandling(fagsak, revurdering)
+        innvilgOgSendTilBeslutter(saksbehandling)
+        godkjennTotrinnskontroll(behandlingService.hentSaksbehandling(revurdering.id))
         kjørTasks(erMigrering = false)
         return revurdering
     }
@@ -486,7 +490,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertRevurdering.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
     }
 
-    private fun innvilgOgSendTilBeslutter(behandling: Behandling) {
+    private fun innvilgOgSendTilBeslutter(saksbehandling: Saksbehandling) {
         val vedtaksperiode = VedtaksperiodeDto(årMånedFra = migrerFraDato,
                                                årMånedTil = til,
                                                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
@@ -500,18 +504,18 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                   inntekter = listOf(inntekt))
         val brevrequest = objectMapper.readTree("123")
         testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
-            stegService.håndterBeregnYtelseForStønad(behandling, innvilget)
+            stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
-                                                      behandling.id)
-            vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, brevrequest, "brevMal")
-            stegService.håndterSendTilBeslutter(behandlingService.hentBehandling(behandling.id))
+                                                      saksbehandling.id)
+            vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevrequest, "brevMal")
+            stegService.håndterSendTilBeslutter(behandlingService.hentSaksbehandling(saksbehandling.id))
         }
     }
 
-    private fun godkjennTotrinnskontroll(behandling: Behandling) {
+    private fun godkjennTotrinnskontroll(saksbehandling: Saksbehandling) {
         testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
-            vedtaksbrevService.lagBeslutterBrev(behandling.id)
-            stegService.håndterBeslutteVedtak(behandlingService.hentBehandling(behandling.id), BeslutteVedtakDto(true))
+            vedtaksbrevService.lagBeslutterBrev(saksbehandling)
+            stegService.håndterBeslutteVedtak(behandlingService.hentSaksbehandling(saksbehandling.id), BeslutteVedtakDto(true))
         }
     }
 

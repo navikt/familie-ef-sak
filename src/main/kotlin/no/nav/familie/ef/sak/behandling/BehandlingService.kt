@@ -172,7 +172,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
                                                 resultat = HENLAGT,
                                                 steg = BEHANDLING_FERDIGSTILT,
                                                 status = FERDIGSTILT)
-        behandlingshistorikkService.opprettHistorikkInnslag(behandling = henlagtBehandling,
+        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = henlagtBehandling.id,
+                                                            stegtype = henlagtBehandling.steg,
                                                             utfall = StegUtfall.HENLAGT,
                                                             metadata = henlagt)
         return behandlingRepository.update(henlagtBehandling)

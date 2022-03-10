@@ -53,9 +53,9 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping("/{behandlingId}/fullfor")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
-        val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
@@ -67,8 +67,8 @@ class BeregningController(private val stegService: StegService,
 
     @PostMapping(value = ["/{behandlingId}/lagre-vedtak", "/{behandlingId}/lagre-blankettvedtak"])
     fun lagreBlankettVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
 
         return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtak).id)
     }

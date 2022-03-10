@@ -40,19 +40,19 @@ class VedtakController(private val stegService: StegService,
 
     @PostMapping("/{behandlingId}/send-til-beslutter")
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
     fun beslutteVedtak(@PathVariable behandlingId: UUID,
                        @RequestBody request: BeslutteVedtakDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
             throw ApiFeil("Mangler begrunnelse", HttpStatus.BAD_REQUEST)
         }
-        val behandling = behandlingService.hentBehandling(behandlingId)
         return Ressurs.success(stegService.håndterBeslutteVedtak(behandling, request).id)
     }
 

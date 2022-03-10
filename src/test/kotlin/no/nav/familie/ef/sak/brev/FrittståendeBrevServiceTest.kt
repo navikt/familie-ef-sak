@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -100,7 +101,7 @@ internal class FrittståendeBrevServiceTest {
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
         every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
-        every { brevsignaturService.lagSignaturMedEnhet(any()) } returns SignaturDto("Navn Navnesen", "En enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto("Navn Navnesen", "En enhet", false)
     }
 
     companion object {

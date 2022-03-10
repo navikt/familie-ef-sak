@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.repository
 
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -55,8 +56,7 @@ fun behandling(fagsak: Fagsak = fagsak(),
                opprettetTid: LocalDateTime = SporbarUtils.now(),
                forrigeBehandlingId: UUID? = null,
                årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-               henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
-): Behandling =
+               henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT): Behandling =
         Behandling(fagsakId = fagsak.id,
                    forrigeBehandlingId = forrigeBehandlingId,
                    id = id,
@@ -66,14 +66,54 @@ fun behandling(fagsak: Fagsak = fagsak(),
                    resultat = resultat,
                    sporbar = Sporbar(opprettetTid = opprettetTid),
                    årsak = årsak,
-                   henlagtÅrsak = henlagtÅrsak
-        )
+                   henlagtÅrsak = henlagtÅrsak)
+
+fun saksbehandling(fagsak: Fagsak = fagsak(),
+                   status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+                   steg: StegType = StegType.VILKÅR,
+                   id: UUID = UUID.randomUUID(),
+                   type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                   resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
+                   opprettetTid: LocalDateTime = SporbarUtils.now(),
+                   forrigeBehandlingId: UUID? = null,
+                   årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                   henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT): Saksbehandling =
+        saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
+                                          forrigeBehandlingId = forrigeBehandlingId,
+                                          id = id,
+                                          type = type,
+                                          status = status,
+                                          steg = steg,
+                                          resultat = resultat,
+                                          sporbar = Sporbar(opprettetTid = opprettetTid),
+                                          årsak = årsak,
+                                          henlagtÅrsak = henlagtÅrsak))
+
+
+fun saksbehandling(fagsak: Fagsak = fagsak(),
+                   behandling: Behandling = behandling()): Saksbehandling =
+        Saksbehandling(id = behandling.id,
+                       eksternId = behandling.eksternId.id,
+                       forrigeBehandlingId = behandling.forrigeBehandlingId,
+                       type = behandling.type,
+                       status = behandling.status,
+                       steg = behandling.steg,
+                       årsak = behandling.årsak,
+                       resultat = behandling.resultat,
+                       henlagtÅrsak = behandling.henlagtÅrsak,
+                       ident = fagsak.hentAktivIdent(),
+                       fagsakId = fagsak.id,
+                       eksternFagsakId = fagsak.eksternId.id,
+                       stønadstype = fagsak.stønadstype,
+                       migrert = fagsak.migrert,
+                       opprettetTid = behandling.sporbar.opprettetTid,
+                       endretTid = behandling.sporbar.endret.endretTid)
 
 fun Behandling.innvilgetOgFerdigstilt() =
         this.copy(resultat = BehandlingResultat.INNVILGET,
                   status = BehandlingStatus.FERDIGSTILT)
 
-fun fagsak(identer: Set<PersonIdent> = setOf(),
+fun fagsak(identer: Set<PersonIdent> = setOf(PersonIdent("15")),
            stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),

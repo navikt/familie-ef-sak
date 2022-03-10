@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingshistorikk.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
@@ -39,13 +39,13 @@ fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
     )
 }
 
-fun Behandlingshistorikk.tilHendelseshistorikkDto(behandling: Behandling): HendelseshistorikkDto {
+fun Behandlingshistorikk.tilHendelseshistorikkDto(saksbehandling: Saksbehandling): HendelseshistorikkDto {
 
     val hendelse: Hendelse = when (this.steg) {
         StegType.VILKÅR -> Hendelse.OPPRETTET
         StegType.SEND_TIL_BESLUTTER -> Hendelse.SENDT_TIL_BESLUTTER
-        StegType.BEHANDLING_FERDIGSTILT -> mapFraFerdigstiltTilHendelse(behandling.resultat)
-        StegType.FERDIGSTILLE_BEHANDLING -> mapFraFerdigstilleTilHendelse(behandling.resultat)
+        StegType.BEHANDLING_FERDIGSTILT -> mapFraFerdigstiltTilHendelse(saksbehandling.resultat)
+        StegType.FERDIGSTILLE_BEHANDLING -> mapFraFerdigstilleTilHendelse(saksbehandling.resultat)
         StegType.BESLUTTE_VEDTAK -> mapFraBeslutteTilHendelse(this.utfall)
         else -> Hendelse.UKJENT
     }

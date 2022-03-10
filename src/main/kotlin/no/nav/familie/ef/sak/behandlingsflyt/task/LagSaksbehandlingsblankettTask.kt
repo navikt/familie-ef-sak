@@ -20,8 +20,8 @@ class LagSaksbehandlingsblankettTask(private val stegService: StegService,
                                      private val behandlingService: BehandlingService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandling = behandlingService.hentBehandling(UUID.fromString(task.payload))
-        stegService.håndterLagSaksbehandlingsblankett(behandling)
+        val saksbehandling = behandlingService.hentSaksbehandling(UUID.fromString(task.payload))
+        stegService.håndterLagSaksbehandlingsblankett(saksbehandling)
     }
 
     companion object {

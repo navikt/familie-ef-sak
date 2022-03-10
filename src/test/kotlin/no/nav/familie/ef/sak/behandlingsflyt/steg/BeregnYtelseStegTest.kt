@@ -12,11 +12,11 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -57,15 +57,13 @@ internal class BeregnYtelseStegTest {
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
-    private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
                                         tilbakekrevingService,
-                                        fagsakService,
-                                        featureToggleService)
+                                        fagsakService)
 
     private val slot = slot<TilkjentYtelse>()
 
@@ -1246,6 +1244,8 @@ internal class BeregnYtelseStegTest {
                                                         periodeBegrunnelse = "",
                                                         inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
+        val fagsak = fagsak()
+        steg.utførSteg(saksbehandling(fagsak, behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId)),
+                       data = vedtak)
     }
 }
