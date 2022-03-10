@@ -94,7 +94,7 @@ class ApplicationConfig {
     fun oAuth2HttpClient(): OAuth2HttpClient {
         return RetryOAuth2HttpClient(RestTemplateBuilder()
                                              .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                                             .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
+                                             .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS)))
     }
 
 }
