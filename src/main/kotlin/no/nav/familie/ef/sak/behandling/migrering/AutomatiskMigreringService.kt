@@ -29,22 +29,20 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         val filtrerteIdenter = personerForMigrering.filterNot { alleredeMigrert.contains(it) }
                 .take(antall) // henter fler fra infotrygd enn vi skal migrere, men plukker ut første X antall
 
-        logger.info("Oppretter task for å migrere ${filtrerteIdenter.size} personer")
+        logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })
-        taskRepository.save(AutomatiskMigreringTask.opprettTask(filtrerteIdenter.toSet()))
+        taskRepository.saveAll(filtrerteIdenter.map { AutomatiskMigreringTask.opprettTask(it) })
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerPersonAutomatisk(personIdent: String) {
         val migreringStatus = migreringsstatusRepository.findByIdOrThrow(personIdent)
-        if (migreringStatus.status != MigreringResultat.IKKE_KONTROLLERT) return
+        if (migreringStatus.status == MigreringResultat.OK){
+            secureLogger.info("Allerede migrert")
+            return
+        }
         try {
-            val taskCallId = MDC.get(MDCConstants.MDC_CALL_ID)
-            val callId = UUID.randomUUID()
-            // setter nytt callId, sånn att alle nye tasker ikke har samme callId som batch-migrerings-tasken
-            MDC.put(MDCConstants.MDC_CALL_ID, callId.toString())
-            MDC.put("task_call_id", taskCallId)
-            secureLogger.info("Automatisk migrering av ident=$personIdent nyttCallId=${callId} taskCallId=${taskCallId}")
+            secureLogger.info("Automatisk migrering av ident=$personIdent")
             migreringService.migrerOvergangsstønadAutomatisk(personIdent)
             migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.OK))
             secureLogger.info("Automatisk migrering av ident=$personIdent utført=OK")

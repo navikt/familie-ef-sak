@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.migrering
+package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.migrering.MigreringResultat

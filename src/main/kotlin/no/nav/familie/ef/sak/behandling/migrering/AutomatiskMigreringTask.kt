@@ -5,11 +5,14 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.UUID
 
-data class AutomatiskMigreringTaskData(val personIdenter: Set<String>)
+/**
+ * @param uniktId settes då payload er unikt på en task og ønsker å kunne opprette en ny task for samme ident, då disse taskene
+ * settes til OK for å ikke spamme med feilede tasker for migrering hvis det er en eller annen MigreringException
+ */
+data class AutomatiskMigreringTaskData(val personIdent: String, val uniktId: UUID = UUID.randomUUID())
 
 @Service
 @TaskStepBeskrivelse(taskStepType = AutomatiskMigreringTask.TYPE,
@@ -19,30 +22,17 @@ data class AutomatiskMigreringTaskData(val personIdenter: Set<String>)
                      beskrivelse = "Automatisk migrering")
 class AutomatiskMigreringTask(private val automatiskMigreringService: AutomatiskMigreringService) : AsyncTaskStep {
 
-    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
-
     override fun doTask(task: Task) {
-        val personIdenter = objectMapper.readValue<AutomatiskMigreringTaskData>(task.payload).personIdenter
-        var antallFeil = 0
-        personIdenter.forEach { personIdent ->
-            try {
-                automatiskMigreringService.migrerPersonAutomatisk(personIdent)
-            } catch (e: Exception) {
-                secureLogger.warn("Feilet migrering av $personIdent ${e.message}", e)
-                antallFeil++
-            }
-        }
-        if (antallFeil > 0) {
-            error("Feilet $antallFeil migreringer, sjekk securelogs for mer info")
-        }
+        val personIdent = objectMapper.readValue<AutomatiskMigreringTaskData>(task.payload).personIdent
+        automatiskMigreringService.migrerPersonAutomatisk(personIdent)
     }
 
     companion object {
 
         const val TYPE = "automatiskMigrering"
 
-        fun opprettTask(identer: Set<String>): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(identer)))
+        fun opprettTask(ident: String): Task {
+            return Task(TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)))
         }
     }
 }

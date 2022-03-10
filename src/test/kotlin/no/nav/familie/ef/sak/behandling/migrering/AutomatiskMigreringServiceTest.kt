@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +39,7 @@ internal class AutomatiskMigreringServiceTest {
         mockFindById(MigreringResultat.IKKE_KONTROLLERT)
         every { migreringsstatusRepository.findAllByIdentIn(any()) } returns emptySet()
         every { migreringsstatusRepository.insertAll(capture(insertAllSlot)) } answers { firstArg() }
-        every { taskRepository.save(any()) } answers { firstArg() }
+        every { taskRepository.saveAll(any<Iterable<Task>>()) } answers { firstArg() }
     }
 
     @Test

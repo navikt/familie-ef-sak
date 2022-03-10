@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling.migrering
+package no.nav.familie.ef.sak.behandling.migrering
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
