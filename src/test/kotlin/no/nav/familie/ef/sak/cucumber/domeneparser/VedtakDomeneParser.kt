@@ -1,19 +1,23 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.vedtak.HistorikkEndring
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.AbstractMap
 import java.util.UUID
 
@@ -23,8 +27,53 @@ object VedtakDomeneParser {
     val tilkjentYtelseIdNummerTilUUID = mapOf(1 to UUID.randomUUID(), 2 to UUID.randomUUID(), 3 to UUID.randomUUID())
 
     fun mapVedtak(dataTable: DataTable): List<Vedtak> {
-        return dataTable.asMaps().map {
-            VedtakMapper().mapRad(it)
+        return dataTable.asMaps().groupBy {
+            it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
+        }.map { (_, rader) ->
+
+            val perioder = rader.map { rad ->
+                val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
+                val datoTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now()
+                Vedtaksperiode(
+                        datoFra = datoFra,
+                        datoTil = datoTil,
+                        aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
+                        periodeType = VedtaksperiodeType.HOVEDPERIODE
+                )
+            }
+            val rad = rader.first()
+            Vedtak(
+                    behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
+                    resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE,
+                    perioder = PeriodeWrapper(perioder),
+                    inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder)),
+                    opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1)
+            )
+        }
+    }
+
+    private fun lagDefaultInntektsperiode(perioder: List<Vedtaksperiode>) =
+            perioder.firstOrNull()?.let {
+                listOf(Inntektsperiode(it.datoFra,
+                                       LocalDate.MAX,
+                                       BigDecimal.ZERO,
+                                       BigDecimal.ZERO))
+            } ?: emptyList()
+
+    fun mapInntekter(dataTable: DataTable): Map<UUID, InntektWrapper> {
+        return dataTable.asMaps().groupBy {
+            it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
+        }.values.associate { rader ->
+            val inntektsperioder = rader.fold(mutableListOf<Inntektsperiode>()) { acc, rad ->
+                val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
+                acc.removeLastOrNull()?.copy(sluttDato = datoFra.minusDays(1))?.let { acc.add(it) }
+                acc.add(Inntektsperiode(datoFra,
+                                        LocalDate.MAX,
+                                        BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
+                                        BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)))
+                acc
+            }
+            behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rader.first())]!! to InntektWrapper(inntektsperioder)
         }
     }
 
@@ -39,8 +88,8 @@ object VedtakDomeneParser {
             val historikkEndring: HistorikkEndring?,
             val stønadFra: LocalDate,
             val stønadTil: LocalDate,
-            val inntekt: Int,
-            val beløp: Int,
+            val inntekt: Int?,
+            val beløp: Int?,
             val aktivitetType: AktivitetType
     )
 
@@ -144,11 +193,12 @@ object VedtakDomeneParser {
                                 vedtakstidspunkt = LocalDateTime.now()
                         )
                     },
-                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now(),
-                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth()
-                                ?: LocalDate.now().plusYears(1),
-                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0,
-                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0,
+                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: YearMonth.now()
+                            .atDay(1),
+                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: YearMonth.now()
+                            .atEndOfMonth(),
+                    inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
+                    beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
                     aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
             )
         }

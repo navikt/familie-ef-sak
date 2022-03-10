@@ -8,13 +8,12 @@ Egenskap: Andelhistorikk: Nytt vedtak sletter andel og en ny periode
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato |
       | 1            | 01.2021         | 03.2021         |
-      | 2            | 01.2021         | 03.2021         |
-
-    Og følgende andeler tilkjent ytelse
-      | BehandlingId | Fra og med dato | Til og med dato |
-      | 1            | 01.2021         | 03.2021         |
-      | 2            | 01.2021         | 01.2021         |
       | 2            | 02.2021         | 03.2021         |
+
+    Og følgende inntekter
+      | BehandlingId | Fra og med dato |
+      | 1            | 01.2021         |
+      | 2            | 02.2021         |
 
     Når lag andelhistorikk kjøres
 
