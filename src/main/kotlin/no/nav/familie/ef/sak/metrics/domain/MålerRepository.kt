@@ -5,14 +5,24 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
 interface MålerRepository : CrudRepository<Behandling, UUID> {
 
     // language=PostgreSQL
-    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingÅrsak""")
+    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingårsak""")
     fun finnAntallBehandlingerAvÅrsak(behandlingÅrsak: BehandlingÅrsak): Int
+
+    // language=PostgreSQL
+    @Query("""SELECT b.stonadstype, dato, COUNT(*) AS antall, SUM(aty.belop) AS belop FROM gjeldende_iverksatte_behandlinger b
+                JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
+                JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
+                JOIN GENERATE_SERIES(:fra, :til, '1 month') dato 
+                  ON dato BETWEEN aty.stonad_fom AND aty.stonad_tom
+              GROUP BY b.stonadstype, dato""")
+    fun finnAntallLøpendeSaker(fra: LocalDate, til: LocalDate): List<LøpendeBehandling>
 
     // language=PostgreSQL
     @Query("""SELECT stonadstype,
@@ -46,7 +56,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               GROUP BY stonadstype, resultat, år, uke""")
     fun finnVedtakPerUke(): List<VedtakPerUke>
 
-    @Query("""SELECT count(*) 
+    @Query("""SELECT COUNT(*) 
               FROM behandling b
               JOIN vedtak v ON v.behandling_id = b.id
               WHERE v.resultat_type = 'SANKSJONERE'
