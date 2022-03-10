@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -29,9 +29,9 @@ internal class EksternBehandlingControllerTest {
 
     private val pdlClient = mockk<PdlClient>()
     private val behandlingRepository = mockk<BehandlingRepository>()
-    private val fagsakRepository = mockk<FagsakRepository>()
+    private val fagsakService = mockk<FagsakService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingRepository, fagsakRepository)
+    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingRepository, fagsakService)
     private val eksternBehandlingController = EksternBehandlingController(pdlClient, eksternBehandlingService)
 
     private val ident1 = "11111111111"
@@ -39,12 +39,8 @@ internal class EksternBehandlingControllerTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { pdlClient.hentPersonidenter(ident1, true) } returns PdlIdenter(
-                listOf(
-                        PdlIdent(ident1, true),
-                        PdlIdent(ident2, false)
-                )
-        )
+        every { pdlClient.hentPersonidenter(ident1, true) }
+                .returns(PdlIdenter(listOf(PdlIdent(ident1, true), PdlIdent(ident2, false))))
     }
 
     @Test
@@ -162,7 +158,7 @@ internal class EksternBehandlingControllerTest {
         val behandling1 = behandling(id = uuid1)
         val behandling2 = behandling(id = uuid2)
 
-        every { fagsakRepository.findBySøkerIdent(any(), any()) } returns fagsakDao()
+        every { fagsakService.finnFagsak(any(), any()) } returns fagsak()
         every {
             behandlingRepository.finnSisteIverksatteBehandling(any())
         } returns behandling1 andThen behandling2 andThen null

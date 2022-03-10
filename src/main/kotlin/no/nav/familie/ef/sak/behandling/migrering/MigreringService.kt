@@ -42,6 +42,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -93,28 +94,38 @@ class MigreringService(
                              beløpsperioder = beregnYtelse)
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun migrerOvergangsstønadAutomatisk(personIdent: String) {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId)
+    }
+
     /**
      * Henter data fra infotrygd og oppretter migrering
      */
     @Transactional
     fun migrerOvergangsstønad(fagsakPersonId: UUID): UUID {
-        val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
-        val personIdent = fagsakPerson.hentAktivIdent()
-        val kjøremåned = kjøremåned()
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
         try {
-            val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
-            return opprettMigrering(fagsak = fagsak,
-                                    fra = fra(periode),
-                                    til = til(periode),
-                                    inntektsgrunnlag = periode.inntektsgrunnlag,
-                                    samordningsfradrag = periode.samordningsfradrag,
-                                    erReellArbeidssøker = erReellArbeidssøker(periode)).id
+            return migrerOvergangsstønadForFagsakPerson(fagsakPersonId)
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
             throw ApiFeil(e.årsak, HttpStatus.BAD_REQUEST)
         }
+    }
+
+    private fun migrerOvergangsstønadForFagsakPerson(fagsakPersonId: UUID): UUID {
+        val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
+        val personIdent = fagsakPerson.hentAktivIdent()
+        val kjøremåned = kjøremåned()
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
+        return opprettMigrering(fagsak = fagsak,
+                                fra = fra(periode),
+                                til = til(periode),
+                                inntektsgrunnlag = periode.inntektsgrunnlag,
+                                samordningsfradrag = periode.samordningsfradrag,
+                                erReellArbeidssøker = erReellArbeidssøker(periode)).id
     }
 
     /**
