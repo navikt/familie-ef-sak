@@ -161,7 +161,8 @@ internal class VurderingServiceTest {
         val delvilkårsvurdering =
                 SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(),
                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                                                                                barn = emptyList()))
+                                                                                barn = emptyList(),
+                                                                                søktOmBarnetilsyn = emptyList()))
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
                 listOf(Vilkårsvurdering(behandlingId = behandlingId,
                                         type = VilkårType.SIVILSTAND,

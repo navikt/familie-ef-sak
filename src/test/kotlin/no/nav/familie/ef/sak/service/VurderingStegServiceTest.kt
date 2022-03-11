@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -231,7 +230,10 @@ internal class VurderingStegServiceTest {
     internal fun `behandlingen uten barn skal likevel opprette et vilkår for aleneomsorg`() {
         val vilkårsvurderinger =
                 opprettNyeVilkårsvurderinger(behandlingId,
-                                             HovedregelMetadata(null, Sivilstandstype.UGIFT, barn = emptyList()),
+                                             HovedregelMetadata(null,
+                                                                Sivilstandstype.UGIFT,
+                                                                barn = emptyList(),
+                                                                søktOmBarnetilsyn = emptyList()),
                                              OVERGANGSSTØNAD)
 
         assertThat(vilkårsvurderinger).hasSize(vilkårsreglerForStønad(OVERGANGSSTØNAD).size)
@@ -248,7 +250,8 @@ internal class VurderingStegServiceTest {
                                                             listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)))))
         val vilkårsvurderinger =
                 opprettNyeVilkårsvurderinger(behandlingId,
-                                             HovedregelMetadata(søknad.sivilstand, Sivilstandstype.UGIFT, barn = barn),
+                                             HovedregelMetadata(søknad.sivilstand, Sivilstandstype.UGIFT, barn = barn,
+                                                                søktOmBarnetilsyn = emptyList()),
                                              OVERGANGSSTØNAD)
                         .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
 
