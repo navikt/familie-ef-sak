@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.metrics
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.metrics.domain.BehandlingerPerStatus
 import no.nav.familie.ef.sak.metrics.domain.ForekomsterPerUke
@@ -11,23 +13,28 @@ import no.nav.familie.ef.sak.metrics.domain.MålerRepository
 import no.nav.familie.ef.sak.metrics.domain.VedtakPerUke
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
 import java.time.temporal.IsoFields
 
 class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired
-    lateinit var målerRepository: MålerRepository
+    @Autowired lateinit var målerRepository: MålerRepository
+    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
-
-    private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
+    private val år = Year.now().value
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 
     @BeforeEach
@@ -124,5 +131,66 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
                 VedtakPerUke(år, uke, Stønadstype.BARNETILSYN, BehandlingResultat.IKKE_SATT, 3),
                 VedtakPerUke(år, uke, Stønadstype.SKOLEPENGER, BehandlingResultat.IKKE_SATT, 3)
         )
+    }
+
+    @Test
+    internal fun `finnAntallLøpendeSaker finner ingen løpende saker når det ikke finnes noen`() {
+        val now = YearMonth.now()
+        assertThat(målerRepository.finnAntallLøpendeSaker(now.atDay(1), now.plusMonths(1).atEndOfMonth()))
+                .isEmpty()
+    }
+
+    @Test
+    internal fun `skal finne løpende behandlinger`() {
+        val now = YearMonth.now()
+        val fagsak1 = testoppsettService.lagreFagsak(fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        val behandling1 = opprettFerdigstiltBehandling(fagsak1, LocalDateTime.now().minusDays(1))
+        // behandling 2 er gjeldende på fagsak 1 då den er opprettet etter 1
+        val behandling2 = opprettFerdigstiltBehandling(fagsak1)
+        val behandling1Fagsak2 = opprettFerdigstiltBehandling(fagsak2)
+
+        lagreTilkjentYtelse(behandling1,
+                            lagAndelTilkjentYtelse(10_000,
+                                                   fraOgMed = now.atDay(1),
+                                                   tilOgMed = now.atEndOfMonth()))
+
+        lagreTilkjentYtelse(behandling1, lagAndelTilkjentYtelse(10_000,
+                                                                fraOgMed = now.atDay(1),
+                                                                tilOgMed = now.atEndOfMonth()))
+        lagreTilkjentYtelse(behandling2, lagAndelTilkjentYtelse(2_000,
+                                                                fraOgMed = now.atDay(1),
+                                                                tilOgMed = now.atEndOfMonth()))
+        lagreTilkjentYtelse(behandling1Fagsak2,
+                            lagAndelTilkjentYtelse(3_000,
+                                                   fraOgMed = now.atDay(1),
+                                                   tilOgMed = now.atEndOfMonth()),
+                            lagAndelTilkjentYtelse(3_000,
+                                                   fraOgMed = now.plusMonths(1).atDay(1),
+                                                   tilOgMed = now.plusMonths(1).atEndOfMonth()),
+                            lagAndelTilkjentYtelse(20_000,
+                                                   fraOgMed = now.plusMonths(3).atDay(1),
+                                                   tilOgMed = now.plusMonths(3).atEndOfMonth()))
+
+        val løpendeSaker = målerRepository.finnAntallLøpendeSaker(now.atDay(1), now.plusMonths(1).atDay(1))
+        assertThat(løpendeSaker).hasSize(2)
+        val denneMåned = løpendeSaker.single { it.dato == now.atDay(1) }
+        val nesteMåned = løpendeSaker.single { it.dato == now.plusMonths(1).atDay(1) }
+        assertThat(denneMåned.antall).isEqualTo(2)
+        assertThat(denneMåned.belop).isEqualTo(5_000)
+        assertThat(nesteMåned.antall).isEqualTo(1)
+        assertThat(nesteMåned.belop).isEqualTo(3000)
+
+    }
+
+    private fun opprettFerdigstiltBehandling(fagsak: Fagsak, opprettetTid: LocalDateTime = LocalDateTime.now()) =
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = BehandlingStatus.FERDIGSTILT,
+                                                   resultat = BehandlingResultat.INNVILGET,
+                                                   opprettetTid = opprettetTid))
+
+    private fun lagreTilkjentYtelse(behandling: Behandling, vararg andelTilkjentYtelse: AndelTilkjentYtelse) {
+        val andeler = andelTilkjentYtelse.map { it.copy(kildeBehandlingId = behandling.id) }.toList()
+        tilkjentYtelseRepository.insert(lagTilkjentYtelse(andeler, behandlingId = behandling.id))
     }
 }
