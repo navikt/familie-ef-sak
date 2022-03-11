@@ -40,13 +40,13 @@ class MålerService(private val målerRepository: MålerRepository) {
 
         løpendeBehandlingerGauge.register(løpendeSaker.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue),
+                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')),
                               it.antall)
         }, true)
 
         løpendeBehandlingerBeløpGauge.register(løpendeSaker.map {
             MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue),
+                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')),
                               it.belop)
         }, true)
     }
