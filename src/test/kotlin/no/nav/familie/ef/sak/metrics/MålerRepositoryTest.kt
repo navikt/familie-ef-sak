@@ -34,7 +34,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
-    private val år = Year.now().value
+    private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 
     @BeforeEach
