@@ -46,6 +46,7 @@ enum class VedtaksperiodeType {
     PERIODE_FØR_FØDSEL,
     SANKSJON,
     UTVIDELSE,
+    NY_PERIODE_FOR_NYTT_BARN
 }
 
 enum class AktivitetType {
