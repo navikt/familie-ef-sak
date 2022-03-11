@@ -12,7 +12,7 @@ import java.util.UUID
 interface MålerRepository : CrudRepository<Behandling, UUID> {
 
     // language=PostgreSQL
-    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingårsak""")
+    @Query("""SELECT COUNT(*) FROM behandling WHERE arsak = :behandlingÅrsak""")
     fun finnAntallBehandlingerAvÅrsak(behandlingÅrsak: BehandlingÅrsak): Int
 
     // language=PostgreSQL
