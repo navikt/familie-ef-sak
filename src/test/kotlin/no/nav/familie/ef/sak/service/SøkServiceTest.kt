@@ -35,19 +35,15 @@ internal class SøkServiceTest {
     private val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
     private val personService = mockk<PersonService>()
     private val fagsakService = mockk<FagsakService>()
-    private val fagsakRepository = mockk<FagsakRepository>()
     private val adresseMapper: AdresseMapper = AdresseMapper(KodeverkServiceMock().kodeverkService())
     private val behandlingService = mockk<BehandlingService>()
-    private val infotrygdService = mockk<InfotrygdService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
-    private val søkService = SøkService(fagsakRepository,
-                                        fagsakPersonService,
+    private val søkService = SøkService(fagsakPersonService,
                                         behandlingService,
                                         personService,
                                         pdlSaksbehandlerClient,
                                         adresseMapper,
-                                        fagsakService,
-                                        infotrygdService)
+                                        fagsakService)
 
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {

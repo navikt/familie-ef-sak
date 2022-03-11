@@ -76,7 +76,7 @@ class NyeBarnServiceTest {
     fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med ett født terminbarn i PDL, forvent ingen treff`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
-        val fnrForPdlBarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForPdlBarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdatoEksisterendeBarn))),
                             fnrForPdlBarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdato)))
         )
@@ -93,8 +93,8 @@ class NyeBarnServiceTest {
     fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn med alle i behandlingen, forvent ingen nye barn`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
-        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
-        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
+        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdatoEksisterendeBarn))),
                             fnrForTerminbarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdato))),
                             fnrForTvillingbarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdato)))
@@ -114,8 +114,8 @@ class NyeBarnServiceTest {
     fun `finnNyeBarnSidenGjeldendeBehandlingForPersonIdent med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
         val terminDato = LocalDate.now()
         val fødselsdato = LocalDate.now().minusWeeks(5)
-        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
-        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato.year, fødselsdato.month.value, fødselsdato.dayOfMonth)
+        val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
+        val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdatoEksisterendeBarn))),
                             fnrForTerminbarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdato))),
                             fnrForTvillingbarn to pdlBarn(fødsel = listOf(fødsel(fødselsdato = fødselsdato)))

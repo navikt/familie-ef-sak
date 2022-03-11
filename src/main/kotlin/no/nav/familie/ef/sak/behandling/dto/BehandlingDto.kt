@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling.dto
 
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -30,5 +31,17 @@ fun Behandling.tilDto(stønadstype: Stønadstype): BehandlingDto =
                       sistEndret = this.sporbar.endret.endretTid,
                       resultat = this.resultat,
                       opprettet = this.sporbar.opprettetTid,
+                      behandlingsårsak = this.årsak,
+                      stønadstype = stønadstype)
+
+fun Saksbehandling.tilDto(): BehandlingDto =
+        BehandlingDto(id = this.id,
+                      fagsakId = this.fagsakId,
+                      steg = this.steg,
+                      type = this.type,
+                      status = this.status,
+                      sistEndret = this.endretTid,
+                      resultat = this.resultat,
+                      opprettet = this.opprettetTid,
                       behandlingsårsak = this.årsak,
                       stønadstype = stønadstype)

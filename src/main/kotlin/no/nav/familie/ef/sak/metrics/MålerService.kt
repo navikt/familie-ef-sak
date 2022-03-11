@@ -8,6 +8,8 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.concurrent.atomic.AtomicInteger
 
 @Service
@@ -15,6 +17,8 @@ class MålerService(private val målerRepository: MålerRepository) {
 
     private val åpneBehandlingerPerUkeGauge = MultiGauge.builder("KlarTilBehandlingPerUke").register(Metrics.globalRegistry)
     private val åpneBehandlingerGauge = MultiGauge.builder("KlarTilBehandling").register(Metrics.globalRegistry)
+    private val løpendeBehandlingerGauge = MultiGauge.builder("LopendeBehandlinger").register(Metrics.globalRegistry)
+    private val løpendeBehandlingerBeløpGauge = MultiGauge.builder("LopendeBehandlingerBelop").register(Metrics.globalRegistry)
     private val vedtakGauge = MultiGauge.builder("Vedtak").register(Metrics.globalRegistry)
     private val antallMigreringerGauge = Metrics.gauge("AntallMigreringer", AtomicInteger()) ?: error("Forventer not null")
     private val antallSanksjonerGauge = Metrics.gauge("AntallSanksjoner", AtomicInteger()) ?: error("Forventer not null")
@@ -26,6 +30,25 @@ class MålerService(private val målerRepository: MålerRepository) {
         val antallBehandlinger = målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)
         logger.info("Antall migreringer=$antallBehandlinger")
         antallMigreringerGauge.set(antallBehandlinger)
+    }
+
+    @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
+    fun antallLøpendeSaker() {
+        val now = YearMonth.now()
+        val løpendeSaker = målerRepository.finnAntallLøpendeSaker(now.minusMonths(2).atDay(1),
+                                                                  now.plusMonths(2).atDay(1))
+
+        løpendeBehandlingerGauge.register(løpendeSaker.map {
+            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
+                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')),
+                              it.antall)
+        }, true)
+
+        løpendeBehandlingerBeløpGauge.register(løpendeSaker.map {
+            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
+                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')),
+                              it.belop)
+        }, true)
     }
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
