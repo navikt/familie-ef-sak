@@ -32,6 +32,8 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
@@ -87,17 +89,30 @@ internal class VurderingServiceTest {
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
-        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             sivilstand,
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             false,
-                                                                                             mockk(relaxed = true))
+
+        val barnMedSamvær = barn.map { lagBarnetilsynBarn(it.id) }
+
+
+        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(
+                tidligereVedtaksperioder = mockk(relaxed = true),
+                medlemskap = mockk(relaxed = true),
+                sivilstand = sivilstand,
+                bosituasjon = mockk(relaxed = true),
+                barnMedSamvær = barnMedSamvær,
+                sivilstandsplaner = mockk(relaxed = true),
+                aktivitet = mockk(relaxed = true),
+                sagtOppEllerRedusertStilling = mockk(relaxed = true),
+                lagtTilEtterFerdigstilling = false,
+                registeropplysningerOpprettetTid = mockk(relaxed = true))
     }
+
+    private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(barnId,
+                                                                                        søknadsgrunnlag = mockk(relaxed = true),
+                                                                                        registergrunnlag = mockk(relaxed = true),
+                                                                                        barnepass = BarnepassDto(barnId,
+                                                                                                                 skalHaBarnepass = true,
+                                                                                                                 barnepassordninger = listOf(),
+                                                                                                                 årsakBarnepass = null))
 
     @Test
     fun `skal opprette nye Vilkårsvurdering for overgangsstønad med alle vilkår dersom ingen vurderinger finnes`() {
