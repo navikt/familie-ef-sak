@@ -68,9 +68,11 @@ class VurderingService(private val behandlingService: BehandlingService,
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
+        val søktOmBarnetilsyn = grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
                                           sivilstandSøknad = søknad?.sivilstand,
-                                          barn = barn)
+                                          barn = barn,
+                                          søktOmBarnetilsyn = søktOmBarnetilsyn)
         return Pair(grunnlag, metadata)
     }
 
