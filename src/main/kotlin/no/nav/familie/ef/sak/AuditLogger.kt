@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest
 data class Sporingsdata(
         val event: AuditLoggerEvent,
         val personIdent: String,
+        val harTilgang: Boolean,
         val custom1: CustomKeyValue? = null,
         val custom2: CustomKeyValue? = null,
         val custom3: CustomKeyValue? = null
@@ -64,8 +65,11 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
                "sproc=${getCallId()} " +
                "requestMethod=${request.method} " +
                "request=${request.requestURI} " +
+               "flexString1Label=Decision flexString1=${formatHarTilgang(data)} " +
                createCustomString(data)
     }
+
+    private fun formatHarTilgang(data: Sporingsdata) = if (data.harTilgang) "Permit" else "Deny"
 
     private fun createCustomString(data: Sporingsdata): String {
         return listOfNotNull(data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },

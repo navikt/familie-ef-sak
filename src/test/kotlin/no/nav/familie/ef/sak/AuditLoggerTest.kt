@@ -43,29 +43,32 @@ internal class AuditLoggerTest {
 
     @Test
     internal fun `logger melding uten custom strings`() {
-        auditLogger.log(Sporingsdata(AuditLoggerEvent.ACCESS, "12345678901"))
+        auditLogger.log(Sporingsdata(AuditLoggerEvent.ACCESS, "12345678901", false))
         assertThat(listAppender.list).hasSize(1)
-        assertThat(getMessage()).isEqualTo(expectedBaseLog)
+        assertThat(getMessage()).isEqualTo(expectedBaseLog("Deny"))
     }
 
     @Test
     internal fun `logger melding med custom strings`() {
         auditLogger.log(Sporingsdata(event = AuditLoggerEvent.ACCESS,
                                      personIdent = "12345678901",
+                                     harTilgang = true,
                                      custom1 = CustomKeyValue("k", "v"),
                                      custom2 = CustomKeyValue("k2", "v2"),
                                      custom3 = CustomKeyValue("k3", "v3")))
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage())
-                .isEqualTo("${expectedBaseLog}cs3Label=k cs3=v cs5Label=k2 cs5=v2 cs6Label=k3 cs6=v3")
+                .isEqualTo("${expectedBaseLog("Permit")}cs3Label=k cs3=v cs5Label=k2 cs5=v2 cs6Label=k3 cs6=v3")
     }
 
     private fun getMessage() = listAppender.list[0].message.replace("""end=\d+""".toRegex(), "end=123")
 
-    private val expectedBaseLog = "CEF:0|familie-ef-sak|auditLog|1.0|audit:access|Saksbehandling|INFO|end=123 " +
-                                  "suid=Z1234567 " +
-                                  "duid=12345678901 " +
-                                  "sproc=00001111 " +
-                                  "requestMethod=POST " +
-                                  "request=/api/test/123 "
+    private fun expectedBaseLog(harTilgang: String) =
+            "CEF:0|familie-ef-sak|auditLog|1.0|audit:access|Saksbehandling|INFO|end=123 " +
+            "suid=Z1234567 " +
+            "duid=12345678901 " +
+            "sproc=00001111 " +
+            "requestMethod=POST " +
+            "request=/api/test/123 " +
+            "flexString1Label=Decision flexString1=$harTilgang "
 }
