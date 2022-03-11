@@ -36,6 +36,7 @@ class UttrekkArbeidssøkerService(
         val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
         val registertSomArbeidssøkerPåFagsak = hentRegistertSomArbeidssøker(aktiveIdenter, årMåned)
 
+        var feilede = 0
         uttrekk.forEach {
             if (uttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(årMåned, it.fagsakId)) {
                 return@forEach
@@ -49,7 +50,11 @@ class UttrekkArbeidssøkerService(
                                                                           registrertArbeidssøker = registertSomArbeidssøker))
             } catch (ex: Exception) {
                 logger.error(ex.message)
+                ++feilede
             }
+        }
+        if (feilede > 0) {
+            error("Kunne ikke opprette ${feilede} av ${uttrekk.size} uttrekk")
         }
     }
 
