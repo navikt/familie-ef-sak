@@ -16,13 +16,10 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterme
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
@@ -33,7 +30,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
@@ -44,8 +40,12 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNo
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagKjønn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagNavn
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -64,7 +64,7 @@ class PdlClientConfig {
         val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
         val pdlPersonFraSøk = PdlPersonFraSøk(listOf(element = Folkeregisteridentifikator(fnrPåAdresseSøk)),
                                               bostedsadresse(),
-                                              lagNavn())
+                                              listOf(lagNavn()))
         every { pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(any()) } returns
                 PersonSøkResultat(listOf(PersonSøkTreff(pdlPersonFraSøk)), 1, 1, 1)
         return pdlSaksbehandlerClient
@@ -102,28 +102,27 @@ class PdlClientConfig {
         private const val søkerFnr = "01010172272"
         private const val annenForelderFnr = "17097926735"
         private const val fnrPåAdresseSøk = "01012067050"
-        private val metadataGjeldende = Metadata(historisk = false)
 
         fun lagPersonKort(it: String) =
                 PdlPersonKort(listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT,
                                                         metadata = metadataGjeldende)),
-                              lagNavn(fornavn = it),
+                              listOf(lagNavn(fornavn = it)),
                               emptyList())
 
         fun opprettPdlSøker() =
-                PdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT,
+                pdlSøker(adressebeskyttelse = listOf(Adressebeskyttelse(gradering = AdressebeskyttelseGradering.UGRADERT,
                                                                         metadata = metadataGjeldende)),
                          bostedsadresse = bostedsadresse(),
                          dødsfall = listOf(),
                          forelderBarnRelasjon = forelderBarnRelasjoner(),
-                         fødsel = fødsel(),
+                         fødsel = listOf(fødsel()),
                          folkeregisterpersonstatus = listOf(Folkeregisterpersonstatus("bosatt",
                                                                                       "bosattEtterFolkeregisterloven",
                                                                                       metadataGjeldende)),
                          fullmakt = fullmakter(),
                          kjønn = lagKjønn(KjønnType.KVINNE),
                          kontaktadresse = kontaktadresse(),
-                         navn = lagNavn(),
+                         navn = listOf(lagNavn()),
                          opphold = listOf(Opphold(Oppholdstillatelse.PERMANENT, startdato, null)),
                          oppholdsadresse = listOf(),
                          sivilstand = sivilstand(),
@@ -142,35 +141,21 @@ class PdlClientConfig {
                                                                   LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55))
 
         private fun barn(): Map<String, PdlBarn> =
-                mapOf(barnFnr to PdlBarn(adressebeskyttelse = listOf(),
-                                         bostedsadresse = bostedsadresse(),
-                                         deltBosted = listOf(),
-                                         dødsfall = listOf(),
+                mapOf(barnFnr to pdlBarn(bostedsadresse = bostedsadresse(),
                                          forelderBarnRelasjon = familierelasjonerBarn(),
                                          fødsel = fødsel(),
                                          navn = lagNavn("Barn", null, "Barnesen")),
-                      barn2Fnr to PdlBarn(adressebeskyttelse = listOf(),
-                                          bostedsadresse = bostedsadresse(),
-                                          deltBosted = listOf(),
-                                          dødsfall = listOf(),
+                      barn2Fnr to pdlBarn(bostedsadresse = bostedsadresse(),
                                           forelderBarnRelasjon = familierelasjonerBarn(),
                                           fødsel = fødsel(),
                                           navn = lagNavn("Barn2", null, "Barnesen")))
-
-        private fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): List<Fødsel> =
-                listOf(Fødsel(fødselsår = år,
-                              fødselsdato = LocalDate.of(år, måned, dag),
-                              metadata = metadataGjeldende,
-                              fødested = null,
-                              fødekommune = null,
-                              fødeland = null))
 
         private fun annenForelder(): PdlAnnenForelder =
                 PdlAnnenForelder(
                         adressebeskyttelse = emptyList(),
                         bostedsadresse = bostedsadresse(),
                         dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
-                        fødsel = fødsel(1994, 11, 1),
+                        fødsel = listOf(fødsel(1994, 11, 1)),
                         navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                 )
 

@@ -24,19 +24,22 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
+import java.time.LocalDate
 
 object PdlTestdataHelper {
 
-    fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = listOf(Kjønn(kjønnType))
+    val metadataGjeldende = Metadata(historisk = false)
+
+    fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = Kjønn(kjønnType)
 
     fun lagNavn(fornavn: String = "Fornavn",
                 mellomnavn: String? = "mellomnavn",
                 etternavn: String = "Etternavn",
-                historisk: Boolean = false): List<Navn> {
-        return listOf(Navn(fornavn,
-                           mellomnavn,
-                           etternavn,
-                           Metadata(historisk = historisk)))
+                historisk: Boolean = false): Navn {
+        return Navn(fornavn,
+                    mellomnavn,
+                    etternavn,
+                    Metadata(historisk = historisk))
     }
 
     fun pdlSøker(adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),
@@ -46,7 +49,7 @@ object PdlTestdataHelper {
                  fødsel: List<Fødsel> = emptyList(),
                  folkeregisterpersonstatus: List<Folkeregisterpersonstatus> = emptyList(),
                  fullmakt: List<Fullmakt> = emptyList(),
-                 kjønn: List<Kjønn> = emptyList(),
+                 kjønn: Kjønn? = null,
                  kontaktadresse: List<Kontaktadresse> = emptyList(),
                  navn: List<Navn> = emptyList(),
                  opphold: List<Opphold> = emptyList(),
@@ -65,7 +68,7 @@ object PdlTestdataHelper {
                      fødsel,
                      folkeregisterpersonstatus,
                      fullmakt,
-                     kjønn,
+                     listOfNotNull(kjønn),
                      kontaktadresse,
                      navn,
                      opphold,
@@ -83,13 +86,24 @@ object PdlTestdataHelper {
                 deltBosted: List<DeltBosted> = emptyList(),
                 dødsfall: List<Dødsfall> = emptyList(),
                 forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
-                fødsel: List<Fødsel> = emptyList(),
-                navn: List<Navn> = lagNavn()) =
+                fødsel: Fødsel? = null,
+                navn: Navn = lagNavn()) =
             PdlBarn(adressebeskyttelse,
                     bostedsadresse,
                     deltBosted,
                     dødsfall,
                     forelderBarnRelasjon,
-                    fødsel,
-                    navn)
+                    listOfNotNull(fødsel),
+                    listOfNotNull(navn))
+
+    fun fødsel(år: Int = 2018, måned: Int = 1, dag: Int = 1): Fødsel =
+            fødsel(LocalDate.of(år, måned, dag))
+
+    fun fødsel(fødselsdato: LocalDate) =
+            Fødsel(fødselsår = fødselsdato.year,
+                   fødselsdato = fødselsdato,
+                   metadata = metadataGjeldende,
+                   fødested = null,
+                   fødekommune = null,
+                   fødeland = null)
 }
