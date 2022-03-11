@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -25,6 +26,8 @@ class UttrekkArbeidssøkerService(
         private val personService: PersonService,
         private val arbeidssøkerClient: ArbeidssøkerClient
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
@@ -46,6 +49,7 @@ class UttrekkArbeidssøkerService(
                                                                           årMåned = årMåned,
                                                                           registrertArbeidssøker = registertSomArbeidssøker))
             } catch (ex: Exception) {
+                logger.error(ex.message)
                 ++feilede
             }
         }
