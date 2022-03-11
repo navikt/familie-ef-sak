@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 internal class JournalpostUtilKtTest {
 
     @Test
-    internal fun `harStrukturertSøknad - orvegangsstønad med søknad skal returnere true`() {
+    internal fun `harStrukturertSøknad - overgangsstønad med søknad skal returnere true`() {
         val journalpost = lagjournalpost(behandlingstemaOvergangsstønad,
                                          listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)))
         assertThat(journalpost.harStrukturertSøknad()).isTrue
@@ -35,7 +35,7 @@ internal class JournalpostUtilKtTest {
     }
 
     @Test
-    internal fun `harStrukturertSøknad - orvegangsstønad med søknad og vedlegg skal returnere true`() {
+    internal fun `harStrukturertSøknad - overgangsstønad med søknad og vedlegg skal returnere true`() {
         val journalpost = lagjournalpost(behandlingstemaOvergangsstønad,
                                          listOf(dokumentUkjent,
                                                 dokumentEttersending(DokumentBrevkode.OVERGANGSSTØNAD),
@@ -45,13 +45,24 @@ internal class JournalpostUtilKtTest {
 
 
     @Test
-    internal fun `harStrukturertSøknad - overgangsstønad med feil brevkode skal returnere false`() {
-        val journalpostSkolepengeSøknad = lagjournalpost(behandlingstemaOvergangsstønad,
+    internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode skolepenger skal returnere true`() {
+        val journalpostSkolepengeSøknad = lagjournalpost(behandlingstema = null,
                                          listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER)))
-        assertThat(journalpostSkolepengeSøknad.harStrukturertSøknad()).isFalse
-        val journalpostBarnetilsynSøknad = lagjournalpost(behandlingstemaOvergangsstønad,
+        assertThat(journalpostSkolepengeSøknad.harStrukturertSøknad()).isTrue
+    }
+
+    @Test
+    internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode overgangsstønad skal returnere true`() {
+        val journalpostOvergangsstønad = lagjournalpost(behandlingstema = null,
+                                         listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)))
+        assertThat(journalpostOvergangsstønad.harStrukturertSøknad()).isTrue
+    }
+
+    @Test
+    internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode barnetilsyn skal returnere true`() {
+        val journalpostBarnetilsynSøknad = lagjournalpost(behandlingstema = null,
                                          listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN)))
-        assertThat(journalpostBarnetilsynSøknad.harStrukturertSøknad()).isFalse
+        assertThat(journalpostBarnetilsynSøknad.harStrukturertSøknad()).isTrue
     }
 
     @Test
@@ -91,7 +102,7 @@ internal class JournalpostUtilKtTest {
                                       "Vedlegg3",
                                       brevkode = "XYZ")
 
-    fun lagjournalpost(behandlingstema: String, dokumenter: List<DokumentInfo>) =
+    fun lagjournalpost(behandlingstema: String?, dokumenter: List<DokumentInfo>) =
             Journalpost(journalpostId = journalpostId,
                         journalposttype = Journalposttype.I,
                         journalstatus = Journalstatus.MOTTATT,

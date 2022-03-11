@@ -35,7 +35,10 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
+
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
+
+
         val eksterneIder = behandlingService.hentEksterneIder(tilkjentYtelser.map { it.behandlingId }.toSet())
                 .associateBy { it.behandlingId }
 

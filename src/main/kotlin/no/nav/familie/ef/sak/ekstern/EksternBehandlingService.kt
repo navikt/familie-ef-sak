@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -11,7 +11,9 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService, val behandlingRepository: BehandlingRepository, val fagsakRepository: FagsakRepository) {
+class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
+                               val behandlingRepository: BehandlingRepository,
+                               val fagsakService: FagsakService) {
 
 
     fun finnesBehandlingFor(personidenter: Set<String>, stønadstype: Stønadstype?): Boolean {
@@ -42,7 +44,7 @@ class EksternBehandlingService(val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
-        return Stønadstype.values().mapNotNull { fagsakRepository.findBySøkerIdent(personidenter, it) }
+        return Stønadstype.values().mapNotNull { fagsakService.finnFagsak(personidenter, it) }
                 .mapNotNull { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
                 .map { it.id }
                 .toSet()

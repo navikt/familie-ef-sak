@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.http.config.RestTemplateAzure
 import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
@@ -9,7 +10,6 @@ import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
-import no.nav.security.token.support.client.spring.oauth2.DefaultOAuth2HttpClient
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import org.slf4j.LoggerFactory
@@ -92,9 +92,9 @@ class ApplicationConfig {
     @Bean
     @Primary
     fun oAuth2HttpClient(): OAuth2HttpClient {
-        return DefaultOAuth2HttpClient(RestTemplateBuilder()
-                                               .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                                               .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)))
+        return RetryOAuth2HttpClient(RestTemplateBuilder()
+                                             .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                                             .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS)))
     }
 
 }
