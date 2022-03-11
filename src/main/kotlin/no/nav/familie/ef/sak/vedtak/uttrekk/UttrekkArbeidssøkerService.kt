@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -29,19 +28,29 @@ class UttrekkArbeidssøkerService(
 
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
-    @Transactional
     fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()) {
         val uttrekk = hentArbeidssøkereForUttrekk(årMåned)
         val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
         val registertSomArbeidssøkerPåFagsak = hentRegistertSomArbeidssøker(aktiveIdenter, årMåned)
 
+        var feilede = 0
         uttrekk.forEach {
-            val registertSomArbeidssøker = registertSomArbeidssøkerPåFagsak[it.fagsakId]
-                                           ?: error("Finner ikke status om registert arbeidssøker for fagsak=${it.fagsakId}")
-            uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
-                                                                      vedtakId = it.behandlingIdForVedtak,
-                                                                      årMåned = årMåned,
-                                                                      registrertArbeidssøker = registertSomArbeidssøker))
+            if (uttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(årMåned, it.fagsakId)) {
+                return@forEach
+            }
+            try {
+                val registertSomArbeidssøker = registertSomArbeidssøkerPåFagsak[it.fagsakId]
+                                               ?: error("Finner ikke status om registert arbeidssøker for fagsak=${it.fagsakId}")
+                uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
+                                                                          vedtakId = it.behandlingIdForVedtak,
+                                                                          årMåned = årMåned,
+                                                                          registrertArbeidssøker = registertSomArbeidssøker))
+            } catch (ex: Exception) {
+                ++feilede
+            }
+        }
+        if (feilede > 0) {
+            error("Kunne ikke opprette ${feilede} av ${uttrekk.size} uttrekk")
         }
     }
 

@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -31,11 +33,14 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.tilDomene
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -43,6 +48,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse as DtoAdressebeskyttelse
 
 internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
@@ -236,6 +242,56 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             assertThat(uttrekkMedKontrollerte.antallKontrollert).isEqualTo(2)
             assertThat(uttrekkMedKontrollerte.arbeidssøkere.size).isEqualTo(22)
         }
+    }
+
+    @Test
+    internal fun `manglende aktiv ident ved opprettUttrekkforArbeissøkere i første kall, forvent insert av kun denne andre gang`() {
+        val uttrekkSlot = slot<UttrekkArbeidssøkere>()
+        val tilgangService = mockk<TilgangService>()
+        val mockUttrekkArbeidssøkerRepository = mockk<UttrekkArbeidssøkerRepository>()
+        val mockFagsakService = mockk<FagsakService>()
+        val uttrekkArbeidssøkerService = UttrekkArbeidssøkerService(tilgangService,
+                                                                    mockUttrekkArbeidssøkerRepository,
+                                                                    mockFagsakService,
+                                                                    personService,
+                                                                    arbeidssøkerClient)
+
+        val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.tilPeriode().fradato, vedtaksperiode.tilPeriode().tildato)
+        val periodeForUttrekk = VedtaksperioderForUttrekk(UUID.randomUUID(),
+                                                          UUID.randomUUID(),
+                                                          UUID.randomUUID(),
+                                                          PeriodeWrapper(listOf(vedtaksperiode).tilDomene()))
+        val periodeForUttrekk2 = VedtaksperioderForUttrekk(UUID.randomUUID(),
+                                                           UUID.randomUUID(),
+                                                           UUID.randomUUID(),
+                                                           PeriodeWrapper(listOf(vedtaksperiode).tilDomene()))
+
+        val aktiveIdenter = mutableMapOf(periodeForUttrekk2.fagsakId to "")
+
+        every { mockFagsakService.hentAktiveIdenter(any()) } returns aktiveIdenter
+        every { mockUttrekkArbeidssøkerRepository.insert(capture(uttrekkSlot)) } returns mockk()
+        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf(arbeidssøkerPeriode,
+                                                                                                           arbeidssøkerPeriode))
+
+        every {
+            mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
+        } returns listOf(
+                periodeForUttrekk, periodeForUttrekk2)
+
+        every {
+            mockUttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(any(), any())
+        } returns false andThen false andThen false andThen true
+
+        Assertions.assertThrows(IllegalStateException::class.java) {
+            uttrekkArbeidssøkerService.opprettUttrekkArbeidssøkere(mars2021)
+        }
+        verify(exactly = 1) { mockUttrekkArbeidssøkerRepository.insert(any()) }
+        assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk2.fagsakId)
+
+        aktiveIdenter.put(periodeForUttrekk.fagsakId, "")
+        uttrekkArbeidssøkerService.opprettUttrekkArbeidssøkere(mars2021)
+        verify(exactly = 2) { mockUttrekkArbeidssøkerRepository.insert(any()) }
+        assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk.fagsakId)
     }
 
     @Nested
