@@ -41,6 +41,7 @@ class InfotrygdReplikaMock {
             }
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
+            every { client.hentPersonerForMigrering(any()) } returns emptySet()
         }
     }
 

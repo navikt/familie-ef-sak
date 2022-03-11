@@ -36,6 +36,66 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnAktivIdent(behandlingId: UUID): String
 
     // language=PostgreSQL
+    @Query("""SELECT
+              b.id,
+              b.forrige_behandling_id,
+              be.id AS ekstern_id,
+              b.type,
+              b.status,
+              b.steg,
+              b.arsak,
+              b.krav_mottatt,
+              b.resultat,
+              b.henlagt_arsak,
+              b.opprettet_tid,
+              b.endret_tid,
+              pi.ident,
+              b.fagsak_id,
+              fe.id AS ekstern_fagsak_id,
+              f.stonadstype,
+              f.migrert
+             FROM fagsak f
+             JOIN behandling b ON f.id = b.fagsak_id
+             JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+             JOIN behandling_ekstern be ON be.behandling_id = b.id         
+             JOIN fagsak_ekstern fe ON f.id = fe.fagsak_id         
+             WHERE b.id = :behandlingId
+             ORDER BY pi.endret_tid DESC
+             LIMIT 1
+             """)
+    fun finnSaksbehandling(behandlingId: UUID): Saksbehandling
+
+    // language=PostgreSQL
+    @Query("""SELECT
+              b.id,
+              b.forrige_behandling_id,
+              be.id AS ekstern_id,
+              b.type,
+              b.status,
+              b.steg,
+              b.arsak,
+              b.krav_mottatt,
+              b.resultat,
+              b.henlagt_arsak,
+              b.opprettet_tid,
+              b.endret_tid,
+              pi.ident,
+              b.fagsak_id,
+              fe.id AS ekstern_fagsak_id,
+              f.stonadstype,
+              f.migrert
+             FROM fagsak f
+             JOIN behandling b ON f.id = b.fagsak_id
+             JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+             JOIN behandling_ekstern be ON be.behandling_id = b.id         
+             JOIN fagsak_ekstern fe ON f.id = fe.fagsak_id         
+             WHERE be.id = :eksternBehandlingId
+             ORDER BY pi.endret_tid DESC
+             LIMIT 1
+             """)
+    fun finnSaksbehandling(eksternBehandlingId: Long): Saksbehandling
+
+    // language=PostgreSQL
     @Query("""
         SELECT b.*, be.id AS eksternid_id
         FROM behandling b
