@@ -30,8 +30,11 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })
-        taskRepository.saveAll(filtrerteIdenter.map {
-            AutomatiskMigreringTask.opprettTask(it).apply { this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId() }
+        taskRepository.saveAll(filtrerteIdenter.map { personIdent ->
+            AutomatiskMigreringTask.opprettTask(personIdent).apply {
+                this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+                this.metadata["personIdent"] = personIdent
+            }
         })
     }
 
