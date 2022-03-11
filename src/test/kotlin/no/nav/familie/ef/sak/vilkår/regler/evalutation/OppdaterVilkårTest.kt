@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
+import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype.GIFT
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
@@ -16,6 +19,7 @@ import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.erAlleVilkårTattStillingTil
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -26,6 +30,110 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class OppdaterVilkårTest {
+
+
+    @Test
+    fun `Skal bare lage ALDER_PÅ_BARN vurderinger for barn det er søkt om - barnetilsyn`() {
+
+        val behandlingId = UUID.randomUUID()
+        val barn = BehandlingBarn(
+                id = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                søknadBarnId = null,
+                personIdent = null,
+                navn = null,
+                fødselTermindato = null,
+        )
+        val metadata = HovedregelMetadata(sivilstandSøknad = null,
+                                          sivilstandstype = GIFT,
+                                          erMigrering = false,
+                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+                                          søktOmBarnetilsyn = listOf(barn.id))
+
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
+                                                                 metadata,
+                                                                 Stønadstype.BARNETILSYN)
+
+        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(1)
+        assertThat(nyeVilkårsvurderinger.find { it.type === VilkårType.ALDER_PÅ_BARN }?.barnId).isEqualTo(barn.id)
+    }
+
+    @Test
+    fun `Skal bare lage ALENEOMSORG vurderinger for barn det er søkt om - barnetilsyn`() {
+
+        val behandlingId = UUID.randomUUID()
+        val barn = BehandlingBarn(
+                id = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                søknadBarnId = null,
+                personIdent = null,
+                navn = null,
+                fødselTermindato = null,
+        )
+        val metadata = HovedregelMetadata(sivilstandSøknad = null,
+                                          sivilstandstype = GIFT,
+                                          erMigrering = false,
+                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+                                          søktOmBarnetilsyn = listOf(barn.id))
+
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
+                                                                 metadata,
+                                                                 Stønadstype.BARNETILSYN)
+
+        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(1)
+        assertThat(nyeVilkårsvurderinger.find { it.type === VilkårType.ALENEOMSORG }?.barnId).isEqualTo(barn.id)
+    }
+
+    @Test
+    fun `Skal lage null ALDER_PÅ_BARN vurderinger når type er overgangsstønad`() {
+
+        val behandlingId = UUID.randomUUID()
+        val barn = BehandlingBarn(
+                id = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                søknadBarnId = null,
+                personIdent = null,
+                navn = null,
+                fødselTermindato = null,
+        )
+        val metadata = HovedregelMetadata(sivilstandSøknad = null,
+                                          sivilstandstype = GIFT,
+                                          erMigrering = false,
+                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+                                          søktOmBarnetilsyn = emptyList())
+
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
+                                                                 metadata,
+                                                                 Stønadstype.OVERGANGSSTØNAD)
+
+        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(0)
+    }
+
+    @Test
+    fun `Skal lage ALENEOMSORG-vurderinger for alle barn når type er overgangsstønad`() {
+
+        val behandlingId = UUID.randomUUID()
+        val barn = BehandlingBarn(
+                id = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                søknadBarnId = null,
+                personIdent = null,
+                navn = null,
+                fødselTermindato = null,
+        )
+        val metadata = HovedregelMetadata(sivilstandSøknad = null,
+                                          sivilstandstype = GIFT,
+                                          erMigrering = false,
+                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+                                          søktOmBarnetilsyn = emptyList())
+
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
+                                                                 metadata,
+                                                                 Stønadstype.OVERGANGSSTØNAD)
+
+        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(2)
+    }
+
 
     @Test
     fun `har kun svart på første spørsmål som er en sluttnode - allt ok`() {
@@ -119,7 +227,10 @@ internal class OppdaterVilkårTest {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
         val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand, Sivilstandstype.SKILT, barn = barn))
+        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
+                                                                                Sivilstandstype.SKILT,
+                                                                                barn = barn,
+                                                                                søktOmBarnetilsyn = emptyList()))
         val aktuelleDelvilkår = initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }
         assertThat(initDelvilkår).hasSize(5)
         assertThat(initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
@@ -141,7 +252,10 @@ internal class OppdaterVilkårTest {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
         val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand, Sivilstandstype.SKILT, barn = barn))
+        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
+                                                                                Sivilstandstype.SKILT,
+                                                                                barn = barn,
+                                                                                søktOmBarnetilsyn = emptyList()))
 
         val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
                                                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
