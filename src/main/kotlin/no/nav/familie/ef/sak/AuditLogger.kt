@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak
 
+import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServletRequest
 data class Sporingsdata(
         val event: AuditLoggerEvent,
         val personIdent: String,
-        val harTilgang: Boolean,
+        val tilgang: Tilgang,
         val custom1: CustomKeyValue? = null,
         val custom2: CustomKeyValue? = null,
         val custom3: CustomKeyValue? = null
@@ -38,6 +39,8 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val audit = LoggerFactory.getLogger("auditLogger")
+
+    private val regexFlereSpaces = "\\s+".toRegex()
 
     fun log(data: Sporingsdata) {
         val request = getRequest() ?: throw IllegalArgumentException("Ikke brukt i context av en HTTP request")
@@ -65,11 +68,20 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
                "sproc=${getCallId()} " +
                "requestMethod=${request.method} " +
                "request=${request.requestURI} " +
-               "flexString1Label=Decision flexString1=${formatHarTilgang(data)} " +
+               "flexString1Label=Decision flexString1=${formatHarTilgang(data.tilgang)} " +
+               formatDenyPolicy(data.tilgang) +
                createCustomString(data)
     }
 
-    private fun formatHarTilgang(data: Sporingsdata) = if (data.harTilgang) "Permit" else "Deny"
+    private fun formatHarTilgang(tilgang: Tilgang): String = if (tilgang.harTilgang) "Permit" else "Deny"
+
+    private fun formatDenyPolicy(tilgang: Tilgang): String {
+        val begrunnelse = tilgang.begrunnelse
+        return if(!tilgang.harTilgang && begrunnelse != null) {
+            val denyPolicy = begrunnelse.replace(regexFlereSpaces, " ").split(" ").joinToString("_")
+            "flexString2Label=deny_policy flexString2=$denyPolicy "
+        } else ""
+    }
 
     private fun createCustomString(data: Sporingsdata): String {
         return listOfNotNull(data.custom1?.let { "cs3Label=${it.key} cs3=${it.value}" },

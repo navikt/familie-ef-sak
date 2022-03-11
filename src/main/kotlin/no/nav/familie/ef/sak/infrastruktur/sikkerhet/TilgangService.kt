@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
@@ -34,18 +35,18 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
      * Kun ved tilgangskontroll for enskild person, ellers bruk [validerTilgangTilPersonMedBarn]
      */
     fun validerTilgangTilPerson(personIdent: String, event: AuditLoggerEvent) {
-        val harTilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent).harTilgang
-        auditLogger.log(Sporingsdata(event, personIdent, harTilgang))
-        if (!harTilgang) {
+        val tilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent)
+        auditLogger.log(Sporingsdata(event, personIdent, tilgang))
+        if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til $personIdent")
         }
     }
 
     fun validerTilgangTilPersonMedBarn(personIdent: String, event: AuditLoggerEvent) {
-        val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        auditLogger.log(Sporingsdata(event, personIdent, harTilgang))
-        if (!harTilgang) {
+        val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
+        auditLogger.log(Sporingsdata(event, personIdent, tilgang))
+        if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til $personIdent eller dets barn")
         }
@@ -55,10 +56,10 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         val personIdent = cacheManager.getValue("behandlingPersonIdent", behandlingId) {
             behandlingService.hentAktivIdent(behandlingId)
         }
-        val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        auditLogger.log(Sporingsdata(event, personIdent, harTilgang,
+        val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
+        auditLogger.log(Sporingsdata(event, personIdent, tilgang,
                                      custom1 = CustomKeyValue("behandling", behandlingId.toString())))
-        if (!harTilgang) {
+        if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til behandling=$behandlingId")
         }
@@ -68,9 +69,9 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         val personIdent = cacheManager.getValue("fagsakIdent", fagsakId) {
             fagsakService.hentAktivIdent(fagsakId)
         }
-        val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        auditLogger.log(Sporingsdata(event, personIdent, harTilgang, custom1 = CustomKeyValue("fagsak", fagsakId.toString())))
-        if (!harTilgang) {
+        val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
+        auditLogger.log(Sporingsdata(event, personIdent, tilgang, custom1 = CustomKeyValue("fagsak", fagsakId.toString())))
+        if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til fagsak=$fagsakId")
         }
@@ -80,17 +81,17 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         val personIdent = cacheManager.getValue("fagsakPersonIdent", fagsakPersonId) {
             fagsakPersonService.hentAktivIdent(fagsakPersonId)
         }
-        val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        auditLogger.log(Sporingsdata(event, personIdent, harTilgang, custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
-        if (!harTilgang) {
+        val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
+        auditLogger.log(Sporingsdata(event, personIdent, tilgang, custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
+        if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til fagsakPerson=$fagsakPersonId")
         }
     }
 
-    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Boolean {
+    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
         return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
-            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
+            personopplysningerIntegrasjonerClient.sjekkTilgangTilPersonMedRelasjoner(personIdent)
         }
     }
 
@@ -136,7 +137,7 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
      * @param cacheName navnet på cachen
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
-    private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
+    private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Tilgang): Tilgang {
         val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler(true))) {
             hentVerdi()
