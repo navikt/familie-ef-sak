@@ -19,7 +19,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
     @Query("""SELECT b.stonadstype, dato, COUNT(*) AS antall, SUM(aty.belop) AS belop FROM gjeldende_iverksatte_behandlinger b
                 JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
                 JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
-                JOIN GENERATE_SERIES(:fra, :til, '1 month') dato 
+                JOIN GENERATE_SERIES(:fra::date, :til::date, '1 month') dato 
                   ON dato BETWEEN aty.stonad_fom AND aty.stonad_tom
               GROUP BY b.stonadstype, dato""")
     fun finnAntallLøpendeSaker(fra: LocalDate, til: LocalDate): List<LøpendeBehandling>
