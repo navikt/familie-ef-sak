@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -62,8 +62,8 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
         try {
             val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())
             return pakkUtRespons(respons, uri, "fordelOppgave").oppgaveId
-        } catch (e: HttpClientErrorException.BadRequest) {
-            if (e.responseBodyAsString.contains("allerede er ferdigstilt")) {
+        } catch (e: RessursException) {
+            if (e.ressurs.melding.contains("allerede er ferdigstilt")) {
                 throw ApiFeil("Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.", HttpStatus.BAD_REQUEST)
             }
             throw e
