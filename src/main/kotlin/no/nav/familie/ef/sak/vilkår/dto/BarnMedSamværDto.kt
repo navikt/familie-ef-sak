@@ -51,7 +51,7 @@ data class AnnenForelderDto(
 )
 
 data class BarnepassDto(
-        val id: UUID, // TODO: Trenger vi denne?
+        val id: UUID,
         val skalHaBarnepass: Boolean? = null,
         val barnepassordninger: List<BarnepassordningDto> = emptyList(),
         val årsakBarnepass: String? = null,
