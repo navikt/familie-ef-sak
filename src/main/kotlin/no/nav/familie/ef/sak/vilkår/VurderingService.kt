@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -28,7 +29,8 @@ class VurderingService(private val behandlingService: BehandlingService,
                        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
                        private val barnService: BarnService,
                        private val vilkårGrunnlagService: VilkårGrunnlagService,
-                       private val grunnlagsdataService: GrunnlagsdataService) {
+                       private val grunnlagsdataService: GrunnlagsdataService,
+                       private val fagsakService: FagsakService) {
 
     @Transactional
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
@@ -49,9 +51,11 @@ class VurderingService(private val behandlingService: BehandlingService,
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) { "Behandling er låst for videre redigering" }
         feilHvis(vilkårsvurderingRepository.findByBehandlingId(behandling.id).isNotEmpty()) { "Vilkår finnes allerede" }
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
+        val stønadstype = fagsakService.hentFagsakForBehandling(behandling.id).stønadstype
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandling.id,
-                                                                 metadata.copy(erMigrering = true))
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId = behandling.id,
+                                                                 metadata = metadata.copy(erMigrering = true),
+                                                                 stønadstype = stønadstype)
                 .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
         vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
         nyeVilkårsvurderinger.forEach {
@@ -64,9 +68,11 @@ class VurderingService(private val behandlingService: BehandlingService,
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
+        val søktOmBarnetilsyn = grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         val metadata = HovedregelMetadata(sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
                                           sivilstandSøknad = søknad?.sivilstand,
-                                          barn = barn)
+                                          barn = barn,
+                                          søktOmBarnetilsyn = søktOmBarnetilsyn)
         return Pair(grunnlag, metadata)
     }
 
@@ -89,7 +95,10 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun lagreNyeVilkårsvurderinger(behandlingId: UUID,
                                            metadata: HovedregelMetadata): List<Vilkårsvurdering> {
-        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = opprettNyeVilkårsvurderinger(behandlingId, metadata)
+        val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
+        val nyeVilkårsvurderinger: List<Vilkårsvurdering> = opprettNyeVilkårsvurderinger(behandlingId = behandlingId,
+                                                                                         metadata = metadata,
+                                                                                         stønadstype = stønadstype)
         return vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
     }
 
@@ -163,15 +172,16 @@ class VurderingService(private val behandlingService: BehandlingService,
 
     private fun skalKopiereVurdering(it: Vilkårsvurdering,
                                      harNyeBarnForVurdering: Boolean) =
-            if (it.type == VilkårType.ALENEOMSORG && it.barnId == null) {
+            if (it.type.gjelderFlereBarn() && it.barnId == null) {
                 !harNyeBarnForVurdering
             } else {
                 true
             }
 
     fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
+        val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val lagredeVilkårsvurderinger: List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
-        return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger)
+        return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger, stønadstype)
     }
 
     companion object {

@@ -58,10 +58,10 @@ data class Barnepass(@Column("arsak_barnepass")
                      val barnepassordninger: Set<Barnepassordning>?)
 
 @Table("soknad_barnepassordning")
-data class Barnepassordning(val hvaSlagsBarnepassordning: String? = null,
+data class Barnepassordning(val hvaSlagsBarnepassordning: String,
                             val navn: String,
                             @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
-                            val datoperiode: Datoperiode? = null,
+                            val datoperiode: Datoperiode,
                             @Column("belop")
                             val beløp: Int)
 

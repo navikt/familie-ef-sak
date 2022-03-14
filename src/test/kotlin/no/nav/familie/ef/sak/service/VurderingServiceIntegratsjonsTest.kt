@@ -50,7 +50,8 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val metadata = HovedregelMetadata(søknadskjema.sivilstand,
                                           Sivilstandstype.SKILT,
                                           false,
-                                          barnPåRevurdering)
+                                          barnPåRevurdering,
+                                          emptyList())
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
@@ -83,6 +84,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val metadata = HovedregelMetadata(null,
                                           Sivilstandstype.SKILT,
                                           false,
+                                          emptyList(),
                                           emptyList())
         assertThat(catchThrowable {
             vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId,
@@ -96,7 +98,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                                           behandling: Behandling,
                                           barn: List<BehandlingBarn>): List<Vilkårsvurdering> {
         val hovedregelMetadata =
-                HovedregelMetadata(søknadskjema.sivilstand, Sivilstandstype.ENKE_ELLER_ENKEMANN, barn = barn)
+                HovedregelMetadata(søknadskjema.sivilstand, Sivilstandstype.ENKE_ELLER_ENKEMANN, barn = barn, søktOmBarnetilsyn = emptyList())
         val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                                          type = VilkårType.SIVILSTAND,

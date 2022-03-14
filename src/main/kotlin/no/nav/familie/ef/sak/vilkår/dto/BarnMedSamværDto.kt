@@ -58,9 +58,9 @@ data class BarnepassDto(
 )
 
 data class BarnepassordningDto(
-        val type: String?,
+        val type: String,
         val navn: String,
-        val fra: LocalDate?,
-        val til: LocalDate?,
+        val fra: LocalDate,
+        val til: LocalDate,
         val beløp: Int
 )

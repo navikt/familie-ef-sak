@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -60,6 +61,7 @@ internal class JournalføringServiceTest {
     private val taskRepository = mockk<TaskRepository>()
     private val barnService = mockk<BarnService>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
     private val journalføringService =
             JournalføringService(
@@ -73,6 +75,7 @@ internal class JournalføringServiceTest {
                     oppgaveService = oppgaveService,
                     taskRepository = taskRepository,
                     barnService = barnService,
+                    featureToggleService = featureToggleService
             )
 
     private val fagsakId: UUID = UUID.randomUUID()
@@ -114,7 +117,7 @@ internal class JournalføringServiceTest {
 
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
 
-        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any()) } just Runs
+        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any()) } just Runs
 
         every { behandlingService.hentBehandling(behandlingId) }
                 .returns(Behandling(id = behandlingId,
@@ -262,4 +265,6 @@ internal class JournalføringServiceTest {
                                                                                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
         }
     }
+
+    // Test barnetilsyn!!!
 }

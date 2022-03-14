@@ -9,6 +9,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
@@ -337,7 +339,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurderinger(behandlingId: UUID,
                                       resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
                                       ikkeLag: Int = 0) {
-        val vilkårsvurderinger = VilkårType.hentVilkår().map {
+        val vilkårsvurderinger = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(behandlingId = behandlingId,
                              resultat = resultat,
                              type = it,
