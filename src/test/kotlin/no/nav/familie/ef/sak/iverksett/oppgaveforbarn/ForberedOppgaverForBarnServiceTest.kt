@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
