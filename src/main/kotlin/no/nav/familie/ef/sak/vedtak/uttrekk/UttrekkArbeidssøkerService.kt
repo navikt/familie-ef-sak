@@ -34,7 +34,6 @@ class UttrekkArbeidssøkerService(
     fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()) {
         val uttrekk = hentArbeidssøkereForUttrekk(årMåned)
         val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
-        val registertSomArbeidssøkerPåFagsak = hentRegistertSomArbeidssøker(aktiveIdenter, årMåned)
 
         var feilede = 0
         uttrekk.forEach {
@@ -42,14 +41,15 @@ class UttrekkArbeidssøkerService(
                 return@forEach
             }
             try {
-                val registertSomArbeidssøker = registertSomArbeidssøkerPåFagsak[it.fagsakId]
-                                               ?: error("Finner ikke status om registert arbeidssøker for fagsak=${it.fagsakId}")
+                val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(aktiveIdenter[it.fagsakId]
+                                                                            ?: error("Kunne ikke finne fagsak for aktive identer. Dette skal ikke skje."),
+                                                                            årMåned)
                 uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
                                                                           vedtakId = it.behandlingIdForVedtak,
                                                                           årMåned = årMåned,
-                                                                          registrertArbeidssøker = registertSomArbeidssøker))
+                                                                          registrertArbeidssøker = registrertSomArbeidssøker))
             } catch (ex: Exception) {
-                logger.error(ex.message)
+                logger.error(ex.message, ex)
                 ++feilede
             }
         }
@@ -93,14 +93,12 @@ class UttrekkArbeidssøkerService(
         )
     }
 
-    private fun hentRegistertSomArbeidssøker(aktiveIdenter: Map<UUID, String>, årMåned: YearMonth): Map<UUID, Boolean> {
+    fun erRegistrertSomArbeidssøker(personIdent: String, årMåned: YearMonth): Boolean {
         val sisteIMåneden = årMåned.atEndOfMonth()
-        return aktiveIdenter.entries.associate { entry ->
-            val perioder = arbeidssøkerClient.hentPerioder(entry.value, sisteIMåneden, sisteIMåneden).perioder
-            val arbeidssøkerISluttetPåMåneden =
-                    perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
-            entry.key to arbeidssøkerISluttetPåMåneden
-        }
+        val perioder = arbeidssøkerClient.hentPerioder(personIdent,
+                                                       sisteIMåneden,
+                                                       sisteIMåneden).perioder
+        return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
     }
 
     /**
