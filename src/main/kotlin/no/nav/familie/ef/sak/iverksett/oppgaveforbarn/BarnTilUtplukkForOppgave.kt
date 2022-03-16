@@ -14,10 +14,12 @@ data class BarnTilUtplukkForOppgave(@Id
                                     val termindatoBarn: LocalDate?,
                                     val fraMigrering: Boolean)
 
+// TODO flytt til kontrakter
 data class OppgaveForBarn(val behandlingId: UUID,
                           val eksternFagsakId: Long,
                           val personIdent: String,
                           val stønadType: String,
-                          val beskrivelse: String)
+                          val beskrivelse: String,
+                          val aktivFra: LocalDate? = null)
 
 data class OppgaverForBarnDto(val oppgaverForBarn: List<OppgaveForBarn>)

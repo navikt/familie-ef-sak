@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,14 +20,22 @@ import java.util.UUID
 class NyeBarnService(private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val personService: PersonService,
-                     private val barnService: BarnService) {
+                     private val barnService: BarnService,
+                     private val taskRepository: TaskRepository) {
 
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
-        return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
+        val finnNyeBarnSidenGjeldendeBehandlingForFagsak = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
+        return finnNyeBarnSidenGjeldendeBehandlingForFagsak.map { it.personIdent }
+    }
+
+    fun skalOppretteOppgaveForNyttBarn(fagsak: Fagsak, nyeBarn: Set<BarnMinimumDto>) {
+        if (fagsak.migrert) {
+            nyeBarn.forEach { }
+        }
     }
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
@@ -33,12 +43,12 @@ class NyeBarnService(private val behandlingService: BehandlingService,
                          ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return finnNyeBarnSidenGjeldendeBehandling(behandling.id, aktivIdent)
-
     }
 
     private fun finnNyeBarnSidenGjeldendeBehandling(forrigeBehandlingId: UUID, personIdent: String): List<BarnMinimumDto> {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
-        val allePdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn).filter { it.fødsel.gjeldende().erUnder18År() }
+        val allePdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
+                .filter { it.fødsel.gjeldende().erUnder18År() }
         val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, allePdlBarn)
 
         return allePdlBarn

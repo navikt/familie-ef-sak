@@ -20,6 +20,7 @@ import java.util.UUID
 class BarnController(val nyeBarnService: NyeBarnService) {
 
     @PostMapping("nye-barn")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // for å unngå att vi oppretter oppgaver for nye barn for andre enna
     fun finnNyeBarnSidenGjeldendeBehandlingForPerson(@RequestBody personIdent: PersonIdent): Ressurs<List<String>> {
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent))
     }
