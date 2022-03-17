@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtBarnTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
@@ -13,6 +14,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -23,18 +27,28 @@ class NyeBarnService(private val behandlingService: BehandlingService,
                      private val barnService: BarnService,
                      private val taskRepository: TaskRepository) {
 
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
+
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
         val finnNyeBarnSidenGjeldendeBehandlingForFagsak = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
+
+        opprettOppfølgningsoppgaveForBarn(fagsak, finnNyeBarnSidenGjeldendeBehandlingForFagsak)
+
         return finnNyeBarnSidenGjeldendeBehandlingForFagsak.map { it.personIdent }
     }
 
-    fun skalOppretteOppgaveForNyttBarn(fagsak: Fagsak, nyeBarn: Set<BarnMinimumDto>) {
+    // TODO slett 4 måneder etter att siste migreringen er klar
+    private fun opprettOppfølgningsoppgaveForBarn(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>) {
         if (fagsak.migrert) {
-            nyeBarn.forEach { }
+            try {
+                taskRepository.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
+            } catch (e: DuplicateKeyException) {
+                logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
+            }
         }
     }
 

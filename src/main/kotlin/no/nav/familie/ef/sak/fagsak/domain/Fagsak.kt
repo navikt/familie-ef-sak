@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.fagsak.domain
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.kontrakter.ef.felles.StønadType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -57,8 +58,8 @@ fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
                 sporbar = sporbar
         )
 
-enum class Stønadstype {
-    OVERGANGSSTØNAD,
-    BARNETILSYN,
-    SKOLEPENGER
+enum class Stønadstype(val kontraktType: StønadType) {
+    OVERGANGSSTØNAD(StønadType.OVERGANGSSTØNAD),
+    BARNETILSYN(StønadType.BARNETILSYN),
+    SKOLEPENGER(StønadType.SKOLEPENGER)
 }

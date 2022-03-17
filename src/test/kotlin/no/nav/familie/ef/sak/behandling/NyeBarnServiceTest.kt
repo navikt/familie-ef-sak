@@ -35,7 +35,7 @@ class NyeBarnServiceTest {
     val personService = mockk<PersonService>()
     val barnService = mockk<BarnService>()
     val pdlSøker = mockk<PdlSøker>(relaxed = true)
-    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService)
+    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, mockk())
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
     val fagsak = mockk<Fagsak>()
