@@ -41,9 +41,9 @@ class UttrekkArbeidssøkerService(
                 return@forEach
             }
             try {
-                val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(aktiveIdenter[it.fagsakId]
-                                                                            ?: error("Kunne ikke finne fagsak for aktive identer. Dette skal ikke skje."),
-                                                                            årMåned)
+                val personIdent = (aktiveIdenter[it.fagsakId]
+                                   ?: error("Kunne ikke finne fagsak for aktive identer. Dette skal ikke skje."))
+                val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(personIdent, årMåned)
                 uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
                                                                           vedtakId = it.behandlingIdForVedtak,
                                                                           årMåned = årMåned,
