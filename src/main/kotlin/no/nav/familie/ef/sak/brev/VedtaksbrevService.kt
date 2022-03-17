@@ -136,14 +136,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     private fun lagBeslutterPdfMedSignatur(besluttervedtaksbrev: Vedtaksbrev,
                                            signaturMedEnhet: SignaturDto) =
-            when (besluttervedtaksbrev.saksbehandlerHtml != null) {
+            when (besluttervedtaksbrev.saksbehandlerHtml != null) { // TODO: saksbehandlerHtml skal kanskje bli ikke-nullable.
                 true -> {
                     val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(html = besluttervedtaksbrev.saksbehandlerHtml,
                                                                                  beslutterSignatur = besluttervedtaksbrev.besluttersignatur)
                     Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
 
                 }
-                false ->
+                false -> // TODO: Denne branchen kan fjernes når gamle brev er besluttet
                     Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter)))
             }
 
