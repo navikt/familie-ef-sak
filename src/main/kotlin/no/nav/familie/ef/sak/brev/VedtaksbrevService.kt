@@ -67,10 +67,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                        saksbehandlersignatur.enhet,
                                                        html)
 
-
-            val pdf = familieDokumentClient.genererPdfFraHtml(html)
-
-            return pdf
+            return familieDokumentClient.genererPdfFraHtml(html)
 
         }
 
