@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -26,13 +27,13 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
-        val ident = fagsakService.hentAktivIdent(frittståendeBrevDto.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(frittståendeBrevDto.fagsakId)
+        val ident = fagsak.hentAktivIdent()
         val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
-        val eksternFagsakId = fagsakService.hentEksternId(frittståendeBrevDto.fagsakId)
-        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(
-            ident)
+        val eksternFagsakId = fagsak.eksternId.id
+        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        val stønadstype = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId).stønadstype
+        val stønadstype = fagsak.stønadstype
         val brevType = utledFrittståendeBrevType(frittståendeBrevDto, stønadstype)
         iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
                                                                              eksternFagsakId = eksternFagsakId,
@@ -50,15 +51,15 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
                                           navn = navn.getValue(ident))
     }
 
-    private fun lagFrittståendeBrevMedSignatur(
-        frittståendeBrevDto: FrittståendeBrevDto
-    ): ByteArray {
+    private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         val fagsak = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId)
-        val aktivIdent = fagsak.hentAktivIdent()
-        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, aktivIdent)
+        return lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
+    }
+
+    private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto, fagsak: Fagsak): ByteArray {
+        val request = lagFrittståendeBrevRequest(frittståendeBrevDto, fagsak.hentAktivIdent())
         val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
-        val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
-        return brev
+        return brevClient.genererBrev(request, signatur.navn, signatur.enhet)
     }
 
 

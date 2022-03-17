@@ -132,19 +132,19 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
 
-fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
-        behandlingId = behandlingId,
-        personident = personIdent,
-        vedtakstidspunkt = LocalDateTime.now(),
-        andelerTilkjentYtelse = listOf(
-                AndelTilkjentYtelse(beløp = 9500,
-                                    stønadFom = LocalDate.of(2021, 1, 1),
-                                    stønadTom = LocalDate.of(2021, 12, 31),
-                                    personIdent = personIdent,
-                                    inntektsreduksjon = 0,
-                                    inntekt = 0,
-                                    samordningsfradrag = 0,
-                                    kildeBehandlingId = behandlingId)))
+fun tilkjentYtelse(behandlingId: UUID, personIdent: String, stønadsår: Int = 2021): TilkjentYtelse =
+        TilkjentYtelse(behandlingId = behandlingId,
+                       personident = personIdent,
+                       vedtakstidspunkt = LocalDateTime.now(),
+                       andelerTilkjentYtelse = listOf(
+                               AndelTilkjentYtelse(beløp = 9500,
+                                                   stønadFom = LocalDate.of(stønadsår, 1, 1),
+                                                   stønadTom = LocalDate.of(stønadsår, 12, 31),
+                                                   personIdent = personIdent,
+                                                   inntektsreduksjon = 0,
+                                                   inntekt = 0,
+                                                   samordningsfradrag = 0,
+                                                   kildeBehandlingId = behandlingId)))
 
 fun vedtak(behandlingId: UUID,
            resultatType: ResultatType = ResultatType.INNVILGE,

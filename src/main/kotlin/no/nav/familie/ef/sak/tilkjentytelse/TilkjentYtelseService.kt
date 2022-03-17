@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -17,7 +18,8 @@ import java.util.UUID
 @Service
 class TilkjentYtelseService(private val behandlingService: BehandlingService,
                             private val vedtakService: VedtakService,
-                            private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
+                            private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+                            private val fagsakService: FagsakService) {
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
@@ -38,21 +40,23 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
 
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
 
-
-        val eksterneIder = behandlingService.hentEksterneIder(tilkjentYtelser.map { it.behandlingId }.toSet())
-                .associateBy { it.behandlingId }
+        val behandlinger = behandlingService.hentBehandlinger(tilkjentYtelser.map { it.behandlingId }.toSet())
+                .associateBy { it.id }
 
         return tilkjentYtelser.map { tilkjentYtelse ->
-            val eksternId = eksterneIder[tilkjentYtelse.behandlingId]
-                            ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
+            val behandling = behandlinger[tilkjentYtelse.behandlingId]
+                             ?: error("Finner ikke eksterne id'er til behandling=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
                     .filter { it.stønadTom.isEqualOrAfter(datoForAvstemming) }
                     .filter { it.beløp > 0 }
                     .map { it.tilIverksettDto() }
+
+            val fagsakMedOppdatertPersonIdent = fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
+
             KonsistensavstemmingTilkjentYtelseDto(behandlingId = tilkjentYtelse.behandlingId,
-                                                  eksternBehandlingId = eksternId.eksternBehandlingId,
-                                                  eksternFagsakId = eksternId.eksternFagsakId,
-                                                  personIdent = tilkjentYtelse.personident,
+                                                  eksternBehandlingId = behandling.eksternId.id,
+                                                  eksternFagsakId = fagsakMedOppdatertPersonIdent.eksternId.id,
+                                                  personIdent = fagsakMedOppdatertPersonIdent.hentAktivIdent(),
                                                   andelerTilkjentYtelse = andelerTilkjentYtelse)
         }
     }

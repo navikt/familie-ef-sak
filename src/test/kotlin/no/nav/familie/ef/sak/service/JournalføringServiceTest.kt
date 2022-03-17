@@ -78,8 +78,9 @@ internal class JournalføringServiceTest {
                     featureToggleService = featureToggleService
             )
 
-    private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
+    private val fagsak = fagsak(eksternId = EksternFagsakId(fagsakEksternId))
+    private val fagsakId: UUID = fagsak.id
     private val journalpostId = "98765"
     private val nyOppgaveId = 999999L
     private val behandlingId: UUID = UUID.randomUUID()
@@ -116,6 +117,7 @@ internal class JournalføringServiceTest {
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost)
 
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
+        every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
         every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any()) } just Runs
 

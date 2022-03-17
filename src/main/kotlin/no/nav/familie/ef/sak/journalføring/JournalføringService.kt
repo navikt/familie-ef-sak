@@ -96,7 +96,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         knyttJournalpostTilBehandling(journalpost, behandling)
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
@@ -117,7 +117,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
                                                                  fagsakId = journalføringRequest.fagsakId,
                                                                  journalpost = journalpost)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
             ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
@@ -149,13 +149,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     private fun opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype: BehandlingType,
                                                         fagsakId: UUID,
                                                         journalpost: Journalpost): Behandling {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         feilHvis(fagsak.stønadstype == Stønadstype.BARNETILSYN && !featureToggleService.isEnabled("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning")) {
             "Journalføring av barnetilsyn er ikke skrudd på"
         }
 
         val behandling = opprettBehandlingMedBehandlingstype(behandlingstype, fagsakId)
-
         iverksettService.startBehandling(behandling, fagsak)
         settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)

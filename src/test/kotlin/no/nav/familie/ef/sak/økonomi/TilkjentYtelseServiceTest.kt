@@ -3,7 +3,8 @@ package no.nav.familie.ef.sak.økonomi
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.dto.EksternId
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -18,10 +19,14 @@ class TilkjentYtelseServiceTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val behandlingService = mockk<BehandlingService>()
+    private val fagsakService = mockk<FagsakService>()
+    private val tilkjentYtelseService = TilkjentYtelseService(behandlingService,
+                                                              mockk(),
+                                                              tilkjentYtelseRepository,
+                                                              fagsakService)
 
-    private val tilkjentYtelseService = TilkjentYtelseService(behandlingService = behandlingService,
-                                                              vedtakService = mockk(),
-                                                              tilkjentYtelseRepository = tilkjentYtelseRepository)
+    private val fagsak = fagsak(setOf(PersonIdent("321")))
+    private val behandling = behandling(fagsak = fagsak)
 
     private val datoForAvstemming = LocalDate.of(2021, 2, 1)
     private val stønadstype = Stønadstype.OVERGANGSSTØNAD
@@ -36,10 +41,11 @@ class TilkjentYtelseServiceTest {
         val andelerTilkjentYtelse = listOf(andel2.copy(beløp = 0), andel3)
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
 
-        every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
+        every { behandlingService.hentBehandlinger(setOf(behandling.id)) } returns listOf(behandling)
         every {
             tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, any())
         } returns listOf(tilkjentYtelse)
+        every { fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId) } returns fagsak
 
         val tilkjentYtelser = tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
         assertThat(tilkjentYtelser).hasSize(1)
@@ -52,10 +58,11 @@ class TilkjentYtelseServiceTest {
         val andelerTilkjentYtelse = listOf(andel1, andel2, andel3, andel4)
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
 
-        every { behandlingService.hentEksterneIder(setOf(behandling.id)) } returns setOf(EksternId(behandling.id, 1, 1))
+        every { behandlingService.hentBehandlinger(setOf(behandling.id)) } returns listOf(behandling)
         every {
             tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, any())
         } returns listOf(tilkjentYtelse)
+        every { fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId) } returns fagsak
 
         val tilkjentYtelser = tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
         assertThat(tilkjentYtelser).hasSize(1)
@@ -104,9 +111,4 @@ class TilkjentYtelseServiceTest {
         assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
     }
 
-    companion object {
-
-        val fagsak = fagsak()
-        val behandling = behandling(fagsak = fagsak)
-    }
 }

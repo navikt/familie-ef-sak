@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -11,19 +12,44 @@ import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
+    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
+
+    @Test
+    fun `harLøpendeUtbetaling returnerer true for fagsak med ferdigstilt behandling med aktiv utbetaling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
+
+        val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+
+        assertThat(harLøpendeUtbetaling).isTrue()
+    }
+
+    @Test
+    fun `harLøpendeUtbetaling returnerer false for fagsak med ferdigstilt behandling med inaktiv utbetaling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
+
+        val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+
+        assertThat(harLøpendeUtbetaling).isFalse()
+    }
 
     @Test
     internal fun `skal ikke være mulig med flere stønader av samme typen for samme person`() {
