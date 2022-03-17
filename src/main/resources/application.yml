@@ -171,6 +171,7 @@ AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_BLANKETT_API_URL: http://familie-ef-blankett
 FAMILIE_EF_IVERKSETT_URL: http://familie-ef-iverksett
+FAMILIE_DOKUMENT_URL: http://familie-dokument
 
 
 FAMILIE_TILBAKE_URL: http://familie-tilbake
