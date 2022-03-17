@@ -4,7 +4,9 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
+import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -12,6 +14,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -25,29 +29,42 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
-        return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
+        return finnNyeBarnForFagsak(fagsak.id).map { it.personIdent }
     }
 
-    fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
+    fun finnNyeBarnForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
+        val kobledeBarn = finnKobledeBarnForFagsak(fagsakId)
+        return filtrerNyeBarn(kobledeBarn)
+    }
+
+    private fun finnKobledeBarnForFagsak(fagsakId: UUID): NyeBarnData {
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
                          ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
-        return finnNyeBarnSidenGjeldendeBehandling(behandling.id, aktivIdent)
-
+        return finnKobledeBarn(behandling.id, aktivIdent)
     }
 
-    private fun finnNyeBarnSidenGjeldendeBehandling(forrigeBehandlingId: UUID, personIdent: String): List<BarnMinimumDto> {
+    private fun finnKobledeBarn(forrigeBehandlingId: UUID, personIdent: String): NyeBarnData {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
-        val allePdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn).filter { it.fødsel.gjeldende().erUnder18År() }
-        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, allePdlBarn)
+        val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
+                .filter { it.fødsel.gjeldende().erUnder18År() }
+        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarnUnder18år)
 
-        return allePdlBarn
-                .filter { pdlBarn -> kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
-                .map {
-                    BarnMinimumDto(personIdent = it.personIdent,
-                                   navn = it.navn.visningsnavn(),
-                                   fødselsdato = it.fødsel.gjeldende().fødselsdato)
-                }
+        return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
     }
+
+    private data class NyeBarnData(val pdlBarnUnder18år: List<BarnMedIdent>,
+                                   val kobledeBarn: List<MatchetBehandlingBarn>)
+
+    private fun filtrerNyeBarn(data: NyeBarnData) =
+            data.pdlBarnUnder18år
+                    .filter { pdlBarn -> data.kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
+                    .map { barnMinimumDto(it) }
+
+    private fun barnMinimumDto(it: BarnMedIdent) =
+            BarnMinimumDto(personIdent = it.personIdent,
+                           navn = it.navn.visningsnavn(),
+                           fødselsdato = it.fødsel.gjeldende().fødselsdato)
+
 
 }
