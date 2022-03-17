@@ -19,9 +19,17 @@ import java.util.UUID
 @Validated
 class BarnController(val nyeBarnService: NyeBarnService) {
 
+    @Deprecated("nye-eller-tidligere-fodte-barn")
     @PostMapping("nye-barn")
     fun finnNyeBarnSidenGjeldendeBehandlingForPerson(@RequestBody personIdent: PersonIdent): Ressurs<List<String>> {
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent))
+    }
+
+    @PostMapping("nye-eller-tidligere-fodte-barn")
+    // for å unngå att vi oppretter oppgaver for nye barn så sjekkes roles
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun finnNyeEllerTidligereFødteBarn(@RequestBody personIdent: PersonIdent): Ressurs<NyeBarnDto> {
+        return Ressurs.success(nyeBarnService.finnNyeEllerTidligereFødteBarn(personIdent))
     }
 
     @GetMapping("fagsak/{fagsakId}/nye-barn")

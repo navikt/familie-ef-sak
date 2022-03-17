@@ -18,21 +18,41 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
+data class NyeBarnDto(val nyeBarn: List<NyttBarn>)
+data class NyttBarn(val personIdent: String, val årsak: NyttBarnÅrsak)
+enum class NyttBarnÅrsak {
+    BARN_FINNES_IKKE_PÅ_BEHANDLING,
+    FØDT_FØR_TERMIN
+}
+
 @Service
 class NyeBarnService(private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val personService: PersonService,
                      private val barnService: BarnService) {
 
+    @Deprecated("bruk finnNyeEllerTidligereFødteBarn")
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
-        return finnNyeBarnForFagsak(fagsak.id).map { it.personIdent }
+        return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
     }
 
-    fun finnNyeBarnForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
+    fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
+        val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
+        val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
+                     ?: error("Kunne ikke finne fagsak for personident")
+        val kobledeBarn = finnKobledeBarnForFagsak(fagsak.id)
+
+        val nyeBarn = filtrerNyeBarn(kobledeBarn)
+        val nyeBarnDto = nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) }
+        val forTidligtFødteBarn = finnForTidligtFødteBarn(kobledeBarn, nyeBarn)
+        return NyeBarnDto(nyeBarnDto + forTidligtFødteBarn)
+    }
+
+    fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
         val kobledeBarn = finnKobledeBarnForFagsak(fagsakId)
         return filtrerNyeBarn(kobledeBarn)
     }
@@ -51,6 +71,30 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarnUnder18år)
 
         return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
+    }
+
+    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData,
+                                        nyeBarn: List<BarnMinimumDto>): List<NyttBarn> {
+        val nyeBarnIdenter = nyeBarn.map { it.personIdent }.toSet()
+        return kobledeBarn.kobledeBarn
+                .filter { barnFødtFørTermin(it, nyeBarnIdenter) }
+                .map {
+                    val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
+                    NyttBarn(barn.personIdent, NyttBarnÅrsak.FØDT_FØR_TERMIN)
+                }
+    }
+
+    private fun barnFødtFørTermin(barn: MatchetBehandlingBarn, nyeBarnIdenter: Set<String>): Boolean {
+        val pdlBarn = barn.barn
+        val behandlingBarn = barn.behandlingBarn
+        if (pdlBarn == null || behandlingBarn.fødselTermindato == null || nyeBarnIdenter.contains(pdlBarn.personIdent)) {
+            return false
+        }
+        val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
+        if (fødselsdato !in LocalDate.now().minusMonths(1)..LocalDate.now().plusMonths(1)) {
+            return false
+        }
+        return YearMonth.from(fødselsdato) < YearMonth.from(behandlingBarn.fødselTermindato)
     }
 
     private data class NyeBarnData(val pdlBarnUnder18år: List<BarnMedIdent>,
