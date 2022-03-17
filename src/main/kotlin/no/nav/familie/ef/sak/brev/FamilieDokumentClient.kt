@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
-import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -13,7 +13,7 @@ import java.net.URI
 class FamilieDokumentClient(@Value("\${FAMILIE_DOKUMENT_URL}")
                             private val familieDokumentUrl: String,
                             @Qualifier("utenAuth")
-                            private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations,
+                            private val restOperations: RestOperations) : AbstractRestClient(restOperations,
                                                                                                      "familie.dokument") {
 
     fun genererPdfFraHtml(html: String): ByteArray {
@@ -26,14 +26,6 @@ class FamilieDokumentClient(@Value("\${FAMILIE_DOKUMENT_URL}")
                                  this.contentType = MediaType.TEXT_HTML
                                  this.accept = listOf(MediaType.APPLICATION_PDF)
                              })
-    }
-
-
-
-    override val pingUri: URI = URI.create("$familieDokumentUrl/api/status")
-
-    override fun ping() {
-        operations.optionsForAllow(pingUri)
     }
 
     companion object {
