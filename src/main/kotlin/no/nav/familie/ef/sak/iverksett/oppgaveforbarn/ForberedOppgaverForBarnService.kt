@@ -3,6 +3,9 @@ package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
+import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -43,7 +46,7 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
                            utplukketBarn.first.fødselsnummerSøker,
-                           Stønadstype.OVERGANGSSTØNAD.name,
+                           StønadType.OVERGANGSSTØNAD,
                            beskrivelse)
         }
     }
