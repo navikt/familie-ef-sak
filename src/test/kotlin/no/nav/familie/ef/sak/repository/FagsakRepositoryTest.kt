@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
@@ -32,7 +33,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `harLøpendeUtbetaling returnerer true for fagsak med ferdigstilt behandling med aktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
 
         val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
@@ -43,7 +46,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `harLøpendeUtbetaling returnerer false for fagsak med ferdigstilt behandling med inaktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
 
         val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)

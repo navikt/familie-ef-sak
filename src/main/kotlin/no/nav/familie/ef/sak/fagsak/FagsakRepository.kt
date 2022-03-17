@@ -65,17 +65,14 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
     fun finnAktivIdenter(ider: Set<UUID>): List<Pair<UUID, String>>
 
     // language=PostgreSQL
-    @Query("""SELECT COUNT(*) FROM (select * from fagsak f 
-              JOIN behandling b ON f.id = b.fagsak_id
-              JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
-              JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
-              AND aty.stonad_tom > CURRENT_DATE
-              WHERE f.id = :fagsakId 
-              AND b.type <> 'BLANKETT'
-              AND b.resultat NOT IN ('HENLAGT', 'AVSLÅTT')
-              AND b.status = 'FERDIGSTILT'
-              ORDER BY b.opprettet_tid DESC 
-              LIMIT 1) as aktivUtbetaling""")
+    @Query("""SELECT count(*) FROM gjeldende_iverksatte_behandlinger b 
+              JOIN tilkjent_ytelse ty
+              ON b.id = ty.behandling_id
+              JOIN andel_tilkjent_ytelse aty 
+              ON ty.id = aty.tilkjent_ytelse 
+              AND aty.stonad_tom >= CURRENT_DATE 
+              WHERE b.fagsak_id = :fagsakId
+              LIMIT 1""")
     fun harLøpendeUtbetaling(fagsakId: UUID): Boolean
 
 }
