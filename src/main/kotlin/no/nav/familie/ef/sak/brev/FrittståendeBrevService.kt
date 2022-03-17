@@ -58,7 +58,7 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
 
     private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto, fagsak: Fagsak): ByteArray {
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto, fagsak.hentAktivIdent())
-        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(frittståendeBrevDto.fagsakId)
         return brevClient.genererBrev(request, signatur.navn, signatur.enhet)
     }
 
