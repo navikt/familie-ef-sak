@@ -29,14 +29,12 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(frittståendeBrevDto.fagsakId)
         val ident = fagsak.hentAktivIdent()
-        val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
-        val eksternFagsakId = fagsak.eksternId.id
+        val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        val stønadstype = fagsak.stønadstype
-        val brevType = utledFrittståendeBrevType(frittståendeBrevDto, stønadstype)
+        val brevType = utledFrittståendeBrevType(frittståendeBrevDto, fagsak.stønadstype)
         iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
-                                                                             eksternFagsakId = eksternFagsakId,
+                                                                             eksternFagsakId = fagsak.eksternId.id,
                                                                              brevtype = brevType,
                                                                              fil = brev,
                                                                              journalførendeEnhet = journalførendeEnhet,
