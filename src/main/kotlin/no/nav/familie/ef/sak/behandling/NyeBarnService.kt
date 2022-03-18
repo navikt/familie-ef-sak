@@ -14,16 +14,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-
-data class NyeBarnDto(val nyeBarn: List<NyttBarn>)
-data class NyttBarn(val personIdent: String, val årsak: NyttBarnÅrsak)
-enum class NyttBarnÅrsak {
-    BARN_FINNES_IKKE_PÅ_BEHANDLING,
-    FØDT_FØR_TERMIN
-}
 
 @Service
 class NyeBarnService(private val behandlingService: BehandlingService,
