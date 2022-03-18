@@ -19,13 +19,19 @@ object AdresseHjelper {
             return false
         }
 
-        val gjeldendeBostedsadresseForelder = bostedsadresserForelder.gjeldende()
+        return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
+               || sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
+    }
 
-        return barn.bostedsadresse.gjeldende()?.let { adresseBarn ->
-            return (adresseBarn.matrikkelId()?.let { matrikkelId ->
-                return matrikkelId == gjeldendeBostedsadresseForelder?.matrikkelId()
-            } ?: adresseBarn.vegadresse) != null && adresseBarn.vegadresse == gjeldendeBostedsadresseForelder?.vegadresse
-        } ?: false
+    private fun sammeMatrikkeladresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
+        return bostedsadresseBarn?.matrikkelId != null && bostedsadresseForelder?.matrikkelId != null
+               && bostedsadresseBarn.matrikkelId == bostedsadresseForelder.matrikkelId
+               && bostedsadresseBarn.bruksenhetsnummer == bostedsadresseForelder.bruksenhetsnummer
+    }
+
+    private fun sammeVegadresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
+        return bostedsadresseBarn?.vegadresse != null && bostedsadresseForelder?.vegadresse != null
+               && bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
     }
 
     private fun harDeltBosted(barn: BarnMedIdent): Boolean {
