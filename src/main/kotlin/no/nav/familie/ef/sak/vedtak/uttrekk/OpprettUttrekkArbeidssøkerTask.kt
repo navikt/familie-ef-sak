@@ -49,7 +49,7 @@ class OpprettUttrekkArbeidssøkerTask(
             }
         }
         if (feilede > 0) {
-            error("Kunne ikke opprette ${feilede} av ${uttrekk.size} uttrekk")
+            error("Kunne ikke opprette $feilede av ${uttrekk.size} uttrekk")
         }
     }
 
