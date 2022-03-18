@@ -56,7 +56,7 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         val fagsak = fagsakService.hentFagsak(frittståendeBrevDto.fagsakId)
         val aktivIdent = fagsak.hentAktivIdent()
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto, aktivIdent)
-        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(frittståendeBrevDto.fagsakId)
         val brev = brevClient.genererBrev(request, signatur.navn, signatur.enhet)
         return brev
     }

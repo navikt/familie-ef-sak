@@ -73,6 +73,7 @@ spec:
         - application: familie-brev
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
+        - application: familie-dokument
         - application: familie-ef-proxy
           cluster: dev-fss
       external:

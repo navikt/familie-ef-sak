@@ -1,0 +1,1 @@
+ALTER TABLE vedtaksbrev ADD COLUMN saksbehandler_html VARCHAR;
