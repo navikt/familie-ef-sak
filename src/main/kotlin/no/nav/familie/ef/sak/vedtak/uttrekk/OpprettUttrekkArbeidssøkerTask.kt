@@ -42,7 +42,9 @@ class OpprettUttrekkArbeidssøkerTask(
                                                                        personIdent = aktiveIdenter[it.fagsakId]
                                                                                      ?: error("Kunne ikke finne fagsakID"))
             } catch (ex: Exception) {
-                logger.error(ex.message, ex)
+                val errorMelding = "Sjekk av utrekkArbeidssøker feiler fagsak=$it.fagsakId behandling=$it.behandlingId"
+                logger.error(errorMelding)
+                secureLogger.error("$errorMelding - ${ex.message}", ex)
                 ++feilede
             }
         }
