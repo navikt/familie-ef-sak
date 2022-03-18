@@ -2,6 +2,9 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
@@ -19,6 +22,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +33,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val fagsakPersonService: FagsakPersonService,
                     private val behandlingService: BehandlingService,
                     private val pdlClient: PdlClient,
+                    private val tilkjentYtelseService: TilkjentYtelseService,
                     private val featureToggleService: FeatureToggleService,
                     private val infotrygdService: InfotrygdService) {
 
@@ -82,7 +87,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
-        val erLøpende = erLøpende(fagsak)
+        val erLøpende = erLøpende(behandlinger)
         return fagsak.tilDto(behandlinger = behandlinger.map{ it.tilDto(fagsak.stønadstype)}, erLøpende = erLøpende)
     }
 
@@ -97,8 +102,14 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
         )
     }
 
-    fun erLøpende(fagsak: Fagsak): Boolean {
-        return fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+    fun erLøpende(behandlinger: List<Behandling>): Boolean {
+        return behandlinger.filter {
+            it.type != BehandlingType.BLANKETT &&
+            it.resultat !== BehandlingResultat.HENLAGT &&
+            it.resultat !== BehandlingResultat.AVSLÅTT &&
+            it.status == BehandlingStatus.FERDIGSTILT
+        }.maxByOrNull { it.sporbar.opprettetTid }
+                       ?.let { tilkjentYtelseService.harLøpendeUtbetaling(it.id) } ?: false
     }
 
     fun hentFagsak(fagsakId: UUID): Fagsak = fagsakRepository.findByIdOrThrow(fagsakId).tilFagsakMedPerson()
