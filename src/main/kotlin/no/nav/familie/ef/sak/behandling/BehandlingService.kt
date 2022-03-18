@@ -152,6 +152,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
+    fun harFørstegangsbehandlingEllerRevurderingFraFør(fagsakId: UUID) =
+            behandlingRepository.existsByFagsakIdAndTypeIn(fagsakId, setOf(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                           BehandlingType.REVURDERING))
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
         return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }

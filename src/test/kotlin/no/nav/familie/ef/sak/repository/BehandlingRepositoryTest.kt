@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -303,6 +304,37 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
                 behandling.id)
+    }
+
+    @Nested
+    inner class ExistsByFagsakIdAndTypeIn {
+
+        @Test
+        internal fun `existsByFagsakIdAndTypeIn - finner ikke når det ikke finnes noen behandlinger`() {
+            assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
+                                                                      setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
+        @Test
+        internal fun `existsByFagsakIdAndTypeIn - finner ikke når det kun finnes av annen type`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = FERDIGSTILT,
+                                                   type = BehandlingType.BLANKETT))
+            assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
+                                                                      setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
+        @Test
+        internal fun `existsByFagsakIdAndTypeIn - true når det av typen man spør etter`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = FERDIGSTILT,
+                                                   type = BehandlingType.REVURDERING))
+            assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
+                                                                      setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
     }
 
 }
