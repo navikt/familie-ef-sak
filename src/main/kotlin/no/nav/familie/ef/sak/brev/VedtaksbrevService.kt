@@ -136,7 +136,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             when (besluttervedtaksbrev.saksbehandlerHtml != null) { // TODO: saksbehandlerHtml skal kanskje bli ikke-nullable.
                 true -> {
                     val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(html = besluttervedtaksbrev.saksbehandlerHtml,
-                                                                                 beslutterSignatur = besluttervedtaksbrev.besluttersignatur)
+                                                                                 beslutterSignatur = if(signaturMedEnhet.skjulBeslutter) "" else besluttervedtaksbrev.besluttersignatur)
                     Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
 
                 }
@@ -196,8 +196,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     companion object {
-
-        const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
+        const val BESLUTTER_SIGNATUR_PLACEHOLDER = "Her kommer besluttersignatur"
     }
 
 }
