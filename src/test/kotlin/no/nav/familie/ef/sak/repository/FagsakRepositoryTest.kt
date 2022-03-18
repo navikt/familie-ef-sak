@@ -65,7 +65,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         Stønadstype.values().forEach {
             assertThatThrownBy { fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it)) }
                     .hasRootCauseInstanceOf(PSQLException::class.java)
-                    .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"fagsak_person_unique\""))
+                    .has(hasCauseMessageContaining("ERROR: duplicate key value violates " +
+                                                   "unique constraint \"fagsak_person_unique\""))
         }
     }
 
