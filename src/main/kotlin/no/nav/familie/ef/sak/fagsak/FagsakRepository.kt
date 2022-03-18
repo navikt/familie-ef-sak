@@ -65,7 +65,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
     fun finnAktivIdenter(ider: Set<UUID>): List<Pair<UUID, String>>
 
     // language=PostgreSQL
-    @Query("""SELECT count(*) FROM gjeldende_iverksatte_behandlinger b 
+    @Query("""SELECT COUNT(*) > 0 FROM gjeldende_iverksatte_behandlinger b 
               JOIN tilkjent_ytelse ty
               ON b.id = ty.behandling_id
               JOIN andel_tilkjent_ytelse aty 

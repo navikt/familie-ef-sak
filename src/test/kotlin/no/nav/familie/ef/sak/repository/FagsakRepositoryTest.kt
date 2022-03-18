@@ -44,6 +44,20 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    fun `harLøpendeUtbetaling returnerer true for fagsak med flere aktive ytelser`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
+
+        val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+
+        assertThat(harLøpendeUtbetaling).isTrue()
+    }
+
+    @Test
     fun `harLøpendeUtbetaling returnerer false for fagsak med ferdigstilt behandling med inaktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
