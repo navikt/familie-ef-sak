@@ -17,6 +17,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -46,8 +47,12 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         if (fagsak.migrert) {
             try {
                 taskRepository.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
-            } catch (e: DuplicateKeyException) {
-                logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
+            } catch (e: DbActionExecutionException) {
+                if(e.cause is DuplicateKeyException) {
+                    logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
+                    return
+                }
+                throw e
             }
         }
     }
