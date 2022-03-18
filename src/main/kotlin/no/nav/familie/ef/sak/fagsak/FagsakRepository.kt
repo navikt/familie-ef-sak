@@ -6,18 +6,18 @@ import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpdateRepository<FagsakDomain> {
 
     // language=PostgreSQL
-    @Query("""SELECT distinct f.*, fe.id AS eksternid_id
+    @Query("""SELECT DISTINCT f.*, fe.id AS eksternid_id
                     FROM fagsak f 
                     JOIN fagsak_ekstern fe ON fe.fagsak_id = f.id
                     LEFT JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
-                    WHERE ident IN (:personIdenter)
-                    AND stonadstype = :stønadstype""")
+                    WHERE pi.ident IN (:personIdenter)
+                    AND f.stonadstype = :stønadstype""")
     fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: Stønadstype): FagsakDomain?
 
     fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: Stønadstype): FagsakDomain?
@@ -63,5 +63,16 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
           JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id
         WHERE f.id IN (:ider)""")
     fun finnAktivIdenter(ider: Set<UUID>): List<Pair<UUID, String>>
+
+    // language=PostgreSQL
+    @Query("""SELECT COUNT(*) > 0 FROM gjeldende_iverksatte_behandlinger b 
+              JOIN tilkjent_ytelse ty
+              ON b.id = ty.behandling_id
+              JOIN andel_tilkjent_ytelse aty 
+              ON ty.id = aty.tilkjent_ytelse 
+              AND aty.stonad_tom >= CURRENT_DATE 
+              WHERE b.fagsak_id = :fagsakId
+              LIMIT 1""")
+    fun harLøpendeUtbetaling(fagsakId: UUID): Boolean
 
 }
