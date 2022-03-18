@@ -222,7 +222,7 @@ class NyeBarnServiceTest {
         }
 
         @Test
-        internal fun `finnNyeEllerTidligereFødteBarn - født før termin, men er ukjent barn`() {
+        internal fun `finnNyeEllerTidligereFødteBarn - ukjent barn`() {
             val terminDato = LocalDate.of(2021, 3, 1)
             val fødselsdato = terminDato.minusMonths(1)
             val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)

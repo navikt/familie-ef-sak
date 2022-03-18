@@ -48,7 +48,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
         val nyeBarn = filtrerNyeBarn(kobledeBarn)
         val nyeBarnDto = nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) }
-        val forTidligtFødteBarn = finnForTidligtFødteBarn(kobledeBarn, nyeBarn)
+        val forTidligtFødteBarn = finnForTidligtFødteBarn(kobledeBarn)
         return NyeBarnDto(nyeBarnDto + forTidligtFødteBarn)
     }
 
@@ -73,22 +73,20 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
     }
 
-    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData,
-                                        nyeBarn: List<BarnMinimumDto>): List<NyttBarn> {
-        val nyeBarnIdenter = nyeBarn.map { it.personIdent }.toSet()
+    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData): List<NyttBarn> {
         return kobledeBarn.kobledeBarn
                 .filter { it.behandlingBarn.personIdent == null }
-                .filter { barnFødtFørTermin(it, nyeBarnIdenter) }
+                .filter { barnFødtFørTermin(it) }
                 .map {
                     val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
                     NyttBarn(barn.personIdent, NyttBarnÅrsak.FØDT_FØR_TERMIN)
                 }
     }
 
-    private fun barnFødtFørTermin(barn: MatchetBehandlingBarn, nyeBarnIdenter: Set<String>): Boolean {
+    private fun barnFødtFørTermin(barn: MatchetBehandlingBarn): Boolean {
         val pdlBarn = barn.barn
         val behandlingBarn = barn.behandlingBarn
-        if (pdlBarn == null || behandlingBarn.fødselTermindato == null || nyeBarnIdenter.contains(pdlBarn.personIdent)) {
+        if (pdlBarn == null || behandlingBarn.fødselTermindato == null) {
             return false
         }
         val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
