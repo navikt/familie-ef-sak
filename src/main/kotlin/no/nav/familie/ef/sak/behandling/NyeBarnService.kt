@@ -77,6 +77,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
                                         nyeBarn: List<BarnMinimumDto>): List<NyttBarn> {
         val nyeBarnIdenter = nyeBarn.map { it.personIdent }.toSet()
         return kobledeBarn.kobledeBarn
+                .filter { it.behandlingBarn.personIdent == null }
                 .filter { barnFødtFørTermin(it, nyeBarnIdenter) }
                 .map {
                     val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
@@ -91,9 +92,6 @@ class NyeBarnService(private val behandlingService: BehandlingService,
             return false
         }
         val fødselsdato = pdlBarn.fødsel.gjeldende().fødselsdato ?: return false
-        if (fødselsdato !in LocalDate.now().minusMonths(1)..LocalDate.now().plusMonths(1)) {
-            return false
-        }
         return YearMonth.from(fødselsdato) < YearMonth.from(behandlingBarn.fødselTermindato)
     }
 
