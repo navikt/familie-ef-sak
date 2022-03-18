@@ -23,7 +23,7 @@ class OpprettUttrekkArbeidssøkerTask(
         private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
         val årMåned = objectMapper.readValue<YearMonth>(task.payload)
