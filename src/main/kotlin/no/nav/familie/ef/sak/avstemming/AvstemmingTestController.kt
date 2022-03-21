@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.avstemming
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,7 +17,7 @@ import java.time.LocalDate
 class AvstemmingTestController(private val avstemmingService: AvstemmingService) {
 
     @PostMapping
-    fun utførKonsistensavstemming(@RequestParam("type") stønadstype: Stønadstype): Ressurs<String> {
+    fun utførKonsistensavstemming(@RequestParam("type") stønadstype: StønadType): Ressurs<String> {
         avstemmingService.konsistensavstemOppdrag(stønadstype, LocalDate.now())
         return Ressurs.success("OK")
     }

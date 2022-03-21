@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.barn
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,9 +18,9 @@ class BarnService(
     fun opprettBarnPåBehandlingMedSøknadsdata(behandlingId: UUID,
                                               fagsakId: UUID,
                                               grunnlagsdataBarn: List<BarnMedIdent>,
-                                              stønadstype: Stønadstype) {
+                                              stønadstype: StønadType) {
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
-            Stønadstype.BARNETILSYN -> {
+            StønadType.BARNETILSYN -> {
                 val søknadsbarnForBarnetilsyn = hentSøknadsbarnForBehandling(behandlingId)
                 grunnlagsdataBarn.map { barn ->
                     BehandlingBarn(
@@ -31,7 +31,7 @@ class BarnService(
                     )
                 }
             }
-            Stønadstype.OVERGANGSSTØNAD -> {
+            StønadType.OVERGANGSSTØNAD -> {
                 val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId)
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                         .map {

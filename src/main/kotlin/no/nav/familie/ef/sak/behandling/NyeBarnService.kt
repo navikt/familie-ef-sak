@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -13,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -26,7 +26,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
     @Deprecated("bruk finnNyeEllerTidligereFødteBarn")
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
-        val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
         return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
