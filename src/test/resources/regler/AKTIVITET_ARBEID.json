@@ -1,0 +1,26 @@
+{
+  "vilkårType" : "AKTIVITET_ARBEID",
+  "regler" : {
+    "ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM" : {
+      "regelId" : "ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM",
+      "svarMapping" : {
+        "ER_I_ARBEID" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "ETABLERER_EGEN_VIRKSOMHET" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "HAR_FORBIGÅENDE_SYKDOM" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}

@@ -191,11 +191,11 @@ internal class TilbakekrevingServiceTest {
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
                     .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
-            val feil = assertFailsWith<Feil> {
+            val feil = assertFailsWith<ApiFeil> {
                 tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
             }
 
-            assertThat(feil.frontendFeilmelding).isEqualTo("Melding til front end.")
+            assertThat(feil.feil).isEqualTo("Melding til front end.")
         }
 
         @Test

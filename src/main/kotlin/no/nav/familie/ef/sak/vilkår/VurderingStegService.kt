@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
-import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForAleneomsorg
+import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.hentVilkårsregel
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus
@@ -83,8 +83,8 @@ class VurderingStegService(private val behandlingService: BehandlingService,
         val behandling = behandlingService.hentBehandling(behandlingId)
         val lagredeVilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
         val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
-            if (it.key == VilkårType.ALENEOMSORG) {
-                utledResultatForAleneomsorg(it.value)
+            if (it.key.gjelderFlereBarn()) {
+                utledResultatForVilkårSomGjelderFlereBarn(it.value)
             } else {
                 it.value.single().resultat
             }

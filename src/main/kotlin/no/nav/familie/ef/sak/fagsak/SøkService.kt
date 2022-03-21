@@ -1,15 +1,11 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.tilFagsakMedPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
-import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
@@ -28,14 +24,12 @@ import java.util.UUID
 
 @Service
 class SøkService(
-        private val fagsakRepository: FagsakRepository,
         private val fagsakPersonService: FagsakPersonService,
         private val behandlingService: BehandlingService,
         private val personService: PersonService,
         private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
         private val adresseMapper: AdresseMapper,
-        private val fagsakService: FagsakService,
-        private val infotrygdService: InfotrygdService,
+        private val fagsakService: FagsakService
 ) {
 
     fun søkPerson(personIdentFraRequest: String): Søkeresultat {
@@ -44,7 +38,8 @@ class SøkService(
         if (personIdenter.identer.isEmpty()) {
             throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
         }
-        val fagsaker = finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
+        val fagsaker =
+                fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
         val fagsakPerson = fagsakPersonService.finnPerson(personIdenter.identer())
 
         val person = personService.hentSøker(gjeldendePersonIdent)
@@ -54,31 +49,14 @@ class SøkService(
                             visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
                             fagsakPersonId = fagsakPerson?.id,
                             fagsaker = fagsaker.map {
-                                val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(it.id)
-
-                                val erLøpende: Boolean = fagsakService.erLøpende(behandlinger)
-
                                 FagsakForSøkeresultat(fagsakId = it.id,
                                                       stønadstype = it.stønadstype,
-                                                      erLøpende = erLøpende,
+                                                      erLøpende = fagsakService.erLøpende(it),
                                                       erMigrert = it.migrert)
                             }
         )
     }
 
-    private fun finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter: Set<String>,
-                                                                 gjeldendePersonIdent: String): List<Fagsak> {
-        val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
-
-        if (fagsaker.isEmpty()) {
-            if (infotrygdService.eksisterer(gjeldendePersonIdent)) {
-                fagsakPersonService.hentEllerOpprettPerson(personIdenter, gjeldendePersonIdent)
-                return listOf()
-            }
-            throw ApiFeil("Finner ikke fagsak for søkte personen", HttpStatus.BAD_REQUEST)
-        }
-        return fagsaker.map { it.tilFagsakMedPerson(fagsakPersonService.hentIdenter(it.fagsakPersonId)) }
-    }
 
     // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.
     // Pdl gjører tilgangskontroll for søkPersoner

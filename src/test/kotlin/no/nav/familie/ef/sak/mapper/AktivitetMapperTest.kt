@@ -55,7 +55,8 @@ internal class AktivitetMapperTest {
                       underUtdanning = underUtdanning(),
                       aksjeselskap = aksjeselskap(),
                       virksomhet = virksomhet(),
-                      tidligereUtdanninger = tidligereUtdanning())
+                      tidligereUtdanninger = tidligereUtdanning(),
+                      erIArbeid = "JA")
 
     private fun aksjeselskap(): Set<Aksjeselskap> =
             setOf(Aksjeselskap(navn = "navn", arbeidsmengde = 30))

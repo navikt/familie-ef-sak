@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -31,6 +30,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -74,29 +74,31 @@ fun Behandling.innvilgetOgFerdigstilt() =
                   status = BehandlingStatus.FERDIGSTILT)
 
 fun fagsak(identer: Set<PersonIdent> = setOf(),
-           stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+           stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()): Fagsak {
-    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar)
+           sporbar: Sporbar = Sporbar(),
+           migrert: Boolean = false): Fagsak {
+    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar, migrert = migrert)
 }
 
-fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+fun fagsak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            person: FagsakPerson,
            eksternId: EksternFagsakId = EksternFagsakId(),
-           sporbar: Sporbar = Sporbar()): Fagsak {
+           sporbar: Sporbar = Sporbar(),
+           migrert: Boolean = false): Fagsak {
     return Fagsak(id = id,
                   fagsakPersonId = person.id,
                   personIdenter = person.identer,
                   stønadstype = stønadstype,
                   eksternId = eksternId,
-                  migrert = false,
+                  migrert = migrert,
                   sporbar = sporbar)
 }
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
-              stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
               personId: UUID = UUID.randomUUID(),
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
         FagsakDomain(id = id,
@@ -130,19 +132,19 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
 
-fun tilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse = TilkjentYtelse(
-        behandlingId = behandlingId,
-        personident = personIdent,
-        vedtakstidspunkt = LocalDateTime.now(),
-        andelerTilkjentYtelse = listOf(
-                AndelTilkjentYtelse(beløp = 9500,
-                                    stønadFom = LocalDate.of(2021, 1, 1),
-                                    stønadTom = LocalDate.of(2021, 12, 31),
-                                    personIdent = personIdent,
-                                    inntektsreduksjon = 0,
-                                    inntekt = 0,
-                                    samordningsfradrag = 0,
-                                    kildeBehandlingId = behandlingId)))
+fun tilkjentYtelse(behandlingId: UUID, personIdent: String, stønadsår: Int = 2021): TilkjentYtelse =
+        TilkjentYtelse(behandlingId = behandlingId,
+                       personident = personIdent,
+                       vedtakstidspunkt = LocalDateTime.now(),
+                       andelerTilkjentYtelse = listOf(
+                               AndelTilkjentYtelse(beløp = 9500,
+                                                   stønadFom = LocalDate.of(stønadsår, 1, 1),
+                                                   stønadTom = LocalDate.of(stønadsår, 12, 31),
+                                                   personIdent = personIdent,
+                                                   inntektsreduksjon = 0,
+                                                   inntekt = 0,
+                                                   samordningsfradrag = 0,
+                                                   kildeBehandlingId = behandlingId)))
 
 fun vedtak(behandlingId: UUID,
            resultatType: ResultatType = ResultatType.INNVILGE,
@@ -163,7 +165,7 @@ fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
         Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
 
 fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
-                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
-                    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
+                   sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+                   aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
+                   vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
         Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)

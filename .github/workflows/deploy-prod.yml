@@ -13,7 +13,7 @@ jobs:
     name: Build, push and deploy to dev-gcp and prod-gcp
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - name: Set up JDK 17
@@ -45,21 +45,19 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Deploy til dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais.yaml
-          VARS: .deploy/vars-dev.yaml
+          RESOURCE: .deploy/preprod.yaml
       - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .deploy/nais.yaml
-          VARS: .deploy/vars-prod.yaml
+          RESOURCE: .deploy/prod.yaml
       - name: Post deploy failures to Slack
         if: failure()
         run: |

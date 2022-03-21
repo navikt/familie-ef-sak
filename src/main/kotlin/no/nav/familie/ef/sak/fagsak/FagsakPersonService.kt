@@ -27,7 +27,7 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
     @Transactional
     fun hentEllerOpprettPerson(personIdenter: Set<String>, gjeldendePersonIdent: String): FagsakPerson {
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
-            "Liste med personidenter inneholder ikke gjelende personident"
+            "Liste med personidenter inneholder ikke gjeldende personident"
         }
         return (fagsakPersonRepository.findByIdent(personIdenter)
                 ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent)))))

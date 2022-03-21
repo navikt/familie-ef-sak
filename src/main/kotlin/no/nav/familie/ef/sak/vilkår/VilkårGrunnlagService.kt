@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -20,6 +19,7 @@ import no.nav.familie.ef.sak.vilkår.dto.TidligereInnvilgetVedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -78,7 +78,7 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
                                  grunnlagsdata: GrunnlagsdataDomene,
                                  barn: List<BehandlingBarn>,
                                  søknadsbarn: Collection<SøknadBarn>,
-                                 stønadstype: Stønadstype): List<BarnMedSamværDto> {
+                                 stønadstype: StønadType): List<BarnMedSamværDto> {
         val barnMedSamværRegistergrunnlag = BarnMedSamværMapper.mapRegistergrunnlag(personIdentSøker,
                                                                                     grunnlagsdata.barn,
                                                                                     grunnlagsdata.annenForelder,
@@ -87,7 +87,7 @@ class VilkårGrunnlagService(private val medlemskapMapper: MedlemskapMapper,
                                                                                     grunnlagsdata.søker.bostedsadresse)
         val søknadsgrunnlag = BarnMedSamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
         val barnepass: List<BarnepassDto> = when (stønadstype) {
-            Stønadstype.BARNETILSYN -> BarnMedSamværMapper.mapBarnepass(barn, søknadsbarn)
+            StønadType.BARNETILSYN -> BarnMedSamværMapper.mapBarnepass(barn, søknadsbarn)
             else -> emptyList()
         }
         return BarnMedSamværMapper

@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.avstemming
 
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingTask
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.util.isOptimisticLocking
 import org.slf4j.LoggerFactory
@@ -50,7 +50,7 @@ class KonsistensavstemmingService(private val repository: KonsistensavstemmingJo
         jobber.forEach {
             val triggerTid = it.triggerdato.atTime(8, 0)
             logger.info("Oppretter task for triggerTid=$triggerTid")
-            val payload = KonsistensavstemmingPayload(Stønadstype.OVERGANGSSTØNAD, triggerTid)
+            val payload = KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerTid)
             taskRepository.save(KonsistensavstemmingTask.opprettTask(payload))
         }
         repository.updateAll(jobber.map { it.copy(opprettet = true) })

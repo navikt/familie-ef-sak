@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere
@@ -65,7 +66,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
                 "mock-inntekt",
                 "mock-ereg",
                 "mock-aareg",
-                "mock-tilbakekreving")
+                "mock-tilbakekreving",
+                "mock-dokument")
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
 
@@ -132,6 +134,7 @@ abstract class OppslagSpringRunnerTest {
                 FagsakPerson::class,
                 TaskLogg::class,
                 Task::class,
+                Migreringsstatus::class,
 
                 ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }

@@ -9,6 +9,7 @@ import java.util.UUID
 data class Vedtaksbrev(@Id
                        val behandlingId: UUID,
                        val saksbehandlerBrevrequest: String,
+                       val saksbehandlerHtml: String? = null,
                        val brevmal: String,
                        val saksbehandlersignatur: String,
                        val besluttersignatur: String? = null,
@@ -18,10 +19,6 @@ data class Vedtaksbrev(@Id
                        val beslutterident: String? = null) {
 
 
-}
-
-object VedtaksbrevKonstanter {
-    const val IKKE_SATT_IDENT_PÅ_GAMLE_VEDTAKSBREV = "IKKE_SATT"
 }
 
 fun Vedtaksbrev.tilDto(skjulBeslutterSignatur: Boolean): VedtaksbrevDto = VedtaksbrevDto(saksbehandlerBrevrequest = this.saksbehandlerBrevrequest,

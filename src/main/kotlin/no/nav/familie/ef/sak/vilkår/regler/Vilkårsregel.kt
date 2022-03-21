@@ -5,11 +5,11 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import java.util.UUID
 
 /**
  * Brukes for å utlede hvilke delvilkår som må besvares
@@ -17,7 +17,8 @@ import no.nav.familie.ef.sak.vilkår.Vurdering
 data class HovedregelMetadata(val sivilstandSøknad: Sivilstand?,
                               val sivilstandstype: Sivilstandstype,
                               val erMigrering: Boolean = false,
-                              val barn: List<BehandlingBarn>
+                              val barn: List<BehandlingBarn>,
+                              val søktOmBarnetilsyn: List<UUID>
 )
 
 abstract class Vilkårsregel(val vilkårType: VilkårType,

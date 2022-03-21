@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -46,12 +46,12 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal oppdatere entitet`() {
         val person = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
-        val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = Stønadstype.BARNETILSYN, personId = person.id))
-        fagsakRepository.update(fagsak.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = StønadType.BARNETILSYN, personId = person.id))
+        fagsakRepository.update(fagsak.copy(stønadstype = StønadType.OVERGANGSSTØNAD))
 
         assertThat(fagsakRepository.count()).isEqualTo(1)
         fagsakRepository.findAll().forEach {
-            assertThat(it.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
+            assertThat(it.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
         }
     }
 
@@ -59,13 +59,13 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     internal fun `skal oppdatere entiteter`() {
         val person1 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val person2 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
-        val fagsaker = fagsakRepository.insertAll(listOf(fagsakDao(stønadstype = Stønadstype.BARNETILSYN, personId = person1.id),
-                                                         fagsakDao(stønadstype = Stønadstype.SKOLEPENGER, personId = person2.id)))
-        fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = Stønadstype.OVERGANGSSTØNAD) })
+        val fagsaker = fagsakRepository.insertAll(listOf(fagsakDao(stønadstype = StønadType.BARNETILSYN, personId = person1.id),
+                                                         fagsakDao(stønadstype = StønadType.SKOLEPENGER, personId = person2.id)))
+        fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = StønadType.OVERGANGSSTØNAD) })
 
         assertThat(fagsakRepository.count()).isEqualTo(2)
         fagsakRepository.findAll().forEach {
-            assertThat(it.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
+            assertThat(it.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
         }
     }
 

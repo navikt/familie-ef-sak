@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import java.time.LocalDate
 import java.util.UUID
@@ -36,6 +36,7 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
                          AND aty.stonad_tom >= :datoForAvstemming
                          AND aty.belop > 0)
           """)
-    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype, datoForAvstemming: LocalDate): List<TilkjentYtelse>
+    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: StønadType,
+                                                   datoForAvstemming: LocalDate): List<TilkjentYtelse>
 
 }

@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -337,7 +338,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagVilkårsvurderinger(behandlingId: UUID,
                                       resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
                                       ikkeLag: Int = 0) {
-        val vilkårsvurderinger = VilkårType.hentVilkår().map {
+        val vilkårsvurderinger = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(behandlingId = behandlingId,
                              resultat = resultat,
                              type = it,
