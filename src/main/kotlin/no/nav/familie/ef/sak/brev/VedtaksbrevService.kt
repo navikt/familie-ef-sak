@@ -150,7 +150,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             "Brev-HTML mangler placeholder for besluttersignatur"
         }
 
-        val beslutterSignatur =  if (signaturMedEnhet.skjulBeslutter) "" else signaturMedEnhet.navn
+        val beslutterSignatur =  if (signaturMedEnhet.skjulBeslutter) "" else "- ${signaturMedEnhet.navn}"
         return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
     }
 
