@@ -9,9 +9,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
@@ -74,8 +71,12 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
                                                           EgenAnsattRequest(ident)).data!!.erEgenAnsatt
     }
 
-    fun hentNavKontor(ident: String): NavKontorEnhet {
-        return postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident)).getDataOrThrow()
+    fun hentNavKontor(ident: String): NavKontorEnhet? {
+        val ressurs = postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident))
+        if (ressurs.status != Ressurs.Status.SUKSESS) {
+            error("Henting av nav-kontor feilet status=${ressurs.status} - ${ressurs.melding}")
+        }
+        return ressurs.data
     }
 
     companion object {
