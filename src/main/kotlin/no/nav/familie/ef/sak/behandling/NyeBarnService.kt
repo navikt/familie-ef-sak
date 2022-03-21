@@ -11,6 +11,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.kontrakter.ef.personhendelse.NyeBarnDto
+import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
+import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -34,7 +37,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
-        val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
         val kobledeBarn = finnKobledeBarnForFagsak(fagsak.id)
 
