@@ -4,9 +4,9 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -14,7 +14,7 @@ import java.time.YearMonth
 
 @Service
 class InfotrygdPeriodeValideringService(
-        private val infotrygdService: InfotrygdService,
+        private val infotrygdService: InfotrygdService
 ) {
 
     fun validerKanJournalføres(personIdent: String, stønadType: StønadType) {

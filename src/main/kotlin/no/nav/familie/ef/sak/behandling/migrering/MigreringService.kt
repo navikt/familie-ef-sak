@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
@@ -38,6 +37,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -96,7 +96,7 @@ class MigreringService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerOvergangsstønadAutomatisk(personIdent: String) {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId)
     }
 
@@ -118,7 +118,7 @@ class MigreringService(
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         val personIdent = fagsakPerson.hentAktivIdent()
         val kjøremåned = kjøremåned()
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
         return opprettMigrering(fagsak = fagsak,
                                 fra = fra(periode),
@@ -228,7 +228,7 @@ class MigreringService(
     }
 
     private fun validerFagsakOgBehandling(fagsak: Fagsak) {
-        if (fagsak.stønadstype != Stønadstype.OVERGANGSSTØNAD) {
+        if (fagsak.stønadstype != StønadType.OVERGANGSSTØNAD) {
             throw MigreringException("Håndterer ikke andre stønadstyper enn overgangsstønad",
                                      MigreringExceptionType.FEIL_STØNADSTYPE)
         } else if (fagsak.migrert) {

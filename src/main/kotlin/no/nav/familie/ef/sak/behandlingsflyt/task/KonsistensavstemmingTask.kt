@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.avstemming.AvstemmingService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.Properties
 
-data class KonsistensavstemmingPayload(val stønadstype: Stønadstype, val triggerTid: LocalDateTime)
+data class KonsistensavstemmingPayload(val stønadstype: StønadType,
+                                       val triggerTid: LocalDateTime)
 
 @Service
 @TaskStepBeskrivelse(taskStepType = KonsistensavstemmingTask.TYPE, beskrivelse = "Utfører konsistensavstemming mot økonomi.")

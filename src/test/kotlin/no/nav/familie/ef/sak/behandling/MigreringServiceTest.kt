@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.SjekkMigrertStatusIInfotrygdTa
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
@@ -43,7 +42,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
@@ -51,6 +49,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -287,7 +286,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentMigreringInfo - sak inneholder annen ident`() {
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("2",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.INNVILGET)))
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
 
@@ -301,7 +300,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentMigreringInfo - sak er åpen`() {
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("1",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.ÅPEN_SAK)))
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
 
@@ -370,7 +369,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val nå = YearMonth.of(2021, 1)
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("1",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.INNVILGET)))
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
@@ -388,7 +387,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val nå = YearMonth.of(2021, 1)
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("1",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.ÅPEN_SAK)))
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())

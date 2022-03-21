@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -27,7 +26,7 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        val stønadType = StønadType.valueOf(fagsak.stønadstype.name)
+        val stønadType = fagsak.stønadstype
 
         if (!finnesEnIverksattBehandlingFor(fagsak)) {
             val identer = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), historikk = true).identer.map { it.ident }.toSet()

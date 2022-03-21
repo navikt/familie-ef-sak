@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
@@ -24,6 +23,7 @@ import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.MedlemskapMapper
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -137,7 +137,7 @@ internal class VilkårGrunnlagServiceTest {
     internal fun `skal ha barnepass for barnetilsyn`() {
         val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
-        every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak.copy(stønadstype = Stønadstype.BARNETILSYN)
+        every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak.copy(stønadstype = StønadType.BARNETILSYN)
 
         val grunnlag = service.hentGrunnlag(behandlingId, søknadBarnetilsyn, søknadOvergangsstønad.fødselsnummer, barnBarnetilsyn)
 

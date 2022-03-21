@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.barn
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
@@ -11,6 +10,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,7 +46,7 @@ internal class BarnServiceTest {
         barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId,
                                                           UUID.randomUUID(),
                                                           grunnlagsdatabarn,
-                                                          Stønadstype.BARNETILSYN)
+                                                          StønadType.BARNETILSYN)
 
         assertThat(barnSlot.captured).hasSize(4)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC, fnrBarnD)
@@ -68,7 +68,7 @@ internal class BarnServiceTest {
         barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId,
                                                           UUID.randomUUID(),
                                                           grunnlagsdatabarn,
-                                                          Stønadstype.OVERGANGSSTØNAD)
+                                                          StønadType.OVERGANGSSTØNAD)
 
         assertThat(barnSlot.captured).hasSize(2)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB)
@@ -82,7 +82,7 @@ internal class BarnServiceTest {
             barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId,
                                                               UUID.randomUUID(),
                                                               emptyList(),
-                                                              Stønadstype.SKOLEPENGER)
+                                                              StønadType.SKOLEPENGER)
         }
 
     }
