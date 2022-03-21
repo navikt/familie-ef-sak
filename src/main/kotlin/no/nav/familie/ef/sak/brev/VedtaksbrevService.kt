@@ -136,7 +136,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             when (besluttervedtaksbrev.saksbehandlerHtml != null) { // TODO: saksbehandlerHtml skal kanskje bli ikke-nullable.
                 true -> {
                     val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(html = besluttervedtaksbrev.saksbehandlerHtml,
-                                                                                 beslutterSignatur = if(signaturMedEnhet.skjulBeslutter) "" else besluttervedtaksbrev.besluttersignatur)
+                                                                                 signaturMedEnhet = signaturMedEnhet)
                     Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
 
                 }
@@ -144,13 +144,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                     Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter)))
             }
 
-    private fun settInnBeslutterSignaturIHtml(html: String, beslutterSignatur: String?): String {
+    private fun settInnBeslutterSignaturIHtml(html: String, signaturMedEnhet: SignaturDto): String {
 
-        feilHvisIkke(html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)){
+        feilHvisIkke(html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)) {
             "Brev-HTML mangler placeholder for besluttersignatur"
         }
 
-        return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur ?: "")
+        val beslutterSignatur =  if (signaturMedEnhet.skjulBeslutter) "" else signaturMedEnhet.navn
+        return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
     }
 
     fun lagSaksbehandlerFritekstbrev(frittståendeBrevDto: VedtaksbrevFritekstDto): ByteArray {
@@ -196,6 +197,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     companion object {
+
         const val BESLUTTER_SIGNATUR_PLACEHOLDER = "Her kommer besluttersignatur"
     }
 
