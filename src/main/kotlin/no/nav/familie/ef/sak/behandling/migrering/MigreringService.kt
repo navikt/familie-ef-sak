@@ -46,7 +46,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -193,41 +192,29 @@ class MigreringService(
      * Den sjekker også att de summerte periodene sin max(stønadFom) går til den samme måneden
      */
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
-        val opphørsdato = opphørsmåned.atEndOfMonth()
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
-        val overførtNyLøsningOpphørsdato =
-                perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
-        val maksStønadTom = sisteSummertePerioden?.stønadTom
 
-        val erOpphørtBegrunnelse = when {
-            maksStønadTom == null -> "har ikke noen summerte perioder"
-            maksStønadTom <= opphørsdato -> "maksStønadTom=$maksStønadTom er før opphørsdato=$opphørsdato"
-            overførtNyLøsningOpphørsdato == null && sisteSummertePerioden.opphørsdato != null ->
-                "er allerede opphørt i Infotrygd med opphørsdato=${sisteSummertePerioden.opphørsdato}"
-            overførtNyLøsningOpphørsdato != null && overførtNyLøsningOpphørsdato < opphørsdato ->
-                "er opphørt med kode=${InfotrygdEndringKode.OVERTFØRT_NY_LØSNING}"
-            else -> null
+        if (sisteSummertePerioden != null &&
+            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadFom > opphørsmåned.atEndOfMonth())) {
+            loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
+            return false
         }
-
-        if (erOpphørtBegrunnelse != null) {
-            logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - $erOpphørtBegrunnelse")
-            return true
-        }
-
-        loggIkkeOpphørt(behandlingId, overførtNyLøsningOpphørsdato, maksStønadTom, opphørsmåned, perioder)
-        return false
+        logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
+                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
+        return true
     }
 
     private fun loggIkkeOpphørt(behandlingId: UUID,
-                                overførtNyLøsningOpphørsdato: LocalDate?,
-                                maksStønadTom: LocalDate?,
-                                opphørsmåned: YearMonth,
-                                perioder: InfotrygdStønadPerioderDto) {
+                                perioder: InfotrygdStønadPerioderDto,
+                                sisteSummertePerioden: SummertInfotrygdPeriodeDto,
+                                opphørsmåned: YearMonth) {
+        val overførtNyLøsningOpphørsdato =
+                perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val logMessage = "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
                          "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
-                         "summertMaxTom=$maksStønadTom " +
+                         "sisteSummertePeriodeTom=${sisteSummertePerioden.stønadTom} " +
                          "opphørsmåned=$opphørsmåned"
         logger.warn(logMessage)
         val periodeInformasjon = perioder.perioder
