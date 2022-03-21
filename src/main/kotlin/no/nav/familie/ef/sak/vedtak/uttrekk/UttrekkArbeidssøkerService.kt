@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
@@ -29,33 +30,16 @@ class UttrekkArbeidssøkerService(
 
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
-    @Transactional
-    fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke()) {
-        val uttrekk = hentArbeidssøkereForUttrekk(årMåned)
-        val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
-        val registertSomArbeidssøkerPåFagsak = hentRegistertSomArbeidssøker(aktiveIdenter, årMåned)
-
-        uttrekk.forEach {
-            val registertSomArbeidssøker = registertSomArbeidssøkerPåFagsak[it.fagsakId]
-                                           ?: error("Finner ikke status om registert arbeidssøker for fagsak=${it.fagsakId}")
-            uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = it.fagsakId,
-                                                                      vedtakId = it.behandlingIdForVedtak,
-                                                                      årMåned = årMåned,
-                                                                      registrertArbeidssøker = registertSomArbeidssøker))
-        }
-    }
-
-    fun settKontrollert(id: UUID, kontrollert: Boolean): UttrekkArbeidssøkerDto {
-        tilgangService.validerHarSaksbehandlerrolle()
-        val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
-        tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId, AuditLoggerEvent.UPDATE)
-
-        val oppdatertArbeidssøker = if (uttrekkArbeidssøkere.kontrollert == kontrollert) {
-            uttrekkArbeidssøkere
-        } else {
-            uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
-        }
-        return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
+                                    fagsakId: UUID,
+                                    behandlingIdForVedtak: UUID,
+                                    personIdent: String) {
+        val registrertSomArbeidssøker = erRegistrertSomArbeidssøker(personIdent, årMåned)
+        uttrekkArbeidssøkerRepository.insert(UttrekkArbeidssøkere(fagsakId = fagsakId,
+                                                                  vedtakId = behandlingIdForVedtak,
+                                                                  årMåned = årMåned,
+                                                                  registrertArbeidssøker = registrertSomArbeidssøker))
     }
 
     fun hentUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
@@ -80,14 +64,37 @@ class UttrekkArbeidssøkerService(
         )
     }
 
-    private fun hentRegistertSomArbeidssøker(aktiveIdenter: Map<UUID, String>, årMåned: YearMonth): Map<UUID, Boolean> {
-        val sisteIMåneden = årMåned.atEndOfMonth()
-        return aktiveIdenter.entries.associate { entry ->
-            val perioder = arbeidssøkerClient.hentPerioder(entry.value, sisteIMåneden, sisteIMåneden).perioder
-            val arbeidssøkerISluttetPåMåneden =
-                    perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
-            entry.key to arbeidssøkerISluttetPåMåneden
+    fun settKontrollert(id: UUID, kontrollert: Boolean): UttrekkArbeidssøkerDto {
+        tilgangService.validerHarSaksbehandlerrolle()
+        val uttrekkArbeidssøkere = uttrekkArbeidssøkerRepository.findByIdOrThrow(id)
+        tilgangService.validerTilgangTilFagsak(uttrekkArbeidssøkere.fagsakId, AuditLoggerEvent.UPDATE)
+
+        val oppdatertArbeidssøker = if (uttrekkArbeidssøkere.kontrollert == kontrollert) {
+            uttrekkArbeidssøkere
+        } else {
+            uttrekkArbeidssøkerRepository.update(uttrekkArbeidssøkere.medKontrollert(kontrollert = kontrollert))
         }
+        return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
+    }
+
+    fun hentArbeidssøkereForUttrekk(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
+        val startdato = årMåned.atDay(1)
+        val sluttdato = årMåned.atEndOfMonth()
+        val arbeidssøkere =
+                uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
+        return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
+    }
+
+    fun uttrekkFinnes(årMåned: YearMonth, fagsakId: UUID): Boolean {
+        return uttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(årMåned, fagsakId)
+    }
+
+    private fun erRegistrertSomArbeidssøker(personIdent: String, årMåned: YearMonth): Boolean {
+        val sisteIMåneden = årMåned.atEndOfMonth()
+        val perioder = arbeidssøkerClient.hentPerioder(personIdent,
+                                                       sisteIMåneden,
+                                                       sisteIMåneden).perioder
+        return perioder.any { it.fraOgMedDato <= sisteIMåneden && (it.tilOgMedDato == null || it.tilOgMedDato >= sisteIMåneden) }
     }
 
     /**
@@ -123,14 +130,6 @@ class UttrekkArbeidssøkerService(
         return personIdentPåFagsak.entries.associateBy({ it.key }) {
             Persondata(it.value, personKortPåPersonIdent[it.value] ?: error("Finner ikke data til ident=${it.value}"))
         }
-    }
-
-    fun hentArbeidssøkereForUttrekk(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
-        val startdato = årMåned.atDay(1)
-        val sluttdato = årMåned.atEndOfMonth()
-        val arbeidssøkere =
-                uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
-        return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
     }
 
     private fun harPeriodeSomArbeidssøker(it: VedtaksperioderForUttrekk,
