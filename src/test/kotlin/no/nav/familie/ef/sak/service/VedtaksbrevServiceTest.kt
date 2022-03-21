@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.every
 import io.mockk.mockk
@@ -198,7 +197,7 @@ internal class VedtaksbrevServiceTest {
 
         vedtaksbrevService.lagBeslutterBrev(behandling.id)
 
-        assertThat(htmlSlot.captured).isEqualTo("html med placeholder $beslutterNavn og en liten avslutning")
+        assertThat(htmlSlot.captured).isEqualTo("html med placeholder - $beslutterNavn og en liten avslutning")
     }
 
     @Test
