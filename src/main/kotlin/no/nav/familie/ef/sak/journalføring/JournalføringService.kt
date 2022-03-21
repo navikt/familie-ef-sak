@@ -174,7 +174,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak: Fagsak) {
         if (!behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(fagsak.id)) {
-            infotrygdPeriodeValideringService.validerKanJournalføres(fagsak.hentAktivIdent(), fagsak.stønadstype)
+            infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(fagsak.hentAktivIdent(), fagsak.stønadstype)
         }
     }
 

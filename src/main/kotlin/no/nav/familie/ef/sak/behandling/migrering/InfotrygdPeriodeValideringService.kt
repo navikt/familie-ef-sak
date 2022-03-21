@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -17,20 +18,26 @@ class InfotrygdPeriodeValideringService(
         private val infotrygdService: InfotrygdService
 ) {
 
-    fun validerKanJournalføres(personIdent: String, stønadType: StønadType) {
-        if (infotrygdService.eksisterer(personIdent, setOf(StønadType.OVERGANGSSTØNAD))) {
-            try {
-                hentPeriodeForMigrering(personIdent)
-                // hvis hentPeriodeForMigrering returnerer noe, så betyder det att den kan migreres
-                throw ApiFeil("Denne må migreres", HttpStatus.BAD_REQUEST)
-            } catch (e: MigreringException) {
-                if(e.type.kanGåVidereTilJournalføring) {
-                    return
-                } else {
-                    throw ApiFeil("Denne må migreres", HttpStatus.BAD_REQUEST)
-                }
+    fun validerKanJournalføreUtenÅMigrere(personIdent: String, stønadType: StønadType) {
+        brukerfeilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
+            "Har ikke støtte for å sjekke migrering av stønadstypen $stønadType"
+        }
+        if (trengerMigrering(personIdent)) {
+            throw ApiFeil("Det eksisterer perioder i infotrygd for denne personen. " +
+                          "Vennligst søk opp personen og migrer før du journalfører denne journalposten",
+                          HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    private fun trengerMigrering(personIdent: String): Boolean {
+        try {
+            hentPeriodeForMigrering(personIdent)
+        } catch (e: MigreringException) {
+            if (e.type.kanGåVidereTilJournalføring) {
+                return false
             }
         }
+        return true
     }
 
     fun hentPeriodeForMigrering(personIdent: String, kjøremåned: YearMonth = YearMonth.now()): SummertInfotrygdPeriodeDto {

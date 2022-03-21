@@ -51,7 +51,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import java.util.UUID
 
@@ -283,7 +282,7 @@ internal class JournalføringServiceTest {
         } returns Testsøknad.søknadOvergangsstønad
 
         every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns false
-        every { infotrygdPeriodeValideringService.validerKanJournalføres(any(), any()) } throws ApiFeil("feil", BAD_REQUEST)
+        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil", BAD_REQUEST)
 
         assertThatThrownBy {
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(

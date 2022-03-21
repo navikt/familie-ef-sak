@@ -31,13 +31,13 @@ internal class InfotrygdPeriodeValideringServiceTest {
     }
 
     @Nested
-    inner class ValiderKanJournalføres {
+    inner class ValiderKanJournalføreUtenÅMigrere {
 
         @Test
         internal fun `skal kunne journalføre når personen ikke har noen saker i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns infotrygdPerioderDto(emptyList())
 
-            service.validerKanJournalføres(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD)
         }
 
         @Test
@@ -47,7 +47,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1",
                                                                     stønadFom = dato.atDay(1),
                                                                     stønadTom = dato.atEndOfMonth())))
-            service.validerKanJournalføres(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD)
         }
 
         @Test
@@ -55,7 +55,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))
 
-            assertThatThrownBy { service.validerKanJournalføres(personIdent, StønadType.OVERGANGSSTØNAD) }
+            assertThatThrownBy { service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD) }
                     .isInstanceOf(ApiFeil::class.java)
         }
 
@@ -65,7 +65,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1", vedtakId = 1),
                                                 lagInfotrygdPeriode(personIdent = "2", vedtakId = 2)))
 
-            assertThatThrownBy { service.validerKanJournalføres(personIdent, StønadType.OVERGANGSSTØNAD) }
+            assertThatThrownBy { service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD) }
                     .isInstanceOf(ApiFeil::class.java)
         }
     }
