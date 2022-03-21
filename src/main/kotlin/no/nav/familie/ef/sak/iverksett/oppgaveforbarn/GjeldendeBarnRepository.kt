@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
@@ -27,7 +27,7 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
           AND aty.stonad_tom >= :dato
           AND aty.belop > 0)
         """)
-    fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: Stønadstype, dato: LocalDate): List<BarnTilUtplukkForOppgave>
+    fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
 
     @Query("""
         SELECT b.id behandling_id, pi.ident fodselsnummer_soker, 
@@ -46,6 +46,6 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
                      AND aty.belop > 0)
          AND f.migrert = TRUE
     """)
-    fun finnBarnTilMigrerteBehandlinger(stønadstype: Stønadstype, dato: LocalDate): List<BarnTilUtplukkForOppgave>
+    fun finnBarnTilMigrerteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
 
 }

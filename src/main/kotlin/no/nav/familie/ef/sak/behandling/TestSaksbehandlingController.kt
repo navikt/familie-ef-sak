@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -37,6 +36,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -212,10 +212,10 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 }
 
-private fun TestBehandlingsType.tilStønadstype(): Stønadstype =
+private fun TestBehandlingsType.tilStønadstype(): StønadType =
         when (this) {
-            FØRSTEGANGSBEHANDLING, BLANKETT, MIGRERING -> Stønadstype.OVERGANGSSTØNAD
-            BARNETILSYN -> Stønadstype.BARNETILSYN
+            FØRSTEGANGSBEHANDLING, BLANKETT, MIGRERING -> StønadType.OVERGANGSSTØNAD
+            BARNETILSYN -> StønadType.BARNETILSYN
         }
 
 data class TestFagsakRequest(val personIdent: String,

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype.GIFT
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
@@ -23,6 +22,7 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettN
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Disabled
@@ -52,7 +52,7 @@ internal class OppdaterVilkårTest {
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
                                                                  metadata,
-                                                                 Stønadstype.BARNETILSYN)
+                                                                 StønadType.BARNETILSYN)
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(1)
         assertThat(nyeVilkårsvurderinger.find { it.type === VilkårType.ALDER_PÅ_BARN }?.barnId).isEqualTo(barn.id)
@@ -78,7 +78,7 @@ internal class OppdaterVilkårTest {
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
                                                                  metadata,
-                                                                 Stønadstype.BARNETILSYN)
+                                                                 StønadType.BARNETILSYN)
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(1)
         assertThat(nyeVilkårsvurderinger.find { it.type === VilkårType.ALENEOMSORG }?.barnId).isEqualTo(barn.id)
@@ -104,7 +104,7 @@ internal class OppdaterVilkårTest {
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
                                                                  metadata,
-                                                                 Stønadstype.OVERGANGSSTØNAD)
+                                                                 StønadType.OVERGANGSSTØNAD)
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(0)
     }
@@ -129,7 +129,7 @@ internal class OppdaterVilkårTest {
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
                                                                  metadata,
-                                                                 Stønadstype.OVERGANGSSTØNAD)
+                                                                 StønadType.OVERGANGSSTØNAD)
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(2)
     }

@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -31,6 +30,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -74,7 +74,7 @@ fun Behandling.innvilgetOgFerdigstilt() =
                   status = BehandlingStatus.FERDIGSTILT)
 
 fun fagsak(identer: Set<PersonIdent> = setOf(),
-           stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+           stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            eksternId: EksternFagsakId = EksternFagsakId(),
            sporbar: Sporbar = Sporbar(),
@@ -82,7 +82,7 @@ fun fagsak(identer: Set<PersonIdent> = setOf(),
     return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar, migrert = migrert)
 }
 
-fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+fun fagsak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
            id: UUID = UUID.randomUUID(),
            person: FagsakPerson,
            eksternId: EksternFagsakId = EksternFagsakId(),
@@ -98,7 +98,7 @@ fun fagsak(stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
 }
 
 fun fagsakDao(id: UUID = UUID.randomUUID(),
-              stønadstype: Stønadstype = Stønadstype.OVERGANGSSTØNAD,
+              stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
               personId: UUID = UUID.randomUUID(),
               eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
         FagsakDomain(id = id,

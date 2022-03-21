@@ -3,11 +3,11 @@ package no.nav.familie.ef.sak.oppgave
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -158,11 +158,11 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         return oppgaveClient.hentOppgaver(finnOppgaveRequest)
     }
 
-    private fun finnBehandlingstema(stønadstype: Stønadstype): Behandlingstema {
+    private fun finnBehandlingstema(stønadstype: StønadType): Behandlingstema {
         return when (stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
-            Stønadstype.BARNETILSYN -> Behandlingstema.Barnetilsyn
-            Stønadstype.SKOLEPENGER -> Behandlingstema.Skolepenger
+            StønadType.OVERGANGSSTØNAD -> Behandlingstema.Overgangsstønad
+            StønadType.BARNETILSYN -> Behandlingstema.Barnetilsyn
+            StønadType.SKOLEPENGER -> Behandlingstema.Skolepenger
         }
     }
 

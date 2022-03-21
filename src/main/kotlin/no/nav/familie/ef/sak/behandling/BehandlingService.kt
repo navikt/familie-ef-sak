@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -27,6 +26,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
@@ -64,7 +64,7 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
             }
 
 
-    fun finnGjeldendeIverksatteBehandlinger(stonadstype: Stønadstype) =
+    fun finnGjeldendeIverksatteBehandlinger(stonadstype: StønadType) =
             behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
 
     @Transactional

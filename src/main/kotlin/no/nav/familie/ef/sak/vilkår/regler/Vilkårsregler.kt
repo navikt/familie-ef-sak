@@ -1,8 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AktivitetArbeidRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AktivitetRegel
@@ -17,6 +14,9 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.SagtOppEllerRedusertRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SamlivRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.TidligareVedtaksperioderRegel
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 
 /**
  * Singleton for å holde på alle regler
@@ -45,7 +45,7 @@ private val alleVilkårsregler = listOf(
         AlderPåBarnRegel()
 )
 
-fun vilkårsreglerForStønad(stønadstype: Stønadstype): List<Vilkårsregel> =
+fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
         when (stønadstype) {
             OVERGANGSSTØNAD -> listOf(
                     ForutgåendeMedlemskapRegel(),

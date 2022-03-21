@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.opprettBarnMedIdent
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
@@ -24,6 +23,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -185,10 +185,10 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     private fun finnBarnTilMigrerteBehandlinger() =
-            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(Stønadstype.OVERGANGSSTØNAD, LocalDate.now())
+            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
     private fun finnBarnAvGjeldendeIverksatteBehandlinger() =
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, LocalDate.now())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
     private fun lagreInnvilgetBehandling(fagsak: Fagsak,
                                          tidligereBehandling: Behandling? = null,

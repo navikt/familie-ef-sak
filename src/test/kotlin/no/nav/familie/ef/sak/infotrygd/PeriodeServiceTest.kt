@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -21,6 +20,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -178,7 +178,7 @@ internal class PeriodeServiceTest {
     }
 
     private fun mockFagsak(fagsak: Fagsak? = this.fagsak) {
-        every { fagsakService.finnFagsak(setOf(personIdent), Stønadstype.OVERGANGSSTØNAD) } returns fagsak
+        every { fagsakService.finnFagsak(setOf(personIdent), StønadType.OVERGANGSSTØNAD) } returns fagsak
     }
 
     private fun mockBehandling(behandling: Behandling? = this.behandling) {
