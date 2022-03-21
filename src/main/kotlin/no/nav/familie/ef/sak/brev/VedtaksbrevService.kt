@@ -198,7 +198,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     companion object {
 
-        const val BESLUTTER_SIGNATUR_PLACEHOLDER = "Her kommer besluttersignatur"
+        const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
     }
 
 }
