@@ -26,7 +26,7 @@ class BarnController(val nyeBarnService: NyeBarnService) {
     }
 
     @PostMapping("nye-eller-tidligere-fodte-barn")
-    // for å unngå att vi oppretter oppgaver for nye barn så sjekkes roles
+    // denne skal kalles på fra ef-personhendelse(client_credential) for å opprette oppgaver for nye eller for tidligt fødte barn
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun finnNyeEllerTidligereFødteBarn(@RequestBody personIdent: PersonIdent): Ressurs<NyeBarnDto> {
         return Ressurs.success(nyeBarnService.finnNyeEllerTidligereFødteBarn(personIdent))
