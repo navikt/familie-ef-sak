@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -136,5 +137,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
     fun finnSisteIverksatteBehandlinger(stønadstype: StønadType): Set<UUID>
+
+    fun existsByFagsakIdAndTypeIn(fagsakId: UUID, typer: Set<BehandlingType>): Boolean
 
 }

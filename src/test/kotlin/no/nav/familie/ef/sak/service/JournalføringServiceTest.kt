@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
@@ -29,6 +30,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
@@ -44,10 +46,12 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import java.util.UUID
 
 internal class JournalføringServiceTest {
@@ -62,6 +66,7 @@ internal class JournalføringServiceTest {
     private val barnService = mockk<BarnService>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
     private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    private val infotrygdPeriodeValideringService = mockk<InfotrygdPeriodeValideringService>()
 
     private val journalføringService =
             JournalføringService(
@@ -75,7 +80,8 @@ internal class JournalføringServiceTest {
                     oppgaveService = oppgaveService,
                     taskRepository = taskRepository,
                     barnService = barnService,
-                    featureToggleService = featureToggleService
+                    featureToggleService = featureToggleService,
+                    infotrygdPeriodeValideringService = infotrygdPeriodeValideringService
             )
 
     private val fagsakId: UUID = UUID.randomUUID()
@@ -128,6 +134,12 @@ internal class JournalføringServiceTest {
                                     resultat = BehandlingResultat.IKKE_SATT,
                                     årsak = BehandlingÅrsak.SØKNAD))
 
+        every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns true
+
+        every {
+            fagsakService.hentFagsak(any())
+        } returns fagsak(identer = fagsakpersoner(setOf("1")),id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
+
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) }
                 .returns(Behandling(id = behandlingId,
                                     fagsakId = fagsakId,
@@ -165,10 +177,6 @@ internal class JournalføringServiceTest {
                                                   journalpostId,
                                                   any())
         } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
-
-        every {
-            fagsakService.hentFagsak(any())
-        } returns fagsak().copy(id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
 
         val journalførtOppgaveId =
                 journalføringService.fullførJournalpost(journalpostId = journalpostId,
@@ -264,6 +272,25 @@ internal class JournalføringServiceTest {
                     journalføringRequest = JournalføringTilNyBehandlingRequest(fagsakId = fagsakId,
                                                                                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
         }
+    }
+
+    @Test
+    internal fun `opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost skal kaste feil hvis finnes i infotrygd`() {
+        every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost.copy(journalstatus = Journalstatus.JOURNALFOERT))
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
+
+        every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns false
+        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil", BAD_REQUEST)
+
+        assertThatThrownBy {
+            journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
+                    journalpostId = journalpostId,
+                    journalføringRequest = JournalføringTilNyBehandlingRequest(fagsakId = fagsakId,
+                                                                               behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING))
+        }.isInstanceOf(ApiFeil::class.java)
+
     }
 
     // Test barnetilsyn!!!

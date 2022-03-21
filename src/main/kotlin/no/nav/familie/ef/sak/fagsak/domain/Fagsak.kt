@@ -57,4 +57,3 @@ fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
                 migrert = migrert,
                 sporbar = sporbar
         )
-

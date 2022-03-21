@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -60,7 +61,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                            private val taskRepository: TaskRepository,
                            private val barnService: BarnService,
                            private val oppgaveService: OppgaveService,
-                           private val featureToggleService: FeatureToggleService) {
+                           private val featureToggleService: FeatureToggleService,
+                           private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService) {
 
     fun hentJournalpost(journalpostId: String): Journalpost {
         return journalpostClient.hentJournalpost(journalpostId)
@@ -113,11 +115,12 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val behandlingstype = journalføringRequest.behandling.behandlingstype
                               ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
+        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
-                                                                 fagsakId = journalføringRequest.fagsakId,
+                                                                 fagsak = fagsak,
                                                                  journalpost = journalpost)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
             ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
@@ -137,8 +140,11 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         brukerfeilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
             "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
         }
+        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
+
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = journalføringRequest.behandlingstype,
-                                                                 fagsakId = journalføringRequest.fagsakId,
+                                                                 fagsak = fagsak,
                                                                  journalpost = journalpost)
 
         opprettBehandlingsstatistikkTask(behandling.id)
@@ -147,14 +153,13 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     }
 
     private fun opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype: BehandlingType,
-                                                        fagsakId: UUID,
+                                                        fagsak: Fagsak,
                                                         journalpost: Journalpost): Behandling {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
         feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN && !featureToggleService.isEnabled("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning")) {
             "Journalføring av barnetilsyn er ikke skrudd på"
         }
 
-        val behandling = opprettBehandlingMedBehandlingstype(behandlingstype, fagsakId)
+        val behandling = opprettBehandlingMedBehandlingstype(behandlingstype, fagsak.id)
 
         iverksettService.startBehandling(behandling, fagsak)
         settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
@@ -167,6 +172,11 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         return behandling
     }
 
+    private fun validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak: Fagsak) {
+        if (!behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(fagsak.id)) {
+            infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(fagsak.hentAktivIdent(), fagsak.stønadstype)
+        }
+    }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long? = null) {
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
