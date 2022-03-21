@@ -26,7 +26,9 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.net.URL
 import java.time.LocalDate
@@ -35,61 +37,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class AndelHistorikkBeregnerTest {
-
-    @Test
-    internal fun `inntek_endrer_seg`() {
-        run("/økonomi/inntekt_endrer_seg.csv")
-    }
-
-    @Test
-    internal fun `når vi revurderer fra midt i en tidligere periode lagrer vi ikke ned hele vedtakshistorikken`() {
-        run("/økonomi/hele_vedtaket_blir_ikke_med.csv")
-    }
-
-    @Test
-    internal fun `aktivitet og vedtaksperiodetype endrer seg`() {
-        run("/økonomi/aktivitet_periodetype_endrer_seg.csv")
-    }
-
-    @Test
-    internal fun `periode2_slettes`() {
-        run("/økonomi/periode2_slettes.csv")
-    }
-
-    @Test
-    internal fun `periode2_slettes_og_får_en_ny_periode`() {
-        run("/økonomi/periode2_slettes_og_får_en_ny_periode.csv")
-    }
-
-    @Test
-    internal fun `periode_blir_lagt_til_på_nytt`() {
-        run("/økonomi/periode_blir_lagt_til_på_nytt.csv")
-    }
-
-    @Test
-    internal fun `periode_splittes_g_omregning`() {
-        run("/økonomi/periode_splittes_g_omregning.csv")
-    }
-
-    @Test
-    internal fun `opphør, vedtaket har ikke noen perioder og tilkjente ytelsen har inge andeler`() {
-        run("/økonomi/opphør.csv")
-    }
-
-    @Test
-    internal fun `opphør midt i periode, `() {
-        run("/økonomi/opphør_midt_i_periode.csv")
-    }
-
-    @Test
-    internal fun `periode_splittes`() {
-        run("/økonomi/periode_splittes.csv")
-    }
-
-    @Test
-    internal fun `periode_splittes_og_sen_fjernes`() {
-        run("/økonomi/periode_splittes_og_sen_fjernes.csv")
-    }
 
     @Test
     internal fun `periode forlenges`() {
@@ -111,6 +58,57 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/filtrer_tilOgMedBehandling_er_andre_behandlingen.csv", tilOgMedBehandlingId = 2)
     }
 
+    @Test
+    internal fun `revurerer behandling uten endringer`() {
+        run("/økonomi/revurder_på_nytt_uten_endringer_som_først_splittets.csv")
+    }
+
+    @Test
+    internal fun `revurderer behandling med nytt beløp, som sen revurderes uten endringer`() {
+        run("/økonomi/revurder_på_nytt_uten_endringer.csv")
+    }
+
+
+    @Nested
+    inner class Sanksjon {
+
+        @Test
+        internal fun `sanksjon midt i en periode`() {
+            run("/økonomi/sanksjon_midt_i.csv")
+        }
+
+        @Test
+        internal fun `sanksjon i slutten på en periode`() {
+            run("/økonomi/sanksjon_slutten.csv")
+        }
+
+        @Test
+        internal fun `sanksjon i starten på en periode`() {
+            run("/økonomi/sanksjon_starten.csv")
+        }
+
+        @Test
+        internal fun `sanksjon overlapper 2 perioder`() {
+            run("/økonomi/sanksjon_overlapper_2_andeler.csv")
+        }
+
+        @Test
+        internal fun `revuderer sanksjon og setter tilbake til den første perioden på nytt`() {
+            run("/økonomi/sanksjon_revurderes.csv")
+        }
+
+        @Test
+        internal fun `revurderer en sanksjon der beløpet endres`() {
+            run("/økonomi/sanksjon_revurdering_nytt_beløp.csv")
+        }
+
+        @Test
+        internal fun `revurderer med sanksjon 2 ganger`() {
+            run("/økonomi/sanksjon_flere.csv")
+        }
+
+    }
+
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
         AndelHistorikkRunner.run(javaClass.getResource(filnavn)!!, tilOgMedBehandlingId)
     }
@@ -127,7 +125,7 @@ object AndelHistorikkRunner {
         val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
             behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()))
         }
-        val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it)}
+        val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
         val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
 
@@ -136,6 +134,12 @@ object AndelHistorikkRunner {
 
     private fun validerInput(grupper: ParsetAndelHistorikkData) {
         validerVedtaksperioderIkkeOverlapper(grupper)
+        validerHarMaks1SanksjonPerVedtak(grupper)
+    }
+
+    private fun validerHarMaks1SanksjonPerVedtak(grupper: ParsetAndelHistorikkData) {
+        grupper.vedtaksliste.mapNotNull { it.perioder?.perioder }
+                .forEach { perioder -> perioder.count { it.periodeType == VedtaksperiodeType.SANKSJON } < 2 }
     }
 
     private fun validerVedtaksperioderIkkeOverlapper(grupper: ParsetAndelHistorikkData) {
@@ -200,7 +204,7 @@ private enum class AndelHistorikkHeader(val key: String,
                                         val value: (AndelHistorikkDto) -> Any?,
                                         val minHeaderValue: Int = key.length) {
 
-    TEST_TYPE("type", {""}),
+    TEST_TYPE("type", { "" }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
     FOM("fom", { YearMonth.from(it.andel.stønadFra) }, 11),
     TOM("tom", { YearMonth.from(it.andel.stønadTil) }, 11),
@@ -288,19 +292,22 @@ object AndelHistorikkParser {
                 .groupBy({ it.first }, { it.second })
                 .map { (behandlingId, vedtaksperioder) ->
                     val resultat: ResultatType
-                    val periodeWrapper: PeriodeWrapper?
-                    val opphørFom: LocalDate?
-                    if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
+                    var periodeWrapper: PeriodeWrapper? = null
+                    var opphørFom: LocalDate? = null
+                    var sanksjonsårsak: Sanksjonsårsak? = null
+                    if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
+                        resultat = ResultatType.SANKSJONERE
+                        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
+                        periodeWrapper = mapVedtaksperioder(vedtaksperioder)
+                    } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
                         resultat = ResultatType.INNVILGE
-                        opphørFom = null
                         periodeWrapper = mapVedtaksperioder(vedtaksperioder)
                     } else {
                         feilHvis(vedtaksperioder.size > 1) {
                             "Kan kun være en vedtaksperiode som er av typen opphør"
                         }
                         resultat = ResultatType.OPPHØRT
-                        periodeWrapper = null
-                        opphørFom = vedtaksperioder.single().stønadFom
+                        opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
                     }
                     Vedtak(behandlingId = behandlingId,
                            resultatType = resultat,
@@ -311,7 +318,8 @@ object AndelHistorikkParser {
                            inntekter = null,
                            saksbehandlerIdent = null,
                            opphørFom = opphørFom,
-                           beslutterIdent = null)
+                           beslutterIdent = null,
+                           sanksjonsårsak = sanksjonsårsak)
 
                 }
     }

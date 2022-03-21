@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
+import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,12 +26,14 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
 
     @PostMapping("", "/person")
     fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
+        validerPersonIdent(personIdentRequest)
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
     }
 
     @PostMapping("/person/uten-fagsak")
     fun søkPersonUtenFagsak(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<SøkeresultatUtenFagsak> {
+        validerPersonIdent(personIdentRequest)
         tilgangService.validerTilgangTilPerson(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
 
         return Ressurs.success(søkService.søkPersonUtenFagsak(personIdentRequest.personIdent))
@@ -53,4 +56,9 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(søkService.søkEtterPersonerMedSammeAdressePåFagsakPerson(fagsakPersonId))
     }
+
+    private fun validerPersonIdent(personIdentRequest: PersonIdentDto) {
+        validerIdent(personIdentRequest.personIdent)
+    }
+
 }

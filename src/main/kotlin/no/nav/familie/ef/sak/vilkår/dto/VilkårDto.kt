@@ -13,6 +13,6 @@ data class VilkårGrunnlagDto(val tidligereVedtaksperioder: TidligereVedtaksperi
                              val barnMedSamvær: List<BarnMedSamværDto>,
                              val sivilstandsplaner: SivilstandsplanerDto,
                              val aktivitet: AktivitetDto?,
-                             val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?,
+                             val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
                              val lagtTilEtterFerdigstilling: Boolean,
                              val registeropplysningerOpprettetTid: LocalDateTime)

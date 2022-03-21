@@ -1,12 +1,11 @@
 package no.nav.familie.ef.sak.barn
 
-import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -14,21 +13,41 @@ import java.util.UUID
 class BarnService(
         private val barnRepository: BarnRepository,
         private val søknadService: SøknadService,
-        private val fagsakService: FagsakService,
 ) {
 
-    fun opprettBarnPåBehandlingMedSøknadsdata(behandlingId: UUID, fagsakId: UUID, grunnlagsdataBarn: List<BarnMedIdent>) {
-        val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId, fagsakId = fagsakId)
-        val barnPåBehandlingen = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
-                .map {
-                    BehandlingBarn(id = it.behandlingBarn.id,
-                                   behandlingId = behandlingId,
-                                   personIdent = it.barn?.personIdent,
-                                   søknadBarnId = it.behandlingBarn.søknadBarnId,
-                                   navn = it.barn?.navn?.visningsnavn(),
-                                   fødselTermindato = it.behandlingBarn.fødselTermindato)
+    fun opprettBarnPåBehandlingMedSøknadsdata(behandlingId: UUID,
+                                              fagsakId: UUID,
+                                              grunnlagsdataBarn: List<BarnMedIdent>,
+                                              stønadstype: StønadType) {
+        val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
+            StønadType.BARNETILSYN -> {
+                val søknadsbarnForBarnetilsyn = hentSøknadsbarnForBehandling(behandlingId)
+                grunnlagsdataBarn.map { barn ->
+                    BehandlingBarn(
+                            behandlingId = behandlingId,
+                            søknadBarnId = søknadsbarnForBarnetilsyn.find { it.fødselsnummer != null && it.fødselsnummer == barn.personIdent }?.id,
+                            personIdent = barn.personIdent,
+                            navn = barn.navn.visningsnavn(),
+                    )
                 }
+            }
+            StønadType.OVERGANGSSTØNAD -> {
+                val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId)
+                BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
+                        .map {
+                            BehandlingBarn(id = it.behandlingBarn.id,
+                                           behandlingId = behandlingId,
+                                           personIdent = it.barn?.personIdent,
+                                           søknadBarnId = it.behandlingBarn.søknadBarnId,
+                                           navn = it.barn?.navn?.visningsnavn(),
+                                           fødselTermindato = it.behandlingBarn.fødselTermindato)
+                        }
 
+            }
+            else -> {
+                throw NotImplementedError("Støtter kun overgangsstønad og barnetilsyn")
+            }
+        }
         barnRepository.insertAll(barnPåBehandlingen)
     }
 
@@ -59,13 +78,8 @@ class BarnService(
         return BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleAktuelleBarn, grunnlagsdataBarn)
     }
 
-    private fun finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId: UUID, fagsakId: UUID): List<BehandlingBarn> {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
-        val barnFraSøknad = when (fagsak.stønadstype) {
-                                Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)?.barn
-                                Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)?.barn
-                                Stønadstype.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)?.barn
-                            } ?: emptyList()
+    private fun finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId: UUID): List<BehandlingBarn> {
+        val barnFraSøknad = hentSøknadsbarnForBehandling(behandlingId)
         return barnFraSøknad.map {
             BehandlingBarn(behandlingId = behandlingId,
                            søknadBarnId = it.id,
@@ -74,6 +88,8 @@ class BarnService(
                            fødselTermindato = it.fødselTermindato)
         }
     }
+
+    private fun hentSøknadsbarnForBehandling(behandlingId: UUID) = søknadService.hentSøknadsgrunnlag(behandlingId)?.barn ?: emptyList()
 
     fun finnBarnPåBehandling(behandlingId: UUID): List<BehandlingBarn> = barnRepository.findByBehandlingId(behandlingId)
 

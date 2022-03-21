@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,9 +23,9 @@ class SøknadController(private val søknadService: SøknadService,
     @GetMapping("/{behandlingId}/datoer")
     fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId)
-        feilHvis(overgangsstønad == null) { "Kan ikke hente søknad til behandlingen" }
-        return Ressurs.success(SøknadDatoerDto(søknadsdato = overgangsstønad.datoMottatt,
-                                               søkerStønadFra = overgangsstønad.søkerFra))
+        val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
+        brukerfeilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }
+        return Ressurs.success(SøknadDatoerDto(søknadsdato = søknadsgrunnlag.datoMottatt,
+                                               søkerStønadFra = søknadsgrunnlag.søkerFra))
     }
 }

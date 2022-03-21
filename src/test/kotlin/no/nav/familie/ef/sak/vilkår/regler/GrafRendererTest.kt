@@ -18,7 +18,7 @@ internal class GrafRendererTest {
 
     @Test
     internal fun `print alle vilkår`() {
-        val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
+        val vilkårsregler = Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
             val regler = it.value.regler
             mapOf("name" to it.key,
                   "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) })
@@ -43,7 +43,7 @@ internal class GrafRendererTest {
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
-            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad.sivilstand, it.sivilstandstype, barn= emptyList()))
+            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad.sivilstand, it.sivilstandstype, barn= emptyList(), søktOmBarnetilsyn = emptyList()))
             val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
                 delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
             }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }

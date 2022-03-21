@@ -29,12 +29,25 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
     private val eksistererUri: URI =
             UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
 
+    private fun migreringspersonerUri(antall: Int): URI =
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri)
+                    .pathSegment("api/perioder/migreringspersoner")
+                    .queryParam("antall", antall)
+                    .build()
+                    .toUri()
+
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
         return postForEntity(perioderUri, request)
     }
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
         return postForEntity(finnSakerUri, request)
+    }
+
+    fun hentPersonerForMigrering(antall: Int): Set<String> {
+        val response = getForEntity<Map<String, Any>>(migreringspersonerUri(antall))
+        @Suppress("UNCHECKED_CAST")
+        return (response.getValue("personIdenter") as List<String>).toSet()
     }
 
     /**

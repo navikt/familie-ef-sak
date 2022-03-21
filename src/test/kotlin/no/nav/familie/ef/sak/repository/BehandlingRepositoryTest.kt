@@ -9,23 +9,23 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.test.assertEquals
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -61,6 +61,37 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingRepository.findByFagsakIdAndStatus(UUID.randomUUID(), BehandlingStatus.OPPRETTET)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, FERDIGSTILT)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.OPPRETTET)).containsOnly(behandling)
+    }
+
+    @Test
+    fun `finnBehandlingServiceObject returnerer korrekt konstruert BehandlingServiceObject`() {
+        val fagsak = testoppsettService
+                .lagreFagsak(fagsak(setOf(PersonIdent(ident = "1"),
+                                          PersonIdent(ident = "2",
+                                                      sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now()
+                                                              .plusDays(2)))),
+                                          PersonIdent(ident = "3"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
+
+        val behandlingServiceObject = behandlingRepository.finnSaksbehandling(behandling.id)
+
+        assertThat(behandlingServiceObject.id).isEqualTo(behandling.id)
+        assertThat(behandlingServiceObject.eksternId).isEqualTo(behandling.eksternId.id)
+        assertThat(behandlingServiceObject.forrigeBehandlingId).isEqualTo(behandling.forrigeBehandlingId)
+        assertThat(behandlingServiceObject.type).isEqualTo(behandling.type)
+        assertThat(behandlingServiceObject.status).isEqualTo(behandling.status)
+        assertThat(behandlingServiceObject.steg).isEqualTo(behandling.steg)
+        assertThat(behandlingServiceObject.årsak).isEqualTo(behandling.årsak)
+        assertThat(behandlingServiceObject.kravMottatt).isEqualTo(behandling.kravMottatt)
+        assertThat(behandlingServiceObject.resultat).isEqualTo(behandling.resultat)
+        assertThat(behandlingServiceObject.henlagtÅrsak).isEqualTo(behandling.henlagtÅrsak)
+        assertThat(behandlingServiceObject.ident).isEqualTo("2")
+        assertThat(behandlingServiceObject.fagsakId).isEqualTo(fagsak.id)
+        assertThat(behandlingServiceObject.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
+        assertThat(behandlingServiceObject.stønadstype).isEqualTo(fagsak.stønadstype)
+        assertThat(behandlingServiceObject.migrert).isEqualTo(fagsak.migrert)
+        assertThat(behandlingServiceObject.opprettetTid).isEqualTo(behandling.sporbar.opprettetTid)
+        assertThat(behandlingServiceObject.endretTid).isEqualTo(behandling.sporbar.endret.endretTid)
     }
 
     @Test
@@ -185,11 +216,12 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(first.eksternBehandlingId).isEqualTo(behandling.eksternId.id)
         assertThat(first.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
     }
+
     @Test
     internal fun `finnEksterneIder - send inn én behandlingId som finnes, forvent én eksternId `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val annenFagsak = testoppsettService.lagreFagsak(fagsak())
+        val annenFagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
         val annenBehandling = behandlingRepository.insert(behandling(annenFagsak))
 
         val eksterneIder = behandlingRepository.finnEksterneIder(setOf(annenBehandling.id))
@@ -272,6 +304,37 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
                 behandling.id)
+    }
+
+    @Nested
+    inner class ExistsByFagsakIdAndTypeIn {
+
+        @Test
+        internal fun `existsByFagsakIdAndTypeIn - finner ikke når det ikke finnes noen behandlinger`() {
+            assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
+                                                                      setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
+        @Test
+        internal fun `existsByFagsakIdAndTypeIn - finner ikke når det kun finnes av annen type`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = FERDIGSTILT,
+                                                   type = BehandlingType.BLANKETT))
+            assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
+                                                                      setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
+        @Test
+        internal fun `existsByFagsakIdAndTypeIn - true når det av typen man spør etter`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = FERDIGSTILT,
+                                                   type = BehandlingType.REVURDERING))
+            assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
+                                                                      setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
     }
 
 }

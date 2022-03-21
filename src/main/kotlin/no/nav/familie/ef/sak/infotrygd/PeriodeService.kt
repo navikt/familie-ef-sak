@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.infotrygd
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infotrygd.InternPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -11,6 +10,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Component
 
 @Component
@@ -27,11 +27,11 @@ class PeriodeService(
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
 
         return InternePerioder(
-                overgangsstønad = slåSammenPerioder(hentPerioderFraEf(personIdenter, Stønadstype.OVERGANGSSTØNAD),
+                overgangsstønad = slåSammenPerioder(hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD),
                                                     perioderFraReplika.overgangsstønad),
-                barnetilsyn = slåSammenPerioder(hentPerioderFraEf(personIdenter, Stønadstype.BARNETILSYN),
+                barnetilsyn = slåSammenPerioder(hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN),
                                                 perioderFraReplika.barnetilsyn),
-                skolepenger = slåSammenPerioder(hentPerioderFraEf(personIdenter, Stønadstype.SKOLEPENGER),
+                skolepenger = slåSammenPerioder(hentPerioderFraEf(personIdenter, StønadType.SKOLEPENGER),
                                                 perioderFraReplika.skolepenger)
         )
     }
@@ -39,12 +39,12 @@ class PeriodeService(
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad
-        val perioderFraEf = hentPerioderFraEf(personIdenter, Stønadstype.OVERGANGSSTØNAD)
+        val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD)
 
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: Stønadstype): List<InternPeriode> {
+    private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: StønadType): List<InternPeriode> {
         return fagsakService.finnFagsak(personIdenter, stønadstype)
                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
                        ?.let { hentPerioderFraEf(it) }
@@ -63,7 +63,9 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriod
         personIdent = this.personIdent,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
-        beløp = this.beløp,
+        utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
+        månedsbeløp = this.beløp,
+        engangsbeløp = this.beløp,
         stønadFom = this.stønadFom,
         stønadTom = this.stønadTom,
         opphørsdato = null,
@@ -74,7 +76,9 @@ fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
         personIdent = this.personIdent,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
-        beløp = this.beløp,
+        utgifterBarnetilsyn = this.utgifterBarnetilsyn,
+        månedsbeløp = this.månedsbeløp,
+        engangsbeløp = this.engangsbeløp,
         stønadFom = this.stønadFom,
         stønadTom = this.stønadTom,
         opphørsdato = this.opphørsdato,

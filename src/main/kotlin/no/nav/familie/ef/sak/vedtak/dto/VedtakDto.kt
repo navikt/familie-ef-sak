@@ -27,6 +27,15 @@ enum class ResultatType {
     AVSLÅ,
     HENLEGGE,
     OPPHØRT,
+    SANKSJONERE,
+}
+
+enum class Sanksjonsårsak {
+    NEKTET_DELTAGELSE_ARBEIDSMARKEDSTILTAK,
+    NEKTET_TILBUDT_ARBEID,
+    SAGT_OPP_STILLING,
+    UNNLATT_GJENOPPTAGELSE_ARBEIDSFORHOLD,
+    UNNLATT_MØTE_INNKALLING,
 }
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
@@ -34,6 +43,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
     ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
     ResultatType.OPPHØRT -> Vedtaksresultat.OPPHØRT
+    ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
 sealed class VedtakDto {
@@ -58,23 +68,34 @@ class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
              val opphørFom: YearMonth,
              val begrunnelse: String?) : VedtakDto()
 
+class Sanksjonert(val resultatType: ResultatType = ResultatType.SANKSJONERE,
+                  val sanksjonsårsak: Sanksjonsårsak,
+                  val periode: VedtaksperiodeDto,
+                  val internBegrunnelse: String) : VedtakDto()
+
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
                        avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
                        resultatType = ResultatType.AVSLÅ)
-    is Innvilget -> Vedtak(
-            behandlingId = behandlingId,
-            periodeBegrunnelse = this.periodeBegrunnelse,
-            inntektBegrunnelse = this.inntektBegrunnelse,
-            resultatType = this.resultatType,
-            perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
-            inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
-            samordningsfradragType = this.samordningsfradragType)
+    is Innvilget -> Vedtak(behandlingId = behandlingId,
+                           periodeBegrunnelse = this.periodeBegrunnelse,
+                           inntektBegrunnelse = this.inntektBegrunnelse,
+                           resultatType = this.resultatType,
+                           perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
+                           inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
+                           samordningsfradragType = this.samordningsfradragType)
     is Opphør -> Vedtak(behandlingId = behandlingId,
                         avslåBegrunnelse = begrunnelse,
                         resultatType = ResultatType.OPPHØRT,
                         opphørFom = opphørFom.atDay(1)
+    )
+    is Sanksjonert -> Vedtak(
+            behandlingId = behandlingId,
+            sanksjonsårsak = this.sanksjonsårsak,
+            perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
+            internBegrunnelse = this.internBegrunnelse,
+            resultatType = ResultatType.SANKSJONERE,
     )
 }
 
@@ -97,8 +118,13 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                     begrunnelse = this.avslåBegrunnelse,
                     opphørFom = YearMonth.from(this.opphørFom)
             )
+            ResultatType.SANKSJONERE -> Sanksjonert(
+                    resultatType = this.resultatType,
+                    sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
+                    periode = (this.perioder?.perioder ?: emptyList()).fraDomeneForSanksjon(),
+                    internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
+            )
             else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
-
         }
 
 
@@ -111,6 +137,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
             ResultatType.INNVILGE -> mapper.treeToValue(node, Innvilget::class.java)
             ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
             ResultatType.OPPHØRT -> mapper.treeToValue(node, Opphør::class.java)
+            ResultatType.SANKSJONERE -> mapper.treeToValue(node, Sanksjonert::class.java)
             else -> throw Feil("Kunde ikke deserialisera vedtakdto")
         }
     }

@@ -12,13 +12,15 @@ fun lagTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                       behandlingId: UUID = UUID.randomUUID(),
                       personident: String = "123",
                       vedtaksdato: LocalDate = LocalDate.now(),
-                      type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING) =
+                      type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+                      startdato: LocalDate? = null) =
         TilkjentYtelse(id = id,
                        behandlingId = behandlingId,
                        personident = personident,
                        vedtakstidspunkt = vedtaksdato.atStartOfDay().truncatedTo(ChronoUnit.MILLIS),
                        type = type,
-                       andelerTilkjentYtelse = andelerTilkjentYtelse)
+                       andelerTilkjentYtelse = andelerTilkjentYtelse,
+                       startdato = startdato ?: andelerTilkjentYtelse.minOfOrNull { it.stønadFom })
 
 fun lagAndelTilkjentYtelse(beløp: Int,
                            fraOgMed: LocalDate,

@@ -16,9 +16,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
@@ -51,12 +52,19 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
-            ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
+                                                              ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-    fun finnGjeldendeIverksatteBehandlinger(stonadstype: Stønadstype) =
+    fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
+            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+            ?: hentBehandlinger(fagsakId).lastOrNull {
+                it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT
+            }
+
+
+    fun finnGjeldendeIverksatteBehandlinger(stonadstype: StønadType) =
             behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
 
     @Transactional
@@ -119,6 +127,11 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentBehandling(behandlingId: UUID): Behandling = behandlingRepository.findByIdOrThrow(behandlingId)
 
+    fun hentSaksbehandling(behandlingId: UUID): Saksbehandling = behandlingRepository.finnSaksbehandling(behandlingId)
+
+    fun hentSaksbehandling(eksternBehandlingId: Long): Saksbehandling =
+            behandlingRepository.finnSaksbehandling(eksternBehandlingId)
+
     fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(
             eksternBehandlingId) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
 
@@ -139,6 +152,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
+    fun harFørstegangsbehandlingEllerRevurderingFraFør(fagsakId: UUID) =
+            behandlingRepository.existsByFagsakIdAndTypeIn(fagsakId, setOf(BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                           BehandlingType.REVURDERING))
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
         return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }
@@ -167,12 +183,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
         if (!behandling.kanHenlegges()) {
-            throw Feil(
-                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                    "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                    HttpStatus.BAD_REQUEST,
-                    null
-            )
+            throw ApiFeil("Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
+                          HttpStatus.BAD_REQUEST)
         }
     }
 
@@ -184,8 +196,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun settPåVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        feilHvis(behandling.status.behandlingErLåstForVidereRedigering(),
-                 HttpStatus.BAD_REQUEST) { "Kan ikke sette behandling med status ${behandling.status} på vent" }
+        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke sette behandling med status ${behandling.status} på vent"
+        }
 
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
@@ -194,8 +207,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     @Transactional
     fun taAvVent(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
-        feilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT,
-                 HttpStatus.BAD_REQUEST) { "Kan ikke ta behandling med status ${behandling.status} av vent" }
+        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+            "Kan ikke ta behandling med status ${behandling.status} av vent"
+        }
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }

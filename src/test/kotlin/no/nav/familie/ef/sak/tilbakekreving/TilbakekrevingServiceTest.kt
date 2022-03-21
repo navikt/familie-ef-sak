@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
@@ -78,7 +79,7 @@ internal class TilbakekrevingServiceTest {
                     TilbakekrevingDto(valg = Tilbakekrevingsvalg.AVVENT,
                                       varseltekst = "",
                                       begrunnelse = "Dette er tekst ")
-            val feil = assertThrows<Feil> {
+            val feil = assertThrows<ApiFeil> {
                 tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
                                                           behandlingId = UUID.randomUUID())
             }
@@ -93,7 +94,7 @@ internal class TilbakekrevingServiceTest {
                                       varseltekst = null,
                                       begrunnelse = "tekst her")
 
-            val feil = assertThrows<Feil> {
+            val feil = assertThrows<ApiFeil> {
                 tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
                                                           behandlingId = UUID.randomUUID())
             }
@@ -109,7 +110,7 @@ internal class TilbakekrevingServiceTest {
                                       varseltekst = "   ",
                                       begrunnelse = "tekst her")
 
-            val feil = assertThrows<Feil> {
+            val feil = assertThrows<ApiFeil> {
                 tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
                                                           behandlingId = UUID.randomUUID())
             }
@@ -161,8 +162,8 @@ internal class TilbakekrevingServiceTest {
         @Test
         internal fun `Varselbrev feiler hvis behandling er låst`() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
-            val assertFails = assertFailsWith<Feil> { tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel") }
-            assertThat(assertFails.frontendFeilmelding).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
+            val assertFails = assertFailsWith<ApiFeil> { tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel") }
+            assertThat(assertFails.feil).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
         }
 
         private fun mockHentDataForGenereringAvVarselbrev(): CapturingSlot<ForhåndsvisVarselbrevRequest> {
@@ -190,11 +191,11 @@ internal class TilbakekrevingServiceTest {
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
                     .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
-            val feil = assertFailsWith<Feil> {
+            val feil = assertFailsWith<ApiFeil> {
                 tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
             }
 
-            assertThat(feil.frontendFeilmelding).isEqualTo("Melding til front end.")
+            assertThat(feil.feil).isEqualTo("Melding til front end.")
         }
 
         @Test
@@ -213,9 +214,11 @@ internal class TilbakekrevingServiceTest {
 
             tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
 
-            verify { tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id,
-                                                                      behandling.eksternId.id,
-                                                                      fagsak.stønadstype) }
+            verify {
+                tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id,
+                                                                 behandling.eksternId.id,
+                                                                 fagsak.stønadstype)
+            }
         }
 
 

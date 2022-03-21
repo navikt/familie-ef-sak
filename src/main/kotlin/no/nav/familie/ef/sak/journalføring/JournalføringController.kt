@@ -1,9 +1,13 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -25,13 +29,14 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalføringController(private val journalføringService: JournalføringService,
                               private val pdlClient: PdlClient,
-                              private val tilgangService: TilgangService) {
+                              private val tilgangService: TilgangService,
+                              private val featureToggleService: FeatureToggleService) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(JournalføringResponse(journalpost, personIdent))
+        return Ressurs.success(JournalføringResponse(journalpost, personIdent, journalpost.harStrukturertSøknad()))
     }
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
@@ -56,6 +61,21 @@ class JournalføringController(private val journalføringService: Journalføring
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
+    }
+
+    @PostMapping("/{journalpostId}/opprett-behandling-med-soknadsdata-fra-en-ferdigstilt-journalpost")
+    fun opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
+            @PathVariable journalpostId: String,
+            @RequestBody request: JournalføringTilNyBehandlingRequest): Ressurs<Long> {
+        feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost")) {
+            "Funksjonen opprettBehandlingPåFerdigstiltJournalføring er skrudd av for denne brukeren"
+        }
+        val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
+        return Ressurs.success(journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(request,
+                                                                                                               journalpostId))
     }
 
     fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.felles.util
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
@@ -37,3 +38,13 @@ fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
                                                           harTidligereBarnetilsyn = true,
                                                           harTidligereSkolepenger = false))
 )
+
+fun opprettBarnMedIdent(personIdent: String) =
+        BarnMedIdent(adressebeskyttelse = emptyList(),
+                     bostedsadresse = emptyList(),
+                     deltBosted = emptyList(),
+                     dødsfall = emptyList(),
+                     forelderBarnRelasjon = emptyList(),
+                     fødsel = emptyList(),
+                     navn = Navn("", "", "", Metadata(false)),
+                     personIdent = personIdent)

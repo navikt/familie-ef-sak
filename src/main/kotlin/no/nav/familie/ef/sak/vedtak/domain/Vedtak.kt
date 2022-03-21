@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
@@ -23,7 +24,10 @@ data class Vedtak(@Id
                   val saksbehandlerIdent: String? = null,
                   @Column("opphor_fom")
                   val opphørFom: LocalDate? = null,
-                  val beslutterIdent: String? = null)
+                  val beslutterIdent: String? = null,
+                  @Column("sanksjon_arsak")
+                  val sanksjonsårsak: Sanksjonsårsak? = null,
+                  val internBegrunnelse: String? = null)
 
 data class Vedtaksperiode(
         val datoFra: LocalDate,
@@ -35,12 +39,14 @@ data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
 
 enum class VedtaksperiodeType {
-    MIGRERING,
     FORLENGELSE,
     HOVEDPERIODE,
+    MIDLERTIDIG_OPPHØR,
+    MIGRERING,
     PERIODE_FØR_FØDSEL,
+    SANKSJON,
     UTVIDELSE,
-    MIDLERTIDIG_OPPHØR
+    NY_PERIODE_FOR_NYTT_BARN
 }
 
 enum class AktivitetType {

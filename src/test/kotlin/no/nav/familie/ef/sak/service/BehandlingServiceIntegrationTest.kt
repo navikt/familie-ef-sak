@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.behandling
@@ -84,5 +85,34 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
 
         assertThat(behandlingService.hentBehandlinger(setOf(behandling.id, behandling2.id))).hasSize(2)
+    }
+
+    @Test
+    internal fun `skal finne siste behandling med avslåtte hvis kun avslått`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT))
+        val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+        assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
+    }
+
+    @Test
+    internal fun `skal finne siste behandling med avslåtte hvis avslått, henlagt og blankett`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val blankett = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT, type = BehandlingType.BLANKETT))
+        val avslag = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT))
+        val henleggelse = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT))
+        val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+        assertThat(sisteBehandling?.id).isEqualTo(avslag.id)
+    }
+
+    @Test
+    internal fun `skal plukke ut førstegangsbehandling hvis det finnes førstegangsbehandling, avslått, henlagt og blankett`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val blankett = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT, type = BehandlingType.BLANKETT))
+        val førstegang = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT))
+        val avslag = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT))
+        val henleggelse = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT))
+        val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+        assertThat(sisteBehandling?.id).isEqualTo(førstegang.id)
     }
 }

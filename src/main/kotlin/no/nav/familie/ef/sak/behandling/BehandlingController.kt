@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,6 +26,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(private val behandlingService: BehandlingService,
+                           private val fagsakService: FagsakService,
                            private val henleggService: HenleggService,
                            private val stegService: StegService,
                            private val tilgangService: TilgangService) {
@@ -32,7 +35,8 @@ class BehandlingController(private val behandlingService: BehandlingService,
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val behandling: Behandling = behandlingService.hentBehandling(behandlingId)
-        val behandlingDto = behandling.tilDto()
+        val fagsak: Fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val behandlingDto = behandling.tilDto(fagsak.stønadstype)
         return Ressurs.success(behandlingDto)
     }
 
@@ -62,14 +66,16 @@ class BehandlingController(private val behandlingService: BehandlingService,
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
-        return Ressurs.success(henlagtBehandling.tilDto())
+        val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
+        return Ressurs.success(henlagtBehandling.tilDto(fagsak.stønadstype))
     }
 
     @GetMapping("/ekstern/{eksternBehandlingId}")
     fun hentBehandling(@PathVariable eksternBehandlingId: Long): Ressurs<BehandlingDto> {
         val behandling: Behandling = behandlingService.hentBehandlingPåEksternId(eksternBehandlingId)
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        val behandlingDto = behandling.tilDto()
+        val fagsak: Fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        val behandlingDto = behandling.tilDto(fagsak.stønadstype)
         return Ressurs.success(behandlingDto)
     }
 }

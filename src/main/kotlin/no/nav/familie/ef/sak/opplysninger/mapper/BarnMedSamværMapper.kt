@@ -9,29 +9,59 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepassordning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnepassordningDto
 
 object BarnMedSamværMapper {
 
     fun slåSammenBarnMedSamvær(søknadsgrunnlag: List<BarnMedSamværSøknadsgrunnlagDto>,
-                               registergrunnlag: List<BarnMedSamværRegistergrunnlagDto>): List<BarnMedSamværDto> {
+                               registergrunnlag: List<BarnMedSamværRegistergrunnlagDto>,
+                               barnepass: List<BarnepassDto>): List<BarnMedSamværDto> {
         val registergrunnlagPaaId = registergrunnlag.associateBy { it.id }
+        val barnepassPaaId = barnepass.associateBy { it.id }
         return søknadsgrunnlag.map {
             val id = it.id
             BarnMedSamværDto(barnId = id,
                              søknadsgrunnlag = it,
-                             registergrunnlag = registergrunnlagPaaId[id] ?: error("Savner registergrunnlag for barn=$id"))
+                             registergrunnlag = registergrunnlagPaaId[id] ?: error("Savner registergrunnlag for barn=$id"),
+                             barnepass = barnepassPaaId[id]
+            )
         }
     }
 
-    fun mapSøknadsgrunnlag(behandlingBarn: List<BehandlingBarn>, søknadBarn: Collection<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
+    fun mapSøknadsgrunnlag(behandlingBarn: List<BehandlingBarn>,
+                           søknadBarn: Collection<SøknadBarn>): List<BarnMedSamværSøknadsgrunnlagDto> {
         val søknadsbarn = søknadBarn.associateBy { it.id }
-        return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadsbarn[it] } ) }
+        return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadsbarn[it] }) }
     }
+
+
+    fun mapBarnepass(behandlingBarn: List<BehandlingBarn>, søknadBarn: Collection<SøknadBarn>): List<BarnepassDto> {
+        val søknadsbarn = søknadBarn.associateBy { it.id }
+        return behandlingBarn.map { barn -> mapBarnepass(barn, barn.søknadBarnId?.let { søknadsbarn[it] }) }
+    }
+
+    private fun mapBarnepass(behandlingBarn: BehandlingBarn, søknadBarn: SøknadBarn?): BarnepassDto {
+        val barnepass = søknadBarn?.barnepass
+        return BarnepassDto(id = behandlingBarn.id,
+                            skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: false,
+                            barnepassordninger = barnepass?.barnepassordninger?.map(this::mapBarnepassordning) ?: emptyList(),
+                            årsakBarnepass = barnepass?.årsakBarnepass)
+    }
+
+
+    private fun mapBarnepassordning(it: Barnepassordning) =
+            BarnepassordningDto(type = it.hvaSlagsBarnepassordning,
+                                navn = it.navn,
+                                fra = it.datoperiode.fra,
+                                til = it.datoperiode.til,
+                                beløp = it.beløp)
 
     private fun mapSøknadsgrunnlag(behandlingBarn: BehandlingBarn, søknadsbarn: SøknadBarn?): BarnMedSamværSøknadsgrunnlagDto {
         val samvær = søknadsbarn?.samvær
@@ -97,6 +127,7 @@ object BarnMedSamværMapper {
                 },
                 forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr) },
                 dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
+                fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato
         )
     }
 
@@ -121,4 +152,5 @@ object BarnMedSamværMapper {
         )
 
     }
+
 }

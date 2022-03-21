@@ -10,10 +10,12 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -28,12 +30,16 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -51,16 +57,18 @@ internal class VurderingServiceTest {
     private val barnService = mockk<BarnService>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    private val fagsakService = mockk<FagsakService>()
     private val vurderingService = VurderingService(behandlingService = behandlingService,
                                                     søknadService = søknadService,
                                                     vilkårsvurderingRepository = vilkårsvurderingRepository,
                                                     vilkårGrunnlagService = vilkårGrunnlagService,
                                                     grunnlagsdataService = grunnlagsdataService,
-                                                    barnService = barnService)
+                                                    barnService = barnService,
+                                                    fagsakService = fagsakService)
     private val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().setBarn(listOf(
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
             TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-    )).build().søknadOvergangsstønad)
+    )).build().søknadOvergangsstønad).tilSøknadsverdier()
     private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()
@@ -69,7 +77,7 @@ internal class VurderingServiceTest {
     fun setUp() {
         every { behandlingService.hentAktivIdent(behandlingId) } returns søknad.fødselsnummer
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        every { søknadService.hentOvergangsstønad(any()) }.returns(søknad)
+        every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
                 .returns(Medlemskapsinfo(personIdent = søknad.fødselsnummer,
@@ -78,28 +86,42 @@ internal class VurderingServiceTest {
                                          avvistePerioder = emptyList()))
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
+        every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         val sivilstand = SivilstandInngangsvilkårDto(mockk(relaxed = true),
                                                      SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null))
-        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             sivilstand,
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             mockk(relaxed = true),
-                                                                                             false,
-                                                                                             mockk(relaxed = true))
+
+        val barnMedSamvær = barn.map { lagBarnetilsynBarn(it.id) }
+
+
+        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(
+                tidligereVedtaksperioder = mockk(relaxed = true),
+                medlemskap = mockk(relaxed = true),
+                sivilstand = sivilstand,
+                bosituasjon = mockk(relaxed = true),
+                barnMedSamvær = barnMedSamvær,
+                sivilstandsplaner = mockk(relaxed = true),
+                aktivitet = mockk(relaxed = true),
+                sagtOppEllerRedusertStilling = mockk(relaxed = true),
+                lagtTilEtterFerdigstilling = false,
+                registeropplysningerOpprettetTid = mockk(relaxed = true))
     }
 
+    private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(barnId,
+                                                                                        søknadsgrunnlag = mockk(relaxed = true),
+                                                                                        registergrunnlag = mockk(relaxed = true),
+                                                                                        barnepass = BarnepassDto(barnId,
+                                                                                                                 skalHaBarnepass = true,
+                                                                                                                 barnepassordninger = listOf(),
+                                                                                                                 årsakBarnepass = null))
+
     @Test
-    fun `skal opprette nye Vilkårsvurdering for alle vilkår dersom ingen vurderinger finnes`() {
+    fun `skal opprette nye Vilkårsvurdering for overgangsstønad med alle vilkår dersom ingen vurderinger finnes`() {
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns emptyList()
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
                 { it.invocation.args.first() as List<Vilkårsvurdering> }
-        val vilkår = VilkårType.hentVilkår()
+        val vilkår = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)
 
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)
@@ -108,6 +130,29 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyInAnyOrderElementsOf(vilkår)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }
+                           .toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
+    }
+
+    @Test
+    fun `skal opprette nye Vilkårsvurdering for barnetilsyn med alle vilkår dersom ingen vurderinger finnes`() {
+        every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns emptyList()
+        every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = BARNETILSYN)
+
+        val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
+        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
+                { it.invocation.args.first() as List<Vilkårsvurdering> }
+        val vilkår = VilkårType.hentVilkårForStønad(BARNETILSYN)
+
+
+        vurderingService.hentEllerOpprettVurderinger(behandlingId)
+
+        assertThat(nyeVilkårsvurderinger.captured).hasSize(vilkår.size + 2) // 2 barn, Ekstra aleneomsorgsvilkår og aldersvilkår
+        assertThat(nyeVilkårsvurderinger.captured.map { it.type }.distinct()).containsExactlyInAnyOrderElementsOf(vilkår)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }).hasSize(2)
+        assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(4)
         assertThat(nyeVilkårsvurderinger.captured.map { it.resultat }
                            .toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
@@ -131,7 +176,8 @@ internal class VurderingServiceTest {
         val delvilkårsvurdering =
                 SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(mockk(),
                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                                                                                barn = emptyList()))
+                                                                                barn = emptyList(),
+                                                                                søktOmBarnetilsyn = emptyList()))
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
                 listOf(Vilkårsvurdering(behandlingId = behandlingId,
                                         type = VilkårType.SIVILSTAND,
@@ -187,7 +233,7 @@ internal class VurderingServiceTest {
     internal fun `Skal returnere ikke oppfylt hvis noen vurderinger er SKAL_IKKE_VURDERES`() {
         val vilkårsvurderinger = lagVilkårsvurderingerMedResultat()
         // Guard
-        assertThat((vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår()))).isTrue()
+        assertThat((vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)))).isTrue()
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
 
@@ -202,7 +248,7 @@ internal class VurderingServiceTest {
 
     private fun lagVilkårsvurderinger(behandlingId: UUID,
                                       resultat: Vilkårsresultat = OPPFYLT): List<Vilkårsvurdering> {
-        return VilkårType.hentVilkår().map {
+        return VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(behandlingId = behandlingId,
                              resultat = resultat,
                              type = it,

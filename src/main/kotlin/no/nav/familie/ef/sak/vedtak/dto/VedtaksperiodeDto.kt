@@ -12,7 +12,11 @@ data class VedtaksperiodeDto(
         val årMånedTil: YearMonth,
         val aktivitet: AktivitetType,
         val periodeType: VedtaksperiodeType
-)
+) {
+
+    fun tilPeriode() = Periode(fradato = this.årMånedFra.atDay(1),
+                               tildato = this.årMånedTil.atEndOfMonth())
+}
 
 fun List<VedtaksperiodeDto>.erSammenhengende(): Boolean = this.foldIndexed(true) { index, acc, periode ->
     if (index == 0) {
@@ -28,8 +32,7 @@ fun List<VedtaksperiodeDto>.erSammenhengende(): Boolean = this.foldIndexed(true)
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
         this.map {
-            Periode(fradato = it.årMånedFra.atDay(1),
-                    tildato = it.årMånedTil.atEndOfMonth())
+            it.tilPeriode()
         }
 
 
@@ -52,3 +55,11 @@ fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
                     periodeType = it.periodeType,
             )
         }
+
+fun List<Vedtaksperiode>.fraDomeneForSanksjon(): VedtaksperiodeDto =
+        VedtaksperiodeDto(
+                årMånedFra = YearMonth.from(this.first().datoFra),
+                årMånedTil = YearMonth.from(this.first().datoTil),
+                aktivitet = this.first().aktivitet,
+                periodeType = this.first().periodeType,
+        )

@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -76,10 +75,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 hendelse = hendelse,
                 behandlingResultat = behandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
-                opprettetEnhet = sisteOppgaveForBehandling.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                ansvarligEnhet = sisteOppgaveForBehandling.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
-                stønadstype = StønadType.valueOf(fagsak.stønadstype.name),
+                stønadstype = fagsak.stønadstype,
                 behandlingstype = BehandlingType.valueOf(behandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
                 relatertEksternBehandlingId = relatertEksternBehandlingId,
@@ -89,10 +88,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
     }
 
-    private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave {
-        val gsakOppgaveId = oppgaveId ?: oppgaveService.finnSisteOppgaveForBehandling(behandlingId).gsakOppgaveId
+    private fun finnSisteOppgaveForBehandlingen(behandlingId: UUID, oppgaveId: Long?): Oppgave? {
+        val gsakOppgaveId = oppgaveId ?: oppgaveService.finnSisteOppgaveForBehandling(behandlingId)?.gsakOppgaveId
 
-        return oppgaveService.hentOppgave(gsakOppgaveId)
+        return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
     }
 
     private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?): String? {
@@ -129,7 +128,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
     companion object {
 
-        fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long): Task =
+        fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long?): Task =
                 opprettTask(behandlingId = behandlingId,
                             hendelse = Hendelse.MOTTATT,
                             hendelseTidspunkt = LocalDateTime.now(),

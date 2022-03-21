@@ -5,11 +5,11 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.fagsak.FagsakRequest
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.FagsakDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,7 +40,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentFagsakForPerson(): ResponseEntity<Ressurs<FagsakDto>> {
-        val fagsakRequest = FagsakRequest("ikkeTilgang", Stønadstype.OVERGANGSSTØNAD)
+        val fagsakRequest = FagsakRequest("ikkeTilgang", StønadType.OVERGANGSSTØNAD)
 
         return restTemplate.exchange(localhost("/api/fagsak"),
                                      HttpMethod.POST,

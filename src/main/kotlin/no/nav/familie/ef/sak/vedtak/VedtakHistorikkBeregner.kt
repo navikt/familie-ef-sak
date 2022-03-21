@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -23,9 +24,34 @@ object VedtakHistorikkBeregner {
             val nyePerioder = vedtak.perioder?.perioder ?: error("Finner ikke perioder på vedtak=${vedtak.behandlingId}")
             val førsteFraDato = nyePerioder.first().datoFra
             avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder
+        } else if (vedtak.resultatType == ResultatType.SANKSJONERE) {
+            splitOppPerioderSomErSanksjonert(acc, vedtak)
         } else {
             val opphørFom = vedtak.opphørFom ?: error("Mangler dato for opphør på vedtak=${vedtak.behandlingId}")
             avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
+        }
+    }
+
+    private fun splitOppPerioderSomErSanksjonert(acc: List<Pair<UUID, List<Vedtaksperiode>>>, vedtak: Vedtak): List<Vedtaksperiode> {
+        val vedtaksperiodeSanksjon =
+                vedtak.perioder?.perioder?.singleOrNull() ?: error("Sanksjon må ha en periode vedtak=${vedtak.behandlingId}")
+        val sanksjonsperiode = Periode(vedtaksperiodeSanksjon.datoFra, vedtaksperiodeSanksjon.datoTil)
+        return acc.last().second.flatMap {
+            if (!sanksjonsperiode.overlapper(Periode(it.datoFra, it.datoTil))) {
+                return@flatMap listOf(it)
+            }
+            val nyePerioder = mutableListOf<Vedtaksperiode>()
+            if (sanksjonsperiode.fradato <= it.datoFra && sanksjonsperiode.tildato < it.datoTil) {
+                nyePerioder.add(vedtaksperiodeSanksjon)
+                nyePerioder.add(it.copy(datoFra = sanksjonsperiode.tildato.plusDays(1)))
+            } else if (sanksjonsperiode.fradato > it.datoFra) {
+                nyePerioder.add(it.copy(datoTil = sanksjonsperiode.fradato.minusDays(1)))
+                nyePerioder.add(vedtaksperiodeSanksjon)
+                if (sanksjonsperiode.tildato < it.datoTil) {
+                    nyePerioder.add(it.copy(datoFra = sanksjonsperiode.tildato.plusDays(1)))
+                }
+            }
+            nyePerioder
         }
     }
 

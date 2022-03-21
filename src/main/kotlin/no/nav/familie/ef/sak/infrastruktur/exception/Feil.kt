@@ -25,8 +25,22 @@ inline fun feilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERN
     }
 }
 
+@OptIn(ExperimentalContracts::class)
+inline fun brukerfeilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.BAD_REQUEST, lazyMessage: () -> String) {
+    contract {
+        returns() implies !boolean
+    }
+    if (boolean) {
+        throw ApiFeil(feil = lazyMessage(), httpStatus= httpStatus)
+    }
+}
+
 inline fun feilHvisIkke(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR, lazyMessage: () -> String) {
     feilHvis(!boolean, httpStatus) { lazyMessage() }
+}
+
+inline fun brukerfeilHvisIkke(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.BAD_REQUEST, lazyMessage: () -> String) {
+    brukerfeilHvis(!boolean, httpStatus) { lazyMessage() }
 }
 
 class ManglerTilgang(val melding: String) : RuntimeException(melding)
