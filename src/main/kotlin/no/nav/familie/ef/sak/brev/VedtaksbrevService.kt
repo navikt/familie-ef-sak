@@ -52,34 +52,21 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
         val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
 
-        if (featureToggleService.isEnabled("familie.ef.sak.bruk-html-for-brev")) {
-            val html = brevClient.genererHtml(brevmal = brevmal,
-                                              saksbehandlerBrevrequest = brevrequest,
-                                              saksbehandlersignatur = saksbehandlersignatur.navn,
-                                              enhet = saksbehandlersignatur.enhet,
-                                              skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter)
+        val html = brevClient.genererHtml(brevmal = brevmal,
+                                          saksbehandlerBrevrequest = brevrequest,
+                                          saksbehandlersignatur = saksbehandlersignatur.navn,
+                                          enhet = saksbehandlersignatur.enhet,
+                                          skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter)
 
 
-            lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId,
-                                                       "", // TODO: Dette feltet skal fjernes senere
-                                                       brevmal,
-                                                       saksbehandlersignatur.navn,
-                                                       saksbehandlersignatur.enhet,
-                                                       html)
+        lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId,
+                                                   "", // TODO: Dette feltet skal fjernes senere
+                                                   brevmal,
+                                                   saksbehandlersignatur.navn,
+                                                   saksbehandlersignatur.enhet,
+                                                   html)
 
-            return familieDokumentClient.genererPdfFraHtml(html)
-
-        }
-
-        val vedtaksbrev = lagreEllerOppdaterSaksbehandlerVedtaksbrev(
-                behandlingId,
-                brevrequest.toString(),
-                brevmal,
-                saksbehandlersignatur.navn,
-                saksbehandlersignatur.enhet
-        )
-
-        return brevClient.genererBrev(vedtaksbrev.tilDto(saksbehandlersignatur.skjulBeslutter))
+        return familieDokumentClient.genererPdfFraHtml(html)
     }
 
     private fun lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId: UUID,
@@ -165,6 +152,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                  navn = navn[ident]!!)
 
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
+
+
+
+
         val vedtaksbrev = lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
                                                                      brevrequest = objectMapper.writeValueAsString(request),
                                                                      brevmal = FRITEKST,
