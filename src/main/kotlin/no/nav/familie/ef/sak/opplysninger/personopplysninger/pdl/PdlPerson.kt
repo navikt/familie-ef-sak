@@ -114,9 +114,10 @@ data class Bostedsadresse(val angittFlyttedato: LocalDate?,
                           val matrikkeladresse: Matrikkeladresse?,
                           val metadata: Metadata) {
 
-    fun matrikkelId(): Long? {
-        return matrikkeladresse?.matrikkelId ?: vegadresse?.matrikkelId
-    }
+    val matrikkelId get() = matrikkeladresse?.matrikkelId ?: vegadresse?.matrikkelId
+
+    val bruksenhetsnummer get() = matrikkeladresse?.bruksenhetsnummer ?: vegadresse?.bruksenhetsnummer
+
 }
 
 data class Oppholdsadresse(val gyldigFraOgMed: LocalDate?,
