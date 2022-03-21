@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -35,6 +34,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.DokarkivBruker
 import no.nav.familie.kontrakter.felles.dokarkiv.DokumentInfo
 import no.nav.familie.kontrakter.felles.dokarkiv.OppdaterJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.Sak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
@@ -150,7 +150,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
                                                         fagsakId: UUID,
                                                         journalpost: Journalpost): Behandling {
         val fagsak = fagsakService.hentFagsak(fagsakId)
-        feilHvis(fagsak.stønadstype == Stønadstype.BARNETILSYN && !featureToggleService.isEnabled("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning")) {
+        feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN && !featureToggleService.isEnabled("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning")) {
             "Journalføring av barnetilsyn er ikke skrudd på"
         }
 
@@ -243,15 +243,15 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId: UUID) {
         when (fagsak.stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> {
+            StønadType.OVERGANGSSTØNAD -> {
                 val søknad = hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
                 søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpostId)
             }
-            Stønadstype.BARNETILSYN -> {
+            StønadType.BARNETILSYN -> {
                 val søknad = hentSøknadFraJournalpostForBarnetilsyn(journalpostId)
                 søknadService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpostId)
             }
-            Stønadstype.SKOLEPENGER -> {
+            StønadType.SKOLEPENGER -> {
                 val søknad = hentSøknadFraJournalpostForSkolepenger(journalpostId)
                 søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpostId)
             }

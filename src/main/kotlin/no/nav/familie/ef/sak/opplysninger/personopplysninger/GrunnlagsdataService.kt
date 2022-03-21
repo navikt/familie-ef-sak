@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
@@ -10,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -62,8 +62,8 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
 
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val søknad = when (stønadstype) {
-            Stønadstype.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
-            Stønadstype.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
+            StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
+            StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
             else -> throw Feil("Ikke implementert støtte for Støndastype $stønadstype")
         }
 

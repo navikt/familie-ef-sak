@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -18,9 +18,9 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
                     LEFT JOIN person_ident pi ON pi.fagsak_person_id = f.fagsak_person_id 
                     WHERE pi.ident IN (:personIdenter)
                     AND f.stonadstype = :stønadstype""")
-    fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: Stønadstype): FagsakDomain?
+    fun findBySøkerIdent(personIdenter: Set<String>, stønadstype: StønadType): FagsakDomain?
 
-    fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: Stønadstype): FagsakDomain?
+    fun findByFagsakPersonIdAndStønadstype(fagsakPersonId: UUID, stønadstype: StønadType): FagsakDomain?
 
     // language=PostgreSQL
     @Query("""SELECT f.*, fe.id AS eksternid_id

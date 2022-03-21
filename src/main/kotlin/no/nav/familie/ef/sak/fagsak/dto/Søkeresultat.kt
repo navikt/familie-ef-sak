@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.fagsak.dto
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.util.UUID
 
 
@@ -12,7 +12,10 @@ data class Søkeresultat(val personIdent: String,
                         val fagsaker: List<FagsakForSøkeresultat>)
 
 
-data class FagsakForSøkeresultat(val fagsakId: UUID, val stønadstype: Stønadstype, val erLøpende: Boolean, val erMigrert: Boolean)
+data class FagsakForSøkeresultat(val fagsakId: UUID,
+                                 val stønadstype: StønadType,
+                                 val erLøpende: Boolean,
+                                 val erMigrert: Boolean)
 
 data class PersonFraSøk(
         val personIdent: String,
