@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -196,27 +198,45 @@ class MigreringService(
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
         val overførtNyLøsningOpphørsdato =
                 perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
-        val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
+        val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
+        val maksStønadTom = sisteSummertePerioden?.stønadTom
 
-        val summertMaxTomErFørOpphørsmåned = maxStønadTom <= opphørsdato
-        val overførtTilNyLøsningOpphørErFørOpphørsdato =
-                overførtNyLøsningOpphørsdato != null && overførtNyLøsningOpphørsdato <= opphørsdato
-        val erOpphørtIInfotrygd = summertMaxTomErFørOpphørsmåned && overførtTilNyLøsningOpphørErFørOpphørsdato
-        if (!erOpphørtIInfotrygd) {
-            val logMessage = "erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                             "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
-                             "summertMaxTom=$maxStønadTom " +
-                             "opphørsmåned=$opphørsmåned"
-            logger.warn(logMessage)
-            val periodeInformasjon = perioder.perioder
-                    .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
-                    .map {
-                        "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
-                        "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
-                    }
-            secureLogger.info("$logMessage $periodeInformasjon")
+        val erOpphørtBegrunnelse = when {
+            maksStønadTom == null -> "har ikke noen summerte perioder"
+            maksStønadTom <= opphørsdato -> "maksStønadTom=$maksStønadTom er før opphørsdato=$opphørsdato"
+            overførtNyLøsningOpphørsdato == null && sisteSummertePerioden.opphørsdato != null ->
+                "er allerede opphørt i Infotrygd med opphørsdato=${sisteSummertePerioden.opphørsdato}"
+            overførtNyLøsningOpphørsdato != null && overførtNyLøsningOpphørsdato < opphørsdato ->
+                "er opphørt med kode=${InfotrygdEndringKode.OVERTFØRT_NY_LØSNING}"
+            else -> null
         }
-        return erOpphørtIInfotrygd
+
+        if (erOpphørtBegrunnelse != null) {
+            logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - $erOpphørtBegrunnelse")
+            return true
+        }
+
+        loggIkkeOpphørt(behandlingId, overførtNyLøsningOpphørsdato, maksStønadTom, opphørsmåned, perioder)
+        return false
+    }
+
+    private fun loggIkkeOpphørt(behandlingId: UUID,
+                                overførtNyLøsningOpphørsdato: LocalDate?,
+                                maksStønadTom: LocalDate?,
+                                opphørsmåned: YearMonth,
+                                perioder: InfotrygdStønadPerioderDto) {
+        val logMessage = "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
+                         "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
+                         "summertMaxTom=$maksStønadTom " +
+                         "opphørsmåned=$opphørsmåned"
+        logger.warn(logMessage)
+        val periodeInformasjon = perioder.perioder
+                .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+                .map {
+                    "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
+                    "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
+                }
+        secureLogger.info("$logMessage $periodeInformasjon")
     }
 
     private fun hentGjeldendePeriodeOgValiderState(fagsakPerson: FagsakPerson,
