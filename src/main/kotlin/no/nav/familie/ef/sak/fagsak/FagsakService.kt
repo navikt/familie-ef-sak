@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -40,8 +41,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun hentEllerOpprettFagsak(personIdent: String,
                                stønadstype: StønadType): Fagsak {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true)
-        val gjeldendePersonIdent = personIdenter.gjeldende().ident
-        val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent)
+        val gjeldendePersonIdent = personIdenter.gjeldende()
+        val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent.ident)
         val oppdatertPerson = oppdatertPerson(person, gjeldendePersonIdent)
         val fagsak = fagsakRepository.findByFagsakPersonIdAndStønadstype(oppdatertPerson.id, stønadstype)
                      ?: opprettFagsak(stønadstype, oppdatertPerson)
@@ -106,15 +107,29 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         val person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
-        val gjelendeIdent = pdlClient.hentPersonidenter(person.hentAktivIdent(), true).gjeldende().ident
-        val oppdatertPerson = oppdatertPerson(person, gjelendeIdent)
+        val gjeldendeIdent = pdlClient.hentPersonidenter(person.hentAktivIdent(), true).gjeldende()
+        val oppdatertPerson = oppdatertPerson(person, gjeldendeIdent)
         return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }
 
+    fun fagsakerMedOppdatertePersonIdenter(fagsakId: List<UUID>): List<Fagsak> {
+        val fagsaker = fagsakRepository.findAllById(fagsakId)
+        val personer = fagsakPersonService.hentPersoner(fagsaker.map { it.fagsakPersonId }).associateBy { it.id }
+
+        val gjeldendeIdenter = pdlClient.hentIdenterBolk(personer.values.map { it.hentAktivIdent() })
+
+        return fagsaker.map {
+            val person = personer[it.fagsakPersonId]!!
+            val gjeldendeIdent = gjeldendeIdenter[person.hentAktivIdent()]
+            val oppdatertPerson = gjeldendeIdent?.let { oppdatertPerson(person, gjeldendeIdent) } ?: person
+            it.tilFagsakMedPerson(oppdatertPerson.identer)
+        }
+    }
+
     private fun oppdatertPerson(person: FagsakPerson,
-                                gjeldendePersonIdent: String) =
+                                gjeldendePersonIdent: PdlIdent) =
             if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
-                fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent)
+                fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
             } else {
                 person
             }
