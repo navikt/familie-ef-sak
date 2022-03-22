@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -12,7 +13,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
-import java.io.InvalidClassException
 import java.time.LocalDate
 import java.util.UUID
 
@@ -41,18 +41,55 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `kan ikke ha 2 barn med samme ident på samme behandling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+
+        barnRepository.insert(lagBarn(behandling, personIdent = personIdent))
+
+        val cause = assertThatThrownBy {
+            barnRepository.insert(lagBarn(behandling, personIdent = personIdent))
+        }.cause
+        cause.isInstanceOf(DataIntegrityViolationException::class.java)
+        cause.hasMessageContaining("duplicate key value violates unique constraint")
+    }
+
+    @Test
+    internal fun `kan ha 2 barn med ulik ident på ulike behandlinger`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak))
+
+        barnRepository.insert(lagBarn(behandling, personIdent = "1"))
+        barnRepository.insert(lagBarn(behandling, personIdent = "2"))
+
+        barnRepository.insert(lagBarn(behandling2, personIdent = "1"))
+        barnRepository.insert(lagBarn(behandling2, personIdent = "2"))
+    }
+
+    @Test
+    internal fun `kan ha 2 barn med termindato på ulike behandlinger`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak))
+
+        barnRepository.insert(lagBarn(behandling, fødselTermindato = LocalDate.now()))
+        barnRepository.insert(lagBarn(behandling, fødselTermindato = LocalDate.now()))
+
+        barnRepository.insert(lagBarn(behandling2, fødselTermindato = LocalDate.now()))
+        barnRepository.insert(lagBarn(behandling2, fødselTermindato = LocalDate.now()))
+    }
+
+    @Test
     internal fun `barn må ha ident eller termindato`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val nyttBarn = BehandlingBarn(id = UUID.randomUUID(),
-                                      behandlingId = behandling.id,
-                                      søknadBarnId = UUID.randomUUID(),
-                                      personIdent = null,
-                                      navn = "A",
-                                      fødselTermindato = null)
+        val nyttBarn = lagBarn(behandling, navn = "A")
+
         val cause = assertThatThrownBy {
             barnRepository.insert(nyttBarn)
         }.cause
+
         cause.isInstanceOf(DataIntegrityViolationException::class.java)
         cause.hasMessageContaining("violates check constraint \"behandling_barn_ident_fodsel_termindato_check\"")
     }
@@ -60,12 +97,8 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
     private fun lagreOgVerifiserBarn(personIdent: String?, navn: String?, fødselTermindato: LocalDate?) {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val nyttBarn = BehandlingBarn(id = UUID.randomUUID(),
-                                      behandlingId = behandling.id,
-                                      søknadBarnId = UUID.randomUUID(),
-                                      personIdent = personIdent,
-                                      navn = navn,
-                                      fødselTermindato = fødselTermindato)
+        val nyttBarn = lagBarn(behandling, personIdent, navn, fødselTermindato)
+
         barnRepository.insert(nyttBarn)
         val barnet = barnRepository.findByIdOrThrow(nyttBarn.id)
         assertThat(barnet).usingRecursiveComparison().ignoringFields("sporbar").isEqualTo(nyttBarn)
@@ -74,5 +107,15 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(barnForBehandling).hasSize(1)
         assertThat(barnForBehandling.first()).usingRecursiveComparison().ignoringFields("sporbar").isEqualTo(nyttBarn)
     }
+
+    private fun lagBarn(behandling: Behandling,
+                        personIdent: String? = null,
+                        navn: String? = null,
+                        fødselTermindato: LocalDate? = null) =
+            BehandlingBarn(behandlingId = behandling.id,
+                           søknadBarnId = UUID.randomUUID(),
+                           personIdent = personIdent,
+                           navn = navn,
+                           fødselTermindato = fødselTermindato)
 
 }
