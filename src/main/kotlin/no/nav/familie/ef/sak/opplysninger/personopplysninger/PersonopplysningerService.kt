@@ -67,7 +67,7 @@ class PersonopplysningerService(private val personService: PersonService,
     }
 
     @Cacheable("navKontor")
-    fun hentNavKontor(ident: String): NavKontorEnhet {
+    fun hentNavKontor(ident: String): NavKontorEnhet? {
         return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
     }
 
