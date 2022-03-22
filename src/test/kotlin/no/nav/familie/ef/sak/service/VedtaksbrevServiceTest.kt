@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.every
 import io.mockk.mockk
@@ -22,7 +21,6 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -44,7 +42,6 @@ internal class VedtaksbrevServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val brevsignaturService = mockk<BrevsignaturService>()
-    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
 
     private val vedtaksbrevService =
@@ -53,7 +50,6 @@ internal class VedtaksbrevServiceTest {
                                behandlingService,
                                personopplysningerService,
                                brevsignaturService,
-                               featureToggleService,
                                familieDokumentClient)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
@@ -65,7 +61,6 @@ internal class VedtaksbrevServiceTest {
         mockBrukerContext(beslutterNavn)
         val signaturDto = SignaturDto(beslutterNavn, "enhet", false)
         every { brevsignaturService.lagSignaturMedEnhet(any()) } returns signaturDto
-        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @AfterEach

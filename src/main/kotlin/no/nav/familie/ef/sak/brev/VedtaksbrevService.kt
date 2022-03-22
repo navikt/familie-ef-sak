@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -30,7 +29,6 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                          private val behandlingService: BehandlingService,
                          private val personopplysningerService: PersonopplysningerService,
                          private val brevsignaturService: BrevsignaturService,
-                         private val featureToggleService: FeatureToggleService,
                          private val familieDokumentClient: FamilieDokumentClient) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
