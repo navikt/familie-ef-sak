@@ -22,12 +22,14 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -56,10 +58,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         when (data) {
             is Innvilget -> {
+                validerStartTidEtterSanksjon(data, behandling)
                 opprettTilkjentYtelseForInnvilgetBehandling(data, behandling, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
             is Opphør -> {
+                validerStartTidEtterSanksjon(data.opphørFom, behandling)
                 opprettTilkjentYtelseForOpphørtBehandling(behandling, data, aktivIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(behandling)
             }
@@ -71,6 +75,26 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 opprettTilkjentYtelseForSanksjonertBehandling(data, behandling, aktivIdent)
             }
         }
+    }
+
+    private fun validerStartTidEtterSanksjon(innvilget: Innvilget, behandling: Behandling) {
+        innvilget.perioder.firstOrNull()?.let {
+            validerStartTidEtterSanksjon(it.årMånedFra, behandling)
+        }
+    }
+
+    private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Behandling) {
+        behandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
+            val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandlingId)
+            if (forrigeVedtak.resultatType == ResultatType.SANKSJONERE) {
+                val sanksjonsdato = forrigeVedtak.perioder?.perioder?.firstOrNull()?.datoFra
+                                    ?: error("Fant ikke periode for sanksjonert vedtak for behandling =$forrigeBehandlingId")
+                feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
+                    "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
+                }
+            }
+        }
+
     }
 
     private fun validerGyldigeVedtaksperioder(behandling: Behandling, data: VedtakDto) {
@@ -125,7 +149,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, startdato) = when (behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(
+                    andelerTilkjentYtelse)
             BehandlingType.REVURDERING -> nyeAndelerForRevurderingMedStartdato(behandling, vedtak, andelerTilkjentYtelse)
             else -> error("Steg ikke støttet for type=${behandling.type}")
         }

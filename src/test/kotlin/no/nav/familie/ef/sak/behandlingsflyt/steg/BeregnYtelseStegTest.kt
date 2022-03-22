@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -25,6 +26,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
@@ -34,6 +36,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -1031,7 +1034,7 @@ internal class BeregnYtelseStegTest {
     }
 
     @Nested
-    inner class Opphør {
+    inner class Opphørt {
 
         @Test
         internal fun `skal kunne opphøre bak i tid - skal sette opphørsdato på tilkjent ytelse`() {
@@ -1201,6 +1204,46 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.andelerTilkjentYtelse[0].stønadTom).isEqualTo(startMåned.atEndOfMonth())
             assertThat(slot.captured.andelerTilkjentYtelse[1].stønadFom).isEqualTo(andelFom.plusMonths(2))
             assertThat(slot.captured.andelerTilkjentYtelse[1].stønadTom).isEqualTo(andelTom)
+        }
+
+    }
+
+    @Nested
+    inner class Sanksjonsrevurdering {
+
+        @Test
+        internal fun `skal ikke kunne opphøre før forrige sanksjonsbehandling`() {
+            val opphørFom = YearMonth.of(2021, 6)
+            val sankskjonsMåned = YearMonth.of(2021, 8)
+            val forrigeBehandlingId = UUID.randomUUID()
+
+            every {
+                vedtakService.hentVedtak(forrigeBehandlingId)
+            } returns sanksjon(sankskjonsMåned).tilVedtak(forrigeBehandlingId)
+
+            assertThrows<Feil> {
+                utførSteg(BehandlingType.REVURDERING,
+                          Opphør(ResultatType.OPPHØRT, opphørFom, "ok"),
+                          forrigeBehandlingId = forrigeBehandlingId)
+            }
+        }
+
+        @Test
+        internal fun `skal ikke kunne innvilge med periode før forrige sanksjonsbehandling`() {
+            val startMåned = YearMonth.of(2021, 6)
+            val sluttMåned = YearMonth.of(2021, 12)
+            val sankskjonsMåned = YearMonth.of(2021, 8)
+            val forrigeBehandlingId = UUID.randomUUID()
+
+            every {
+                vedtakService.hentVedtak(forrigeBehandlingId)
+            } returns sanksjon(sankskjonsMåned).tilVedtak(forrigeBehandlingId)
+
+            assertThrows<Feil> {
+                utførSteg(BehandlingType.REVURDERING,
+                          innvilget(listOf(innvilgetPeriode(startMåned, sluttMåned)), listOf(inntekt(startMåned))),
+                          forrigeBehandlingId = forrigeBehandlingId)
+            }
         }
 
     }
