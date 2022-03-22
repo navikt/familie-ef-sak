@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -191,32 +192,38 @@ class MigreringService(
      * Den sjekker også att de summerte periodene sin max(stønadFom) går til den samme måneden
      */
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
-        val opphørsdato = opphørsmåned.atEndOfMonth()
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
+        val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
+
+        if (sisteSummertePerioden != null &&
+            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadFom > opphørsmåned.atEndOfMonth())) {
+            loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
+            return false
+        }
+        logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
+                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
+        return true
+    }
+
+    private fun loggIkkeOpphørt(behandlingId: UUID,
+                                perioder: InfotrygdStønadPerioderDto,
+                                sisteSummertePerioden: SummertInfotrygdPeriodeDto,
+                                opphørsmåned: YearMonth) {
         val overførtNyLøsningOpphørsdato =
                 perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
-        val maxStønadTom = perioder.summert.maxOf { it.stønadTom }
-
-        val summertMaxTomErFørOpphørsmåned = maxStønadTom <= opphørsdato
-        val overførtTilNyLøsningOpphørErFørOpphørsdato =
-                overførtNyLøsningOpphørsdato != null && overførtNyLøsningOpphørsdato <= opphørsdato
-        val erOpphørtIInfotrygd = summertMaxTomErFørOpphørsmåned && overførtTilNyLøsningOpphørErFørOpphørsdato
-        if (!erOpphørtIInfotrygd) {
-            val logMessage = "erOpphørtIInfotrygd - Datoer ikke like behandling=$behandlingId " +
-                             "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
-                             "summertMaxTom=$maxStønadTom " +
-                             "opphørsmåned=$opphørsmåned"
-            logger.warn(logMessage)
-            val periodeInformasjon = perioder.perioder
-                    .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
-                    .map {
-                        "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
-                        "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
-                    }
-            secureLogger.info("$logMessage $periodeInformasjon")
-        }
-        return erOpphørtIInfotrygd
+        val logMessage = "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
+                         "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
+                         "sisteSummertePeriodeTom=${sisteSummertePerioden.stønadTom} " +
+                         "opphørsmåned=$opphørsmåned"
+        logger.warn(logMessage)
+        val periodeInformasjon = perioder.perioder
+                .sortedWith(compareBy<InfotrygdPeriode>({ it.stønadId }, { it.vedtakId }, { it.stønadFom }).reversed())
+                .map {
+                    "InfotrygdPeriode(stønadId=${it.stønadId}, vedtakId=${it.vedtakId}, kode=${it.kode}, " +
+                    "stønadFom=${it.stønadFom}, stønadTom=${it.stønadTom}, opphørsdato=${it.opphørsdato})"
+                }
+        secureLogger.info("$logMessage $periodeInformasjon")
     }
 
     private fun hentGjeldendePeriodeOgValiderState(fagsakPerson: FagsakPerson,
