@@ -56,7 +56,7 @@ fun feilmeldOgReturnerData(pdlResponse: PdlIdentBolkResponse): Map<String, PdlId
     val feil = pdlResponse.data.hentIdenterBolk.filter { it.code != "ok" }.associate { it.ident to it.code }
     if (feil.isNotEmpty()) {
         // Logg feil og gå vider. Ved feil returneres nåværende ident.
-        secureLogger.error("Feil ved henting av ${PdlIdentBolkResponse::class} fra PDL: $feil")
+        secureLogger.error("Feil ved henting av ${PdlIdentBolkResponse::class} fra PDL: $feil. Nåværende ident returnert.")
     }
     return pdlResponse.data.hentIdenterBolk.associateBy({ it.ident }, { it.gjeldende() })
 }

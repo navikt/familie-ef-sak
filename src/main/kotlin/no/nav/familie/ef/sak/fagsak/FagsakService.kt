@@ -120,15 +120,15 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
 
         return fagsaker.map {
             val person = personer[it.fagsakPersonId]!!
-            val oppdatertPerson = oppdatertPerson(person, gjeldendeIdenter[person.hentAktivIdent()])
+            val gjeldendeIdent = gjeldendeIdenter[person.hentAktivIdent()]
+            val oppdatertPerson = gjeldendeIdent?.let { oppdatertPerson(person, gjeldendeIdent) } ?: person
             it.tilFagsakMedPerson(oppdatertPerson.identer)
         }
     }
 
     private fun oppdatertPerson(person: FagsakPerson,
-                                gjeldendePersonIdent: PdlIdent?) =
-            if (gjeldendePersonIdent != null &&
-                featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
+                                gjeldendePersonIdent: PdlIdent) =
+            if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
                 fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
             } else {
                 person
