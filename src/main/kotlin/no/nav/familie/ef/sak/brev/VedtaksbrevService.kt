@@ -157,9 +157,6 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                       saksbehandlerNavn = signaturMedEnhet.navn,
                                                       enhet = signaturMedEnhet.enhet)
 
-        println("html: $html")
-
-
         lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = fritekstbrevDto.behandlingId,
                                                    brevrequest = "", // TODO: Dette feltet skal fjernes senere
                                                    brevmal = FRITEKST,
