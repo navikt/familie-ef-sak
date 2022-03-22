@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.fagsak.domain
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.kontrakter.ef.felles.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -20,7 +20,7 @@ data class Fagsak(
         val fagsakPersonId: UUID,
         val personIdenter: Set<PersonIdent>,
         val eksternId: EksternFagsakId,
-        val stønadstype: Stønadstype,
+        val stønadstype: StønadType,
         val migrert: Boolean,
         val sporbar: Sporbar
 ) {
@@ -40,7 +40,7 @@ data class FagsakDomain(@Id
                         @MappedCollection(idColumn = "fagsak_id")
                         val eksternId: EksternFagsakId = EksternFagsakId(),
                         @Column("stonadstype")
-                        val stønadstype: Stønadstype,
+                        val stønadstype: StønadType,
                         val migrert: Boolean = false,
                         @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                         val sporbar: Sporbar = Sporbar()) {
@@ -57,9 +57,3 @@ fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
                 migrert = migrert,
                 sporbar = sporbar
         )
-
-enum class Stønadstype(val kontraktType: StønadType) {
-    OVERGANGSSTØNAD(StønadType.OVERGANGSSTØNAD),
-    BARNETILSYN(StønadType.BARNETILSYN),
-    SKOLEPENGER(StønadType.SKOLEPENGER)
-}

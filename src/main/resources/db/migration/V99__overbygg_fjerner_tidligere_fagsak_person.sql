@@ -1,0 +1,1 @@
+DROP TABLE fagsak_person_old;

@@ -6,19 +6,18 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.fagsakDao
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -46,27 +45,27 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `skal returnere false når det ikke finnes en behandling`() {
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, setOf(ident1, ident2))
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns null
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
+        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
                 .isEqualTo(false)
     }
 
     @Test
     internal fun `skal returnere false når en behandling finnes som er teknisk opphør`() {
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, setOf(ident1, ident2))
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns behandling(fagsak(), type = BehandlingType.TEKNISK_OPPHØR)
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
+        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
                 .isEqualTo(false)
     }
 
     @Test
     internal fun `skal returnere true når behandling finnes`() {
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(Stønadstype.OVERGANGSSTØNAD, setOf(ident1, ident2))
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns behandling(fagsak())
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(Stønadstype.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
+        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
                 .isEqualTo(true)
     }
 

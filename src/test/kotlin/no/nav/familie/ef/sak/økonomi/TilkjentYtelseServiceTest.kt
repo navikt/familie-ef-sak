@@ -4,11 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.dto.EksternId
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ class TilkjentYtelseServiceTest {
                                                               tilkjentYtelseRepository = tilkjentYtelseRepository)
 
     private val datoForAvstemming = LocalDate.of(2021, 2, 1)
-    private val stønadstype = Stønadstype.OVERGANGSSTØNAD
+    private val stønadstype = StønadType.OVERGANGSSTØNAD
 
     private val andel1 = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
     private val andel2 = lagAndelTilkjentYtelse(2, LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 28))
@@ -75,7 +75,7 @@ class TilkjentYtelseServiceTest {
         } returns listOf(tilkjentYtelse)
 
         assertThat(catchThrowable {
-            tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(Stønadstype.OVERGANGSSTØNAD,
+            tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(StønadType.OVERGANGSSTØNAD,
                                                                              datoForAvstemming)
         }).hasMessageContaining(behandling.id.toString())
     }

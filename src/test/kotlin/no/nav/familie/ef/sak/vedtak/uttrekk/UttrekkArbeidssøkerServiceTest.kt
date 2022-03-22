@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -31,11 +33,17 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.tilDomene
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -43,6 +51,8 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.util.Properties
+import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse as DtoAdressebeskyttelse
 
 internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
@@ -54,12 +64,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository
     @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
     @Autowired private lateinit var rolleConfig: RolleConfig
+    @Autowired private lateinit var opprettUttrekkArbeidssøkerTask: OpprettUttrekkArbeidssøkerTask
 
     private lateinit var service: UttrekkArbeidssøkerService
-
     private val arbeidssøkerClient = mockk<ArbeidssøkerClient>()
     private val personService = mockk<PersonService>()
-
+    private val taskRepository = mockk<TaskRepository>()
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
     private val behandling2 = behandling(fagsak,
@@ -78,6 +88,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                                         aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
     private val navn = Navn("fornavn", "", "", Metadata(false))
 
+    fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
+
     @BeforeEach
     internal fun setUp() {
         every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
@@ -89,6 +101,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                              fagsakService,
                                              personService,
                                              arbeidssøkerClient)
+        opprettUttrekkArbeidssøkerTask =
+                OpprettUttrekkArbeidssøkerTask(service, fagsakService, taskRepository)
     }
 
     @Test
@@ -121,7 +135,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentUttrekkArbeidssøkere - finnes ikke noen arbeidssøkere valgt måned`() {
         opprettdata()
-        service.opprettUttrekkArbeidssøkere(februar2021)
+        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                   objectMapper.writeValueAsString(februar2021),
+                                                   Properties()))
         assertThat(service.hentUttrekkArbeidssøkere(februar2021).arbeidssøkere).isEmpty()
     }
 
@@ -129,7 +145,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentUttrekkArbeidssøkere - skal opprette uttrekk for arbeidssøkere`() {
         opprettdata()
 
-        service.opprettUttrekkArbeidssøkere(januar2021)
+        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                   objectMapper.writeValueAsString(januar2021),
+                                                   Properties()))
 
         val uttrekk = service.hentUttrekkArbeidssøkere(januar2021).arbeidssøkere
         assertThat(uttrekk).hasSize(1)
@@ -142,7 +160,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentUttrekkArbeidssøkere - vedtaket skal peke til endringen sin behandling`() {
         opprettdata()
-        service.opprettUttrekkArbeidssøkere(mars2021)
+        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                   objectMapper.writeValueAsString(mars2021),
+                                                   Properties()))
 
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
         assertThat(uttrekk).hasSize(1)
@@ -156,8 +176,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         opprettdata()
         opprettEkstraFagsak()
 
-        service.opprettUttrekkArbeidssøkere(mars2021)
-
+        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                   objectMapper.writeValueAsString(mars2021),
+                                                   Properties()))
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
         assertThat(uttrekk).hasSize(2)
     }
@@ -174,7 +195,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
                 opprettdata()
 
-                service.opprettUttrekkArbeidssøkere(mars2021)
+                opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                           objectMapper.writeValueAsString(mars2021),
+                                                           Properties()))
                 assertThat(uttrekkArbeidssøkerRepository.findAll().single().registrertArbeidssøker).isTrue
 
                 testWithSaksbehandlerContext {
@@ -193,7 +216,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
                 opprettdata()
 
-                service.opprettUttrekkArbeidssøkere(mars2021)
+                opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                           objectMapper.writeValueAsString(mars2021),
+                                                           Properties()))
 
                 testWithSaksbehandlerContext {
                     val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
@@ -236,6 +261,62 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             assertThat(uttrekkMedKontrollerte.antallKontrollert).isEqualTo(2)
             assertThat(uttrekkMedKontrollerte.arbeidssøkere.size).isEqualTo(22)
         }
+    }
+
+    @Test
+    internal fun `manglende aktiv ident ved opprettUttrekkforArbeissøkere i første kall, forvent insert av kun denne andre gang`() {
+        val uttrekkSlot = slot<UttrekkArbeidssøkere>()
+        val tilgangService = mockk<TilgangService>()
+        val mockUttrekkArbeidssøkerRepository = mockk<UttrekkArbeidssøkerRepository>()
+        val mockFagsakService = mockk<FagsakService>()
+        val uttrekkArbeidssøkerService = UttrekkArbeidssøkerService(tilgangService,
+                                                                    mockUttrekkArbeidssøkerRepository,
+                                                                    mockFagsakService,
+                                                                    personService,
+                                                                    arbeidssøkerClient)
+        val opprettUttrekkArbeidssøkerTask =
+                OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskRepository)
+
+        val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.tilPeriode().fradato, vedtaksperiode.tilPeriode().tildato)
+        val periodeForUttrekk = VedtaksperioderForUttrekk(UUID.randomUUID(),
+                                                          UUID.randomUUID(),
+                                                          UUID.randomUUID(),
+                                                          PeriodeWrapper(listOf(vedtaksperiode).tilDomene()))
+        val periodeForUttrekk2 = VedtaksperioderForUttrekk(UUID.randomUUID(),
+                                                           UUID.randomUUID(),
+                                                           UUID.randomUUID(),
+                                                           PeriodeWrapper(listOf(vedtaksperiode).tilDomene()))
+
+        val aktiveIdenter = mutableMapOf(periodeForUttrekk2.fagsakId to "")
+
+        every { mockFagsakService.hentAktiveIdenter(any()) } returns aktiveIdenter
+        every { mockUttrekkArbeidssøkerRepository.insert(capture(uttrekkSlot)) } returns mockk()
+        every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf(arbeidssøkerPeriode,
+                                                                                                           arbeidssøkerPeriode))
+
+        every {
+            mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
+        } returns listOf(
+                periodeForUttrekk, periodeForUttrekk2)
+
+        every {
+            mockUttrekkArbeidssøkerRepository.existsByÅrMånedAndFagsakId(any(), any())
+        } returns false andThen false andThen false andThen true
+
+        Assertions.assertThrows(IllegalStateException::class.java) {
+            opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                       objectMapper.writeValueAsString(mars2021),
+                                                       Properties()))
+        }
+        verify(exactly = 1) { mockUttrekkArbeidssøkerRepository.insert(any()) }
+        assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk2.fagsakId)
+
+        aktiveIdenter.put(periodeForUttrekk.fagsakId, "")
+        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                   objectMapper.writeValueAsString(mars2021),
+                                                   Properties()))
+        verify(exactly = 2) { mockUttrekkArbeidssøkerRepository.insert(any()) }
+        assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk.fagsakId)
     }
 
     @Nested
@@ -352,7 +433,9 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `settKontrollert - sett arbeidssøker til kontrollert`() {
         opprettdata()
-        service.opprettUttrekkArbeidssøkere(mars2021)
+        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
+                                                   objectMapper.writeValueAsString(mars2021),
+                                                   Properties()))
         val id = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id
 
         testWithSaksbehandlerContext { service.settKontrollert(id, true) }
@@ -441,4 +524,5 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     fun testWithSaksbehandlerContext(groups: List<String> = emptyList(), fn: () -> Unit) {
         testWithBrukerContext(groups = groups + rolleConfig.saksbehandlerRolle, fn = fn)
     }
+
 }

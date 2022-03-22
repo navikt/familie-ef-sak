@@ -7,6 +7,9 @@ data class PdlIdentRequestVariables(val ident: String,
 
 data class PdlPersonBolkRequestVariables(val identer: List<String>)
 
+data class PdlIdentBolkRequestVariables(val identer: List<String>,
+                                        val gruppe: String)
+
 data class PdlPersonSøkRequestVariables(val paging: Paging,
                                         val criteria: List<SøkeKriterier>)
 

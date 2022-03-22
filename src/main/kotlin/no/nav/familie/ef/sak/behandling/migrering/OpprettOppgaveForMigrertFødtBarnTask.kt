@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.behandling.migrering
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppgaveBeskrivelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -92,7 +92,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                                 behandlingId = behandlingId,
                                 eksternFagsakId = data.eksternFagsakId,
                                 personIdent = data.personIdent,
-                                stønadType = data.stønadType.kontraktType,
+                                stønadType = data.stønadType,
                                 beskrivelse = datoOgBeskrivelse.second,
                                 aktivFra = datoOgBeskrivelse.first
                         )
@@ -142,6 +142,6 @@ class OpprettOppgaveForMigrertFødtBarnTask(
 
 data class OpprettOppgaveForMigrertFødtBarnTaskData(val fagsakId: UUID,
                                                     val eksternFagsakId: Long,
-                                                    val stønadType: Stønadstype,
+                                                    val stønadType: StønadType,
                                                     val personIdent: String,
                                                     val barn: List<BarnMinimumDto>)
