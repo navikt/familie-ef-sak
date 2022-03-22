@@ -142,11 +142,11 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         val behandling = behandlingService.hentBehandling(fritekstbrevDto.behandlingId)
         validerRedigerbarBehandling(behandling)
         val ident = behandlingService.hentAktivIdent(fritekstbrevDto.behandlingId)
-        val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
+        val navn : String = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
         val request = FrittståendeBrevRequestDto(overskrift = fritekstbrevDto.overskrift,
                                                  avsnitt = fritekstbrevDto.avsnitt,
                                                  personIdent = ident,
-                                                 navn = navn[ident]!!)
+                                                 navn = navn)
 
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
 
