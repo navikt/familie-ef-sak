@@ -97,6 +97,16 @@ class PdlClientTest {
     }
 
     @Test
+    fun `hentIdenterBolk håndterer response for uthenting av identer i bolk`() {
+        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                                           .willReturn(okJson(readFile("hent_identer_bolk.json"))))
+        val response = pdlClient.hentIdenterBolk(listOf("12345"))
+        assertThat(response["12345678910"]?.ident).isEqualTo("11223344556677")
+        assertThat(response["12345678911"]?.ident).isEqualTo("12345678911")
+        assertThat(response["test"]?.ident).isEqualTo("test")
+    }
+
+    @Test
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der person i data er null`() {
         wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                                            .willReturn(okJson("{\"data\": {}}")))

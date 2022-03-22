@@ -3,13 +3,17 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBolkResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlHentIdenter
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentBolkRequest
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentBolkRequestVariables
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentBolkResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentRequestVariables
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonBolkRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonBolkRequestVariables
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBolkResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonRequestVariables
@@ -95,12 +99,26 @@ class PdlClient(val pdlConfig: PdlConfig,
      */
     @Cacheable("personidenter", cacheManager = "shortCache")
     fun hentPersonidenter(ident: String, historikk: Boolean = false): PdlIdenter {
-        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
-                                               query = PdlConfig.hentIdentQuery)
+        val pdlIdentRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
+                                              query = PdlConfig.hentIdentQuery)
         val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
-                                                                     pdlPersonRequest,
+                                                                     pdlIdentRequest,
                                                                      httpHeaders())
         return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
+    }
+
+    /**
+     * @param identer Identene til personene, samme hvilke type (Folkeregisterident, aktørid eller npid)
+     * @return map med søkeident som nøkkel og liste av folkeregisteridenter
+     */
+    fun hentIdenterBolk(identer: List<String>): Map<String, PdlIdent> {
+        val pdlIdentBolkRequest = PdlIdentBolkRequest(variables = PdlIdentBolkRequestVariables(identer, "FOLKEREGISTERIDENT"),
+                                                      query = PdlConfig.hentIdenterBolkQuery)
+        val pdlResponse: PdlIdentBolkResponse = postForEntity(pdlConfig.pdlUri,
+                                                              pdlIdentBolkRequest,
+                                                              httpHeaders())
+
+        return feilmeldOgReturnerData(pdlResponse)
     }
 
     private fun httpHeaders(): HttpHeaders {
