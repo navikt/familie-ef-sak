@@ -35,11 +35,11 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         val fagsak = fagsakService.finnFagsak(personIdenter, Stønadstype.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
-        val finnNyeBarnSidenGjeldendeBehandlingForFagsak = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
+        val nyeBarnSidenGjeldendeBehandling = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
 
-        opprettOppfølgningsoppgaveForBarn(fagsak, finnNyeBarnSidenGjeldendeBehandlingForFagsak)
+        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarnSidenGjeldendeBehandling)
 
-        return finnNyeBarnSidenGjeldendeBehandlingForFagsak.map { it.personIdent }
+        return nyeBarnSidenGjeldendeBehandling.map { it.personIdent }
     }
 
     // TODO slett 4 måneder etter att siste migreringen er klar
