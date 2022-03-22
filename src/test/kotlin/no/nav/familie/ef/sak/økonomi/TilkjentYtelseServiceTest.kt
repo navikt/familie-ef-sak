@@ -74,7 +74,7 @@ class TilkjentYtelseServiceTest {
 
 
         @Test
-        internal fun `konsistensavstemming - filtrer bort andeler som har 0-beløp`() {
+        internal fun `filtrer bort andeler som har 0-beløp`() {
             val andelerTilkjentYtelse = listOf(andel2.copy(beløp = 0), andel3)
             val tilkjentYtelse =
                     DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
@@ -92,7 +92,7 @@ class TilkjentYtelseServiceTest {
         }
 
         @Test
-        internal fun `konsistensavstemming - filtrer andeler har tom dato som er lik eller etter dato for konsistensavstemming`() {
+        internal fun `filtrer andeler har tom dato som er lik eller etter dato for konsistensavstemming`() {
             val andelerTilkjentYtelse = listOf(andel1, andel2, andel3, andel4)
             val tilkjentYtelse =
                     DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
@@ -110,7 +110,7 @@ class TilkjentYtelseServiceTest {
         }
 
         @Test
-        internal fun `konsistensavstemming - skal kaste feil hvis den ikke finner eksterneIder til behandling`() {
+        internal fun `skal kaste feil hvis den ikke finner eksterneIder til behandling`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                     .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
@@ -131,7 +131,7 @@ class TilkjentYtelseServiceTest {
     inner class HarLøpendeUtbetaling {
 
         @Test
-        internal fun `harLøpendeUtbetaling skal returnere true hvis det finnes andel med sluttdato etter idag`() {
+        internal fun `skal returnere true hvis det finnes andel med sluttdato etter idag`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().plusDays(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                     .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
@@ -140,7 +140,7 @@ class TilkjentYtelseServiceTest {
         }
 
         @Test
-        internal fun `harLøpendeUtbetaling skal returnere false hvis det finnes andel mer sluttdato før idag`() {
+        internal fun `skal returnere false hvis det finnes andel mer sluttdato før idag`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusDays(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                     .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
@@ -149,7 +149,7 @@ class TilkjentYtelseServiceTest {
         }
 
         @Test
-        internal fun `harLøpendeUtbetaling skal returnere false hvis det ikke finnes noen andel`() {
+        internal fun `skal returnere false hvis det ikke finnes noen andel`() {
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns null
             assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
         }
