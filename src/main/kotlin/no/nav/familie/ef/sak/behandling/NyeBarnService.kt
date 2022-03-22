@@ -44,6 +44,8 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
         val nyeBarnSidenGjeldendeBehandling = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
 
+        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarnSidenGjeldendeBehandling)
+
         return nyeBarnSidenGjeldendeBehandling.map { it.personIdent }
     }
 
