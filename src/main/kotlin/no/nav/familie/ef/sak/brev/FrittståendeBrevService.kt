@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
@@ -32,9 +31,10 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        val brevType = utledFrittståendeBrevType(frittståendeBrevDto, fagsak.stønadstype)
+        val brevType = utledFrittståendeBrevtype(frittståendeBrevDto.brevType)
         iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
                                                                              eksternFagsakId = fagsak.eksternId.id,
+                                                                             stønadType = fagsak.stønadstype,
                                                                              brevtype = brevType,
                                                                              fil = brev,
                                                                              journalførendeEnhet = journalførendeEnhet,
@@ -61,34 +61,12 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     }
 
 
-    private fun utledFrittståendeBrevType(frittståendeBrevDto: FrittståendeBrevDto,
-                                          stønadstype: StønadType) =
-            when (frittståendeBrevDto.brevType) {
-                FrittståendeBrevKategori.INFORMASJONSBREV, FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT ->
-                    utledBrevtypeInfobrev(stønadstype)
-                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> utledBrevtypeMangelbrev(stønadstype)
-                FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> utledBrevtypeSanksjonsbrev(stønadstype)
-            }
-
-    private fun utledBrevtypeInfobrev(stønadstype: StønadType) =
-            when (stønadstype) {
-                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.INFOBREV_OVERGANGSSTØNAD
-                StønadType.BARNETILSYN -> FrittståendeBrevType.INFOBREV_BARNETILSYN
-                StønadType.SKOLEPENGER -> FrittståendeBrevType.INFOBREV_SKOLEPENGER
-            }
-
-    private fun utledBrevtypeMangelbrev(stønadstype: StønadType) =
-            when (stønadstype) {
-                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.MANGELBREV_OVERGANGSSTØNAD
-                StønadType.BARNETILSYN -> FrittståendeBrevType.MANGELBREV_BARNETILSYN
-                StønadType.SKOLEPENGER -> FrittståendeBrevType.MANGELBREV_SKOLEPENGER
-            }
-
-    private fun utledBrevtypeSanksjonsbrev(stønadstype: StønadType) =
-            when (stønadstype) {
-                StønadType.OVERGANGSSTØNAD -> FrittståendeBrevType.SANKSJONSBREV_OVERGANGSTØNAD
-                StønadType.BARNETILSYN -> FrittståendeBrevType.SANKSJONSBREV_BARNETILSYN
-                StønadType.SKOLEPENGER -> FrittståendeBrevType.SANKSJONSBREV_SKOLEPENGER
+    private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori) : FrittståendeBrevType =
+            when(brevKategori){
+                FrittståendeBrevKategori.INFORMASJONSBREV -> FrittståendeBrevType.INFORMASJONSBREV
+                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
+                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
+                FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> FrittståendeBrevType.VARSEL_OM_SANKSJON
             }
 }
 
