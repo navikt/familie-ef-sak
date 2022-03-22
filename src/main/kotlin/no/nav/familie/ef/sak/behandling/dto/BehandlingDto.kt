@@ -6,8 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -20,9 +20,9 @@ data class BehandlingDto(val id: UUID,
                          val resultat: BehandlingResultat,
                          val opprettet: LocalDateTime,
                          val behandlingsårsak: BehandlingÅrsak,
-                         val stønadstype: Stønadstype)
+                         val stønadstype: StønadType)
 
-fun Behandling.tilDto(stønadstype: Stønadstype): BehandlingDto =
+fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
         BehandlingDto(id = this.id,
                       fagsakId = this.fagsakId,
                       steg = this.steg,

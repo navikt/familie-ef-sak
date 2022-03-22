@@ -5,16 +5,15 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +49,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body?.data?.fagsakPersonId).isEqualTo(fagsak.fagsakPersonId)
         assertThat(response.body?.data?.personIdent).isEqualTo("01010199999")
-        assertThat(response.body?.data?.fagsaker?.first()?.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
+        assertThat(response.body?.data?.fagsaker?.first()?.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
     }
 
     @Test

@@ -1,10 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.SKOLEPENGER
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -20,6 +16,10 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledRes
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import java.util.UUID
 
 object OppdaterVilkår {
@@ -114,7 +114,8 @@ object OppdaterVilkår {
         }
     }
 
-    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>, stønadstype: Stønadstype): Boolean {
+    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>,
+                                        stønadstype: StønadType): Boolean {
         val inneholderAlleTyperVilkår =
                 vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkårForStønad(stønadstype))
         val vilkårsresultat = utledVilkårsresultat(vilkårsvurderinger)
@@ -146,7 +147,7 @@ object OppdaterVilkår {
 
     fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
                                      metadata: HovedregelMetadata,
-                                     stønadstype: Stønadstype): List<Vilkårsvurdering> {
+                                     stønadstype: StønadType): List<Vilkårsvurdering> {
         return vilkårsreglerForStønad(stønadstype)
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
@@ -159,7 +160,7 @@ object OppdaterVilkår {
                 }
     }
 
-    private fun skalLageVilkårsvurderingForBarnet(stønadstype: Stønadstype,
+    private fun skalLageVilkårsvurderingForBarnet(stønadstype: StønadType,
                                                   metadata: HovedregelMetadata,
                                                   barn: BehandlingBarn) =
             when (stønadstype) {

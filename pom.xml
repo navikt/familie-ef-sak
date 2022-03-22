@@ -36,7 +36,7 @@
         <felles.version>1.20220310100515_c0dcfc1</felles.version>
         <prosessering.version>1.20220308102416_2479ea0</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20220316123605_8c83061</kontrakter.version>
+        <kontrakter.version>2.0_20220321181602_8d247bd</kontrakter.version>
         <cucumber.version>7.2.3</cucumber.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->

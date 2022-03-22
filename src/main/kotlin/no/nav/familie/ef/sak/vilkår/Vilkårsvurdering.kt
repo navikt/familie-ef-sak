@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -56,7 +56,7 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
 }
 
-enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Stønadstype>) {
+enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<StønadType>) {
 
     FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
     LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
@@ -81,7 +81,7 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
 
     companion object {
 
-        fun hentVilkårForStønad(stønadstype: Stønadstype): List<VilkårType> = values().filter {
+        fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> = values().filter {
             it.gjelderStønader.contains(stønadstype)
         }
 

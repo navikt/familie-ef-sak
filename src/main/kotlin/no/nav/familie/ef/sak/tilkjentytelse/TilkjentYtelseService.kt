@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
@@ -11,6 +10,7 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -35,7 +35,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
                        ?.let { it.andelerTilkjentYtelse.any { andel -> andel.stønadTom.isAfter(LocalDate.now()) } } ?: false
     }
 
-    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: Stønadstype,
+    fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: StønadType,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
 
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)

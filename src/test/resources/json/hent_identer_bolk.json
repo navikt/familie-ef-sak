@@ -1,0 +1,27 @@
+{
+  "data": {
+    "hentIdenterBolk": [
+      {
+        "ident": "12345678910",
+        "identer": [
+          {
+            "ident": "11223344556677",
+            "historisk": false,
+            "gruppe": "AKTORID"
+          }
+        ],
+        "code": "ok"
+      },
+      {
+        "ident": "12345678911",
+        "identer": null,
+        "code": "not_found"
+      },
+      {
+        "ident": "test",
+        "identer": null,
+        "code": "bad_request"
+      }
+    ]
+  }
+}

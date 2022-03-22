@@ -1,8 +1,5 @@
 package no.nav.familie.ef.sak.vilkår
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.BARNETILSYN
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.SKOLEPENGER
 import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET
 import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET_ARBEID
 import no.nav.familie.ef.sak.vilkår.VilkårType.ALDER_PÅ_BARN
@@ -16,6 +13,9 @@ import no.nav.familie.ef.sak.vilkår.VilkårType.SAGT_OPP_ELLER_REDUSERT
 import no.nav.familie.ef.sak.vilkår.VilkårType.SAMLIV
 import no.nav.familie.ef.sak.vilkår.VilkårType.SIVILSTAND
 import no.nav.familie.ef.sak.vilkår.VilkårType.TIDLIGERE_VEDTAKSPERIODER
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

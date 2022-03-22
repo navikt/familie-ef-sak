@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.ekstern
 
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,7 +30,7 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
     */
     @PostMapping("finnes")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: Stønadstype?,
+    fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: StønadType?,
                                   @RequestBody request: PersonIdent): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
         return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))

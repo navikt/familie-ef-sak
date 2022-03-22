@@ -14,6 +14,8 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
 
     fun hentPerson(personId: UUID): FagsakPerson = fagsakPersonRepository.findByIdOrThrow(personId)
 
+    fun hentPersoner(personId: List<UUID>): Iterable<FagsakPerson> = fagsakPersonRepository.findAllById(personId)
+
     fun finnPerson(personIdenter: Set<String>): FagsakPerson? = fagsakPersonRepository.findByIdent(personIdenter)
 
     fun hentIdenter(personId: UUID): Set<PersonIdent> {

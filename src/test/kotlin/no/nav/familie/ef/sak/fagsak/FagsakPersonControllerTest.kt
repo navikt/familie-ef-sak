@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -16,9 +16,9 @@ internal class FagsakPersonControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal finne fagsaker til person`() {
         val person = testoppsettService.opprettPerson("1")
-        val overgangsstønad = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.OVERGANGSSTØNAD))
-        val barnetilsyn = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.BARNETILSYN))
-        val skolepenger = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.SKOLEPENGER))
+        val overgangsstønad = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = StønadType.OVERGANGSSTØNAD))
+        val barnetilsyn = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = StønadType.BARNETILSYN))
+        val skolepenger = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = StønadType.SKOLEPENGER))
 
         val fagsakPersonDto = testWithBrukerContext { fagsakPersonController.hentFagsakPersonUtvidet(person.id).getDataOrThrow() }
 

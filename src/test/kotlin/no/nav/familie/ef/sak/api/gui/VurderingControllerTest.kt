@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -19,6 +18,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,7 +53,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `oppdaterVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
-        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", StønadType.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -70,7 +70,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     internal fun `nullstillVilkår skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", StønadType.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -156,7 +156,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
             søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-            Stønadstype.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(

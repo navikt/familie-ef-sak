@@ -52,34 +52,21 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
         val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
 
-        if (featureToggleService.isEnabled("familie.ef.sak.bruk-html-for-brev")) {
-            val html = brevClient.genererHtml(brevmal = brevmal,
-                                              saksbehandlerBrevrequest = brevrequest,
-                                              saksbehandlersignatur = saksbehandlersignatur.navn,
-                                              enhet = saksbehandlersignatur.enhet,
-                                              skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter)
+        val html = brevClient.genererHtml(brevmal = brevmal,
+                                          saksbehandlerBrevrequest = brevrequest,
+                                          saksbehandlersignatur = saksbehandlersignatur.navn,
+                                          enhet = saksbehandlersignatur.enhet,
+                                          skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter)
 
 
-            lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId,
-                                                       "", // TODO: Dette feltet skal fjernes senere
-                                                       brevmal,
-                                                       saksbehandlersignatur.navn,
-                                                       saksbehandlersignatur.enhet,
-                                                       html)
+        lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId,
+                                                   "", // TODO: Dette feltet skal fjernes senere
+                                                   brevmal,
+                                                   saksbehandlersignatur.navn,
+                                                   saksbehandlersignatur.enhet,
+                                                   html)
 
-            return familieDokumentClient.genererPdfFraHtml(html)
-
-        }
-
-        val vedtaksbrev = lagreEllerOppdaterSaksbehandlerVedtaksbrev(
-                behandlingId,
-                brevrequest.toString(),
-                brevmal,
-                saksbehandlersignatur.navn,
-                saksbehandlersignatur.enhet
-        )
-
-        return brevClient.genererBrev(vedtaksbrev.tilDto(saksbehandlersignatur.skjulBeslutter))
+        return familieDokumentClient.genererPdfFraHtml(html)
     }
 
     private fun lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId: UUID,
@@ -136,7 +123,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             when (besluttervedtaksbrev.saksbehandlerHtml != null) { // TODO: saksbehandlerHtml skal kanskje bli ikke-nullable.
                 true -> {
                     val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(html = besluttervedtaksbrev.saksbehandlerHtml,
-                                                                                 beslutterSignatur = besluttervedtaksbrev.besluttersignatur)
+                                                                                 signaturMedEnhet = signaturMedEnhet)
                     Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
 
                 }
@@ -144,13 +131,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                     Fil(brevClient.genererBrev(besluttervedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter)))
             }
 
-    private fun settInnBeslutterSignaturIHtml(html: String, beslutterSignatur: String?): String {
+    private fun settInnBeslutterSignaturIHtml(html: String, signaturMedEnhet: SignaturDto): String {
 
-        feilHvisIkke(html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)){
+        feilHvisIkke(html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)) {
             "Brev-HTML mangler placeholder for besluttersignatur"
         }
 
-        return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur ?: "")
+        val beslutterSignatur =  if (signaturMedEnhet.skjulBeslutter) "" else signaturMedEnhet.navn
+        return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
     }
 
     fun lagSaksbehandlerFritekstbrev(frittståendeBrevDto: VedtaksbrevFritekstDto): ByteArray {
@@ -164,6 +152,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                                  navn = navn[ident]!!)
 
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
+
+
+
+
         val vedtaksbrev = lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
                                                                      brevrequest = objectMapper.writeValueAsString(request),
                                                                      brevmal = FRITEKST,
