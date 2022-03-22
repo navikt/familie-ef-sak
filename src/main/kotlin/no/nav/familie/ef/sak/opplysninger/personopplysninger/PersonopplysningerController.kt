@@ -59,14 +59,14 @@ class PersonopplysningerController(private val personopplysningerService: Person
     }
 
     @GetMapping("/nav-kontor/behandling/{behandlingId}")
-    fun hentNavKontor(@PathVariable behandlingId: UUID): Ressurs<NavKontorEnhet> {
+    fun hentNavKontor(@PathVariable behandlingId: UUID): Ressurs<NavKontorEnhet?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val aktivIdent = behandlingService.hentAktivIdent(behandlingId)
         return Ressurs.success(personopplysningerService.hentNavKontor(aktivIdent))
     }
 
     @PostMapping("/nav-kontor")
-    fun hentNavKontorTilFagsak(@RequestBody personIdent: PersonIdentDto): Ressurs<NavKontorEnhet> {
+    fun hentNavKontorTilFagsak(@RequestBody personIdent: PersonIdentDto): Ressurs<NavKontorEnhet?> {
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentNavKontor(personIdent.personIdent))
     }
