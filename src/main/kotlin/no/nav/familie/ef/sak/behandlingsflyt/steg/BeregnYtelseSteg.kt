@@ -22,7 +22,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
@@ -84,18 +83,15 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Behandling) {
-        behandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
-            val forrigeVedtak = vedtakService.hentVedtak(forrigeBehandlingId)
-            if (forrigeVedtak.resultatType == ResultatType.SANKSJONERE) {
-                val sanksjonsdato = forrigeVedtak.perioder?.perioder?.firstOrNull()?.datoFra
-                                    ?: error("Fant ikke periode for sanksjonert vedtak for behandling =$forrigeBehandlingId")
-                feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
-                    "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
-                }
+        val nyesteSanksjonsperiode = tilkjentYtelseService.hentHistorikk(behandling.fagsakId, null)
+                .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
+        nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
+            feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
+                "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
             }
         }
-
     }
+
 
     private fun validerGyldigeVedtaksperioder(behandling: Behandling, data: VedtakDto) {
         if (data is Innvilget) {
