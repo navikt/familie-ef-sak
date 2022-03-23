@@ -28,14 +28,14 @@ import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as KontrakterFri
 
 internal class FrittståendeBrevServiceTest {
 
-    val brevClient = mockk<BrevClient>()
-    val fagsakService = mockk<FagsakService>()
-    val personopplysningerService = mockk<PersonopplysningerService>()
-    val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    val iverksettClient = mockk<IverksettClient>()
-    val brevsignaturService = mockk<BrevsignaturService>()
+    private val brevClient = mockk<BrevClient>()
+    private val fagsakService = mockk<FagsakService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    private val iverksettClient = mockk<IverksettClient>()
+    private val brevsignaturService = mockk<BrevsignaturService>()
 
-    val frittståendeBrevService =
+    private val frittståendeBrevService =
             FrittståendeBrevService(brevClient,
                                     fagsakService,
                                     personopplysningerService,
@@ -44,8 +44,8 @@ internal class FrittståendeBrevServiceTest {
                                     brevsignaturService
 
             )
-    val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
-    val frittståendeBrevDto = FrittståendeBrevDto(
+    private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
+    private val frittståendeBrevDto = FrittståendeBrevDto(
         "overskrift",
         listOf(
             FrittståendeBrevAvsnitt(
@@ -77,16 +77,17 @@ internal class FrittståendeBrevServiceTest {
     @TestFactory
     fun `skal sende frittstående brev med riktig brevtype`() =
             brevtyperTestData.map { (input, forventetBrevtype) ->
-                DynamicTest.dynamicTest("Skal sende brev for stønadtype ${input.first} og brevkategori ${input.second} til iverksett for journalføring med brevtype $forventetBrevtype") {
+                DynamicTest.dynamicTest("Skal sende brev for stønadtype ${input.first} og brevkategori " +
+                                        "${input.second} til iverksett for journalføring med brevtype $forventetBrevtype") {
                     mockAvhengigheter()
 
-                val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
-                every { fagsakService.hentFagsak(any()) } returns fagsak.copy(stønadstype = input.first)
-                every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
+                    val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
+                    every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak.copy(stønadstype = input.first)
+                    every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
 
-                frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
+                    frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
 
-                assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
+                    assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
             }
         }
 
@@ -94,6 +95,7 @@ internal class FrittståendeBrevServiceTest {
         BrukerContextUtil.mockBrukerContext("Saksbehandler")
         every { brevClient.genererBrev(any(), any(), any()) } returns "123".toByteArray()
         every { fagsakService.hentAktivIdent(any()) } returns fagsak.hentAktivIdent()
+        every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
         every { fagsakService.hentFagsak(any()) } returns fagsak
         every { fagsakService.hentEksternId(any()) } returns Long.MAX_VALUE
         every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf(fagsak.hentAktivIdent() to "Navn Navnesen")

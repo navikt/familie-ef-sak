@@ -126,7 +126,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     fun opprettManuellTilbakekreving(fagsakId: UUID) {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         val kanBehandlingOpprettesManuelt =
                 tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id)
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
