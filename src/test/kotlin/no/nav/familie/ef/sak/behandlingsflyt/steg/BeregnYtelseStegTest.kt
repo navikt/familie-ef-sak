@@ -14,17 +14,21 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
@@ -34,6 +38,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -46,6 +51,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -1031,7 +1037,7 @@ internal class BeregnYtelseStegTest {
     }
 
     @Nested
-    inner class Opphør {
+    inner class Opphørt {
 
         @Test
         internal fun `skal kunne opphøre bak i tid - skal sette opphørsdato på tilkjent ytelse`() {
@@ -1205,6 +1211,50 @@ internal class BeregnYtelseStegTest {
 
     }
 
+    @Nested
+    inner class Sanksjonsrevurdering {
+
+        @Test
+        internal fun `skal ikke kunne opphøre før forrige sanksjonsbehandling`() {
+            val startMåned = YearMonth.of(2021, 6)
+            val sluttMåned = YearMonth.of(2021, 12)
+            val opphørFom = YearMonth.of(2021, 6)
+            val sankskjonsMåned = YearMonth.of(2021, 8)
+
+            every {
+                tilkjentYtelseService.hentHistorikk(any(), any())
+            } returns listOf(andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
+                             andelhistorikkSanksjon(sankskjonsMåned),
+                             andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned))
+
+            assertThrows<Feil> {
+                utførSteg(BehandlingType.REVURDERING,
+                          Opphør(ResultatType.OPPHØRT, opphørFom, "ok"),
+                          forrigeBehandlingId = UUID.randomUUID())
+            }
+        }
+
+        @Test
+        internal fun `skal ikke kunne innvilge med periode før forrige sanksjonsbehandling`() {
+            val startMåned = YearMonth.of(2021, 6)
+            val sluttMåned = YearMonth.of(2021, 12)
+            val sankskjonsMåned = YearMonth.of(2021, 8)
+
+            every {
+                tilkjentYtelseService.hentHistorikk(any(), any())
+            } returns listOf(andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
+                             andelhistorikkSanksjon(sankskjonsMåned),
+                             andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned))
+
+            assertThrows<Feil> {
+                utførSteg(BehandlingType.REVURDERING,
+                          innvilget(listOf(innvilgetPeriode(startMåned, sluttMåned)), listOf(inntekt(startMåned))),
+                          forrigeBehandlingId = UUID.randomUUID())
+            }
+        }
+
+    }
+
     private fun innvilget(perioder: List<VedtaksperiodeDto>,
                           inntekter: List<Inntekt>) =
             Innvilget(resultatType = ResultatType.INNVILGE,
@@ -1220,6 +1270,38 @@ internal class BeregnYtelseStegTest {
                                                     aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                                                     periodeType = VedtaksperiodeType.SANKSJON),
                         internBegrunnelse = "")
+
+    private fun andelhistorikkInnvilget(fom: YearMonth, tom: YearMonth) =
+            AndelHistorikkDto(behandlingId = UUID.randomUUID(),
+                              behandlingType = BehandlingType.REVURDERING,
+                              vedtakstidspunkt = LocalDateTime.now(),
+                              saksbehandler = "",
+                              andel = AndelTilkjentYtelseDto(beløp = 1,
+                                                             stønadFra =fom.atDay(1),
+                                                             stønadTil =tom.atEndOfMonth(),
+                                                             inntekt = 0,
+                                                             inntektsreduksjon = 0,
+                                                             samordningsfradrag = 0),
+                              aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                              periodeType = VedtaksperiodeType.HOVEDPERIODE,
+                              endring = null
+            )
+
+    private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
+            AndelHistorikkDto(behandlingId = UUID.randomUUID(),
+                              behandlingType = BehandlingType.REVURDERING,
+                              vedtakstidspunkt = LocalDateTime.now(),
+                              saksbehandler = "",
+                              andel = AndelTilkjentYtelseDto(beløp = 0,
+                                                             stønadFra =sanksjonMåned.atDay(1),
+                                                             stønadTil =sanksjonMåned.atEndOfMonth(),
+                                                             inntekt = 0,
+                                                             inntektsreduksjon = 0,
+                                                             samordningsfradrag = 0),
+                              aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                              periodeType = VedtaksperiodeType.SANKSJON,
+                              endring = null
+            )
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
