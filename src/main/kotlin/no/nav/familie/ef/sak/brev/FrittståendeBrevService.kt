@@ -61,8 +61,8 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
     }
 
 
-    private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori) : FrittståendeBrevType =
-            when(brevKategori){
+    private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori): FrittståendeBrevType =
+            when (brevKategori) {
                 FrittståendeBrevKategori.INFORMASJONSBREV -> FrittståendeBrevType.INFORMASJONSBREV
                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.infrastruktur.config
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.brev.BrevClient
-import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

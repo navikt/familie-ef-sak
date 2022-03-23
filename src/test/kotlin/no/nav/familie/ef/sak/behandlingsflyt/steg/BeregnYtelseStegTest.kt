@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
@@ -38,7 +37,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -1275,8 +1273,8 @@ internal class BeregnYtelseStegTest {
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
                               andel = AndelTilkjentYtelseDto(beløp = 1,
-                                                             stønadFra =fom.atDay(1),
-                                                             stønadTil =tom.atEndOfMonth(),
+                                                             stønadFra = fom.atDay(1),
+                                                             stønadTil = tom.atEndOfMonth(),
                                                              inntekt = 0,
                                                              inntektsreduksjon = 0,
                                                              samordningsfradrag = 0),
@@ -1291,8 +1289,8 @@ internal class BeregnYtelseStegTest {
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
                               andel = AndelTilkjentYtelseDto(beløp = 0,
-                                                             stønadFra =sanksjonMåned.atDay(1),
-                                                             stønadTil =sanksjonMåned.atEndOfMonth(),
+                                                             stønadFra = sanksjonMåned.atDay(1),
+                                                             stønadTil = sanksjonMåned.atEndOfMonth(),
                                                              inntekt = 0,
                                                              inntektsreduksjon = 0,
                                                              samordningsfradrag = 0),

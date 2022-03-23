@@ -47,33 +47,35 @@ internal class FrittståendeBrevServiceTest {
             )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(
-        "overskrift",
-        listOf(
-            FrittståendeBrevAvsnitt(
-                "deloverskrift",
-                "innhold"
-            )
-        ),
-        fagsak.id, FrittståendeBrevKategori.INFORMASJONSBREV
+            "overskrift",
+            listOf(
+                    FrittståendeBrevAvsnitt(
+                            "deloverskrift",
+                            "innhold"
+                    )
+            ),
+            fagsak.id, FrittståendeBrevKategori.INFORMASJONSBREV
     )
 
 
     private val brevtyperTestData = listOf(Pair(StønadType.OVERGANGSSTØNAD,
                                                 FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
-            Pair(StønadType.OVERGANGSSTØNAD,
-                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
-            Pair(StønadType.OVERGANGSSTØNAD,
-                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
-            Pair(StønadType.SKOLEPENGER, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
-            Pair(StønadType.SKOLEPENGER,
-                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
-            Pair(StønadType.SKOLEPENGER,
-                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
-            Pair(StønadType.BARNETILSYN, FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
-            Pair(StønadType.BARNETILSYN,
-                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
-            Pair(StønadType.BARNETILSYN,
-                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT)
+                                           Pair(StønadType.OVERGANGSSTØNAD,
+                                                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
+                                           Pair(StønadType.OVERGANGSSTØNAD,
+                                                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
+                                           Pair(StønadType.SKOLEPENGER,
+                                                FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
+                                           Pair(StønadType.SKOLEPENGER,
+                                                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
+                                           Pair(StønadType.SKOLEPENGER,
+                                                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
+                                           Pair(StønadType.BARNETILSYN,
+                                                FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
+                                           Pair(StønadType.BARNETILSYN,
+                                                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
+                                           Pair(StønadType.BARNETILSYN,
+                                                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT)
 
     @TestFactory
     fun `skal sende frittstående brev med riktig brevtype`() =
@@ -89,7 +91,7 @@ internal class FrittståendeBrevServiceTest {
                     frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
 
                     assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
-            }
+                }
         }
 
     private fun mockAvhengigheter() {

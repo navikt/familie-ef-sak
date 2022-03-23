@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.every
 import io.mockk.mockk
@@ -57,14 +56,14 @@ internal class VedtaksbrevServiceTest {
     private val fritekstBrevDto = lagVedtaksbrevFritekstDto()
 
     @BeforeEach
-    fun setUp(){
+    fun setUp() {
         mockBrukerContext(beslutterNavn)
         val signaturDto = SignaturDto(beslutterNavn, "enhet", false)
         every { brevsignaturService.lagSignaturMedEnhet(any<Saksbehandling>()) } returns signaturDto
     }
 
     @AfterEach
-    fun tearDown(){
+    fun tearDown() {
         clearBrukerContext()
     }
 
@@ -178,7 +177,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    fun `skal kaste feil hvis saksbehandlerHtml ikke inneholder placeholder for besluttersignatur`(){
+    fun `skal kaste feil hvis saksbehandlerHtml ikke inneholder placeholder for besluttersignatur`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlerHtml = "html uten placeholder")
 
 
@@ -189,7 +188,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    fun `Skal erstatte placeholder med besluttersignatur`(){
+    fun `Skal erstatte placeholder med besluttersignatur`() {
 
         val htmlSlot = slot<String>()
 
@@ -204,7 +203,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    fun `Skal lage pdf gitt html fra familie-brev`(){
+    fun `Skal lage pdf gitt html fra familie-brev`() {
 
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
@@ -215,12 +214,13 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.insert(capture(vedtaksbrevSlot)) } returns vedtaksbrev
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
-        vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling(fagsak, behandling), objectMapper.createObjectNode(), "brevmal")
+        vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling(fagsak, behandling),
+                                                      objectMapper.createObjectNode(),
+                                                      "brevmal")
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(html)
         assertThat(vedtaksbrevSlot.captured.saksbehandlerBrevrequest).isEmpty()
     }
-
 
 
 }

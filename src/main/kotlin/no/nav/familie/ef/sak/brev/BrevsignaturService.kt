@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 
 @Service

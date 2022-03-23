@@ -68,7 +68,10 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
 
     fun validerTilgangTilBehandling(saksbehandling: Saksbehandling, event: AuditLoggerEvent) {
         val tilgang = harTilgangTilPersonMedRelasjoner(saksbehandling.ident)
-        auditLogger.log(Sporingsdata(event, saksbehandling.ident, tilgang, CustomKeyValue("behandling", saksbehandling.id.toString())))
+        auditLogger.log(Sporingsdata(event,
+                                     saksbehandling.ident,
+                                     tilgang,
+                                     CustomKeyValue("behandling", saksbehandling.id.toString())))
         if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til behandling=${saksbehandling.id}")
@@ -92,7 +95,10 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
             fagsakPersonService.hentAktivIdent(fagsakPersonId)
         }
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        auditLogger.log(Sporingsdata(event, personIdent, tilgang, custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
+        auditLogger.log(Sporingsdata(event,
+                                     personIdent,
+                                     tilgang,
+                                     custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
         if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til fagsakPerson=$fagsakPersonId")

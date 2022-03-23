@@ -46,11 +46,11 @@ class NyeBarnServiceTest {
     val grunnlagsdataDomene = mockk<GrunnlagsdataDomene>()
 
     val fnrForEksisterendeBarn = "19011870794"
-    val fødselsdatoEksisterendeBarn = LocalDate.of(2018, 1, 19)
+    val fødselsdatoEksisterendeBarn: LocalDate = LocalDate.of(2018, 1, 19)
     val fnrForNyttBarn = "15012279679"
-    val fødselsdatoNyttBarn = LocalDate.of(2022, 1, 15)
+    val fødselsdatoNyttBarn: LocalDate = LocalDate.of(2022, 1, 15)
     val fnrForVoksentBarn = "22100188701"
-    val fødselsdatoVoksentBarn = LocalDate.of(2001, 10, 22)
+    val fødselsdatoVoksentBarn: LocalDate = LocalDate.of(2001, 10, 22)
 
     @BeforeEach fun init() {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling

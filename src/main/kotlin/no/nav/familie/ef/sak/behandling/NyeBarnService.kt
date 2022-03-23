@@ -70,7 +70,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
             try {
                 taskRepository.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
             } catch (e: DbActionExecutionException) {
-                if(e.cause is DuplicateKeyException) {
+                if (e.cause is DuplicateKeyException) {
                     logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
                     return
                 }

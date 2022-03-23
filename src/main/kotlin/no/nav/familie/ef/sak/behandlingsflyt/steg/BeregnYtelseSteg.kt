@@ -144,7 +144,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
                 andelerTilkjentYtelse to startdatoForFørstegangsbehandling(
-                    andelerTilkjentYtelse)
+                        andelerTilkjentYtelse)
             BehandlingType.REVURDERING -> nyeAndelerForRevurderingMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -11,11 +10,8 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import java.util.UUID
 
 internal class BrevsignaturServiceTest {
 
@@ -25,7 +21,7 @@ internal class BrevsignaturServiceTest {
     val brevsignaturService = BrevsignaturService(personopplysningerService, fagsakService)
 
     @BeforeEach
-    fun setUp(){
+    fun setUp() {
         every { fagsakService.hentFagsak(any()) } returns fagsak(identer = setOf(PersonIdent("123")))
     }
 
