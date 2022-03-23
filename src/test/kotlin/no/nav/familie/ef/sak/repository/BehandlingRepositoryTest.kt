@@ -4,7 +4,10 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
 import java.util.UUID
@@ -333,6 +337,35 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                    type = BehandlingType.REVURDERING))
             assertThat(behandlingRepository.existsByFagsakIdAndTypeIn(UUID.randomUUID(),
                                                                       setOf(BehandlingType.REVURDERING))).isFalse
+        }
+
+    }
+
+    @Nested
+    inner class Maks1UtredesPerFagsak {
+
+        @Test
+        internal fun `skal ikke kunne ha flere behandlinger på samma fagsak med annen status enn ferdigstilt`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
+            behandlingRepository.insert(behandling(fagsak, status = UTREDES))
+            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
+
+            listOf(UTREDES, OPPRETTET, FATTER_VEDTAK).forEach {
+                val cause = assertThatThrownBy {
+                    behandlingRepository.insert(behandling(fagsak, status = it))
+                }.cause
+                cause.isInstanceOf(DuplicateKeyException::class.java)
+                cause.hasMessageContaining("duplicate key value violates unique constraint \"behandlinger_i_arbeid\"")
+            }
+        }
+
+        @Test
+        internal fun `skal kunne ha flere behandlinger på ulike fagsak med status utredes`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, status = UTREDES))
+            behandlingRepository.insert(behandling(fagsak2, status = UTREDES))
         }
 
     }
