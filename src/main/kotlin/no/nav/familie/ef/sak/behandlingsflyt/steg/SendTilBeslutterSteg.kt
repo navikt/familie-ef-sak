@@ -72,7 +72,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         if (erIkkeRelevantForTilbakekreving(behandling)) {
             return false
         }
-        val feilutbetaling = simuleringService.hentLagretSimuleringsresultat(behandling.id).feilutbetaling > BigDecimal.ZERO
+        val feilutbetaling = simuleringService.hentLagretSimuleringsoppsommering(behandling.id).feilutbetaling > BigDecimal.ZERO
         val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(behandling.id)
         if (feilutbetaling && harIkkeTattStillingTil) {
             return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(behandling.id)

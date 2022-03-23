@@ -91,7 +91,7 @@ internal class IverksettingDtoMapperTest {
                                  varseltekst = forventetVarseltekst,
                                  begrunnelse = "ingen")
         every {
-            simuleringService.hentLagretSimuleringsresultat(behandlingId = behandling.id)
+            simuleringService.hentLagretSimuleringsoppsommering(behandlingId = behandling.id)
         } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal.TEN)
 
         val tilbakekreving = iverksettingDtoMapper.mapTilbakekreving(behandling.id)

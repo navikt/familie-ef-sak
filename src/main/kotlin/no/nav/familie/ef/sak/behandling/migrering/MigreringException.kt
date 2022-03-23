@@ -17,5 +17,6 @@ enum class MigreringExceptionType(val kanGåVidereTilJournalføring: Boolean = f
     ELDRE_PERIODER(kanGåVidereTilJournalføring = true),
     SIMULERING_FEILUTBETALING,
     SIMULERING_ETTERBETALING,
+    SIMULERING_DEBIT_TREKK,
     BELØP_0,
 }

@@ -41,9 +41,12 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         }
     }
 
-    fun hentLagretSimuleringsresultat(behandlingId: UUID): Simuleringsoppsummering {
-        val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandlingId)
-        return simuleringsresultat.beriketData.oppsummering
+    fun hentLagretSimuleringsoppsommering(behandlingId: UUID): Simuleringsoppsummering {
+        return hentLagretSimmuleringsresultat(behandlingId).oppsummering
+    }
+
+    fun hentLagretSimmuleringsresultat(behandlingId: UUID): BeriketSimuleringsresultat {
+        return simuleringsresultatRepository.findByIdOrThrow(behandlingId).beriketData
     }
 
     fun slettSimuleringForBehandling(behandlingId: UUID) {
@@ -65,8 +68,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
     private fun simulerForBehandling(behandling: Behandling): Simuleringsoppsummering {
 
         if (behandling.status.behandlingErLåstForVidereRedigering() || !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)) {
-            val simuleringsresultat: Simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
-            return simuleringsresultat.beriketData.oppsummering
+            return hentLagretSimuleringsoppsommering(behandling.id)
         }
         val simuleringsresultat = hentOgLagreSimuleringsresultat(behandling)
         return simuleringsresultat.beriketData.oppsummering
