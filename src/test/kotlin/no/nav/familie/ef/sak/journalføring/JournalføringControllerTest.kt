@@ -25,6 +25,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -131,31 +132,36 @@ internal class JournalføringControllerTest {
         }
     }
 
-    @Test
-    internal fun `skal kaste ApiFeil hvis vedlegget ikke inneholder dokumentvariant ARKIV`() {
-        every {
-            journalføringService.hentJournalpost(any())
-        } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-            it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
-        })
+    @Nested
+    inner class HentDokument {
 
-        assertThrows<ApiFeil> { journalføringController.hentDokument(journalpostId, dokumentInfoId) }
-    }
+        @Test
+        internal fun `skal kaste ApiFeil hvis vedlegget ikke inneholder dokumentvariant ARKIV`() {
+            every {
+                journalføringService.hentJournalpost(any())
+            } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
+                it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
+            })
 
-    @Test
-    internal fun `skal hente dokument med dokumentvariant ARKIV`() {
-        every {
-            journalføringService.hentJournalpost(any())
-        } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-            it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
-                                               Dokumentvariant(Dokumentvariantformat.ARKIV)))
-        })
+            assertThrows<ApiFeil> { journalføringController.hentDokument(journalpostId, dokumentInfoId) }
+        }
 
-        every { journalføringService.hentDokument(any(), any()) } returns byteArrayOf()
+        @Test
+        internal fun `skal kunne hente dokument med dokumentvariant ARKIV`() {
+            every {
+                journalføringService.hentJournalpost(any())
+            } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
+                it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
+                                                   Dokumentvariant(Dokumentvariantformat.ARKIV)))
+            })
 
-        journalføringController.hentDokument(journalpostId, dokumentInfoId)
+            every { journalføringService.hentDokument(any(), any()) } returns byteArrayOf()
 
-        verify(exactly = 1) { journalføringService.hentDokument(journalpostId, dokumentInfoId) }
+            journalføringController.hentDokument(journalpostId, dokumentInfoId)
+
+            verify(exactly = 1) { journalføringService.hentDokument(journalpostId, dokumentInfoId) }
+        }
+
     }
 
     private val aktørId = "11111111111"
