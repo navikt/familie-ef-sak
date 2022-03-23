@@ -39,10 +39,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
 
 
-    override fun validerSteg(saksbehandling: Saksbehandling) {
-
-    }
-
     override fun stegType(): StegType {
         return StegType.BEREGNE_YTELSE
     }
