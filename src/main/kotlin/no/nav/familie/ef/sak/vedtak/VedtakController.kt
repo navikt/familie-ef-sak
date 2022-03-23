@@ -3,13 +3,13 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -90,7 +90,7 @@ class VedtakController(private val stegService: StegService,
     @GetMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(): Ressurs<Map<String, Int?>> {
-        val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD)
+        val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD)
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
         for (behandlingId in behandlingIds) {
             val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))

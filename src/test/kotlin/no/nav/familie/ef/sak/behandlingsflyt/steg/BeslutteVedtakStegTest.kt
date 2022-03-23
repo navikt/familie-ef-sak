@@ -20,7 +20,6 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -39,6 +38,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
@@ -83,7 +83,7 @@ internal class BeslutteVedtakStegTest {
                                           saksbehandlerident = "saksbIdent",
                                           beslutterident = innloggetBeslutter)
 
-    private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
                                 identer = setOf(PersonIdent(ident = "12345678901")))
     private val behandlingId = UUID.randomUUID()
 

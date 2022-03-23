@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
@@ -25,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -313,7 +313,7 @@ internal class OppgaveServiceTest {
 
     private fun lagTestFagsak(): Fagsak {
         return fagsak(id = FAGSAK_ID,
-                      stønadstype = Stønadstype.OVERGANGSSTØNAD,
+                      stønadstype = StønadType.OVERGANGSSTØNAD,
                       eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
                       identer = setOf(PersonIdent(ident = FNR)))
     }

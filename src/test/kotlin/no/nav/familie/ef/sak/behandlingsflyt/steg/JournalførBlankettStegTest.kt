@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.blankett.Blankett
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.blankett.BlankettSteg
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.repository.fagsak
@@ -30,6 +29,7 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
@@ -66,7 +66,7 @@ class JournalførBlankettStegTest {
     private lateinit var taskSlot: MutableList<Task>
 
     private val fnr = "12345678901"
-    private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
                                 identer = setOf(PersonIdent(ident = fnr)))
 
     private val journalpost =

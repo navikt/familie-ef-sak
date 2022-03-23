@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -55,10 +56,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         when (data) {
             is Innvilget -> {
+                validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetBehandling(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Opphør -> {
+                validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
@@ -71,6 +74,23 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             }
         }
     }
+
+    private fun validerStartTidEtterSanksjon(innvilget: Innvilget, behandling: Saksbehandling) {
+        innvilget.perioder.firstOrNull()?.let {
+            validerStartTidEtterSanksjon(it.årMånedFra, behandling)
+        }
+    }
+
+    private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
+        val nyesteSanksjonsperiode = tilkjentYtelseService.hentHistorikk(behandling.fagsakId, null)
+                .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
+        nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
+            feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
+                "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
+            }
+        }
+    }
+
 
     private fun validerGyldigeVedtaksperioder(saksbehandling: Saksbehandling, data: VedtakDto) {
         if (data is Innvilget) {
@@ -123,7 +143,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
-                andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+                andelerTilkjentYtelse to startdatoForFørstegangsbehandling(
+                    andelerTilkjentYtelse)
             BehandlingType.REVURDERING -> nyeAndelerForRevurderingMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }

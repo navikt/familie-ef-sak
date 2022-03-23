@@ -9,8 +9,9 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.dto.EksternId
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +56,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir seks mnd om 4 dager, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusDays(3)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -66,7 +67,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir seks mnd i dag, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusDays(182)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 1) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -78,7 +79,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir seks mnd om 1 uke minus en dag, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusWeeks(1).minusDays(1)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -89,7 +90,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir seks mnd om 1 uke, sjekk om fyller innen 1 uke, forvent beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusWeeks(1)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -100,7 +101,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir seks mnd om 1 uker pluss en dag, sjekk om fyller innen 1 uke, forvent ingen kall`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusWeeks(1).plusDays(1)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -113,7 +114,7 @@ internal class ForberedOppgaverForBarnServiceTest {
         val kjøreDato = LocalDate.of(2022, 2, 21)
         val barn = opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato))
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barn)
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN, kjøreDato)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
@@ -124,7 +125,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `8 av 14 barn blir 6 mnd innen 1 uke, sjekk fyller innen 1 uke, forvent 8 kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdatoer = (0..14).asSequence().map { LocalDate.now().minusDays(182).plusDays(it.toLong()) }.toList()
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns fødselsdatoer.map { opprettBarn(fødselsnummer = FnrGenerator.generer(it)) }
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
@@ -135,7 +136,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `8 av 14 barn blir 1 år innen 1 uke, sjekk fyller innen 1 uke, forvent 8 kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdatoer = (0..14).asSequence().map { LocalDate.now().minusYears(1).plusDays(it.toLong()) }.toList()
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns fødselsdatoer.map { opprettBarn(fødselsnummer = FnrGenerator.generer(it)) }
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 8) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
@@ -146,7 +147,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir 1 år om 4 dager, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdato = LocalDate.now().minusYears(1).plusDays(3)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -157,7 +158,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir 1 år i dag, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdato = LocalDate.now().minusYears(1)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -168,7 +169,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn blir 1 år om 7 dager, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdato = LocalDate.now().minusYears(1).plusDays(7)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -179,7 +180,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn ble 1 år i går, for sen kjøring med 2 dager, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdato = LocalDate.now().minusYears(1).minusDays(1)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN.minusDays(2))
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -190,7 +191,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn ble 1 år for 3 dager siden, for sen kjøring med 2 dager, sjekk om fyller innen 1 uke, forvent ingen kall`() {
         val fødselsdato = LocalDate.now().minusYears(1).minusDays(3)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN.minusDays(2))
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -201,7 +202,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `for tidlig kjøring med 7 dager, barn fyller om 7 dager, forvent kall til beskrivelseBarnFyllerEttÅr`() {
         val fødselsdato = LocalDate.now().minusYears(1).plusDays(7)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = FnrGenerator.generer(fødselsdato)))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN.minusDays(7))
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -212,7 +213,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     fun `barn med bare termindato fyller 1 år i morgen, forvent kall til beskrivelseBarnFyllerEttÅr og ingen unntak`() {
         val termindato = LocalDate.now().minusYears(1).plusDays(7)
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = null, termindato = termindato))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd() }
@@ -225,7 +226,7 @@ internal class ForberedOppgaverForBarnServiceTest {
         val behandlingId = UUID.randomUUID()
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato),
                          opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
@@ -237,7 +238,7 @@ internal class ForberedOppgaverForBarnServiceTest {
         val termindato = LocalDate.now().minusYears(1).plusDays(7)
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato),
                          opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato))
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(SISTE_KJØRING_EN_UKE_SIDEN)
@@ -253,10 +254,10 @@ internal class ForberedOppgaverForBarnServiceTest {
         val migrertBehandlingId = UUID.randomUUID()
 
         every {
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(behandlingId = behandlingId, termindato = termindato))
         every {
-            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(Stønadstype.OVERGANGSSTØNAD, any())
+            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(behandlingId = migrertBehandlingId,
                                      fødselsnummer = FnrGenerator.generer(fødselsdato),
                                      fraMigrering = true))

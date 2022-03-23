@@ -14,11 +14,11 @@ internal class VilkårsregelTest {
     @Test
     internal fun `sjekker att output fortsatt er det samme på json`() {
         val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
-        alleVilkårsregler.forEach {
-            val json = objectWriter.writeValueAsString(it)
+        Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {
+            val json = objectWriter.writeValueAsString(it.value)
             // kommentere ut hvis regler har endret seg for å lagre de nye reglene
             //skrivTilFil(it, json)
-            val fileJson = readFile(it)
+            val fileJson = readFile(it.value)
             assertThat(json).isEqualTo(fileJson)
         }
     }
@@ -35,7 +35,7 @@ internal class VilkårsregelTest {
     @Disabled
     internal fun `print alle vilkår`() {
         val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
-        println(objectWriter.writeValueAsString(Vilkårsregler.VILKÅRSREGLER))
+        println(objectWriter.writeValueAsString(Vilkårsregler.ALLE_VILKÅRSREGLER))
     }
 
     private fun readFile(it: Vilkårsregel) =

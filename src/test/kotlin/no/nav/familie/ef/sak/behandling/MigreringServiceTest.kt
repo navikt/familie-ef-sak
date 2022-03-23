@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype.OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
@@ -29,7 +28,6 @@ import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
-import no.nav.familie.ef.sak.patch.PatchAktivitetService
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -45,7 +43,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
@@ -53,6 +50,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -91,7 +89,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var iverksettClient: IverksettClient
     @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
-    @Autowired private lateinit var patchAktivitetService: PatchAktivitetService
     @Autowired private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
@@ -291,7 +288,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentMigreringInfo - sak inneholder annen ident`() {
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("2",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.INNVILGET)))
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
 
@@ -305,7 +302,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentMigreringInfo - sak er åpen`() {
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("1",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.ÅPEN_SAK)))
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
 
@@ -374,7 +371,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val nå = YearMonth.of(2021, 1)
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("1",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.INNVILGET)))
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
@@ -392,7 +389,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val nå = YearMonth.of(2021, 1)
         every { infotrygdReplikaClient.hentSaker(any()) } returns
                 InfotrygdSakResponse(listOf(InfotrygdSak("1",
-                                                         stønadType = StønadType.OVERGANGSSTØNAD,
+                                                         stønadType = OVERGANGSSTØNAD,
                                                          resultat = InfotrygdSakResultat.ÅPEN_SAK)))
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
                 InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
@@ -420,19 +417,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isTrue
-    }
-
-    @Test
-    internal fun `skal patche migrert person - oppdaterer vedtak til reell arbeidssøker`() {
-        val mockPerioder = { mockPerioder(aktivitetstype = InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER) }
-        val migrering = opprettOgIverksettMigrering(mockPerioder = mockPerioder)
-        assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
-                .isEqualTo(AktivitetType.MIGRERING)
-
-        patchAktivitetService.patch(true)
-
-        assertThat(vedtakService.hentVedtak(migrering.id).perioder!!.perioder.single().aktivitet)
-                .isEqualTo(AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER)
     }
 
     @Nested

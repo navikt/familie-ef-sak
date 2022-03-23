@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -10,11 +11,15 @@ import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.svarTilDomene
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
-import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.VILKÅRSREGLER
-import no.nav.familie.ef.sak.vilkår.regler.alleVilkårsregler
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.ALLE_VILKÅRSREGLER
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import java.util.UUID
 
 object OppdaterVilkår {
@@ -25,7 +30,7 @@ object OppdaterVilkår {
      */
     fun lagNyOppdatertVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering,
                                        oppdatering: List<DelvilkårsvurderingDto>,
-                                       vilkårsregler: Map<VilkårType, Vilkårsregel> = VILKÅRSREGLER.vilkårsregler)
+                                       vilkårsregler: Map<VilkårType, Vilkårsregel> = ALLE_VILKÅRSREGLER.vilkårsregler) // TODO: Ikke default input her, kanskje?
             : Vilkårsvurdering {
         val vilkårsregel = vilkårsregler[vilkårsvurdering.type] ?: error("Finner ikke vilkårsregler for ${vilkårsvurdering.type}")
 
@@ -93,9 +98,9 @@ object OppdaterVilkår {
         }
     }
 
-    fun utledResultatForAleneomsorg(value: List<Vilkårsvurdering>): Vilkårsresultat {
-        feilHvis(value.any { it.type != VilkårType.ALENEOMSORG }) {
-            "Denne metoden kan kun kalles med vilkår for Aleneomsorg"
+    fun utledResultatForVilkårSomGjelderFlereBarn(value: List<Vilkårsvurdering>): Vilkårsresultat {
+        feilHvis(value.any { !it.type.gjelderFlereBarn() }) {
+            "Denne metoden kan kun kalles med vilkår som kan ha flere barn"
         }
         return when {
             value.any { it.resultat == Vilkårsresultat.OPPFYLT } -> Vilkårsresultat.OPPFYLT
@@ -109,16 +114,18 @@ object OppdaterVilkår {
         }
     }
 
-    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>): Boolean {
-        val inneholderAlleTyperVilkår = vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkår())
+    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>,
+                                        stønadstype: StønadType): Boolean {
+        val inneholderAlleTyperVilkår =
+                vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkårForStønad(stønadstype))
         val vilkårsresultat = utledVilkårsresultat(vilkårsvurderinger)
         return inneholderAlleTyperVilkår && vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }
     }
 
     private fun utledVilkårsresultat(lagredeVilkårsvurderinger: List<Vilkårsvurdering>): List<Vilkårsresultat> {
         val vilkårsresultat = lagredeVilkårsvurderinger.groupBy { it.type }.map {
-            if (it.key == VilkårType.ALENEOMSORG) {
-                utledResultatForAleneomsorg(it.value)
+            if (it.key.gjelderFlereBarn()) {
+                utledResultatForVilkårSomGjelderFlereBarn(it.value)
             } else {
                 it.value.single().resultat
             }
@@ -139,18 +146,29 @@ object OppdaterVilkår {
             }
 
     fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
-                                     metadata: HovedregelMetadata): List<Vilkårsvurdering> {
-        return alleVilkårsregler
+                                     metadata: HovedregelMetadata,
+                                     stønadstype: StønadType): List<Vilkårsvurdering> {
+        return vilkårsreglerForStønad(stønadstype)
                 .flatMap { vilkårsregel ->
-                    if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG && metadata.barn.isNotEmpty()) {
-                        metadata.barn.map {
-                            lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id)
-                        }
+                    if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
+                        metadata.barn
+                                .filter { skalLageVilkårsvurderingForBarnet(stønadstype, metadata, it) }
+                                .map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
                     } else {
                         listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
                     }
                 }
     }
+
+    private fun skalLageVilkårsvurderingForBarnet(stønadstype: StønadType,
+                                                  metadata: HovedregelMetadata,
+                                                  barn: BehandlingBarn) =
+            when (stønadstype) {
+                OVERGANGSSTØNAD -> true
+                BARNETILSYN -> metadata.søktOmBarnetilsyn.contains(barn.id)
+                SKOLEPENGER -> error("Ikke implementert")
+            }
+
 
     fun lagVilkårsvurderingForNyttBarn(metadata: HovedregelMetadata,
                                        behandlingId: UUID,

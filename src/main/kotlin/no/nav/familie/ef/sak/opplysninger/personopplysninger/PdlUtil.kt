@@ -3,11 +3,14 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBolkResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentBolkResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+val logger = LoggerFactory.getLogger(PdlClient::class.java)
 
 inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String?,
                                                                          pdlResponse: PdlResponse<DATA>,
@@ -43,4 +46,19 @@ inline fun <reified T : Any> feilsjekkOgReturnerData(pdlResponse: PdlBolkRespons
         throw PdlRequestException("Feil ved henting av ${T::class} fra PDL. Se secure logg for detaljer.")
     }
     return pdlResponse.data.personBolk.associateBy({ it.ident }, { it.person!! })
+}
+
+fun feilmeldOgReturnerData(pdlResponse: PdlIdentBolkResponse): Map<String, PdlIdent> {
+    if (pdlResponse.data == null) {
+        secureLogger.error("Data fra pdl er null ved bolkoppslag av identer fra PDL: ${pdlResponse.errorMessages()}")
+        throw PdlRequestException("Data er null fra PDL -  ${PdlIdentBolkResponse::class}. Se secure logg for detaljer.")
+    }
+
+    val feil = pdlResponse.data.hentIdenterBolk.filter { it.code != "ok" }.associate { it.ident to it.code }
+    if (feil.isNotEmpty()) {
+        // Logg feil og gå vider. Ved feil returneres nåværende ident.
+        logger.error("Feil ved henting av ${PdlIdentBolkResponse::class}. Nåværende ident returnert.")
+        secureLogger.error("Feil ved henting av ${PdlIdentBolkResponse::class} fra PDL: $feil. Nåværende ident returnert.")
+    }
+    return pdlResponse.data.hentIdenterBolk.associateBy({ it.ident }, { it.gjeldende() })
 }

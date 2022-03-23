@@ -34,7 +34,7 @@ class VurderingController(private val vurderingService: VurderingService,
 
     @GetMapping("regler")
     fun hentRegler(): Ressurs<Vilkårsregler> {
-        return Ressurs.success(Vilkårsregler.VILKÅRSREGLER)
+        return Ressurs.success(Vilkårsregler.ALLE_VILKÅRSREGLER)
     }
 
     @PostMapping("vilkar")

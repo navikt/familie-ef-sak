@@ -13,11 +13,3 @@ data class BarnTilUtplukkForOppgave(@Id
                                     val fødselsnummerBarn: String?,
                                     val termindatoBarn: LocalDate?,
                                     val fraMigrering: Boolean)
-
-data class OppgaveForBarn(val behandlingId: UUID,
-                          val eksternFagsakId: Long,
-                          val personIdent: String,
-                          val stønadType: String,
-                          val beskrivelse: String)
-
-data class OppgaverForBarnDto(val oppgaverForBarn: List<OppgaveForBarn>)

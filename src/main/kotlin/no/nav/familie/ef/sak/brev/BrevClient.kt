@@ -1,10 +1,13 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
+import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
 import no.nav.familie.ef.sak.brev.dto.erFritekstType
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
@@ -53,6 +56,29 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                                                             null,
                                                             enhet),
                              HttpHeaders().medContentTypeJsonUTF8())
+    }
+
+    fun genererHtml(brevmal: String,
+                    saksbehandlerBrevrequest: JsonNode,
+                    saksbehandlersignatur: String,
+                    enhet: String?,
+                    skjulBeslutterSignatur: Boolean): String {
+
+        feilHvis(brevmal === FRITEKST) {
+            "HTML-generering av fritekstbrev er ikke implementert"
+        }
+
+        val url = URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/bokmaal/${brevmal}/html")
+
+        return postForEntity(url,
+                             BrevRequestMedSignaturer(brevFraSaksbehandler = saksbehandlerBrevrequest,
+                                                      saksbehandlersignatur = saksbehandlersignatur,
+                                                      besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
+                                                      enhet = enhet,
+                                                      skjulBeslutterSignatur = skjulBeslutterSignatur
+                             ),
+                             HttpHeaders().medContentTypeJsonUTF8()
+        )
     }
 
     companion object {

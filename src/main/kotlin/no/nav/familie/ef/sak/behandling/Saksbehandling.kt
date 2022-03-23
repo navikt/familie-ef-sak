@@ -5,8 +5,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,7 +28,7 @@ data class Saksbehandling(val id: UUID,
                           val fagsakId: UUID,
                           val eksternFagsakId: Long,
                           @Column("stonadstype")
-                          val stønadstype: Stønadstype,
+                          val stønadstype: StønadType,
                           val migrert: Boolean = false,
                           val opprettetTid: LocalDateTime,
                           val endretTid: LocalDateTime) {

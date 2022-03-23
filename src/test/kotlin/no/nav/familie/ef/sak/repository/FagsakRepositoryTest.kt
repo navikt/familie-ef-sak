@@ -2,39 +2,85 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
+    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
+    fun `harLøpendeUtbetaling returnerer true for fagsak med ferdigstilt behandling med aktiv utbetaling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
+
+        val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+
+        assertThat(harLøpendeUtbetaling).isTrue()
+    }
+
+    @Test
+    fun `harLøpendeUtbetaling returnerer true for fagsak med flere aktive ytelser`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", LocalDate.now().year))
+
+        val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+
+        assertThat(harLøpendeUtbetaling).isTrue()
+    }
+
+    @Test
+    fun `harLøpendeUtbetaling returnerer false for fagsak med ferdigstilt behandling med inaktiv utbetaling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
+
+        val harLøpendeUtbetaling = fagsakRepository.harLøpendeUtbetaling(fagsak.id)
+
+        assertThat(harLøpendeUtbetaling).isFalse()
+    }
+
+    @Test
     internal fun `skal ikke være mulig med flere stønader av samme typen for samme person`() {
         val person = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
-        Stønadstype.values().forEach {
+        StønadType.values().forEach {
             fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it))
         }
-        Stønadstype.values().forEach {
+        StønadType.values().forEach {
             assertThatThrownBy { fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it)) }
                     .hasRootCauseInstanceOf(PSQLException::class.java)
-                    .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"fagsak_person_unique\""))
+                    .has(hasCauseMessageContaining("ERROR: duplicate key value violates " +
+                                                   "unique constraint \"fagsak_person_unique\""))
         }
     }
 
@@ -42,8 +88,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `2 ulike personer skal kunne ha samme type stønad`() {
         val person1 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         val person2 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
-        fagsakRepository.insert(fagsakDao(personId = person1.id, stønadstype = Stønadstype.OVERGANGSSTØNAD))
-        fagsakRepository.insert(fagsakDao(personId = person2.id, stønadstype = Stønadstype.OVERGANGSSTØNAD))
+        fagsakRepository.insert(fagsakDao(personId = person1.id, stønadstype = StønadType.OVERGANGSSTØNAD))
+        fagsakRepository.insert(fagsakDao(personId = person2.id, stønadstype = StønadType.OVERGANGSSTØNAD))
     }
 
     @Test
@@ -58,11 +104,11 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun findBySøkerIdent() {
         testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678901", "98765432109"))))
-        val fagsakHentetFinnesIkke = fagsakRepository.findBySøkerIdent(setOf("0"), Stønadstype.OVERGANGSSTØNAD)
+        val fagsakHentetFinnesIkke = fagsakRepository.findBySøkerIdent(setOf("0"), StønadType.OVERGANGSSTØNAD)
 
         assertThat(fagsakHentetFinnesIkke).isNull()
 
-        val fagsak = fagsakRepository.findBySøkerIdent(setOf("12345678901"), Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakRepository.findBySøkerIdent(setOf("12345678901"), StønadType.OVERGANGSSTØNAD)
                      ?: error("Finner ikke fagsak")
         val person = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
 
@@ -75,9 +121,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val ident = "12345678901"
         val person = testoppsettService.opprettPerson(ident)
         val fagsak1 = testoppsettService.lagreFagsak(fagsak(person = person,
-                                                            stønadstype = Stønadstype.OVERGANGSSTØNAD))
+                                                            stønadstype = StønadType.OVERGANGSSTØNAD))
         val fagsak2 = testoppsettService.lagreFagsak(fagsak(person = person,
-                                                            stønadstype = Stønadstype.SKOLEPENGER))
+                                                            stønadstype = StønadType.SKOLEPENGER))
         val fagsaker = fagsakRepository.findBySøkerIdent(setOf(ident))
 
         assertThat(fagsaker.forEach { fagsak ->
@@ -86,8 +132,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             assertThat(person.identer.map { it.ident }).contains(ident)
         })
 
-        assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.SKOLEPENGER)
-        assertThat(fagsaker.map { it.stønadstype }).contains(Stønadstype.OVERGANGSSTØNAD)
+        assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.SKOLEPENGER)
+        assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.OVERGANGSSTØNAD)
         assertThat(fagsaker).containsExactlyInAnyOrder(fagsak1.tilFagsakDao(), fagsak2.tilFagsakDao())
     }
 
@@ -104,14 +150,14 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `findByFagsakPersonIdAndStønadstype - skal finne fagsak`() {
         val person = testoppsettService.opprettPerson("1")
         val overgangsstønad = testoppsettService.lagreFagsak(fagsak(person = person))
-        val barnetilsyn = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = Stønadstype.BARNETILSYN))
+        val barnetilsyn = testoppsettService.lagreFagsak(fagsak(person = person, stønadstype = StønadType.BARNETILSYN))
         testoppsettService.lagreFagsak(fagsak())
 
-        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, Stønadstype.OVERGANGSSTØNAD)!!.id)
+        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, StønadType.OVERGANGSSTØNAD)!!.id)
                 .isEqualTo(overgangsstønad.id)
-        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, Stønadstype.BARNETILSYN)!!.id)
+        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, StønadType.BARNETILSYN)!!.id)
                 .isEqualTo(barnetilsyn.id)
-        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, Stønadstype.SKOLEPENGER)).isNull()
+        assertThat(fagsakRepository.findByFagsakPersonIdAndStønadstype(person.id, StønadType.SKOLEPENGER)).isNull()
     }
 
     @Test
@@ -161,7 +207,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(fagsakMedFlereIdenter.personIdenter).hasSize(3)
         assertThat(fagsakRepository.findBySøkerIdent(fagsakMedFlereIdenter.personIdenter.map { it.ident }.toSet(),
-                                                     Stønadstype.OVERGANGSSTØNAD)).isNotNull
+                                                     StønadType.OVERGANGSSTØNAD)).isNotNull
         assertThat(fagsakRepository.findBySøkerIdent(setOf(fagsakMedFlereIdenter.personIdenter.map { it.ident }
                                                                    .first()))).hasSize(
                 1)

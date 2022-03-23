@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -23,6 +24,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
@@ -119,12 +121,11 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     fun opprettManuellTilbakekreving(fagsakId: UUID) {
-        val fagsak = fagsakService.hentFagsak(fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         val kanBehandlingOpprettesManuelt =
                 tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id)
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
-            throw Feil("Kan ikke opprette manuell tilbakekreving for fagsakId=$fagsakId",
-                       frontendFeilmelding = kanBehandlingOpprettesManuelt.melding)
+            throw ApiFeil(kanBehandlingOpprettesManuelt.melding, HttpStatus.BAD_REQUEST)
         }
 
         val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)

@@ -1,0 +1,35 @@
+{
+  "vilkårType" : "ALDER_PÅ_BARN",
+  "regler" : {
+    "HAR_ALDER_LAVERE_ENN_GRENSEVERDI" : {
+      "regelId" : "HAR_ALDER_LAVERE_ENN_GRENSEVERDI",
+      "svarMapping" : {
+        "JA" : {
+          "regelId" : "UNNTAK_ALDER",
+          "begrunnelseType" : "UTEN"
+        },
+        "NEI" : {
+          "begrunnelseType" : "VALGFRI",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    },
+    "UNNTAK_ALDER" : {
+      "regelId" : "UNNTAK_ALDER",
+      "svarMapping" : {
+        "TRENGER_MER_TILSYN_ENN_JEVNALDRENDE" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "FORSØRGER_HAR_LANGVARIG_ELLER_UREGELMESSIG_ARBEIDSTID" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}

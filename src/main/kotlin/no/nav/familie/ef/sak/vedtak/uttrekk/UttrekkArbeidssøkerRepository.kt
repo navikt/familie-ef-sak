@@ -14,6 +14,8 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
 
     fun findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned: YearMonth): List<UttrekkArbeidssøkere>
 
+    fun existsByÅrMånedAndFagsakId(årMåned: YearMonth, fagsakId : UUID) : Boolean
+
     // language=PostgreSQL
     @Query("""
         SELECT DISTINCT ON (v.behandling_id) -- Trenger ikke å hente samme vedtak flere ganger 

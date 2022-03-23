@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -188,21 +187,21 @@ internal class TilbakekrevingServiceTest {
         @Test
         fun `feiler hvis tilbakekrevingsbehandling ikke kan opprettes`() {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
-            every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+            every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
                     .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
-            val feil = assertFailsWith<Feil> {
+            val feil = assertFailsWith<ApiFeil> {
                 tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
             }
 
-            assertThat(feil.frontendFeilmelding).isEqualTo("Melding til front end.")
+            assertThat(feil.feil).isEqualTo("Melding til front end.")
         }
 
         @Test
         fun `fullfører kaller tilbakekrevingClient opprettManuelTilbakekreving hvis behandling kan opprettes`() {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
-            every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+            every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             val behandling = behandling(fagsak)
             every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
+import no.nav.familie.kontrakter.ef.personhendelse.NyeBarnDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -19,9 +20,19 @@ import java.util.UUID
 @Validated
 class BarnController(val nyeBarnService: NyeBarnService) {
 
+    @Deprecated("nye-eller-tidligere-fodte-barn")
     @PostMapping("nye-barn")
+    // for å unngå att vi oppretter oppgaver for nye barn så sjekkes roles
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun finnNyeBarnSidenGjeldendeBehandlingForPerson(@RequestBody personIdent: PersonIdent): Ressurs<List<String>> {
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent))
+    }
+
+    @PostMapping("nye-eller-tidligere-fodte-barn")
+    // denne skal kalles på fra ef-personhendelse(client_credential) for å opprette oppgaver for nye eller for tidligt fødte barn
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun finnNyeEllerTidligereFødteBarn(@RequestBody personIdent: PersonIdent): Ressurs<NyeBarnDto> {
+        return Ressurs.success(nyeBarnService.finnNyeEllerTidligereFødteBarn(personIdent))
     }
 
     @GetMapping("fagsak/{fagsakId}/nye-barn")

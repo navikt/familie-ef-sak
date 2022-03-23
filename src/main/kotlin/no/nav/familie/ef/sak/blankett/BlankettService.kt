@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
@@ -21,6 +20,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -48,12 +48,12 @@ class BlankettService(private val tilgangService: TilgangService,
         val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.CREATE)
         val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, Stønadstype.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         val behandling = behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
         opprettEfOppgave(behandling.id, oppgaveId)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id, fagsak.id, grunnlagsdata.grunnlagsdata.barn, fagsak.stønadstype)
         return behandling
     }
 

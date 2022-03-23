@@ -3,6 +3,9 @@ package no.nav.familie.ef.sak.vilkår
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -53,24 +56,35 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
 }
 
-enum class VilkårType(val beskrivelse: String) {
+enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<StønadType>) {
 
-    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap"),
-    LOVLIG_OPPHOLD("§15-3 Lovlig opphold"),
+    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
 
-    MOR_ELLER_FAR("§15-4 Mor eller far"),
+    MOR_ELLER_FAR("§15-4 Mor eller far", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
 
-    SIVILSTAND("§15-4 Sivilstand"),
-    SAMLIV("§15-4 Samliv"),
-    ALENEOMSORG("§15-4 Aleneomsorg"),
-    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner"),
-    SAGT_OPP_ELLER_REDUSERT("Sagt opp eller redusert stilling"),
-    AKTIVITET("Aktivitet"),
-    TIDLIGERE_VEDTAKSPERIODER("Tidligere vedtaksperioder");
+    SIVILSTAND("§15-4 Sivilstand", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    SAMLIV("§15-4 Samliv", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    ALENEOMSORG("§15-4 Aleneomsorg", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    SAGT_OPP_ELLER_REDUSERT("Sagt opp eller redusert stilling", listOf(OVERGANGSSTØNAD)),
+    AKTIVITET("Aktivitet", listOf(OVERGANGSSTØNAD)),
+    AKTIVITET_ARBEID("Aktivitet", listOf(BARNETILSYN)),
+    TIDLIGERE_VEDTAKSPERIODER("Tidligere vedtaksperioder", listOf(OVERGANGSSTØNAD)),
+    INNTEKT("§15-10 Inntekt", listOf(BARNETILSYN)),
+    ALDER_PÅ_BARN("Alder på barn", listOf(BARNETILSYN)),
+    ;
+
+    fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN
+
 
 
     companion object {
 
-        fun hentVilkår(): List<VilkårType> = values().toList()
+        fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> = values().filter {
+            it.gjelderStønader.contains(stønadstype)
+        }
+
+
     }
 }

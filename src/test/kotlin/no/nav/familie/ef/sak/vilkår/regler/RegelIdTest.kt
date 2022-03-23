@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 internal class RegelIdTest {
 
-    private val vilkårsregler = Vilkårsregler.VILKÅRSREGLER.vilkårsregler.values
+    private val vilkårsregler = Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.values
 
     @Test
     internal fun `valider att regelId ikke brukes på flere steder`() {

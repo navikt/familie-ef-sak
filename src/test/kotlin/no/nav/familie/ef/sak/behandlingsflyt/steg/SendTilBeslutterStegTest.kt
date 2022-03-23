@@ -22,7 +22,6 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.fagsak.domain.Stønadstype
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -40,6 +39,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -86,7 +86,7 @@ internal class SendTilBeslutterStegTest {
                                  simuleringService,
                                  tilbakekrevingService,
                                  vurderingService)
-    private val fagsak = fagsak(stønadstype = Stønadstype.OVERGANGSSTØNAD,
+    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
                                 identer = setOf(PersonIdent(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
