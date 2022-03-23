@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -133,22 +132,28 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
     }
 
-    fun lagSaksbehandlerFritekstbrev(frittståendeBrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
+    fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
         validerRedigerbarBehandling(saksbehandling)
-        val navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident))
-        val request = FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
-                                                 avsnitt = frittståendeBrevDto.avsnitt,
+        val navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident)
+        val request = FrittståendeBrevRequestDto(overskrift = fritekstbrevDto.overskrift,
+                                                 avsnitt = fritekstbrevDto.avsnitt,
                                                  personIdent = saksbehandling.ident,
-                                                 navn = navn[saksbehandling.ident]!!)
+                                                 navn = navn)
 
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
-        val vedtaksbrev = lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = frittståendeBrevDto.behandlingId,
-                                                                     brevrequest = objectMapper.writeValueAsString(request),
-                                                                     brevmal = FRITEKST,
-                                                                     saksbehandlersignatur = signaturMedEnhet.navn,
-                                                                     enhet = signaturMedEnhet.enhet)
 
-        return brevClient.genererBrev(vedtaksbrev = vedtaksbrev.tilDto(signaturMedEnhet.skjulBeslutter))
+        val html = brevClient.genererHtmlFritekstbrev(fritekstBrev = request,
+                                                      saksbehandlerNavn = signaturMedEnhet.navn,
+                                                      enhet = signaturMedEnhet.enhet)
+
+        lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = fritekstbrevDto.behandlingId,
+                                                   brevrequest = "", // TODO: Dette feltet skal fjernes senere
+                                                   brevmal = FRITEKST,
+                                                   saksbehandlersignatur = signaturMedEnhet.navn,
+                                                   enhet = signaturMedEnhet.enhet,
+                                                   saksbehandlerHtml = html)
+
+        return familieDokumentClient.genererPdfFraHtml(html)
     }
 
     private fun validerRedigerbarBehandling(saksbehandling: Saksbehandling) {

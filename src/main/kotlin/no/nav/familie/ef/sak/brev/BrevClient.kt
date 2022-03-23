@@ -30,6 +30,7 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
         operations.optionsForAllow(pingUri)
     }
 
+    @Deprecated("Skal slettes når fritekstbrev har tatt i bruk html")
     fun genererBrev(vedtaksbrev: VedtaksbrevDto): ByteArray {
 
         val url = when (vedtaksbrev.erFritekstType()) {
@@ -79,6 +80,16 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
                              ),
                              HttpHeaders().medContentTypeJsonUTF8()
         )
+    }
+
+    fun genererHtmlFritekstbrev(fritekstBrev: FrittståendeBrevRequestDto, saksbehandlerNavn: String, enhet: String): String {
+        val url = URI.create("$familieBrevUri/api/fritekst-brev/html")
+        return postForEntity(url,
+                             FritekstBrevRequestMedSignatur(fritekstBrev,
+                                                            saksbehandlerNavn,
+                                                            BESLUTTER_SIGNATUR_PLACEHOLDER,
+                                                            enhet),
+                             HttpHeaders().medContentTypeJsonUTF8())
     }
 
     companion object {

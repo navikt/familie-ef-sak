@@ -18,9 +18,9 @@ class BrevClientMock {
     fun brevClient(): BrevClient {
         val brevClient: BrevClient = mockk()
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
-        every { brevClient.genererBrev(any()) } returns dummyPdf
         every { brevClient.genererBrev(any(), any(), "NAV Arbeid og ytelser") } returns dummyPdf
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "<h1>Hei $BESLUTTER_SIGNATUR_PLACEHOLDER</h1>"
+        every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "<h1>Hei $BESLUTTER_SIGNATUR_PLACEHOLDER</h1>"
         return brevClient
     }
 }
