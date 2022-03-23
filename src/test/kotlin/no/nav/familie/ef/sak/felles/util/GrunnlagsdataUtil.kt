@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
@@ -39,12 +40,13 @@ fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
                                                           harTidligereSkolepenger = false))
 )
 
-fun opprettBarnMedIdent(personIdent: String) =
+fun opprettBarnMedIdent(personIdent: String,
+                        fødsel: Fødsel? = null) =
         BarnMedIdent(adressebeskyttelse = emptyList(),
                      bostedsadresse = emptyList(),
                      deltBosted = emptyList(),
                      dødsfall = emptyList(),
                      forelderBarnRelasjon = emptyList(),
-                     fødsel = emptyList(),
+                     fødsel = listOfNotNull(fødsel),
                      navn = Navn("", "", "", Metadata(false)),
                      personIdent = personIdent)

@@ -98,7 +98,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val journalpost = hentJournalpost(journalpostId)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         knyttJournalpostTilBehandling(journalpost, behandling)
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
@@ -160,7 +160,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         }
 
         val behandling = opprettBehandlingMedBehandlingstype(behandlingstype, fagsak.id)
-
         iverksettService.startBehandling(behandling, fagsak)
         settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
         knyttJournalpostTilBehandling(journalpost, behandling)
