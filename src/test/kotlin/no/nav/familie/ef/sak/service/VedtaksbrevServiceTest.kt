@@ -103,7 +103,8 @@ internal class VedtaksbrevServiceTest {
         every { personopplysningerService.hentGjeldeneNavn(any()) } returns navnMap
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
-        every { brevClient.genererBrev(any()) } returns "123".toByteArray()
+        every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
+        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
         vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto)
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(beslutterNavn)
