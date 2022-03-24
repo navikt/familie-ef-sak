@@ -61,7 +61,8 @@ import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatI
 import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg as TilbakekrevingsvalgKontrakter
 
-private val fagsakIder = setOf("1e98b81a-ffd9-4f18-b54d-2eb125cacff6",
+private val fagsakIder = setOf("139bed17-9b80-402f-b68e-e797afe6e81c",
+                               "1e98b81a-ffd9-4f18-b54d-2eb125cacff6",
                                "2227b15e-741b-471c-beab-7ab636c9cab7",
                                "223cd010-dcd4-470d-922b-47f5592324c2",
                                "23a72970-f6b0-47ba-953e-054fd670d07b",
