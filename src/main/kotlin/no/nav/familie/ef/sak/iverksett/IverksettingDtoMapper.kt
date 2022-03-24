@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -60,6 +61,34 @@ import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatI
 import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg as TilbakekrevingsvalgKontrakter
 
+private val fagsakIder = setOf("1e98b81a-ffd9-4f18-b54d-2eb125cacff6",
+                               "2227b15e-741b-471c-beab-7ab636c9cab7",
+                               "223cd010-dcd4-470d-922b-47f5592324c2",
+                               "23a72970-f6b0-47ba-953e-054fd670d07b",
+                               "241f34ca-e92d-4610-b1d5-fc78afd0acc8",
+                               "27fb48ef-e80d-4ffc-8cae-cabbeeca56cc",
+                               "2db3f40d-446d-41ca-bbac-978c4501101b",
+                               "3963d6cd-68d3-4ce6-b0e2-e1b6e49577fa",
+                               "4d743168-4fda-4440-9a9e-8b0c6689f3e4",
+                               "5d1a72d9-9234-4b0a-8251-d1fa33594b71",
+                               "6283d075-febf-4d0c-873d-681dd60818ac",
+                               "63ed1ecc-45fe-41c5-828a-063d23ceaeea",
+                               "64789382-c57f-46e5-a03e-6135bb24a944",
+                               "70198ca1-83dc-42f4-92e0-00027f8e9bf3",
+                               "7756dc40-6d60-4857-a966-895ebefe900a",
+                               "8810884c-c813-4d89-b09b-7cad227ff136",
+                               "8c09c154-208d-4a13-a335-f76c75435e11",
+                               "8c534a19-975d-4b9a-b3c3-bc2e0bbe9067",
+                               "9a938982-a4be-4de6-8a79-877ac70bc7d4",
+                               "b2ad32ea-acdd-4eca-b7fc-084ec4130a1b",
+                               "c9706b9f-2eeb-4c29-8c1c-43d9de48b7a6",
+                               "ce41e938-b755-4e79-abcb-089fbe080bb3",
+                               "d9142a37-c9d7-4173-b77e-28cebc1bf757",
+                               "dcd46f43-cdc7-4275-9f70-270fc4d50509",
+                               "dd0c6f9a-40ab-4f0f-8acc-c7d16283779a",
+                               "eb22ff59-12c8-4b9c-88d1-9d4efd8463b8",
+                               "f3025911-25e6-45f6-b09d-d38a349c948a").map { UUID.fromString(it) }.toSet()
+
 @Component
 class IverksettingDtoMapper(private val arbeidsfordelingService: ArbeidsfordelingService,
                             private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -74,6 +103,9 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val brevmottakereRepository: BrevmottakereRepository) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
+        brukerfeilHvis(fagsakIder.contains(saksbehandling.fagsakId)) {
+            "Kan ikke iverksette denne fagsaken akkurat nå"
+        }
         val saksbehandler =
                 behandlingshistorikkService.finnSisteBehandlingshistorikk(saksbehandling.id,
                                                                           StegType.SEND_TIL_BESLUTTER)?.opprettetAv
