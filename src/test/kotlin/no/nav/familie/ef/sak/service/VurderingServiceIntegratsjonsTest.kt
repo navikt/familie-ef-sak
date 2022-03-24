@@ -98,7 +98,10 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                                           behandling: Behandling,
                                           barn: List<BehandlingBarn>): List<Vilkårsvurdering> {
         val hovedregelMetadata =
-                HovedregelMetadata(søknadskjema.sivilstand, Sivilstandstype.ENKE_ELLER_ENKEMANN, barn = barn, søktOmBarnetilsyn = emptyList())
+                HovedregelMetadata(søknadskjema.sivilstand,
+                                   Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                                   barn = barn,
+                                   søktOmBarnetilsyn = emptyList())
         val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
                                                          type = VilkårType.SIVILSTAND,

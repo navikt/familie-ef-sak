@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
@@ -82,7 +83,6 @@ internal class SendTilBeslutterStegTest {
                                  behandlingService,
                                  vedtaksbrevRepository,
                                  vedtakService,
-                                 vedtakRepository,
                                  simuleringService,
                                  tilbakekrevingService,
                                  vurderingService)
@@ -97,12 +97,12 @@ internal class SendTilBeslutterStegTest {
                                           enhet = "enhet",
                                           saksbehandlerident = saksbehandlerNavn)
 
-    private val behandling = Behandling(fagsakId = fagsak.id,
-                                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                        status = BehandlingStatus.UTREDES,
-                                        steg = beslutteVedtakSteg.stegType(),
-                                        resultat = BehandlingResultat.IKKE_SATT,
-                                        årsak = BehandlingÅrsak.SØKNAD)
+    private val behandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
+                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                               status = BehandlingStatus.UTREDES,
+                                                               steg = beslutteVedtakSteg.stegType(),
+                                                               resultat = BehandlingResultat.IKKE_SATT,
+                                                               årsak = BehandlingÅrsak.SØKNAD))
 
     private val revurdering = behandling.copy(type = BehandlingType.REVURDERING, resultat = INNVILGET)
 

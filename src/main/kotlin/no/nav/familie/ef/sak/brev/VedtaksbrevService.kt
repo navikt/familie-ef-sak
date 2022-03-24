@@ -1,8 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
@@ -26,7 +25,6 @@ import java.util.UUID
 @Service
 class VedtaksbrevService(private val brevClient: BrevClient,
                          private val brevRepository: VedtaksbrevRepository,
-                         private val behandlingService: BehandlingService,
                          private val personopplysningerService: PersonopplysningerService,
                          private val brevsignaturService: BrevsignaturService,
                          private val familieDokumentClient: FamilieDokumentClient) {
@@ -43,11 +41,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         }
     }
 
-    fun lagSaksbehandlerSanitybrev(behandlingId: UUID, brevrequest: JsonNode, brevmal: String): ByteArray {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        validerRedigerbarBehandling(behandling)
+    fun lagSaksbehandlerSanitybrev(saksbehandling: Saksbehandling, brevrequest: JsonNode, brevmal: String): ByteArray {
+        validerRedigerbarBehandling(saksbehandling)
 
-        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
+        val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
 
         val html = brevClient.genererHtml(brevmal = brevmal,
                                           saksbehandlerBrevrequest = brevrequest,
@@ -56,7 +53,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
                                           skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter)
 
 
-        lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId,
+        lagreEllerOppdaterSaksbehandlerVedtaksbrev(saksbehandling.id,
                                                    "", // TODO: Dette feltet skal fjernes senere
                                                    brevmal,
                                                    saksbehandlersignatur.navn,
@@ -87,17 +84,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
 
-    fun lagBeslutterBrev(behandlingId: UUID): ByteArray {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        validerBehandlingKanBesluttes(behandling)
+    fun lagBeslutterBrev(saksbehandling: Saksbehandling): ByteArray {
+        validerBehandlingKanBesluttes(saksbehandling)
 
-        val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
-        val besluttervedtaksbrev = vedtaksbrev.copy(
-                besluttersignatur = signaturMedEnhet.navn,
-                enhet = signaturMedEnhet.enhet,
-                beslutterident = SikkerhetContext.hentSaksbehandler(true)
-        )
+        val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = signaturMedEnhet.navn,
+                                                    enhet = signaturMedEnhet.enhet,
+                                                    beslutterident = SikkerhetContext.hentSaksbehandler(true))
 
         validerBeslutterIkkeErLikSaksbehandler(besluttervedtaksbrev)
 
@@ -108,7 +102,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return beslutterPdf.bytes
     }
 
-    private fun validerBehandlingKanBesluttes(behandling: Behandling) {
+    private fun validerBehandlingKanBesluttes(behandling: Saksbehandling) {
         if (behandling.steg != StegType.BESLUTTE_VEDTAK || behandling.status != BehandlingStatus.FATTER_VEDTAK) {
             throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
                        httpStatus = HttpStatus.BAD_REQUEST)
@@ -138,18 +132,15 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
     }
 
-    fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto): ByteArray {
-        val behandling = behandlingService.hentBehandling(fritekstbrevDto.behandlingId)
-        validerRedigerbarBehandling(behandling)
-        val ident = behandlingService.hentAktivIdent(fritekstbrevDto.behandlingId)
-        val navn : String = personopplysningerService.hentGjeldeneNavn(listOf(ident)).getValue(ident)
+    fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
+        validerRedigerbarBehandling(saksbehandling)
+        val navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident)
         val request = FrittståendeBrevRequestDto(overskrift = fritekstbrevDto.overskrift,
                                                  avsnitt = fritekstbrevDto.avsnitt,
-                                                 personIdent = ident,
+                                                 personIdent = saksbehandling.ident,
                                                  navn = navn)
 
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(behandling.fagsakId)
-
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
 
         val html = brevClient.genererHtmlFritekstbrev(fritekstBrev = request,
                                                       saksbehandlerNavn = signaturMedEnhet.navn,
@@ -165,9 +156,9 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         return familieDokumentClient.genererPdfFraHtml(html)
     }
 
-    private fun validerRedigerbarBehandling(behandling: Behandling) {
-        if (behandling.status.behandlingErLåstForVidereRedigering()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
+    private fun validerRedigerbarBehandling(saksbehandling: Saksbehandling) {
+        if (saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            throw Feil("Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
     }

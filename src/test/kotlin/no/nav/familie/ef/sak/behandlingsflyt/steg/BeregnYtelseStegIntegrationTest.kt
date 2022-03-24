@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -33,7 +35,9 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
+    private val saksbehandling = saksbehandling(fagsak, behandling)
     private val behandling2 = behandling(fagsak, type = BehandlingType.REVURDERING, forrigeBehandlingId = behandling.id)
+    private val saksbehandling2 = saksbehandling(fagsak, behandling2)
 
     private val årMånedFra = YearMonth.of(2021, 1)
     private val årMånedTil = YearMonth.of(2021, 3)
@@ -44,9 +48,9 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kildeBehandlingId skal bli beholdr på andelen som ikke endrer seg`() {
         opprettBehandlinger()
-        innvilg(behandling, listOf(vedtaksperiode))
+        innvilg(saksbehandling, listOf(vedtaksperiode))
         settBehandlingTilIverksatt(behandling)
-        innvilg(behandling2, listOf(vedtaksperiode2), listOf(Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
+        innvilg(saksbehandling2, listOf(vedtaksperiode2), listOf(Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
         settBehandlingTilIverksatt(behandling2)
 
         assertThat(hentAndeler(behandling.id)).hasSize(1)
@@ -59,10 +63,10 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kildeBehandlingId skal bli endret når man skriver over hele perioden`() {
         opprettBehandlinger()
-        innvilg(behandling, listOf(vedtaksperiode2))
+        innvilg(saksbehandling, listOf(vedtaksperiode2))
         settBehandlingTilIverksatt(behandling)
-        innvilg(behandling2, listOf(vedtaksperiode), listOf(Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
-                                                            Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
+        innvilg(saksbehandling2, listOf(vedtaksperiode), listOf(Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
+                                                                Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
         settBehandlingTilIverksatt(behandling2)
 
         assertThat(hentAndeler(behandling.id)).hasSize(1)
@@ -83,7 +87,7 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     private fun opprettVedtaksperiode(fra: YearMonth, til: YearMonth) =
             VedtaksperiodeDto(fra, til, AktivitetType.BARNET_ER_SYKT, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
-    private fun innvilg(behandling: Behandling,
+    private fun innvilg(saksbehandling: Saksbehandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
         val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
@@ -91,7 +95,7 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
                                inntekter = inntekter,
                                periodeBegrunnelse = null,
                                inntektBegrunnelse = null)
-        beregnYtelseSteg.utførSteg(behandling, vedtak)
+        beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }
 
     fun opprettBehandlinger() {

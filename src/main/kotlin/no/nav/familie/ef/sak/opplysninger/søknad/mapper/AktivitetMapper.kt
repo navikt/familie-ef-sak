@@ -30,8 +30,8 @@ object AktivitetMapper {
                 arbeidssøker = tilArbeidssøkerDto(aktivitet?.arbeidssøker),
                 underUtdanning = tilUnderUtdanningDto(aktivitet?.underUtdanning),
                 virksomhet = aktivitet?.virksomhet?.let {
-                VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse)
-            },
+                    VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse)
+                },
                 tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet?.tidligereUtdanninger),
                 gjelderDeg = situasjon?.gjelderDetteDeg?.verdier ?: emptyList(),
                 særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),

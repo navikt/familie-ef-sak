@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -51,35 +51,33 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) =
                 objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val personIdent = fagsak.hentAktivIdent()
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
-        val henvendelseTidspunkt = finnHenvendelsestidspunkt(behandling)
+        val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
-                behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
+                saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
-                eksternBehandlingId = behandling.eksternId.id,
-                personIdent = personIdent,
+                eksternBehandlingId = saksbehandling.eksternId,
+                personIdent = saksbehandling.ident,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
-                eksternFagsakId = fagsak.eksternId.id,
+                eksternFagsakId = saksbehandling.eksternFagsakId,
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
-                behandlingOpprettetTidspunkt = behandling.sporbar.opprettetTid.atZone(zoneIdOslo),
+                behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
                 hendelse = hendelse,
-                behandlingResultat = behandling.resultat.name,
+                behandlingResultat = saksbehandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
                 opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
-                stønadstype = fagsak.stønadstype,
-                behandlingstype = BehandlingType.valueOf(behandling.type.name),
+                stønadstype = saksbehandling.stønadstype,
+                behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
                 relatertEksternBehandlingId = relatertEksternBehandlingId,
                 relatertBehandlingId = null
@@ -117,11 +115,11 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun finnHenvendelsestidspunkt(behandling: Behandling): LocalDateTime {
-        return when (behandling.type) {
-            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
-            REVURDERING -> behandling.sporbar.opprettetTid
-            else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
+    private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
+        return when (saksbehandling.type) {
+            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
+            REVURDERING -> saksbehandling.opprettetTid
+            else -> error("Støtter ikke uthenting av mottatt-dato for ${saksbehandling.type}")
         }
     }
 

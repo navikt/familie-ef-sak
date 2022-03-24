@@ -140,7 +140,7 @@ internal class JournalføringServiceTest {
 
         every {
             fagsakService.hentFagsak(any())
-        } returns fagsak(identer = fagsakpersoner(setOf("1")),id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
+        } returns fagsak(identer = fagsakpersoner(setOf("1")), id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
 
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) }
                 .returns(Behandling(id = behandlingId,
@@ -284,7 +284,8 @@ internal class JournalføringServiceTest {
         } returns Testsøknad.søknadOvergangsstønad
 
         every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns false
-        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil", BAD_REQUEST)
+        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil",
+                                                                                                                   BAD_REQUEST)
 
         assertThatThrownBy {
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(

@@ -43,7 +43,8 @@ interface PdlPerson {
 }
 
 data class PdlIdentBolkResponse(val data: IdentBolk,
-                                val errors: List<PdlError>?)  {
+                                val errors: List<PdlError>?) {
+
     fun errorMessages(): String {
         return errors?.joinToString { it -> it.message } ?: ""
     }
@@ -54,7 +55,7 @@ data class PdlIdenterBolk(val code: String,
                           val ident: String,
                           val identer: List<PdlIdent>?) {
 
-    fun gjeldende(): PdlIdent = this.identer?.first{ !it.historisk } ?: PdlIdent(ident, false)
+    fun gjeldende(): PdlIdent = this.identer?.first { !it.historisk } ?: PdlIdent(ident, false)
 }
 
 data class IdentBolk(val hentIdenterBolk: List<PdlIdenterBolk>)

@@ -221,7 +221,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val delvilkårsvurdering =
                 SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                                                                                barn = emptyList(), søktOmBarnetilsyn = emptyList()))
+                                                                                barn = emptyList(),
+                                                                                søktOmBarnetilsyn = emptyList()))
 
         val delvilkårsvurderingAleneomsorg =
                 AleneomsorgRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,

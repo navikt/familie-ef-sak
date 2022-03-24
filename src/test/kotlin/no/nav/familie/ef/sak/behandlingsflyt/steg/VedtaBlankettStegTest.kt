@@ -9,9 +9,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.blankett.VedtaBlankettSteg
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -26,7 +26,8 @@ internal class VedtaBlankettStegTest {
 
     @Test
     internal fun `skal opprette nytt vedtak - innvilget`() {
-        val behandling = behandling(fagsak(),
+        val fagsak = fagsak()
+        val behandling = behandling(fagsak,
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
@@ -51,14 +52,15 @@ internal class VedtaBlankettStegTest {
             blankettRepository.deleteById(any())
         } just Runs
 
-        vedtaBlankettSteg.utførOgReturnerNesteSteg(behandling, request)
+        vedtaBlankettSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak, behandling), request)
 
     }
 
 
     @Test
     internal fun `skal feile hvis nytt vedtak er førstegangsbehandling`() {
-        val behandling = behandling(fagsak(),
+        val fagsak = fagsak()
+        val behandling = behandling(fagsak,
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
@@ -83,13 +85,17 @@ internal class VedtaBlankettStegTest {
             blankettRepository.deleteById(any())
         } just Runs
 
-        assertThrows<IllegalStateException> { vedtaBlankettSteg.utførOgReturnerNesteSteg(behandling, request) }
+        assertThrows<IllegalStateException> {
+            vedtaBlankettSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak, behandling),
+                                                       request)
+        }
 
     }
 
     @Test
     internal fun `skal forsøke å slette blankett ved lagring av vedtak`() {
-        val behandling = behandling(fagsak(),
+        val fagsak = fagsak()
+        val behandling = behandling(fagsak,
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
@@ -114,7 +120,7 @@ internal class VedtaBlankettStegTest {
             blankettRepository.deleteById(any())
         } just Runs
 
-        vedtaBlankettSteg.utførOgReturnerNesteSteg(behandling, request)
+        vedtaBlankettSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak, behandling), request)
 
         verify { blankettRepository.deleteById(behandling.id) }
 

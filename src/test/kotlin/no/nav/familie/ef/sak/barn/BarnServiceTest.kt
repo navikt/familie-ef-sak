@@ -24,7 +24,7 @@ internal class BarnServiceTest {
     val søknadService = mockk<SøknadService>()
     val barnService = BarnService(barnRepository, søknadService)
     val søknadMock = mockk<Søknadsverdier>()
-    val behandlingId = UUID.randomUUID()
+    val behandlingId: UUID = UUID.randomUUID()
 
     @BeforeEach
     internal fun setUp() {

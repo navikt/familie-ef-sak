@@ -153,17 +153,19 @@ class MigreringService(
 
         val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
-        beregnYtelseSteg.utførSteg(behandling, Innvilget(resultatType = ResultatType.INNVILGE,
-                                                         periodeBegrunnelse = null,
-                                                         inntektBegrunnelse = null,
-                                                         perioder = vedtaksperioder,
-                                                         inntekter = inntekter))
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+        beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(resultatType = ResultatType.INNVILGE,
+                                                             periodeBegrunnelse = null,
+                                                             inntektBegrunnelse = null,
+                                                             perioder = vedtaksperioder,
+                                                             inntekter = inntekter))
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
+
+        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(saksbehandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
