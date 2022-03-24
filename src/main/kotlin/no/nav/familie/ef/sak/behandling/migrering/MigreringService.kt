@@ -197,7 +197,7 @@ class MigreringService(
         val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
 
         if (sisteSummertePerioden != null &&
-            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadFom > opphørsmåned.atEndOfMonth())) {
+            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadTom > opphørsmåned.atEndOfMonth())) {
             loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
             return false
         }
