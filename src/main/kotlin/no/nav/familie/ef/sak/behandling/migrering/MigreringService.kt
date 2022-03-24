@@ -188,15 +188,15 @@ class MigreringService(
         } else if (oppsummering.etterbetaling.compareTo(BigDecimal.ZERO) != 0) {
             throw MigreringException("Etterbetaling er ${oppsummering.etterbetaling}",
                                      MigreringExceptionType.SIMULERING_ETTERBETALING)
-        } else if (inneholderDebitTrekk(simulering)) {
-            throw MigreringException("Simuleringen inneholder posteringstypen TREKK med betalingstypen DEBIT. " +
+        } else if (inneholderDebettrekk(simulering)) {
+            throw MigreringException("Simuleringen inneholder posteringstypen TREKK med betalingstypen DEBET. " +
                                      "Dette blir en uønsket utbetaling pga en feil. Denne kan migreres på nytt i neste måned.",
-                                     MigreringExceptionType.SIMULERING_DEBIT_TREKK)
+                                     MigreringExceptionType.SIMULERING_DEBET_TREKK)
         }
     }
 
     // Kan slettes når TØB fikset TOB-1739
-    private fun inneholderDebitTrekk(simulering: BeriketSimuleringsresultat) =
+    private fun inneholderDebettrekk(simulering: BeriketSimuleringsresultat) =
             simulering.detaljer.simuleringMottaker.any { simuleringMottaker ->
                 simuleringMottaker.simulertPostering.any {
                     it.posteringType == PosteringType.TREKK && it.betalingType == BetalingType.DEBIT
