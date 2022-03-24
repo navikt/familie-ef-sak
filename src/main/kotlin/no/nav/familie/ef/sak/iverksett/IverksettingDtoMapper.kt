@@ -134,9 +134,10 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
             }
 
 
-    private fun mapFagsakdetaljer(saksbehandling: Saksbehandling) = FagsakdetaljerDto(fagsakId = saksbehandling.id,
-                                                                                      eksternId = saksbehandling.eksternId,
-                                                                                      stønadstype = StønadType.OVERGANGSSTØNAD)
+    private fun mapFagsakdetaljer(saksbehandling: Saksbehandling) =
+            FagsakdetaljerDto(fagsakId = saksbehandling.fagsakId,
+                              eksternId = saksbehandling.eksternFagsakId,
+                              stønadstype = StønadType.OVERGANGSSTØNAD)
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
     private fun mapBehandlingsdetaljer(saksbehandling: Saksbehandling,
