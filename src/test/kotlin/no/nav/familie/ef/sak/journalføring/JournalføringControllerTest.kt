@@ -4,6 +4,8 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -21,7 +23,9 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -34,7 +38,15 @@ internal class JournalføringControllerTest {
     private val pdlClient = mockk<PdlClient>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
-    private val journalføringController = JournalføringController(journalføringService, pdlClient, tilgangService, featureToggleService)
+    private val journalføringController =
+            JournalføringController(journalføringService, pdlClient, tilgangService, featureToggleService)
+
+    @BeforeEach
+    internal fun setUp() {
+        every {
+            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
+        } just Runs
+    }
 
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {
@@ -48,13 +60,9 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedAktørId
 
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
-        } just Runs
-
-        val journalpostResponse = journalføringController.hentJournalPost("1234")
-        Assertions.assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
-        Assertions.assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo("1234")
+        val journalpostResponse = journalføringController.hentJournalPost(journalpostId)
+        assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
+        assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
     }
 
     @Test
@@ -64,13 +72,9 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
 
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
-        } just Runs
-
-        val journalpostResponse = journalføringController.hentJournalPost("1234")
-        Assertions.assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
-        Assertions.assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo("1234")
+        val journalpostResponse = journalføringController.hentJournalPost(journalpostId)
+        assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
+        assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
     }
 
     @Test
@@ -85,7 +89,7 @@ internal class JournalføringControllerTest {
         } throws ManglerTilgang("Ingen tilgang")
 
         assertFailsWith<ManglerTilgang> {
-            journalføringController.hentJournalPost("1234")
+            journalføringController.hentJournalPost(journalpostId)
         }
     }
 
@@ -95,7 +99,7 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostUtenBruker
 
-        assertThrows<IllegalStateException> { journalføringController.hentJournalPost("1234") }
+        assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
     }
 
 
@@ -105,7 +109,7 @@ internal class JournalføringControllerTest {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedOrgnr
 
-        assertThrows<IllegalStateException> { journalføringController.hentJournalPost("1234") }
+        assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
     }
 
     @Test
@@ -113,10 +117,6 @@ internal class JournalføringControllerTest {
         every {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
-
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
-        } just Runs
 
         every {
             tilgangService.validerHarSaksbehandlerrolle()
@@ -132,11 +132,45 @@ internal class JournalføringControllerTest {
         }
     }
 
+    @Nested
+    inner class HentDokument {
+
+        @Test
+        internal fun `skal kaste ApiFeil hvis vedlegget ikke inneholder dokumentvariant ARKIV`() {
+            every {
+                journalføringService.hentJournalpost(any())
+            } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
+                it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
+            })
+
+            assertThrows<ApiFeil> { journalføringController.hentDokument(journalpostId, dokumentInfoId) }
+        }
+
+        @Test
+        internal fun `skal kunne hente dokument med dokumentvariant ARKIV`() {
+            every {
+                journalføringService.hentJournalpost(any())
+            } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
+                it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
+                                                   Dokumentvariant(Dokumentvariantformat.ARKIV)))
+            })
+
+            every { journalføringService.hentDokument(any(), any()) } returns byteArrayOf()
+
+            journalføringController.hentDokument(journalpostId, dokumentInfoId)
+
+            verify(exactly = 1) { journalføringService.hentDokument(journalpostId, dokumentInfoId) }
+        }
+
+    }
+
     private val aktørId = "11111111111"
     private val personIdentFraPdl = "12345678901"
+    private val journalpostId = "1234"
+    private val dokumentInfoId = "12345"
 
     private val journalpostMedAktørId =
-            Journalpost(journalpostId = "1234",
+            Journalpost(journalpostId = journalpostId,
                         journalposttype = Journalposttype.I,
                         journalstatus = Journalstatus.MOTTATT,
                         tema = "ENF",
@@ -146,7 +180,7 @@ internal class JournalføringControllerTest {
                         journalforendeEnhet = "4817",
                         kanal = "SKAN_IM",
                         dokumenter =
-                        listOf(DokumentInfo(dokumentInfoId = "12345",
+                        listOf(DokumentInfo(dokumentInfoId = dokumentInfoId,
                                             tittel = "Tittel",
                                             brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                                             dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))))
