@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
+import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
+import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
@@ -9,10 +11,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
-import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
-import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -85,40 +88,47 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
     @Bean
     override fun jdbcCustomConversions(): JdbcCustomConversions {
-        return JdbcCustomConversions(listOf(UtbetalingsoppdragTilStringConverter(),
-                                            StringTilUtbetalingsoppdragConverter(),
-                                            DokumentTilStringConverter(),
-                                            StringTilDokumentConverter(),
-                                            YearMonthTilLocalDateConverter(),
-                                            LocalDateTilYearMonthConverter(),
-                                            PropertiesWrapperTilStringConverter(),
-                                            StringTilPropertiesWrapperConverter(),
-                                            PGobjectTilDelvilkårConverter(),
-                                            DelvilkårTilPGobjectConverter(),
-                                            GjelderDegTilStringConverter(),
-                                            StringTilGjelderDegConverter(),
-                                            ArbeidssituasjonTilStringConverter(),
-                                            StringTilArbeidssituasjonConverter(),
-                                            PGobjectTilJsonWrapperConverter(),
-                                            JsonWrapperTilPGobjectConverter(),
-                                            FilTilBytearrayConverter(),
-                                            BytearrayTilFilConverter(),
-                                            PGobjectTilVedtaksperioder(),
-                                            VedtaksperiodeTilPGobjectConverter(),
-                                            PGobjectTilInntektsperiode(),
-                                            GrunnlagsdataTilPGobjectConverter(),
-                                            PGobjectTilGrunnlagsdata(),
-                                            InntektsperiodeTilPGobjectConverter(),
-                                            PGobjectTilDetaljertSimuleringResultat(),
-                                            DetaljertSimuleringResultatTilPGobjectConverter(),
-                                            PGobjectTilBeriketSimuleringsresultat(),
-                                            BeriketSimuleringsresultatTilPGobjectConverter(),
-                                            PGObjectTilFritekstbrevConverter(),
-                                            FritekstbrevTilPGObjectConverter(),
-                                            PGobjectTilBrevmottakerPersoner(),
-                                            BrevmottakerePersonerTilPGobjectConverter(),
-                                            PGobjectTilBrevmottakerOrganisasjoner(),
-                                            BrevmottakereOrganisasjonerTilPGobjectConverter(),
+        return JdbcCustomConversions(listOf(
+                UtbetalingsoppdragTilStringConverter(),
+                StringTilUtbetalingsoppdragConverter(),
+                DokumentTilStringConverter(),
+                StringTilDokumentConverter(),
+                YearMonthTilLocalDateConverter(),
+                LocalDateTilYearMonthConverter(),
+                PropertiesWrapperTilStringConverter(),
+                StringTilPropertiesWrapperConverter(),
+                PGobjectTilDelvilkårConverter(),
+                DelvilkårTilPGobjectConverter(),
+                GjelderDegTilStringConverter(),
+                StringTilGjelderDegConverter(),
+                ArbeidssituasjonTilStringConverter(),
+                StringTilArbeidssituasjonConverter(),
+                PGobjectTilJsonWrapperConverter(),
+                JsonWrapperTilPGobjectConverter(),
+                FilTilBytearrayConverter(),
+                BytearrayTilFilConverter(),
+                PGobjectTilVedtaksperioder(),
+                VedtaksperiodeTilPGobjectConverter(),
+                PGobjectTilInntektsperiode(),
+                GrunnlagsdataTilPGobjectConverter(),
+                PGobjectTilGrunnlagsdata(),
+                InntektsperiodeTilPGobjectConverter(),
+                PGobjectTilTilleggsstønadConverter(),
+                TilleggsstønadTilPGobjectConverter(),
+                PGobjectTilKontantstøtteConverter(),
+                KontantstøtteTilPGobjectConverter(),
+                PGobjectTilBarnetilsynConverter(),
+                BarnetilsynTilPGobjectConverter(),
+                PGobjectTilDetaljertSimuleringResultat(),
+                DetaljertSimuleringResultatTilPGobjectConverter(),
+                PGobjectTilBeriketSimuleringsresultat(),
+                BeriketSimuleringsresultatTilPGobjectConverter(),
+                PGObjectTilFritekstbrevConverter(),
+                FritekstbrevTilPGObjectConverter(),
+                PGobjectTilBrevmottakerPersoner(),
+                BrevmottakerePersonerTilPGobjectConverter(),
+                PGobjectTilBrevmottakerOrganisasjoner(),
+                BrevmottakereOrganisasjonerTilPGobjectConverter(),
         ))
     }
 
@@ -314,6 +324,68 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(inntekter.inntekter)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilBarnetilsynConverter : Converter<PGobject, BarnetilsynWrapper> {
+
+        override fun convert(pGobject: PGobject): BarnetilsynWrapper {
+            val barnetilsynVerdi: BarnetilsynWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            return barnetilsynVerdi ?: BarnetilsynWrapper(perioder = emptyList(), begrunnelse = null)
+        }
+    }
+
+    @WritingConverter
+    class BarnetilsynTilPGobjectConverter : Converter<BarnetilsynWrapper, PGobject> {
+
+        override fun convert(barnetilsyn: BarnetilsynWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(barnetilsyn)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilKontantstøtteConverter : Converter<PGobject, KontantstøtteWrapper> {
+
+        override fun convert(pGobject: PGobject): KontantstøtteWrapper {
+            val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            return kontantstøtteVerdi ?: KontantstøtteWrapper(harKontantstøtte = false,
+                                                              perioder = emptyList(),
+                                                              begrunnelse = null)
+        }
+    }
+
+    @WritingConverter
+    class KontantstøtteTilPGobjectConverter : Converter<KontantstøtteWrapper, PGobject> {
+
+        override fun convert(kontantstøtte: KontantstøtteWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(kontantstøtte)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilTilleggsstønadConverter : Converter<PGobject, TilleggsstønadWrapper> {
+
+        override fun convert(pGobject: PGobject): TilleggsstønadWrapper {
+            val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            return tilleggstønadVerdi ?: TilleggsstønadWrapper(harTilleggsstønad = false,
+                                                               skalStønadReduseres = false,
+                                                               perioder = emptyList(),
+                                                               begrunnelse = null)
+        }
+    }
+
+    @WritingConverter
+    class TilleggsstønadTilPGobjectConverter : Converter<TilleggsstønadWrapper, PGobject> {
+
+        override fun convert(tilleggsstønad: TilleggsstønadWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(tilleggsstønad)
                 }
     }
 

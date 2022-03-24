@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.vedtak.domain
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -24,6 +26,11 @@ data class Vedtak(@Id
                   val saksbehandlerIdent: String? = null,
                   @Column("opphor_fom")
                   val opphørFom: LocalDate? = null,
+                  val barnetilsyn: BarnetilsynWrapper? = null,
+                  @Column("kontantstotte")
+                  val kontantstøtte: KontantstøtteWrapper? = null,
+                  @Column("tilleggsstonad")
+                  val tilleggsstønad: TilleggsstønadWrapper? = null,
                   val beslutterIdent: String? = null,
                   @Column("sanksjon_arsak")
                   val sanksjonsårsak: Sanksjonsårsak? = null,
@@ -35,8 +42,33 @@ data class Vedtaksperiode(
         val aktivitet: AktivitetType,
         val periodeType: VedtaksperiodeType)
 
+@Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
+data class Barnetilsynperiode(val startDato: LocalDate,
+                              val sluttDato: LocalDate,
+                              val utgifter: BigDecimal,
+                              val barn: List<UUID>)
+
+data class Kontantstøtteperiode(val startDato: LocalDate,
+                                val sluttDato: LocalDate,
+                                val beløp: BigDecimal)
+
+data class Tilleggsstønadperiode(val startDato: LocalDate,
+                                 val sluttDato: LocalDate,
+                                 val beløp: BigDecimal)
+
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
+data class TilleggsstønadWrapper(val harTilleggsstønad: Boolean,
+                                 val skalStønadReduseres: Boolean,
+                                 val perioder: List<Tilleggsstønadperiode>,
+                                 val begrunnelse: String?)
+
+data class KontantstøtteWrapper(val harKontantstøtte: Boolean,
+                                val perioder: List<Kontantstøtteperiode>,
+                                val begrunnelse: String?)
+
+data class BarnetilsynWrapper(val perioder: List<Barnetilsynperiode>,
+                              val begrunnelse: String?)
 
 enum class VedtaksperiodeType {
     FORLENGELSE,
