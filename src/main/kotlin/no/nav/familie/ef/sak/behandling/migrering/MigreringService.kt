@@ -198,14 +198,15 @@ class MigreringService(
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
         val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
 
-        if (sisteSummertePerioden != null &&
-            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadTom > opphørsmåned.atEndOfMonth())) {
-            loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
-            return false
+        if (sisteSummertePerioden == null ||
+            sisteSummertePerioden.opphørsdato != null ||
+            sisteSummertePerioden.stønadTom <= opphørsmåned.atEndOfMonth()) {
+            logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - " +
+                        "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
+            return true
         }
-        logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
-                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
-        return true
+        loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
+        return false
     }
 
     private fun loggIkkeOpphørt(behandlingId: UUID,
