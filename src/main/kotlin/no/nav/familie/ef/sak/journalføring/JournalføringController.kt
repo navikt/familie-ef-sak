@@ -45,13 +45,7 @@ class JournalføringController(private val journalføringService: Journalføring
     fun hentDokument(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): Ressurs<ByteArray> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
-        val dokument = journalpost.dokumenter?.find { it.dokumentInfoId == dokumentInfoId }
-        feilHvis(dokument == null) {
-            "Finner ikke dokument med $dokumentInfoId for journalpost=$journalpostId"
-        }
-        brukerfeilHvisIkke(dokument.dokumentvarianter?.any { it.variantformat == Dokumentvariantformat.ARKIV } ?: false) {
-            "Vedlegget er sannsynligvis under arbeid, må åpnes i gosys"
-        }
+        validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
@@ -87,7 +81,19 @@ class JournalføringController(private val journalføringService: Journalføring
                                                                                                                journalpostId))
     }
 
-    fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
+    private fun validerDokumentKanHentes(journalpost: Journalpost,
+                                         dokumentInfoId: String,
+                                         journalpostId: String) {
+        val dokument = journalpost.dokumenter?.find { it.dokumentInfoId == dokumentInfoId }
+        feilHvis(dokument == null) {
+            "Finner ikke dokument med $dokumentInfoId for journalpost=$journalpostId"
+        }
+        brukerfeilHvisIkke(dokument.dokumentvarianter?.any { it.variantformat == Dokumentvariantformat.ARKIV } ?: false) {
+            "Vedlegget er sannsynligvis under arbeid, må åpnes i gosys"
+        }
+    }
+
+    private fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
         val journalpost = journalføringService.hentJournalpost(journalpostId)
         val personIdent = journalpost.bruker?.let {
             when (it.type) {
