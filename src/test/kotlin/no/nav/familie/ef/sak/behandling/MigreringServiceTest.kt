@@ -79,6 +79,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var vedtakService: VedtakService
     @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
     @Autowired private lateinit var taskRepository: TaskRepository
+
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private lateinit var taskWorker: TaskWorker
     @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
@@ -159,11 +160,31 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         verifiserBehandlingErFerdigstilt(revurdering)
     }
 
-    @Test
-    internal fun `migrert behandling er ikke opphørt i Infotrygd`() {
-        assertThatThrownBy { opprettOgIverksettMigrering(opphørsdato = null) }
-                .hasMessageContaining(SjekkMigrertStatusIInfotrygdTask.TYPE)
-                .hasCauseInstanceOf(TaskExceptionUtenStackTrace::class.java)
+    @Nested
+    inner class OpphørtIInfotrygd {
+
+        @Test
+        internal fun `false når ikke opphørsdato er satt, då periodene ikke er avkortet og stønadTom blir etter datoet for migrering`() {
+            assertThatThrownBy { opprettOgIverksettMigrering(opphørsdato = null) }
+                    .hasMessageContaining(SjekkMigrertStatusIInfotrygdTask.TYPE)
+                    .hasCauseInstanceOf(TaskExceptionUtenStackTrace::class.java)
+        }
+
+        @Test
+        internal fun `true når perioden sin sluttdato er før opphørsdatoet`() {
+            opprettOgIverksettMigrering(opphørsdato = periodeFraMåned.minusMonths(1))
+        }
+
+        @Test
+        internal fun `true når man ikke har noen perioder, då opphørsdatoet er før første perioden sitt fom`() {
+            val fra = YearMonth.now().minusMonths(6)
+            val til = YearMonth.now().plusMonths(3)
+            val opphørsdato = fra.minusMonths(1)
+            opprettOgIverksettMigrering(opphørsdato = null,
+                                        migrerFraDato = til,
+                                        migrerTilDato = til,
+                                        mockPerioder = { mockPerioder(opphørsdato = opphørsdato, stønadFom = fra, stønadTom = til) })
+        }
     }
 
     @Test
