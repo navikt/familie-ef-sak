@@ -1,1 +1,1 @@
-SELECT setval('fagsak_ekstern_id_seq', 5000);
+ALTER SEQUENCE fagsak_ekstern_id_seq INCREMENT BY 5000;
