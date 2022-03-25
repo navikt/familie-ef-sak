@@ -121,7 +121,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING, BLANKETT -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
             REVURDERING -> saksbehandling.opprettetTid
-            else -> error("Støtter ikke uthenting av mottatt-dato for ${saksbehandling.type}")
+            else -> error("Støtter ikke uthenting av henvendelsestidspunkt for ${saksbehandling.type}")
         }
     }
 
