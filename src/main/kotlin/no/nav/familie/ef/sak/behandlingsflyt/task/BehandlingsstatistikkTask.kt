@@ -100,7 +100,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                     ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
-                    else -> error("Mangler vedtak")
+                    ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
+                    null -> error("Mangler vedtak")
                 }
             }
         }
