@@ -1,5 +1,6 @@
 /**
-  Behandling-DVH ønsker å få rekjørt behandlingsstatistikk-tasker som har fått endret ekstern fagsakId
+  Behandling-DVH ønsker å få rekjørt behandlingsstatistikk-tasker
+  som har fått endret ekstern fagsakId
  */
 UPDATE task
 SET status='KLAR_TIL_PLUKK'
