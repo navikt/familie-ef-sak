@@ -15,4 +15,4 @@ WHERE (payload::JSON ->> 'behandlingId')::VARCHAR::UUID IN (
     )
 )
   AND type = 'behandlingsstatistikkTask'
-  AND opprettet_tid < '2022-03-24 11:20:00.000'
+  AND opprettet_tid < '2022-03-24 11:20:00.000';
