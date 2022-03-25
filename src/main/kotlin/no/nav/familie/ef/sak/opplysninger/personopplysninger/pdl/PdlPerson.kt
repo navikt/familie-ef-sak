@@ -42,7 +42,7 @@ interface PdlPerson {
     val bostedsadresse: List<Bostedsadresse>
 }
 
-data class PdlIdentBolkResponse(val data: IdentBolk,
+data class PdlIdentBolkResponse(val data: IdentBolk?,
                                 val errors: List<PdlError>?) {
 
     fun errorMessages(): String {

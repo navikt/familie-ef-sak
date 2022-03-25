@@ -1,5 +1,6 @@
-query($ident: [ID!]!, $gruppe: [IdentGruppe!]) {
-    hentIdenterBolk(identer: $ident, grupper: $gruppe) {
+query($identer: [ID!]!, $gruppe: [IdentGruppe!]) {
+    hentIdenterBolk(identer: $identer, grupper: $gruppe) {
+        code
         ident
         identer {
             ident
