@@ -43,7 +43,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.3.19</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <nav.security.version>2.0.14</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <unleash.version>4.4.1</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
