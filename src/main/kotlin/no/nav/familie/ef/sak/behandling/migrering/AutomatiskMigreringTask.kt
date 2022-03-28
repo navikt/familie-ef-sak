@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.util.Properties
 import java.util.UUID
 
 /**
@@ -32,7 +33,9 @@ class AutomatiskMigreringTask(private val automatiskMigreringService: Automatisk
         const val TYPE = "automatiskMigrering"
 
         fun opprettTask(ident: String): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)))
+            return Task(TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)), Properties().apply {
+                this["personIdent"] = ident
+            })
         }
     }
 }
