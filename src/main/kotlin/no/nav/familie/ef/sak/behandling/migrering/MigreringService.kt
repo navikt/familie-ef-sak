@@ -39,6 +39,9 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
+import no.nav.familie.kontrakter.felles.simulering.BetalingType
+import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -179,15 +182,28 @@ class MigreringService(
     }
 
     private fun validerSimulering(behandling: Behandling) {
-        val simulering = simuleringService.hentLagretSimuleringsresultat(behandling.id)
-        if (simulering.feilutbetaling.compareTo(BigDecimal.ZERO) != 0) {
-            throw MigreringException("Feilutbetaling er ${simulering.feilutbetaling}",
+        val simulering = simuleringService.hentLagretSimmuleringsresultat(behandling.id)
+        val oppsummering = simulering.oppsummering
+        if (oppsummering.feilutbetaling.compareTo(BigDecimal.ZERO) != 0) {
+            throw MigreringException("Feilutbetaling er ${oppsummering.feilutbetaling}",
                                      MigreringExceptionType.SIMULERING_FEILUTBETALING)
-        } else if (simulering.etterbetaling.compareTo(BigDecimal.ZERO) != 0) {
-            throw MigreringException("Etterbetaling er ${simulering.etterbetaling}",
+        } else if (oppsummering.etterbetaling.compareTo(BigDecimal.ZERO) != 0) {
+            throw MigreringException("Etterbetaling er ${oppsummering.etterbetaling}",
                                      MigreringExceptionType.SIMULERING_ETTERBETALING)
+        } else if (inneholderDebettrekk(simulering)) {
+            throw MigreringException("Simuleringen inneholder posteringstypen TREKK med betalingstypen DEBET. " +
+                                     "Dette blir en uønsket utbetaling pga en feil. Denne kan migreres på nytt i neste måned.",
+                                     MigreringExceptionType.SIMULERING_DEBET_TREKK)
         }
     }
+
+    // Kan slettes når TØB fikset TOB-1739
+    private fun inneholderDebettrekk(simulering: BeriketSimuleringsresultat) =
+            simulering.detaljer.simuleringMottaker.any { simuleringMottaker ->
+                simuleringMottaker.simulertPostering.any {
+                    it.posteringType == PosteringType.TREKK && it.betalingType == BetalingType.DEBIT
+                }
+            }
 
     /**
      * Sjekker att perioden som har kode [InfotrygdEndringKode.OVERTFØRT_NY_LØSNING] har opphør i måneden jobbet blir kjørt.

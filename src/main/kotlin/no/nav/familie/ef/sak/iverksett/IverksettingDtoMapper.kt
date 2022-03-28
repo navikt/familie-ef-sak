@@ -117,7 +117,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
     private fun mapTilbakekrevingMedVarsel(tilbakekreving: Tilbakekreving, behandlingId: UUID): TilbakekrevingMedVarselDto? {
         if (tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL) {
-            val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsresultat(behandlingId)
+            val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsoppsommering(behandlingId)
             val perioder = lagretSimuleringsresultat.hentSammenhengendePerioderMedFeilutbetaling()
                     .map { Periode(fom = it.fom, tom = it.tom) }
             return TilbakekrevingMedVarselDto(varseltekst = tilbakekreving.varseltekst ?: "",
