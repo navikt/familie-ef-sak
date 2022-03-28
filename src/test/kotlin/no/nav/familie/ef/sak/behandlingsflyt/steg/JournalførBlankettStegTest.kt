@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -86,15 +87,15 @@ class JournalførBlankettStegTest {
                                             dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))))
             )
 
-    private val behandling = Behandling(fagsakId = fagsak.id,
-                                        type = BehandlingType.BLANKETT,
-                                        status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                        steg = blankettSteg.stegType(),
-                                        resultat = BehandlingResultat.IKKE_SATT,
-                                        årsak = BehandlingÅrsak.SØKNAD)
+    private val saksbehandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
+                                                                   type = BehandlingType.BLANKETT,
+                                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
+                                                                   steg = blankettSteg.stegType(),
+                                                                   resultat = BehandlingResultat.IKKE_SATT,
+                                                                   årsak = BehandlingÅrsak.SØKNAD))
 
     private val behandlingJournalpost =
-            Behandlingsjournalpost(behandling.id, journalpost.journalpostId, journalpost.journalposttype)
+            Behandlingsjournalpost(saksbehandling.id, journalpost.journalpostId, journalpost.journalposttype)
 
     private val pdf = "enPdF".toByteArray()
 
@@ -115,7 +116,7 @@ class JournalførBlankettStegTest {
 
         every {
             blankettRepository.findByIdOrThrow(any())
-        } returns Blankett(behandling.id, Fil(pdf))
+        } returns Blankett(saksbehandling.id, Fil(pdf))
 
         every {
             taskRepository.save(any())
@@ -125,7 +126,7 @@ class JournalførBlankettStegTest {
             arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any())
         } returns "1234"
 
-        every { behandlingService.hentBehandlingsjournalposter(behandling.id) } returns listOf(behandlingJournalpost)
+        every { behandlingService.hentBehandlingsjournalposter(saksbehandling.id) } returns listOf(behandlingJournalpost)
     }
 
     @Test
@@ -143,7 +144,7 @@ class JournalførBlankettStegTest {
             behandlingService.leggTilBehandlingsjournalpost(capture(journalpostIdSlot), any(), any())
         } just Runs
 
-        blankettSteg.utførSteg(behandling, null)
+        blankettSteg.utførSteg(saksbehandling, null)
 
         assertThat(arkiverDokumentRequestSlot.captured.fnr).isEqualTo(fnr)
         assertThat(arkiverDokumentRequestSlot.captured.fagsakId).isEqualTo(fagsak.id.toString())

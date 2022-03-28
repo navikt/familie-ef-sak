@@ -12,12 +12,12 @@ import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
@@ -38,7 +37,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -63,15 +61,13 @@ internal class BeregnYtelseStegTest {
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
-    private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
                                         simuleringService,
                                         vedtakService,
                                         tilbakekrevingService,
-                                        fagsakService,
-                                        featureToggleService)
+                                        fagsakService)
 
     private val slot = slot<TilkjentYtelse>()
 
@@ -1277,8 +1273,8 @@ internal class BeregnYtelseStegTest {
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
                               andel = AndelTilkjentYtelseDto(beløp = 1,
-                                                             stønadFra =fom.atDay(1),
-                                                             stønadTil =tom.atEndOfMonth(),
+                                                             stønadFra = fom.atDay(1),
+                                                             stønadTil = tom.atEndOfMonth(),
                                                              inntekt = 0,
                                                              inntektsreduksjon = 0,
                                                              samordningsfradrag = 0),
@@ -1293,8 +1289,8 @@ internal class BeregnYtelseStegTest {
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
                               andel = AndelTilkjentYtelseDto(beløp = 0,
-                                                             stønadFra =sanksjonMåned.atDay(1),
-                                                             stønadTil =sanksjonMåned.atEndOfMonth(),
+                                                             stønadFra = sanksjonMåned.atDay(1),
+                                                             stønadTil = sanksjonMåned.atEndOfMonth(),
                                                              inntekt = 0,
                                                              inntektsreduksjon = 0,
                                                              samordningsfradrag = 0),
@@ -1328,6 +1324,8 @@ internal class BeregnYtelseStegTest {
                                                         periodeBegrunnelse = "",
                                                         inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        steg.utførSteg(behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId), data = vedtak)
+        val fagsak = fagsak()
+        steg.utførSteg(saksbehandling(fagsak, behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId)),
+                       data = vedtak)
     }
 }

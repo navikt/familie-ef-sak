@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
@@ -41,8 +42,9 @@ internal class TotrinnskontrollServiceTest {
         val opprettetAv = "Behandler"
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
                 behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
-        val response = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling(BehandlingStatus.UTREDES),
-                                                                                        BeslutteVedtakDto(false, ""))
+        val response = totrinnskontrollService
+                .lagreTotrinnskontrollOgReturnerBehandler(saksbehandling(status = BehandlingStatus.UTREDES),
+                                                          BeslutteVedtakDto(false, ""))
         assertThat(response).isEqualTo(opprettetAv)
     }
 

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -32,9 +33,9 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal håndtere en ny søknad`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
-
-        stegService.håndterVilkår(behandling)
+        val behandling = behandling(fagsak, status = BehandlingStatus.UTREDES)
+        behandlingRepository.insert(behandling)
+        stegService.håndterVilkår(saksbehandling(fagsak, behandling))
     }
 
     @Test
@@ -51,12 +52,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val inntek = Inntekt(årMånedFra = YearMonth.of(2021, 1),
                              forventetInntekt = BigDecimal(12345),
                              samordningsfradrag = BigDecimal(2))
-        stegService.håndterBeregnYtelseForStønad(behandling, vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                                                periodeBegrunnelse = "ok",
-                                                                                inntektBegrunnelse = "okok",
-                                                                                perioder = listOf(vedtaksperiode),
-                                                                                inntekter = listOf(inntek),
-                                                                                samordningsfradragType = SamordningsfradragType.UFØRETRYGD))
+        stegService.håndterBeregnYtelseForStønad(saksbehandling(fagsak, behandling),
+                                                 vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
+                                                                    periodeBegrunnelse = "ok",
+                                                                    inntektBegrunnelse = "okok",
+                                                                    perioder = listOf(vedtaksperiode),
+                                                                    inntekter = listOf(inntek),
+                                                                    samordningsfradragType = SamordningsfradragType.UFØRETRYGD))
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
                 .isEqualTo(StegType.BEREGNE_YTELSE)
@@ -69,7 +71,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BEHANDLING_FERDIGSTILT))
 
         assertThrows<IllegalStateException> {
-            stegService.håndterVilkår(behandling)
+            stegService.håndterVilkår(saksbehandling(fagsak, behandling))
         }
     }
 
@@ -79,7 +81,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.BESLUTTE_VEDTAK))
 
         assertThrows<IllegalStateException> {
-            stegService.håndterVilkår(behandling)
+            stegService.håndterVilkår(saksbehandling(fagsak, behandling))
         }
     }
 }

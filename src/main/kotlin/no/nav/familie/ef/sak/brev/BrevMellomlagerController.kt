@@ -25,8 +25,7 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
 
     @PostMapping("/{behandlingId}")
     fun mellomlagreBrevverdier(@PathVariable behandlingId: UUID,
-                               @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto
-    ): Ressurs<UUID> {
+                               @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 

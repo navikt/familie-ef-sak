@@ -56,13 +56,13 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
 
     private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto, fagsak: Fagsak): ByteArray {
         val request = lagFrittståendeBrevRequest(frittståendeBrevDto, fagsak.hentAktivIdent())
-        val signatur = brevsignaturService.lagSignaturMedEnhet(frittståendeBrevDto.fagsakId)
+        val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
         return brevClient.genererBrev(request, signatur.navn, signatur.enhet)
     }
 
 
-    private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori) : FrittståendeBrevType =
-            when(brevKategori){
+    private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori): FrittståendeBrevType =
+            when (brevKategori) {
                 FrittståendeBrevKategori.INFORMASJONSBREV -> FrittståendeBrevType.INFORMASJONSBREV
                 FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
                 FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT

@@ -12,12 +12,13 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -50,15 +51,13 @@ class StepDefinitions {
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
-    private val featureToggleService = mockFeatureToggleService()
 
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
                                                     beregningService,
                                                     simuleringService,
                                                     vedtakService,
                                                     tilbakekrevingService,
-                                                    fagsakService,
-                                                    featureToggleService)
+                                                    fagsakService)
 
     private val slot = slot<TilkjentYtelse>()
 
@@ -90,7 +89,9 @@ class StepDefinitions {
         }
 
         vedtakMedInntekt.forEach {
-            beregnYtelseSteg.utførSteg(behandlinger.getValue(it.behandlingId), it.tilVedtakDto())
+            val behandling = behandlinger.getValue(it.behandlingId)
+            val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId), behandling)
+            beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
         }
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
                                                                          lagredeVedtak,

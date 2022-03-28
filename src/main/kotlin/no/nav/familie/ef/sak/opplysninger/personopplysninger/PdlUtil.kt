@@ -10,7 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
-val logger = LoggerFactory.getLogger(PdlClient::class.java)
+val logger: Logger = LoggerFactory.getLogger(PdlClient::class.java)
 
 inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String?,
                                                                          pdlResponse: PdlResponse<DATA>,
