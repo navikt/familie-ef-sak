@@ -53,6 +53,6 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarBeslutterrolle()
-        return Ressurs.success(brevService.lagBeslutterBrev(saksbehandling))
+        return Ressurs.success(brevService.forhåndsvisBeslutterBrev(saksbehandling))
     }
 }

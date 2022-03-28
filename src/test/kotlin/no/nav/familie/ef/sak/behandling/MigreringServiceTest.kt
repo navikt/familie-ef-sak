@@ -519,7 +519,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     private fun godkjennTotrinnskontroll(saksbehandling: Saksbehandling) {
         testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
-            vedtaksbrevService.lagBeslutterBrev(saksbehandling)
+            vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling)
             stegService.håndterBeslutteVedtak(behandlingService.hentSaksbehandling(saksbehandling.id), BeslutteVedtakDto(true))
         }
     }

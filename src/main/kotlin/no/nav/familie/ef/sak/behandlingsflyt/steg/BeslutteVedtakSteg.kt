@@ -10,24 +10,20 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
-import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
-import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -38,9 +34,10 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val iverksettClient: IverksettClient,
                          private val iverksettingDtoMapper: IverksettingDtoMapper,
                          private val totrinnskontrollService: TotrinnskontrollService,
-                         private val vedtaksbrevRepository: VedtaksbrevRepository,
                          private val behandlingService: BehandlingService,
-                         private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
+                         private val vedtakService: VedtakService,
+                         private val vedtaksbrevService: VedtaksbrevService,
+                         private val featureToggleService: FeatureToggleService) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
         if (saksbehandling.steg != stegType()) {
@@ -63,10 +60,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                     stegType().hentNesteSteg(saksbehandling.type)
                 }
                 else -> {
-                    val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
-                    validerBeslutterVedtaksbrev(vedtaksbrev)
-                    val fil = vedtaksbrev.beslutterPdf ?: throw ApiFeil("Beslutter-pdf er null, beslutter må kontrollere brevet.",
-                                                                        HttpStatus.BAD_REQUEST)
+                    val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
                     val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
                     oppdaterResultatPåBehandling(saksbehandling.id)
                     opprettPollForStatusOppgave(saksbehandling.id)
@@ -76,7 +70,9 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                 }
             }
         } else {
-            vedtaksbrevRepository.deleteById(saksbehandling.id)
+            if (!featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")){
+                vedtaksbrevService.slettVedtaksbrev(saksbehandling)
+            }
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
@@ -95,20 +91,6 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             else -> error("Støtter ikke resultattypen=${vedtak.resultatType}")
         }
-    }
-
-    private fun validerBeslutterVedtaksbrev(vedtaksbrev: Vedtaksbrev) {
-
-        brukerfeilHvis(vedtaksbrev.beslutterident == null || vedtaksbrev.beslutterident.isBlank()) {
-            "Beklager. Det har skjedd en feil. Last brevsiden på nytt, kontroller brevet og prøv igjen."
-        }
-
-        validerSammeBeslutterIdent(vedtaksbrev)
-
-    }
-
-    private fun validerSammeBeslutterIdent(vedtaksbrev: Vedtaksbrev) {
-        brukerfeilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
     }
 
     private fun ferdigstillOppgave(saksbehandling: Saksbehandling): Long? {

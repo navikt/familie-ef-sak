@@ -16,20 +16,20 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPaylo
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
-import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -56,21 +56,23 @@ internal class BeslutteVedtakStegTest {
     private val fagsakService = mockk<FagsakService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
-    private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val iverksettingDtoMapper = mockk<IverksettingDtoMapper>()
     private val iverksett = mockk<IverksettClient>()
     private val vedtakService = mockk<VedtakService>()
+    private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
-    private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository,
-                                                        fagsakService,
-                                                        oppgaveService,
-                                                        iverksett,
-                                                        iverksettingDtoMapper,
-                                                        totrinnskontrollService,
-                                                        vedtaksbrevRepository,
-                                                        behandlingService,
-                                                        vedtakService)
+    private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository = taskRepository,
+                                                        fagsakService = fagsakService,
+                                                        oppgaveService = oppgaveService,
+                                                        iverksettClient = iverksett,
+                                                        iverksettingDtoMapper = iverksettingDtoMapper,
+                                                        totrinnskontrollService = totrinnskontrollService,
+                                                        behandlingService = behandlingService,
+                                                        vedtakService = vedtakService,
+                                                        vedtaksbrevService = vedtaksbrevService,
+                                                        featureToggleService = featureToggleService)
 
     private val innloggetBeslutter = "sign2"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
@@ -109,7 +111,6 @@ internal class BeslutteVedtakStegTest {
             taskRepository.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
-        every { vedtaksbrevRepository.deleteById(any()) } just Runs
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
         every { iverksett.iverksett(any(), any()) } just Runs
         every { vedtakService.hentVedtak(any()) } returns Vedtak(behandlingId = UUID.randomUUID(),
@@ -121,6 +122,7 @@ internal class BeslutteVedtakStegTest {
                                                                  inntekter = null,
                                                                  saksbehandlerIdent = null,
                                                                  beslutterIdent = null)
+        every { featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null") } returns false
 
     }
 
@@ -131,7 +133,6 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
-        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
         every { vedtakService.oppdaterBeslutter(behandlingId, any()) } just Runs
         every { vedtakService.hentVedtak(behandlingId) } returns Vedtak(behandlingId = behandlingId,
                                                                         resultatType = ResultatType.INNVILGE,
@@ -140,6 +141,8 @@ internal class BeslutteVedtakStegTest {
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, resultat = secondArg())
         }
+
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any()) } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
         assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
@@ -153,6 +156,9 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
+
+        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
+
         val nesteSteg = utførTotrinnskontroll(godkjent = false)
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)

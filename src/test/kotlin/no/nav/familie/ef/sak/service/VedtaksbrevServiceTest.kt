@@ -18,9 +18,11 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus.BAD_REQUEST
 
 internal class VedtaksbrevServiceTest {
 
@@ -43,13 +46,15 @@ internal class VedtaksbrevServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val brevsignaturService = mockk<BrevsignaturService>()
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val vedtaksbrevService =
             VedtaksbrevService(brevClient,
                                vedtaksbrevRepository,
                                personopplysningerService,
                                brevsignaturService,
-                               familieDokumentClient)
+                               familieDokumentClient,
+                               featureToggleService)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
     private val beslutterNavn = "456"
@@ -97,24 +102,49 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig steg`() {
-        assertThrows<Feil> {
-            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak,
-                                                               behandlingForBeslutter.copy(steg = StegType.VILKÅR)))
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+
+
+        val feil = assertThrows<Feil> {
+            vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak,
+                                                                      behandlingForBeslutter.copy(steg = StegType.VILKÅR)))
         }
+        assertThat(feil.message).contains("Behandling er i feil steg")
+        assertThat(feil.httpStatus).isEqualTo(BAD_REQUEST)
     }
 
     @Test
     internal fun `lagBeslutterBrev - skal kaste feil hvis behandlingen ikke har riktig status`() {
-        assertThrows<Feil> {
-            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak,
-                                                               behandlingForBeslutter.copy(status =
-                                                                                           BehandlingStatus.FERDIGSTILT)))
-        }
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
 
-        assertThrows<Feil> {
-            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak,
-                                                               behandling.copy(status = BehandlingStatus.UTREDES)))
+        val feilFerdigstilt = assertThrows<Feil> {
+            vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak,
+                                                                      behandlingForBeslutter.copy(status =
+                                                                                                  BehandlingStatus.FERDIGSTILT)))
         }
+        assertThat(feilFerdigstilt.httpStatus).isEqualTo(BAD_REQUEST)
+        assertThat(feilFerdigstilt.message).contains("Behandling er i feil steg")
+
+
+        val feilUtredes = assertThrows<Feil> {
+            vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak,
+                                                                      behandling.copy(status = BehandlingStatus.UTREDES)))
+        }
+        assertThat(feilUtredes.httpStatus).isEqualTo(BAD_REQUEST)
+        assertThat(feilUtredes.message).contains("Behandling er i feil steg")
+
+    }
+
+    @Test
+    internal fun `skal kaste feil når det finnes beslutterpdf i forveien`() {
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterPdf = Fil("123".toByteArray()))
+        every { featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null") } returns true
+
+        val feil = assertThrows<Feil> {
+            vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak,
+                                                                      behandlingForBeslutter))
+        }
+        assertThat(feil.message).isEqualTo("Det finnes allerede et beslutterbrev")
     }
 
     @Test
@@ -162,7 +192,7 @@ internal class VedtaksbrevServiceTest {
 
 
         val feilmelding = assertThrows<Feil> {
-            vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
+            vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
         }.message
         assertThat(feilmelding).isEqualTo("Brev-HTML mangler placeholder for besluttersignatur")
     }
@@ -177,7 +207,7 @@ internal class VedtaksbrevServiceTest {
         every { familieDokumentClient.genererPdfFraHtml(capture(htmlSlot)) } returns "123".toByteArray()
 
 
-        vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
+        vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
 
         assertThat(htmlSlot.captured).isEqualTo("html med placeholder $beslutterNavn og en liten avslutning")
     }

@@ -331,7 +331,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         mockBrukerContext(beslutter)
         try {
             val saksbehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
-            vedtaksbrevService.lagBeslutterBrev(saksbehandling)
+            vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling)
         } catch (e: Feil) {
             // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
         } catch (e: ApiFeil) {
