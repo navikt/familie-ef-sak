@@ -59,12 +59,16 @@ class OpprettUttrekkArbeidssøkerTask(
     fun opprettTaskForNesteMåned(task: Task) {
         val årMåned = YearMonth.parse(task.payload)
         val nesteMåned = årMåned.plusMonths(1)
-        val triggerTid = nesteMåned.atDay(1).atTime(5, 0)
-        taskRepository.save(Task(TYPE, nesteMåned.format(DATE_FORMAT_ISO_YEAR_MONTH)).medTriggerTid(triggerTid))
+        taskRepository.save(opprettTask(nesteMåned))
     }
 
     companion object {
 
         const val TYPE = "opprettUttrekkArbeidssøker"
+
+        fun opprettTask(årMåned: YearMonth): Task {
+            val triggerTid = årMåned.atDay(1).atTime(5, 0)
+            return Task(TYPE, årMåned.format(DATE_FORMAT_ISO_YEAR_MONTH)).medTriggerTid(triggerTid)
+        }
     }
 }
