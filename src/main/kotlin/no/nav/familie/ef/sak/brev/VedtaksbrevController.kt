@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,6 +21,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtaksbrevController(private val brevService: VedtaksbrevService,
+                            private val behandlingService: BehandlingService,
                             private val tilgangService: TilgangService) {
 
     @GetMapping("/{behandlingId}")
@@ -32,22 +34,25 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     fun lagSaksbehandlerbrev(@PathVariable behandlingId: UUID,
                              @PathVariable brevMal: String,
                              @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(brevService.lagSaksbehandlerSanitybrev(behandlingId, brevRequest, brevMal))
+        return Ressurs.success(brevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, brevMal))
     }
 
     @PostMapping("/fritekst")
     fun lagSaksbehandlerbrev(@RequestBody brevInnhold: VedtaksbrevFritekstDto): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(brevInnhold.behandlingId, AuditLoggerEvent.UPDATE)
+        val saksbehandling = behandlingService.hentSaksbehandling(brevInnhold.behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold))
+        return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold, saksbehandling))
     }
 
     @PostMapping("/{behandlingId}")
     fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarBeslutterrolle()
-        return Ressurs.success(brevService.lagBeslutterBrev(behandlingId))
+        return Ressurs.success(brevService.lagBeslutterBrev(saksbehandling))
     }
 }

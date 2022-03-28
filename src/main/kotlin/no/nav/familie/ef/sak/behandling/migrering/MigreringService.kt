@@ -156,17 +156,19 @@ class MigreringService(
 
         val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
-        beregnYtelseSteg.utførSteg(behandling, Innvilget(resultatType = ResultatType.INNVILGE,
-                                                         periodeBegrunnelse = null,
-                                                         inntektBegrunnelse = null,
-                                                         perioder = vedtaksperioder,
-                                                         inntekter = inntekter))
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+        beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(resultatType = ResultatType.INNVILGE,
+                                                             periodeBegrunnelse = null,
+                                                             inntektBegrunnelse = null,
+                                                             perioder = vedtaksperioder,
+                                                             inntekter = inntekter))
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
+
+        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(saksbehandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
@@ -212,14 +214,15 @@ class MigreringService(
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
         val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
 
-        if (sisteSummertePerioden != null &&
-            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadFom > opphørsmåned.atEndOfMonth())) {
-            loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
-            return false
+        if (sisteSummertePerioden == null ||
+            sisteSummertePerioden.opphørsdato != null ||
+            sisteSummertePerioden.stønadTom <= opphørsmåned.atEndOfMonth()) {
+            logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - " +
+                        "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
+            return true
         }
-        logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
-                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
-        return true
+        loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
+        return false
     }
 
     private fun loggIkkeOpphørt(behandlingId: UUID,

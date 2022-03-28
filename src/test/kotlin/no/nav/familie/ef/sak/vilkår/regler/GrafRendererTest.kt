@@ -43,7 +43,10 @@ internal class GrafRendererTest {
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
-            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad.sivilstand, it.sivilstandstype, barn= emptyList(), søktOmBarnetilsyn = emptyList()))
+            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad.sivilstand,
+                                                                                                 it.sivilstandstype,
+                                                                                                 barn = emptyList(),
+                                                                                                 søktOmBarnetilsyn = emptyList()))
             val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
                 delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
             }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }

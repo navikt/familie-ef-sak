@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
@@ -42,42 +42,42 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                          private val behandlingService: BehandlingService,
                          private val vedtakService: VedtakService) : BehandlingSteg<BeslutteVedtakDto> {
 
-    override fun validerSteg(behandling: Behandling) {
-        if (behandling.steg != stegType()) {
-            throw Feil("Behandling er i feil steg=${behandling.steg}")
+    override fun validerSteg(saksbehandling: Saksbehandling) {
+        if (saksbehandling.steg != stegType()) {
+            throw Feil("Behandling er i feil steg=${saksbehandling.steg}")
         }
 
     }
 
-    override fun utførOgReturnerNesteSteg(behandling: Behandling, data: BeslutteVedtakDto): StegType {
-        fagsakService.fagsakMedOppdatertPersonIdent(behandling.fagsakId)
-        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(behandling, data)
+    override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): StegType {
+        fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId)
+        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
-        val oppgaveId = ferdigstillOppgave(behandling)
+        val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
-            vedtakService.oppdaterBeslutter(behandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
-            when (behandling.type) {
+            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
+            when (saksbehandling.type) {
                 BehandlingType.BLANKETT -> {
-                    opprettTaskForJournalførBlankett(behandling)
-                    stegType().hentNesteSteg(behandling.type)
+                    opprettTaskForJournalførBlankett(saksbehandling)
+                    stegType().hentNesteSteg(saksbehandling.type)
                 }
                 else -> {
-                    val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(behandling.id)
+                    val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
                     validerBeslutterVedtaksbrev(vedtaksbrev)
                     val fil = vedtaksbrev.beslutterPdf ?: throw ApiFeil("Beslutter-pdf er null, beslutter må kontrollere brevet.",
                                                                         HttpStatus.BAD_REQUEST)
-                    val iverksettDto = iverksettingDtoMapper.tilDto(behandling, beslutter)
-                    oppdaterResultatPåBehandling(behandling.id)
-                    opprettPollForStatusOppgave(behandling.id)
-                    opprettTaskForBehandlingsstatistikk(behandling.id, oppgaveId)
+                    val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
+                    oppdaterResultatPåBehandling(saksbehandling.id)
+                    opprettPollForStatusOppgave(saksbehandling.id)
+                    opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
                     iverksettClient.iverksett(iverksettDto, fil)
                     StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
                 }
             }
         } else {
-            vedtaksbrevRepository.deleteById(behandling.id)
-            opprettBehandleUnderkjentVedtakOppgave(behandling, saksbehandler)
+            vedtaksbrevRepository.deleteById(saksbehandling.id)
+            opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
     }
@@ -111,11 +111,11 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         brukerfeilHvis(vedtaksbrev.beslutterident != SikkerhetContext.hentSaksbehandler(true)) { "En annen beslutter har signert vedtaksbrevet" }
     }
 
-    private fun ferdigstillOppgave(behandling: Behandling): Long? {
+    private fun ferdigstillOppgave(saksbehandling: Saksbehandling): Long? {
         val oppgavetype = Oppgavetype.GodkjenneVedtak
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
-        return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = behandling.id,
+        val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
+        return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
+            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = saksbehandling.id,
                                                                    oppgavetype = oppgavetype,
                                                                    oppgaveId = it.gsakOppgaveId,
                                                                    personIdent = aktivIdent))
@@ -123,16 +123,15 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         }
     }
 
-    private fun opprettBehandleUnderkjentVedtakOppgave(behandling: Behandling, navIdent: String) {
+    private fun opprettBehandleUnderkjentVedtakOppgave(saksbehandling: Saksbehandling, navIdent: String) {
         taskRepository.save(OpprettOppgaveTask.opprettTask(
-                OpprettOppgaveTaskData(behandlingId = behandling.id,
+                OpprettOppgaveTaskData(behandlingId = saksbehandling.id,
                                        oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                                        tilordnetNavIdent = navIdent)))
     }
 
-    private fun opprettTaskForJournalførBlankett(behandling: Behandling) {
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
-        taskRepository.save(JournalførBlankettTask.opprettTask(behandling, aktivIdent))
+    private fun opprettTaskForJournalførBlankett(saksbehandling: Saksbehandling) {
+        taskRepository.save(JournalførBlankettTask.opprettTask(saksbehandling))
     }
 
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {
@@ -143,7 +142,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         return StegType.BESLUTTE_VEDTAK
     }
 
-    override fun utførSteg(behandling: Behandling, data: BeslutteVedtakDto) {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto) {
         error("Bruker utførOgReturnerNesteSteg")
     }
 

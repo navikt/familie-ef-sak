@@ -78,7 +78,6 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN
 
 
-
     companion object {
 
         fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> = values().filter {

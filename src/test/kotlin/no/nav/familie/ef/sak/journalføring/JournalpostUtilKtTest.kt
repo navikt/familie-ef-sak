@@ -47,21 +47,21 @@ internal class JournalpostUtilKtTest {
     @Test
     internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode skolepenger skal returnere true`() {
         val journalpostSkolepengeSøknad = lagjournalpost(behandlingstema = null,
-                                         listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER)))
+                                                         listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER)))
         assertThat(journalpostSkolepengeSøknad.harStrukturertSøknad()).isTrue
     }
 
     @Test
     internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode overgangsstønad skal returnere true`() {
         val journalpostOvergangsstønad = lagjournalpost(behandlingstema = null,
-                                         listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)))
+                                                        listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)))
         assertThat(journalpostOvergangsstønad.harStrukturertSøknad()).isTrue
     }
 
     @Test
     internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode barnetilsyn skal returnere true`() {
         val journalpostBarnetilsynSøknad = lagjournalpost(behandlingstema = null,
-                                         listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN)))
+                                                          listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN)))
         assertThat(journalpostBarnetilsynSøknad.harStrukturertSøknad()).isTrue
     }
 

@@ -1,9 +1,8 @@
 package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -20,8 +19,7 @@ import org.springframework.stereotype.Service
 class BlankettSimuleringsService(val beregningService: BeregningService) {
 
     fun genererTilkjentYtelseForBlankett(vedtak: VedtakDto?,
-                                         behandling: Behandling,
-                                         fagsak: Fagsak): TilkjentYtelseMedMetadata {
+                                         saksbehandling: Saksbehandling): TilkjentYtelseMedMetadata {
         val andeler = when (vedtak) {
             is Innvilget -> {
                 beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
@@ -30,29 +28,27 @@ class BlankettSimuleringsService(val beregningService: BeregningService) {
                             AndelTilkjentYtelse(beløp = it.beløp.toInt(),
                                                 stønadFom = it.periode.fradato,
                                                 stønadTom = it.periode.tildato,
-                                                kildeBehandlingId = behandling.id,
+                                                kildeBehandlingId = saksbehandling.id,
                                                 inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
                                                 inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
                                                 samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
-                                                personIdent = fagsak.hentAktivIdent())
+                                                personIdent = saksbehandling.ident)
                         }
             }
             else -> emptyList()
         }
 
 
-        val tilkjentYtelseForBlankett = TilkjentYtelse(
-                personident = fagsak.hentAktivIdent(),
-                behandlingId = behandling.id,
-                andelerTilkjentYtelse = andeler,
-                type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING)
+        val tilkjentYtelseForBlankett = TilkjentYtelse(personident = saksbehandling.ident,
+                                                       behandlingId = saksbehandling.id,
+                                                       andelerTilkjentYtelse = andeler,
+                                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING)
 
-        return tilkjentYtelseForBlankett
-                .tilTilkjentYtelseMedMetaData(
-                        saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                        stønadstype = fagsak.stønadstype,
-                        eksternBehandlingId = behandling.eksternId.id,
-                        eksternFagsakId = fagsak.eksternId.id
-                )
+        return tilkjentYtelseForBlankett.tilTilkjentYtelseMedMetaData(
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                stønadstype = saksbehandling.stønadstype,
+                eksternBehandlingId = saksbehandling.eksternId,
+                eksternFagsakId = saksbehandling.eksternFagsakId
+        )
     }
 }

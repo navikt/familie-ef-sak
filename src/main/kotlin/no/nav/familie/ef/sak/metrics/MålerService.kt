@@ -8,7 +8,6 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.concurrent.atomic.AtomicInteger
 
