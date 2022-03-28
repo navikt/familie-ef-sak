@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.SøkService
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
@@ -22,7 +23,10 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.ukjentBostedsadresse
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -43,6 +47,13 @@ internal class SøkServiceTest {
                                         adresseMapper,
                                         fagsakService)
 
+    @BeforeEach
+    internal fun setUp() {
+        every {
+            behandlingService.hentAktivIdent(any())
+        } returns "ident"
+    }
+
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {
 
@@ -62,7 +73,7 @@ internal class SøkServiceTest {
                                                          null,
                                                          null,
                                                          vegadresse,
-                                                         UkjentBosted(""),
+                                                         null,
                                                          null,
                                                          Metadata(historisk = false)))
 
@@ -80,9 +91,6 @@ internal class SøkServiceTest {
             pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(any())
         } returns personFraPdl
         every {
-            behandlingService.hentAktivIdent(any())
-        } returns "ident"
-        every {
             personService.hentSøker(any())
         } returns pdlSøker(bostedsadresse = bostedsadresseFraPdl)
 
@@ -92,5 +100,16 @@ internal class SøkServiceTest {
 
         val person = SøkeresultatPerson(listOf(forventetResultat), 1, 1, 1)
         assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
+    }
+
+    @Test
+    internal fun `skal kaste feil hvis personen har ukjent adresse`() {
+        every {
+            personService.hentSøker(any())
+        } returns pdlSøker(bostedsadresse = listOf(ukjentBostedsadresse()))
+
+        assertThatThrownBy { søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID()) }
+                .isInstanceOf(ApiFeil::class.java)
+                .hasMessageContaining("ukjent bostedsadresse")
     }
 }
