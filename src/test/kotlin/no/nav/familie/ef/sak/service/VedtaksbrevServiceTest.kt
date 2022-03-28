@@ -68,26 +68,6 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    internal fun `skal legge på signatur og lage pdf ved lagBeslutterBrev`() {
-        val vedtaksbrevSlot = slot<Vedtaksbrev>()
-
-
-        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { brevClient.genererBrev(any()) } returns "enPdf".toByteArray()
-        every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
-
-        vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
-
-        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo(beslutterNavn)
-        assertThat(vedtaksbrevSlot.captured).usingRecursiveComparison()
-                .ignoringFields("besluttersignatur", "beslutterPdf", "beslutterident", "enhet")
-                .isEqualTo(vedtaksbrev)
-        assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(null)
-        assertThat(vedtaksbrevSlot.captured.saksbehandlerBrevrequest).isNotBlank()
-
-    }
-
-    @Test
     internal fun `skal legge på signatur og lage pdf ved lagSaksbehandlerFritekstbrev`() {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
@@ -158,8 +138,7 @@ internal class VedtaksbrevServiceTest {
                                                         steg = StegType.SEND_TIL_BESLUTTER)
 
     private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(behandlingId = behandling.id,
-                                                                                                  saksbehandlerBrevrequest = "123",
-                                                                                                  saksbehandlerHtml = null,
+                                                                                                  saksbehandlerHtml = "Brev med $BESLUTTER_SIGNATUR_PLACEHOLDER",
                                                                                                   brevmal = brevmal,
                                                                                                   saksbehandlersignatur = "Saksbehandler Signatur",
                                                                                                   besluttersignatur = null,
@@ -220,8 +199,5 @@ internal class VedtaksbrevServiceTest {
                                                       "brevmal")
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(html)
-        assertThat(vedtaksbrevSlot.captured.saksbehandlerBrevrequest).isEmpty()
     }
-
-
 }
