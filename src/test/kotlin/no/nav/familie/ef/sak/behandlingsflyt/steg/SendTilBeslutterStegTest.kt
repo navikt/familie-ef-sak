@@ -90,12 +90,12 @@ internal class SendTilBeslutterStegTest {
                                 identer = setOf(PersonIdent(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
-                                          saksbehandlerBrevrequest = "",
                                           brevmal = "",
                                           saksbehandlersignatur = saksbehandlerNavn,
                                           beslutterPdf = null,
                                           enhet = "enhet",
-                                          saksbehandlerident = saksbehandlerNavn)
+                                          saksbehandlerident = saksbehandlerNavn,
+                                          saksbehandlerHtml = "")
 
     private val behandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,

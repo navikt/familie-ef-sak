@@ -73,7 +73,6 @@ internal class VedtaksbrevServiceTest {
 
 
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
-        every { brevClient.genererBrev(any()) } returns "enPdf".toByteArray()
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
 
         vedtaksbrevService.lagBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
@@ -83,7 +82,6 @@ internal class VedtaksbrevServiceTest {
                 .ignoringFields("besluttersignatur", "beslutterPdf", "beslutterident", "enhet")
                 .isEqualTo(vedtaksbrev)
         assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(null)
-        assertThat(vedtaksbrevSlot.captured.saksbehandlerBrevrequest).isNotBlank()
 
     }
 
@@ -158,8 +156,7 @@ internal class VedtaksbrevServiceTest {
                                                         steg = StegType.SEND_TIL_BESLUTTER)
 
     private fun lagVedtaksbrev(brevmal: String, saksbehandlerIdent: String = "123") = Vedtaksbrev(behandlingId = behandling.id,
-                                                                                                  saksbehandlerBrevrequest = "123",
-                                                                                                  saksbehandlerHtml = null,
+                                                                                                  saksbehandlerHtml = "",
                                                                                                   brevmal = brevmal,
                                                                                                   saksbehandlersignatur = "Saksbehandler Signatur",
                                                                                                   besluttersignatur = null,
@@ -220,8 +217,5 @@ internal class VedtaksbrevServiceTest {
                                                       "brevmal")
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(html)
-        assertThat(vedtaksbrevSlot.captured.saksbehandlerBrevrequest).isEmpty()
     }
-
-
 }
