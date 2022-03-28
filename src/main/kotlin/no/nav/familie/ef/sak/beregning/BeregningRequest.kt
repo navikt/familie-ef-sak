@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 
 data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<VedtaksperiodeDto>)
 
