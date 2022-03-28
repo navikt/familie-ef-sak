@@ -39,10 +39,15 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.RegelId
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
+import no.nav.familie.kontrakter.ef.iverksett.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -67,6 +72,7 @@ internal class IverksettingDtoMapperTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val brevmottakereRepository = mockk<BrevmottakereRepository>()
+    private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
     private val barnMatcher = mockk<BarnMatcher>()
 
@@ -80,7 +86,7 @@ internal class IverksettingDtoMapperTest {
                                   tilbakekrevingService = tilbakekrevingService,
                                   tilkjentYtelseService = tilkjentYtelseService,
                                   vedtakService = vedtakService,
-                                  vilkårsvurderingRepository = mockk(relaxed = true),
+                                  vilkårsvurderingRepository = vilkårsvurderingRepository,
                                   brevmottakereRepository = brevmottakereRepository)
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -92,7 +98,7 @@ internal class IverksettingDtoMapperTest {
         every { fagsakService.hentFagsakForBehandling(behandling.id) } returns fagsak
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.INNVILGE)
         val behandlingshistorikk =
-                Behandlingshistorikk(behandlingId = behandling.id, opprettetAv = "", steg = StegType.SEND_TIL_BESLUTTER)
+                Behandlingshistorikk(behandlingId = behandling.id, opprettetAv = "opprettetAv", steg = StegType.SEND_TIL_BESLUTTER)
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
     }
@@ -134,6 +140,7 @@ internal class IverksettingDtoMapperTest {
                                                                                                  false,
                                                                                                  LocalDateTime.now())
         every { tilkjentYtelseService.hentForBehandling(any()) } returns mockk(relaxed = true)
+        every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
 
         verify(exactly = 1) { grunnlagsdataService.hentGrunnlagsdata(any()) }
@@ -159,7 +166,15 @@ internal class IverksettingDtoMapperTest {
         assertThat(iverksettDto.behandling.eksternId).isEqualTo(1)
         assertThat(iverksettDto.behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
         assertThat(iverksettDto.behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.size).isEqualTo(0) //Burde ha verdi i test
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.size).isEqualTo(1)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().resultat.name).isEqualTo(Vilkårsresultat.OPPFYLT.name)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().vilkårType.name).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP.name)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.size).isEqualTo(1)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().resultat.name).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL.name)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.size).isEqualTo(1)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.first().regelId.name).isEqualTo(RegelId.MEDLEMSKAP_UNNTAK.name)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.first().svar?.name).isEqualTo(SvarId.JA.name)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.first().begrunnelse).isEqualTo("begrunnelse")
 
         assertThat(iverksettDto.fagsak.eksternId).isEqualTo(4)
         assertThat(iverksettDto.fagsak.fagsakId).isEqualTo(UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"))
@@ -186,7 +201,7 @@ internal class IverksettingDtoMapperTest {
 
         assertThat(iverksettDto.vedtak.opphørÅrsak).isNull() // Burde ha verdi i test?
         assertThat(iverksettDto.vedtak.resultat).isEqualTo(Vedtaksresultat.INNVILGET)
-        assertThat(iverksettDto.vedtak.saksbehandlerId).isEqualTo("") // Burde ha verdi i test
+        assertThat(iverksettDto.vedtak.saksbehandlerId).isEqualTo("opprettetAv")
 
         assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.perioder?.size).isEqualTo(1)
         assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(
@@ -242,7 +257,7 @@ internal class IverksettingDtoMapperTest {
                         behandlingBarn = behandlingBarn
                 )
         )
-
+        every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns listOf(objectMapper.readValue(vilkårsvurderingJson))
         every { vedtakService.hentVedtak(any()) } returns objectMapper.readValue(vedtakJson)
         every { brevmottakereRepository.findByIdOrNull(any()) } returns objectMapper.readValue(brevmottakereJson)
         every { tilbakekrevingService.hentTilbakekreving(any()) } returns objectMapper.readValue(tilbakekrevingJson)
@@ -283,6 +298,26 @@ internal class IverksettingDtoMapperTest {
             "personIdent": "123",
             "navn": "fornavn etternavn",
             "fødselTermindato": "2022-03-25"
+        }
+    """.trimIndent()
+
+    private val vilkårsvurderingJson = """
+        {
+            "id": "73144d90-d238-41d2-833b-fc719dae23aa",
+            "behandlingId": "73144d90-d238-41d2-833b-fc719dae23cb",
+            "resultat": "OPPFYLT",
+            "type": "FORUTGÅENDE_MEDLEMSKAP",
+            "barnId": "73144d90-d238-41d2-833b-fc719dae23ab",
+            "delvilkårsvurdering": {
+                "delvilkårsvurderinger": [{
+                    "resultat": "IKKE_TATT_STILLING_TIL",
+                    "vurderinger": [{
+                        "regelId": "MEDLEMSKAP_UNNTAK",
+                        "svar": "JA",
+                        "begrunnelse": "begrunnelse"
+                    }]
+                }]
+            }
         }
     """.trimIndent()
 
