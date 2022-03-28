@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
-import no.nav.familie.ef.sak.brev.dto.VedtaksbrevDto
-import no.nav.familie.ef.sak.brev.dto.erFritekstType
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.http.client.AbstractPingableRestClient
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -28,23 +25,6 @@ class BrevClient(@Value("\${FAMILIE_BREV_API_URL}")
 
     override fun ping() {
         operations.optionsForAllow(pingUri)
-    }
-
-    @Deprecated("Skal slettes når fritekstbrev har tatt i bruk html")
-    fun genererBrev(vedtaksbrev: VedtaksbrevDto): ByteArray {
-
-        val url = when (vedtaksbrev.erFritekstType()) {
-            false -> URI.create("$familieBrevUri/api/ef-brev/avansert-dokument/bokmaal/${vedtaksbrev.brevmal}/pdf")
-            true -> URI.create("$familieBrevUri/api/fritekst-brev")
-        }
-        return postForEntity(url,
-                             BrevRequestMedSignaturer(objectMapper.readTree(vedtaksbrev.saksbehandlerBrevrequest),
-                                                      vedtaksbrev.saksbehandlersignatur,
-                                                      vedtaksbrev.besluttersignatur,
-                                                      vedtaksbrev.enhet,
-                                                      vedtaksbrev.skjulBeslutterSignatur
-                             ),
-                             HttpHeaders().medContentTypeJsonUTF8())
     }
 
     fun genererBrev(fritekstBrev: FrittståendeBrevRequestDto,
