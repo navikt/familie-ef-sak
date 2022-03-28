@@ -128,7 +128,7 @@ internal class SendTilBeslutterStegTest {
         every { vurderingService.erAlleVilkårOppfylt(any()) } returns true
 
         every { vedtaksbrevRepository.existsById(any()) } returns true
-        every { simuleringService.hentLagretSimuleringsoppsommering(any()) } returns simuleringsoppsummering
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
@@ -173,7 +173,7 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal ikke kaste feil hvis ikke det har vært en feilutbetaling`() {
         mockTilbakekrevingValideringsfeil()
         // Gitt at vi IKKE har feilutbetaling,
-        every { simuleringService.hentLagretSimuleringsoppsommering(any()) } returns simuleringsoppsummering
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering
         beslutteVedtakSteg.validerSteg(revurdering)
     }
 
@@ -257,7 +257,7 @@ internal class SendTilBeslutterStegTest {
     private fun mockTilbakekrevingValideringsfeil() {
         // tilbakekrevingService.
         every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
-        every { simuleringService.hentLagretSimuleringsoppsommering(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
                 1000))
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false

@@ -3,12 +3,10 @@ package no.nav.familie.ef.sak.barn
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
+import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
@@ -141,18 +139,5 @@ internal class BarnServiceTest {
                                    lagtTilManuelt = false
     )
 
-    private fun barnMedIdent(fnr: String, navn: String): BarnMedIdent =
-            BarnMedIdent(adressebeskyttelse = emptyList(),
-                         bostedsadresse = emptyList(),
-                         deltBosted = emptyList(),
-                         dødsfall = emptyList(),
-                         forelderBarnRelasjon = emptyList(),
-                         fødsel = emptyList(),
-                         navn = Navn(fornavn = navn.split(" ")[0],
-                                     mellomnavn = null,
-                                     etternavn = navn.split(" ")[1],
-                                     metadata = Metadata(
-                                             historisk = false)),
-                         personIdent = fnr)
 
 }
