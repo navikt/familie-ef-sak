@@ -19,10 +19,7 @@ import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -60,6 +57,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg as TilbakekrevingsvalgKontrakt
 
 internal class IverksettingDtoMapperTest {
 
@@ -159,22 +157,27 @@ internal class IverksettingDtoMapperTest {
     }
 
     private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?) {
-        assertThat(iverksettDto.behandling.behandlingId).isEqualTo(behandlingId)
-        assertThat(iverksettDto.behandling.behandlingType.name).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING.name)
-        assertThat(iverksettDto.behandling.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
-        assertThat(iverksettDto.behandling.forrigeBehandlingId).isEqualTo(UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc"))
-        assertThat(iverksettDto.behandling.eksternId).isEqualTo(1)
-        assertThat(iverksettDto.behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
-        assertThat(iverksettDto.behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.size).isEqualTo(1)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().resultat.name).isEqualTo(Vilkårsresultat.OPPFYLT.name)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().vilkårType.name).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP.name)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.size).isEqualTo(1)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().resultat.name).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL.name)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.size).isEqualTo(1)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.first().regelId.name).isEqualTo(RegelId.MEDLEMSKAP_UNNTAK.name)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.first().svar?.name).isEqualTo(SvarId.JA.name)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger.first().delvilkårsvurderinger.first().vurderinger.first().begrunnelse).isEqualTo("begrunnelse")
+        val behandling = iverksettDto.behandling
+        assertThat(behandling.behandlingId).isEqualTo(behandlingId)
+        assertThat(behandling.behandlingType.name).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING.name)
+        assertThat(behandling.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
+        assertThat(behandling.forrigeBehandlingId).isEqualTo(UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc"))
+        assertThat(behandling.eksternId).isEqualTo(1)
+        assertThat(behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
+        assertThat(behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(behandling.vilkårsvurderinger.size).isEqualTo(1)
+
+        val vilkårsvurdering = behandling.vilkårsvurderinger.first()
+        assertThat(vilkårsvurdering.resultat.name).isEqualTo(Vilkårsresultat.OPPFYLT.name)
+        assertThat(vilkårsvurdering.vilkårType.name).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP.name)
+        assertThat(vilkårsvurdering.delvilkårsvurderinger.size).isEqualTo(1)
+
+        val delvilkårsvurdering = vilkårsvurdering.delvilkårsvurderinger.first()
+        assertThat(delvilkårsvurdering.resultat.name).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL.name)
+        assertThat(delvilkårsvurdering.vurderinger.size).isEqualTo(1)
+        assertThat(delvilkårsvurdering.vurderinger.first().regelId.name).isEqualTo(RegelId.MEDLEMSKAP_UNNTAK.name)
+        assertThat(delvilkårsvurdering.vurderinger.first().svar?.name).isEqualTo(SvarId.JA.name)
+        assertThat(delvilkårsvurdering.vurderinger.first().begrunnelse).isEqualTo("begrunnelse")
 
         assertThat(iverksettDto.fagsak.eksternId).isEqualTo(4)
         assertThat(iverksettDto.fagsak.fagsakId).isEqualTo(UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"))
@@ -187,46 +190,44 @@ internal class IverksettingDtoMapperTest {
         assertThat(iverksettDto.søker.tilhørendeEnhet).isEqualTo("4489")
         assertThat(iverksettDto.søker.adressebeskyttelse?.name).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT.name)
 
-        assertThat(iverksettDto.vedtak.beslutterId).isEqualTo("beslutter")
-        assertThat(iverksettDto.vedtak.brevmottakere.size).isEqualTo(2)
-        assertThat(iverksettDto.vedtak.brevmottakere[0].ident).isEqualTo("personIdent")
-        assertThat(iverksettDto.vedtak.brevmottakere[0].navn).isEqualTo("fornavn etternavn")
-        assertThat(iverksettDto.vedtak.brevmottakere[0].identType.name).isEqualTo(Brevmottaker.IdentType.PERSONIDENT.name)
-        assertThat(iverksettDto.vedtak.brevmottakere[0].mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
+        val vedtak = iverksettDto.vedtak
+        assertThat(vedtak.beslutterId).isEqualTo("beslutter")
+        assertThat(vedtak.brevmottakere.size).isEqualTo(2)
+        assertThat(vedtak.brevmottakere[0].ident).isEqualTo("personIdent")
+        assertThat(vedtak.brevmottakere[0].navn).isEqualTo("fornavn etternavn")
+        assertThat(vedtak.brevmottakere[0].identType.name).isEqualTo(Brevmottaker.IdentType.PERSONIDENT.name)
+        assertThat(vedtak.brevmottakere[0].mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
 
-        assertThat(iverksettDto.vedtak.brevmottakere[1].ident).isEqualTo("organisasjonsnummer")
-        assertThat(iverksettDto.vedtak.brevmottakere[1].navn).isEqualTo("organisasjonsnavn")
-        assertThat(iverksettDto.vedtak.brevmottakere[1].identType.name).isEqualTo(Brevmottaker.IdentType.ORGANISASJONSNUMMER.name)
-        assertThat(iverksettDto.vedtak.brevmottakere[1].mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
+        assertThat(vedtak.brevmottakere[1].ident).isEqualTo("organisasjonsnummer")
+        assertThat(vedtak.brevmottakere[1].navn).isEqualTo("organisasjonsnavn")
+        assertThat(vedtak.brevmottakere[1].identType.name).isEqualTo(Brevmottaker.IdentType.ORGANISASJONSNUMMER.name)
+        assertThat(vedtak.brevmottakere[1].mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
 
-        assertThat(iverksettDto.vedtak.opphørÅrsak).isNull() // Burde ha verdi i test?
-        assertThat(iverksettDto.vedtak.resultat).isEqualTo(Vedtaksresultat.INNVILGET)
-        assertThat(iverksettDto.vedtak.saksbehandlerId).isEqualTo("opprettetAv")
+        assertThat(vedtak.opphørÅrsak).isNull() // Burde ha verdi i test?
+        assertThat(vedtak.resultat).isEqualTo(Vedtaksresultat.INNVILGET)
+        assertThat(vedtak.saksbehandlerId).isEqualTo("opprettetAv")
 
-        assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.perioder?.size).isEqualTo(1)
-        assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(
-                2022,
-                3,
-                30))
-        assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.perioder?.first()?.tom).isEqualTo(LocalDate.of(
-                2022,
-                3,
-                31))
-        assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.varseltekst).isEqualTo("varseltekst")
-        assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingMedVarsel?.sumFeilutbetaling).isEqualTo(BigDecimal("1000.0"))
-        assertThat(iverksettDto.vedtak.tilbakekreving?.tilbakekrevingsvalg?.name).isEqualTo(no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL.name)
+        val tilbakekrevingMedVarsel = vedtak.tilbakekreving?.tilbakekrevingMedVarsel
+        assertThat(tilbakekrevingMedVarsel?.perioder?.size).isEqualTo(1)
+        assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(2022, 3, 30))
+        assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.tom).isEqualTo(LocalDate.of(2022, 3, 31))
+        assertThat(tilbakekrevingMedVarsel?.varseltekst).isEqualTo("varseltekst")
+        assertThat(tilbakekrevingMedVarsel?.sumFeilutbetaling).isEqualTo(BigDecimal("1000.0"))
+        assertThat(vedtak.tilbakekreving?.tilbakekrevingsvalg)
+                .isEqualTo(TilbakekrevingsvalgKontrakt.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
 
-        assertThat(iverksettDto.vedtak.tilkjentYtelse?.startdato).isEqualTo(LocalDate.of(2022, 4, 7))
+        assertThat(vedtak.tilkjentYtelse?.startdato).isEqualTo(LocalDate.of(2022, 4, 7))
         //opphørsdato ikke i bruk?
 
-        assertThat(iverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(1)
+        assertThat(vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(1)
 
-        assertThat(iverksettDto.vedtak.vedtaksperioder.size).isEqualTo(1)
-        assertThat(iverksettDto.vedtak.vedtaksperioder.first().fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
-        assertThat(iverksettDto.vedtak.vedtaksperioder.first().tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
-        assertThat(iverksettDto.vedtak.vedtaksperioder.first().aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
-        assertThat(iverksettDto.vedtak.vedtaksperioder.first().periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
+        assertThat(vedtak.vedtaksperioder.size).isEqualTo(1)
+        val vedtaksperiode = vedtak.vedtaksperioder.first()
+        assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
+        assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
+        assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
+        assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
         //assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
     }
 
@@ -244,16 +245,7 @@ internal class IverksettingDtoMapperTest {
         every { barnMatcher.kobleBehandlingBarnOgRegisterBarn(any(), any()) } returns listOf(
                 MatchetBehandlingBarn(
                         fødselsnummer = "1234",
-                        barn = BarnMedIdent(
-                                listOf(),
-                                listOf(),
-                                listOf(),
-                                listOf(),
-                                listOf(),
-                                listOf(),
-                                Navn("fornavn", null, "etternavn", Metadata(false)),
-                                "123"
-                        ),
+                        barn = barnMedIdent(fnr = "1234", "fornavn etternavn"),
                         behandlingBarn = behandlingBarn
                 )
         )
