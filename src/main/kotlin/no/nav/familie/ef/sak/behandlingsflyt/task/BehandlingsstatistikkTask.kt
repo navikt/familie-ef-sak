@@ -184,10 +184,6 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
 }
 
-fun main() {
-
-}
-
 data class BehandlingsstatistikkTaskPayload(
         val behandlingId: UUID,
         val hendelse: Hendelse,
