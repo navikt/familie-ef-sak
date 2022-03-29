@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -145,6 +146,23 @@ internal class VedtaksbrevServiceTest {
                                                                       behandlingForBeslutter))
         }
         assertThat(feil.message).isEqualTo("Det finnes allerede et beslutterbrev")
+    }
+
+    @Test
+    internal fun `skal lage brev med innlogget beslutterident beslutterident `() {
+
+        val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterident = "tilfeldigvisFeilIdent")
+        every { featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null") } returns true
+        val brevSlot = slot<Vedtaksbrev>()
+        every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
+        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()
+        // Når
+        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter))
+
+        assertThat(beslutterIdent).isNotNull()
+        assertThat(brevSlot.captured.beslutterident).isEqualTo(beslutterIdent)
+
     }
 
     @Test
