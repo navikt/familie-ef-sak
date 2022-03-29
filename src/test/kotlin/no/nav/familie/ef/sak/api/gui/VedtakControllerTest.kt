@@ -12,8 +12,6 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -259,7 +257,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun beslutteVedtak(saksbehandler: Saksbehandler, beslutteVedtak: BeslutteVedtakDto,
                                validator: (ResponseEntity<Ressurs<UUID>>) -> Unit) {
-        lagBeslutterBrev(saksbehandler.name)
         headers.setBearerAuth(token(saksbehandler))
         val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
                                                             HttpMethod.POST,
@@ -324,19 +321,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         mockBrukerContext(saksbehandlerSignatur)
         val saksbehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
         vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, "brevMal")
-        clearBrukerContext()
-    }
-
-    private fun lagBeslutterBrev(beslutter: String) {
-        mockBrukerContext(beslutter)
-        try {
-            val saksbehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
-            vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling)
-        } catch (e: Feil) {
-            // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
-        } catch (e: ApiFeil) {
-            // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
-        }
         clearBrukerContext()
     }
 
