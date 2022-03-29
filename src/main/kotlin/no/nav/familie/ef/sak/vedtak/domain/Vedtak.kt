@@ -43,17 +43,17 @@ data class Vedtaksperiode(
         val periodeType: VedtaksperiodeType)
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
-data class Barnetilsynperiode(val startDato: LocalDate,
-                              val sluttDato: LocalDate,
+data class Barnetilsynperiode(val datoFra: LocalDate,
+                              val datoTil: LocalDate,
                               val utgifter: BigDecimal,
                               val barn: List<UUID>)
 
-data class Kontantstøtteperiode(val startDato: LocalDate,
-                                val sluttDato: LocalDate,
+data class Kontantstøtteperiode(val datoFra: LocalDate,
+                                val datoTil: LocalDate,
                                 val beløp: BigDecimal)
 
-data class Tilleggsstønadperiode(val startDato: LocalDate,
-                                 val sluttDato: LocalDate,
+data class Tilleggsstønadperiode(val datoFra: LocalDate,
+                                 val datoTil: LocalDate,
                                  val beløp: BigDecimal)
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
@@ -63,8 +63,7 @@ data class TilleggsstønadWrapper(val harTilleggsstønad: Boolean,
                                  val perioder: List<Tilleggsstønadperiode>,
                                  val begrunnelse: String?)
 
-data class KontantstøtteWrapper(val harKontantstøtte: Boolean,
-                                val perioder: List<Kontantstøtteperiode>,
+data class KontantstøtteWrapper(val perioder: List<Kontantstøtteperiode>,
                                 val begrunnelse: String?)
 
 data class BarnetilsynWrapper(val perioder: List<Barnetilsynperiode>,
