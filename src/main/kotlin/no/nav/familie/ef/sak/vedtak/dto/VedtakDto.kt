@@ -1,12 +1,10 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
@@ -19,7 +17,6 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
-import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.YearMonth
 import java.util.UUID
 
@@ -49,29 +46,6 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
-fun main() {
-
-    jsontype(OvergangsstønadVedtakDto("Overgangsstønad"))
-    jsontype(BarnetilsynVedtakDto("Barnetilsyn"))
-}
-
-fun jsontype(vedtak: NyVedtakDto) {
-    val str = objectMapper.writeValueAsString(vedtak)
-    println(str)
-    val obj = objectMapper.readValue<NyVedtakDto>(str)
-    println(obj::class.java)
-}
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
-              include = JsonTypeInfo.As.PROPERTY,
-              property = "_type")
-sealed class NyVedtakDto() {
-
-}
-
-class OvergangsstønadVedtakDto(val _type: String) : NyVedtakDto()
-class BarnetilsynVedtakDto(val _type: String) : NyVedtakDto()
-class SkolepengerVedtakDto(val _type: String) : NyVedtakDto()
 
 sealed class VedtakDto(val resultattypeIntern: ResultatType) {
 
