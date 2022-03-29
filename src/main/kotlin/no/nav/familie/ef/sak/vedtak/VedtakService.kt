@@ -29,7 +29,7 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 
     fun hentVedtaksresultat(behandlingId: UUID): ResultatType {
-        return vedtakRepository.findByIdOrThrow(behandlingId).resultatType
+        return hentVedtak(behandlingId).resultatType
     }
 
     fun hentVedtakForBehandlinger(behandlingIder: Set<UUID>): List<Vedtak> {
@@ -64,7 +64,9 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
-        return hentVedtak(behandlingId).perioder?.perioder?.any { it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate) } ?: false
+        return hentVedtak(behandlingId).perioder?.perioder?.any {
+            it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate)
+        } ?: false
     }
 }
 
