@@ -66,7 +66,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 behandlingId = behandlingId,
                 eksternBehandlingId = saksbehandling.eksternId,
                 personIdent = saksbehandling.ident,
-                gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
+                gjeldendeSaksbehandlerId = gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse"),
                 eksternFagsakId = saksbehandling.eksternFagsakId,
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
                 behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
@@ -104,15 +104,6 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                     null -> error("Mangler vedtak")
                 }
             }
-        }
-    }
-
-    private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
-        return when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
-                                                                    ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
-            Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
         }
     }
 
@@ -190,6 +181,10 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
         const val TYPE = "behandlingsstatistikkTask"
     }
+
+}
+
+fun main() {
 
 }
 
