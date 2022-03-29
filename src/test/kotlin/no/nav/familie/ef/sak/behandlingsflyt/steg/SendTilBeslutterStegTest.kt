@@ -34,7 +34,6 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -90,12 +89,12 @@ internal class SendTilBeslutterStegTest {
                                 identer = setOf(PersonIdent(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
-                                          saksbehandlerBrevrequest = "",
                                           brevmal = "",
                                           saksbehandlersignatur = saksbehandlerNavn,
                                           beslutterPdf = null,
                                           enhet = "enhet",
-                                          saksbehandlerident = saksbehandlerNavn)
+                                          saksbehandlerident = saksbehandlerNavn,
+                                          saksbehandlerHtml = "")
 
     private val behandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
                                                                type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -128,7 +127,7 @@ internal class SendTilBeslutterStegTest {
         every { vurderingService.erAlleVilkårOppfylt(any()) } returns true
 
         every { vedtaksbrevRepository.existsById(any()) } returns true
-        every { simuleringService.hentLagretSimuleringsoppsommering(any()) } returns simuleringsoppsummering
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
@@ -173,7 +172,7 @@ internal class SendTilBeslutterStegTest {
     internal fun `Skal ikke kaste feil hvis ikke det har vært en feilutbetaling`() {
         mockTilbakekrevingValideringsfeil()
         // Gitt at vi IKKE har feilutbetaling,
-        every { simuleringService.hentLagretSimuleringsoppsommering(any()) } returns simuleringsoppsummering
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering
         beslutteVedtakSteg.validerSteg(revurdering)
     }
 
@@ -257,24 +256,11 @@ internal class SendTilBeslutterStegTest {
     private fun mockTilbakekrevingValideringsfeil() {
         // tilbakekrevingService.
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { simuleringService.hentLagretSimuleringsoppsommering(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
                 1000))
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false
     }
-
-    private fun lagVedtak(resultatType: ResultatType = ResultatType.INNVILGE) = Vedtak(
-            resultatType = resultatType,
-            behandlingId = revurdering.id,
-            periodeBegrunnelse = null,
-            inntektBegrunnelse = null,
-            avslåBegrunnelse = null,
-            perioder = null,
-            inntekter = null,
-            saksbehandlerIdent = null,
-            opphørFom = null,
-            beslutterIdent = null,
-    )
 
 }

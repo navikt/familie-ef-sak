@@ -73,8 +73,8 @@ internal class BeslutteVedtakStegTest {
 
     private val innloggetBeslutter = "sign2"
     private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
-                                          saksbehandlerBrevrequest = "123",
                                           brevmal = "mal",
+                                          saksbehandlerHtml = "",
                                           saksbehandlersignatur = "sign1",
                                           besluttersignatur = innloggetBeslutter,
                                           beslutterPdf = Fil("123".toByteArray()),

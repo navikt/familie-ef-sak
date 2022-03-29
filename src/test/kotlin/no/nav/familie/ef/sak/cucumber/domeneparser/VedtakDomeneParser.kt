@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -23,8 +24,8 @@ import java.util.UUID
 
 object VedtakDomeneParser {
 
-    val behandlingIdTilUUID = mapOf(1 to UUID.randomUUID(), 2 to UUID.randomUUID(), 3 to UUID.randomUUID())
-    val tilkjentYtelseIdNummerTilUUID = mapOf(1 to UUID.randomUUID(), 2 to UUID.randomUUID(), 3 to UUID.randomUUID())
+    val behandlingIdTilUUID = (1..10).map { it to UUID.randomUUID() }.toMap()
+    val tilkjentYtelseIdNummerTilUUID = (1..10).map { it to UUID.randomUUID() }.toMap()
 
     fun mapVedtak(dataTable: DataTable): List<Vedtak> {
         return dataTable.asMaps().groupBy {
@@ -38,16 +39,20 @@ object VedtakDomeneParser {
                         datoFra = datoFra,
                         datoTil = datoTil,
                         aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
-                        periodeType = VedtaksperiodeType.HOVEDPERIODE
+                        periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE
                 )
             }
             val rad = rader.first()
+            val resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE
             Vedtak(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
-                    resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE,
+                    resultatType = resultatType,
                     perioder = PeriodeWrapper(perioder),
                     inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder)),
-                    opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1)
+                    opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1),
+                    sanksjonsårsak = if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null,
+                    internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null
+
             )
         }
     }
@@ -217,6 +222,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     FRA_OG_MED_DATO("Fra og med dato"),
     TIL_OG_MED_DATO("Til og med dato"),
     AKTIVITET_TYPE("Aktivitet"),
+    VEDTAKSPERIODE_TYPE("Vedtaksperiode"),
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
     ENDRING_TYPE("Endringstype"),

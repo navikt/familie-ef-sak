@@ -38,7 +38,7 @@ object VedtakHistorikkBeregner {
         val sanksjonsperiode = Periode(vedtaksperiodeSanksjon.datoFra, vedtaksperiodeSanksjon.datoTil)
         return acc.last().second.flatMap {
             if (!sanksjonsperiode.overlapper(Periode(it.datoFra, it.datoTil))) {
-                return@flatMap listOf(it)
+                return@flatMap listOf(it, vedtaksperiodeSanksjon)
             }
             val nyePerioder = mutableListOf<Vedtaksperiode>()
             if (sanksjonsperiode.fradato <= it.datoFra && sanksjonsperiode.tildato < it.datoTil) {

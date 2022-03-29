@@ -34,7 +34,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         }
     }
 
-    fun hentLagretSimuleringsoppsommering(behandlingId: UUID): Simuleringsoppsummering {
+    fun hentLagretSimuleringsoppsummering(behandlingId: UUID): Simuleringsoppsummering {
         return hentLagretSimmuleringsresultat(behandlingId).oppsummering
     }
 
@@ -61,7 +61,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
         if (saksbehandling.status.behandlingErLåstForVidereRedigering()
             || !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)) {
-            return hentLagretSimuleringsoppsommering(saksbehandling.id)
+            return hentLagretSimuleringsoppsummering(saksbehandling.id)
         }
         val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
         return simuleringsresultat.beriketData.oppsummering
