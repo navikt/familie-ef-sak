@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidsgiver
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepass
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepassordning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
@@ -41,7 +40,6 @@ import no.nav.familie.kontrakter.ef.søknad.AnnenForelder as KontraktAnnenForeld
 import no.nav.familie.kontrakter.ef.søknad.Arbeidsgiver as KontraktArbeidsgiver
 import no.nav.familie.kontrakter.ef.søknad.Arbeidssøker as KontraktArbeidssøker
 import no.nav.familie.kontrakter.ef.søknad.Barn as KontraktBarn
-import no.nav.familie.kontrakter.ef.søknad.Barnepass as KontraktBarnepass
 import no.nav.familie.kontrakter.ef.søknad.BarnepassOrdning as KontraktBarnepassOrdning
 import no.nav.familie.kontrakter.ef.søknad.BarnetilsynDokumentasjon as KontraktBarnetilsynDokumentasjon
 import no.nav.familie.kontrakter.ef.søknad.Bosituasjon as KontraktBosituasjon
@@ -183,26 +181,23 @@ object SøknadsskjemaMapper {
                            samvær = tilDomene(it.samvær?.verdi),
                            skalHaBarnepass = it.skalHaBarnepass?.verdi,
                            særligeTilsynsbehov = it.særligeTilsynsbehov?.verdi,
-                           barnepass = tilDomene(it.barnepass?.verdi),
+                           årsakBarnepass = it.barnepass?.verdi?.årsakBarnepass?.svarId,
+                           barnepassordninger = tilBarnepass(it.barnepass?.verdi?.barnepassordninger?.verdi),
                            skalBoHosSøker = it.skalBarnetBoHosSøker?.svarId,
                            lagtTilManuelt = it.lagtTilManuelt ?: false)
 
             }.toSet()
 
-    private fun tilDomene(barnepass: KontraktBarnepass?): Barnepass? =
-            barnepass?.let {
-                Barnepass(årsakBarnepass = it.årsakBarnepass?.svarId,
-                          barnepassordninger = tilBarnepass(it.barnepassordninger.verdi))
-            }
-
-    private fun tilBarnepass(list: List<KontraktBarnepassOrdning>): Set<Barnepassordning> = list.map {
-        Barnepassordning(hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.svarId
-                                                    ?: error("Mangler verdi for hvaSlagsbarnepassOrdning"),
-                         navn = it.navn.verdi,
-                         datoperiode = it.datoperiode?.let { datoperiode -> tilDomene(datoperiode.verdi) }
-                                       ?: error("Mangler verdi for datoperiode i barnepassordningen"),
-                         beløp = it.belop.verdi.roundToInt())
-    }.toSet()
+    private fun tilBarnepass(list: List<KontraktBarnepassOrdning>?): Set<Barnepassordning> = list?.let { ordning ->
+        ordning.map {
+            Barnepassordning(hvaSlagsBarnepassordning = it.hvaSlagsBarnepassOrdning.svarId
+                                                        ?: error("Mangler verdi for hvaSlagsbarnepassOrdning"),
+                             navn = it.navn.verdi,
+                             datoperiode = it.datoperiode?.let { datoperiode -> tilDomene(datoperiode.verdi) }
+                                           ?: error("Mangler verdi for datoperiode i barnepassordningen"),
+                             beløp = it.belop.verdi.roundToInt())
+        }.toSet()
+    } ?: emptySet()
 
     private fun tilDomene(datoperiode: KontraktDatoperiode?): Datoperiode? {
 
