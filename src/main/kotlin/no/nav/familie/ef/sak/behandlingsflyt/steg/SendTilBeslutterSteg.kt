@@ -58,8 +58,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
-        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
-        if (vedtak.resultatType == INNVILGE) {
+        val vedtaksresultat = vedtakService.hentVedtaksresultat(saksbehandling.id)
+        if (vedtaksresultat == INNVILGE) {
             brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(saksbehandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${saksbehandling.id}"
             }
@@ -80,7 +80,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
-        val resultatType = vedtakService.hentVedtak(saksbehandling.id).resultatType
+        val resultatType = vedtakService.hentVedtaksresultat(saksbehandling.id)
         return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || saksbehandling.type == BehandlingType.BLANKETT || resultatType == ResultatType.AVSLÅ || resultatType == ResultatType.HENLEGGE
     }
 
