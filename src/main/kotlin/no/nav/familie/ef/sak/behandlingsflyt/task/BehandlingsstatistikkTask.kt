@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.BLANKETT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -118,9 +119,9 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
     private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
         return when (saksbehandling.type) {
-            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
+            FØRSTEGANGSBEHANDLING, BLANKETT -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
             REVURDERING -> saksbehandling.opprettetTid
-            else -> error("Støtter ikke uthenting av mottatt-dato for ${saksbehandling.type}")
+            else -> error("Støtter ikke uthenting av henvendelsestidspunkt for sak med ${saksbehandling.type}")
         }
     }
 
