@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -153,6 +155,11 @@ fun parseEndringType(rad: Map<String, String>): EndringType? {
 fun parseAktivitetType(rad: Map<String, String>): AktivitetType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.AKTIVITET_TYPE.nøkkel, rad) ?: return null
     return AktivitetType.valueOf(verdi)
+}
+
+fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
+    val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null
+    return VedtaksperiodeType.valueOf(verdi)
 }
 
 fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {
