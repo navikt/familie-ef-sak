@@ -97,40 +97,42 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling): Fil {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
-
-        validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev)
-
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
         val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
+        validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent)
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
         val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = signaturMedEnhet.navn,
                                                     enhet = signaturMedEnhet.enhet,
-                                                    beslutterident = beslutterIdent)
-
-        validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
-
-        feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
-            "Mangler saksbehandlerbrev"
-        }
-
-        val beslutterPdf = lagBeslutterPdfMedSignatur(vedtaksbrev.saksbehandlerHtml, signaturMedEnhet)
-
-        val besluttervedtaksbrevMedPdf = besluttervedtaksbrev.copy(beslutterPdf = beslutterPdf)
-        brevRepository.update(besluttervedtaksbrevMedPdf)
+                                                    beslutterident = beslutterIdent,
+                                                    beslutterPdf = beslutterPdf)
+        brevRepository.update(besluttervedtaksbrev)
         return Fil(bytes = beslutterPdf.bytes)
     }
 
-    private fun validerKanLageBeslutterbrev(behandling: Saksbehandling, vedtaksbrev: Vedtaksbrev) {
+    private fun hentSaksbehandlerHtml(vedtaksbrev: Vedtaksbrev,
+                                      saksbehandling: Saksbehandling): String {
+        feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
+            "Mangler saksbehandlerbrev for behandling: ${saksbehandling.id}"
+        }
+        feilHvis(vedtaksbrev.saksbehandlerHtml.isEmpty()) {
+            "Mangler innhold i saksbehandlerbrev for behandling: ${saksbehandling.id}"
+        }
+        return vedtaksbrev.saksbehandlerHtml
+    }
+
+    private fun validerKanLageBeslutterbrev(behandling: Saksbehandling, vedtaksbrev: Vedtaksbrev, beslutterIdent: String) {
         if (behandling.steg != StegType.BESLUTTE_VEDTAK || behandling.status != BehandlingStatus.FATTER_VEDTAK) {
             throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
                        httpStatus = HttpStatus.BAD_REQUEST)
         }
 
-        if (featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")){
-            feilHvisIkke(vedtaksbrev.beslutterPdf == null){
+        if (featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")) {
+            feilHvisIkke(vedtaksbrev.beslutterPdf == null) {
                 "Det finnes allerede et beslutterbrev"
             }
         }
-
+        validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
     }
 
     private fun lagBeslutterPdfMedSignatur(saksbehandlerHtml: String,
