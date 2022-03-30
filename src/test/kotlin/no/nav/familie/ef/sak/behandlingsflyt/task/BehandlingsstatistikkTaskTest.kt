@@ -74,7 +74,6 @@ internal class BehandlingsstatistikkTaskTest {
 
     val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient = iverksettClient,
                                                               behandlingService = behandlingService,
-                                                              fagsakService = fagsakService,
                                                               søknadService = søknadService,
                                                               vedtakRepository = vedtakRepository,
                                                               oppgaveService = oppgaveService,
