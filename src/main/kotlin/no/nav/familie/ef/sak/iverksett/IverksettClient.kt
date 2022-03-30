@@ -53,6 +53,10 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-barns-alder/opprett"), oppgaverForBarn)
     }
 
+    fun sendOppgaverForTerminBarn(oppgaverForBarn: OppgaverForBarnDto) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-terminbarn/opprett"), oppgaverForBarn)
+    }
+
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
     }
