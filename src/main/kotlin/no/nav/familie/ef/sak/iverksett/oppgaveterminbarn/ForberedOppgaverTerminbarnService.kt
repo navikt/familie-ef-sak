@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnTilUtplukkForOppgave
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
@@ -22,8 +21,7 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Service
-class ForberedOppgaverTerminbarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
-                                        private val behandlingRepository: BehandlingRepository,
+class ForberedOppgaverTerminbarnService(private val behandlingRepository: BehandlingRepository,
                                         private val personService: PersonService,
                                         private val terminbarnRepository: TerminbarnRepository,
                                         private val iverksettClient: IverksettClient,
@@ -36,8 +34,8 @@ class ForberedOppgaverTerminbarnService(private val gjeldendeBarnRepository: Gje
 
         val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn: Map<UUID, List<BarnTilUtplukkForOppgave>> =
-                (gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, referanseDato))
-                        .filter { erTerminbarn(it) }
+                (terminbarnRepository
+                        .finnBarnAvGjeldendeIverksatteBehandlingerKunTerminbarn(StønadType.OVERGANGSSTØNAD, referanseDato))
                         .groupBy { it.behandlingId }
 
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")
