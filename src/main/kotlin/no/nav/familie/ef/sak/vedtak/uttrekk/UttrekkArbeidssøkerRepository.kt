@@ -14,7 +14,7 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
 
     fun findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned: YearMonth): List<UttrekkArbeidssøkere>
 
-    fun existsByÅrMånedAndFagsakId(årMåned: YearMonth, fagsakId : UUID) : Boolean
+    fun existsByÅrMånedAndFagsakId(årMåned: YearMonth, fagsakId: UUID): Boolean
 
     // language=PostgreSQL
     @Query("""

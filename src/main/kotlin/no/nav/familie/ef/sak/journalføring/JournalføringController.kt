@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingReq
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -41,8 +43,9 @@ class JournalføringController(private val journalføringService: Journalføring
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
     fun hentDokument(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): Ressurs<ByteArray> {
-        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
+        validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
         return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
@@ -78,7 +81,19 @@ class JournalføringController(private val journalføringService: Journalføring
                                                                                                                journalpostId))
     }
 
-    fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
+    private fun validerDokumentKanHentes(journalpost: Journalpost,
+                                         dokumentInfoId: String,
+                                         journalpostId: String) {
+        val dokument = journalpost.dokumenter?.find { it.dokumentInfoId == dokumentInfoId }
+        feilHvis(dokument == null) {
+            "Finner ikke dokument med $dokumentInfoId for journalpost=$journalpostId"
+        }
+        brukerfeilHvisIkke(dokument.dokumentvarianter?.any { it.variantformat == Dokumentvariantformat.ARKIV } ?: false) {
+            "Vedlegget er sannsynligvis under arbeid, må åpnes i gosys"
+        }
+    }
+
+    private fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
         val journalpost = journalføringService.hentJournalpost(journalpostId)
         val personIdent = journalpost.bruker?.let {
             when (it.type) {

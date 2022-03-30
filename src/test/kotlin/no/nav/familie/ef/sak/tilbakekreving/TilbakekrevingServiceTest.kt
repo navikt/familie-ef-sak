@@ -17,10 +17,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
@@ -155,14 +155,14 @@ internal class TilbakekrevingServiceTest {
         @Test
         internal fun `Varselbrev må lages med riktig varseltekst`() {
             val requestSlot = mockHentDataForGenereringAvVarselbrev()
-            tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel")
+            tilbakekrevingService.genererBrev(saksbehandling(), "Varsel, varsel")
             assertThat(requestSlot.captured.varseltekst).isEqualTo("Varsel, varsel")
         }
 
         @Test
         internal fun `Varselbrev feiler hvis behandling er låst`() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
-            val assertFails = assertFailsWith<ApiFeil> { tilbakekrevingService.genererBrev(UUID.randomUUID(), "Varsel, varsel") }
+            val assertFails = assertFailsWith<ApiFeil> { tilbakekrevingService.genererBrev(saksbehandling(), "Varsel, varsel") }
             assertThat(assertFails.feil).isEqualTo("Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling.")
         }
 
@@ -187,7 +187,7 @@ internal class TilbakekrevingServiceTest {
         @Test
         fun `feiler hvis tilbakekrevingsbehandling ikke kan opprettes`() {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
-            every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+            every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
                     .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
@@ -201,7 +201,7 @@ internal class TilbakekrevingServiceTest {
         @Test
         fun `fullfører kaller tilbakekrevingClient opprettManuelTilbakekreving hvis behandling kan opprettes`() {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
-            every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
+            every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             val behandling = behandling(fagsak)
             every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -20,12 +21,14 @@ import java.util.UUID
 @Validated
 class SimuleringController(
         private val tilgangService: TilgangService,
+        private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
 ) {
 
     @GetMapping("/{behandlingId}")
     fun simulerForBehandling(@PathVariable behandlingId: UUID): Ressurs<Simuleringsoppsummering> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(simuleringService.simuler(behandlingId))
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
+        return Ressurs.success(simuleringService.simuler(saksbehandling))
     }
 }

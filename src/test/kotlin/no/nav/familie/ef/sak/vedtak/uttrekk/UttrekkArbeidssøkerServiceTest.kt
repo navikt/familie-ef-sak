@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
@@ -30,6 +31,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
@@ -88,8 +90,6 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                                         aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
     private val navn = Navn("fornavn", "", "", Metadata(false))
 
-    fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
-
     @BeforeEach
     internal fun setUp() {
         every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
@@ -135,9 +135,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentUttrekkArbeidssøkere - finnes ikke noen arbeidssøkere valgt måned`() {
         opprettdata()
-        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                   objectMapper.writeValueAsString(februar2021),
-                                                   Properties()))
+        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(februar2021))
         assertThat(service.hentUttrekkArbeidssøkere(februar2021).arbeidssøkere).isEmpty()
     }
 
@@ -145,9 +143,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentUttrekkArbeidssøkere - skal opprette uttrekk for arbeidssøkere`() {
         opprettdata()
 
-        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                   objectMapper.writeValueAsString(januar2021),
-                                                   Properties()))
+        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(januar2021))
 
         val uttrekk = service.hentUttrekkArbeidssøkere(januar2021).arbeidssøkere
         assertThat(uttrekk).hasSize(1)
@@ -160,9 +156,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentUttrekkArbeidssøkere - vedtaket skal peke til endringen sin behandling`() {
         opprettdata()
-        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                   objectMapper.writeValueAsString(mars2021),
-                                                   Properties()))
+        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
 
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
         assertThat(uttrekk).hasSize(1)
@@ -176,9 +170,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         opprettdata()
         opprettEkstraFagsak()
 
-        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                   objectMapper.writeValueAsString(mars2021),
-                                                   Properties()))
+        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
         val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
         assertThat(uttrekk).hasSize(2)
     }
@@ -195,9 +187,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
                 opprettdata()
 
-                opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                           objectMapper.writeValueAsString(mars2021),
-                                                           Properties()))
+                opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
                 assertThat(uttrekkArbeidssøkerRepository.findAll().single().registrertArbeidssøker).isTrue
 
                 testWithSaksbehandlerContext {
@@ -216,9 +206,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
                 opprettdata()
 
-                opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                           objectMapper.writeValueAsString(mars2021),
-                                                           Properties()))
+                opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
 
                 testWithSaksbehandlerContext {
                     val uttrekk = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere
@@ -304,17 +292,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         } returns false andThen false andThen false andThen true
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-            opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                       objectMapper.writeValueAsString(mars2021),
-                                                       Properties()))
+            opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
         }
         verify(exactly = 1) { mockUttrekkArbeidssøkerRepository.insert(any()) }
         assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk2.fagsakId)
 
         aktiveIdenter.put(periodeForUttrekk.fagsakId, "")
-        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                   objectMapper.writeValueAsString(mars2021),
-                                                   Properties()))
+        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
         verify(exactly = 2) { mockUttrekkArbeidssøkerRepository.insert(any()) }
         assertThat(uttrekkSlot.captured.fagsakId).isEqualTo(periodeForUttrekk.fagsakId)
     }
@@ -433,9 +417,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `settKontrollert - sett arbeidssøker til kontrollert`() {
         opprettdata()
-        opprettUttrekkArbeidssøkerTask.doTask(Task("opprettUttrekkArbeidssøker",
-                                                   objectMapper.writeValueAsString(mars2021),
-                                                   Properties()))
+        opprettUttrekkArbeidssøkerTask.doTask(OpprettUttrekkArbeidssøkerTask.opprettTask(mars2021))
         val id = service.hentUttrekkArbeidssøkere(mars2021).arbeidssøkere.single().id
 
         testWithSaksbehandlerContext { service.settKontrollert(id, true) }
@@ -468,9 +450,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     private fun opprettdata() {
         opprettBehandlinger()
-        innvilg(behandling, listOf(vedtaksperiode))
+        innvilg(fagsak, behandling, listOf(vedtaksperiode))
         ferdigstillBehandling(behandling)
-        innvilg(behandling2,
+        innvilg(fagsak,
+                behandling2,
                 listOf(vedtaksperiode2, vedtaksperiode3),
                 listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(10_000))))
         ferdigstillBehandling(behandling2)
@@ -483,7 +466,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                            type = BehandlingType.REVURDERING,
                            forrigeBehandlingId = behandling2.id,
                            opprettetTid = behandling2.sporbar.opprettetTid.plusDays(1)))
-        innvilg(behandling,
+        innvilg(fagsak,
+                behandling,
                 listOf(vedtaksperiode2, vedtaksperiode3),
                 listOf(Inntekt(februar2021, BigDecimal.ZERO, BigDecimal(15_000))))
         ferdigstillBehandling(behandling)
@@ -499,7 +483,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                       aktivitetType: AktivitetType = AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER) =
             VedtaksperiodeDto(fra, til, aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
-    private fun innvilg(behandling: Behandling,
+    private fun innvilg(fagsak: Fagsak,
+                        behandling: Behandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
         val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
@@ -507,7 +492,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                inntekter = inntekter,
                                periodeBegrunnelse = null,
                                inntektBegrunnelse = null)
-        beregnYtelseSteg.utførSteg(behandling, vedtak)
+        beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
     }
 
     fun opprettBehandlinger() {

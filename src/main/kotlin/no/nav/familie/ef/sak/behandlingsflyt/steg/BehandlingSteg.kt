@@ -1,25 +1,25 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 
 interface BehandlingSteg<T> {
 
-    fun validerSteg(behandling: Behandling) {}
+    fun validerSteg(saksbehandling: Saksbehandling) {}
 
     /**
      * Hvis man trenger å overridea vanlige flytet og returnere en annen stegtype kan man overridea denne metoden,
      * hvis ikke kalles utførSteg uten å returnere en stegType
      */
-    fun utførOgReturnerNesteSteg(behandling: Behandling, data: T): StegType {
-        utførSteg(behandling, data)
-        return nesteSteg(behandling)
+    fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: T): StegType {
+        utførSteg(saksbehandling, data)
+        return nesteSteg(saksbehandling)
     }
 
-    fun nesteSteg(behandling: Behandling) = stegType().hentNesteSteg(behandling.type)
+    fun nesteSteg(saksbehandling: Saksbehandling) = stegType().hentNesteSteg(saksbehandling.type)
 
-    fun utførSteg(behandling: Behandling, data: T)
+    fun utførSteg(saksbehandling: Saksbehandling, data: T)
 
     fun stegType(): StegType
 

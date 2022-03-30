@@ -6,8 +6,10 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadReposit
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.kontrakter.ef.søknad.Barnepass
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,8 +42,7 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
 
-        // Jdbc returnerer tomt objekt for barnepass selv om Embedded.OnEmpty.USE_NULL er satt
-        assertThat(søknadFraDatabase).isEqualToIgnoringGivenFields(søknadTilLagring, "barn")
+        assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
     }
 
     @Test
@@ -60,8 +61,8 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
         assertThat(søknadFraDatabase.aktivitet.underUtdanning).isNull()
         assertThat(søknadFraDatabase.aktivitet.tidligereUtdanninger).isEmpty()
-        assertThat(søknadFraDatabase.barn.first().barnepass!!.årsakBarnepass).isNull()
-        assertThat(søknadFraDatabase.barn.first().barnepass!!.barnepassordninger).isEmpty()
+        assertThat(søknadFraDatabase.barn.first().årsakBarnepass).isNull()
+        assertThat(søknadFraDatabase.barn.first().barnepassordninger).isEmpty()
 
     }
 
@@ -72,8 +73,7 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         søknadSkolepengerRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadSkolepengerRepository.findByIdOrThrow(søknadTilLagring.id)
 
-        // Jdbc returnerer tomt objekt for barnepass selv om Embedded.OnEmpty.USE_NULL er satt
-        assertThat(søknadFraDatabase).isEqualToIgnoringGivenFields(søknadTilLagring, "barn")
+        assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
     }
 
     @Test
@@ -83,7 +83,35 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         søknadBarnetilsynRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadBarnetilsynRepository.findByIdOrThrow(søknadTilLagring.id)
 
-        // Jdbc returnerer tomt objekt for barnepass selv om Embedded.OnEmpty.USE_NULL er satt
-        assertThat(søknadFraDatabase).isEqualToIgnoringGivenFields(søknadTilLagring, "barn")
+        assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
     }
+
+    @Test
+    internal fun `søknad uten barnepass blir hentet korrekt`() {
+        val builder = TestsøknadBuilder.Builder()
+        builder.setBarn(listOf(builder.defaultBarn(barnepass = Barnepass(barnepassordninger = Søknadsfelt("", emptyList())),
+                                                   skalHaBarnepass = false)))
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(builder.build().søknadBarnetilsyn)
+
+        søknadBarnetilsynRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadBarnetilsynRepository.findByIdOrThrow(søknadTilLagring.id)
+
+        assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
+        assertThat(søknadFraDatabase.barn.single().barnepassordninger).isEmpty()
+    }
+
+    @Test
+    internal fun `søknad med barnepass blir hentet korrekt`() {
+        val builder = TestsøknadBuilder.Builder()
+        val barnepass = builder.defaultBarnepass(ordninger = listOf(builder.defaultBarnepassordning()))
+        builder.setBarn(listOf(builder.defaultBarn(barnepass = barnepass, skalHaBarnepass = true)))
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(builder.build().søknadBarnetilsyn)
+
+        søknadBarnetilsynRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadBarnetilsynRepository.findByIdOrThrow(søknadTilLagring.id)
+
+        assertThat(søknadFraDatabase.barn).isEqualTo(søknadTilLagring.barn)
+        assertThat(søknadFraDatabase.barn.single().barnepassordninger).hasSize(1)
+    }
+
 }

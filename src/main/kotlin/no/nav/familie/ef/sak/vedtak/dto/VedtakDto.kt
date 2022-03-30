@@ -46,7 +46,8 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
-sealed class VedtakDto {
+
+sealed class VedtakDto(val resultattypeIntern: ResultatType) {
 
     fun erInnvilgeMedOpphør(): Boolean {
         return this is Innvilget && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
@@ -58,26 +59,26 @@ class Innvilget(val resultatType: ResultatType,
                 val inntektBegrunnelse: String?,
                 val perioder: List<VedtaksperiodeDto> = emptyList(),
                 val inntekter: List<Inntekt> = emptyList(),
-                val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto()
+                val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE)
 
 class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
             val avslåÅrsak: AvslagÅrsak?,
-            val avslåBegrunnelse: String?) : VedtakDto()
+            val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ)
 
 class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
              val opphørFom: YearMonth,
-             val begrunnelse: String?) : VedtakDto()
+             val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT)
 
 class Sanksjonert(val resultatType: ResultatType = ResultatType.SANKSJONERE,
                   val sanksjonsårsak: Sanksjonsårsak,
                   val periode: VedtaksperiodeDto,
-                  val internBegrunnelse: String) : VedtakDto()
+                  val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE)
 
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
                        avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
-                       resultatType = ResultatType.AVSLÅ)
+                       resultatType = this.resultattypeIntern)
     is Innvilget -> Vedtak(behandlingId = behandlingId,
                            periodeBegrunnelse = this.periodeBegrunnelse,
                            inntektBegrunnelse = this.inntektBegrunnelse,

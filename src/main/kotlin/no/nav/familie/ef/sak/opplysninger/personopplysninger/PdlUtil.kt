@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+val logger: Logger = LoggerFactory.getLogger(PdlClient::class.java)
 
 inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(ident: String?,
                                                                          pdlResponse: PdlResponse<DATA>,
@@ -56,6 +57,7 @@ fun feilmeldOgReturnerData(pdlResponse: PdlIdentBolkResponse): Map<String, PdlId
     val feil = pdlResponse.data.hentIdenterBolk.filter { it.code != "ok" }.associate { it.ident to it.code }
     if (feil.isNotEmpty()) {
         // Logg feil og gå vider. Ved feil returneres nåværende ident.
+        logger.error("Feil ved henting av ${PdlIdentBolkResponse::class}. Nåværende ident returnert.")
         secureLogger.error("Feil ved henting av ${PdlIdentBolkResponse::class} fra PDL: $feil. Nåværende ident returnert.")
     }
     return pdlResponse.data.hentIdenterBolk.associateBy({ it.ident }, { it.gjeldende() })

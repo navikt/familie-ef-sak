@@ -18,6 +18,6 @@ class FamilieDokumentClientMock {
         val familieDokumentClient: FamilieDokumentClient = mockk()
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns dummyPdf
-        return  familieDokumentClient
+        return familieDokumentClient
     }
 }

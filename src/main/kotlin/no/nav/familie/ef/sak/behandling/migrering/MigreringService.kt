@@ -39,6 +39,9 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
+import no.nav.familie.kontrakter.felles.simulering.BetalingType
+import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -153,17 +156,19 @@ class MigreringService(
 
         val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
-        beregnYtelseSteg.utførSteg(behandling, Innvilget(resultatType = ResultatType.INNVILGE,
-                                                         periodeBegrunnelse = null,
-                                                         inntektBegrunnelse = null,
-                                                         perioder = vedtaksperioder,
-                                                         inntekter = inntekter))
+        val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
+        beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(resultatType = ResultatType.INNVILGE,
+                                                             periodeBegrunnelse = null,
+                                                             inntektBegrunnelse = null,
+                                                             perioder = vedtaksperioder,
+                                                             inntekter = inntekter))
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(behandling)
+
+        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(saksbehandling)
         iverksettClient.iverksettMigrering(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
@@ -177,15 +182,28 @@ class MigreringService(
     }
 
     private fun validerSimulering(behandling: Behandling) {
-        val simulering = simuleringService.hentLagretSimuleringsresultat(behandling.id)
-        if (simulering.feilutbetaling.compareTo(BigDecimal.ZERO) != 0) {
-            throw MigreringException("Feilutbetaling er ${simulering.feilutbetaling}",
+        val simulering = simuleringService.hentLagretSimmuleringsresultat(behandling.id)
+        val oppsummering = simulering.oppsummering
+        if (oppsummering.feilutbetaling.compareTo(BigDecimal.ZERO) != 0) {
+            throw MigreringException("Feilutbetaling er ${oppsummering.feilutbetaling}",
                                      MigreringExceptionType.SIMULERING_FEILUTBETALING)
-        } else if (simulering.etterbetaling.compareTo(BigDecimal.ZERO) != 0) {
-            throw MigreringException("Etterbetaling er ${simulering.etterbetaling}",
+        } else if (oppsummering.etterbetaling.compareTo(BigDecimal.ZERO) != 0) {
+            throw MigreringException("Etterbetaling er ${oppsummering.etterbetaling}",
                                      MigreringExceptionType.SIMULERING_ETTERBETALING)
+        } else if (inneholderDebettrekk(simulering)) {
+            throw MigreringException("Simuleringen inneholder posteringstypen TREKK med betalingstypen DEBET. " +
+                                     "Dette blir en uønsket utbetaling pga en feil. Denne kan migreres på nytt i neste måned.",
+                                     MigreringExceptionType.SIMULERING_DEBET_TREKK)
         }
     }
+
+    // Kan slettes når TØB fikset TOB-1739
+    private fun inneholderDebettrekk(simulering: BeriketSimuleringsresultat) =
+            simulering.detaljer.simuleringMottaker.any { simuleringMottaker ->
+                simuleringMottaker.simulertPostering.any {
+                    it.posteringType == PosteringType.TREKK && it.betalingType == BetalingType.DEBIT
+                }
+            }
 
     /**
      * Sjekker att perioden som har kode [InfotrygdEndringKode.OVERTFØRT_NY_LØSNING] har opphør i måneden jobbet blir kjørt.
@@ -196,14 +214,15 @@ class MigreringService(
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
         val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
 
-        if (sisteSummertePerioden != null &&
-            (sisteSummertePerioden.opphørsdato == null || sisteSummertePerioden.stønadFom > opphørsmåned.atEndOfMonth())) {
-            loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
-            return false
+        if (sisteSummertePerioden == null ||
+            sisteSummertePerioden.opphørsdato != null ||
+            sisteSummertePerioden.stønadTom <= opphørsmåned.atEndOfMonth()) {
+            logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - " +
+                        "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
+            return true
         }
-        logger.info("erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
-                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}")
-        return true
+        loggIkkeOpphørt(behandlingId, perioder, sisteSummertePerioden, opphørsmåned)
+        return false
     }
 
     private fun loggIkkeOpphørt(behandlingId: UUID,

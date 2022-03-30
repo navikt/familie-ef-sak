@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtBarnTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -16,6 +18,11 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -24,7 +31,10 @@ import java.util.UUID
 class NyeBarnService(private val behandlingService: BehandlingService,
                      private val fagsakService: FagsakService,
                      private val personService: PersonService,
-                     private val barnService: BarnService) {
+                     private val barnService: BarnService,
+                     private val taskRepository: TaskRepository) {
+
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Deprecated("bruk finnNyeEllerTidligereFødteBarn")
     fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
@@ -32,27 +42,49 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
 
-        return finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id).map { it.personIdent }
+        val nyeBarnSidenGjeldendeBehandling = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
+
+        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarnSidenGjeldendeBehandling)
+
+        return nyeBarnSidenGjeldendeBehandling.map { it.personIdent }
     }
 
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
                      ?: error("Kunne ikke finne fagsak for personident")
-        val kobledeBarn = finnKobledeBarnForFagsak(fagsak.id)
+        val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
 
-        val nyeBarn = filtrerNyeBarn(kobledeBarn)
+        val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+
+        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
+
         val nyeBarnDto = nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) }
-        val forTidligtFødteBarn = finnForTidligtFødteBarn(kobledeBarn)
+        val forTidligtFødteBarn = finnForTidligtFødteBarn(barnSidenGjeldendeBehandling)
         return NyeBarnDto(nyeBarnDto + forTidligtFødteBarn)
     }
 
+    // TODO slett 4 måneder etter att siste migreringen er klar
+    private fun opprettOppfølgningsoppgaveForBarn(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>) {
+        if (fagsak.migrert) {
+            try {
+                taskRepository.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
+            } catch (e: DbActionExecutionException) {
+                if (e.cause is DuplicateKeyException) {
+                    logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
+                    return
+                }
+                throw e
+            }
+        }
+    }
+
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
-        val kobledeBarn = finnKobledeBarnForFagsak(fagsakId)
+        val kobledeBarn = finnKobledeBarnSidenGjeldendeBehandling(fagsakId)
         return filtrerNyeBarn(kobledeBarn)
     }
 
-    private fun finnKobledeBarnForFagsak(fagsakId: UUID): NyeBarnData {
+    private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData {
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
                          ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)

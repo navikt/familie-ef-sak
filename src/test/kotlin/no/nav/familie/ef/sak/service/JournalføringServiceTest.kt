@@ -84,8 +84,9 @@ internal class JournalføringServiceTest {
                     infotrygdPeriodeValideringService = infotrygdPeriodeValideringService
             )
 
-    private val fagsakId: UUID = UUID.randomUUID()
     private val fagsakEksternId = 12345L
+    private val fagsak = fagsak(eksternId = EksternFagsakId(fagsakEksternId))
+    private val fagsakId: UUID = fagsak.id
     private val journalpostId = "98765"
     private val nyOppgaveId = 999999L
     private val behandlingId: UUID = UUID.randomUUID()
@@ -122,6 +123,7 @@ internal class JournalføringServiceTest {
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost)
 
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
+        every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
         every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any()) } just Runs
 
@@ -138,7 +140,7 @@ internal class JournalføringServiceTest {
 
         every {
             fagsakService.hentFagsak(any())
-        } returns fagsak(identer = fagsakpersoner(setOf("1")),id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
+        } returns fagsak(identer = fagsakpersoner(setOf("1")), id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
 
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) }
                 .returns(Behandling(id = behandlingId,
@@ -282,7 +284,8 @@ internal class JournalføringServiceTest {
         } returns Testsøknad.søknadOvergangsstønad
 
         every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns false
-        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil", BAD_REQUEST)
+        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil",
+                                                                                                                   BAD_REQUEST)
 
         assertThatThrownBy {
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(

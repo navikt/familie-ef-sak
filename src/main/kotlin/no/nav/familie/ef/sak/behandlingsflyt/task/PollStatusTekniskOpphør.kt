@@ -23,7 +23,7 @@ class PollStatusTekniskOpphør(private val stegService: StegService,
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         stegService.håndterPollStatusTekniskOpphør(behandling)
     }
 
