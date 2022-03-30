@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
@@ -25,6 +26,10 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
     fun hentVedtak(behandlingId: UUID): Vedtak {
         return vedtakRepository.findByIdOrThrow(behandlingId)
+    }
+
+    fun hentVedtaksresultat(behandlingId: UUID): ResultatType {
+        return hentVedtak(behandlingId).resultatType
     }
 
     fun hentVedtakForBehandlinger(behandlingIder: Set<UUID>): List<Vedtak> {
@@ -59,7 +64,9 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
-        return hentVedtak(behandlingId).perioder?.perioder?.any { it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate) } ?: false
+        return hentVedtak(behandlingId).perioder?.perioder?.any {
+            it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate)
+        } ?: false
     }
 }
 
