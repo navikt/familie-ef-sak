@@ -53,7 +53,7 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
                         .filter { it.fødsel.gjeldende().erUnder18År() }
 
                 val ugyldigeTerminbarn = utgåtteTerminbarn.filter { !it.match(pdlBarnUnder18år) }.associateBy { it.behandlingId }
-                val oppgaver = lagreOgagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn)
+                val oppgaver = lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn)
                 if (oppgaver.isNotEmpty()) {
                     sendOppgaverTilIverksett(oppgaver)
                 }
@@ -73,7 +73,7 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
         return TerminbarnOppgave(fagsakId, termindato)
     }
 
-    private fun lagreOgagOppgaverForUgyldigeTerminbarn(barnTilUtplukkForOppgave: Map<UUID, BarnTilUtplukkForOppgave>): List<OppgaveForBarn> {
+    private fun lagreOgLagOppgaverForUgyldigeTerminbarn(barnTilUtplukkForOppgave: Map<UUID, BarnTilUtplukkForOppgave>): List<OppgaveForBarn> {
 
         return behandlingRepository.finnEksterneIder(barnTilUtplukkForOppgave.map { it.key }.toSet()).filter {
             val terminbarnOppgave = lagTerminbarnOppgave(
