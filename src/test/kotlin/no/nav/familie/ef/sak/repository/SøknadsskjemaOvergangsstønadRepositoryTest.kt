@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadReposit
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.kontrakter.ef.søknad.Barnepass
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
@@ -88,14 +89,15 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
     @Test
     internal fun `søknad uten barnepass blir hentet korrekt`() {
         val builder = TestsøknadBuilder.Builder()
-        builder.setBarn(listOf(builder.defaultBarn(barnepass = null, skalHaBarnepass = false)))
+        builder.setBarn(listOf(builder.defaultBarn(barnepass = Barnepass(barnepassordninger = Søknadsfelt("", emptyList())),
+                                                   skalHaBarnepass = false)))
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(builder.build().søknadBarnetilsyn)
 
         søknadBarnetilsynRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadBarnetilsynRepository.findByIdOrThrow(søknadTilLagring.id)
 
         assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
-        assertThat(søknadFraDatabase.barn.single().barnepassordninger).hasSize(1)
+        assertThat(søknadFraDatabase.barn.single().barnepassordninger).isEmpty()
     }
 
     @Test
@@ -109,7 +111,7 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         val søknadFraDatabase = søknadBarnetilsynRepository.findByIdOrThrow(søknadTilLagring.id)
 
         assertThat(søknadFraDatabase.barn).isEqualTo(søknadTilLagring.barn)
-        assertThat(søknadFraDatabase.barn.single().barnepassordninger).isEmpty()
+        assertThat(søknadFraDatabase.barn.single().barnepassordninger).hasSize(1)
     }
 
 }
