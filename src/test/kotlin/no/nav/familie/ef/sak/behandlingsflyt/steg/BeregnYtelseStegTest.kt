@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -121,7 +122,11 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningService.beregnYtelse(any(), any()) } returns listOf(lagBeløpsperiode(nyAndelFom, nyAndelTom))
 
-            utførSteg(BehandlingType.REVURDERING, forrigeBehandlingId = null)
+            utførSteg(BehandlingType.REVURDERING,
+                      forrigeBehandlingId = null,
+                      vedtak = innvilget(listOf(vedtaksperiodeDto(årMånedFra = nyAndelFom,
+                                                                  årMånedTil = nyAndelTom)),
+                                         listOf(inntekt(YearMonth.from(nyAndelFom)))))
 
             val andeler = slot.captured.andelerTilkjentYtelse
             assertThat(andeler).hasSize(1)

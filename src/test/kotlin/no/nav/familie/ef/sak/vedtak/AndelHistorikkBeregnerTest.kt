@@ -364,20 +364,20 @@ object AndelHistorikkParser {
                     }
                     acc
                 }
-                .map {
+                .map { holder ->
                     val andelerTilkjentYtelse =
-                            if (it.andeler.contains(null)) {
-                                feilHvis(it.andeler.size > 1) {
+                            if (holder.andeler.contains(null)) {
+                                feilHvis(holder.andeler.size > 1) {
                                     "Andeler kan kun inneholde ett element som mangler stønadFom/stønadTom savnes"
                                 }
                                 emptyList()
-                            } else it.andeler as List<AndelTilkjentYtelse>
+                            } else holder.andeler as List<AndelTilkjentYtelse>
 
-                    TilkjentYtelse(behandlingId = it.behandlingId,
+                    TilkjentYtelse(behandlingId = holder.behandlingId,
                                    vedtakstidspunkt = LocalDateTime.now(),
                                    andelerTilkjentYtelse = andelerTilkjentYtelse,
                                    personident = PERSON_IDENT,
-                                   startdato = andelerTilkjentYtelse.minOf { it.stønadFom })
+                                   startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now())
                 }
     }
 }

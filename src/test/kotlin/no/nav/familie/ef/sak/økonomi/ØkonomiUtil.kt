@@ -13,7 +13,7 @@ fun lagTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                       personident: String = "123",
                       vedtaksdato: LocalDate = LocalDate.now(),
                       type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                      startdato: LocalDate? = null) =
+                      startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now()) =
         TilkjentYtelse(id = id,
                        behandlingId = behandlingId,
                        personident = personident,

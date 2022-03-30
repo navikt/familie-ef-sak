@@ -19,6 +19,8 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
 
@@ -50,6 +53,12 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         behandling = behandlingRepository.insert(behandling(fagsak,
                                                             status = BehandlingStatus.FERDIGSTILT,
                                                             resultat = BehandlingResultat.INNVILGET))
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(beløp = 0,
+                                                         fraOgMed = LocalDate.now(),
+                                                         tilOgMed = LocalDate.now(),
+                                                         kildeBehandlingId = behandling.id)
+        tilkjentYtelseService.opprettTilkjentYtelse(lagTilkjentYtelse(behandlingId = behandling.id,
+                                                                      andelerTilkjentYtelse = listOf(andelTilkjentYtelse)))
     }
 
     @AfterEach
