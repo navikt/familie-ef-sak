@@ -34,7 +34,6 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -143,7 +142,7 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Innvilget behandling - alt ok`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
-        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         beslutteVedtakSteg.validerSteg(innvilgetBehandling)
     }
 
@@ -151,7 +150,7 @@ internal class SendTilBeslutterStegTest {
     internal fun `Innvilget behandling - IKKE ok hvis erAlleVilkårOppfylt false`() {
         every { vurderingService.erAlleVilkårOppfylt(any()) } returns false
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
-        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val frontendFeilmelding =
                 assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
         val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
@@ -206,7 +205,7 @@ internal class SendTilBeslutterStegTest {
     @Test
     internal fun `Skal feile hvis saksbehandlersignatur i vedtaksbrev er ulik saksbehandleren som sendte til beslutter`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlersignatur = "Saksbehandler A")
-        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         mockBrukerContext("Saksbehandler B")
 
         assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(behandling) }
@@ -256,25 +255,12 @@ internal class SendTilBeslutterStegTest {
     // saksbehandler ikke har tatt stilling til tilbakekrevingsvarsel.
     private fun mockTilbakekrevingValideringsfeil() {
         // tilbakekrevingService.
-        every { vedtakService.hentVedtak(any()) } returns lagVedtak(ResultatType.INNVILGE)
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
                 1000))
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false
     }
-
-    private fun lagVedtak(resultatType: ResultatType = ResultatType.INNVILGE) = Vedtak(
-            resultatType = resultatType,
-            behandlingId = revurdering.id,
-            periodeBegrunnelse = null,
-            inntektBegrunnelse = null,
-            avslåBegrunnelse = null,
-            perioder = null,
-            inntekter = null,
-            saksbehandlerIdent = null,
-            opphørFom = null,
-            beslutterIdent = null,
-    )
 
 }

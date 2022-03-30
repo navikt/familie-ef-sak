@@ -83,13 +83,13 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                                                                                oppgaveId = oppgaveId))
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
-        val vedtak = vedtakService.hentVedtak(behandlingId)
-        when (vedtak.resultatType) {
+        val resultat = vedtakService.hentVedtaksresultat(behandlingId)
+        when (resultat) {
             ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
-            else -> error("Støtter ikke resultattypen=${vedtak.resultatType}")
+            ResultatType.HENLEGGE -> error("Støtter ikke resultattypen=$resultat for behandling=$behandlingId")
         }
     }
 

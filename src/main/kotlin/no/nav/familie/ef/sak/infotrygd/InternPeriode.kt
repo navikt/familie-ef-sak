@@ -10,6 +10,12 @@ data class InternePerioder(
 )
 
 /**
+ * Holder for å sette startdato fra tilkjent ytelse sammen med internperioder
+ */
+data class EfInternPerioder(val startdato: LocalDate,
+                            val internperioder: List<InternPeriode>)
+
+/**
  * Brukes for å mappe interne ef-perioder og infotrygd perioder til ett felles format
  */
 data class InternPeriode(

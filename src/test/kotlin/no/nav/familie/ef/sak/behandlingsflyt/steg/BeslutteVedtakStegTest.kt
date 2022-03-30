@@ -33,7 +33,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -113,17 +112,8 @@ internal class BeslutteVedtakStegTest {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
         every { iverksett.iverksett(any(), any()) } just Runs
-        every { vedtakService.hentVedtak(any()) } returns Vedtak(behandlingId = UUID.randomUUID(),
-                                                                 resultatType = ResultatType.INNVILGE,
-                                                                 periodeBegrunnelse = null,
-                                                                 inntektBegrunnelse = null,
-                                                                 avslåBegrunnelse = null,
-                                                                 perioder = null,
-                                                                 inntekter = null,
-                                                                 saksbehandlerIdent = null,
-                                                                 beslutterIdent = null)
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         every { featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null") } returns false
-
     }
 
     @AfterEach
@@ -134,10 +124,8 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtakService.oppdaterBeslutter(behandlingId, any()) } just Runs
-        every { vedtakService.hentVedtak(behandlingId) } returns Vedtak(behandlingId = behandlingId,
-                                                                        resultatType = ResultatType.INNVILGE,
-                                                                        saksbehandlerIdent = "sak1",
-                                                                        beslutterIdent = "beslutter1")
+        every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
+
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, resultat = secondArg())
         }
