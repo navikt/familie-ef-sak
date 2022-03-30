@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -19,18 +19,18 @@ class JournalførBlankettTask(private val stegService: StegService,
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
-        val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
         stegService.håndterBlankett(behandling)
     }
 
     companion object {
 
-        fun opprettTask(behandling: Behandling, personIdent: String): Task {
+        fun opprettTask(saksbehandling: Saksbehandling): Task {
             return Task(type = TYPE,
-                        payload = behandling.id.toString(),
+                        payload = saksbehandling.id.toString(),
                         properties = Properties().apply {
-                            this["personIdent"] = personIdent
-                            this["behandlingId"] = behandling.id.toString()
+                            this["personIdent"] = saksbehandling.ident
+                            this["behandlingId"] = saksbehandling.id.toString()
                             this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
                         })
         }

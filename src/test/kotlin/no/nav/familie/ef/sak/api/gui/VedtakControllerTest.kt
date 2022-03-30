@@ -5,10 +5,10 @@ import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTE
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.BESLUTTER_2
 import no.nav.familie.ef.sak.api.gui.VedtakControllerTest.Saksbehandler.SAKSBEHANDLER
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
@@ -49,6 +50,7 @@ import java.util.UUID
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var behandlingService: BehandlingService
     @Autowired private lateinit var rolleConfig: RolleConfig
     @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
     @Autowired private lateinit var vedtakRepository: VedtakRepository
@@ -58,8 +60,9 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
 
-    private val fagsak = fagsak(setOf(PersonIdent("")))
+    private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
+    private val saksbehandling = saksbehandling(fagsak, behandling)
 
     private enum class Saksbehandler(val beslutter: Boolean = false) {
         SAKSBEHANDLER,
@@ -319,14 +322,16 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagSaksbehandlerBrev(saksbehandlerSignatur: String) {
         val brevRequest = objectMapper.readTree("123")
         mockBrukerContext(saksbehandlerSignatur)
-        vedtaksbrevService.lagSaksbehandlerSanitybrev(behandling.id, brevRequest, "brevMal")
+        val saksbehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
+        vedtaksbrevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, "brevMal")
         clearBrukerContext()
     }
 
     private fun lagBeslutterBrev(beslutter: String) {
         mockBrukerContext(beslutter)
         try {
-            vedtaksbrevService.lagBeslutterBrev(behandling.id)
+            val saksbehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
+            vedtaksbrevService.lagBeslutterBrev(saksbehandling)
         } catch (e: Feil) {
             // Ønsker ikke å kaste feil fra denne hvis det eks er "feil steg", feil steg ønsker vi å teste i beslutteVedtak
         } catch (e: ApiFeil) {

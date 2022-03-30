@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.behandlingsflyt.task
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.BLANKETT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -38,7 +38,6 @@ import java.util.UUID
 
 class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val behandlingService: BehandlingService,
-                                private val fagsakService: FagsakService,
                                 private val søknadService: SøknadService,
                                 private val vedtakRepository: VedtakRepository,
                                 private val oppgaveService: OppgaveService,
@@ -51,35 +50,35 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) =
                 objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        val personIdent = fagsak.hentAktivIdent()
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
         val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
-        val henvendelseTidspunkt = finnHenvendelsestidspunkt(behandling)
+        val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
-                behandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
+                saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
                 behandlingId = behandlingId,
-                eksternBehandlingId = behandling.eksternId.id,
-                personIdent = personIdent,
+                eksternBehandlingId = saksbehandling.eksternId,
+                personIdent = saksbehandling.ident,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
-                eksternFagsakId = fagsak.eksternId.id,
+                beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
+                              else null,
+                eksternFagsakId = saksbehandling.eksternFagsakId,
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
-                behandlingOpprettetTidspunkt = behandling.sporbar.opprettetTid.atZone(zoneIdOslo),
+                behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
                 hendelse = hendelse,
-                behandlingResultat = behandling.resultat.name,
+                behandlingResultat = saksbehandling.resultat.name,
                 resultatBegrunnelse = resultatBegrunnelse,
                 opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
                 strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
-                stønadstype = fagsak.stønadstype,
-                behandlingstype = BehandlingType.valueOf(behandling.type.name),
+                stønadstype = saksbehandling.stønadstype,
+                behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
                 henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
                 relatertEksternBehandlingId = relatertEksternBehandlingId,
                 relatertBehandlingId = null
@@ -94,6 +93,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
     }
 
+    private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
+
     private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?): String? {
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
@@ -102,7 +103,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                     ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
-                    else -> error("Mangler vedtak")
+                    ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
+                    null -> error("Mangler vedtak")
                 }
             }
         }
@@ -112,16 +114,15 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
                                                                     ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
-            Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
+            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
         }
     }
 
-    private fun finnHenvendelsestidspunkt(behandling: Behandling): LocalDateTime {
-        return when (behandling.type) {
-            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(behandling.id)
-            REVURDERING -> behandling.sporbar.opprettetTid
-            else -> error("Støtter ikke uthenting av mottatt-dato for ${behandling.type}")
+    private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
+        return when (saksbehandling.type) {
+            FØRSTEGANGSBEHANDLING, BLANKETT -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
+            REVURDERING -> saksbehandling.opprettetTid
+            else -> error("Støtter ikke uthenting av henvendelsestidspunkt for sak med ${saksbehandling.type}")
         }
     }
 

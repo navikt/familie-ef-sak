@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,11 +36,12 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                            steg = behandling.steg,
                                                                            opprettetAvNavn = "Saksbehandlernavn",
                                                                            opprettetAv = SikkerhetContext.hentSaksbehandler()))
-        val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto(behandling)
+        val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto(saksbehandling(fagsak, behandling))
 
 
         /** Hent */
-        val innslag: HendelseshistorikkDto = behandlingshistorikkService.finnHendelseshistorikk(behandling)[0]
+        val innslag: HendelseshistorikkDto =
+                behandlingshistorikkService.finnHendelseshistorikk(saksbehandling(fagsak, behandling))[0]
 
         assertThat(innslag).isEqualTo(hendelseshistorikkDto)
     }
@@ -52,7 +54,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         /** Hent */
-        val list = behandlingshistorikkService.finnHendelseshistorikk(behandling)
+        val list = behandlingshistorikkService.finnHendelseshistorikk(saksbehandling(fagsak, behandling))
 
         assertThat(list.isEmpty()).isTrue
     }

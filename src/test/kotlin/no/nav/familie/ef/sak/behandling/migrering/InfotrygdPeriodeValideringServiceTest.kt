@@ -47,7 +47,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1",
                                                                     stønadFom = dato.atDay(1),
                                                                     stønadTom = dato.atEndOfMonth())))
-            service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanJournalføreUtenÅMigrere(personIdent, no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD)
         }
 
         @Test

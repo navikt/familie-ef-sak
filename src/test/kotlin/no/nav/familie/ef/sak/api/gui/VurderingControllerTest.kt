@@ -155,8 +155,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
-            søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-            StønadType.OVERGANGSSTØNAD
+                søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+                StønadType.OVERGANGSSTØNAD
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(

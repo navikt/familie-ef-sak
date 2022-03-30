@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
@@ -21,6 +22,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as Tilbakekrev
 @RequestMapping(path = ["/api/tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 class TilbakekrevingController(private val tilgangService: TilgangService,
+                               private val behandlingService: BehandlingService,
                                private val tilbakekrevingService: TilbakekrevingService) {
 
     @PostMapping("/{behandlingId}")
@@ -58,15 +60,17 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
 
     @GetMapping("/{behandlingId}/brev")
     fun genererBrevMedEskisterendeVarseltekst(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(behandlingId))
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
+        return Ressurs.success(tilbakekrevingService.genererBrevMedVarseltekstFraEksisterendeTilbakekreving(saksbehandling))
     }
 
     @PostMapping("/{behandlingId}/brev/generer")
     fun genererTilbakekekrevingBrevMedVarseltekst(@PathVariable behandlingId: UUID,
                                                   @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(tilbakekrevingService.genererBrev(behandlingId, varseltekstDto.varseltekst))
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
+        return Ressurs.success(tilbakekrevingService.genererBrev(saksbehandling, varseltekstDto.varseltekst))
     }
 
 }

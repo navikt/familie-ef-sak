@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.metrics.domain.BehandlingerPerStatus
 import no.nav.familie.ef.sak.metrics.domain.ForekomsterPerUke
 import no.nav.familie.ef.sak.metrics.domain.MålerRepository
@@ -38,9 +39,9 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun init() {
-        val fagsakBarneTilsyn = fagsak(stønadstype = StønadType.BARNETILSYN)
-        val fagsakOvergangsstønad = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
-        val fagsakSkolepenger = fagsak(stønadstype = StønadType.SKOLEPENGER)
+        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.BARNETILSYN)
+        val fagsakOvergangsstønad = fagsak(setOf(PersonIdent("2")), stønadstype = StønadType.OVERGANGSSTØNAD)
+        val fagsakSkolepenger = fagsak(setOf(PersonIdent("3")), stønadstype = StønadType.SKOLEPENGER)
         val fagsaker = listOf(fagsakBarneTilsyn, fagsakOvergangsstønad, fagsakSkolepenger)
 
         fagsaker.forEach(testoppsettService::lagreFagsak)
@@ -64,7 +65,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnAntallBehandlingerAvÅrsak - finner riktig antall`() {
         assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(0)
-        val fagsakBarneTilsyn = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
+        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("4")), stønadstype = StønadType.OVERGANGSSTØNAD)
 
         testoppsettService.lagreFagsak(fagsakBarneTilsyn)
 
@@ -143,7 +144,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal finne løpende behandlinger`() {
         val now = YearMonth.now()
         val fagsak1 = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
-        val fagsak2 = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("4")), StønadType.OVERGANGSSTØNAD))
         val behandling1 = opprettFerdigstiltBehandling(fagsak1, LocalDateTime.now().minusDays(1))
         // behandling 2 er gjeldende på fagsak 1 då den er opprettet etter 1
         val behandling2 = opprettFerdigstiltBehandling(fagsak1)

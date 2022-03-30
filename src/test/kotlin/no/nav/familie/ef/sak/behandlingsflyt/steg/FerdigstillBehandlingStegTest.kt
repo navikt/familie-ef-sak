@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -29,25 +30,31 @@ internal class FerdigstillBehandlingStegTest {
 
     @Test
     internal fun `skal opprette publiseringstask og behandlingsstatistikkTask hvis behandlingen er førstegagsbehandling`() {
-        task.utførSteg(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING), null)
+        task.utførSteg(saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING)), null)
         verify(exactly = 2) { taskRepository.save(any()) }
     }
 
     @Test
     internal fun `skal opprette publiseringstask og behandlingsstatistikkTask hvis behandlingen er revurdering`() {
-        task.utførSteg(behandling(fagsak, type = BehandlingType.REVURDERING), null)
+        task.utførSteg(saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.REVURDERING)), null)
         verify(exactly = 2) { taskRepository.save(any()) }
     }
 
     @Test
     internal fun `skal ikke opprette publiseringstask hvis behandlingen er type blankett`() {
-        task.utførSteg(behandling(fagsak, type = BehandlingType.BLANKETT), null)
+        task.utførSteg(saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.BLANKETT)), null)
         verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
     internal fun `skal kaste feil hvis behandlingen er av andre typer`() {
-        assertThat(catchThrowable { task.utførSteg(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR), null) })
-        assertThat(catchThrowable { task.utførSteg(behandling(fagsak, type = BehandlingType.REVURDERING), null) })
+        assertThat(catchThrowable {
+            task.utførSteg(saksbehandling(fagsak,
+                                          behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR)), null)
+        })
+        assertThat(catchThrowable {
+            task.utførSteg(saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.REVURDERING)),
+                           null)
+        })
     }
 }

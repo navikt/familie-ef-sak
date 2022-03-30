@@ -46,6 +46,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
+
 sealed class VedtakDto(val resultattypeIntern: ResultatType) {
 
     fun erInnvilgeMedOpphør(): Boolean {

@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.CustomKeyValue
 import no.nav.familie.ef.sak.Sporingsdata
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -65,6 +66,18 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
         }
     }
 
+    fun validerTilgangTilBehandling(saksbehandling: Saksbehandling, event: AuditLoggerEvent) {
+        val tilgang = harTilgangTilPersonMedRelasjoner(saksbehandling.ident)
+        auditLogger.log(Sporingsdata(event,
+                                     saksbehandling.ident,
+                                     tilgang,
+                                     CustomKeyValue("behandling", saksbehandling.id.toString())))
+        if (!tilgang.harTilgang) {
+            throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                                 "har ikke tilgang til behandling=${saksbehandling.id}")
+        }
+    }
+
     fun validerTilgangTilFagsak(fagsakId: UUID, event: AuditLoggerEvent) {
         val personIdent = cacheManager.getValue("fagsakIdent", fagsakId) {
             fagsakService.hentAktivIdent(fagsakId)
@@ -82,7 +95,10 @@ class TilgangService(private val personopplysningerIntegrasjonerClient: Personop
             fagsakPersonService.hentAktivIdent(fagsakPersonId)
         }
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        auditLogger.log(Sporingsdata(event, personIdent, tilgang, custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
+        auditLogger.log(Sporingsdata(event,
+                                     personIdent,
+                                     tilgang,
+                                     custom1 = CustomKeyValue("fagsakPersonId", fagsakPersonId.toString())))
         if (!tilgang.harTilgang) {
             throw ManglerTilgang("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                                  "har ikke tilgang til fagsakPerson=$fagsakPersonId")
