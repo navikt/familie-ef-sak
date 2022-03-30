@@ -31,5 +31,5 @@ import java.util.UUID
           AND aty.belop > 0)
         """)
     fun finnBarnAvGjeldendeIverksatteBehandlingerKunTerminbarn(stønadstype: StønadType,
-                                                               dato: LocalDate): List<BarnTilUtplukkForOppgave>
+                                                               dato: LocalDate = LocalDate.now()): List<BarnTilUtplukkForOppgave>
 }

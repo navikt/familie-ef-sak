@@ -32,10 +32,9 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
     @Transactional
     fun forberedOppgaverForUfødteTerminbarn(sisteKjøring: LocalDate, kjøreDato: LocalDate = LocalDate.now()) {
 
-        val referanseDato = referanseDato(sisteKjøring)
         val gjeldendeBarn: Map<UUID, List<BarnTilUtplukkForOppgave>> =
                 (terminbarnRepository
-                        .finnBarnAvGjeldendeIverksatteBehandlingerKunTerminbarn(StønadType.OVERGANGSSTØNAD, referanseDato))
+                        .finnBarnAvGjeldendeIverksatteBehandlingerKunTerminbarn(StønadType.OVERGANGSSTØNAD))
                         .groupBy { it.behandlingId }
 
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")
@@ -115,15 +114,4 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
         return termindato.isBefore(LocalDate.now())
     }
 
-    private fun erTerminbarn(barn: BarnTilUtplukkForOppgave): Boolean {
-        return barn.fødselsnummerBarn == null
-    }
-
-    private fun referanseDato(sisteKjøring: LocalDate): LocalDate {
-        val periodeGap = ChronoUnit.DAYS.between(sisteKjøring, LocalDate.now()) - 7
-        if (periodeGap > 0) {
-            return LocalDate.now().minusDays(periodeGap)
-        }
-        return LocalDate.now()
-    }
 }
