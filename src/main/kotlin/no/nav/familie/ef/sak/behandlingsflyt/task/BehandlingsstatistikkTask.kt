@@ -66,7 +66,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 eksternBehandlingId = saksbehandling.eksternId,
                 personIdent = saksbehandling.ident,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
-                beslutterId = vedtak?.beslutterIdent,
+                beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
+                              else null,
                 eksternFagsakId = saksbehandling.eksternFagsakId,
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
                 behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
@@ -91,6 +92,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
         return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
     }
+
+    private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
     private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?): String? {
         return when (hendelse) {
