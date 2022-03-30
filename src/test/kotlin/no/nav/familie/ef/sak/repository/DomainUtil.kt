@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
+import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
@@ -180,19 +181,24 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
 
-fun tilkjentYtelse(behandlingId: UUID, personIdent: String, stønadsår: Int = 2021): TilkjentYtelse =
-        TilkjentYtelse(behandlingId = behandlingId,
-                       personident = personIdent,
-                       vedtakstidspunkt = LocalDateTime.now(),
-                       andelerTilkjentYtelse = listOf(
-                               AndelTilkjentYtelse(beløp = 9500,
-                                                   stønadFom = LocalDate.of(stønadsår, 1, 1),
-                                                   stønadTom = LocalDate.of(stønadsår, 12, 31),
-                                                   personIdent = personIdent,
-                                                   inntektsreduksjon = 0,
-                                                   inntekt = 0,
-                                                   samordningsfradrag = 0,
-                                                   kildeBehandlingId = behandlingId)))
+fun tilkjentYtelse(behandlingId: UUID,
+                   personIdent: String,
+                   stønadsår: Int = 2021,
+                   startdato: LocalDate? = null): TilkjentYtelse {
+    val andeler = listOf(AndelTilkjentYtelse(beløp = 9500,
+                                             stønadFom = LocalDate.of(stønadsår, 1, 1),
+                                             stønadTom = LocalDate.of(stønadsår, 12, 31),
+                                             personIdent = personIdent,
+                                             inntektsreduksjon = 0,
+                                             inntekt = 0,
+                                             samordningsfradrag = 0,
+                                             kildeBehandlingId = behandlingId))
+    return TilkjentYtelse(behandlingId = behandlingId,
+                          personident = personIdent,
+                          vedtakstidspunkt = LocalDateTime.now(),
+                          startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
+                          andelerTilkjentYtelse = andeler)
+}
 
 fun vedtak(behandlingId: UUID,
            resultatType: ResultatType = ResultatType.INNVILGE,
@@ -218,7 +224,12 @@ fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
         Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)
 
-fun behandlingBarn(id: UUID, behandlingId: UUID, søknadBarnId: UUID, personIdent: String, navn: String, fødselTermindato: LocalDate): BehandlingBarn {
+fun behandlingBarn(id: UUID,
+                   behandlingId: UUID,
+                   søknadBarnId: UUID,
+                   personIdent: String,
+                   navn: String,
+                   fødselTermindato: LocalDate): BehandlingBarn {
     return BehandlingBarn(
             id = id,
             behandlingId = behandlingId,
@@ -246,23 +257,23 @@ fun barnMedIdent(fnr: String, navn: String): BarnMedIdent =
 
 fun søker(): Søker =
         Søker(
-            adressebeskyttelse = Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, Metadata(false)),
-            bostedsadresse = listOf(),
-            dødsfall = null,
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf(),
-            KjønnType.KVINNE,
-            listOf(),
-            Navn("fornavn", null, "etternavn", Metadata(false)),
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf(),
-            listOf()
+                adressebeskyttelse = Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, Metadata(false)),
+                bostedsadresse = listOf(),
+                dødsfall = null,
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                KjønnType.KVINNE,
+                listOf(),
+                Navn("fornavn", null, "etternavn", Metadata(false)),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf(),
+                listOf()
         )
