@@ -120,7 +120,8 @@ internal class AktivitetMapperTest {
                              samvær = null,
                              skalHaBarnepass = false,
                              særligeTilsynsbehov = "Ja",
-                             barnepass = null,
+                             årsakBarnepass = null,
+                             barnepassordninger = emptySet(),
                              lagtTilManuelt = true
             ))
 }
