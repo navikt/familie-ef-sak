@@ -30,6 +30,7 @@ import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
+import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
@@ -138,6 +139,7 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
+        val builder = TestsøknadBuilder.Builder()
         val barneListe: List<Barn> = søkerMedBarn.barn.map {
             TestsøknadBuilder.Builder().defaultBarn(
                     navn = it.value.navn.gjeldende().visningsnavn(),
@@ -145,15 +147,16 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     harSkalHaSammeAdresse = true,
                     ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
                     erBarnetFødt = true,
+                    skalHaBarnepass = true,
                     fødselTermindato = Fødselsnummer(it.key).fødselsdato,
-                    annenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(
+                    annenForelder = builder.defaultAnnenForelder(
                             ikkeOppgittAnnenForelderBegrunnelse = null,
                             bosattINorge = false,
                             land = "Sverige",
-                            personMinimum = TestsøknadBuilder.Builder()
+                            personMinimum = builder
                                     .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
                     ),
-                    samvær = TestsøknadBuilder.Builder().defaultSamvær(
+                    samvær = builder.defaultSamvær(
                             beskrivSamværUtenBarn = "Har sjelden sett noe til han",
                             borAnnenForelderISammeHus = "ja",
                             borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
@@ -167,6 +170,11 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
                     ),
                     skalBoHosSøker = "jaMenSamarbeiderIkke"
             )
+        }.map {
+            it.copy(barnepass = Søknadsfelt("Barnepass",
+                                            builder.defaultBarnepass("asd", listOf(
+                                                    builder.defaultBarnepassordning("type1"),
+                                                    builder.defaultBarnepassordning()))))
         }
         return barneListe
     }

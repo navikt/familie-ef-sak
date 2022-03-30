@@ -184,6 +184,7 @@ fun tilkjentYtelse(behandlingId: UUID, personIdent: String, stønadsår: Int = 2
         TilkjentYtelse(behandlingId = behandlingId,
                        personident = personIdent,
                        vedtakstidspunkt = LocalDateTime.now(),
+                       startdato = LocalDate.of(stønadsår, 1, 1),
                        andelerTilkjentYtelse = listOf(
                                AndelTilkjentYtelse(beløp = 9500,
                                                    stønadFom = LocalDate.of(stønadsår, 1, 1),

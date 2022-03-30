@@ -20,7 +20,7 @@ data class TilkjentYtelse(@Id
                           val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
                           val samordningsfradragType: SamordningsfradragType? = null,
                           @Column("opphorsdato")
-                          val startdato: LocalDate? = null,
+                          val startdato: LocalDate,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar())
 

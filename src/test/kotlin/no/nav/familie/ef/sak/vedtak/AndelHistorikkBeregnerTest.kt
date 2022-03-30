@@ -376,7 +376,8 @@ object AndelHistorikkParser {
                     TilkjentYtelse(behandlingId = it.behandlingId,
                                    vedtakstidspunkt = LocalDateTime.now(),
                                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                   personident = PERSON_IDENT)
+                                   personident = PERSON_IDENT,
+                                   startdato = andelerTilkjentYtelse.minOf { it.stønadFom })
                 }
     }
 }
