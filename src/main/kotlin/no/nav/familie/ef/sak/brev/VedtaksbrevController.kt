@@ -54,7 +54,7 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
         return foråndsvisBeslutterbrev(behandlingId)
     }
 
-    @PostMapping("/beslutter/forhåndsvis/{behandlingId}")
+    @PostMapping("/beslutter/vis/{behandlingId}")
     fun forhåndsvisBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
         return foråndsvisBeslutterbrev(behandlingId)
     }
