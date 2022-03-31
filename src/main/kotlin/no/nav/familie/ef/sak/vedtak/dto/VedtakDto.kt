@@ -71,36 +71,6 @@ data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
                                       val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE,
                                                                                                               "InnvilgelseOvergangsstønad")
 
-data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
-                                  val perioder: List<BarnetilsynperiodeDto> = emptyList(),
-                                  val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
-                                  val tilleggsstønad: TilleggsstønadDto) : VedtakDto(ResultatType.INNVILGE,
-                                                                                     "InnvilgelseBarnetilsyn")
-
-data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
-                             val perioder: List<PeriodeMedBeløpDto> = emptyList(),
-                             val begrunnelse: String?)
-
-data class BarnetilsynperiodeDto(val datoFra: LocalDate,
-                                 val datoTil: LocalDate,
-                                 val utgifter: BigDecimal,
-                                 val barn: List<UUID>)
-
-data class PeriodeMedBeløpDto(val datoFra: LocalDate,
-                              val datoTil: LocalDate,
-                              val beløp: BigDecimal)
-
-fun BarnetilsynperiodeDto.tilDomene(): Barnetilsynperiode =
-        Barnetilsynperiode(datoFra = this.datoFra,
-                           datoTil = this.datoTil,
-                           utgifter = this.utgifter,
-                           barn = this.barn)
-
-fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
-        PeriodeMedBeløp(datoFra = this.datoFra,
-                        datoTil = this.datoTil,
-                        beløp = this.beløp)
-
 data class Avslå(val avslåÅrsak: AvslagÅrsak?,
                  val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
 
@@ -182,27 +152,6 @@ private fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad
             perioder = this.perioder.perioder.fraDomene(),
             inntekter = this.inntekter.inntekter.tilInntekt(),
             samordningsfradragType = this.samordningsfradragType)
-}
-
-private fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
-    feilHvis(this.barnetilsyn == null || this.kontantstøtte == null || this.tilleggsstønad == null) {
-        "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
-    }
-    return InnvilgelseBarnetilsyn(
-            begrunnelse = barnetilsyn.begrunnelse,
-            perioder = barnetilsyn.perioder.map {
-                BarnetilsynperiodeDto(datoFra = it.datoFra,
-                                      datoTil = it.datoTil,
-                                      utgifter = it.utgifter,
-                                      barn = it.barn)
-            },
-            perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
-            tilleggsstønad = TilleggsstønadDto(
-                    harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
-                    perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
-                    begrunnelse = this.tilleggsstønad.begrunnelse
-            )
-    )
 }
 
 
