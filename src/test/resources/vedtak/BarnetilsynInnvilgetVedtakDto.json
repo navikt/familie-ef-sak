@@ -1,21 +1,34 @@
 {
-  "_type": "InnvilgelseBarnetilsyn",
-  "begrunnelse": "",
+  "begrunnelse": "begrunnelse",
   "perioder": [
     {
-      "årMånedFra": "2021-01",
-      "årMånedTil": "2021-12",
-      "aktivitet": "BARN_UNDER_ETT_ÅR",
-      "periodeType": "HOVEDPERIODE"
+      "datoFra": "2021-01-01",
+      "datoTil": "2021-12-31",
+      "utgifter": 500,
+      "barn": [
+        "4ab497b2-a19c-4415-bf00-556ff8e9ce86"
+      ]
     }
   ],
-  "inntekter": [
+  "perioderKontantstøtte": [
     {
-      "årMånedFra": "2021-01",
-      "forventetInntekt": 100000,
-      "samordningsfradrag": 500
+      "datoFra": "2021-01-01",
+      "datoTil": "2021-12-31",
+      "beløp": 1000
     }
   ],
+  "tilleggsstønad": {
+    "harTilleggsstønad": true,
+    "perioder": [
+      {
+        "datoFra": "2021-01-01",
+        "datoTil": "2021-12-31",
+        "beløp": 1000
+      }
+    ],
+    "begrunnelse": "begrunnelse tilleggstønad"
+  },
   "samordningsfradragType": "GJENLEVENDEPENSJON",
-  "resultatType": "INNVILGE"
+  "resultatType": "INNVILGE",
+  "_type": "InnvilgelseBarnetilsyn"
 }
