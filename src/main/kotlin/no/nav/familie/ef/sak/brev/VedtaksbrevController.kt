@@ -48,11 +48,21 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
         return Ressurs.success(brevService.lagSaksbehandlerFritekstbrev(brevInnhold, saksbehandling))
     }
 
+    @Deprecated("Slettes - bruk forhåndsvisBeslutterbrev")
     @PostMapping("/{behandlingId}")
     fun lagBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        return foråndsvisBeslutterbrev(behandlingId)
+    }
+
+    @PostMapping("/beslutter/vis/{behandlingId}")
+    fun forhåndsvisBeslutterbrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
+        return foråndsvisBeslutterbrev(behandlingId)
+    }
+
+    private fun foråndsvisBeslutterbrev(behandlingId: UUID): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarBeslutterrolle()
-        return Ressurs.success(brevService.lagBeslutterBrev(saksbehandling))
+        return Ressurs.success(brevService.forhåndsvisBeslutterBrev(saksbehandling))
     }
 }
