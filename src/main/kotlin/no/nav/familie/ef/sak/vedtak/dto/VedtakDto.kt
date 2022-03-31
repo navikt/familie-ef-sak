@@ -63,14 +63,14 @@ data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
                                       val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE, "InnvilgelseOvergangsstønad")
 
 data class Avslå(val avslåÅrsak: AvslagÅrsak?,
-                 val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslå")
+                 val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
 
 data class Opphør(val opphørFom: YearMonth,
                   val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
 
 data class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
                        val periode: VedtaksperiodeDto,
-                       val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonert")
+                       val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
