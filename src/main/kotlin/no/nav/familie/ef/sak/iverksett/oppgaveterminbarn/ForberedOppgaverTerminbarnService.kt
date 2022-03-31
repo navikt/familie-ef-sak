@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -18,11 +17,10 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class ForberedOppgaverTerminbarnService(private val behandlingRepository: BehandlingRepository,
-                                        private val personService: PersonService,
+class ForberedOppgaverTerminbarnService(private val personService: PersonService,
+                                        private val fagsakService: FagsakService,
                                         private val terminbarnRepository: TerminbarnRepository,
-                                        private val iverksettClient: IverksettClient,
-                                        private val fagsakService: FagsakService) {
+                                        private val iverksettClient: IverksettClient) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -37,18 +35,14 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")
 
         gjeldendeBarn.keys.forEach {
-            val terminbarnPåSøknad = gjeldendeBarn[it]
-            val utgåtteTerminbarn =
-                    terminbarnPåSøknad?.filter {
-                        utgåttTermindato(it.termindatoBarn)
-                    } ?: emptyList()
-            if (utgåtteTerminbarn.isNotEmpty()) {
+            val terminbarnPåSøknad = gjeldendeBarn[it] ?: emptyList()
+            if (terminbarnPåSøknad.isNotEmpty()) {
                 val fødselsnummerSøker = fagsakService.hentAktivIdent(gjeldendeBarn[it]?.first()?.fagsakId
                                                                       ?: error("Kunne ikke finne TerminbarnTilUtplukkForOppgave"))
                 val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(fødselsnummerSøker).barn)
                         .filter { it.fødsel.gjeldende().erUnder18År() }
 
-                val ugyldigeTerminbarn = utgåtteTerminbarn.filter { !it.match(pdlBarnUnder18år) }
+                val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarnUnder18år) }
                 val oppgaver = lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
                 if (oppgaver.isNotEmpty()) {
                     sendOppgaverTilIverksett(oppgaver)
@@ -69,14 +63,9 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
                                                         fødselsnummerSøker: String): List<OppgaveForBarn> {
 
         return barnTilUtplukkForOppgave.filter {
-            val terminbarnOppgave = lagTerminbarnOppgave(it)
-            val oppgaveFinnes =
-                    terminbarnRepository.existsByFagsakIdAndTermindato(terminbarnOppgave.fagsakId, terminbarnOppgave.termindato)
-            if (!oppgaveFinnes) {
-                terminbarnRepository.insert(terminbarnOppgave)
-            }
-            !oppgaveFinnes
+            !terminbarnRepository.existsByFagsakIdAndTermindato(it.fagsakId, it.termindatoBarn)
         }.map {
+            terminbarnRepository.insert(lagTerminbarnOppgave(it))
             OppgaveForBarn(it.behandlingId,
                            it.eksternFagsakId,
                            fødselsnummerSøker,
@@ -95,10 +84,6 @@ class ForberedOppgaverTerminbarnService(private val behandlingRepository: Behand
     private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: LocalDate): Boolean {
         return søknadBarnTermindato.minusMonths(3).isBefore(pdlBarnFødselsdato)
                && søknadBarnTermindato.plusWeeks(4).isAfter(pdlBarnFødselsdato)
-    }
-
-    private fun utgåttTermindato(termindato: LocalDate): Boolean {
-        return termindato.isBefore(LocalDate.now())
     }
 
 }
