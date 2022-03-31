@@ -39,6 +39,10 @@ import java.util.TimeZone
 
 internal class BehandlingsstatistikkTaskTest {
 
+    init {
+        TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
+    }
+
     val personIdent = "123456789012"
     val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
     val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, type = FØRSTEGANGSBEHANDLING)
@@ -81,7 +85,6 @@ internal class BehandlingsstatistikkTaskTest {
 
     @BeforeEach
     internal fun setUp() {
-        TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Oslo")))
 
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
