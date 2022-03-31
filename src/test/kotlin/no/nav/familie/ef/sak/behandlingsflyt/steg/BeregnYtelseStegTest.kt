@@ -1343,7 +1343,7 @@ internal class BeregnYtelseStegTest {
                           vedtak: VedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
                                                                          inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        utførSteg(saksbehandling(type = type, forrigeBehandlingId = forrigeBehandlingId))
+        utførSteg(saksbehandling(type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak)
     }
 
     private fun utførSteg(saksbehandling: Saksbehandling = saksbehandling(),

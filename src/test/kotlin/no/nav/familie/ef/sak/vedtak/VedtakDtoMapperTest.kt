@@ -74,40 +74,47 @@ class VedtakDtoMapperTest {
     }
 
     private fun innvilgelseOvergangsstønad() =
-            InnvilgelseOvergangsstønad("periodebegrunnelse",
-                                       "inntektsbegrunnelse",
-                                       listOf(vedtaksperiode()),
-                                       listOf(Inntekt(årMånedFra = YearMonth.of(2021, 1),
-                                                      forventetInntekt = BigDecimal(100_000),
-                                                      samordningsfradrag = BigDecimal(500))),
-                                       SamordningsfradragType.GJENLEVENDEPENSJON)
+            InnvilgelseOvergangsstønad(
+                    "periodebegrunnelse",
+                    "inntektsbegrunnelse",
+                    listOf(vedtaksperiode()),
+                    listOf(Inntekt(årMånedFra = YearMonth.of(2021, 1),
+                                   forventetInntekt = BigDecimal(100_000),
+                                   samordningsfradrag = BigDecimal(500))),
+                    SamordningsfradragType.GJENLEVENDEPENSJON)
 
-    private fun innvilgelseBarnetilsyn(barnId: UUID = UUID.randomUUID()) = InnvilgelseBarnetilsyn(
-            "begrunnelse",
-            listOf(barnetilsynperiodeDto(barnId)),
-            listOf(periodeMedBeløpDto()),
-            tilleggsstønadDto()
-    )
+    private fun innvilgelseBarnetilsyn(barnId: UUID = UUID.randomUUID()) =
+            InnvilgelseBarnetilsyn(
+                    "begrunnelse",
+                    listOf(barnetilsynperiodeDto(barnId)),
+                    listOf(periodeMedBeløpDto()),
+                    tilleggsstønadDto())
 
-    private fun barnetilsynperiodeDto(barnId: UUID) = BarnetilsynperiodeDto(LocalDate.of(2021, 1, 1),
-                                                                LocalDate.of(2021, 12, 31),
-                                                                BigDecimal(500),
-                                                                listOf(barnId)
-    )
+    private fun barnetilsynperiodeDto(barnId: UUID) =
+            BarnetilsynperiodeDto(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 12, 31),
+                    BigDecimal(500),
+                    listOf(barnId))
 
-    private fun periodeMedBeløpDto() = PeriodeMedBeløpDto(LocalDate.of(2021, 1, 1),
-                                                          LocalDate.of(2021, 12, 31),
-                                                          BigDecimal(1000))
+    private fun periodeMedBeløpDto() =
+            PeriodeMedBeløpDto(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 12, 31),
+                    BigDecimal(1000))
 
-    private fun tilleggsstønadDto() = TilleggsstønadDto(true,
-                                                        listOf(periodeMedBeløpDto()),
-                                                        "begrunnelse tilleggstønad")
+    private fun tilleggsstønadDto() =
+            TilleggsstønadDto(
+                    true,
+                    listOf(periodeMedBeløpDto()),
+                    "begrunnelse tilleggstønad")
 
     private fun vedtaksperiode() =
-            VedtaksperiodeDto(YearMonth.of(2021, 1),
-                              YearMonth.of(2021, 12),
-                              AktivitetType.BARN_UNDER_ETT_ÅR,
-                              VedtaksperiodeType.HOVEDPERIODE)
+            VedtaksperiodeDto(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 12),
+                    AktivitetType.BARN_UNDER_ETT_ÅR,
+                    VedtaksperiodeType.HOVEDPERIODE)
 
 
     private fun assertErLik(vedtakDto: VedtakDto, vedtakJson: String) {
