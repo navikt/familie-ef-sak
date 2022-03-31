@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -38,9 +38,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakRequest = Innvilget(resultatType = ResultatType.INNVILGE,
-                                      tomBegrunnelse,
-                                      tomBegrunnelse, emptyList(), emptyList())
+        val vedtakRequest = InnvilgelseOvergangsstønad(tomBegrunnelse,
+                                                       tomBegrunnelse, emptyList(), emptyList())
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
         vedtakService.slettVedtakHvisFinnes(behandling.id)
@@ -54,9 +53,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtakLagret?.periodeBegrunnelse).isEqualTo(tomBegrunnelse)
 
         /** Slett og opprett ny **/
-        val vedtakRequestMedPeriodeBegrunnelse = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                           "Begrunnelse",
-                                                           tomBegrunnelse, emptyList(), emptyList())
+        val vedtakRequestMedPeriodeBegrunnelse = InnvilgelseOvergangsstønad("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         assertThat(vedtakRepository.findAll()).isEmpty()
         vedtakService.lagreVedtak(vedtakRequestMedPeriodeBegrunnelse, behandling.id)
@@ -77,9 +74,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  tomBegrunnelse,
-                                  tomBegrunnelse, emptyList(), emptyList())
+        val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
 
@@ -95,9 +90,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  tomBegrunnelse,
-                                  tomBegrunnelse, emptyList(), emptyList())
+        val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
         val saksbehandlerIdent = "S123456"
@@ -114,9 +107,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  tomBegrunnelse,
-                                  tomBegrunnelse, emptyList(), emptyList())
+        val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
         val beslutterIdent = "B123456"
@@ -136,11 +127,10 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak)).id
         val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "",
-                                  inntektBegrunnelse = "tomBegrunnelse",
-                                  perioder = emptyList(),
-                                  inntekter = emptyList())
+        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
+                                                   inntektBegrunnelse = "tomBegrunnelse",
+                                                   perioder = emptyList(),
+                                                   inntekter = emptyList())
         vedtakService.lagreVedtak(vedtakDto, behandling)
         vedtakService.lagreVedtak(vedtakDto, behandling2)
 

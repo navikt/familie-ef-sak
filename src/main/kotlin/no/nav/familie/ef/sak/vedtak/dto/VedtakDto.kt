@@ -46,81 +46,75 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
-
-sealed class VedtakDto(val resultattypeIntern: ResultatType) {
+/*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+              include = JsonTypeInfo.As.PROPERTY,
+              property = "_type")*/
+sealed class VedtakDto(val resultatType: ResultatType, val _type: String) {
 
     fun erInnvilgeMedOpphør(): Boolean {
-        return this is Innvilget && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+        return this is InnvilgelseOvergangsstønad && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     }
 }
 
-class Innvilget(val resultatType: ResultatType,
-                val periodeBegrunnelse: String?,
-                val inntektBegrunnelse: String?,
-                val perioder: List<VedtaksperiodeDto> = emptyList(),
-                val inntekter: List<Inntekt> = emptyList(),
-                val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE)
+data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
+                                      val inntektBegrunnelse: String?,
+                                      val perioder: List<VedtaksperiodeDto> = emptyList(),
+                                      val inntekter: List<Inntekt> = emptyList(),
+                                      val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE, "InnvilgelseOvergangsstønad")
 
-class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
-            val avslåÅrsak: AvslagÅrsak?,
-            val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ)
+data class Avslå(val avslåÅrsak: AvslagÅrsak?,
+                 val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
 
-class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
-             val opphørFom: YearMonth,
-             val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT)
+data class Opphør(val opphørFom: YearMonth,
+                  val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
 
-class Sanksjonert(val resultatType: ResultatType = ResultatType.SANKSJONERE,
-                  val sanksjonsårsak: Sanksjonsårsak,
-                  val periode: VedtaksperiodeDto,
-                  val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE)
+data class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
+                       val periode: VedtaksperiodeDto,
+                       val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
                        avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
-                       resultatType = this.resultattypeIntern)
-    is Innvilget -> Vedtak(behandlingId = behandlingId,
-                           periodeBegrunnelse = this.periodeBegrunnelse,
-                           inntektBegrunnelse = this.inntektBegrunnelse,
-                           resultatType = this.resultatType,
-                           perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
-                           inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
-                           samordningsfradragType = this.samordningsfradragType)
-    is Opphør -> Vedtak(behandlingId = behandlingId,
-                        avslåBegrunnelse = begrunnelse,
-                        resultatType = ResultatType.OPPHØRT,
-                        opphørFom = opphørFom.atDay(1)
-    )
-    is Sanksjonert -> Vedtak(
-            behandlingId = behandlingId,
-            sanksjonsårsak = this.sanksjonsårsak,
-            perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
-            internBegrunnelse = this.internBegrunnelse,
-            resultatType = ResultatType.SANKSJONERE,
-    )
+                       resultatType = this.resultatType)
+    is InnvilgelseOvergangsstønad ->
+        Vedtak(behandlingId = behandlingId,
+               periodeBegrunnelse = this.periodeBegrunnelse,
+               inntektBegrunnelse = this.inntektBegrunnelse,
+               resultatType = this.resultatType,
+               perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
+               inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
+               samordningsfradragType = this.samordningsfradragType)
+    is Opphør ->
+        Vedtak(behandlingId = behandlingId,
+               avslåBegrunnelse = begrunnelse,
+               resultatType = ResultatType.OPPHØRT,
+               opphørFom = opphørFom.atDay(1))
+    is Sanksjonert ->
+        Vedtak(behandlingId = behandlingId,
+               sanksjonsårsak = this.sanksjonsårsak,
+               perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
+               internBegrunnelse = this.internBegrunnelse,
+               resultatType = ResultatType.SANKSJONERE)
 }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
-            ResultatType.INNVILGE -> Innvilget(
-                    resultatType = this.resultatType,
+            ResultatType.INNVILGE -> InnvilgelseOvergangsstønad(
                     periodeBegrunnelse = this.periodeBegrunnelse,
                     inntektBegrunnelse = this.inntektBegrunnelse,
                     perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
                     inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt(),
                     samordningsfradragType = this.samordningsfradragType)
             ResultatType.AVSLÅ -> Avslå(
-                    resultatType = this.resultatType,
                     avslåBegrunnelse = this.avslåBegrunnelse,
                     avslåÅrsak = this.avslåÅrsak,
             )
             ResultatType.OPPHØRT -> Opphør(
-                    resultatType = this.resultatType,
                     begrunnelse = this.avslåBegrunnelse,
                     opphørFom = YearMonth.from(this.opphørFom)
             )
             ResultatType.SANKSJONERE -> Sanksjonert(
-                    resultatType = this.resultatType,
                     sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
                     periode = (this.perioder?.perioder ?: emptyList()).fraDomeneForSanksjon(),
                     internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
@@ -135,7 +129,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         val mapper = p.codec as ObjectMapper
         val node: JsonNode = mapper.readTree(p)
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
-            ResultatType.INNVILGE -> mapper.treeToValue(node, Innvilget::class.java)
+            ResultatType.INNVILGE -> mapper.treeToValue(node, InnvilgelseOvergangsstønad::class.java)
             ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
             ResultatType.OPPHØRT -> mapper.treeToValue(node, Opphør::class.java)
             ResultatType.SANKSJONERE -> mapper.treeToValue(node, Sanksjonert::class.java)

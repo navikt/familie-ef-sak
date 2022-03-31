@@ -37,12 +37,9 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -53,7 +50,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.Properties
 import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse as DtoAdressebeskyttelse
 
@@ -487,11 +483,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                         behandling: Behandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                               perioder = vedtaksperioder,
-                               inntekter = inntekter,
-                               periodeBegrunnelse = null,
-                               inntektBegrunnelse = null)
+        val vedtak = InnvilgelseOvergangsstønad(perioder = vedtaksperioder,
+                                                inntekter = inntekter,
+                                                periodeBegrunnelse = null,
+                                                inntektBegrunnelse = null)
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
     }
 
