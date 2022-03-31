@@ -30,7 +30,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -156,10 +156,10 @@ class MigreringService(
         val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
-        beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(periodeBegrunnelse = null,
-                                                             inntektBegrunnelse = null,
-                                                             perioder = vedtaksperioder,
-                                                             inntekter = inntekter))
+        beregnYtelseSteg.utførSteg(saksbehandling, InnvilgelseOvergangsstønad(periodeBegrunnelse = null,
+                                                                              inntektBegrunnelse = null,
+                                                                              perioder = vedtaksperioder,
+                                                                              inntekter = inntekter))
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)

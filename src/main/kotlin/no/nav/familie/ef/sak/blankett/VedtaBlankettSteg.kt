@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -24,7 +24,7 @@ class VedtaBlankettSteg(private val vedtakService: VedtakService, private val bl
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
         when (data) {
-            is Innvilget, is Avslå -> {
+            is InnvilgelseOvergangsstønad, is Avslå -> {
                 vedtakService.slettVedtakHvisFinnes(saksbehandling.id)
                 vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandling.id)
                 blankettRepository.deleteById(saksbehandling.id)

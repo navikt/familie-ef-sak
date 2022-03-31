@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
@@ -60,7 +60,7 @@ class BeregningController(private val stegService: StegService,
     }
 
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
-        if (vedtak is Innvilget) {
+        if (vedtak is InnvilgelseOvergangsstønad) {
             brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
         }
     }
