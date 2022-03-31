@@ -15,7 +15,7 @@ import java.util.Properties
 
 @RestController
 @RequestMapping(
-        path = ["/api/oppgaverforterminbarn"],
+        path = ["/api/oppgaver-for-terminbarn"],
         produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @ProtectedWithClaims(issuer = "azuread")
