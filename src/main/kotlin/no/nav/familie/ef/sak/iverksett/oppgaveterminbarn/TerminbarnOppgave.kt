@@ -8,5 +8,4 @@ import java.util.UUID
 data class TerminbarnOppgave(@Id
                              val fagsakId: UUID,
                              val termindato: LocalDate,
-                             @Column("opprettet_tid")
                              val opprettetTid: LocalDate = LocalDate.now())
