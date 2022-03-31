@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.ForberedOppgaverForBarnTas
 import no.nav.familie.prosessering.domene.Task
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -14,7 +13,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 @RestController
-@RequestMapping(path = ["/api/oppgaverforterminbarn"])
+@RequestMapping(path = ["/api/oppgaver-for-terminbarn"])
 @ProtectedWithClaims(issuer = "azuread")
 class InitForberedOppgaverForBarnTaskController(private val forberedOppgaverTerminbarnTask: ForberedOppgaverTerminbarnTask) {
 
