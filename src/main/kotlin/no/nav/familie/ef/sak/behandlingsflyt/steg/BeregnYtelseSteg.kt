@@ -19,12 +19,14 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -44,7 +46,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
+        validerStønadstype(saksbehandling, data)
         validerGyldigeVedtaksperioder(saksbehandling, data)
+
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId).hentAktivIdent()
         val saksbehandlingMedOppdatertIdent = saksbehandling.copy(ident = aktivIdent)
         nullstillEksisterendeVedtakPåBehandling(saksbehandlingMedOppdatertIdent.id)
@@ -55,6 +59,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetBehandling(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
+            }
+            is InnvilgelseBarnetilsyn -> {
+                // TODO
             }
             is Opphør -> {
                 validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
@@ -98,6 +105,20 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             brukerfeilHvis(!saksbehandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
+        }
+    }
+
+    private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
+        when(data) {
+            is InnvilgelseOvergangsstønad -> validerStønadstype(saksbehandling, data, StønadType.OVERGANGSSTØNAD)
+            is InnvilgelseBarnetilsyn -> validerStønadstype(saksbehandling, data, StønadType.BARNETILSYN)
+            else -> return
+        }
+    }
+
+    private fun validerStønadstype(saksbehandling: Saksbehandling, vedtak: VedtakDto, stønadstype: StønadType) {
+        feilHvis(saksbehandling.stønadstype != stønadstype) {
+            "Feil stønadstype=$stønadstype for gitt vedtakstype ${vedtak::class.java.simpleName}"
         }
     }
 
