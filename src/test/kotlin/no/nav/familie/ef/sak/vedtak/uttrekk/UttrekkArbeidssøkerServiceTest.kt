@@ -37,7 +37,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -483,10 +483,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                         behandling: Behandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = Innvilget(perioder = vedtaksperioder,
-                               inntekter = inntekter,
-                               periodeBegrunnelse = null,
-                               inntektBegrunnelse = null)
+        val vedtak = InnvilgelseOvergangsstønad(perioder = vedtaksperioder,
+                                                inntekter = inntekter,
+                                                periodeBegrunnelse = null,
+                                                inntektBegrunnelse = null)
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
     }
 

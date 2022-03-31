@@ -46,36 +46,38 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
-sealed class VedtakDto(val resultatType: ResultatType) {
+/*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+              include = JsonTypeInfo.As.PROPERTY,
+              property = "_type")*/
+sealed class VedtakDto(val resultatType: ResultatType, val _type: String) {
 
     fun erInnvilgeMedOpphør(): Boolean {
-        return this is Innvilget && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+        return this is InnvilgelseOvergangsstønad && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     }
 }
 
-class Innvilget(val periodeBegrunnelse: String?,
-                val inntektBegrunnelse: String?,
-                val perioder: List<VedtaksperiodeDto> = emptyList(),
-                val inntekter: List<Inntekt> = emptyList(),
-                val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE)
+data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
+                                      val inntektBegrunnelse: String?,
+                                      val perioder: List<VedtaksperiodeDto> = emptyList(),
+                                      val inntekter: List<Inntekt> = emptyList(),
+                                      val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE, "InnvilgelseOvergangsstønad")
 
+data class Avslå(val avslåÅrsak: AvslagÅrsak?,
+                 val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
 
-class Avslå(val avslåÅrsak: AvslagÅrsak?,
-            val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ)
+data class Opphør(val opphørFom: YearMonth,
+                  val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
 
-class Opphør(val opphørFom: YearMonth,
-             val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT)
-
-class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
-                  val periode: VedtaksperiodeDto,
-                  val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE)
+data class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
+                       val periode: VedtaksperiodeDto,
+                       val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
                        avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
                        resultatType = this.resultatType)
-    is Innvilget ->
+    is InnvilgelseOvergangsstønad ->
         Vedtak(behandlingId = behandlingId,
                periodeBegrunnelse = this.periodeBegrunnelse,
                inntektBegrunnelse = this.inntektBegrunnelse,
@@ -98,7 +100,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
-            ResultatType.INNVILGE -> Innvilget(
+            ResultatType.INNVILGE -> InnvilgelseOvergangsstønad(
                     periodeBegrunnelse = this.periodeBegrunnelse,
                     inntektBegrunnelse = this.inntektBegrunnelse,
                     perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
@@ -127,7 +129,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         val mapper = p.codec as ObjectMapper
         val node: JsonNode = mapper.readTree(p)
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
-            ResultatType.INNVILGE -> mapper.treeToValue(node, Innvilget::class.java)
+            ResultatType.INNVILGE -> mapper.treeToValue(node, InnvilgelseOvergangsstønad::class.java)
             ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)
             ResultatType.OPPHØRT -> mapper.treeToValue(node, Opphør::class.java)
             ResultatType.SANKSJONERE -> mapper.treeToValue(node, Sanksjonert::class.java)
