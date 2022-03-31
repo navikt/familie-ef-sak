@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnTilUtplukkForOppgave
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -17,19 +16,12 @@ import java.util.UUID
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, 
-          bb.fodsel_termindato termindato_barn, FALSE AS fra_migrering
+        SELECT b.id behandling_id, b.fagsak_id, fe.id, bb.person_ident fodselsnummer_barn, 
+          bb.fodsel_termindato termindato_barn
         FROM gjeldende_iverksatte_behandlinger b
-         JOIN fagsak f ON f.id = b.fagsak_id
-         JOIN (SELECT DISTINCT ON(pi.fagsak_person_id) * FROM person_ident pi ORDER BY pi.fagsak_person_id, pi.opprettet_tid DESC) pi ON pi.fagsak_person_id = f.fagsak_person_id
+         JOIN fagsak_ekstern fe ON fe.fagsak_id = b.fagsak_id
          JOIN behandling_barn bb ON bb.behandling_id = b.id
-        WHERE bb.person_ident IS NULL AND b.stonadstype=:stønadstype AND EXISTS(SELECT 1 FROM andel_tilkjent_ytelse aty
-            JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
-            WHERE ty.id = aty.tilkjent_ytelse 
-            AND ty.behandling_id = b.id
-          AND aty.stonad_tom >= :dato
-          AND aty.belop > 0)
+        WHERE bb.person_ident IS NULL AND bb.fodsel_termindato < date(NOW() - INTERVAL '4 week') 
         """)
-    fun finnBarnAvGjeldendeIverksatteBehandlingerKunTerminbarn(stønadstype: StønadType,
-                                                               dato: LocalDate = LocalDate.now()): List<BarnTilUtplukkForOppgave>
+    fun finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(): List<TerminbarnTilUtplukkForOppgave>
 }
