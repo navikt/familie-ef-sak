@@ -160,6 +160,8 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): VedtakDto {
         val mapper = p.codec as ObjectMapper
         val node: JsonNode = mapper.readTree(p)
+
+        // før vi har tatt i bruk @JsonTypeInfo så brukes denne for å mappe InnvilgelseBarnetilsyn
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsyn") {
             return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
         }
