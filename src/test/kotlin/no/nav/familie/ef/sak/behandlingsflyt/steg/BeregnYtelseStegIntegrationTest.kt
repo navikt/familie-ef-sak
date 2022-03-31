@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -90,8 +89,7 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     private fun innvilg(saksbehandling: Saksbehandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                               perioder = vedtaksperioder,
+        val vedtak = Innvilget(perioder = vedtaksperioder,
                                inntekter = inntekter,
                                periodeBegrunnelse = null,
                                inntektBegrunnelse = null)

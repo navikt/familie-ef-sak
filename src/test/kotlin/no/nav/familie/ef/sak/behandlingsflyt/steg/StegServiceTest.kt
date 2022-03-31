@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -53,8 +52,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
                              forventetInntekt = BigDecimal(12345),
                              samordningsfradrag = BigDecimal(2))
         stegService.håndterBeregnYtelseForStønad(saksbehandling(fagsak, behandling),
-                                                 vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                                    periodeBegrunnelse = "ok",
+                                                 vedtak = Innvilget(periodeBegrunnelse = "ok",
                                                                     inntektBegrunnelse = "okok",
                                                                     perioder = listOf(vedtaksperiode),
                                                                     inntekter = listOf(inntek),

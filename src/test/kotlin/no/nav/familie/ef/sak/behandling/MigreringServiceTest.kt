@@ -39,7 +39,6 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -502,8 +501,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                                                periodeType = VedtaksperiodeType.HOVEDPERIODE)
 
         val inntekt = Inntekt(migrerFraDato, forventetInntekt = forventetInntekt, samordningsfradrag = samordningsfradrag)
-        val innvilget = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = null,
+        val innvilget = Innvilget(periodeBegrunnelse = null,
                                   inntektBegrunnelse = null,
                                   perioder = listOf(vedtaksperiode),
                                   inntekter = listOf(inntekt))

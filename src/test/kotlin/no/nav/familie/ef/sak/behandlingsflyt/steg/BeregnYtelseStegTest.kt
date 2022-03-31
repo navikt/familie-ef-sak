@@ -32,7 +32,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -1225,7 +1224,7 @@ internal class BeregnYtelseStegTest {
 
             assertThrows<Feil> {
                 utførSteg(BehandlingType.REVURDERING,
-                          Opphør(ResultatType.OPPHØRT, opphørFom, "ok"),
+                          Opphør(opphørFom, "ok"),
                           forrigeBehandlingId = UUID.randomUUID())
             }
         }
@@ -1253,8 +1252,7 @@ internal class BeregnYtelseStegTest {
 
     private fun innvilget(perioder: List<VedtaksperiodeDto>,
                           inntekter: List<Inntekt>) =
-            Innvilget(resultatType = ResultatType.INNVILGE,
-                      perioder = perioder,
+            Innvilget(perioder = perioder,
                       inntekter = inntekter,
                       inntektBegrunnelse = "null",
                       periodeBegrunnelse = "null")
@@ -1320,8 +1318,7 @@ internal class BeregnYtelseStegTest {
                     samordningsfradrag = BigDecimal.ZERO)
 
     private fun utførSteg(type: BehandlingType,
-                          vedtak: VedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                        periodeBegrunnelse = "",
+                          vedtak: VedtakDto = Innvilget(periodeBegrunnelse = "",
                                                         inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
         val fagsak = fagsak()

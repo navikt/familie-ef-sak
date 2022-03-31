@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -115,8 +114,7 @@ internal class SimuleringServiceTest {
         val årMånedFraStart = YearMonth.of(2021, 1)
         val årMånedGEndring = YearMonth.of(2021, 5)
         val årMånedFraSlutt = YearMonth.of(2021, 12)
-        val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                               periodeBegrunnelse = "Ok",
+        val vedtak = Innvilget(periodeBegrunnelse = "Ok",
                                inntektBegrunnelse = "ok",
                                perioder = listOf(VedtaksperiodeDto(årMånedFra = årMånedFraStart,
                                                                    årMånedTil = årMånedFraSlutt,
