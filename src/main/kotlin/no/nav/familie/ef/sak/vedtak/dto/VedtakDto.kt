@@ -74,9 +74,8 @@ data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
 data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
                                   val perioder: List<BarnetilsynperiodeDto> = emptyList(),
                                   val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
-                                  val tilleggsstønad: TilleggsstønadDto,
-                                  val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE,
-                                                                                                          "InnvilgelseBarnetilsyn")
+                                  val tilleggsstønad: TilleggsstønadDto) : VedtakDto(ResultatType.INNVILGE,
+                                                                                     "InnvilgelseBarnetilsyn")
 
 data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
                              val perioder: List<PeriodeMedBeløpDto> = emptyList(),

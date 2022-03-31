@@ -86,8 +86,7 @@ class VedtakDtoMapperTest {
             "begrunnelse",
             listOf(barnetilsynperiodeDto(barnId)),
             listOf(periodeMedBeløpDto()),
-            tilleggsstønadDto(),
-            SamordningsfradragType.GJENLEVENDEPENSJON
+            tilleggsstønadDto()
     )
 
     private fun barnetilsynperiodeDto(barnId: UUID) = BarnetilsynperiodeDto(LocalDate.of(2021, 1, 1),
