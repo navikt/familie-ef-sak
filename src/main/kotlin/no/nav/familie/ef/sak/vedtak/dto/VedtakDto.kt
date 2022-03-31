@@ -12,10 +12,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
-import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
@@ -23,8 +21,6 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
