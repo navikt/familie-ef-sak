@@ -84,8 +84,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
+        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse")
 
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
@@ -104,8 +103,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga valideringsfeil`() {
         val (_, behandling) = lagFagsakOgBehandling()
 
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
+        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse")
 
         vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
@@ -152,8 +150,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                        beløp = 10_000,
                                                        tilOgMed = LocalDate.of(2022, 4, 30),
                                                )))
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
+        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse",
                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 1),
                                                                       årMånedTil = YearMonth.of(2022, 4),
@@ -188,8 +185,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 kildeBehandlingId = revurdering.id,
                                                                 tilOgMed = LocalDate.of(2022, 6, 30))))
 
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
+        val vedtakDto = Innvilget(periodeBegrunnelse = "periode begrunnelse",
                                   inntektBegrunnelse = "inntekt begrunnelse",
                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 3),
                                                                       årMånedTil = YearMonth.of(2022, 6),

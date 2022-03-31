@@ -46,31 +46,27 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.SANKSJONERE -> Vedtaksresultat.INNVILGET
 }
 
-
-sealed class VedtakDto(val resultattypeIntern: ResultatType) {
+sealed class VedtakDto(val resultatType: ResultatType) {
 
     fun erInnvilgeMedOpphør(): Boolean {
         return this is Innvilget && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     }
 }
 
-class Innvilget(val resultatType: ResultatType,
-                val periodeBegrunnelse: String?,
+class Innvilget(val periodeBegrunnelse: String?,
                 val inntektBegrunnelse: String?,
                 val perioder: List<VedtaksperiodeDto> = emptyList(),
                 val inntekter: List<Inntekt> = emptyList(),
                 val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE)
 
-class Avslå(val resultatType: ResultatType = ResultatType.AVSLÅ,
-            val avslåÅrsak: AvslagÅrsak?,
+
+class Avslå(val avslåÅrsak: AvslagÅrsak?,
             val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ)
 
-class Opphør(val resultatType: ResultatType = ResultatType.OPPHØRT,
-             val opphørFom: YearMonth,
+class Opphør(val opphørFom: YearMonth,
              val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT)
 
-class Sanksjonert(val resultatType: ResultatType = ResultatType.SANKSJONERE,
-                  val sanksjonsårsak: Sanksjonsårsak,
+class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
                   val periode: VedtaksperiodeDto,
                   val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE)
 
@@ -78,49 +74,45 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
                        avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
-                       resultatType = this.resultattypeIntern)
-    is Innvilget -> Vedtak(behandlingId = behandlingId,
-                           periodeBegrunnelse = this.periodeBegrunnelse,
-                           inntektBegrunnelse = this.inntektBegrunnelse,
-                           resultatType = this.resultatType,
-                           perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
-                           inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
-                           samordningsfradragType = this.samordningsfradragType)
-    is Opphør -> Vedtak(behandlingId = behandlingId,
-                        avslåBegrunnelse = begrunnelse,
-                        resultatType = ResultatType.OPPHØRT,
-                        opphørFom = opphørFom.atDay(1)
-    )
-    is Sanksjonert -> Vedtak(
-            behandlingId = behandlingId,
-            sanksjonsårsak = this.sanksjonsårsak,
-            perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
-            internBegrunnelse = this.internBegrunnelse,
-            resultatType = ResultatType.SANKSJONERE,
-    )
+                       resultatType = this.resultatType)
+    is Innvilget ->
+        Vedtak(behandlingId = behandlingId,
+               periodeBegrunnelse = this.periodeBegrunnelse,
+               inntektBegrunnelse = this.inntektBegrunnelse,
+               resultatType = this.resultatType,
+               perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
+               inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
+               samordningsfradragType = this.samordningsfradragType)
+    is Opphør ->
+        Vedtak(behandlingId = behandlingId,
+               avslåBegrunnelse = begrunnelse,
+               resultatType = ResultatType.OPPHØRT,
+               opphørFom = opphørFom.atDay(1))
+    is Sanksjonert ->
+        Vedtak(behandlingId = behandlingId,
+               sanksjonsårsak = this.sanksjonsårsak,
+               perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
+               internBegrunnelse = this.internBegrunnelse,
+               resultatType = ResultatType.SANKSJONERE)
 }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
             ResultatType.INNVILGE -> Innvilget(
-                    resultatType = this.resultatType,
                     periodeBegrunnelse = this.periodeBegrunnelse,
                     inntektBegrunnelse = this.inntektBegrunnelse,
                     perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
                     inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt(),
                     samordningsfradragType = this.samordningsfradragType)
             ResultatType.AVSLÅ -> Avslå(
-                    resultatType = this.resultatType,
                     avslåBegrunnelse = this.avslåBegrunnelse,
                     avslåÅrsak = this.avslåÅrsak,
             )
             ResultatType.OPPHØRT -> Opphør(
-                    resultatType = this.resultatType,
                     begrunnelse = this.avslåBegrunnelse,
                     opphørFom = YearMonth.from(this.opphørFom)
             )
             ResultatType.SANKSJONERE -> Sanksjonert(
-                    resultatType = this.resultatType,
                     sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
                     periode = (this.perioder?.perioder ?: emptyList()).fraDomeneForSanksjon(),
                     internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),

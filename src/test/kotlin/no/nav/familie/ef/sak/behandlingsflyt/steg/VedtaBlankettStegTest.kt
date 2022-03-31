@@ -14,7 +14,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -32,7 +31,6 @@ internal class VedtaBlankettStegTest {
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
         val request = Innvilget(
-                resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
                 emptyList(),
@@ -65,7 +63,6 @@ internal class VedtaBlankettStegTest {
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
         val request = Innvilget(
-                resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
                 emptyList(),
@@ -100,7 +97,6 @@ internal class VedtaBlankettStegTest {
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
         val request = Innvilget(
-                resultatType = ResultatType.INNVILGE,
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
                 emptyList(),

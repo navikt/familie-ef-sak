@@ -38,8 +38,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakRequest = Innvilget(resultatType = ResultatType.INNVILGE,
-                                      tomBegrunnelse,
+        val vedtakRequest = Innvilget(tomBegrunnelse,
                                       tomBegrunnelse, emptyList(), emptyList())
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
@@ -54,9 +53,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtakLagret?.periodeBegrunnelse).isEqualTo(tomBegrunnelse)
 
         /** Slett og opprett ny **/
-        val vedtakRequestMedPeriodeBegrunnelse = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                           "Begrunnelse",
-                                                           tomBegrunnelse, emptyList(), emptyList())
+        val vedtakRequestMedPeriodeBegrunnelse = Innvilget("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         assertThat(vedtakRepository.findAll()).isEmpty()
         vedtakService.lagreVedtak(vedtakRequestMedPeriodeBegrunnelse, behandling.id)
@@ -77,9 +74,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  tomBegrunnelse,
-                                  tomBegrunnelse, emptyList(), emptyList())
+        val vedtakDto = Innvilget(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
 
@@ -95,9 +90,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  tomBegrunnelse,
-                                  tomBegrunnelse, emptyList(), emptyList())
+        val vedtakDto = Innvilget(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
         val saksbehandlerIdent = "S123456"
@@ -114,9 +107,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                                                                 type = BehandlingType.BLANKETT))
 
         val tomBegrunnelse = ""
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  tomBegrunnelse,
-                                  tomBegrunnelse, emptyList(), emptyList())
+        val vedtakDto = Innvilget(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
         vedtakService.lagreVedtak(vedtakDto, behandling.id)
         val beslutterIdent = "B123456"
@@ -136,8 +127,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak)).id
         val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "",
+        val vedtakDto = Innvilget(periodeBegrunnelse = "",
                                   inntektBegrunnelse = "tomBegrunnelse",
                                   perioder = emptyList(),
                                   inntekter = emptyList())
