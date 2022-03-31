@@ -14,19 +14,14 @@ import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 @RestController
-@RequestMapping(
-        path = ["/api/oppgaverforterminbarn"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
-)
+@RequestMapping(path = ["/api/oppgaverforterminbarn"])
 @ProtectedWithClaims(issuer = "azuread")
 class InitForberedOppgaverForBarnTaskController(private val forberedOppgaverTerminbarnTask: ForberedOppgaverTerminbarnTask) {
-
-    val DATE_FORMAT_ISO_YEAR_MONTH_DAY = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
         forberedOppgaverTerminbarnTask.doTask(Task(ForberedOppgaverForBarnTask.TYPE,
-                                                   LocalDate.now().minusWeeks(1).format(DATE_FORMAT_ISO_YEAR_MONTH_DAY),
+                                                   LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE),
                                                    Properties()))
         return ResponseEntity(HttpStatus.OK)
     }

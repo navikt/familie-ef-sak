@@ -22,8 +22,6 @@ class ForberedOppgaverTerminbarnTask(val taskRepository: TaskRepository,
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    val DATE_FORMAT_ISO_YEAR_MONTH_DAY = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled("familie.ef.iverksett.opprett-oppgaver-terminbarn")) {
             val sisteKjøring = LocalDate.parse(task.payload)
@@ -40,7 +38,7 @@ class ForberedOppgaverTerminbarnTask(val taskRepository: TaskRepository,
     fun opprettTaskForNesteUke() {
         val nesteUke = LocalDate.now().plusWeeks(1)
         val triggerTid = nesteUke.atTime(5, 0)
-        taskRepository.save(Task(TYPE, LocalDate.now().format(DATE_FORMAT_ISO_YEAR_MONTH_DAY)).medTriggerTid(triggerTid))
+        taskRepository.save(Task(TYPE, LocalDate.now().format(DateTimeFormatter.ISO_DATE)).medTriggerTid(triggerTid))
     }
 
     companion object {
