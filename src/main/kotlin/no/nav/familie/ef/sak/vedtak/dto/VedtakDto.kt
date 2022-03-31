@@ -9,14 +9,22 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -60,7 +68,39 @@ data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
                                       val inntektBegrunnelse: String?,
                                       val perioder: List<VedtaksperiodeDto> = emptyList(),
                                       val inntekter: List<Inntekt> = emptyList(),
-                                      val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE, "InnvilgelseOvergangsstønad")
+                                      val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE,
+                                                                                                              "InnvilgelseOvergangsstønad")
+
+data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
+                                  val perioder: List<BarnetilsynperiodeDto> = emptyList(),
+                                  val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
+                                  val tilleggsstønad: TilleggsstønadDto,
+                                  val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE,
+                                                                                                          "InnvilgelseBarnetilsyn")
+
+data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
+                             val perioder: List<PeriodeMedBeløpDto> = emptyList(),
+                             val begrunnelse: String?)
+
+data class BarnetilsynperiodeDto(val datoFra: LocalDate,
+                                 val datoTil: LocalDate,
+                                 val utgifter: BigDecimal,
+                                 val barn: List<UUID>)
+
+data class PeriodeMedBeløpDto(val datoFra: LocalDate,
+                              val datoTil: LocalDate,
+                              val beløp: BigDecimal)
+
+fun BarnetilsynperiodeDto.tilDomene(): Barnetilsynperiode =
+        Barnetilsynperiode(datoFra = this.datoFra,
+                           datoTil = this.datoTil,
+                           utgifter = this.utgifter,
+                           barn = this.barn)
+
+fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
+        PeriodeMedBeløp(datoFra = this.datoFra,
+                        datoTil = this.datoTil,
+                        beløp = this.beløp)
 
 data class Avslå(val avslåÅrsak: AvslagÅrsak?,
                  val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
@@ -85,6 +125,16 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
                perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
                inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
                samordningsfradragType = this.samordningsfradragType)
+    is InnvilgelseBarnetilsyn ->
+        Vedtak(
+                resultatType = this.resultatType,
+                behandlingId = behandlingId,
+                barnetilsyn = BarnetilsynWrapper(perioder = this.perioder.map { it.tilDomene() },
+                                                 begrunnelse = this.begrunnelse),
+                kontantstøtte = KontantstøtteWrapper(perioder = this.perioderKontantstøtte.map { it.tilDomene() }),
+                tilleggsstønad = TilleggsstønadWrapper(harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
+                                                       perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
+                                                       begrunnelse = this.tilleggsstønad.begrunnelse))
     is Opphør ->
         Vedtak(behandlingId = behandlingId,
                avslåBegrunnelse = begrunnelse,
@@ -100,12 +150,13 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
-            ResultatType.INNVILGE -> InnvilgelseOvergangsstønad(
-                    periodeBegrunnelse = this.periodeBegrunnelse,
-                    inntektBegrunnelse = this.inntektBegrunnelse,
-                    perioder = (this.perioder ?: PeriodeWrapper(emptyList())).perioder.fraDomene(),
-                    inntekter = (this.inntekter ?: InntektWrapper(emptyList())).inntekter.tilInntekt(),
-                    samordningsfradragType = this.samordningsfradragType)
+            ResultatType.INNVILGE -> {
+                when {
+                    this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn()
+                    this.perioder != null -> mapInnvilgelseOvergangsstønad()
+                    else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
+                }
+            }
             ResultatType.AVSLÅ -> Avslå(
                     avslåBegrunnelse = this.avslåBegrunnelse,
                     avslåÅrsak = this.avslåÅrsak,
@@ -122,12 +173,49 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
         }
 
+private fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
+    feilHvis(this.perioder == null || this.inntekter == null) {
+        "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
+    }
+    return InnvilgelseOvergangsstønad(
+            periodeBegrunnelse = this.periodeBegrunnelse,
+            inntektBegrunnelse = this.inntektBegrunnelse,
+            perioder = this.perioder.perioder.fraDomene(),
+            inntekter = this.inntekter.inntekter.tilInntekt(),
+            samordningsfradragType = this.samordningsfradragType)
+}
+
+private fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
+    feilHvis(this.barnetilsyn == null || this.kontantstøtte == null || this.tilleggsstønad == null) {
+        "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
+    }
+    return InnvilgelseBarnetilsyn(
+            begrunnelse = barnetilsyn.begrunnelse,
+            perioder = barnetilsyn.perioder.map {
+                BarnetilsynperiodeDto(datoFra = it.datoFra,
+                                      datoTil = it.datoTil,
+                                      utgifter = it.utgifter,
+                                      barn = it.barn)
+            },
+            perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
+            tilleggsstønad = TilleggsstønadDto(
+                    harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
+                    perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
+                    begrunnelse = this.tilleggsstønad.begrunnelse
+            )
+    )
+}
+
 
 private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::class.java) {
 
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext?): VedtakDto {
         val mapper = p.codec as ObjectMapper
         val node: JsonNode = mapper.readTree(p)
+        if (node.get("_type").textValue() == "InnvilgelseBarnetilsyn") {
+            mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+        }
+
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
             ResultatType.INNVILGE -> mapper.treeToValue(node, InnvilgelseOvergangsstønad::class.java)
             ResultatType.AVSLÅ -> mapper.treeToValue(node, Avslå::class.java)

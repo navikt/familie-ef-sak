@@ -1,0 +1,21 @@
+{
+  "_type": "InnvilgelseBarnetilsyn",
+  "begrunnelse": "",
+  "perioder": [
+    {
+      "årMånedFra": "2021-01",
+      "årMånedTil": "2021-12",
+      "aktivitet": "BARN_UNDER_ETT_ÅR",
+      "periodeType": "HOVEDPERIODE"
+    }
+  ],
+  "inntekter": [
+    {
+      "årMånedFra": "2021-01",
+      "forventetInntekt": 100000,
+      "samordningsfradrag": 500
+    }
+  ],
+  "samordningsfradragType": "GJENLEVENDEPENSJON",
+  "resultatType": "INNVILGE"
+}

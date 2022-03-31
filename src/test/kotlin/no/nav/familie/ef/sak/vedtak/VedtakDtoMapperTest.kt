@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
@@ -25,6 +26,15 @@ class VedtakDtoMapperTest {
     @Test
     fun `deserialiser og serialiser innvilget overgangsstønad vedtak dto`() {
         val vedtakJson = readFile("OvergangsstønadInnvilgetVedtakDto.json")
+
+        val vedtak = innvilgelseOvergangsstønad()
+        assertErLik(vedtak, vedtakJson)
+        assertErLikUtenType(vedtak, vedtakJson)
+    }
+
+    @Test
+    fun `deserialiser og serialiser innvilget barnetilsyn vedtak dto`() {
+        val vedtakJson = readFile("BarnetilsynInnvilgetVedtakDto.json")
 
         val vedtak = innvilgelseOvergangsstønad()
         assertErLik(vedtak, vedtakJson)
@@ -66,6 +76,14 @@ class VedtakDtoMapperTest {
                                                       forventetInntekt = BigDecimal(100_000),
                                                       samordningsfradrag = BigDecimal(500))),
                                        SamordningsfradragType.GJENLEVENDEPENSJON)
+
+    private fun innvilgelseBarnetilsyn() = InnvilgelseBarnetilsyn(
+            "begrunnelse",
+            listOf(barnetilsynperiode()),
+            listOf(periodeMedBeløp()),
+
+
+    )
 
     private fun vedtaksperiode() =
             VedtaksperiodeDto(YearMonth.of(2021, 1),
