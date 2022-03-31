@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
