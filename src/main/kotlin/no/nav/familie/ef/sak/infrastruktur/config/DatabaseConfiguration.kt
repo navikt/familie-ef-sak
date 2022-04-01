@@ -351,8 +351,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
 
         override fun convert(pGobject: PGobject): KontantstøtteWrapper {
             val kontantstøtteVerdi: KontantstøtteWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
-            return kontantstøtteVerdi ?: KontantstøtteWrapper(perioder = emptyList(),
-                                                              begrunnelse = null)
+            return kontantstøtteVerdi ?: KontantstøtteWrapper(perioder = emptyList())
         }
     }
 
@@ -372,7 +371,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
         override fun convert(pGobject: PGobject): TilleggsstønadWrapper {
             val tilleggstønadVerdi: TilleggsstønadWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
             return tilleggstønadVerdi ?: TilleggsstønadWrapper(harTilleggsstønad = false,
-                                                               skalStønadReduseres = false,
                                                                perioder = emptyList(),
                                                                begrunnelse = null)
         }

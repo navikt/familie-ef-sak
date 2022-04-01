@@ -9,16 +9,22 @@ import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.vedtak.dto.BarnetilsynperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 class VedtakDtoMapperTest {
 
@@ -29,6 +35,15 @@ class VedtakDtoMapperTest {
         val vedtak = innvilgelseOvergangsstønad()
         assertErLik(vedtak, vedtakJson)
         assertErLikUtenType(vedtak, vedtakJson)
+    }
+
+    @Test
+    fun `deserialiser og serialiser innvilget barnetilsyn vedtak dto`() {
+        val vedtakJson = readFile("BarnetilsynInnvilgetVedtakDto.json")
+
+        val vedtak = innvilgelseBarnetilsyn(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
+        assertErLik(vedtak, vedtakJson)
+        //assertErLikUtenType(vedtak, vedtakJson) Må få type fra frontend når barnetilsyn blir tatt i bruk
     }
 
     @Test
@@ -59,19 +74,47 @@ class VedtakDtoMapperTest {
     }
 
     private fun innvilgelseOvergangsstønad() =
-            InnvilgelseOvergangsstønad("periodebegrunnelse",
-                                       "inntektsbegrunnelse",
-                                       listOf(vedtaksperiode()),
-                                       listOf(Inntekt(årMånedFra = YearMonth.of(2021, 1),
-                                                      forventetInntekt = BigDecimal(100_000),
-                                                      samordningsfradrag = BigDecimal(500))),
-                                       SamordningsfradragType.GJENLEVENDEPENSJON)
+            InnvilgelseOvergangsstønad(
+                    "periodebegrunnelse",
+                    "inntektsbegrunnelse",
+                    listOf(vedtaksperiode()),
+                    listOf(Inntekt(årMånedFra = YearMonth.of(2021, 1),
+                                   forventetInntekt = BigDecimal(100_000),
+                                   samordningsfradrag = BigDecimal(500))),
+                    SamordningsfradragType.GJENLEVENDEPENSJON)
+
+    private fun innvilgelseBarnetilsyn(barnId: UUID = UUID.randomUUID()) =
+            InnvilgelseBarnetilsyn(
+                    "begrunnelse",
+                    listOf(barnetilsynperiodeDto(barnId)),
+                    listOf(periodeMedBeløpDto()),
+                    tilleggsstønadDto())
+
+    private fun barnetilsynperiodeDto(barnId: UUID) =
+            BarnetilsynperiodeDto(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 12, 31),
+                    BigDecimal(500),
+                    listOf(barnId))
+
+    private fun periodeMedBeløpDto() =
+            PeriodeMedBeløpDto(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 12, 31),
+                    BigDecimal(1000))
+
+    private fun tilleggsstønadDto() =
+            TilleggsstønadDto(
+                    true,
+                    listOf(periodeMedBeløpDto()),
+                    "begrunnelse tilleggstønad")
 
     private fun vedtaksperiode() =
-            VedtaksperiodeDto(YearMonth.of(2021, 1),
-                              YearMonth.of(2021, 12),
-                              AktivitetType.BARN_UNDER_ETT_ÅR,
-                              VedtaksperiodeType.HOVEDPERIODE)
+            VedtaksperiodeDto(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 12),
+                    AktivitetType.BARN_UNDER_ETT_ÅR,
+                    VedtaksperiodeType.HOVEDPERIODE)
 
 
     private fun assertErLik(vedtakDto: VedtakDto, vedtakJson: String) {
