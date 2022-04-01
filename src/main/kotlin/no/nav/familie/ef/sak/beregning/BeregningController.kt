@@ -51,6 +51,7 @@ class BeregningController(private val stegService: StegService,
         return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
     }
 
+    @Deprecated("Slettes - bruk tilsvarende i vedtak controller")
     @PostMapping("/{behandlingId}/fullfor")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
