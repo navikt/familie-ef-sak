@@ -50,7 +50,7 @@ class InfotrygdPeriodeValideringService(
     private fun periodeFremEllerBakITiden(perioder: InfotrygdStønadPerioderDto,
                                           kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = perioder.summert
-        val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
+        val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= kjøremåned.atDay(1) }
         if (perioderFremITiden.isNotEmpty()) {
             return gjeldendePeriodeFremITiden(perioderFremITiden, kjøremåned)
         }
@@ -157,8 +157,6 @@ class InfotrygdPeriodeValideringService(
                                      MigreringExceptionType.ÅPEN_SAK)
         }
     }
-
-    private fun førsteDagenINesteMåned(yearMonth: YearMonth) = yearMonth.plusMonths(1).atDay(1)
 
     private fun lagSakFeilinfo(sak: InfotrygdSak): String {
         return "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
