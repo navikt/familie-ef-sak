@@ -73,7 +73,7 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
     }
 
-    @PostMapping("/{behandlingId}/fullfor")
+    @PostMapping("/{behandlingId}/lagre-vedtak")
     fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
