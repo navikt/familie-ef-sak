@@ -1,0 +1,29 @@
+package no.nav.familie.ef.sak.beregning
+
+import java.math.BigDecimal
+import java.time.YearMonth
+
+data class BeregningBarnetilsynRequest(
+        val utgiftsperioder: List<UtgiftsperiodeDto>,
+        val kontantstøtteperioder: List<KontantstøttePeriodeDto>,
+        val tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>
+)
+
+data class TilleggsstønadPeriodeDto(
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
+        val beløp: BigDecimal
+)
+
+data class KontantstøttePeriodeDto(
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
+        val beløp: BigDecimal
+)
+
+data class UtgiftsperiodeDto(
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
+        val barn: List<String>,
+        val utgifter: BigDecimal
+)
