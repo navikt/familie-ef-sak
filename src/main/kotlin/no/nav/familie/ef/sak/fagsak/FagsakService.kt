@@ -160,8 +160,12 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     private fun opprettFagsak(stønadstype: StønadType, fagsakPerson: FagsakPerson): FagsakDomain {
-        return fagsakRepository.insert(FagsakDomain(stønadstype = stønadstype,
-                                                    fagsakPersonId = fagsakPerson.id))
+        if (featureToggleService.isEnabled("familie.ef.sak.barnetilsyn")) {
+            return fagsakRepository.insert(FagsakDomain(stønadstype = stønadstype,
+                                                        fagsakPersonId = fagsakPerson.id))
+        } else {
+            throw Feil("Barnetilsyn ikke aktivert i prod")
+        }
     }
 
     fun FagsakDomain.tilFagsakMedPerson(): Fagsak {

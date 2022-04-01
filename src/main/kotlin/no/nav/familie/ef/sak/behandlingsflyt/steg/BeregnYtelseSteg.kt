@@ -61,7 +61,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is InnvilgelseBarnetilsyn -> {
-                // TODO
+                throw NotImplementedError()
             }
             is Opphør -> {
                 validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
