@@ -4,10 +4,13 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -34,7 +37,8 @@ class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
-                       private val vedtakService: VedtakService) {
+                       private val vedtakService: VedtakService,
+                       private val vurderingService: VurderingService) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -67,6 +71,20 @@ class VedtakController(private val stegService: StegService,
     fun hentVedtak(@PathVariable behandlingId: UUID): Ressurs<VedtakDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
+    }
+
+    @PostMapping("/{behandlingId}/fullfor")
+    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
+        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
+    }
+
+    private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
+        if (vedtak is InnvilgelseOvergangsstønad) {
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+        }
     }
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
