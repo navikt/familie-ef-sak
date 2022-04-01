@@ -6,14 +6,22 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -53,7 +61,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtakLagret?.periodeBegrunnelse).isEqualTo(tomBegrunnelse)
 
         /** Slett og opprett ny **/
-        val vedtakRequestMedPeriodeBegrunnelse = InnvilgelseOvergangsstønad("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
+        val vedtakRequestMedPeriodeBegrunnelse =
+                InnvilgelseOvergangsstønad("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         assertThat(vedtakRepository.findAll()).isEmpty()
         vedtakService.lagreVedtak(vedtakRequestMedPeriodeBegrunnelse, behandling.id)
@@ -136,4 +145,67 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(vedtakService.hentVedtakForBehandlinger(setOf(behandling, behandling2))).hasSize(2)
     }
+
+    @Nested
+    inner class DtoTilDomeneTilDto {
+
+        @Test
+        internal fun `innvilgelse overgangsstønad`() {
+            val behandling = opprettBehandling()
+            val vedtak = innvilgelseOvergangsstønadDto()
+
+            assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
+        }
+
+        @Test
+        internal fun `innvilgelse barnetilsyn`() {
+            val behandling = opprettBehandling()
+            val vedtak = innvilgelseBarnetilsynDto()
+
+            assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
+        }
+
+        @Test
+        internal fun `avslag`() {
+            val behandling = opprettBehandling()
+            val vedtak = avslagDto()
+
+            assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
+        }
+
+        @Test
+        internal fun `opphør`() {
+            val behandling = opprettBehandling()
+            val vedtak = opphørDto()
+
+            assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
+        }
+
+        @Test
+        internal fun `sanksjonering`() {
+            val behandling = opprettBehandling()
+            val vedtak = sanksjonertDto()
+
+            assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
+        }
+
+        @Test
+        internal fun `innvilgelse barnetilsyn og innvilgelse overgangsstønad er ikke lik`() {
+            assertThat(innvilgelseBarnetilsynDto())
+                    .isNotEqualTo(innvilgelseOvergangsstønadDto())
+        }
+
+        private fun opprettBehandling(): UUID {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            return behandlingRepository.insert(behandling(fagsak)).id
+        }
+
+        private fun assertInnsendtVedtakErLikHentetVedtak(vedtak: VedtakDto,
+                                                          behandling: UUID) {
+            vedtakService.lagreVedtak(vedtak, behandling)
+            val hentetVedtak = vedtakService.hentVedtak(behandling).tilVedtakDto()
+            assertThat(vedtak).isEqualTo(hentetVedtak)
+        }
+    }
+
 }
