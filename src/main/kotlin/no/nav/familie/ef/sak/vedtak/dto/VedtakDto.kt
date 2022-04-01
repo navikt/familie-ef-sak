@@ -60,6 +60,7 @@ sealed class VedtakDto(val resultatType: ResultatType, val _type: String) {
     }
 }
 
+//Rename til dto? InnvilgelseOvergangsstønadDto, AvslagDto, OpphørDto, SanksjoneringDto
 data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
                                       val inntektBegrunnelse: String?,
                                       val perioder: List<VedtaksperiodeDto> = emptyList(),

@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 
@@ -53,8 +54,8 @@ data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val datoTil: LocalDate,
                            val beløp: BigDecimal) {
 
-    fun tilDto() = PeriodeMedBeløpDto(datoFra = datoFra,
-                                      datoTil = datoTil,
+    fun tilDto() = PeriodeMedBeløpDto(årMånedFra = YearMonth.from(datoFra),
+                                      årMånedTil = YearMonth.from(datoTil),
                                       beløp = beløp)
 }
 
