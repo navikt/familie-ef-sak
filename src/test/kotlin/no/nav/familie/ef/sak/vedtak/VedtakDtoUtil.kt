@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -54,15 +53,15 @@ object VedtakDtoUtil {
 
     fun barnetilsynperiodeDto(barnId: UUID) =
             BarnetilsynperiodeDto(
-                    LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2021, 12, 31),
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 12),
                     BigDecimal(500),
                     listOf(barnId))
 
     fun periodeMedBeløpDto() =
             PeriodeMedBeløpDto(
-                    LocalDate.of(2021, 1, 1),
-                    LocalDate.of(2021, 12, 31),
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 12),
                     BigDecimal(1000))
 
     fun tilleggsstønadDto() =
