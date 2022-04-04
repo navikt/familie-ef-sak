@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping(path = ["/api/beregning"], produces = [MediaType.APPLICATION_JSON_VALUE])
+@RequestMapping(path = ["/api/barnetilsyn/beregning"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningBarnetilsynController(private val beregningBarnetilsynService: BeregningBarnetilsynService) {

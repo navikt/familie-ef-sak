@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning
 
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.util.UUID
 
 data class BeregningBarnetilsynRequest(
         val utgiftsperioder: List<UtgiftsperiodeDto>,
@@ -24,6 +25,6 @@ data class KontantstøttePeriodeDto(
 data class UtgiftsperiodeDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
-        val barn: List<String>,
+        val barn: List<UUID>,
         val utgifter: BigDecimal
 )

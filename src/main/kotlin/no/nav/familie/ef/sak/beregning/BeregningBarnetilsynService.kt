@@ -26,11 +26,11 @@ class BeregningBarnetilsynService {
         val kontrantstøtteBeløp = kontantstøttePerioder.first().beløp
 
 
-        return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode,
+        return listOf(BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode,
                                                                     kontrantstøtteBeløp,
                                                                     tillegsønadBeløp,
                                                                     maxbeløpGittAntallBarn,
-                                                                    utgiftsperiode.årMånedFra.atEndOfMonth()
+                                                                    utgiftsperiode.årMånedFra.atEndOfMonth())
 
         )
     }

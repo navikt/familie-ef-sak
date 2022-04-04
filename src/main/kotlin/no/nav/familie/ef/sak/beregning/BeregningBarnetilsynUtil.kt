@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.time.LocalDate
 
 object BeregningBarnetilsynUtil {
@@ -11,13 +13,22 @@ object BeregningBarnetilsynUtil {
                                     kontrantstøtteBeløp: BigDecimal,
                                     tillegsønadBeløp: BigDecimal,
                                     antallBarnIPeriode: Int,
-                                    periodeDato: LocalDate): List<BeløpsperiodeBarnetilsynDto> {
+                                    periodeDato: LocalDate): BeløpsperiodeBarnetilsynDto {
         val beløpPeriode1: BigDecimal =
-                beregnPeriodeBeløp(utgiftsperiode.utgifter, kontrantstøtteBeløp, tillegsønadBeløp, antallBarnIPeriode, periodeDato)
+                beregnPeriodeBeløp(utgiftsperiode.utgifter,
+                                   kontrantstøtteBeløp,
+                                   tillegsønadBeløp,
+                                   antallBarnIPeriode,
+                                   periodeDato)
 
-        return listOf(BeløpsperiodeBarnetilsynDto(Periode(utgiftsperiode.årMånedFra.atDay(1),
-                                                          utgiftsperiode.årMånedTil.atEndOfMonth()), beløpPeriode1,
-                                                  antallBarnIPeriode, null))
+        return BeløpsperiodeBarnetilsynDto(Periode(utgiftsperiode.årMånedFra.atDay(1),
+                                                   utgiftsperiode.årMånedTil.atEndOfMonth()),
+                                           beløpPeriode1,
+                                           BeregningsgrunnlagBarnetilsynDto(
+                                                   utgiftsbeløp = ZERO,
+                                                   kontantstøttebeløp = ZERO,
+                                                   tilleggsstønadsbeløp = ZERO,
+                                                   antallBarn = antallBarnIPeriode))
     }
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
