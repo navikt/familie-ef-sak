@@ -23,7 +23,7 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
 
     @Transactional
     fun migrerAutomatisk(antall: Int) {
-        val personerForMigrering = infotrygdReplikaClient.hentPersonerForMigrering(500)
+        val personerForMigrering = infotrygdReplikaClient.hentPersonerForMigrering(1000)
         val alleredeMigrert = migreringsstatusRepository.findAllByIdentIn(personerForMigrering).map { it.ident }
 
         val filtrerteIdenter = personerForMigrering.filterNot { alleredeMigrert.contains(it) }
