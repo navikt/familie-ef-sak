@@ -7,14 +7,10 @@ import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import org.assertj.core.api.Assertions.assertThat
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
-import java.time.LocalDate
+import java.time.YearMonth
 
 class BeregningBarnetilsynStepDefinitions {
-
-    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     var inputData = mutableMapOf<String, PeriodeDataDto>()
     var resultat = mutableMapOf<String, BigDecimal>()
@@ -34,9 +30,14 @@ class BeregningBarnetilsynStepDefinitions {
         val kontrantstøtteBeløp = it["KontrantstøtteBeløp"]
         val tillegsønadBeløp = it["TillegsønadBeløp"]
         val antallBarn = it["AntallBarn"]
-        val  testKommentar :String? = it["Testkommentar"]
-        val localDate = parseValgfriÅrMåned("PeriodeDato", it)!!.atDay(1)
-        val periodeDataDto = PeriodeDataDto(periodeutgift!!, kontrantstøtteBeløp!!, tillegsønadBeløp!!, antallBarn!!, localDate,testKommentar)
+        val testKommentar: String? = it["Testkommentar"]
+        val årMåned = parseValgfriÅrMåned("PeriodeDato", it)!!
+        val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
+                                            kontrantstøtteBeløp = kontrantstøtteBeløp!!,
+                                            tillegsønadBeløp = tillegsønadBeløp!!,
+                                            antallBarn = antallBarn!!,
+                                            årMåned = årMåned,
+                                            testKommentar = testKommentar)
         return periodeDataDto
     }
 
@@ -52,7 +53,7 @@ class BeregningBarnetilsynStepDefinitions {
                                                         kontrantstøtteBeløp = it.value.kontrantstøtteBeløp.toBigDecimal(),
                                                         tillegsønadBeløp = it.value.tillegsønadBeløp.toBigDecimal(),
                                                         antallBarn = it.value.antallBarn.toInt(),
-                                                        periodeDato = it.value.periodeDato)
+                                                        årMåned = it.value.årMåned)
 
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
@@ -61,20 +62,20 @@ class BeregningBarnetilsynStepDefinitions {
             val rad = forventetData["Rad"]!!
             val periodeutgift = forventetData["Beløp"]!!.toBigDecimal()
 
-            if (resultat[rad]!!.compareTo(periodeutgift)==0) {
+            if (resultat[rad]!!.compareTo(periodeutgift) == 0) {
                 null // alt ok
             } else {
                 "Feilet på rad $rad: Her forventet vi $periodeutgift, men fikk ${resultat[rad]}, kommentar: ${inputData[rad]?.testKommentar} "
             }
         }.filterNotNull()
 
-        assertThat(feil).hasSize(0).withFailMessage { "Vi fikk disse feilene: $feil"  }
+        assertThat(feil).hasSize(0).withFailMessage { "Vi fikk disse feilene: $feil" }
     }
 }
 
-    data class PeriodeDataDto(val periodeutgift: String,
-                              val kontrantstøtteBeløp: String,
-                              val tillegsønadBeløp: String,
-                              val antallBarn: String,
-                              val periodeDato: LocalDate,
-                              val testKommentar: String?)
+data class PeriodeDataDto(val periodeutgift: String,
+                          val kontrantstøtteBeløp: String,
+                          val tillegsønadBeløp: String,
+                          val antallBarn: String,
+                          val årMåned: YearMonth,
+                          val testKommentar: String?)

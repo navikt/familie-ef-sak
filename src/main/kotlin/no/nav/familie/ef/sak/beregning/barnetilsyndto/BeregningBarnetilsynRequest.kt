@@ -26,5 +26,11 @@ data class UtgiftsperiodeDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
+        val utgifter: BigDecimal // Totalutgift eller utgift per måned
+)
+
+data class UtgiftsMåned(
+        val årMåned : YearMonth,
+        val barn: List<UUID>,
         val utgifter: BigDecimal
 )

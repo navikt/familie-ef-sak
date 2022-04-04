@@ -2,46 +2,72 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.math.BigDecimal
 
 @Service
 class BeregningBarnetilsynService {
-
 
     fun beregnYtelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>,
                                 kontantstøttePerioder: List<KontantstøttePeriodeDto>,
                                 tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>): List<BeløpsperiodeBarnetilsynDto> {
 
-        // TODO valider !!!!
 
+        val barnetilsynMåneder = utgiftsperioder.map {
+            it.split()
+        }.flatMap {
+            it.map { utgiftsMåned ->
+                lagUtgiftsmåned(utgiftsMåned, kontantstøttePerioder, tilleggsstønadsperioder)
+            }
+        }
+        return barnetilsynMåneder.merge()
+    }
 
-        // Beløp = minOf( ( (utgifter - kontantstøtte) * 0.64 ) - reduksjonsbeløp, maksBeløpAntallBarnDuHarUtgifterFor)
+    private fun lagUtgiftsmåned(utgiftsMåned: UtgiftsMåned,
+                                kontantstøttePerioder: List<KontantstøttePeriodeDto>,
+                                tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>): BeløpsperiodeBarnetilsynDto {
+        val kontantStøtteBeløp: BigDecimal =
+                kontantstøttePerioder.find { utgiftsMåned.årMåned <= it.årMånedTil && utgiftsMåned.årMåned >= it.årMånedFra }?.beløp
+                ?: BigDecimal.ZERO
+        val tilleggsstønadsperiodeBeløp =
+                tilleggsstønadsperioder.find { utgiftsMåned.årMåned <= it.årMånedTil && utgiftsMåned.årMåned >= it.årMånedFra }?.beløp
+                ?: BigDecimal.ZERO
 
-
-        val utgiftsperiode = utgiftsperioder.first()
-        val size = utgiftsperiode.barn.size
-        val maxbeløpBarnetilsynSats = satserForBarnetilsyn.first()
-        val maxbeløpGittAntallBarn: Int = maxbeløpBarnetilsynSats.maxbeløp[size] ?: 0
-        val tillegsønadBeløp = tilleggsstønadsperioder.first().beløp
-        val kontrantstøtteBeløp = kontantstøttePerioder.first().beløp
-
-
-        return listOf(BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode,
-                                                                    kontrantstøtteBeløp,
-                                                                    tillegsønadBeløp,
-                                                                    maxbeløpGittAntallBarn,
-                                                                    utgiftsperiode.årMånedFra.atEndOfMonth())
-
-        )
+        return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsMåned,
+                                                                    kontantStøtteBeløp,
+                                                                    tilleggsstønadsperiodeBeløp,
+                                                                    BeregningBarnetilsynUtil.satserForBarnetilsyn.hentSatsFor(
+                                                                            utgiftsMåned.barn.size, utgiftsMåned.årMåned))
     }
 }
 
-val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
-        listOf(MaxbeløpBarnetilsynSats(fraOgMedDato = LocalDate.parse("2022-01-01"),
-                                       tilOgMedDato = LocalDate.MAX,
-                                       maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284))
-        )
+fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
+    val perioder = mutableListOf<UtgiftsMåned>()
+    var måned = this.årMånedFra
+    while (måned.isBefore(this.årMånedTil)) {
+        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter))
+        måned.plusMonths(1)
+    }
+    return perioder
+}
 
-data class MaxbeløpBarnetilsynSats(val fraOgMedDato: LocalDate,
-                                   val tilOgMedDato: LocalDate,
-                                   val maxbeløp: Map<Int, Int>)
+fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDto> {
+
+    val sortedBy = this.sortedBy { it.periode.fradato }
+    var beløpsPeriodeDto = sortedBy.first()
+    var tempPeriode = beløpsPeriodeDto.periode
+    val mergedeBeløpsperioder = mutableListOf<BeløpsperiodeBarnetilsynDto>()
+
+    sortedBy.forEach {
+        if (it.beløp == beløpsPeriodeDto.beløp && it.beregningsgrunnlag == beløpsPeriodeDto.beregningsgrunnlag) {
+            tempPeriode = tempPeriode.copy(tildato = it.periode.tildato)
+        } else {
+            mergedeBeløpsperioder.add(beløpsPeriodeDto.copy(periode = tempPeriode))
+            beløpsPeriodeDto = it
+            tempPeriode = beløpsPeriodeDto.periode
+        }
+    }
+    if (!mergedeBeløpsperioder.contains(beløpsPeriodeDto)) {
+        mergedeBeløpsperioder.add(beløpsPeriodeDto.copy(periode = tempPeriode))
+    }
+    return mergedeBeløpsperioder
+}

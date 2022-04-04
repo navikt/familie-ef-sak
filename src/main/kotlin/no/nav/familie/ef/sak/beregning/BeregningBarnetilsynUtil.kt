@@ -6,24 +6,33 @@ import no.nav.familie.ef.sak.felles.dto.Periode
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.time.LocalDate
+import java.time.YearMonth
+
+data class MaxbeløpBarnetilsynSats(val fraOgMedDato: LocalDate,
+                                   val tilOgMedDato: LocalDate,
+                                   val maxbeløp: Map<Int, Int>)
 
 object BeregningBarnetilsynUtil {
 
-    fun lagBeløpsPeriodeBarnetilsyn(utgiftsperiode: UtgiftsperiodeDto,
-                                    kontrantstøtteBeløp: BigDecimal,
-                                    tillegsønadBeløp: BigDecimal,
-                                    antallBarnIPeriode: Int,
-                                    periodeDato: LocalDate): BeløpsperiodeBarnetilsynDto {
-        val beløpPeriode1: BigDecimal =
-                beregnPeriodeBeløp(utgiftsperiode.utgifter,
-                                   kontrantstøtteBeløp,
-                                   tillegsønadBeløp,
-                                   antallBarnIPeriode,
-                                   periodeDato)
+    val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
+            listOf(MaxbeløpBarnetilsynSats(fraOgMedDato = LocalDate.parse("2022-01-01"),
+                                           tilOgMedDato = LocalDate.MAX,
+                                           maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284))
+            )
 
-        return BeløpsperiodeBarnetilsynDto(Periode(utgiftsperiode.årMånedFra.atDay(1),
-                                                   utgiftsperiode.årMånedTil.atEndOfMonth()),
-                                           beløpPeriode1,
+    fun lagBeløpsPeriodeBarnetilsyn(utgiftsperiode: UtgiftsMåned,
+                                    kontantstøtteBeløp: BigDecimal,
+                                    tilleggsstønadBeløp: BigDecimal,
+                                    antallBarnIPeriode: Int): BeløpsperiodeBarnetilsynDto {
+        val beløpPeriode: BigDecimal =
+                beregnPeriodeBeløp(utgiftsperiode.utgifter,
+                                   kontantstøtteBeløp,
+                                   tilleggsstønadBeløp,
+                                   antallBarnIPeriode,
+                                   utgiftsperiode.årMåned)
+
+        return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
+                                           beløpPeriode,
                                            BeregningsgrunnlagBarnetilsynDto(
                                                    utgiftsbeløp = ZERO,
                                                    kontantstøttebeløp = ZERO,
@@ -35,15 +44,19 @@ object BeregningBarnetilsynUtil {
                            kontrantstøtteBeløp: BigDecimal,
                            tillegsønadBeløp: BigDecimal,
                            antallBarn: Int,
-                           periodeDato: LocalDate) =
+                           årMåned: YearMonth) =
             minOf(((periodeutgift - kontrantstøtteBeløp) * 0.64.toBigDecimal()) - tillegsønadBeløp,
-                  satserForBarnetilsyn.hentSatsFor(antallBarn, periodeDato).toBigDecimal())
+                  satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal())
 
+    private fun YearMonth.tilPeriode(): Periode {
+        return Periode(this.atDay(1),
+                       this.atEndOfMonth())
+    }
 }
 
-private fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: LocalDate): Int {
+fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
     val maxbeløpBarnetilsynSats = this.filter {
-        it.fraOgMedDato <= årMåned && it.tilOgMedDato >= årMåned
+        it.fraOgMedDato <= årMåned.atDay(1) && it.tilOgMedDato >= årMåned.atDay(1)
     }.singleOrNull() ?: error("Kunne ikke finne barnetilsyn sats for dato: $årMåned ")
 
     return maxbeløpBarnetilsynSats.maxbeløp[minOf(antallBarn, 3)]
