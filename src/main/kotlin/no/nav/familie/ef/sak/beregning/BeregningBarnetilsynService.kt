@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.felles.dto.Periode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -58,6 +59,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDt
     val mergedeBeløpsperioder = mutableListOf<BeløpsperiodeBarnetilsynDto>()
 
     sortedBy.forEach {
+        validerSammenhengendePeriode(it, tempPeriode)
         if (it.beløp == beløpsPeriodeDto.beløp && it.beregningsgrunnlag == beløpsPeriodeDto.beregningsgrunnlag) {
             tempPeriode = tempPeriode.copy(tildato = it.periode.tildato)
         } else {
@@ -65,9 +67,18 @@ fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDt
             beløpsPeriodeDto = it
             tempPeriode = beløpsPeriodeDto.periode
         }
+
     }
     if (!mergedeBeløpsperioder.contains(beløpsPeriodeDto)) {
         mergedeBeløpsperioder.add(beløpsPeriodeDto.copy(periode = tempPeriode))
     }
     return mergedeBeløpsperioder
+}
+
+/** TODO : Sjekk om vi skal tillate hull i perioder */
+private fun validerSammenhengendePeriode(it: BeløpsperiodeBarnetilsynDto,
+                                         tempPeriode: Periode) {
+    if (it.periode.fradato.minusMonths(1) > tempPeriode.fradato) {
+        throw NotImplementedError("Støtter ikke hull i perioder")
+    }
 }
