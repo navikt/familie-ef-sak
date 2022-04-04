@@ -1,12 +1,15 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
+
 @Service
 class BeregningBarnetilsynService {
+
 
     fun beregnYtelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>,
                                 kontantstøttePerioder: List<KontantstøttePeriodeDto>,
@@ -33,11 +36,10 @@ class BeregningBarnetilsynService {
                 tilleggsstønadsperioder.find { utgiftsMåned.årMåned <= it.årMånedTil && utgiftsMåned.årMåned >= it.årMånedFra }?.beløp
                 ?: BigDecimal.ZERO
 
-        return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsMåned,
-                                                                    kontantStøtteBeløp,
-                                                                    tilleggsstønadsperiodeBeløp,
-                                                                    BeregningBarnetilsynUtil.satserForBarnetilsyn.hentSatsFor(
-                                                                            utgiftsMåned.barn.size, utgiftsMåned.årMåned))
+        return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode = utgiftsMåned,
+                                                                    kontantstøtteBeløp = kontantStøtteBeløp,
+                                                                    tilleggsstønadBeløp = tilleggsstønadsperiodeBeløp,
+                                                                    antallBarnIPeriode = utgiftsMåned.barn.size)
     }
 }
 
@@ -51,15 +53,17 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     return perioder
 }
 
-fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDto> {
+// TODO gjør et valg på implementasjon
+fun List<BeløpsperiodeBarnetilsynDto>.merge2(): List<BeløpsperiodeBarnetilsynDto> {
 
     val sortedBy = this.sortedBy { it.periode.fradato }
     var beløpsPeriodeDto = sortedBy.first()
     var tempPeriode = beløpsPeriodeDto.periode
     val mergedeBeløpsperioder = mutableListOf<BeløpsperiodeBarnetilsynDto>()
-
-    sortedBy.forEach {
-        validerSammenhengendePeriode(it, tempPeriode)
+    sortedBy.forEachIndexed { index, it ->
+        if (index > 0) {
+            validerSammenhengendePeriode(it, tempPeriode)
+        }
         if (it.beløp == beløpsPeriodeDto.beløp && it.beregningsgrunnlag == beløpsPeriodeDto.beregningsgrunnlag) {
             tempPeriode = tempPeriode.copy(tildato = it.periode.tildato)
         } else {
@@ -75,10 +79,42 @@ fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDt
     return mergedeBeløpsperioder
 }
 
+
+data class Key(val beløp: Int, val grunnlag: BeregningsgrunnlagBarnetilsynDto)
+
+fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDto> {
+    val gruppert = this.groupBy { it.toKey() }
+    return gruppert.entries.mapNotNull {
+        val liste: List<BeløpsperiodeBarnetilsynDto> = it.value.sortedBy { it.periode.fradato }
+        var akkumulatorListe = mutableListOf<BeløpsperiodeBarnetilsynDto>()
+        liste.fold(akkumulatorListe) { akkumulatorListe, nestePeriodeDto ->
+            val gjeldendeDto = akkumulatorListe.lastOrNull()
+            if (gjeldendeDto != null && erSammenhengende(gjeldendeDto.periode, nestePeriodeDto.periode)) {
+                val nyPeriode = gjeldendeDto.periode.copy(tildato = nestePeriodeDto.periode.tildato)
+                akkumulatorListe.removeLast()
+                akkumulatorListe.add(gjeldendeDto.copy(periode = nyPeriode))
+            } else {
+                akkumulatorListe.add(nestePeriodeDto)
+            }
+            akkumulatorListe
+        }
+    }.flatten()
+}
+
+private fun erSammenhengende(gjeldendePeriode: Periode,
+                             nestePeriode: Periode) =
+        gjeldendePeriode.tildato.month.equals(nestePeriode.fradato.minusMonths(1).month)
+
+private fun BeløpsperiodeBarnetilsynDto.toKey() = Key(this.beløp.toInt(), this.beregningsgrunnlag)
+
+
 /** TODO : Sjekk om vi skal tillate hull i perioder */
 private fun validerSammenhengendePeriode(it: BeløpsperiodeBarnetilsynDto,
                                          tempPeriode: Periode) {
-    if (it.periode.fradato.minusMonths(1) > tempPeriode.fradato) {
-        throw NotImplementedError("Støtter ikke hull i perioder")
+
+    if (!erSammenhengende(tempPeriode, it.periode)) {
+        error("Periodene $tempPeriode og ${it.periode} er ikke sammenhengende ")
     }
+
+
 }
