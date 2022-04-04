@@ -20,9 +20,7 @@ internal class BeregningBarnetilsynServiceTest {
         val januar = YearMonth.of(2000, 1)
         val desember = YearMonth.of(2000, 12)
 
-
         val utgiftsperiodeDto = UtgiftsperiodeDto(januar, desember, barn = listOf(), utgifter = TEN)
-
         val resultat = utgiftsperiodeDto.split()
 
         assertThat(resultat).hasSize(12)

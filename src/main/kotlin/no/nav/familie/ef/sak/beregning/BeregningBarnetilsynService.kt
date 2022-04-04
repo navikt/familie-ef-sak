@@ -44,9 +44,9 @@ class BeregningBarnetilsynService {
 fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.årMånedFra
-    while (måned.isBefore(this.årMånedTil)) {
+    while (måned.isBefore(this.årMånedTil) || måned.equals(this.årMånedTil)) {
         perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter))
-        måned.plusMonths(1)
+        måned = måned.plusMonths(1)
     }
     return perioder
 }
