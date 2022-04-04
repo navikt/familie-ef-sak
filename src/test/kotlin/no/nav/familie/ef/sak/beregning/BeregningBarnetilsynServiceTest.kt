@@ -7,26 +7,26 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.math.BigDecimal.TEN
+import java.math.BigDecimal.ZERO
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class BeregningBarnetilsynServiceTest {
 
     @Test
-    fun `split to påfølgende utgiftsperioder, forvent sammenhengende liste av perioder`() {
+    fun `split en utgiftsperiode som varer fra januar til desember i 12 mnd`() {
 
         val januar = YearMonth.of(2000, 1)
-        val februar = YearMonth.of(2000, 2)
-        val forventetFraDato = januar.atDay(1)
-        val forventetTilDato = februar.atEndOfMonth()
-        val beløpsperioder = listOf(lagBeløpsperiode(forventetFraDato, januar.atEndOfMonth()),
-                                    lagBeløpsperiode(februar.atDay(1), forventetTilDato))
+        val desember = YearMonth.of(2000, 12)
 
-        val resultat = beløpsperioder.merge()
 
-        assertThat(resultat).hasSize(1)
-        assertThat(resultat.first().periode.fradato).isEqualTo(forventetFraDato)
-        assertThat(resultat.first().periode.tildato).isEqualTo(forventetTilDato)
+        val utgiftsperiodeDto = UtgiftsperiodeDto(januar, desember, barn = listOf(), utgifter = TEN)
+
+        val resultat = utgiftsperiodeDto.split()
+
+        assertThat(resultat).hasSize(12)
+
     }
 
     @Test
@@ -102,9 +102,9 @@ internal class BeregningBarnetilsynServiceTest {
                                  beløp: BigDecimal = BigDecimal(100)): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(periode = Periode(fraDato, tilDato),
                                            beløp = beløp,
-                                           beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgiftsbeløp = BigDecimal.ZERO,
-                                                                                                 kontantstøttebeløp = BigDecimal.ZERO,
-                                                                                                 tilleggsstønadsbeløp = BigDecimal.ZERO,
+                                           beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgiftsbeløp = ZERO,
+                                                                                                 kontantstøttebeløp = ZERO,
+                                                                                                 tilleggsstønadsbeløp = ZERO,
                                                                                                  antallBarn = 1))
     }
 }
