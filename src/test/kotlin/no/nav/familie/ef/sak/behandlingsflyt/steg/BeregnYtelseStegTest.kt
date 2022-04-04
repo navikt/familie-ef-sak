@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
@@ -31,15 +32,17 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import org.assertj.core.api.Assertions.assertThat
@@ -464,6 +467,18 @@ internal class BeregnYtelseStegTest {
             verify { simuleringService.slettSimuleringForBehandling(any()) }
         }
 
+        @Test
+        internal fun `skal kaste feil hvis man innvilger på feil type stønad`() {
+            assertThatThrownBy {
+                utførSteg(lagSaksbehandling(stønadType = StønadType.BARNETILSYN),
+                          innvilget(emptyList(), emptyList()))
+            }.isInstanceOf(Feil::class.java).hasMessageContaining("Feil stønadstype")
+
+            assertThatThrownBy {
+                utførSteg(lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD),
+                          innvilgetBarnetilsyn())
+            }.isInstanceOf(Feil::class.java).hasMessageContaining("Feil stønadstype")
+        }
     }
 
     @Nested
@@ -1230,7 +1245,7 @@ internal class BeregnYtelseStegTest {
 
             assertThrows<Feil> {
                 utførSteg(BehandlingType.REVURDERING,
-                          Opphør(ResultatType.OPPHØRT, opphørFom, "ok"),
+                          Opphør(opphørFom, "ok"),
                           forrigeBehandlingId = UUID.randomUUID())
             }
         }
@@ -1258,11 +1273,16 @@ internal class BeregnYtelseStegTest {
 
     private fun innvilget(perioder: List<VedtaksperiodeDto>,
                           inntekter: List<Inntekt>) =
-            Innvilget(resultatType = ResultatType.INNVILGE,
-                      perioder = perioder,
-                      inntekter = inntekter,
-                      inntektBegrunnelse = "null",
-                      periodeBegrunnelse = "null")
+            InnvilgelseOvergangsstønad(perioder = perioder,
+                                       inntekter = inntekter,
+                                       inntektBegrunnelse = "null",
+                                       periodeBegrunnelse = "null")
+
+    private fun innvilgetBarnetilsyn() =
+            InnvilgelseBarnetilsyn(perioder = emptyList(),
+                                   perioderKontantstøtte = emptyList(),
+                                   tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
+                                   begrunnelse = null)
 
     private fun sanksjon(årMåned: YearMonth) =
             Sanksjonert(sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
@@ -1325,12 +1345,23 @@ internal class BeregnYtelseStegTest {
                     samordningsfradrag = BigDecimal.ZERO)
 
     private fun utførSteg(type: BehandlingType,
-                          vedtak: VedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                                        periodeBegrunnelse = "",
-                                                        inntektBegrunnelse = ""),
+                          vedtak: VedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
+                                                                         inntektBegrunnelse = ""),
                           forrigeBehandlingId: UUID? = null) {
-        val fagsak = fagsak()
-        steg.utførSteg(saksbehandling(fagsak, behandling(fagsak(), type = type, forrigeBehandlingId = forrigeBehandlingId)),
-                       data = vedtak)
+        utførSteg(saksbehandling(type = type, forrigeBehandlingId = forrigeBehandlingId), vedtak)
     }
+
+    private fun utførSteg(saksbehandling: Saksbehandling = saksbehandling(),
+                          vedtak: VedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
+                                                                         inntektBegrunnelse = "")) {
+        steg.utførSteg(saksbehandling = saksbehandling, data = vedtak)
+    }
+
+    private fun lagSaksbehandling(stønadType: StønadType = StønadType.OVERGANGSSTØNAD,
+                                  type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                  forrigeBehandlingId: UUID? = null): Saksbehandling {
+        val fagsak = fagsak(stønadstype = stønadType)
+        return saksbehandling(fagsak, behandling(fagsak, type = type, forrigeBehandlingId = forrigeBehandlingId))
+    }
+
 }
