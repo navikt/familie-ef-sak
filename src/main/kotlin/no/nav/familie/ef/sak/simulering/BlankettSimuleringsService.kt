@@ -42,7 +42,8 @@ class BlankettSimuleringsService(val beregningService: BeregningService) {
         val tilkjentYtelseForBlankett = TilkjentYtelse(personident = saksbehandling.ident,
                                                        behandlingId = saksbehandling.id,
                                                        andelerTilkjentYtelse = andeler,
-                                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING)
+                                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+                                                       startdato = andeler.minOf { it.stønadFom })
 
         return tilkjentYtelseForBlankett.tilTilkjentYtelseMedMetaData(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler(),

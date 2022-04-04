@@ -220,7 +220,7 @@ fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
                                    kildeBehandlingId = andel.kildeBehandlingId,
                                    periodetype = Periodetype.MÅNED)
         },
-        startdato = startdato
+        startdato = startdato ?: error("Mangler startdato for ty=${this.id} behandling=${this.behandlingId}")
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
