@@ -30,8 +30,8 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
                                                status = BehandlingStatus.FERDIGSTILT,
                                                resultat = BehandlingResultat.INNVILGET))
 
-        assertThat(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent(ident))).hasSize(2)
-        assertThat(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent(ident))).hasSize(2)
+        assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
+        assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(taskRepository.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).hasSize(1)
     }
 
@@ -42,7 +42,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
                                                status = BehandlingStatus.FERDIGSTILT,
                                                resultat = BehandlingResultat.INNVILGET))
 
-        assertThat(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(PersonIdent(ident))).hasSize(2)
+        assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(taskRepository.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).isEmpty()
     }
 }
