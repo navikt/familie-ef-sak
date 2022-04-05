@@ -40,9 +40,9 @@ object BeregningBarnetilsynUtil {
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
                                            beløpPeriode,
                                            BeregningsgrunnlagBarnetilsynDto(
-                                                   utgiftsbeløp = ZERO,
-                                                   kontantstøttebeløp = ZERO,
-                                                   tilleggsstønadsbeløp = ZERO,
+                                                   utgiftsbeløp = utgiftsperiode.utgifter,
+                                                   kontantstøttebeløp = kontantstøtteBeløp,
+                                                   tilleggsstønadsbeløp = tilleggsstønadBeløp,
                                                    antallBarn = antallBarnIPeriode))
     }
 
@@ -51,8 +51,8 @@ object BeregningBarnetilsynUtil {
                            tillegsønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth) =
-            minOf(((periodeutgift - kontrantstøtteBeløp) * 0.64.toBigDecimal()) - tillegsønadBeløp,
-                  satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal())
+            maxOf(ZERO, minOf(((periodeutgift - kontrantstøtteBeløp) * 0.64.toBigDecimal()) - tillegsønadBeløp,
+                              satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {
         return Periode(this.atDay(1),
