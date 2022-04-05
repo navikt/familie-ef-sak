@@ -17,7 +17,13 @@ object BeregningBarnetilsynUtil {
     val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
             listOf(MaxbeløpBarnetilsynSats(fraOgMedDato = LocalDate.parse("2022-01-01"),
                                            tilOgMedDato = LocalDate.MAX,
-                                           maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284))
+                                           maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)),
+                   MaxbeløpBarnetilsynSats(fraOgMedDato = LocalDate.parse("2021-01-01"),
+                                           tilOgMedDato = YearMonth.of(2021, 12).atEndOfMonth(),
+                                           maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)),
+                   MaxbeløpBarnetilsynSats(fraOgMedDato = LocalDate.parse("2020-01-01"),
+                                           tilOgMedDato = YearMonth.of(2020, 12).atEndOfMonth(),
+                                           maxbeløp = mapOf(1 to 4053, 2 to 5289, 3 to 5993))
             )
 
     fun lagBeløpsPeriodeBarnetilsyn(utgiftsperiode: UtgiftsMåned,
