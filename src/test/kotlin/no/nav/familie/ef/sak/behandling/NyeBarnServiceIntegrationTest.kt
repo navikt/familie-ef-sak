@@ -1,8 +1,6 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.NyeBarnService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtBarnTask

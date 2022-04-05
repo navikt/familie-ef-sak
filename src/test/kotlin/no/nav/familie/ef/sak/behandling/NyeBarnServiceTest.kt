@@ -1,12 +1,9 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandling
+package no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.NyeBarnService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -16,9 +13,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
+import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -28,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class NyeBarnServiceTest {
@@ -42,7 +42,7 @@ class NyeBarnServiceTest {
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
     val fagsak = fagsak()
-    val behandling = mockk<Behandling>()
+    val behandling = behandling(fagsak)
     val grunnlagsdataDomene = mockk<GrunnlagsdataDomene>()
 
     val fnrForEksisterendeBarn = "19011870794"
@@ -55,7 +55,6 @@ class NyeBarnServiceTest {
     @BeforeEach fun init() {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
-        every { behandling.id } returns UUID.randomUUID()
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("fnr til søker", false)))
         every { fagsakService.hentAktivIdent(any()) } returns "fnr til søker"
@@ -70,14 +69,14 @@ class NyeBarnServiceTest {
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(1)
-        assertThat(barn.first()).isEqualTo(fnrForNyttBarn)
+        assertThat(barn).hasSize(1)
+        assertThat(barn.first()).isEqualTo(NyttBarn(fnrForNyttBarn, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING))
     }
 
     @Test
     fun `finnNyeEllerTidligereFødteBarn med ett født terminbarn i PDL, forvent ingen treff`() {
-        val terminDato = LocalDate.now()
-        val fødselsdato = LocalDate.now().minusWeeks(5)
+        val terminDato = YearMonth.now().atEndOfMonth()
+        val fødselsdato = YearMonth.now().atDay(15)
         val fnrForPdlBarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
                             fnrForPdlBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato))
@@ -88,13 +87,13 @@ class NyeBarnServiceTest {
         )
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(0)
+        assertThat(barn).hasSize(0)
     }
 
     @Test
     fun `finnNyeEllerTidligereFødteBarn med tvillinger i PDL av terminbarn med alle i behandlingen, forvent ingen nye barn`() {
-        val terminDato = LocalDate.now()
-        val fødselsdato = LocalDate.now().minusWeeks(5)
+        val terminDato = YearMonth.now().atEndOfMonth()
+        val fødselsdato = YearMonth.now().atDay(15)
         val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
         val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
@@ -109,13 +108,13 @@ class NyeBarnServiceTest {
         )
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(0)
+        assertThat(barn).hasSize(0)
     }
 
     @Test
     fun `finnNyeEllerTidligereFødteBarn med tvillinger i PDL av terminbarn, men bare ett i behandlingen, forvent ett nytt barn`() {
-        val terminDato = LocalDate.now()
-        val fødselsdato = LocalDate.now().minusWeeks(5)
+        val terminDato = YearMonth.now().atEndOfMonth()
+        val fødselsdato = YearMonth.now().atDay(15)
         val fnrForTerminbarn = FnrGenerator.generer(fødselsdato)
         val fnrForTvillingbarn = FnrGenerator.generer(fødselsdato)
         val pdlBarn = mapOf(fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
@@ -128,7 +127,8 @@ class NyeBarnServiceTest {
         )
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(1)
+        assertThat(barn).hasSize(1)
+        assertThat(barn.single().årsak).isEqualTo(NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING)
     }
 
     @Test
@@ -138,7 +138,7 @@ class NyeBarnServiceTest {
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(0)
+        assertThat(barn).hasSize(0)
     }
 
     @Test
@@ -150,7 +150,7 @@ class NyeBarnServiceTest {
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(0)
+        assertThat(barn).hasSize(0)
     }
 
     @Test
@@ -164,7 +164,7 @@ class NyeBarnServiceTest {
         )
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn.size).isEqualTo(0)
+        assertThat(barn).hasSize(0)
     }
 
     @Nested
