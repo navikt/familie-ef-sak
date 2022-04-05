@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetil
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.TEN
@@ -102,8 +101,8 @@ internal class BeregningBarnetilsynServiceTest {
                                     lagBeløpsperiode(fraDato = mars.atDay(1),
                                                      tilDato = forventetTilDato,
                                                      beløp = BigDecimal(100)))
-        val error = assertThrows<NotImplementedError> { beløpsperioder.merge() }
-        assertThat(error.message).isEqualTo("Støtter ikke hull i perioder")
+        assertThat(beløpsperioder.merge()).hasSize(2)
+
     }
 
     @Test
@@ -118,8 +117,8 @@ internal class BeregningBarnetilsynServiceTest {
                                     lagBeløpsperiode(fraDato = mars.atDay(1),
                                                      tilDato = forventetTilDato,
                                                      beløp = BigDecimal(200)))
-        val error = assertThrows<NotImplementedError> { beløpsperioder.merge() }
-        assertThat(error.message).isEqualTo("Støtter ikke hull i perioder")
+
+        assertThat(beløpsperioder.merge()).hasSize(2)
     }
 
     private fun lagBeløpsperiode(fraDato: LocalDate,
