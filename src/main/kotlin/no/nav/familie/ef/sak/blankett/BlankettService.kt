@@ -92,10 +92,10 @@ class BlankettService(private val tilgangService: TilgangService,
     private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
     private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto? {
-        val overgangsstønad = søknadService.hentOvergangsstønad(behandlingId) ?: return null
+        val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId) ?: return null
         return SøknadDatoerDto(
-                søknadsdato = overgangsstønad.datoMottatt,
-                søkerStønadFra = overgangsstønad.søkerFra
+                søknadsdato = søknadsgrunnlag.datoMottatt,
+                søkerStønadFra = søknadsgrunnlag.søkerFra
         )
 
     }
