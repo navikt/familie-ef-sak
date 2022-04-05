@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.ALLE_VILKÅRSREGLER
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -172,10 +173,16 @@ object OppdaterVilkår {
 
     fun lagVilkårsvurderingForNyttBarn(metadata: HovedregelMetadata,
                                        behandlingId: UUID,
-                                       barnId: UUID): Vilkårsvurdering = lagNyVilkårsvurdering(AleneomsorgRegel(),
-                                                                                               metadata,
-                                                                                               behandlingId,
-                                                                                               barnId)
+                                       barnId: UUID,
+                                       stønadstype: StønadType): List<Vilkårsvurdering> {
+        return when (stønadstype) {
+            OVERGANGSSTØNAD -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId))
+            BARNETILSYN -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
+                                  lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId))
+            SKOLEPENGER -> throw NotImplementedError("Ikke implementert for skolepenger")
+        }
+
+    }
 
 
     private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
