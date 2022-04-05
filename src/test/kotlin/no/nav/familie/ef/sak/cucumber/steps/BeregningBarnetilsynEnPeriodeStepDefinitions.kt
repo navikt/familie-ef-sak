@@ -17,7 +17,6 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     @Gitt("følgende data")
     fun data(dataTable: DataTable) {
-        // | Rad | Periodeutgift | KontrantstøtteBeløp | TillegsønadBeløp | AntallBarn | PeriodeDato |
         dataTable.asMaps().map {
             val rad = it["Rad"] ?: error("Du må fylle inn radnummer i testen")
             val periodeDataDto = mapRadTilPeriodeDataDto(it)

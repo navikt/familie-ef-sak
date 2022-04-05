@@ -1,36 +1,34 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Beregning av barnetilsyn (en periode)
+Egenskap: Beregning av barnetilsyn med flere perioder
 
   Scenario: Varierende utgifter og inntekter, satsperiode og antall barn for 2022
 
-    Gitt følgende data
-      | Rad | Periodeutgift | KontrantstøtteBeløp | TillegsønadBeløp | AntallBarn | PeriodeDato | Testkommentar   |
-      | 1   | 1000000       | 0                   | 0                | 3          | 01.2022     | Max sum 3 barn  |
-      | 2   | 1000000       | 0                   | 0                | 4          | 01.2022     | Antall barn > 3 |
-      | 3   | 1000000       | 0                   | 0                | 2          | 01.2022     | Max sum 2 barn  |
-      | 4   | 1000000       | 0                   | 0                | 1          | 01.2022     | Max sum 1 barn  |
-      | 5   | 100           | 0                   | 0                | 2          | 01.2022     |                 |
-      | 6   | 1234          | 300                 | 0                | 2          | 01.2022     |                 |
-      | 7   | 500.13        | 300.13              | 0                | 3          | 01.2022     |                 |
-      | 8   | 7000          | 0                   | 70               | 3          | 01.2022     |                 |
-      | 9   | 7000          | 0                   | 70               | 2          | 01.2022     |                 |
-      | 10  | 7000          | 0                   | 70               | 1          | 01.2022     |                 |
+    Gitt utgiftsperioder
+      | FraMåned | TilOgMedMåned | Beløp | AntallBarn |
+      | 01.2022  | 07.2022       | 100   | 1          |
+      | 08.2022  | 12.2022       | 20    | 1          |
 
-    Når vi beregner barnetilsyn beløp
+    Og kontantstøtteperioder
+      | FraMåned | TilOgMedMåned | Beløp |
+      | 05.2022  | 09.2022       | 10    |
 
-    Så forventer vi barnetilsyn periodebeløp
-      | Rad | Beløp  |
-      | 1   | 6284   |
-      | 2   | 6284   |
-      | 3   | 5545   |
-      | 4   | 4250   |
-      | 5   | 64     |
-      | 6   | 597.76 |
-      | 7   | 128    |
-      | 8   | 4410   |
-      | 9   | 4410   |
-      | 10  | 4250   |
+    Og tilleggsstønadsperioder
+      | FraMåned | TilOgMedMåned | Beløp |
+      | 07.2022  | 11.2022       | 15    |
+
+    Når vi beregner perioder med barnetilsyn
+    Så forventer vi følgende perioder
+      | Beløp | FraMåned | TilOgMedMåned |
+      | 64    | 01.2022  | 04.2022       |
+      | 57.6  | 05.2022  | 06.2022       |
+      | 42.6  | 07.2022  | 07.2022       |
+      | 0     | 10.2022  | 11.2022       |
+      | 0     | 08.2022  | 09.2022       |
+      | 12.8  | 12.2022  | 12.2022       |
+
+
+
 
 
