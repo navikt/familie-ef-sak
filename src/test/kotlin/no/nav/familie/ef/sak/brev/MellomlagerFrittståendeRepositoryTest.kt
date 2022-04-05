@@ -1,7 +1,6 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.brev
+package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.brev.MellomlagerFrittståendeBrevRepository
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt

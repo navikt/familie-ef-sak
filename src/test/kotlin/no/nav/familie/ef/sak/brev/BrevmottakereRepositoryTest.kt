@@ -1,8 +1,7 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.brev
+package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.Brevmottakere

@@ -1,9 +1,7 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.arbeidsforhold
-
+package no.nav.familie.ef.sak.arbeidsforhold
 
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.arbeidsforhold.ArbeidsforholdDto
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
