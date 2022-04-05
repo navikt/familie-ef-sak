@@ -1,12 +1,10 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
-import no.nav.familie.ef.sak.vedtak.VedtakRepository
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import org.assertj.core.api.Assertions

@@ -1,13 +1,13 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMapper
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
