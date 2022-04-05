@@ -33,7 +33,7 @@ class RevurderingService(private val søknadService: SøknadService,
 
     @Transactional
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
-        fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
         val revurdering = behandlingService.opprettBehandling(BehandlingType.REVURDERING,
                                                               revurderingInnhold.fagsakId,
                                                               BehandlingStatus.UTREDES,
@@ -51,7 +51,7 @@ class RevurderingService(private val søknadService: SøknadService,
                                               nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
                                               grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn)
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
-        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata)
+        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata, fagsak.stønadstype)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
                                                       oppgavetype = Oppgavetype.BehandleSak,
                                                       tilordnetNavIdent = saksbehandler,

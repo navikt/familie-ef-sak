@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -111,7 +112,10 @@ class VurderingService(private val behandlingService: BehandlingService,
      * For å omgå dette problemet lagres først de kopierte vilkårsvurderingene til databasen. Til slutt
      * vil oppdaterEndretTid() manuelt overskrive verdiene for endretTid til korrekte verdier.
      */
-    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingId: UUID, nyBehandlingsId: UUID, metadata: HovedregelMetadata) {
+    fun kopierVurderingerTilNyBehandling(eksisterendeBehandlingId: UUID,
+                                         nyBehandlingsId: UUID,
+                                         metadata: HovedregelMetadata,
+                                         stønadType: StønadType) {
         val tidligereVurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId).associateBy { it.id }
         val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(eksisterendeBehandlingId)
         val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
@@ -122,7 +126,7 @@ class VurderingService(private val behandlingService: BehandlingService,
                                                                                            nyBehandlingsId,
                                                                                            barnIdMap)
 
-        val nyeBarnVurderinger = opprettVurderingerForNyeBarn(kopiAvVurderinger, metadata)
+        val nyeBarnVurderinger = opprettVurderingerForNyeBarn(kopiAvVurderinger, metadata, stønadType)
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
         tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
@@ -150,10 +154,13 @@ class VurderingService(private val behandlingService: BehandlingService,
                     }
 
     private fun opprettVurderingerForNyeBarn(vurderingerKopi: Map<UUID, Vilkårsvurdering>,
-                                             metadata: HovedregelMetadata) =
+                                             metadata: HovedregelMetadata,
+                                             stønadType: StønadType) =
             metadata.barn
                     .filter { barn -> vurderingerKopi.none { it.value.barnId == barn.id } }
-                    .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, it.behandlingId, it.id) }
+                    .map { OppdaterVilkår.lagVilkårsvurderingForNyttBarn(metadata, it.behandlingId, it.id, stønadType) }
+                    .flatten()
+
 
     private fun tilbakestillEndretTidForKopierteVurderinger(vurderinger: Map<UUID, Vilkårsvurdering>,
                                                             tidligereVurderinger: Map<UUID, Vilkårsvurdering>) {
