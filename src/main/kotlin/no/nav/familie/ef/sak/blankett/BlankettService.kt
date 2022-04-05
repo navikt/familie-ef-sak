@@ -70,7 +70,7 @@ class BlankettService(private val tilgangService: TilgangService,
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(
-                BlankettPdfBehandling(årsak = behandling.årsak),
+                BlankettPdfBehandling(årsak = behandling.årsak, stønadstype = behandling.stønadstype),
                 lagPersonopplysningerDto(behandling),
                 hentVilkårDto(behandlingId),
                 hentVedtak(behandlingId),
