@@ -11,12 +11,11 @@ import java.util.UUID
                                              InsertUpdateRepository<TerminbarnOppgave> {
 
     @Query
-    public fun existsByFagsakIdAndTermindato(fagsakId: UUID, termindato: LocalDate): Boolean
+    fun existsByFagsakIdAndTermindato(fagsakId: UUID, termindato: LocalDate): Boolean
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.id behandling_id, b.fagsak_id, fe.id, bb.person_ident fodselsnummer_barn, 
-          bb.fodsel_termindato termindato_barn
+        SELECT b.id behandling_id, b.fagsak_id, fe.id ekstern_fagsak_id, bb.fodsel_termindato termindato_barn
         FROM gjeldende_iverksatte_behandlinger b
          JOIN fagsak_ekstern fe ON fe.fagsak_id = b.fagsak_id
          JOIN behandling_barn bb ON bb.behandling_id = b.id
