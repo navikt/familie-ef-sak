@@ -127,7 +127,7 @@ class VedtakController(private val stegService: StegService,
                     identToForventetInntektMap.put(ident.second!!, forventetInntekt)
                 }
             }
-            logger.info("En chunk ferdig")
+            logger.info("hentPersonerMedAktivStonadOgForventetInntekt en chunk ferdig")
         }
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
         return Ressurs.success(identToForventetInntektMap)
