@@ -108,13 +108,20 @@ class VedtakController(private val stegService: StegService,
     @GetMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(): Ressurs<Map<String, Int?>> {
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD)
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
+        var count = 0
         for (behandlingId in behandlingIds) {
             val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
             val ident = behandlingService.hentAktivIdent(behandlingId)
             identToForventetInntektMap[ident] = forventetInntekt
+            if (++count % 500 == 0) {
+                logger.info("Count=$count")
+            }
         }
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
         return Ressurs.success(identToForventetInntektMap)
     }
 }
