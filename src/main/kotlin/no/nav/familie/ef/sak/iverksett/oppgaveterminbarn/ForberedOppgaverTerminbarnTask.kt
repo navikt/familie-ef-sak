@@ -24,8 +24,7 @@ class ForberedOppgaverTerminbarnTask(val taskRepository: TaskRepository,
 
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled("familie.ef.iverksett.opprett-oppgaver-terminbarn")) {
-            val sisteKjøring = LocalDate.parse(task.payload)
-            forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(sisteKjøring)
+            forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
         } else {
             logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")
         }

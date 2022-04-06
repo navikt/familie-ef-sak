@@ -25,7 +25,7 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun forberedOppgaverForUfødteTerminbarn(sisteKjøring: LocalDate, kjøreDato: LocalDate = LocalDate.now()) {
+    fun forberedOppgaverForUfødteTerminbarn() {
 
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> =
                 (terminbarnRepository
