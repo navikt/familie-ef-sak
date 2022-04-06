@@ -162,7 +162,8 @@ object VedtakDomeneParser {
                     personident = parseString(VedtakDomenebegrep.PERSONIDENT, rad),
                     vedtakstidspunkt = LocalDateTime.now(),
                     type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                    andelerTilkjentYtelse = listOf()
+                    andelerTilkjentYtelse = listOf(),
+                    startdato = LocalDate.now(),
             )
         }
     }

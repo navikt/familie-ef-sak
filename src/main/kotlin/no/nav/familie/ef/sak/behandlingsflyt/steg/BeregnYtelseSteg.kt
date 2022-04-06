@@ -145,10 +145,13 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun beregnNyttOpphørsdatoForRevurdering(nyeAndeler: List<AndelTilkjentYtelse>,
-                                                    opphørsdato: LocalDate?,
-                                                    forrigeTilkjenteYtelse: TilkjentYtelse): LocalDate? {
+                                                    opphørsdato: LocalDate,
+                                                    forrigeTilkjenteYtelse: TilkjentYtelse): LocalDate {
         val opphørsdatoHvisFørTidligereAndeler = if (nyeAndeler.isEmpty()) opphørsdato else null
-        return min(opphørsdatoHvisFørTidligereAndeler, forrigeTilkjenteYtelse.startdato)
+        @Suppress("FoldInitializerAndIfToElvis")
+        if (opphørsdatoHvisFørTidligereAndeler == null) return forrigeTilkjenteYtelse.startdato
+
+        return minOf(opphørsdatoHvisFørTidligereAndeler, forrigeTilkjenteYtelse.startdato)
     }
 
     private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: InnvilgelseOvergangsstønad,
@@ -160,8 +163,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
-                andelerTilkjentYtelse to startdatoForFørstegangsbehandling(
-                        andelerTilkjentYtelse)
+                andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
             BehandlingType.REVURDERING -> nyeAndelerForRevurderingMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
@@ -181,25 +183,17 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun nyeAndelerForRevurderingMedStartdato(saksbehandling: Saksbehandling,
                                                      vedtak: InnvilgelseOvergangsstønad,
                                                      andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
-            : Pair<List<AndelTilkjentYtelse>, LocalDate?> {
+            : Pair<List<AndelTilkjentYtelse>, LocalDate> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
-        validerStartdato(forrigeTilkjenteYtelse)
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
         val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
-        val startdato = nyttStartdato(vedtak, forrigeOpphørsdato)
+        val startdato = nyttStartdato(saksbehandling.id, vedtak, forrigeOpphørsdato)
         return nyeAndeler to startdato
-    }
-
-    // TODO denne kan fjernes når startdato blir not null
-    private fun validerStartdato(forrigeTilkjenteYtelse: TilkjentYtelse?) {
-        feilHvis(forrigeTilkjenteYtelse != null && forrigeTilkjenteYtelse.startdato == null) {
-            "Mangler startdato på tilkjent ytelse behandlingId=${forrigeTilkjenteYtelse?.behandlingId}"
-        }
     }
 
     private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
@@ -222,8 +216,12 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             } ?: andelerTilkjentYtelse
 
 
-    private fun nyttStartdato(innvilget: InnvilgelseOvergangsstønad, forrigeOpphørsdato: LocalDate?): LocalDate? {
-        return min(innvilget.perioder.minOfOrNull { it.årMånedFra.atDay(1) }, forrigeOpphørsdato)
+    private fun nyttStartdato(behandlingId: UUID, innvilget: InnvilgelseOvergangsstønad, forrigeOpphørsdato: LocalDate?): LocalDate {
+        val startdato = min(innvilget.perioder.minOfOrNull { it.årMånedFra.atDay(1) }, forrigeOpphørsdato)
+        feilHvis(startdato == null) {
+            "Klarer ikke å beregne startdato for behandling=$behandlingId vedtak=$innvilget"
+        }
+        return startdato
     }
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
@@ -309,7 +307,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         }
 
         brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
-                       forrigeTilkjentYtelse.startdato != null && forrigeTilkjentYtelse.startdato <= opphørFom) {
+                       forrigeTilkjentYtelse.startdato <= opphørFom) {
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
         }
 

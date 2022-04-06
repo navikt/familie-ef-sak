@@ -34,6 +34,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -45,6 +46,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 fun oppgave(behandling: Behandling,
@@ -223,6 +225,24 @@ fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
                    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
         Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)
+
+fun vedtaksperiodeDto(årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
+                      årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
+                      aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
+                      periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
+        vedtaksperiodeDto(årMånedFra = YearMonth.from(årMånedFra),
+                          årMånedTil = YearMonth.from(årMånedTil),
+                          aktivitet = aktivitet,
+                          periodeType = periodeType)
+
+fun vedtaksperiodeDto(årMånedFra: YearMonth = YearMonth.of(2021, 1),
+                      årMånedTil: YearMonth = YearMonth.of(2021, 12),
+                      aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
+                      periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
+        VedtaksperiodeDto(årMånedFra = årMånedFra,
+                          årMånedTil = årMånedTil,
+                          aktivitet = aktivitet,
+                          periodeType = periodeType)
 
 fun behandlingBarn(id: UUID,
                    behandlingId: UUID,
