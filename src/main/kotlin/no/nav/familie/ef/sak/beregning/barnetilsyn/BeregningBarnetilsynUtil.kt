@@ -45,11 +45,11 @@ object BeregningBarnetilsynUtil {
     }
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
-                           kontrantstøtteBeløp: BigDecimal,
+                           kontantstøtteBeløp: BigDecimal,
                            tillegsønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth) =
-            maxOf(ZERO, minOf(((periodeutgift - kontrantstøtteBeløp) * 0.64.toBigDecimal()) - tillegsønadBeløp,
+            maxOf(ZERO, minOf(((periodeutgift - kontantstøtteBeløp) * 0.64.toBigDecimal()) - tillegsønadBeløp,
                               satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {

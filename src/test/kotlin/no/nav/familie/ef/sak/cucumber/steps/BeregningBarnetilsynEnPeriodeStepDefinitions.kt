@@ -26,13 +26,13 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     private fun mapRadTilPeriodeDataDto(it: MutableMap<String, String>): PeriodeDataDto {
         val periodeutgift = it["Periodeutgift"]
-        val kontrantstøttebeløp = it["Kontantstøttebeløp"]
+        val kontantstøttebeløp = it["Kontantstøttebeløp"]
         val tillegsstønadbeløp = it["Tillegsstønadbeløp"]
         val antallBarn = it["Antall barn"]
         val testkommentar: String? = it["Testkommentar"]
         val årMåned = parseValgfriÅrMåned("Periodedato", it)!!
         val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
-                                            kontrantstøttebeløp = kontrantstøttebeløp!!,
+                                            kontantstøtteBeløp = kontantstøttebeløp!!,
                                             tillegsønadbeløp = tillegsstønadbeløp!!,
                                             antallBarn = antallBarn!!,
                                             årMåned = årMåned,
@@ -49,10 +49,10 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     private fun beregnPeriodebeløp(it: Map.Entry<String, PeriodeDataDto>) =
             BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = it.value.periodeutgift.toBigDecimal(),
-                                                             kontrantstøtteBeløp = it.value.kontrantstøttebeløp.toBigDecimal(),
-                                                             tillegsønadBeløp = it.value.tillegsønadbeløp.toBigDecimal(),
-                                                             antallBarn = it.value.antallBarn.toInt(),
-                                                             årMåned = it.value.årMåned)
+                                                        kontantstøtteBeløp = it.value.kontantstøtteBeløp.toBigDecimal(),
+                                                        tillegsønadBeløp = it.value.tillegsønadbeløp.toBigDecimal(),
+                                                        antallBarn = it.value.antallBarn.toInt(),
+                                                        årMåned = it.value.årMåned)
 
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
@@ -73,7 +73,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 }
 
 data class PeriodeDataDto(val periodeutgift: String,
-                          val kontrantstøttebeløp: String,
+                          val kontantstøtteBeløp: String,
                           val tillegsønadbeløp: String,
                           val antallBarn: String,
                           val årMåned: YearMonth,
