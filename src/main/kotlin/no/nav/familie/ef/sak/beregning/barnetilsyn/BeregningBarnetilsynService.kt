@@ -12,14 +12,13 @@ class BeregningBarnetilsynService {
                                 kontantstøttePerioder: List<PeriodeMedBeløpDto>,
                                 tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): List<BeløpsperiodeBarnetilsynDto> {
 
-        val barnetilsynMåneder = utgiftsperioder.map {
-            it.split()
-        }.flatMap {
-            it.map { utgiftsMåned ->
-                utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder, tilleggsstønadsperioder)
-            }
-        }
-        return barnetilsynMåneder.mergeSammenhengendePerioder()
+        return utgiftsperioder.map { it.split() }
+                .flatten()
+                .map { utgiftsMåned ->
+                    utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder,
+                                                                tilleggsstønadsperioder)
+                }
+                .mergeSammenhengendePerioder()
     }
 }
 
@@ -83,7 +82,7 @@ private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.
 
 fun YearMonth.omsluttesAv(fraOgMed: YearMonth, tilOgMed: YearMonth): Boolean = fraOgMed <= this && this <= tilOgMed
 
-private fun LocalDate.yearMonth() : YearMonth = YearMonth.from(this)
+private fun LocalDate.yearMonth(): YearMonth = YearMonth.from(this)
 
 
 
