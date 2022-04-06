@@ -110,10 +110,18 @@ class VedtakController(private val stegService: StegService,
     fun hentPersonerMedAktivStonadOgForventetInntekt(): Ressurs<Map<String, Int?>> {
         val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD)
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
-        for (behandlingId in behandlingIds) {
-            val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
-            val ident = behandlingService.hentAktivIdent(behandlingId)
-            identToForventetInntektMap[ident] = forventetInntekt
+        val chunkedBehandlingIdList = behandlingIds.chunked(500)
+        for (chunkedBehandlingIds in chunkedBehandlingIdList) {
+            val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForVedtakOgDato(chunkedBehandlingIds, LocalDate.now().minusMonths(1))
+            val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(chunkedBehandlingIds)
+            for (behandlingId in chunkedBehandlingIds) {
+                val ident = behandlingIdToAktivIdentMap[behandlingId]
+                if (ident == null) {
+                    error("Fant ikke ident for behandling $behandlingId")
+                }
+                val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
+                identToForventetInntektMap.put(ident, forventetInntekt)
+            }
         }
         return Ressurs.success(identToForventetInntektMap)
     }

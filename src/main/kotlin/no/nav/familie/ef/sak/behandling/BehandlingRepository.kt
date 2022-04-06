@@ -37,6 +37,17 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnAktivIdent(behandlingId: UUID): String
 
     // language=PostgreSQL
+    @Query("""SELECT pi.ident FROM fagsak f
+                    JOIN behandling b ON f.id = b.fagsak_id
+                    JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+                    WHERE b.id in (:behandlingIds)
+                    ORDER BY pi.endret_tid DESC 
+                    LIMIT 1
+                    """)
+    fun finnAktiveIdenter(behandlingIds: List<UUID>): Map<UUID, String>
+
+
+    // language=PostgreSQL
     @Query("""SELECT
               b.id,
               b.forrige_behandling_id,
