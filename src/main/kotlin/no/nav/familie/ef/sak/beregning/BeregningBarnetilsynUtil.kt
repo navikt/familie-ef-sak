@@ -62,9 +62,9 @@ object BeregningBarnetilsynUtil {
 }
 
 fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
-    val maxbeløpBarnetilsynSats = this.filter {
+    val maxbeløpBarnetilsynSats = this.singleOrNull {
         it.fraOgMedDato <= årMåned.atDay(1) && it.tilOgMedDato >= årMåned.atDay(1)
-    }.singleOrNull() ?: error("Kunne ikke finne barnetilsyn sats for dato: $årMåned ")
+    } ?: error("Kunne ikke finne barnetilsyn sats for dato: $årMåned ")
 
     return maxbeløpBarnetilsynSats.maxbeløp[minOf(antallBarn, 3)]
            ?: error { "Kunne ikke finne barnetilsyn sats for antallBarn: $antallBarn periode: $årMåned " }
