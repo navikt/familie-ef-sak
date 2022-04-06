@@ -49,7 +49,7 @@ object BeregningBarnetilsynUtil {
                            tillegsønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth) =
-            maxOf(ZERO, minOf(((periodeutgift - kontantstøtteBeløp) * 0.64.toBigDecimal()) - tillegsønadBeløp,
+            maxOf(ZERO, minOf(((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()) ) - tillegsønadBeløp,
                               satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {
@@ -59,6 +59,9 @@ object BeregningBarnetilsynUtil {
 }
 
 fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
+    if(antallBarn==0){
+        return 0
+    }
     val maxbeløpBarnetilsynSats = this.singleOrNull {
         it.fraOgMedDato <= årMåned.atDay(1) && it.tilOgMedDato >= årMåned.atDay(1)
     } ?: error("Kunne ikke finne barnetilsyn sats for dato: $årMåned ")
