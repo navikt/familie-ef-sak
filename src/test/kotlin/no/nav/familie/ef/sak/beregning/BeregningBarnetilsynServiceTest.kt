@@ -271,7 +271,7 @@ internal class BeregningBarnetilsynServiceTest {
         val beløpsperioder = listOf(lagBeløpsperiode(forventetFraDato, januar.atEndOfMonth()),
                                     lagBeløpsperiode(februar.atDay(1), forventetTilDato))
 
-        val resultat = beløpsperioder.merge()
+        val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(1)
         assertThat(resultat.first().periode.fradato).isEqualTo(forventetFraDato)
@@ -291,7 +291,7 @@ internal class BeregningBarnetilsynServiceTest {
                                                      tilDato = forventetTilDato,
                                                      beløp = BigDecimal(200)))
 
-        val resultat = beløpsperioder.merge()
+        val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(2)
         assertThat(resultat.first().periode.fradato).isEqualTo(forventetFraDato)
@@ -310,7 +310,7 @@ internal class BeregningBarnetilsynServiceTest {
                                     lagBeløpsperiode(fraDato = mars.atDay(1),
                                                      tilDato = forventetTilDato,
                                                      beløp = BigDecimal(100)))
-        assertThat(beløpsperioder.merge()).hasSize(2)
+        assertThat(beløpsperioder.mergeSammenhengendePerioder()).hasSize(2)
 
     }
 
@@ -327,7 +327,7 @@ internal class BeregningBarnetilsynServiceTest {
                                                      tilDato = forventetTilDato,
                                                      beløp = BigDecimal(200)))
 
-        assertThat(beløpsperioder.merge()).hasSize(2)
+        assertThat(beløpsperioder.mergeSammenhengendePerioder()).hasSize(2)
     }
 
     private fun lagBeløpsperiode(fraDato: LocalDate,

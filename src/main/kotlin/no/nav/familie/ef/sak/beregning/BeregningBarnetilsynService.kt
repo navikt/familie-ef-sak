@@ -20,7 +20,7 @@ class BeregningBarnetilsynService {
                 utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder, tilleggsstønadsperioder)
             }
         }
-        return barnetilsynMåneder.merge()
+        return barnetilsynMåneder.mergeSammenhengendePerioder()
     }
 }
 
@@ -34,12 +34,12 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     return perioder
 }
 
-fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDto> {
+fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     return mapNotNull { it }.groupingBy { it.toKey() }
             .aggregate { _, akkumulatorListe: MutableList<BeløpsperiodeBarnetilsynDto>?, nestePeriodeDto, first ->
-                if (first || akkumulatorListe == null ) {
+                if (first) {
                     mutableListOf(nestePeriodeDto)
-                } else if (akkumulatorListe.isNotEmpty() && erSammenhengende(akkumulatorListe.last().periode, nestePeriodeDto.periode)) {
+                } else if (erSammenhengende(akkumulatorListe!!.last().periode, nestePeriodeDto.periode)) {
                     val oppdatertBeløpsperiodeKopi = lagKopiMedNyTildato(akkumulatorListe.last(), nestePeriodeDto)
                     akkumulatorListe.byttUtSisteMed(oppdatertBeløpsperiodeKopi)
                 } else {
