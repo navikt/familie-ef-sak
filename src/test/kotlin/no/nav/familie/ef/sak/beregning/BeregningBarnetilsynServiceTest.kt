@@ -166,12 +166,19 @@ internal class BeregningBarnetilsynServiceTest {
         val januar = YearMonth.of(2021, 1)
         val desember = YearMonth.of(2022, 12)
 
+        val forventetBeløp2021 = BigDecimal(4195)
+        val forventetBeløp2022 = BigDecimal(4250)
+
         val utgiftsperiode =
                 UtgiftsperiodeDto(januar, desember, barn = listOf(UUID.randomUUID()), utgifter = BigDecimal(1000000.0))
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode),
                                                                       kontantstøttePerioder = listOf(),
                                                                       tilleggsstønadsperioder = listOf())
+                .sortedBy { it.periode.fradato }
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
+        assertThat(beregnYtelseBarnetilsyn.first().beløp).isLessThan(beregnYtelseBarnetilsyn.last().beløp)
+        assertThat(beregnYtelseBarnetilsyn.first().beløp).isEqualTo(forventetBeløp2021)
+        assertThat(beregnYtelseBarnetilsyn.last().beløp).isEqualTo(forventetBeløp2022)
     }
 
     @Test

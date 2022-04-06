@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -56,7 +57,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
 
 fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto): Boolean {
     val firstDatePlussEnMnd = this.periode.tildato.plusMonths(1)
-    return YearMonth.from(firstDatePlussEnMnd) == YearMonth.from(other.periode.fradato)
+    return firstDatePlussEnMnd.yearMonth() == other.periode.fradato.yearMonth()
 }
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
@@ -74,7 +75,6 @@ private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder
                                                                 antallBarnIPeriode = this.barn.size)
 }
 
-
 private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): BigDecimal {
     return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: BigDecimal.ZERO
 }
@@ -83,6 +83,7 @@ private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.
 
 fun YearMonth.omsluttesAv(fraOgMed: YearMonth, tilOgMed: YearMonth): Boolean = fraOgMed <= this && this <= tilOgMed
 
+private fun LocalDate.yearMonth() : YearMonth = YearMonth.from(this)
 
 
 
