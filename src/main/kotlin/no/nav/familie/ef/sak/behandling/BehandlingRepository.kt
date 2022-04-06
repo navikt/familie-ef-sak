@@ -41,9 +41,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id in (:behandlingIds)
-                    ORDER BY pi.endret_tid DESC 
-                    LIMIT 1
-                    """)
+            """)
     fun finnAktiveIdenter(behandlingIds: List<UUID>): Map<UUID, String>
 
 
