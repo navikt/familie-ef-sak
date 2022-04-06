@@ -1,6 +1,16 @@
 # language: no
 # encoding: UTF-8
 
+# Gitt Perioder:
+# JAN-----------------------AUG-------------------------- DES (Utgiftsperioder )
+#         MAI--------------------------SEP                    (Kontantstøtte)
+#                   JUL--------------------------NOV          (Tillesstønad)
+#
+# JAN-----MAI-------JUL-----AUG--------SEP-------NOV----- DES (Resultat = 6)
+
+# Formel beløp når vi ikke treffer maxgrense: ((utgifter - kontantstøtte) * 0.64 ) - reduksjonsbeløp
+# Eksempel beløp Juli som har både kontantstøtte og reduksjonsbeløp: ((100 - 10) * 0.64) - 15 = *42.6*
+
 Egenskap: Beregning av barnetilsyn med flere perioder
 
   Scenario: Varierende utgifter og inntekter, satsperiode og antall barn for 2022
