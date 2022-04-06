@@ -27,13 +27,13 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     private fun mapRadTilPeriodeDataDto(it: MutableMap<String, String>): PeriodeDataDto {
         val periodeutgift = it["Periodeutgift"]
         val kontrantstøtteBeløp = it["KontrantstøtteBeløp"]
-        val tillegsønadBeløp = it["TillegsønadBeløp"]
+        val tillegsstønadBeløp = it["TillegsstønadBeløp"]
         val antallBarn = it["AntallBarn"]
         val testKommentar: String? = it["Testkommentar"]
         val årMåned = parseValgfriÅrMåned("PeriodeDato", it)!!
         val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
                                             kontrantstøtteBeløp = kontrantstøtteBeløp!!,
-                                            tillegsønadBeløp = tillegsønadBeløp!!,
+                                            tillegsønadBeløp = tillegsstønadBeløp!!,
                                             antallBarn = antallBarn!!,
                                             årMåned = årMåned,
                                             testKommentar = testKommentar)
