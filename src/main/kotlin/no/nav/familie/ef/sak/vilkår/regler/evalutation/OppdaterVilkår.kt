@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
-import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -152,23 +151,12 @@ object OppdaterVilkår {
         return vilkårsreglerForStønad(stønadstype)
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-                        metadata.barn
-                                .filter { skalLageVilkårsvurderingForBarnet(stønadstype, metadata, it) }
-                                .map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+                        metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
                     } else {
                         listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
                     }
                 }
     }
-
-    private fun skalLageVilkårsvurderingForBarnet(stønadstype: StønadType,
-                                                  metadata: HovedregelMetadata,
-                                                  barn: BehandlingBarn) =
-            when (stønadstype) {
-                OVERGANGSSTØNAD -> true
-                BARNETILSYN -> metadata.søktOmBarnetilsyn.contains(barn.id)
-                SKOLEPENGER -> error("Ikke implementert")
-            }
 
 
     fun lagVilkårsvurderingForNyttBarn(metadata: HovedregelMetadata,
