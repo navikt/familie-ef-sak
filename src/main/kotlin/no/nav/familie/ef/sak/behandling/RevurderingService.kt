@@ -49,7 +49,8 @@ class RevurderingService(private val søknadService: SøknadService,
         barnService.opprettBarnForRevurdering(behandlingId = revurdering.id,
                                               forrigeBehandlingId = forrigeBehandlingId,
                                               nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
-                                              grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn)
+                                              grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
+                                              stønadstype = fagsak.stønadstype)
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata, fagsak.stønadstype)
         val oppgaveId = oppgaveService.opprettOppgave(behandlingId = revurdering.id,
