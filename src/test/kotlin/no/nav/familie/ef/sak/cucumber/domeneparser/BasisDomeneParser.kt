@@ -1,11 +1,10 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
+package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter

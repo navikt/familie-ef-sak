@@ -37,11 +37,9 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.BARNET_ER_SYKT
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -53,7 +51,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.Properties
 import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse as DtoAdressebeskyttelse
 
@@ -90,8 +87,11 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                                         aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
     private val navn = Navn("fornavn", "", "", Metadata(false))
 
+    private val taskSlot = slot<Task>()
+
     @BeforeEach
     internal fun setUp() {
+        every { taskRepository.save(capture(taskSlot)) } answers { firstArg() }
         every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
         every { personService.hentPdlPersonKort(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
@@ -107,7 +107,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kjøre query uten problemer`() {
-        assertThat(service.hentArbeidssøkereForUttrekk()).isEmpty()
+        assertThat(service.hentArbeidssøkereForUttrekk(YearMonth.now())).isEmpty()
     }
 
     @Test
@@ -448,6 +448,19 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    internal fun `oppretter task som kjører neste måned`() {
+        val now = YearMonth.now()
+        val task = OpprettUttrekkArbeidssøkerTask.opprettTask(now)
+        assertThat(task.payload).isEqualTo(now.toString())
+        assertThat(task.triggerTid).isEqualTo(now.plusMonths(1).atDay(1).atTime(5, 0))
+
+        opprettUttrekkArbeidssøkerTask.onCompletion(task)
+        val lagretTask = taskSlot.captured
+        assertThat(lagretTask.payload).isEqualTo(now.plusMonths(1).toString())
+        assertThat(lagretTask.triggerTid).isEqualTo(now.plusMonths(2).atDay(1).atTime(5, 0))
+    }
+
     private fun opprettdata() {
         opprettBehandlinger()
         innvilg(fagsak, behandling, listOf(vedtaksperiode))
@@ -487,11 +500,10 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                         behandling: Behandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                               perioder = vedtaksperioder,
-                               inntekter = inntekter,
-                               periodeBegrunnelse = null,
-                               inntektBegrunnelse = null)
+        val vedtak = InnvilgelseOvergangsstønad(perioder = vedtaksperioder,
+                                                inntekter = inntekter,
+                                                periodeBegrunnelse = null,
+                                                inntektBegrunnelse = null)
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak)
     }
 

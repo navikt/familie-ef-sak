@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.steps
+package no.nav.familie.ef.sak.cucumber.steps
 
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
@@ -11,11 +11,11 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
+import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling

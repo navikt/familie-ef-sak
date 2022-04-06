@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
@@ -21,7 +21,7 @@ class BlankettSimuleringsService(val beregningService: BeregningService) {
     fun genererTilkjentYtelseForBlankett(vedtak: VedtakDto?,
                                          saksbehandling: Saksbehandling): TilkjentYtelseMedMetadata {
         val andeler = when (vedtak) {
-            is Innvilget -> {
+            is InnvilgelseOvergangsstønad -> {
                 beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
                                               vedtak.inntekter.tilInntektsperioder())
                         .map {
@@ -42,7 +42,8 @@ class BlankettSimuleringsService(val beregningService: BeregningService) {
         val tilkjentYtelseForBlankett = TilkjentYtelse(personident = saksbehandling.ident,
                                                        behandlingId = saksbehandling.id,
                                                        andelerTilkjentYtelse = andeler,
-                                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING)
+                                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+                                                       startdato = andeler.minOf { it.stønadFom })
 
         return tilkjentYtelseForBlankett.tilTilkjentYtelseMedMetaData(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler(),

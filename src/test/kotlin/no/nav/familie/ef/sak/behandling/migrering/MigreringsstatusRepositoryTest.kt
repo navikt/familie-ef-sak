@@ -18,4 +18,11 @@ internal class MigreringsstatusRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(migreringsstatusRepository.findAllByIdentIn(setOf("1"))).hasSize(1)
         assertThat(migreringsstatusRepository.findAllByIdentIn(setOf("2"))).isEmpty()
     }
+
+    @Test
+    internal fun `skal finne de med gitt årsak`() {
+        migreringsstatusRepository.insert(Migreringsstatus("1", MigreringResultat.OK, MigreringExceptionType.ALLEREDE_MIGRERT))
+        assertThat(migreringsstatusRepository.findAllByÅrsak(MigreringExceptionType.ALLEREDE_MIGRERT)).hasSize(1)
+        assertThat(migreringsstatusRepository.findAllByÅrsak(MigreringExceptionType.FLERE_IDENTER)).isEmpty()
+    }
 }

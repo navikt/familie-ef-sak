@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -160,6 +161,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     }
 
     private fun opprettFagsak(stønadstype: StønadType, fagsakPerson: FagsakPerson): FagsakDomain {
+        validerStønadstype(stønadstype)
         return fagsakRepository.insert(FagsakDomain(stønadstype = stønadstype,
                                                     fagsakPersonId = fagsakPerson.id))
     }
@@ -167,6 +169,16 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun FagsakDomain.tilFagsakMedPerson(): Fagsak {
         val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)
         return this.tilFagsakMedPerson(personIdenter)
+    }
+
+    private fun validerStønadstype(stønadstype: StønadType) {
+        when (stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> {}
+            StønadType.BARNETILSYN -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.barnetilsyn")) {
+                "Støtter ikke opprettelse av fagsak for barnetilsyn"
+            }
+            StønadType.SKOLEPENGER -> throw Feil("Støtter ikke opprettelse av fagsak for skolepenger")
+        }
     }
 
 }

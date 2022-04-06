@@ -18,6 +18,10 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -55,7 +59,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
-        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling.stønadstype)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
@@ -95,12 +99,13 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?): String? {
+
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, stønadType: StønadType): String? {
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
+                    ResultatType.INNVILGE -> utledBegrunnelseForInnvilgetVedtak(stønadType, vedtak)
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
@@ -109,6 +114,13 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
             }
         }
     }
+
+    private fun utledBegrunnelseForInnvilgetVedtak(stønadType: StønadType, vedtak: Vedtak) =
+            when (stønadType) {
+                OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
+                BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
+                SKOLEPENGER -> throw NotImplementedError("Skolepenger er ikke implementert")
+            }
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {

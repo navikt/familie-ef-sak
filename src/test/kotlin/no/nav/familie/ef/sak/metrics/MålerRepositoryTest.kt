@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.metrics
+package no.nav.familie.ef.sak.metrics
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository

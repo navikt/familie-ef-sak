@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandlingsflyt.steg
+package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -17,8 +16,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -90,11 +88,10 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     private fun innvilg(saksbehandling: Saksbehandling,
                         vedtaksperioder: List<VedtaksperiodeDto>,
                         inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = Innvilget(resultatType = ResultatType.INNVILGE,
-                               perioder = vedtaksperioder,
-                               inntekter = inntekter,
-                               periodeBegrunnelse = null,
-                               inntektBegrunnelse = null)
+        val vedtak = InnvilgelseOvergangsstønad(perioder = vedtaksperioder,
+                                                inntekter = inntekter,
+                                                periodeBegrunnelse = null,
+                                                inntektBegrunnelse = null)
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }
 
