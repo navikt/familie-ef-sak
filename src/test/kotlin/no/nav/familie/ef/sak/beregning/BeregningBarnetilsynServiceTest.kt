@@ -350,7 +350,7 @@ internal class BeregningBarnetilsynServiceTest {
                                  beløp: BigDecimal = BigDecimal(100)): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(periode = Periode(fraDato, tilDato),
                                            beløp = beløp,
-                                           beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgiftsbeløp = ZERO,
+                                           beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgifter = ZERO,
                                                                                                  kontantstøttebeløp = ZERO,
                                                                                                  tilleggsstønadsbeløp = ZERO,
                                                                                                  antallBarn = 1))

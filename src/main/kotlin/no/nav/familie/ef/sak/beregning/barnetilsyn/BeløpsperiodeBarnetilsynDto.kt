@@ -10,7 +10,7 @@ data class BeløpsperiodeBarnetilsynDto(
 )
 
 data class BeregningsgrunnlagBarnetilsynDto(
-        val utgiftsbeløp: BigDecimal,
+        val utgifter: BigDecimal,
         val kontantstøttebeløp: BigDecimal,
         val tilleggsstønadsbeløp: BigDecimal,
         val antallBarn: Int

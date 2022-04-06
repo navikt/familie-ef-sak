@@ -38,7 +38,7 @@ object BeregningBarnetilsynUtil {
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
                                            beløpPeriode,
                                            BeregningsgrunnlagBarnetilsynDto(
-                                                   utgiftsbeløp = utgiftsperiode.utgifter,
+                                                   utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
                                                    tilleggsstønadsbeløp = tilleggsstønadBeløp,
                                                    antallBarn = antallBarnIPeriode))
