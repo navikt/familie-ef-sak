@@ -54,7 +54,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     }
 }
 
-fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto):Boolean {
+fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto): Boolean {
     val firstDatePlussEnMnd = this.periode.tildato.plusMonths(1)
     return YearMonth.from(firstDatePlussEnMnd) == YearMonth.from(other.periode.fradato)
 }
@@ -75,9 +75,14 @@ private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder
 }
 
 
-
 private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): BigDecimal {
-    return this.find { utgiftsMåned.årMåned <= it.årMånedTil && utgiftsMåned.årMåned >= it.årMånedFra }?.beløp
-           ?: BigDecimal.ZERO
+    return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: BigDecimal.ZERO
 }
+
+private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.omsluttesAv(it.årMånedFra, it.årMånedTil)
+
+fun YearMonth.omsluttesAv(fraOgMed: YearMonth, tilOgMed: YearMonth): Boolean = fraOgMed <= this && this <= tilOgMed
+
+
+
 
