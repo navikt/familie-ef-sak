@@ -1,5 +1,148 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import org.junit.jupiter.api.Assertions.*
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
+import no.nav.familie.util.FnrGenerator
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.UUID
 
-internal class ForberedOppgaverTerminbarnServiceTest
+internal class ForberedOppgaverTerminbarnServiceTest {
+
+    private val personService: PersonService = mockk()
+    private val fagsakService: FagsakService = mockk()
+    private val terminbarnRepository: TerminbarnRepository = mockk()
+    private val iverksettClient: IverksettClient = mockk()
+    private val forberedOppgaverTerminbarnService =
+            ForberedOppgaverTerminbarnService(personService, fagsakService, terminbarnRepository, iverksettClient)
+    private val oppgaverForBarnSlot = slot<OppgaverForBarnDto>()
+    val fødsel: Fødsel = mockk()
+
+    @BeforeEach
+    fun init() {
+
+        every { fagsakService.hentAktivIdent(any()) } returns ""
+        every { iverksettClient.sendOppgaverForTerminBarn(any()) } just runs
+        every { personService.hentPersonMedBarn(any()).barn } returns mockk()
+        every { terminbarnRepository.insert(any()) } returns mockk()
+        every { fødsel.erUnder18År() } returns true
+        mockkObject(GrunnlagsdataMapper)
+    }
+
+    @Test
+    fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, ingen barn i PDL, forvent at oppgave lagres og sendes`() {
+
+        val terminBarn = listOf(opprettTerminbarn())
+        val pdlBarn = emptyList<BarnMedIdent>()
+        every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
+
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        verify(exactly = 1) { iverksettClient.sendOppgaverForTerminBarn(any()) }
+        verify(exactly = 1) { terminbarnRepository.insert(any()) }
+    }
+
+    @Test
+    fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, ingen barn i PDL, forvent at oppgave instansieres riktig`() {
+
+        val terminbarn = listOf(opprettTerminbarn(UUID.randomUUID(), UUID.randomUUID(), 1, LocalDate.MIN))
+        val pdlBarn = emptyList<BarnMedIdent>()
+
+        every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminbarn
+        every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
+        every { iverksettClient.sendOppgaverForTerminBarn(capture(oppgaverForBarnSlot)) } just runs
+
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+
+        val capture = oppgaverForBarnSlot.captured.oppgaverForBarn.first()
+        assertThat(capture.behandlingId).isEqualTo(terminbarn.first().behandlingId)
+        assertThat(capture.eksternFagsakId).isEqualTo(terminbarn.first().eksternFagsakId)
+        assertThat(capture.beskrivelse).isEqualTo(OppgaveBeskrivelse.beskrivelseUfødtTerminbarn())
+    }
+
+    @Test
+    fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, to umatchede barn i PDL, forvent at oppgave opprettes`() {
+
+        val terminBarn = listOf(opprettTerminbarn())
+        val pdlBarn = listOf(opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(1)),
+                             opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)))
+
+        every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
+
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        verify(exactly = 1) { iverksettClient.sendOppgaverForTerminBarn(any()) }
+        verify(exactly = 1) { terminbarnRepository.insert(any()) }
+    }
+
+    @Test
+    fun `ett utløpt terminbarn, et av to matchede PDL barn, forvent at oppgave ikke opprettes`() {
+
+        val terminBarn = listOf(opprettTerminbarn())
+        val pdlBarn = listOf(opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
+                             opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)))
+
+        every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
+
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        verify(exactly = 0) { iverksettClient.sendOppgaverForTerminBarn(any()) }
+    }
+
+    @Test
+    fun `ingen terminbarn finnes, to PDL barn finnes, forvent at oppgave ikke opprettes`() {
+
+        val terminBarn = emptyList<TerminbarnTilUtplukkForOppgave>()
+        val pdlBarn = listOf(opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
+                             opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)))
+
+        every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
+
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        verify(exactly = 0) { iverksettClient.sendOppgaverForTerminBarn(any()) }
+    }
+
+    private fun opprettTerminbarn(behandlingId: UUID = UUID.randomUUID(),
+                                  fagsakId: UUID = UUID.randomUUID(),
+                                  eksternId: Long = 0,
+                                  termindato: LocalDate = LocalDate.now()): TerminbarnTilUtplukkForOppgave {
+        return TerminbarnTilUtplukkForOppgave(behandlingId, fagsakId, eksternId, termindato)
+    }
+
+    private fun opprettPdlBarn(fødselsdato: LocalDate): BarnMedIdent {
+        return BarnMedIdent(adressebeskyttelse = emptyList(),
+                            bostedsadresse = emptyList(),
+                            deltBosted = emptyList(),
+                            dødsfall = emptyList(),
+                            forelderBarnRelasjon = emptyList(),
+                            fødsel = listOf(Fødsel(fødselsår = null,
+                                                   fødselsdato = fødselsdato,
+                                                   fødeland = null,
+                                                   fødested = null,
+                                                   fødekommune = null,
+                                                   metadata = Metadata(historisk = false))),
+                            navn = mockk(),
+                            personIdent = FnrGenerator.generer(fødselsdato, false))
+    }
+}
