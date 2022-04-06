@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
@@ -117,10 +118,11 @@ class VedtakController(private val stegService: StegService,
             for (behandlingId in chunkedBehandlingIds) {
                 val ident = behandlingIdToAktivIdentMap[behandlingId]
                 if (ident == null) {
-                    error("Fant ikke ident for behandling $behandlingId")
+                    secureLogger.warn("Fant ikke ident knyttet til behandling $behandlingId - får ikke vurdert inntekt")
+                } else {
+                    val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
+                    identToForventetInntektMap.put(ident, forventetInntekt)
                 }
-                val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
-                identToForventetInntektMap.put(ident, forventetInntekt)
             }
         }
         return Ressurs.success(identToForventetInntektMap)
