@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsMåned
 import no.nav.familie.ef.sak.felles.dto.Periode
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO

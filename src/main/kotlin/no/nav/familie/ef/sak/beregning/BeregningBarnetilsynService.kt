@@ -2,6 +2,10 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.KontantstøttePeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.TilleggsstønadPeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsMåned
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -32,7 +36,7 @@ class BeregningBarnetilsynService {
 fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.årMånedFra
-    while (måned.isBefore(this.årMånedTil) || måned.equals(this.årMånedTil)) {
+    while (måned <= this.årMånedTil) {
         perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter))
         måned = måned.plusMonths(1)
     }

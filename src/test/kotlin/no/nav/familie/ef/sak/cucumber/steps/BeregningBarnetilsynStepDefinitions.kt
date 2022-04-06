@@ -6,10 +6,10 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.KontantstøttePeriodeDto
-import no.nav.familie.ef.sak.beregning.TilleggsstønadPeriodeDto
-import no.nav.familie.ef.sak.beregning.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.KontantstøttePeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.TilleggsstønadPeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal

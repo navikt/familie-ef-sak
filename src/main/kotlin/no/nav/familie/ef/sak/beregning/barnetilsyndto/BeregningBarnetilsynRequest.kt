@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.beregning
+package no.nav.familie.ef.sak.beregning.barnetilsyndto
 
 import java.math.BigDecimal
 import java.time.YearMonth
