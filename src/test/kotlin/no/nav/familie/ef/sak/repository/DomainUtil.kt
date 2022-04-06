@@ -175,6 +175,10 @@ fun vilkårsvurdering(behandlingId: UUID,
                          barnId = barnId,
                          delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
 
+fun fagsakpersoner(vararg identer: String): Set<PersonIdent> = identer.map {
+    PersonIdent(ident = it)
+}.toSet()
+
 fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
     PersonIdent(ident = it)
 }.toSet()

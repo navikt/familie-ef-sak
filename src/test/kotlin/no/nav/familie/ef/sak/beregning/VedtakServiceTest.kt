@@ -134,7 +134,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentVedtakForBehandlinger - skal returnere vedtak`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak)).id
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)).id
         val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
         val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
                                                    inntektBegrunnelse = "tomBegrunnelse",

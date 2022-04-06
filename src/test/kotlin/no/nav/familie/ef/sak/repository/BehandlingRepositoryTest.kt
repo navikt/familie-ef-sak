@@ -362,8 +362,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal kunne ha flere behandlinger på ulike fagsak med status utredes`() {
-            val fagsak = testoppsettService.lagreFagsak(fagsak())
-            val fagsak2 = testoppsettService.lagreFagsak(fagsak())
+            val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("1")))
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner("2")))
             behandlingRepository.insert(behandling(fagsak, status = UTREDES))
             behandlingRepository.insert(behandling(fagsak2, status = UTREDES))
         }
