@@ -27,21 +27,17 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
     @Transactional
     fun forberedOppgaverForUfødteTerminbarn() {
 
-        val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> =
-                (terminbarnRepository
-                        .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn())
-                        .groupBy { it.behandlingId }
+        val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
+                .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn()
+                .groupBy { it.behandlingId }
 
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")
 
         gjeldendeBarn.keys.forEach {
             val terminbarnPåSøknad = gjeldendeBarn[it] ?: emptyList()
             if (terminbarnPåSøknad.isNotEmpty()) {
-                val fødselsnummerSøker = fagsakService.hentAktivIdent(gjeldendeBarn[it]?.first()?.fagsakId
-                                                                      ?: error("Kunne ikke finne TerminbarnTilUtplukkForOppgave"))
-                val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(fødselsnummerSøker).barn)
-                        .filter { it.fødsel.gjeldende().erUnder18År() }
-
+                val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
+                val pdlBarnUnder18år = pdlBarnUnder18år(fødselsnummerSøker)
                 val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarnUnder18år) }
                 val oppgaver = lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
                 if (oppgaver.isNotEmpty()) {
@@ -51,39 +47,42 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
         }
     }
 
+    private fun pdlBarnUnder18år(fødselsnummerSøker: String): List<BarnMedIdent> =
+            GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(fødselsnummerSøker).barn)
+                    .filter { it.fødsel.gjeldende().erUnder18År() }
+
     private fun sendOppgaverTilIverksett(oppgaver: List<OppgaveForBarn>) {
         iverksettClient.sendOppgaverForTerminBarn(OppgaverForBarnDto(oppgaver))
-    }
-
-    private fun lagTerminbarnOppgave(barn: TerminbarnTilUtplukkForOppgave): TerminbarnOppgave {
-        return TerminbarnOppgave(barn.fagsakId, barn.termindatoBarn)
     }
 
     private fun lagreOgLagOppgaverForUgyldigeTerminbarn(barnTilUtplukkForOppgave: List<TerminbarnTilUtplukkForOppgave>,
                                                         fødselsnummerSøker: String): List<OppgaveForBarn> {
 
-        return barnTilUtplukkForOppgave.filter {
-            !terminbarnRepository.existsByFagsakIdAndTermindato(it.fagsakId, it.termindatoBarn)
-        }.map {
-            terminbarnRepository.insert(lagTerminbarnOppgave(it))
-            OppgaveForBarn(it.behandlingId,
-                           it.eksternFagsakId,
-                           fødselsnummerSøker,
-                           StønadType.OVERGANGSSTØNAD,
-                           OppgaveBeskrivelse.beskrivelseUfødtTerminbarn())
-        }
+        return barnTilUtplukkForOppgave
+                .filter { !terminbarnRepository.existsByFagsakIdAndTermindato(it.fagsakId, it.termindatoBarn) }
+                .map {
+                    terminbarnRepository.insert(it.tilTerminbarnOppgave())
+                    OppgaveForBarn(it.behandlingId,
+                                   it.eksternFagsakId,
+                                   fødselsnummerSøker,
+                                   StønadType.OVERGANGSSTØNAD,
+                                   OppgaveBeskrivelse.beskrivelseUfødtTerminbarn())
+                }
     }
+}
 
-    private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<BarnMedIdent>): Boolean {
-        return pdlBarn.map { Fødselsnummer(it.personIdent).fødselsdato }
-                .filter {
-                    matchBarn(this.termindatoBarn, it)
-                }.isNotEmpty()
-    }
+private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: LocalDate): Boolean {
+    return søknadBarnTermindato.minusMonths(3).isBefore(pdlBarnFødselsdato)
+           && søknadBarnTermindato.plusWeeks(4).isAfter(pdlBarnFødselsdato)
+}
 
-    private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: LocalDate): Boolean {
-        return søknadBarnTermindato.minusMonths(3).isBefore(pdlBarnFødselsdato)
-               && søknadBarnTermindato.plusWeeks(4).isAfter(pdlBarnFødselsdato)
-    }
+private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<BarnMedIdent>): Boolean {
+    return pdlBarn
+            .map { Fødselsnummer(it.personIdent).fødselsdato }
+            .filter { matchBarn(this.termindatoBarn, it) }
+            .isNotEmpty()
+}
 
+private fun TerminbarnTilUtplukkForOppgave.tilTerminbarnOppgave(): TerminbarnOppgave {
+    return TerminbarnOppgave(this.fagsakId, this.termindatoBarn)
 }
