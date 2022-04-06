@@ -37,7 +37,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnAktivIdent(behandlingId: UUID): String
 
     // language=PostgreSQL
-    @Query("""SELECT pi.ident FROM fagsak f
+    @Query("""SELECT b.id, pi.ident FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id in (:behandlingIds)
