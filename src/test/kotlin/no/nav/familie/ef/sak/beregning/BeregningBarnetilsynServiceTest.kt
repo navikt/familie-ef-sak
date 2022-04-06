@@ -1,10 +1,13 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.KontantstøttePeriodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.TilleggsstønadPeriodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
+import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -260,7 +263,6 @@ internal class BeregningBarnetilsynServiceTest {
 
         val utgiftsperiodeDto = UtgiftsperiodeDto(januar, desember, barn = listOf(), utgifter = TEN)
         val resultat = utgiftsperiodeDto.split()
-
         assertThat(resultat).hasSize(12)
 
     }

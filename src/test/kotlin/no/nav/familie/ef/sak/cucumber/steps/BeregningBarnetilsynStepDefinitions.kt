@@ -5,8 +5,8 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
-import no.nav.familie.ef.sak.beregning.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.KontantstøttePeriodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.TilleggsstønadPeriodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto

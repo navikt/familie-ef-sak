@@ -4,7 +4,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
-import no.nav.familie.ef.sak.beregning.BeregningBarnetilsynUtil
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
@@ -49,10 +49,10 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     private fun beregnPeriodebeløp(it: Map.Entry<String, PeriodeDataDto>) =
             BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = it.value.periodeutgift.toBigDecimal(),
-                                                        kontrantstøtteBeløp = it.value.kontrantstøttebeløp.toBigDecimal(),
-                                                        tillegsønadBeløp = it.value.tillegsønadbeløp.toBigDecimal(),
-                                                        antallBarn = it.value.antallBarn.toInt(),
-                                                        årMåned = it.value.årMåned)
+                                                             kontrantstøtteBeløp = it.value.kontrantstøttebeløp.toBigDecimal(),
+                                                             tillegsønadBeløp = it.value.tillegsønadbeløp.toBigDecimal(),
+                                                             antallBarn = it.value.antallBarn.toInt(),
+                                                             årMåned = it.value.årMåned)
 
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
