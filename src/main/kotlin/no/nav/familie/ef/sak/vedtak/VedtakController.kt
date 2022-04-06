@@ -109,9 +109,12 @@ class VedtakController(private val stegService: StegService,
     @GetMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(): Ressurs<Map<String, Int?>> {
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD)
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
         val chunkedBehandlingIdList = behandlingIds.chunked(500)
+
         for (chunkedBehandlingIds in chunkedBehandlingIdList) {
             val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForVedtakOgDato(chunkedBehandlingIds, LocalDate.now().minusMonths(1))
             val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(chunkedBehandlingIds)
@@ -124,7 +127,9 @@ class VedtakController(private val stegService: StegService,
                     identToForventetInntektMap.put(ident.second!!, forventetInntekt)
                 }
             }
+            logger.info("En chunk ferdig")
         }
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
         return Ressurs.success(identToForventetInntektMap)
     }
 }

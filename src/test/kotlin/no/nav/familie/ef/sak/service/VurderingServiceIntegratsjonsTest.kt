@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -52,7 +53,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                                           false,
                                           barnPåRevurdering,
                                           emptyList())
-        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata)
+        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
 
@@ -89,7 +90,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         assertThat(catchThrowable {
             vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId,
                                                               revurdering.id,
-                                                              metadata)
+                                                              metadata, StønadType.OVERGANGSSTØNAD)
         })
                 .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
     }
