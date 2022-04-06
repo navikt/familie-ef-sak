@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-# Gitt Perioder:
+# Gitt Perioder 2022:
 # JAN-----------------------AUG-------------------------- DES (Utgiftsperioder )
 #         MAI--------------------------SEP                    (Kontantstøtte)
 #                   JUL--------------------------NOV          (Tillesstønad)
