@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +51,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         val terminBarn = listOf(opprettTerminbarn())
         val pdlBarn = emptyList<BarnMedIdent>()
         every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
-        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
 
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
@@ -65,7 +66,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         val pdlBarn = emptyList<BarnMedIdent>()
 
         every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
-        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminbarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminbarn
         every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
         every { iverksettClient.sendOppgaverForTerminBarn(capture(oppgaverForBarnSlot)) } just runs
 
@@ -85,7 +86,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
                              opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)))
 
         every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
-        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
 
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
@@ -101,7 +102,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
                              opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)))
 
         every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
-        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
 
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
@@ -116,7 +117,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
                              opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)))
 
         every { GrunnlagsdataMapper.mapBarn(any()) } returns pdlBarn
-        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn() } returns terminBarn
+        every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { terminbarnRepository.existsByFagsakIdAndTermindato(any(), any()) } returns false
 
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()

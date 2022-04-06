@@ -28,7 +28,7 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
     fun forberedOppgaverForUfødteTerminbarn() {
 
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
-                .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn()
+                .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
                 .groupBy { it.behandlingId }
 
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")

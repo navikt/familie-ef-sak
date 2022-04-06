@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +35,8 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
                                         barn(behandlingId = behandling.id,
                                              termindato = LocalDate.now().minusWeeks(5))))
 
-        val barnForUtplukk = terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn()
+        val barnForUtplukk =
+                terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
         assertThat(barnForUtplukk.size).isEqualTo(1)
     }
 
@@ -46,7 +48,8 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
                                         barn(behandlingId = behandling.id,
                                              termindato = LocalDate.now().minusWeeks(3))))
 
-        val barnForUtplukk = terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn()
+        val barnForUtplukk =
+                terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
         assertThat(barnForUtplukk.size).isEqualTo(0)
     }
 
