@@ -26,17 +26,17 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     private fun mapRadTilPeriodeDataDto(it: MutableMap<String, String>): PeriodeDataDto {
         val periodeutgift = it["Periodeutgift"]
-        val kontrantstøtteBeløp = it["KontrantstøtteBeløp"]
-        val tillegsstønadBeløp = it["TillegsstønadBeløp"]
-        val antallBarn = it["AntallBarn"]
-        val testKommentar: String? = it["Testkommentar"]
-        val årMåned = parseValgfriÅrMåned("PeriodeDato", it)!!
+        val kontrantstøttebeløp = it["Kontantstøttebeløp"]
+        val tillegsstønadbeløp = it["Tillegsstønadbeløp"]
+        val antallBarn = it["Antall barn"]
+        val testkommentar: String? = it["Testkommentar"]
+        val årMåned = parseValgfriÅrMåned("Periodedato", it)!!
         val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
-                                            kontrantstøtteBeløp = kontrantstøtteBeløp!!,
-                                            tillegsønadBeløp = tillegsstønadBeløp!!,
+                                            kontrantstøttebeløp = kontrantstøttebeløp!!,
+                                            tillegsønadbeløp = tillegsstønadbeløp!!,
                                             antallBarn = antallBarn!!,
                                             årMåned = årMåned,
-                                            testKommentar = testKommentar)
+                                            testkommentar = testkommentar)
         return periodeDataDto
     }
 
@@ -49,8 +49,8 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     private fun beregnPeriodebeløp(it: Map.Entry<String, PeriodeDataDto>) =
             BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = it.value.periodeutgift.toBigDecimal(),
-                                                        kontrantstøtteBeløp = it.value.kontrantstøtteBeløp.toBigDecimal(),
-                                                        tillegsønadBeløp = it.value.tillegsønadBeløp.toBigDecimal(),
+                                                        kontrantstøtteBeløp = it.value.kontrantstøttebeløp.toBigDecimal(),
+                                                        tillegsønadBeløp = it.value.tillegsønadbeløp.toBigDecimal(),
                                                         antallBarn = it.value.antallBarn.toInt(),
                                                         årMåned = it.value.årMåned)
 
@@ -64,7 +64,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
             if (resultat[rad]!!.compareTo(periodeutgift) == 0) {
                 null // alt ok
             } else {
-                "Feilet på rad $rad: Her forventet vi $periodeutgift, men fikk ${resultat[rad]}, kommentar: ${inputData[rad]?.testKommentar} "
+                "Feilet på rad $rad: Her forventet vi $periodeutgift, men fikk ${resultat[rad]}, kommentar: ${inputData[rad]?.testkommentar} "
             }
         }.filterNotNull()
 
@@ -73,8 +73,8 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 }
 
 data class PeriodeDataDto(val periodeutgift: String,
-                          val kontrantstøtteBeløp: String,
-                          val tillegsønadBeløp: String,
+                          val kontrantstøttebeløp: String,
+                          val tillegsønadbeløp: String,
                           val antallBarn: String,
                           val årMåned: YearMonth,
-                          val testKommentar: String?)
+                          val testkommentar: String?)

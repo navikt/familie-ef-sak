@@ -28,10 +28,10 @@ class BeregningBarnetilsynStepDefinitions {
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val fraÅrMåned = parseValgfriÅrMåned("FraMåned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("TilOgMedMåned", it)!!
+            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
+            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             val beløp = it["Beløp"]!!.toBigDecimal()
-            val barn = it["AntallBarn"]!!.toInt()
+            val barn = it["Antall barn"]!!.toInt()
             utgiftsperioder.add(UtgiftsperiodeDto(fraÅrMåned, tilÅrMåned, List(barn) { UUID.randomUUID() }, beløp))
         }
     }
@@ -39,8 +39,8 @@ class BeregningBarnetilsynStepDefinitions {
     @Og("kontantstøtteperioder")
     fun kontantstøtteperioder(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val fraÅrMåned = parseValgfriÅrMåned("FraMåned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("TilOgMedMåned", it)!!
+            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
+            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             val beløp = it["Beløp"]!!.toBigDecimal()
             kontantStøtteperioder.add(KontantstøttePeriodeDto(fraÅrMåned, tilÅrMåned, beløp))
         }
@@ -49,8 +49,8 @@ class BeregningBarnetilsynStepDefinitions {
     @Og("tilleggsstønadsperioder")
     fun tilleggsstønadsperioder(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val fraÅrMåned = parseValgfriÅrMåned("FraMåned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("TilOgMedMåned", it)!!
+            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
+            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             val beløp = it["Beløp"]!!.toBigDecimal()
             tilleggsstønadPerioder.add(TilleggsstønadPeriodeDto(fraÅrMåned, tilÅrMåned, beløp))
         }
@@ -67,8 +67,8 @@ class BeregningBarnetilsynStepDefinitions {
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
         val forventet = dataTable.asMaps().map {
             val beløp = it["Beløp"]!!.toBigDecimal()
-            val fraÅrMåned = parseValgfriÅrMåned("FraMåned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("TilOgMedMåned", it)!!
+            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
+            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             ForventetPeriode(beløp, fraÅrMåned, tilÅrMåned)
         }
         assertThat(beregnYtelseBarnetilsynResultat).size().isEqualTo(forventet.size)
