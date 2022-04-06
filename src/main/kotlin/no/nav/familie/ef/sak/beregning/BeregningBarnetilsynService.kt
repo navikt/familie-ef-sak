@@ -37,9 +37,9 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
 fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDto> {
     return mapNotNull { it }.groupingBy { it.toKey() }
             .aggregate { _, akkumulatorListe: MutableList<BeløpsperiodeBarnetilsynDto>?, nestePeriodeDto, first ->
-                if (first) {
+                if (first || akkumulatorListe == null ) {
                     mutableListOf(nestePeriodeDto)
-                } else if (erSammenhengende(akkumulatorListe!!.last().periode, nestePeriodeDto.periode)) {
+                } else if (akkumulatorListe.isNotEmpty() && erSammenhengende(akkumulatorListe.last().periode, nestePeriodeDto.periode)) {
                     val oppdatertBeløpsperiodeKopi = lagKopiMedNyTildato(akkumulatorListe.last(), nestePeriodeDto)
                     akkumulatorListe.byttUtSisteMed(oppdatertBeløpsperiodeKopi)
                 } else {
@@ -51,8 +51,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.merge(): List<BeløpsperiodeBarnetilsynDt
 private fun lagKopiMedNyTildato(beløpsperiodeBarnetilsynDto: BeløpsperiodeBarnetilsynDto,
                                 nestePeriodeDto: BeløpsperiodeBarnetilsynDto): BeløpsperiodeBarnetilsynDto {
     val nyPeriode = beløpsperiodeBarnetilsynDto.periode.copy(tildato = nestePeriodeDto.periode.tildato)
-    val copy = beløpsperiodeBarnetilsynDto.copy(periode = nyPeriode)
-    return copy
+    return beløpsperiodeBarnetilsynDto.copy(periode = nyPeriode)
 }
 
 private fun erSammenhengende(gjeldendePeriode: Periode,
@@ -75,9 +74,9 @@ private fun <E> MutableList<E>.leggTil(nestePeriodeDto: E): MutableList<E> {
     return this
 }
 
-private fun <E> MutableList<E>.byttUtSisteMed(copy: E): MutableList<E> {
+private fun <E> MutableList<E>.byttUtSisteMed(ny: E): MutableList<E> {
     this.removeLast()
-    this.add(copy)
+    this.add(ny)
     return this
 }
 
