@@ -45,6 +45,8 @@ import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.SvarId
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -96,7 +98,9 @@ internal class IverksettingDtoMapperTest {
         every { fagsakService.hentFagsakForBehandling(behandling.id) } returns fagsak
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.INNVILGE)
         val behandlingshistorikk =
-                Behandlingshistorikk(behandlingId = behandling.id, opprettetAv = "opprettetAv", steg = StegType.SEND_TIL_BESLUTTER)
+                Behandlingshistorikk(behandlingId = behandling.id,
+                                     opprettetAv = "opprettetAv",
+                                     steg = StegType.SEND_TIL_BESLUTTER)
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
     }
@@ -223,12 +227,18 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(1)
 
         assertThat(vedtak.vedtaksperioder.size).isEqualTo(1)
+        validerVedtaksperiode(vedtak)
+        //assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
+    }
+
+    private fun validerVedtaksperiode(vedtak: VedtaksdetaljerDto) {
         val vedtaksperiode = vedtak.vedtaksperioder.first()
         assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
         assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
-        assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
-        assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
-        //assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
+        if (vedtaksperiode is VedtaksperiodeOvergangsstønadDto) {
+            assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
+            assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
+        }
     }
 
     private fun mockReturnerObjekterMedAlleFelterFylt(): UUID? {

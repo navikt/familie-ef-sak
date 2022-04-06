@@ -37,13 +37,14 @@ import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
+import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingMedVarselDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
-import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
@@ -99,12 +100,19 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         val søkerDto = mapSøkerDto(saksbehandling)
         val tilbakekreving = mapTilbakekreving(saksbehandling.id)
         val brevmottakere = mapBrevmottakere(saksbehandling.id)
-        val vedtakDto = mapVedtaksdetaljerDto(vedtak, saksbehandler, beslutter, tilkjentYtelse, tilbakekreving, brevmottakere)
 
-        return IverksettDto(behandling = behandlingsdetaljer,
-                            fagsak = fagsakdetaljerDto,
-                            søker = søkerDto,
-                            vedtak = vedtakDto)
+        return when (saksbehandling.stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> {
+                val vedtakDto =
+                        mapVedtaksdetaljerOvergangsstønadDto(vedtak, saksbehandler, beslutter, tilkjentYtelse, tilbakekreving, brevmottakere)
+
+                IverksettOvergangsstønadDto(behandling = behandlingsdetaljer,
+                                            fagsak = fagsakdetaljerDto,
+                                            søker = søkerDto,
+                                            vedtak = vedtakDto)
+            }
+            else -> error("Har ikke støtte å mappe iverksett for ${saksbehandling.stønadstype}")
+        }
     }
 
     fun mapTilbakekreving(behandlingId: UUID): TilbakekrevingDto? {
@@ -152,21 +160,22 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                    kravMottatt = saksbehandling.kravMottatt)
 
     @Improvement("Opphørårsak må utledes ved revurdering")
-    private fun mapVedtaksdetaljerDto(vedtak: Vedtak,
-                                      saksbehandler: String,
-                                      beslutter: String,
-                                      tilkjentYtelse: TilkjentYtelse?,
-                                      tilbakekreving: TilbakekrevingDto?,
-                                      brevmottakere: List<Brevmottaker>) =
-            VedtaksdetaljerDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
-                               vedtakstidspunkt = LocalDateTime.now(),
-                               opphørÅrsak = null,
-                               saksbehandlerId = saksbehandler,
-                               beslutterId = beslutter,
-                               tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-                               vedtaksperioder = vedtak.perioder?.tilIverksettDto() ?: emptyList(),
-                               tilbakekreving = tilbakekreving,
-                               brevmottakere = brevmottakere)
+    private fun mapVedtaksdetaljerOvergangsstønadDto(vedtak: Vedtak,
+                                                     saksbehandler: String,
+                                                     beslutter: String,
+                                                     tilkjentYtelse: TilkjentYtelse?,
+                                                     tilbakekreving: TilbakekrevingDto?,
+                                                     brevmottakere: List<Brevmottaker>) =
+            VedtaksdetaljerOvergangsstønadDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
+                                              vedtakstidspunkt = LocalDateTime.now(),
+                                              opphørÅrsak = null,
+                                              saksbehandlerId = saksbehandler,
+                                              beslutterId = beslutter,
+                                              tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
+                                              vedtaksperioder = vedtak.perioder?.tilVedtaksperiodeOvergangsstønadDto()
+                                                                ?: emptyList(),
+                                              tilbakekreving = tilbakekreving,
+                                              brevmottakere = brevmottakere)
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
         val personIdent = saksbehandling.ident
@@ -243,13 +252,13 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
         }
 )
 
-fun PeriodeWrapper.tilIverksettDto(): List<VedtaksperiodeDto> = this.perioder
+fun PeriodeWrapper.tilVedtaksperiodeOvergangsstønadDto(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
         .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
         .map {
-            VedtaksperiodeDto(fraOgMed = it.datoFra,
-                              tilOgMed = it.datoTil,
-                              aktivitet = AktivitetType.valueOf(it.aktivitet.name),
-                              periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
+            VedtaksperiodeOvergangsstønadDto(fraOgMed = it.datoFra,
+                                             tilOgMed = it.datoTil,
+                                             aktivitet = AktivitetType.valueOf(it.aktivitet.name),
+                                             periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
             )
         }
 
