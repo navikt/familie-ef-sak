@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
@@ -112,14 +113,21 @@ class VedtakController(private val stegService: StegService,
         val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD)
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
-        var count = 0
-        for (behandlingId in behandlingIds) {
-            val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
-            val ident = behandlingService.hentAktivIdent(behandlingId)
-            identToForventetInntektMap[ident] = forventetInntekt
-            if (++count % 500 == 0) {
-                logger.info("Count=$count")
+        val chunkedBehandlingIdList = behandlingIds.chunked(500)
+
+        for (chunkedBehandlingIds in chunkedBehandlingIdList) {
+            val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForVedtakOgDato(chunkedBehandlingIds, LocalDate.now().minusMonths(1))
+            val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(chunkedBehandlingIds)
+            for (behandlingId in chunkedBehandlingIds) {
+                val ident = behandlingIdToAktivIdentMap.firstOrNull { it.first == behandlingId }
+                if (ident?.first == null || ident.second == null) {
+                    secureLogger.warn("Fant ikke ident knyttet til behandling $behandlingId - får ikke vurdert inntekt")
+                } else {
+                    val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
+                    identToForventetInntektMap.put(ident.second!!, forventetInntekt)
+                }
             }
+            logger.info("hentPersonerMedAktivStonadOgForventetInntekt en chunk ferdig")
         }
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
         return Ressurs.success(identToForventetInntektMap)
