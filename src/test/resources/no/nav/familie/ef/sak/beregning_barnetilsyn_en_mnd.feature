@@ -69,7 +69,7 @@ Egenskap: Beregning av barnetilsyn (en periode)
       | 24  | 2880   |
       | 25  | 0      |
       | 26  | 1600   |
-      | 27  | 0    |
+      | 27  | 0      |
       | 28  | 5120   |
       | 29  | 6284   |
       | 30  | 6284   |
