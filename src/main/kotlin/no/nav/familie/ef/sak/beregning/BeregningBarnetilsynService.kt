@@ -6,9 +6,9 @@ import no.nav.familie.ef.sak.beregning.barnetilsyndto.KontantstøttePeriodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.TilleggsstønadPeriodeDto
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsMåned
 import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsperiodeDto
-import no.nav.familie.ef.sak.felles.dto.Periode
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.YearMonth
 
 @Service
 class BeregningBarnetilsynService {
@@ -47,37 +47,25 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  * Merger sammenhengende perioder hvor beløp og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
-    return mapNotNull { it }.groupingBy { it.toKey() }
-            .aggregate { _, akkumulatorListe: MutableList<BeløpsperiodeBarnetilsynDto>?, nestePeriodeDto, first ->
-                when (first) {
-                    true -> mutableListOf(nestePeriodeDto)
-                    false -> oppdaterEllerLeggTilNy(akkumulatorListe, nestePeriodeDto)
-                }
-            }.values.flatten()
-}
-
-private fun oppdaterEllerLeggTilNy(akkumulatorListe: MutableList<BeløpsperiodeBarnetilsynDto>?,
-                                   nestePeriodeDto: BeløpsperiodeBarnetilsynDto) =
-        when (erSammenhengende(akkumulatorListe!!.last().periode, nestePeriodeDto.periode)) {
-            true -> lagNyTildato(akkumulatorListe, nestePeriodeDto)
-            false -> akkumulatorListe.leggTil(nestePeriodeDto)
+    val sortertPåDatoListe = this.sortedBy { it.periode.fradato }
+    return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
+        val last = acc.lastOrNull()
+        if (last != null && erSammenhengendeMedSammeBeløpOgBeregningsgrunnlag(last, entry)) {
+            acc.removeLast()
+            acc.add(last.copy(periode = last.periode.copy(tildato = entry.periode.tildato)))
+        } else {
+            acc.add(entry)
         }
-
-private fun lagNyTildato(akkumulatorListe: MutableList<BeløpsperiodeBarnetilsynDto>,
-                         nestePeriodeDto: BeløpsperiodeBarnetilsynDto): MutableList<BeløpsperiodeBarnetilsynDto> {
-    val oppdatertBeløpsperiodeKopi = lagKopiMedNyTildato(akkumulatorListe.last(), nestePeriodeDto)
-    return akkumulatorListe.byttUtSisteMed(oppdatertBeløpsperiodeKopi)
+        acc
+    }
 }
 
-private fun lagKopiMedNyTildato(beløpsperiodeBarnetilsynDto: BeløpsperiodeBarnetilsynDto,
-                                nestePeriodeDto: BeløpsperiodeBarnetilsynDto): BeløpsperiodeBarnetilsynDto {
-    val nyPeriode = beløpsperiodeBarnetilsynDto.periode.copy(tildato = nestePeriodeDto.periode.tildato)
-    return beløpsperiodeBarnetilsynDto.copy(periode = nyPeriode)
+fun erSammenhengendeMedSammeBeløpOgBeregningsgrunnlag(first: BeløpsperiodeBarnetilsynDto,
+                                                      second: BeløpsperiodeBarnetilsynDto): Boolean {
+    val firstDatePlussEnMnd = first.periode.tildato.plusMonths(1)
+    return YearMonth.from(firstDatePlussEnMnd) == YearMonth.from(second.periode.fradato) &&
+           first.toKey() == second.toKey()
 }
-
-private fun erSammenhengende(gjeldendePeriode: Periode,
-                             nestePeriode: Periode) =
-        gjeldendePeriode.tildato.month.equals(nestePeriode.fradato.minusMonths(1).month)
 
 private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder: List<KontantstøttePeriodeDto>,
                                                         tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>): BeløpsperiodeBarnetilsynDto {
@@ -88,17 +76,6 @@ private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder
                                                                 kontantstøtteBeløp = kontantStøtteBeløp,
                                                                 tilleggsstønadBeløp = tilleggsstønadsperiodeBeløp,
                                                                 antallBarnIPeriode = this.barn.size)
-}
-
-private fun <E> MutableList<E>.leggTil(nestePeriodeDto: E): MutableList<E> {
-    this.add(nestePeriodeDto)
-    return this
-}
-
-private fun <E> MutableList<E>.byttUtSisteMed(ny: E): MutableList<E> {
-    this.removeLast()
-    this.add(ny)
-    return this
 }
 
 private fun BeløpsperiodeBarnetilsynDto.toKey() = Key(this.beløp.toInt(), this.beregningsgrunnlag)
