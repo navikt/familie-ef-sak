@@ -8,8 +8,8 @@ import java.time.YearMonth
 class BeregningBarnetilsynService {
 
     fun beregnYtelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                kontantstøttePerioder: List<KontantstøttePeriodeDto>,
-                                tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>): List<BeløpsperiodeBarnetilsynDto> {
+                                kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+                                tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): List<BeløpsperiodeBarnetilsynDto> {
 
         val barnetilsynMåneder = utgiftsperioder.map {
             it.split()
@@ -44,7 +44,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     val sortertPåDatoListe = this.sortedBy { it.periode.fradato }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
-        if (last != null && erSammenhengendeMedSammeBeløpOgBeregningsgrunnlag(last, entry)) {
+        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
             acc.removeLast()
             acc.add(last.copy(periode = last.periode.copy(tildato = entry.periode.tildato)))
         } else {
@@ -54,17 +54,19 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     }
 }
 
-fun erSammenhengendeMedSammeBeløpOgBeregningsgrunnlag(first: BeløpsperiodeBarnetilsynDto,
-                                                      second: BeløpsperiodeBarnetilsynDto): Boolean {
-    val firstDatePlussEnMnd = first.periode.tildato.plusMonths(1)
-    return YearMonth.from(firstDatePlussEnMnd) == YearMonth.from(second.periode.fradato) &&
-           first.toKey() == second.toKey()
+fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto):Boolean {
+    val firstDatePlussEnMnd = this.periode.tildato.plusMonths(1)
+    return YearMonth.from(firstDatePlussEnMnd) == YearMonth.from(other.periode.fradato)
 }
 
-private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder: List<KontantstøttePeriodeDto>,
-                                                        tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>): BeløpsperiodeBarnetilsynDto {
-    val kontantStøtteBeløp = kontantstøttePerioder.finnKontantstøtteBeløp(this)
-    val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnTillegstønadBeløp(this)
+fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
+        this.beløp == other.beløp &&
+        this.beregningsgrunnlag == other.beregningsgrunnlag
+
+private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+                                                        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): BeløpsperiodeBarnetilsynDto {
+    val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
+    val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
 
     return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode = this,
                                                                 kontantstøtteBeløp = kontantStøtteBeløp,
@@ -72,16 +74,10 @@ private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder
                                                                 antallBarnIPeriode = this.barn.size)
 }
 
-private fun BeløpsperiodeBarnetilsynDto.toKey() = Key(this.beløp.toInt(), this.beregningsgrunnlag)
 
-private fun List<TilleggsstønadPeriodeDto>.finnTillegstønadBeløp(utgiftsMåned: UtgiftsMåned): BigDecimal {
+
+private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): BigDecimal {
     return this.find { utgiftsMåned.årMåned <= it.årMånedTil && utgiftsMåned.årMåned >= it.årMånedFra }?.beløp
            ?: BigDecimal.ZERO
 }
 
-private fun List<KontantstøttePeriodeDto>.finnKontantstøtteBeløp(utgiftsMåned: UtgiftsMåned): BigDecimal {
-    return this.find { utgiftsMåned.årMåned <= it.årMånedTil && utgiftsMåned.årMåned >= it.årMånedFra }?.beløp
-           ?: BigDecimal.ZERO
-}
-
-data class Key(val beløp: Int, val grunnlag: BeregningsgrunnlagBarnetilsynDto)

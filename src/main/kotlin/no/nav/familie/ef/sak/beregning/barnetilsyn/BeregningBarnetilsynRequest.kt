@@ -6,17 +6,11 @@ import java.util.UUID
 
 data class BeregningBarnetilsynRequest(
         val utgiftsperioder: List<UtgiftsperiodeDto>,
-        val kontantstøtteperioder: List<KontantstøttePeriodeDto>,
-        val tilleggsstønadsperioder: List<TilleggsstønadPeriodeDto>
+        val kontantstøtteperioder: List<PeriodeMedBeløpDto>,
+        val tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
 )
 
-data class TilleggsstønadPeriodeDto(
-        val årMånedFra: YearMonth,
-        val årMånedTil: YearMonth,
-        val beløp: BigDecimal
-)
-
-data class KontantstøttePeriodeDto(
+data class PeriodeMedBeløpDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val beløp: BigDecimal
@@ -26,7 +20,7 @@ data class UtgiftsperiodeDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
-        val utgifter: BigDecimal // Totalutgift eller utgift per måned
+        val utgifter: BigDecimal
 )
 
 data class UtgiftsMåned(

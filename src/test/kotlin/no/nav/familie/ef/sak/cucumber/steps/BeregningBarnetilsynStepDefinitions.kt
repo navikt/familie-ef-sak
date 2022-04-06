@@ -7,8 +7,7 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.barnetilsyn.KontantstøttePeriodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.TilleggsstønadPeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import org.assertj.core.api.Assertions.assertThat
@@ -19,8 +18,8 @@ import java.util.UUID
 class BeregningBarnetilsynStepDefinitions {
 
     val beregningBarnetilsynService = BeregningBarnetilsynService()
-    val kontantStøtteperioder: MutableList<KontantstøttePeriodeDto> = mutableListOf()
-    val tilleggsstønadPerioder: MutableList<TilleggsstønadPeriodeDto> = mutableListOf()
+    val kontantStøtteperioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
+    val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()
     val utgiftsperioder: MutableList<UtgiftsperiodeDto> = mutableListOf()
 
@@ -42,7 +41,7 @@ class BeregningBarnetilsynStepDefinitions {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             val beløp = it["Beløp"]!!.toBigDecimal()
-            kontantStøtteperioder.add(KontantstøttePeriodeDto(fraÅrMåned, tilÅrMåned, beløp))
+            kontantStøtteperioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
     }
 
@@ -52,7 +51,7 @@ class BeregningBarnetilsynStepDefinitions {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             val beløp = it["Beløp"]!!.toBigDecimal()
-            tilleggsstønadPerioder.add(TilleggsstønadPeriodeDto(fraÅrMåned, tilÅrMåned, beløp))
+            tilleggsstønadPerioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
     }
 
