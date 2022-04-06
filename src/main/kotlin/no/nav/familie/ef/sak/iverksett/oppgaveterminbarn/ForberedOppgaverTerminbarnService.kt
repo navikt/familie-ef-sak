@@ -84,5 +84,5 @@ private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<BarnMedIdent>): B
 }
 
 private fun TerminbarnTilUtplukkForOppgave.tilTerminbarnOppgave(): TerminbarnOppgave {
-    return TerminbarnOppgave(this.fagsakId, this.termindatoBarn)
+    return TerminbarnOppgave(fagsakId = this.fagsakId, termindato = this.termindatoBarn)
 }

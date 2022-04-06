@@ -15,7 +15,7 @@ import java.util.Properties
 @RestController
 @RequestMapping(path = ["/api/oppgaver-for-terminbarn"])
 @ProtectedWithClaims(issuer = "azuread")
-class InitForberedOppgaverForBarnTaskController(private val forberedOppgaverTerminbarnTask: ForberedOppgaverTerminbarnTask) {
+class InitForberedOppgaverForTerminBarnTaskController(private val forberedOppgaverTerminbarnTask: ForberedOppgaverTerminbarnTask) {
 
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {

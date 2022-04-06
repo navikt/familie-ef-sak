@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import nonapi.io.github.classgraph.json.Id
-import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.annotation.Id
 import java.time.LocalDate
 import java.util.UUID
 
