@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping(path = ["/api/barnetilsyn/beregning"])
+@RequestMapping(path = ["/api/beregning/barnetilsyn"])
 @ProtectedWithClaims(issuer = "azuread")
 class BeregningBarnetilsynController(private val beregningBarnetilsynService: BeregningBarnetilsynService) {
 
