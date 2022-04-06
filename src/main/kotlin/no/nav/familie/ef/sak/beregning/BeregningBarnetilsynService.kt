@@ -24,6 +24,11 @@ class BeregningBarnetilsynService {
     }
 }
 
+/**
+ * Del opp utgiftsperioder i atomiske deler (mnd).
+ * Eksempel: 1stk UtgiftsperiodeDto fra januar til mars deles opp i 3:
+ * listOf(UtgiftsMåned(jan), UtgiftsMåned(feb), UtgiftsMåned(mars))
+ */
 fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.årMånedFra
@@ -34,6 +39,9 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     return perioder
 }
 
+/**
+ * Merger sammenhengende perioder hvor beløp og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
+ */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     return mapNotNull { it }.groupingBy { it.toKey() }
             .aggregate { _, akkumulatorListe: MutableList<BeløpsperiodeBarnetilsynDto>?, nestePeriodeDto, first ->
