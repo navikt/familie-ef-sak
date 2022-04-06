@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.beregning.barnetilsyndto
+package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.felles.dto.Periode
 import java.math.BigDecimal

@@ -1,11 +1,5 @@
-package no.nav.familie.ef.sak.beregning
+package no.nav.familie.ef.sak.beregning.barnetilsyn
 
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.KontantstøttePeriodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.TilleggsstønadPeriodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsMåned
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsperiodeDto
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth

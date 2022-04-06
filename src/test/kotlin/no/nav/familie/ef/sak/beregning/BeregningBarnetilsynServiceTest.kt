@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningsgrunnlagBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.KontantstøttePeriodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.TilleggsstønadPeriodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.KontantstøttePeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.TilleggsstønadPeriodeDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

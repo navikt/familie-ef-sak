@@ -1,7 +1,5 @@
-package no.nav.familie.ef.sak.beregning
+package no.nav.familie.ef.sak.beregning.barnetilsyn
 
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeløpsperiodeBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyndto.BeregningBarnetilsynRequest
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.PostMapping
