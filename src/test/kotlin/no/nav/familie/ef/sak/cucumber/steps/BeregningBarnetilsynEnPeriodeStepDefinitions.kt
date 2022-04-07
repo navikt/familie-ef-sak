@@ -5,7 +5,7 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
 import java.time.YearMonth

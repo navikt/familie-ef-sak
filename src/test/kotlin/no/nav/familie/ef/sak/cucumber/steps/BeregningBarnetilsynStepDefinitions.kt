@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
 import java.time.YearMonth
