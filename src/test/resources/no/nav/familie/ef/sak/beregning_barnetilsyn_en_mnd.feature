@@ -3,7 +3,7 @@
 
 Egenskap: Beregning av barnetilsyn (en periode uten at vi runder av beløp)
 
-  Scenariomal: Varierende utgifter og inntekter, satsperiode og antall barn for 2022
+  Scenariomal: Varierende utgifter og inntekter, satsperiode og antall barn
 
     Gitt følgende data
       | Periodeutgift   | Kontantstøttebeløp   | Tillegsstønadbeløp   | Antall barn   | Periodedato   |
