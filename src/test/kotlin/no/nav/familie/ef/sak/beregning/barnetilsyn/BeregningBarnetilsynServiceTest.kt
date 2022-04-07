@@ -53,9 +53,9 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode2 = UtgiftsperiodeDto(april, juli, barn = listOf(barnUUID), utgifter = ONE)
         val utgiftsperiode3 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = TEN + TEN)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = TEN)
-        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = TEN)
-        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = 10)
+        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = 10)
+        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
                                                                                                utgiftsperiode2,
@@ -80,7 +80,7 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode2 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = ONE)
 
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = august, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = august, beløp = 10)
 
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
@@ -105,9 +105,9 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode1 = UtgiftsperiodeDto(januar, juli, barn = listOf(barnUUID), utgifter = TEN)
         val utgiftsperiode2 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = ONE)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = mai, årMånedTil = september, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = mai, årMånedTil = september, beløp = 10)
         val tilleggsstønadPeriodeDto =
-                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = november, beløp = TEN)
+                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = november, beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
                                                                                                utgiftsperiode2),
@@ -130,16 +130,16 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode2 = UtgiftsperiodeDto(april, juli, barn = listOf(barnUUID), utgifter = ONE)
         val utgiftsperiode3 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = TEN + TEN)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = TEN)
-        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = TEN)
-        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = 10)
+        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = 10)
+        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = 10)
 
         val tilleggsstønadsperiodeMars =
-                PeriodeMedBeløpDto(årMånedFra = mars, årMånedTil = mars, TEN)
+                PeriodeMedBeløpDto(årMånedFra = mars, årMånedTil = mars, 10)
         val tilleggsstønadsperiodeJuli =
-                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = juli, TEN)
+                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = juli, 10)
         val tilleggsstønadsperiodeDesember =
-                PeriodeMedBeløpDto(årMånedFra = desember, årMånedTil = desember, TEN)
+                PeriodeMedBeløpDto(årMånedFra = desember, årMånedTil = desember, 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
                                                                                                utgiftsperiode2,

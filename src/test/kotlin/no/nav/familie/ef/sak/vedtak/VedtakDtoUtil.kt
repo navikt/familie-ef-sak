@@ -62,7 +62,7 @@ object VedtakDtoUtil {
             PeriodeMedBeløpDto(
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),
-                    BigDecimal(1000))
+                    1000)
 
     fun tilleggsstønadDto() =
             TilleggsstønadDto(

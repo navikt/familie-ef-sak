@@ -22,7 +22,7 @@ data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
 data class PeriodeMedBeløpDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
-        val beløp: BigDecimal
+        val beløp: Int
 )
 
 data class UtgiftsperiodeDto(

@@ -39,7 +39,7 @@ class BeregningBarnetilsynStepDefinitions {
         dataTable.asMaps().map {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-            val beløp = it["Beløp"]!!.toBigDecimal()
+            val beløp = it["Beløp"]!!.toInt()
             kontantStøtteperioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
     }
@@ -49,7 +49,7 @@ class BeregningBarnetilsynStepDefinitions {
         dataTable.asMaps().map {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-            val beløp = it["Beløp"]!!.toBigDecimal()
+            val beløp = it["Beløp"]!!.toInt()
             tilleggsstønadPerioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
     }
