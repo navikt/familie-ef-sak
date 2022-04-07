@@ -52,7 +52,7 @@ data class Barnetilsynperiode(val datoFra: LocalDate,
 
 data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val datoTil: LocalDate,
-                           val beløp: BigDecimal) {
+                           val beløp: Int) {
 
     fun tilDto() = PeriodeMedBeløpDto(årMånedFra = YearMonth.from(datoFra),
                                       årMånedTil = YearMonth.from(datoTil),

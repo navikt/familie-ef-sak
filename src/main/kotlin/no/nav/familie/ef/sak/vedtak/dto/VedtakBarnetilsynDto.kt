@@ -25,7 +25,7 @@ data class BarnetilsynperiodeDto(val årMånedFra: YearMonth,
 
 data class PeriodeMedBeløpDto(val årMånedFra: YearMonth,
                               val årMånedTil: YearMonth,
-                              val beløp: BigDecimal)
+                              val beløp: Int)
 
 fun BarnetilsynperiodeDto.tilDomene(): Barnetilsynperiode =
         Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
