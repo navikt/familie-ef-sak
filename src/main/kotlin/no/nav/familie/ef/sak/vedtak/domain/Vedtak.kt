@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
-import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
@@ -55,8 +55,8 @@ data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val beløp: BigDecimal) {
 
     fun tilDto() = PeriodeMedBeløpDto(årMånedFra = YearMonth.from(datoFra),
-                                      årMånedTil = YearMonth.from(datoTil),
-                                      beløp = beløp)
+                                           årMånedTil = YearMonth.from(datoTil),
+                                           beløp = beløp)
 }
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
