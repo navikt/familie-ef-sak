@@ -86,41 +86,45 @@ class BeregningBarnetilsynStepDefinitions {
 
     @Så("forventer vi følgende perioder med riktig grunnlagsdata")
     fun `forventer vi følgende perioder med riktig grunnlagsdata`(dataTable: DataTable) {
-
-        val forventet = dataTable.asMaps().map {
-            val beløp = it["Beløp"]!!.toInt()
-            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-
-            val harKontantstøtte = it["Har kontantstøtte"].equals("x")
-            val harTilleggsstønad = it["Har tilleggsstønad"].equals("x")
-            val antallBarn = it["Antall barn"]!!.toInt()
-
-            ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
-        }
+        val forventet = hentUtForventet(dataTable)
+        sjekkAtAlleFelterErSomForventet(forventet)
         assertThat(beregnYtelseBarnetilsynResultat).size().isEqualTo(forventet.size)
+    }
+
+    private fun sjekkAtAlleFelterErSomForventet(forventet: List<ForventetPeriodeMedGrunnlag>) {
         val sortedResultat = beregnYtelseBarnetilsynResultat.sortedBy { it.periode.fradato }
         val sortetForventet = forventet.sortedBy { it.fraÅrMåned }
-        assertThat(sortedResultat.first().periode.fradato).isEqualTo(sortetForventet.first().fraÅrMåned.atDay(1))
-        assertThat(sortedResultat.last().periode.fradato).isEqualTo(sortetForventet.last().fraÅrMåned.atDay(1))
 
         sortedResultat.forEachIndexed { idx, it ->
-            assertThat(it.periode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
-            assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
-            assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
-            assertThat(it.beregningsgrunnlag.antallBarn).isEqualTo(sortetForventet.get(idx).antallBarn)
-            when (sortetForventet.get(idx).harKontantstøtte) {
-                true -> assertThat(it.beregningsgrunnlag.kontantstøttebeløp).isGreaterThan(ZERO)
-                false -> assertThat(it.beregningsgrunnlag.kontantstøttebeløp).isEqualByComparingTo(ZERO)
-            }
+            assertAllefelterErSomForventet(it, sortetForventet, idx)
+        }
+    }
 
-            when (sortetForventet.get(idx).harTilleggsstønad) {
-                true -> assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isGreaterThan(ZERO)
-                false -> assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isEqualByComparingTo(ZERO)
-            }
+    private fun hentUtForventet(dataTable: DataTable) = dataTable.asMaps().map {
+        val beløp = it["Beløp"]!!.toInt()
+        val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
+        val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
+        val harKontantstøtte = it["Har kontantstøtte"].equals("x")
+        val harTilleggsstønad = it["Har tilleggsstønad"].equals("x")
+        val antallBarn = it["Antall barn"]!!.toInt()
+        ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
+    }
 
+    private fun assertAllefelterErSomForventet(it: BeløpsperiodeBarnetilsynDto,
+                                               sortetForventet: List<ForventetPeriodeMedGrunnlag>,
+                                               idx: Int) {
+        assertThat(it.periode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
+        assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
+        assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
+        assertThat(it.beregningsgrunnlag.antallBarn).isEqualTo(sortetForventet.get(idx).antallBarn)
+        when (sortetForventet.get(idx).harKontantstøtte) {
+            true -> assertThat(it.beregningsgrunnlag.kontantstøttebeløp).isGreaterThan(ZERO)
+            false -> assertThat(it.beregningsgrunnlag.kontantstøttebeløp).isEqualByComparingTo(ZERO)
+        }
 
-
+        when (sortetForventet.get(idx).harTilleggsstønad) {
+            true -> assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isGreaterThan(ZERO)
+            false -> assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isEqualByComparingTo(ZERO)
         }
     }
 
