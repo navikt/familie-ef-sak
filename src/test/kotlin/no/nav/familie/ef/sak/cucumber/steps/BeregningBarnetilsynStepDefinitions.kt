@@ -7,9 +7,9 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import java.time.YearMonth
 import java.util.UUID
