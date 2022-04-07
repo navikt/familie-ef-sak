@@ -5,7 +5,7 @@ import java.math.BigDecimal
 
 data class BeløpsperiodeBarnetilsynDto(
         val periode: Periode,
-        val beløp: BigDecimal,
+        val beløp: Int,
         val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
 )
 

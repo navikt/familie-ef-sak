@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Beregning av barnetilsyn (en periode)
+Egenskap: Beregning av barnetilsyn (en periode uten at vi runder av beløp)
 
   Scenario: Varierende utgifter og inntekter, satsperiode og antall barn for 2022
 
