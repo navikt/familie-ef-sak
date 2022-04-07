@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType

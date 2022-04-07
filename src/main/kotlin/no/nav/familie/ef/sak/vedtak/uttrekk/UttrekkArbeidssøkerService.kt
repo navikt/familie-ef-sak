@@ -31,7 +31,7 @@ class UttrekkArbeidssøkerService(
     fun forrigeMåned(): () -> YearMonth = { YearMonth.now().minusMonths(1) }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettUttrekkArbeidssøkere(årMåned: YearMonth = forrigeMåned().invoke(),
+    fun opprettUttrekkArbeidssøkere(årMåned: YearMonth,
                                     fagsakId: UUID,
                                     behandlingIdForVedtak: UUID,
                                     personIdent: String) {
@@ -77,7 +77,7 @@ class UttrekkArbeidssøkerService(
         return tilDtoMedAdressebeskyttelse(oppdatertArbeidssøker, hentPersondataTilFagsak(listOf(oppdatertArbeidssøker))).first
     }
 
-    fun hentArbeidssøkereForUttrekk(årMåned: YearMonth = forrigeMåned().invoke()): List<VedtaksperioderForUttrekk> {
+    fun hentArbeidssøkereForUttrekk(årMåned: YearMonth): List<VedtaksperioderForUttrekk> {
         val startdato = årMåned.atDay(1)
         val sluttdato = årMåned.atEndOfMonth()
         val arbeidssøkere =

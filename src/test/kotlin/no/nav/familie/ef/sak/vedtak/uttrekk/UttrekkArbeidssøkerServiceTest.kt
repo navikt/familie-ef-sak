@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -86,8 +87,11 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                                                         aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER)
     private val navn = Navn("fornavn", "", "", Metadata(false))
 
+    private val taskSlot = slot<Task>()
+
     @BeforeEach
     internal fun setUp() {
+        every { taskRepository.save(capture(taskSlot)) } answers { firstArg() }
         every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
         every { personService.hentPdlPersonKort(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
@@ -103,7 +107,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kjøre query uten problemer`() {
-        assertThat(service.hentArbeidssøkereForUttrekk()).isEmpty()
+        assertThat(service.hentArbeidssøkereForUttrekk(YearMonth.now())).isEmpty()
     }
 
     @Test
@@ -442,6 +446,19 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
                 service.settKontrollert(uttrekk.id, true)
             }
         }
+    }
+
+    @Test
+    internal fun `oppretter task som kjører neste måned`() {
+        val now = YearMonth.now()
+        val task = OpprettUttrekkArbeidssøkerTask.opprettTask(now)
+        assertThat(task.payload).isEqualTo(now.toString())
+        assertThat(task.triggerTid).isEqualTo(now.plusMonths(1).atDay(1).atTime(5, 0))
+
+        opprettUttrekkArbeidssøkerTask.onCompletion(task)
+        val lagretTask = taskSlot.captured
+        assertThat(lagretTask.payload).isEqualTo(now.plusMonths(1).toString())
+        assertThat(lagretTask.triggerTid).isEqualTo(now.plusMonths(2).atDay(1).atTime(5, 0))
     }
 
     private fun opprettdata() {

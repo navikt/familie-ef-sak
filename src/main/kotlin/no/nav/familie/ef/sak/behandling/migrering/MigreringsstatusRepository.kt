@@ -12,6 +12,8 @@ import java.util.UUID
 interface MigreringsstatusRepository : RepositoryInterface<Migreringsstatus, String>, InsertUpdateRepository<Migreringsstatus> {
 
     fun findAllByIdentIn(identer: Set<String>): Set<Migreringsstatus>
+
+    fun findAllByÅrsak(årsak: MigreringExceptionType): Set<Migreringsstatus>
 }
 
 enum class MigreringResultat {
