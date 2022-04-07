@@ -12,16 +12,12 @@ import java.time.YearMonth
 
 class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
-    var inputData = mutableMapOf<String, PeriodeDataDto>()
-    var resultat = mutableMapOf<String, BigDecimal>()
+    lateinit var resultat: BigDecimal
+    lateinit var inputData: PeriodeDataDto
 
     @Gitt("følgende data")
     fun data(dataTable: DataTable) {
-        dataTable.asMaps().map {
-            val rad = it["Rad"] ?: error("Du må fylle inn radnummer i testen")
-            val periodeDataDto = mapRadTilPeriodeDataDto(it)
-            inputData.put(rad, periodeDataDto)
-        }
+        inputData = dataTable.asMaps().map { mapRadTilPeriodeDataDto(it) }.first()
     }
 
     private fun mapRadTilPeriodeDataDto(it: MutableMap<String, String>): PeriodeDataDto {
@@ -29,46 +25,31 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
         val kontantstøttebeløp = it["Kontantstøttebeløp"]
         val tillegsstønadbeløp = it["Tillegsstønadbeløp"]
         val antallBarn = it["Antall barn"]
-        val testkommentar: String? = it["Testkommentar"]
         val årMåned = parseValgfriÅrMåned("Periodedato", it)!!
         val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
                                             kontantstøtteBeløp = kontantstøttebeløp!!,
                                             tillegstønadbeløp = tillegsstønadbeløp!!,
                                             antallBarn = antallBarn!!,
-                                            årMåned = årMåned,
-                                            testkommentar = testkommentar)
+                                            årMåned = årMåned)
         return periodeDataDto
     }
 
     @Når("vi beregner barnetilsyn beløp")
     fun `vi beregner barnetilsyn beløp`() {
-        inputData.forEach { inputRad ->
-            resultat.put(inputRad.key, beregnPeriodebeløp(inputRad))
-        }
+        resultat = beregnPeriodebeløp(inputData)
     }
 
-    private fun beregnPeriodebeløp(it: Map.Entry<String, PeriodeDataDto>) =
-            BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = it.value.periodeutgift.toBigDecimal(),
-                                                        kontantstøtteBeløp = it.value.kontantstøtteBeløp.toBigDecimal(),
-                                                        tillegstønadBeløp = it.value.tillegstønadbeløp.toBigDecimal(),
-                                                        antallBarn = it.value.antallBarn.toInt(),
-                                                        årMåned = it.value.årMåned)
+    private fun beregnPeriodebeløp(periodeDataDto: PeriodeDataDto) =
+            BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = periodeDataDto.periodeutgift.toBigDecimal(),
+                                                        kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp.toBigDecimal(),
+                                                        tillegstønadBeløp = periodeDataDto.tillegstønadbeløp.toBigDecimal(),
+                                                        antallBarn = periodeDataDto.antallBarn.toInt(),
+                                                        årMåned = periodeDataDto.årMåned)
 
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
-
-        val feil = dataTable.asMaps().map { forventetData ->
-            val rad = forventetData["Rad"]!!
-            val periodeutgift = forventetData["Beløp"]!!.toBigDecimal()
-
-            if (resultat[rad]!!.compareTo(periodeutgift) == 0) {
-                null // alt ok
-            } else {
-                "Feilet på rad $rad: Her forventet vi $periodeutgift, men fikk ${resultat[rad]}, kommentar: ${inputData[rad]?.testkommentar} "
-            }
-        }.filterNotNull()
-
-        assertThat(feil).hasSize(0).withFailMessage { "Vi fikk disse feilene: $feil" }
+        val forventetBeløp = dataTable.asMaps().map { it["Beløp"]!!.toBigDecimal() }.first()
+        assertThat(forventetBeløp).isEqualByComparingTo(resultat)
     }
 }
 
@@ -76,5 +57,4 @@ data class PeriodeDataDto(val periodeutgift: String,
                           val kontantstøtteBeløp: String,
                           val tillegstønadbeløp: String,
                           val antallBarn: String,
-                          val årMåned: YearMonth,
-                          val testkommentar: String?)
+                          val årMåned: YearMonth)
