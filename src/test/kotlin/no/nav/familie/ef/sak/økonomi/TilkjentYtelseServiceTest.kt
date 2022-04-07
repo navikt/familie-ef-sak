@@ -6,16 +6,25 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.UUID
 
@@ -24,8 +33,9 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
+    private val vedtakService = mockk<VedtakService>()
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService,
-                                                              mockk(),
+                                                              vedtakService,
                                                               tilkjentYtelseRepository,
                                                               fagsakService)
 
@@ -152,6 +162,30 @@ class TilkjentYtelseServiceTest {
         internal fun `skal returnere false hvis det ikke finnes noen andel`() {
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns null
             assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
+        }
+    }
+
+    @Nested
+    inner class HentBeløpsperioderForBehandling{
+        @Test
+        internal fun `skal kaste feil dersom vedtak har resultattypen OPPHØRT`() {
+
+            val behandlingId = UUID.randomUUID()
+            every { vedtakService.hentVedtak(any()) } returns
+                    Vedtak(behandlingId = behandlingId,
+                           resultatType = ResultatType.OPPHØRT,
+                           perioder =
+                           PeriodeWrapper(perioder = listOf(Vedtaksperiode(LocalDate.of(2022, 1, 1),
+                                                                           datoTil = LocalDate.of(2022, 4, 30),
+                                                                           aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                                                                           periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR))))
+            every { tilkjentYtelseRepository.findByBehandlingId(behandlingId) } returns
+                    lagTilkjentYtelse(andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
+                            fraOgMed = LocalDate.of(2022, 1, 1),
+                            beløp = 10_000,
+                            tilOgMed = LocalDate.of(2022, 4, 30),
+                    )))
+            assertThrows<Feil> { tilkjentYtelseService.hentBeløpsperioderForBehandling(behandlingId) }
         }
     }
 }
