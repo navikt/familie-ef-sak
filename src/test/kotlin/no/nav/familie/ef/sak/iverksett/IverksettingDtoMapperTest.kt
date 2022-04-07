@@ -200,29 +200,29 @@ internal class IverksettingDtoMapperTest {
                 .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
     }
 
-    fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
-        assertAlleFelterIverksettDto(iverksettDto, behandlingId)
+    private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.OVERGANGSSTØNAD)
         assertVedtaksperiode(iverksettDto.vedtak)
     }
 
     private fun assertAlleFelter(iverksettDto: IverksettBarnetilsynDto, behandlingId: UUID?) {
-        assertAlleFelterIverksettDto(iverksettDto, behandlingId)
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.BARNETILSYN)
         assertVedtaksperiode(iverksettDto.vedtak)
     }
 
-    private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?) {
+    private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?, stønadType: StønadType) {
         val behandling = iverksettDto.behandling
-        assertFagsak(iverksettDto.fagsak)
+        assertFagsak(iverksettDto.fagsak, stønadType)
         assertSøker(iverksettDto.søker)
         assertBehandling(behandling, behandlingId)
         assertVilkårsvurdering(behandling.vilkårsvurderinger)
         assertVedtak(iverksettDto.vedtak)
     }
 
-    private fun assertFagsak(fagsak: FagsakdetaljerDto) {
+    private fun assertFagsak(fagsak: FagsakdetaljerDto, stønadType: StønadType) {
         assertThat(fagsak.eksternId).isEqualTo(4)
         assertThat(fagsak.fagsakId).isEqualTo(UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"))
-        assertThat(fagsak.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
+        assertThat(fagsak.stønadstype).isEqualTo(stønadType)
     }
 
     private fun assertBehandling(behandling: BehandlingsdetaljerDto,
