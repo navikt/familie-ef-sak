@@ -92,9 +92,9 @@ class BeregningBarnetilsynStepDefinitions {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
 
-            val harKontantstøtte = it[" Har kontantstøtte "].equals("x")
-            val harTilleggsstønad = it[" Har tilleggsstønad "].equals("x")
-            val antallBarn = it[" Antall barn "]!!.toInt()
+            val harKontantstøtte = it["Har kontantstøtte"].equals("x")
+            val harTilleggsstønad = it["Har tilleggsstønad"].equals("x")
+            val antallBarn = it["Antall barn"]!!.toInt()
 
             ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
         }
@@ -113,7 +113,13 @@ class BeregningBarnetilsynStepDefinitions {
                 true -> assertThat(it.beregningsgrunnlag.kontantstøttebeløp).isGreaterThan(ZERO)
                 false -> assertThat(it.beregningsgrunnlag.kontantstøttebeløp).isEqualByComparingTo(ZERO)
             }
-            assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isGreaterThan(ZERO)
+
+            when (sortetForventet.get(idx).harTilleggsstønad) {
+                true -> assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isGreaterThan(ZERO)
+                false -> assertThat(it.beregningsgrunnlag.tilleggsstønadsbeløp).isEqualByComparingTo(ZERO)
+            }
+
+
 
         }
     }
