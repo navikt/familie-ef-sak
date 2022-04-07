@@ -15,6 +15,8 @@
 # Eksempel overgang fra 1 til 2 barn i 2021 4195->5474
 # Eksempel på satsendring fra 2021 til 2022:  5474 -> 5545 (med samme antall barn)
 
+# Til diskusjon: hull i perioder 07-09
+
 # Til diskusjon: fornuftig/nødvendig?
 # Eksempel på ny periode selv om antall barn, sats og beløp er uendret:
 # 04.2022 -> 05.2022 (grunnlagsdata endret - kontantstøtte)
@@ -27,7 +29,7 @@ Egenskap: Beregning beløp og perioder når utgifter-reduksjon er større enn ma
     Gitt utgiftsperioder
       | Fra måned | Til og med måned | Beløp  | Antall barn |
       | 01.2021   | 07.2021          | 100000 | 1           |
-      | 08.2021   | 07.2022          | 100000 | 2           |
+      | 09.2021   | 07.2022          | 100000 | 2           |
       | 08.2022   | 12.2022          | 100000 | 3           |
 
     Og kontantstøtteperioder
@@ -43,7 +45,7 @@ Egenskap: Beregning beløp og perioder når utgifter-reduksjon er større enn ma
     Så forventer vi følgende perioder med riktig grunnlagsdata
       | Fra måned | Til og med måned | Beløp | Har kontantstøtte | Har tilleggsstønad | Antall barn | Hvorfor ny periode her |
       | 01.2021   | 07.2021          | 4195  |                   |                    | 1           | Start                  |
-      | 08.2021   | 12.2021          | 5474  |                   |                    | 2           | Nytt barn              |
+      | 09.2021   | 12.2021          | 5474  |                   |                    | 2           | Nytt barn              |
       | 01.2022   | 04.2022          | 5545  |                   |                    | 2           | Ny satsperiode         |
       | 05.2022   | 06.2022          | 5545  | x                 |                    | 2           | Får kontantstøtte      |
       | 07.2022   | 07.2022          | 5545  | x                 | x                  | 2           | Får tillegsstønad      |
