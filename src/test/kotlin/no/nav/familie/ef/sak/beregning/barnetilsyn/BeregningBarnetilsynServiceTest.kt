@@ -1,12 +1,5 @@
-package no.nav.familie.ef.sak.beregning
+package no.nav.familie.ef.sak.beregning.barnetilsyn
 
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
-import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -19,7 +12,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningBarnetilsynServiceTest {
-
 
     val service: BeregningBarnetilsynService = BeregningBarnetilsynService()
 
@@ -166,8 +158,8 @@ internal class BeregningBarnetilsynServiceTest {
         val januar = YearMonth.of(2021, 1)
         val desember = YearMonth.of(2022, 12)
 
-        val forventetBeløp2021 = BigDecimal(4195)
-        val forventetBeløp2022 = BigDecimal(4250)
+        val forventetBeløp2021 = 4195
+        val forventetBeløp2022 = 4250
 
         val utgiftsperiode =
                 UtgiftsperiodeDto(januar, desember, barn = listOf(UUID.randomUUID()), utgifter = BigDecimal(1000000.0))
@@ -349,7 +341,7 @@ internal class BeregningBarnetilsynServiceTest {
                                  tilDato: LocalDate,
                                  beløp: BigDecimal = BigDecimal(100)): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(periode = Periode(fraDato, tilDato),
-                                           beløp = beløp,
+                                           beløp = beløp.roundUp().toInt(),
                                            beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgifter = ZERO,
                                                                                                  kontantstøttebeløp = ZERO,
                                                                                                  tilleggsstønadsbeløp = ZERO,
