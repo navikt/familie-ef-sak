@@ -21,8 +21,11 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
+import no.nav.familie.ef.sak.vedtak.dto.BarnetilsynperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -31,6 +34,10 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -135,6 +142,42 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
 
+    @Test
+    internal fun `Skal hente beløpsperioder for førstegangsbehandling barnetilsyn`() {
+
+        val (_, behandling) = lagFagsakOgBehandlingBarnetilsyn()
+
+        val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
+                hentBeløpsperioderForBehandling(behandling.id)
+        val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
+        assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(BigDecimal(10_000))
+    }
+
+    @Test
+    internal fun `Skal kun hente beløpsperioder for det relevante vedtaket barnetilsyn`() {
+        val (fagsak, behandling) = lagFagsakOgBehandlingBarnetilsyn()
+        val revurdering = lagRevurdering(stegType = StegType.BESLUTTE_VEDTAK, fagsak)
+
+        val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
+                hentBeløpsperioderForBehandling(behandling.id)
+        val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
+        assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(BigDecimal(10_000))
+
+        val responsRevurdering: ResponseEntity<Ressurs<List<Beløpsperiode>>> = hentBeløpsperioderForBehandling(revurdering.id)
+        val beløpsperioderRevurdering = responsRevurdering.body.data
+        assertThat(beløpsperioderRevurdering).hasSize(1)
+        assertThat(beløpsperioderRevurdering?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(beløpsperioderRevurdering?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
+        assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
+
+    }
+
     private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
         val førstegangsbehandling = behandlingRepository.insert(behandling(fagsak,
@@ -168,7 +211,46 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         return Pair(fagsak, førstegangsbehandling)
     }
 
-    private fun lagRevurdering(stegType: StegType = StegType.BESLUTTE_VEDTAK, fagsak: Fagsak): Behandling {
+    private fun lagFagsakOgBehandlingBarnetilsyn(): Pair<Fagsak, Behandling> {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910")),
+                                                           stønadstype = BARNETILSYN))
+        val førstegangsbehandling = behandlingRepository.insert(behandling(fagsak,
+                                                                           steg = StegType.BESLUTTE_VEDTAK,
+                                                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                                                           status = BehandlingStatus.FERDIGSTILT))
+
+        val søknad = SøknadMedVedlegg(Testsøknad.søknadBarnetilsyn, emptyList())
+        val tilkjentYtelse = lagTilkjentYtelse(behandlingId = førstegangsbehandling.id,
+                                               andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
+                                                       fraOgMed = LocalDate.of(2022, 1, 1),
+                                                       kildeBehandlingId = førstegangsbehandling.id,
+                                                       beløp = 10_000,
+                                                       tilOgMed = LocalDate.of(2022, 4, 30),
+                                               )))
+        val vedtakDto = InnvilgelseBarnetilsyn(
+                perioder = listOf(
+                        BarnetilsynperiodeDto(årMånedFra = YearMonth.of(2022, 1),
+                                              årMånedTil = YearMonth.of(2022, 4),
+                                              utgifter = BigDecimal(5000), barn = listOf(
+                                UUID.randomUUID())),
+                ),
+                begrunnelse = "",
+                perioderKontantstøtte = emptyList(),
+                tilleggsstønad = TilleggsstønadDto(harTilleggsstønad = false, perioder = emptyList(), begrunnelse = null))
+
+
+
+        søknadService.lagreSøknadForBarnetilsyn(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
+        tilkjentYtelseRepository.insert(tilkjentYtelse)
+        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id)
+        grunnlagsdataService.opprettGrunnlagsdata(førstegangsbehandling.id)
+
+        return Pair(fagsak, førstegangsbehandling)
+
+    }
+
+    private fun lagRevurdering(stegType: StegType = StegType.BESLUTTE_VEDTAK,
+                               fagsak: Fagsak): Behandling {
         val revurdering = behandlingRepository.insert(behandling(fagsak,
                                                                  steg = stegType,
                                                                  type = BehandlingType.REVURDERING,
@@ -185,13 +267,26 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 kildeBehandlingId = revurdering.id,
                                                                 tilOgMed = LocalDate.of(2022, 6, 30))))
 
-        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
-                                                   inntektBegrunnelse = "inntekt begrunnelse",
-                                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 3),
-                                                                      årMånedTil = YearMonth.of(2022, 6),
-                                                                      aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                                      periodeType = VedtaksperiodeType.HOVEDPERIODE)),
-                                                   inntekter = emptyList())
+        val vedtakDto = when (fagsak.stønadstype) {
+            OVERGANGSSTØNAD -> InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
+                                                          inntektBegrunnelse = "inntekt begrunnelse",
+                                                          perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 3),
+                                                                                              årMånedTil = YearMonth.of(2022, 6),
+                                                                                              aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                                                                                              periodeType = VedtaksperiodeType.HOVEDPERIODE)),
+                                                          inntekter = emptyList())
+            BARNETILSYN -> InnvilgelseBarnetilsyn(
+                    perioder = listOf(
+                            BarnetilsynperiodeDto(årMånedFra = YearMonth.of(2022, 3),
+                                                  årMånedTil = YearMonth.of(2022, 6),
+                                                  utgifter = BigDecimal(5000), barn = listOf(
+                                    UUID.randomUUID())),
+                    ),
+                    begrunnelse = "",
+                    perioderKontantstøtte = emptyList(),
+                    tilleggsstønad = TilleggsstønadDto(harTilleggsstønad = false, perioder = emptyList(), begrunnelse = null))
+            SKOLEPENGER -> error("Ikke implementert for skolepenger")
+        }
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id)
         return revurdering

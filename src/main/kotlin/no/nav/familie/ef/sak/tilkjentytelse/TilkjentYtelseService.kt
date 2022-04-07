@@ -1,15 +1,19 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -26,6 +30,27 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
                ?: error("Fant ikke tilkjent ytelse med behandlingsid $behandlingId")
     }
+
+    fun hentBeløpsperioderForBehandling(behandlingId: UUID): List<Beløpsperiode> {
+        val vedtakForBehandling = vedtakService.hentVedtak(behandlingId)
+
+        if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
+            throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
+        }
+        val stønadstype = behandlingService.hentSaksbehandling(behandlingId).stønadstype
+
+        val startDatoForVedtak = when (stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
+            StønadType.BARNETILSYN -> vedtakForBehandling.barnetilsyn?.perioder?.minByOrNull { it.datoFra }?.datoFra
+            StønadType.SKOLEPENGER -> throw NotImplementedError("Henting av perioder ikke implementert for skolepenger")
+        }
+        feilHvis(startDatoForVedtak == null) {
+            "Fant ingen startdato for vedtak på behandling med id=$behandlingId"
+        }
+
+        return hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak)
+    }
+
 
     fun opprettTilkjentYtelse(nyTilkjentYtelse: TilkjentYtelse): TilkjentYtelse {
         return tilkjentYtelseRepository.insert(nyTilkjentYtelse)
