@@ -33,7 +33,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
         val årMåned = parseValgfriÅrMåned("Periodedato", it)!!
         val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
                                             kontantstøtteBeløp = kontantstøttebeløp!!,
-                                            tillegsønadbeløp = tillegsstønadbeløp!!,
+                                            tillegstønadbeløp = tillegsstønadbeløp!!,
                                             antallBarn = antallBarn!!,
                                             årMåned = årMåned,
                                             testkommentar = testkommentar)
@@ -50,7 +50,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     private fun beregnPeriodebeløp(it: Map.Entry<String, PeriodeDataDto>) =
             BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = it.value.periodeutgift.toBigDecimal(),
                                                         kontantstøtteBeløp = it.value.kontantstøtteBeløp.toBigDecimal(),
-                                                        tillegsønadBeløp = it.value.tillegsønadbeløp.toBigDecimal(),
+                                                        tillegstønadBeløp = it.value.tillegstønadbeløp.toBigDecimal(),
                                                         antallBarn = it.value.antallBarn.toInt(),
                                                         årMåned = it.value.årMåned)
 
@@ -74,7 +74,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
 data class PeriodeDataDto(val periodeutgift: String,
                           val kontantstøtteBeløp: String,
-                          val tillegsønadbeløp: String,
+                          val tillegstønadbeløp: String,
                           val antallBarn: String,
                           val årMåned: YearMonth,
                           val testkommentar: String?)
