@@ -55,8 +55,8 @@ data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val beløp: BigDecimal) {
 
     fun tilDto() = PeriodeMedBeløpDto(årMånedFra = YearMonth.from(datoFra),
-                                      årMånedTil = YearMonth.from(datoTil),
-                                      beløp = beløp)
+                                           årMånedTil = YearMonth.from(datoTil),
+                                           beløp = beløp)
 }
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)

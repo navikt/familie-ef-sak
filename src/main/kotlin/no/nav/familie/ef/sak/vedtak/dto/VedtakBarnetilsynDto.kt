@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
@@ -9,7 +10,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
-                                  val perioder: List<BarnetilsynperiodeDto> = emptyList(),
+                                  val perioder: List<UtgiftsperiodeDto> = emptyList(),
                                   val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
                                   val tilleggsstønad: TilleggsstønadDto) : VedtakDto(ResultatType.INNVILGE,
                                                                                      "InnvilgelseBarnetilsyn")
@@ -18,16 +19,28 @@ data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
                              val perioder: List<PeriodeMedBeløpDto> = emptyList(),
                              val begrunnelse: String?)
 
-data class BarnetilsynperiodeDto(val årMånedFra: YearMonth,
-                                 val årMånedTil: YearMonth,
-                                 val utgifter: BigDecimal,
-                                 val barn: List<UUID>)
+data class PeriodeMedBeløpDto(
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
+        val beløp: BigDecimal
+)
 
-data class PeriodeMedBeløpDto(val årMånedFra: YearMonth,
-                              val årMånedTil: YearMonth,
-                              val beløp: BigDecimal)
+data class UtgiftsperiodeDto(
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
+        val barn: List<UUID>,
+        val utgifter: BigDecimal
+) {
 
-fun BarnetilsynperiodeDto.tilDomene(): Barnetilsynperiode =
+    fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
+}
+
+fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> =
+        this.map {
+            it.tilPeriode()
+        }
+
+fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
                            datoTil = this.årMånedTil.atEndOfMonth(),
                            utgifter = this.utgifter,
@@ -45,10 +58,10 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
     return InnvilgelseBarnetilsyn(
             begrunnelse = barnetilsyn.begrunnelse,
             perioder = barnetilsyn.perioder.map {
-                BarnetilsynperiodeDto(årMånedFra = YearMonth.from(it.datoFra),
-                                      årMånedTil = YearMonth.from(it.datoTil),
-                                      utgifter = it.utgifter,
-                                      barn = it.barn)
+                UtgiftsperiodeDto(årMånedFra = YearMonth.from(it.datoFra),
+                                  årMånedTil = YearMonth.from(it.datoTil),
+                                  utgifter = it.utgifter,
+                                  barn = it.barn)
             },
             perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
             tilleggsstønad = TilleggsstønadDto(

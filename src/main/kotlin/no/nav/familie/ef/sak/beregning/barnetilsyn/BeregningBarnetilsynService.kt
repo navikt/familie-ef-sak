@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
