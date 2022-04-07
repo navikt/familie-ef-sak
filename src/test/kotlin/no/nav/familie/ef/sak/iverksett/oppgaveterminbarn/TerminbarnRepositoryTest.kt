@@ -54,23 +54,15 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `insert terminbarn, forvent ingen feil`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
-        terminbarnRepository.insert(opprettTerminbarnOppgave(fagsak = fagsak.id))
-    }
-
-    @Test
     internal fun `insert og hent utgått terminbarn, forvent existByFagsakIdAndTermindato er lik true`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling = lagreInnvilgetBehandling(fagsak)
         val utgåttTermindato = LocalDate.now().minusWeeks(5)
         barnRepository.insertAll(listOf(barn(behandlingId = behandling.id, termindato = LocalDate.now()),
-                                        barn(behandlingId = behandling.id,
-                                             termindato = utgåttTermindato)))
+                                        barn(behandlingId = behandling.id, termindato = utgåttTermindato)))
 
         terminbarnRepository.insert(opprettTerminbarnOppgave(fagsak = fagsak.id, termindato = utgåttTermindato))
-        assertThat(terminbarnRepository.existsByFagsakIdAndTermindato(fagsakId = fagsak.id,
-                                                                      termindato = utgåttTermindato)).isTrue()
+        assertThat(terminbarnRepository.existsByFagsakIdAndTermindato(fagsakId = fagsak.id, termindato = utgåttTermindato)).isTrue()
     }
 
     private fun opprettTerminbarnOppgave(fagsak: UUID = UUID.randomUUID(),
