@@ -22,9 +22,9 @@
 # 04.2022 -> 05.2022 (grunnlagsdata endret - kontantstøtte)
 
 
-Egenskap: Beregning beløp og perioder når utgifter-reduksjon er større enn maxbeløp
+Egenskap: Beregning av beløp og perioder når utgifter-reduksjon er større enn maxbeløp
 
-  Scenario: Tre utgiftsperioder (beveger seg fra 1-3 barn) som strekker seg over to år (to satsperioder).
+  Scenario: Tre utgiftsperioder (beveger seg fra 1-3 barn) og strekker seg over to år (to satsperioder).
 
     Gitt utgiftsperioder
       | Fra måned | Til og med måned | Beløp  | Antall barn |
