@@ -47,10 +47,10 @@ Egenskap: Beregning av beløp og perioder når utgifter-reduksjon er større enn
       | 01.2021   | 07.2021          | 4195  |                   |                    | 1           | Start                  |
       | 09.2021   | 12.2021          | 5474  |                   |                    | 2           | Nytt barn              |
       | 01.2022   | 04.2022          | 5545  |                   |                    | 2           | Ny satsperiode         |
-      | 05.2022   | 06.2022          | 5545  | JA                |                    | 2           | Får kontantstøtte      |
-      | 07.2022   | 07.2022          | 5545  | JA                | JA                 | 2           | Får tillegsstønad      |
-      | 08.2022   | 09.2022          | 6284  | JA                | JA                 | 3           | Nytt barn              |
-      | 10.2022   | 11.2022          | 6284  |                   | JA                 | 3           | Mister kontantstøtte   |
+      | 05.2022   | 06.2022          | 5545  | Ja                |                    | 2           | Får kontantstøtte      |
+      | 07.2022   | 07.2022          | 5545  | Ja                | Ja                 | 2           | Får tillegsstønad      |
+      | 08.2022   | 09.2022          | 6284  | Ja                | Ja                 | 3           | Nytt barn              |
+      | 10.2022   | 11.2022          | 6284  |                   | Ja                 | 3           | Mister kontantstøtte   |
       | 12.2022   | 12.2022          | 6284  |                   |                    | 3           | Mister tilleggsstønad  |
 
 

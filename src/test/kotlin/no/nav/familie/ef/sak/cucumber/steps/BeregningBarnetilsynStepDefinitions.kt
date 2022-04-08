@@ -7,7 +7,16 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseBigDecimal
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.ANTALL_BARN
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.BELØP
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.FRA_MND
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.HAR_KONTANTSTØTTE
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.HAR_TILLEGGSSTØNAD
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.TIL_OG_MED_MND
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.assertj.core.api.Assertions.assertThat
@@ -27,10 +36,10 @@ class BeregningBarnetilsynStepDefinitions {
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-            val beløp = it["Beløp"]!!.toBigDecimal()
-            val barn = it["Antall barn"]!!.toInt()
+            val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+            val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
+            val beløp = parseBigDecimal(BELØP, it)
+            val barn = parseInt(ANTALL_BARN, it)
             utgiftsperioder.add(UtgiftsperiodeDto(fraÅrMåned, tilÅrMåned, List(barn) { UUID.randomUUID() }, beløp))
         }
     }
@@ -38,8 +47,8 @@ class BeregningBarnetilsynStepDefinitions {
     @Og("kontantstøtteperioder")
     fun kontantstøtteperioder(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
+            val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+            val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
             val beløp = it["Beløp"]!!.toInt()
             kontantStøtteperioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
@@ -48,8 +57,8 @@ class BeregningBarnetilsynStepDefinitions {
     @Og("tilleggsstønadsperioder")
     fun tilleggsstønadsperioder(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
+            val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+            val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
             val beløp = it["Beløp"]!!.toInt()
             tilleggsstønadPerioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
@@ -65,9 +74,9 @@ class BeregningBarnetilsynStepDefinitions {
     @Så("forventer vi følgende perioder")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
         val forventet = dataTable.asMaps().map {
-            val beløp = it["Beløp"]!!.toInt()
-            val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
-            val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
+            val beløp = parseInt(BELØP, it)
+            val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+            val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
             ForventetPeriode(beløp, fraÅrMåned, tilÅrMåned)
         }
         assertThat(beregnYtelseBarnetilsynResultat).size().isEqualTo(forventet.size)
@@ -102,10 +111,10 @@ class BeregningBarnetilsynStepDefinitions {
 
     private fun hentUtForventet(dataTable: DataTable) = dataTable.asMaps().map {
         val beløp = it["Beløp"]!!.toInt()
-        val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
-        val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-        val harKontantstøtte = it["Har kontantstøtte"].equals("JA")
-        val harTilleggsstønad = it["Har tilleggsstønad"].equals("JA")
+        val fraÅrMåned = parseÅrMåned(FRA_MND, it)
+        val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
+        val harKontantstøtte = parseBooleanJaIsTrue(HAR_KONTANTSTØTTE, it)
+        val harTilleggsstønad = parseBooleanJaIsTrue(HAR_TILLEGGSSTØNAD, it)
         val antallBarn = it["Antall barn"]!!.toInt()
         ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
     }
