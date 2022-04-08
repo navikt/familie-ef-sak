@@ -21,11 +21,11 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.BarnetilsynperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -34,7 +34,6 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
@@ -229,7 +228,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                )))
         val vedtakDto = InnvilgelseBarnetilsyn(
                 perioder = listOf(
-                        BarnetilsynperiodeDto(årMånedFra = YearMonth.of(2022, 1),
+                        UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
                                               årMånedTil = YearMonth.of(2022, 4),
                                               utgifter = BigDecimal(5000), barn = listOf(
                                 UUID.randomUUID())),
@@ -277,7 +276,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                           inntekter = emptyList())
             BARNETILSYN -> InnvilgelseBarnetilsyn(
                     perioder = listOf(
-                            BarnetilsynperiodeDto(årMånedFra = YearMonth.of(2022, 3),
+                            UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 3),
                                                   årMånedTil = YearMonth.of(2022, 6),
                                                   utgifter = BigDecimal(5000), barn = listOf(
                                     UUID.randomUUID())),
