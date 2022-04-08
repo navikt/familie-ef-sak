@@ -41,7 +41,7 @@ internal class BeregningBarnetilsynServiceTest {
     @Test
     fun `Skal kaste feil når vi sender inn urelevant kontantstøtteperiode`() {
         val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
-        val urelevant = enPeriodeMedBeløp(juli2022, desember2022)
+        val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
         assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
                                             kontantstøttePerioder = urelevant,
@@ -52,7 +52,7 @@ internal class BeregningBarnetilsynServiceTest {
     @Test
     fun `Skal kaste feil når vi sender inn urelevant tilleggsstønadsperiode`() {
         val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
-        val urelevant = enPeriodeMedBeløp(juli2022, desember2022)
+        val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
         assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
                                             kontantstøttePerioder = listOf(),
@@ -74,7 +74,7 @@ internal class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal kaste brukerfeil hvis kontantstøtteperioder er overlappende`() {
-        val overlappende = enPeriodeMedBeløp(januar2022, april2022) + enPeriodeMedBeløp(april2022, april2022)
+        val overlappende = listeMedEnPeriodeMedBeløp(januar2022, april2022) + listeMedEnPeriodeMedBeløp(april2022, april2022)
 
         val feil = assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
@@ -87,7 +87,7 @@ internal class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal kaste brukerfeil hvis tilleggsstønadperioder er overlappende`() {
-        val overlappendePerioder = enPeriodeMedBeløp(april2022, april2022) + enPeriodeMedBeløp(januar2022, april2022)
+        val overlappendePerioder = listeMedEnPeriodeMedBeløp(april2022, april2022) + listeMedEnPeriodeMedBeløp(januar2022, april2022)
         val feil = assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
                                             kontantstøttePerioder = listOf(),
@@ -373,7 +373,7 @@ internal class BeregningBarnetilsynServiceTest {
                                                                                                  antallBarn = 1))
     }
 
-    private fun enPeriodeMedBeløp(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(PeriodeMedBeløpDto(
+    private fun listeMedEnPeriodeMedBeløp(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(PeriodeMedBeløpDto(
             årMånedFra = fra,
             årMånedTil = til,
             beløp = 10))
