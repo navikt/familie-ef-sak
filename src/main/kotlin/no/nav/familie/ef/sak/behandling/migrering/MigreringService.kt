@@ -100,7 +100,7 @@ class MigreringService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerOvergangsstønadAutomatisk(personIdent: String) {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
-        migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId)
+        migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId, kunAktivStønad = true)
     }
 
     /**
@@ -117,15 +117,19 @@ class MigreringService(
         }
     }
 
-    private fun migrerOvergangsstønadForFagsakPerson(fagsakPersonId: UUID): UUID {
+    private fun migrerOvergangsstønadForFagsakPerson(fagsakPersonId: UUID, kunAktivStønad: Boolean = false): UUID {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         val personIdent = fagsakPerson.hentAktivIdent()
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
+        val til = til(periode)
+        if (kunAktivStønad && YearMonth.now() > til) {
+            throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
+        }
         return opprettMigrering(fagsak = fagsak,
                                 fra = fra(periode),
-                                til = til(periode),
+                                til = til,
                                 inntektsgrunnlag = periode.inntektsgrunnlag,
                                 samordningsfradrag = periode.samordningsfradrag,
                                 erReellArbeidssøker = erReellArbeidssøker(periode)).id

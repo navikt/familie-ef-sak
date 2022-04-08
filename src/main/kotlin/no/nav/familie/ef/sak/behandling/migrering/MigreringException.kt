@@ -6,6 +6,7 @@ enum class MigreringExceptionType(val kanGåVidereTilJournalføring: Boolean = f
     ÅPEN_SAK,
     FLERE_IDENTER,
     FLERE_AKTIVE_PERIODER,
+    INGEN_AKTIV_STØNAD,
     HAR_ALLEREDE_BEHANDLINGER,
     IKKE_FERDIGSTILT_BEHANDLING,
     FEIL_STØNADSTYPE,
