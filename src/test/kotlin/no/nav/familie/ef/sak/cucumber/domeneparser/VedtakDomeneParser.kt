@@ -24,8 +24,8 @@ import java.util.UUID
 
 object VedtakDomeneParser {
 
-    val behandlingIdTilUUID = (1..10).map { it to UUID.randomUUID() }.toMap()
-    val tilkjentYtelseIdNummerTilUUID = (1..10).map { it to UUID.randomUUID() }.toMap()
+    val behandlingIdTilUUID = (1..10).associateWith { UUID.randomUUID() }
+    val tilkjentYtelseIdNummerTilUUID = (1..10).associateWith { UUID.randomUUID() }
 
     fun mapVedtak(dataTable: DataTable): List<Vedtak> {
         return dataTable.asMaps().groupBy {
