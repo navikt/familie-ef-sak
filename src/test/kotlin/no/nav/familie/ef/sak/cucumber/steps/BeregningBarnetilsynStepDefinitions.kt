@@ -104,8 +104,8 @@ class BeregningBarnetilsynStepDefinitions {
         val beløp = it["Beløp"]!!.toInt()
         val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
         val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-        val harKontantstøtte = it["Har kontantstøtte"].equals("x")
-        val harTilleggsstønad = it["Har tilleggsstønad"].equals("x")
+        val harKontantstøtte = it["Har kontantstøtte"].equals("JA")
+        val harTilleggsstønad = it["Har tilleggsstønad"].equals("JA")
         val antallBarn = it["Antall barn"]!!.toInt()
         ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
     }
