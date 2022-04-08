@@ -87,7 +87,8 @@ internal class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal kaste brukerfeil hvis tilleggsstønadperioder er overlappende`() {
-        val overlappendePerioder = listeMedEnPeriodeMedBeløp(april2022, april2022) + listeMedEnPeriodeMedBeløp(januar2022, april2022)
+        val overlappendePerioder =
+                listeMedEnPeriodeMedBeløp(april2022, april2022) + listeMedEnPeriodeMedBeløp(januar2022, april2022)
         val feil = assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
                                             kontantstøttePerioder = listOf(),
@@ -378,9 +379,10 @@ internal class BeregningBarnetilsynServiceTest {
             årMånedTil = til,
             beløp = 10))
 
-    private fun listeMedEnUtgiftsperiode(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(UtgiftsperiodeDto(fra,
-                                                                                                                               til,
-                                                                                                                               listOf(UUID.randomUUID()),
-                                                                                                                               TEN))
+    private fun listeMedEnUtgiftsperiode(fra: YearMonth = januar2022,
+                                         til: YearMonth = februar2022) = listOf(UtgiftsperiodeDto(fra,
+                                                                                                  til,
+                                                                                                  listOf(UUID.randomUUID()),
+                                                                                                  TEN))
 
 }

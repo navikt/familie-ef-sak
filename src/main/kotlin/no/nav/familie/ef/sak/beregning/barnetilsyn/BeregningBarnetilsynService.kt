@@ -44,8 +44,10 @@ class BeregningBarnetilsynService {
         val tilleggsstønadsperioder = tilleggsstønadsperioderDto.tilPerioder()
 
         brukerfeilHvis(utgiftsperioder.isEmpty()) { "Ingen utgiftsperioder" }
-        brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder, kontantstøttePerioder)){ "Urelevant kontantstøtteperiode kan fjernes" }
-        brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder, tilleggsstønadsperioder)){ "Urelevant tilleggsstønadsperiode kan fjernes" }
+        brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder,
+                                                     kontantstøttePerioder)) { "Urelevant kontantstøtteperiode kan fjernes" }
+        brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder,
+                                                     tilleggsstønadsperioder)) { "Urelevant tilleggsstønadsperiode kan fjernes" }
         brukerfeilHvis(utgiftsperioder.harOverlappende()) { "Utgiftsperioder $utgiftsperioder overlapper" }
         brukerfeilHvis((kontantstøttePerioder.harOverlappende())) { "Kontantstøtteperioder $kontantstøttePerioder overlapper" }
         brukerfeilHvis((tilleggsstønadsperioder.harOverlappende())) { "Tilleggsstønadsperioder $tilleggsstønadsperioder overlapper" }
