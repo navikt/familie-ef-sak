@@ -130,7 +130,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun validerStønadstype(saksbehandling: Saksbehandling, vedtak: VedtakDto, stønadstype: StønadType) {
         feilHvis(saksbehandling.stønadstype != stønadstype) {
-            "Feil stønadstype=$stønadstype for gitt vedtakstype ${vedtak::class.java.simpleName}"
+            "Feil stønadstype=${saksbehandling.stønadstype} for gitt vedtakstype ${vedtak::class.java.simpleName}"
         }
     }
 
