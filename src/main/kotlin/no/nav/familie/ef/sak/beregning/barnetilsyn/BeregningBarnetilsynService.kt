@@ -17,9 +17,9 @@ class BeregningBarnetilsynService {
                                 kontantstøttePerioder: List<PeriodeMedBeløpDto>,
                                 tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): List<BeløpsperiodeBarnetilsynDto> {
 
-        validerGyldigePerioder(utgiftsperioder.tilPerioder(),
-                               kontantstøttePerioder.tilPerioder(),
-                               tilleggsstønadsperioder.tilPerioder())
+        validerGyldigePerioder(utgiftsperioder,
+                               kontantstøttePerioder,
+                               tilleggsstønadsperioder)
 
         return utgiftsperioder.map { it.split() }
                 .flatten()
@@ -35,9 +35,14 @@ class BeregningBarnetilsynService {
                 it.tilPeriode()
             }
 
-    private fun validerGyldigePerioder(utgiftsperioder: List<Periode>,
-                                       kontantstøttePerioder: List<Periode>,
-                                       tilleggsstønadsperioder: List<Periode>) {
+    private fun validerGyldigePerioder(utgiftsperioderDto: List<UtgiftsperiodeDto>,
+                                       kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
+                                       tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>) {
+
+        val utgiftsperioder = utgiftsperioderDto.tilPerioder()
+        val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
+        val tilleggsstønadsperioder = tilleggsstønadsperioderDto.tilPerioder()
+
         brukerfeilHvis(utgiftsperioder.isEmpty()) { "Ingen utgiftsperioder" }
         brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder, kontantstøttePerioder)){ "Urelevant kontantstøtteperiode kan fjernes" }
         brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder, tilleggsstønadsperioder)){ "Urelevant tilleggsstønadsperiode kan fjernes" }

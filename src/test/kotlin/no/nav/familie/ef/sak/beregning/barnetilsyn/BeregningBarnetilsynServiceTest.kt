@@ -40,7 +40,7 @@ internal class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal kaste feil når vi sender inn urelevant kontantstøtteperiode`() {
-        val januarTilApril = enUtgiftsperiode(januar2022, april2022)
+        val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
         val urelevant = enPeriodeMedBeløp(juli2022, desember2022)
         assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
@@ -51,7 +51,7 @@ internal class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal kaste feil når vi sender inn urelevant tilleggsstønadsperiode`() {
-        val januarTilApril = enUtgiftsperiode(januar2022, april2022)
+        val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
         val urelevant = enPeriodeMedBeløp(juli2022, desember2022)
         assertThrows<ApiFeil> {
             service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
@@ -59,17 +59,6 @@ internal class BeregningBarnetilsynServiceTest {
                                             tilleggsstønadsperioder = urelevant)
         }
     }
-
-
-    private fun enPeriodeMedBeløp(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(PeriodeMedBeløpDto(
-            årMånedFra = fra,
-            årMånedTil = til,
-            beløp = 10))
-
-    private fun enUtgiftsperiode(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(UtgiftsperiodeDto(fra,
-                                                                                                                       til,
-                                                                                                                       listOf(UUID.randomUUID()),
-                                                                                                                       TEN))
 
     @Test
     fun `Skal kaste feil hvis utgiftsperioder er overlappende`() {
@@ -88,7 +77,7 @@ internal class BeregningBarnetilsynServiceTest {
         val overlappende = enPeriodeMedBeløp(januar2022, april2022) + enPeriodeMedBeløp(april2022, april2022)
 
         val feil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = enUtgiftsperiode(januar2022, april2022),
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
                                             kontantstøttePerioder = overlappende,
                                             tilleggsstønadsperioder = listOf())
         }
@@ -100,7 +89,7 @@ internal class BeregningBarnetilsynServiceTest {
     fun `Skal kaste brukerfeil hvis tilleggsstønadperioder er overlappende`() {
         val overlappendePerioder = enPeriodeMedBeløp(april2022, april2022) + enPeriodeMedBeløp(januar2022, april2022)
         val feil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = enUtgiftsperiode(januar2022, april2022),
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
                                             kontantstøttePerioder = listOf(),
                                             tilleggsstønadsperioder = overlappendePerioder)
         }
@@ -383,5 +372,15 @@ internal class BeregningBarnetilsynServiceTest {
                                                                                                  tilleggsstønadsbeløp = ZERO,
                                                                                                  antallBarn = 1))
     }
+
+    private fun enPeriodeMedBeløp(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(PeriodeMedBeløpDto(
+            årMånedFra = fra,
+            årMånedTil = til,
+            beløp = 10))
+
+    private fun listeMedEnUtgiftsperiode(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(UtgiftsperiodeDto(fra,
+                                                                                                                               til,
+                                                                                                                               listOf(UUID.randomUUID()),
+                                                                                                                               TEN))
 
 }
