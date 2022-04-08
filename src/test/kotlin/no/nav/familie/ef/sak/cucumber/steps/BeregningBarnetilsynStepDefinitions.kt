@@ -7,11 +7,10 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.assertj.core.api.Assertions.assertThat
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -40,7 +39,7 @@ class BeregningBarnetilsynStepDefinitions {
         dataTable.asMaps().map {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-            val beløp = it["Beløp"]!!.toBigDecimal()
+            val beløp = it["Beløp"]!!.toInt()
             kontantStøtteperioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
     }
@@ -50,7 +49,7 @@ class BeregningBarnetilsynStepDefinitions {
         dataTable.asMaps().map {
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
-            val beløp = it["Beløp"]!!.toBigDecimal()
+            val beløp = it["Beløp"]!!.toInt()
             tilleggsstønadPerioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
     }
@@ -65,7 +64,7 @@ class BeregningBarnetilsynStepDefinitions {
     @Så("forventer vi følgende perioder")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
         val forventet = dataTable.asMaps().map {
-            val beløp = it["Beløp"]!!.toBigDecimal()
+            val beløp = it["Beløp"]!!.toInt()
             val fraÅrMåned = parseValgfriÅrMåned("Fra måned", it)!!
             val tilÅrMåned = parseValgfriÅrMåned("Til og med måned", it)!!
             ForventetPeriode(beløp, fraÅrMåned, tilÅrMåned)
@@ -79,10 +78,10 @@ class BeregningBarnetilsynStepDefinitions {
         sortedResultat.forEachIndexed { idx, it ->
             assertThat(it.periode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
             assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
-            assertThat(it.beløp.compareTo(sortetForventet.get(idx).beløp)).isEqualTo(0).withFailMessage("Beløp var ${it.beløp}")
+            assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
         }
 
     }
 
-    data class ForventetPeriode(val beløp: BigDecimal, val fraÅrMåned: YearMonth, val tilÅrMåned: YearMonth)
+    data class ForventetPeriode(val beløp: Int, val fraÅrMåned: YearMonth, val tilÅrMåned: YearMonth)
 }

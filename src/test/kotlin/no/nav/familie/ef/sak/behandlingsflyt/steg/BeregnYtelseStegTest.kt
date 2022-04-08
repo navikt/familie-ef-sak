@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -61,6 +62,7 @@ internal class BeregnYtelseStegTest {
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val beregningService = mockk<BeregningService>()
+    private val beregningBarnetilsynService = mockk<BeregningBarnetilsynService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
@@ -68,6 +70,7 @@ internal class BeregnYtelseStegTest {
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
+                                        beregningBarnetilsynService,
                                         simuleringService,
                                         vedtakService,
                                         tilbakekrevingService,

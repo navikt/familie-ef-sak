@@ -1,13 +1,8 @@
-package no.nav.familie.ef.sak.beregning
+package no.nav.familie.ef.sak.beregning.barnetilsyn
 
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.PeriodeMedBeløpDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.UtgiftsperiodeDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
-import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.math.BigDecimal
@@ -19,7 +14,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningBarnetilsynServiceTest {
-
 
     val service: BeregningBarnetilsynService = BeregningBarnetilsynService()
 
@@ -59,9 +53,9 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode2 = UtgiftsperiodeDto(april, juli, barn = listOf(barnUUID), utgifter = ONE)
         val utgiftsperiode3 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = TEN + TEN)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = TEN)
-        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = TEN)
-        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = 10)
+        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = 10)
+        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
                                                                                                utgiftsperiode2,
@@ -86,7 +80,7 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode2 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = ONE)
 
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = august, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = august, beløp = 10)
 
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
@@ -111,9 +105,9 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode1 = UtgiftsperiodeDto(januar, juli, barn = listOf(barnUUID), utgifter = TEN)
         val utgiftsperiode2 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = ONE)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = mai, årMånedTil = september, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = mai, årMånedTil = september, beløp = 10)
         val tilleggsstønadPeriodeDto =
-                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = november, beløp = TEN)
+                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = november, beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
                                                                                                utgiftsperiode2),
@@ -136,16 +130,16 @@ internal class BeregningBarnetilsynServiceTest {
         val utgiftsperiode2 = UtgiftsperiodeDto(april, juli, barn = listOf(barnUUID), utgifter = ONE)
         val utgiftsperiode3 = UtgiftsperiodeDto(august, desember, barn = listOf(barnUUID), utgifter = TEN + TEN)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = TEN)
-        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = TEN)
-        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = TEN)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar, årMånedTil = januar, beløp = 10)
+        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april, årMånedTil = april, beløp = 10)
+        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august, årMånedTil = august, beløp = 10)
 
         val tilleggsstønadsperiodeMars =
-                PeriodeMedBeløpDto(årMånedFra = mars, årMånedTil = mars, TEN)
+                PeriodeMedBeløpDto(årMånedFra = mars, årMånedTil = mars, 10)
         val tilleggsstønadsperiodeJuli =
-                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = juli, TEN)
+                PeriodeMedBeløpDto(årMånedFra = juli, årMånedTil = juli, 10)
         val tilleggsstønadsperiodeDesember =
-                PeriodeMedBeløpDto(årMånedFra = desember, årMånedTil = desember, TEN)
+                PeriodeMedBeløpDto(årMånedFra = desember, årMånedTil = desember, 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1,
                                                                                                utgiftsperiode2,
@@ -166,8 +160,8 @@ internal class BeregningBarnetilsynServiceTest {
         val januar = YearMonth.of(2021, 1)
         val desember = YearMonth.of(2022, 12)
 
-        val forventetBeløp2021 = BigDecimal(4195)
-        val forventetBeløp2022 = BigDecimal(4250)
+        val forventetBeløp2021 = 4195
+        val forventetBeløp2022 = 4250
 
         val utgiftsperiode =
                 UtgiftsperiodeDto(januar, desember, barn = listOf(UUID.randomUUID()), utgifter = BigDecimal(1000000.0))
@@ -349,7 +343,7 @@ internal class BeregningBarnetilsynServiceTest {
                                  tilDato: LocalDate,
                                  beløp: BigDecimal = BigDecimal(100)): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(periode = Periode(fraDato, tilDato),
-                                           beløp = beløp,
+                                           beløp = beløp.roundUp().toInt(),
                                            beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgifter = ZERO,
                                                                                                  kontantstøttebeløp = ZERO,
                                                                                                  tilleggsstønadsbeløp = ZERO,

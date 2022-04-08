@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn
 import no.nav.familie.ef.sak.felles.dto.Periode
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -36,7 +37,7 @@ object BeregningBarnetilsynUtil {
                                    utgiftsperiode.årMåned)
 
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
-                                           beløpPeriode,
+                                           beløpPeriode.roundUp().toInt(),
                                            BeregningsgrunnlagBarnetilsynDto(
                                                    utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
@@ -57,6 +58,8 @@ object BeregningBarnetilsynUtil {
                        this.atEndOfMonth())
     }
 }
+
+fun BigDecimal.roundUp(): BigDecimal = this.setScale(0, RoundingMode.UP)
 
 fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
     if(antallBarn==0){

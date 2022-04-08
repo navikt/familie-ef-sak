@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -69,13 +71,13 @@ private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder
     val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
 
     return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode = this,
-                                                                kontantstøtteBeløp = kontantStøtteBeløp,
-                                                                tilleggsstønadBeløp = tilleggsstønadsperiodeBeløp,
+                                                                kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
+                                                                tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
                                                                 antallBarnIPeriode = this.barn.size)
 }
 
-private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): BigDecimal {
-    return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: BigDecimal.ZERO
+private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int {
+    return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: 0
 }
 
 private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.omsluttesAv(it.årMånedFra, it.årMånedTil)

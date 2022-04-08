@@ -19,6 +19,8 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -36,14 +38,18 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
 import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingMedVarselDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
@@ -104,12 +110,29 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         return when (saksbehandling.stønadstype) {
             StønadType.OVERGANGSSTØNAD -> {
                 val vedtakDto =
-                        mapVedtaksdetaljerOvergangsstønadDto(vedtak, saksbehandler, beslutter, tilkjentYtelse, tilbakekreving, brevmottakere)
+                        mapVedtaksdetaljerOvergangsstønadDto(vedtak,
+                                                             saksbehandler,
+                                                             beslutter,
+                                                             tilkjentYtelse,
+                                                             tilbakekreving,
+                                                             brevmottakere)
 
                 IverksettOvergangsstønadDto(behandling = behandlingsdetaljer,
                                             fagsak = fagsakdetaljerDto,
                                             søker = søkerDto,
                                             vedtak = vedtakDto)
+            }
+            StønadType.BARNETILSYN -> {
+                val vedtakDto = mapVedtaksdetaljerBarnetilsynDto(vedtak,
+                                                                 saksbehandler,
+                                                                 beslutter,
+                                                                 tilkjentYtelse,
+                                                                 tilbakekreving,
+                                                                 brevmottakere)
+                IverksettBarnetilsynDto(behandling = behandlingsdetaljer,
+                                        fagsak = fagsakdetaljerDto,
+                                        søker = søkerDto,
+                                        vedtak = vedtakDto)
             }
             else -> error("Har ikke støtte å mappe iverksett for ${saksbehandling.stønadstype}")
         }
@@ -146,7 +169,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
     private fun mapFagsakdetaljer(saksbehandling: Saksbehandling) =
             FagsakdetaljerDto(fagsakId = saksbehandling.fagsakId,
                               eksternId = saksbehandling.eksternFagsakId,
-                              stønadstype = StønadType.OVERGANGSSTØNAD)
+                              stønadstype = saksbehandling.stønadstype)
 
     @Improvement("Årsak og Type må utledes når vi støtter revurdering")
     private fun mapBehandlingsdetaljer(saksbehandling: Saksbehandling,
@@ -165,7 +188,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                                      beslutter: String,
                                                      tilkjentYtelse: TilkjentYtelse?,
                                                      tilbakekreving: TilbakekrevingDto?,
-                                                     brevmottakere: List<Brevmottaker>) =
+                                                     brevmottakere: List<Brevmottaker>): VedtaksdetaljerOvergangsstønadDto =
             VedtaksdetaljerOvergangsstønadDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
                                               vedtakstidspunkt = LocalDateTime.now(),
                                               opphørÅrsak = null,
@@ -176,6 +199,26 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                                                 ?: emptyList(),
                                               tilbakekreving = tilbakekreving,
                                               brevmottakere = brevmottakere)
+
+    @Improvement("Opphørårsak må utledes ved revurdering")
+    private fun mapVedtaksdetaljerBarnetilsynDto(vedtak: Vedtak,
+                                                 saksbehandler: String,
+                                                 beslutter: String,
+                                                 tilkjentYtelse: TilkjentYtelse?,
+                                                 tilbakekreving: TilbakekrevingDto?,
+                                                 brevmottakere: List<Brevmottaker>): VedtaksdetaljerBarnetilsynDto =
+            VedtaksdetaljerBarnetilsynDto(resultat = vedtak.resultatType.tilVedtaksresultat(),
+                                          vedtakstidspunkt = LocalDateTime.now(),
+                                          opphørÅrsak = null,
+                                          saksbehandlerId = saksbehandler,
+                                          beslutterId = beslutter,
+                                          tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
+                                          vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperiodeBarnetilsynDto()
+                                                            ?: emptyList(),
+                                          tilbakekreving = tilbakekreving,
+                                          brevmottakere = brevmottakere,
+                                          kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
+                                          tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder))
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
         val personIdent = saksbehandling.ident
@@ -261,6 +304,23 @@ fun PeriodeWrapper.tilVedtaksperiodeOvergangsstønadDto(): List<VedtaksperiodeOv
                                              periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
             )
         }
+
+fun BarnetilsynWrapper.tilVedtaksperiodeBarnetilsynDto(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
+        .map {
+            VedtaksperiodeBarnetilsynDto(fraOgMed = it.datoFra,
+                                         tilOgMed = it.datoTil,
+                                         utgifter = it.utgifter,
+                                         antallBarn = it.barn.size
+            )
+        }
+
+private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) =
+        perioder?.map { it.tilPeriodeMedBeløpDto() } ?: emptyList()
+
+fun PeriodeMedBeløp.tilPeriodeMedBeløpDto(): PeriodeMedBeløpDto =
+        PeriodeMedBeløpDto(fraOgMed = this.datoFra,
+                           tilOgMed = this.datoTil,
+                           beløp = this.beløp)
 
 fun MottakerRolle.tilIverksettDto(): Brevmottaker.MottakerRolle =
         when (this) {
