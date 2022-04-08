@@ -23,15 +23,17 @@ data class PeriodeMedBeløpDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val beløp: Int
-)
 
-data class UtgiftsperiodeDto(
+){
+    fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
+}
+
+data class UtgiftsperiodeDto (
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
         val utgifter: BigDecimal
 ) {
-
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
 

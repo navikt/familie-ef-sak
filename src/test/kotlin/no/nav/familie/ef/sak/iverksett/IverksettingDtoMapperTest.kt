@@ -42,8 +42,9 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.felles.RegelId
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
@@ -51,7 +52,6 @@ import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
-import no.nav.familie.kontrakter.ef.iverksett.SvarId
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
@@ -69,6 +69,13 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.familie.kontrakter.ef.felles.BehandlingType as BehandlingTypeIverksett
+import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
+import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
+import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatIverksett
+import no.nav.familie.kontrakter.ef.iverksett.AktivitetType as AktivitetTypeIverksett
+import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType as VedtaksperiodeTypeIverksett
 
 internal class IverksettingDtoMapperTest {
 
@@ -178,29 +185,44 @@ internal class IverksettingDtoMapperTest {
         assertAlleFelter(iverksettDto as IverksettBarnetilsynDto, behandlingId)
     }
 
+    @Test
+    internal fun `skal kunne mappe alle enums`() {
+        BehandlingType.values().forEach { BehandlingTypeIverksett.valueOf(it.name) }
+
+        RegelId.values().forEach { RegelIdIverksett.valueOf(it.name) }
+        SvarId.values().forEach { SvarIdIverksett.valueOf(it.name) }
+        VilkårType.values().forEach { VilkårTypeIverksett.valueOf(it.name) }
+        Vilkårsresultat.values().forEach { VilkårsresultatIverksett.valueOf(it.name) }
+
+        AktivitetType.values().forEach { AktivitetTypeIverksett.valueOf(it.name) }
+        VedtaksperiodeType.values()
+                .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+                .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
+    }
+
     private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
-        assertAlleFelterIverksettDto(iverksettDto, behandlingId)
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.OVERGANGSSTØNAD)
         assertVedtaksperiode(iverksettDto.vedtak)
     }
 
     private fun assertAlleFelter(iverksettDto: IverksettBarnetilsynDto, behandlingId: UUID?) {
-        assertAlleFelterIverksettDto(iverksettDto, behandlingId)
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.BARNETILSYN)
         assertVedtaksperiode(iverksettDto.vedtak)
     }
 
-    private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?) {
+    private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?, stønadType: StønadType) {
         val behandling = iverksettDto.behandling
-        assertFagsak(iverksettDto.fagsak)
+        assertFagsak(iverksettDto.fagsak, stønadType)
         assertSøker(iverksettDto.søker)
         assertBehandling(behandling, behandlingId)
         assertVilkårsvurdering(behandling.vilkårsvurderinger)
         assertVedtak(iverksettDto.vedtak)
     }
 
-    private fun assertFagsak(fagsak: FagsakdetaljerDto) {
+    private fun assertFagsak(fagsak: FagsakdetaljerDto, stønadType: StønadType) {
         assertThat(fagsak.eksternId).isEqualTo(4)
         assertThat(fagsak.fagsakId).isEqualTo(UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"))
-        assertThat(fagsak.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
+        assertThat(fagsak.stønadstype).isEqualTo(stønadType)
     }
 
     private fun assertBehandling(behandling: BehandlingsdetaljerDto,
@@ -279,7 +301,7 @@ internal class IverksettingDtoMapperTest {
 
         val vurdering = vurderinger[0]
         assertThat(vurdering.regelId.name).isEqualTo(RegelId.MEDLEMSKAP_UNNTAK.name)
-        assertThat(vurdering.svar?.name).isEqualTo(SvarId.JA.name)
+        assertThat(vurdering.svar?.name).isEqualTo(SvarIdIverksett.JA.name)
         assertThat(vurdering.begrunnelse).isEqualTo("begrunnelse")
     }
 

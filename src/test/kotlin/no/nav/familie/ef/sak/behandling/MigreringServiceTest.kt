@@ -182,7 +182,11 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             opprettOgIverksettMigrering(opphørsdato = null,
                                         migrerFraDato = til,
                                         migrerTilDato = til,
-                                        mockPerioder = { mockPerioder(opphørsdato = opphørsdato, stønadFom = fra, stønadTom = til) })
+                                        mockPerioder = {
+                                            mockPerioder(opphørsdato = opphørsdato,
+                                                         stønadFom = fra,
+                                                         stønadTom = til)
+                                        })
         }
     }
 
@@ -463,6 +467,22 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     }
 
+    @Nested
+    inner class AutomatiskMigrering {
+
+        @Test
+        internal fun `skal ikke automatisk migrere de som ikke har aktiv stønad`() {
+            mockPerioder(stønadFom = YearMonth.now().minusMonths(1),
+                         stønadTom = YearMonth.now().minusMonths(1))
+
+            assertThatThrownBy {
+                testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
+                    migreringService.migrerOvergangsstønadAutomatisk("1")
+                }
+            }.hasMessageContaining("Har ikke aktiv stønad")
+        }
+    }
+
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
@@ -518,7 +538,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private fun godkjennTotrinnskontroll(saksbehandling: Saksbehandling) {
         testWithBrukerContext(preferredUsername = "Beslutter", groups = listOf(rolleConfig.beslutterRolle)) {
             vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling)
-            stegService.håndterBeslutteVedtak(behandlingService.hentSaksbehandling(saksbehandling.id), BeslutteVedtakDto(true))
+            stegService.håndterBeslutteVedtak(behandlingService.hentSaksbehandling(saksbehandling.id),
+                                              BeslutteVedtakDto(true))
         }
     }
 
