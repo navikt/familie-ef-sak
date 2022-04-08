@@ -28,6 +28,8 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
@@ -69,9 +71,28 @@ class StepDefinitions {
         vedtak = VedtakDomeneParser.mapVedtak(dataTable)
     }
 
+    @Gitt("følgende vedtak for barnetilsyn")
+    fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
+        vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+    }
+
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
         inntekter = VedtakDomeneParser.mapInntekter(dataTable)
+    }
+
+    @Gitt("følgende kontantstøtte")
+    fun følgende_kontantstøtte(dataTable: DataTable) {
+        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+            vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
+        }
+    }
+
+    @Gitt("følgende tilleggsstønad")
+    fun følgende_tilleggsstønad(dataTable: DataTable) {
+        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+            vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
+        }
     }
 
     @Når("lag andelhistorikk kjøres")
@@ -81,9 +102,9 @@ class StepDefinitions {
 
         val behandlinger = vedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
             acc + behandling(id = id,
-                                        opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                                        type = BehandlingType.REVURDERING,
-                                        forrigeBehandlingId = acc.lastOrNull()?.id)
+                             opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
+                             type = BehandlingType.REVURDERING,
+                             forrigeBehandlingId = acc.lastOrNull()?.id)
         }.associateBy { it.id }
 
         //Skriver over inntekt hvis inntekter er definiert

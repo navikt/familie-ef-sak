@@ -7,8 +7,13 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.vedtak.HistorikkEndring
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -31,17 +36,7 @@ object VedtakDomeneParser {
         return dataTable.asMaps().groupBy {
             it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
         }.map { (_, rader) ->
-
-            val perioder = rader.map { rad ->
-                val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
-                val datoTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now()
-                Vedtaksperiode(
-                        datoFra = datoFra,
-                        datoTil = datoTil,
-                        aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
-                        periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE
-                )
-            }
+            val perioder = mapPerioderForOvergangsstønad(rader)
             val rad = rader.first()
             val resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE
             Vedtak(
@@ -54,6 +49,73 @@ object VedtakDomeneParser {
                     internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null
 
             )
+        }
+    }
+
+    fun mapVedtakForBarnetilsyn(dataTable: DataTable): List<Vedtak> {
+        return dataTable.asMaps().groupBy {
+            it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
+        }.map { (_, rader) ->
+            val perioder = mapPerioderForBarnetilsyn(rader)
+            val rad = rader.first()
+            val resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE
+            Vedtak(
+                    behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
+                    resultatType = resultatType,
+                    opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1),
+                    sanksjonsårsak = if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null,
+                    internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null,
+                    barnetilsyn = BarnetilsynWrapper(perioder, null),
+                    kontantstøtte = KontantstøtteWrapper(emptyList()), // overskreves i egen "Gitt"
+                    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null) // overskreves i egen "Gitt"
+            )
+        }
+    }
+
+    private fun mapPerioderForOvergangsstønad(rader: List<MutableMap<String, String>>): List<Vedtaksperiode> {
+        return rader.map { rad ->
+            val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
+            val datoTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now()
+            Vedtaksperiode(
+                    datoFra = datoFra,
+                    datoTil = datoTil,
+                    aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
+                    periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE
+            )
+        }
+    }
+
+    private fun mapPerioderForBarnetilsyn(rader: List<MutableMap<String, String>>): List<Barnetilsynperiode> {
+        return rader.map { rad ->
+            val datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
+            val datoTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now()
+            Barnetilsynperiode(
+                    datoFra = datoFra,
+                    datoTil = datoTil,
+                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad)?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
+                    barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(0, it).map { UUID.randomUUID() } }
+                           ?: emptyList()
+            )
+        }
+    }
+
+    fun mapOgSettPeriodeMedBeløp(vedtak: List<Vedtak>,
+                                 dataTable: DataTable,
+                                 oppdaterVedtak: (Vedtak, List<PeriodeMedBeløp>) -> Vedtak): List<Vedtak> {
+        val beløpsperioder = dataTable.asMaps().groupBy {
+            UUID.fromString(it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel))
+        }.map { (behandlingId, rader) ->
+            behandlingId to rader.map { rad ->
+                PeriodeMedBeløp(
+                        datoFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now(),
+                        datoTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now(),
+                        beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
+                )
+            }
+        }.toMap()
+        return vedtak.map {
+            val perioder = beløpsperioder[it.behandlingId] ?: emptyList()
+            oppdaterVedtak(it, perioder)
         }
     }
 
@@ -227,7 +289,9 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
     ENDRING_TYPE("Endringstype"),
-    OPPHØRSDATO("Opphørsdato")
+    OPPHØRSDATO("Opphørsdato"),
+    UTGIFTER("Utgifter"),
+    ANTALL_BARN("Antall barn")
     ;
 
     override fun nøkkel(): String {
