@@ -257,8 +257,14 @@ class MigreringService(
                                      MigreringExceptionType.FEIL_STØNADSTYPE)
         } else if (fagsak.migrert) {
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
-        } else if (behandlingService.hentBehandlinger(fagsak.id).any { it.type != BehandlingType.BLANKETT }) {
-            throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
+        } else {
+            val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
+            if (behandlinger.any { it.type != BehandlingType.BLANKETT }) {
+                throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
+            } else if (behandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+                throw MigreringException("Fagsaken har behandling som ikke er ferdigstilt",
+                                         MigreringExceptionType.IKKE_FERDIGSTILT_BEHANDLING)
+            }
         }
     }
 
