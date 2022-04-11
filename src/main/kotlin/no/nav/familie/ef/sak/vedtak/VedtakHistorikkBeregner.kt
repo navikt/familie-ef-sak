@@ -11,114 +11,124 @@ import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+sealed class Vedtakshistorikkperiode {
+
+    abstract val datoFra: LocalDate
+    abstract val datoTil: LocalDate
+
+    abstract fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode
+    abstract fun medTil(datoTil: LocalDate): Vedtakshistorikkperiode
+}
+
+data class VedtakshistorikkperiodeOvergangsstønad(
+        override val datoFra: LocalDate,
+        override val datoTil: LocalDate,
+        val aktivitet: AktivitetType,
+        val periodeType: VedtaksperiodeType
+) : Vedtakshistorikkperiode() {
+
+    constructor(periode: VedtaksperiodeDto) :
+            this(periode.årMånedFra.atDay(1),
+                 periode.årMånedTil.atEndOfMonth(),
+                 periode.aktivitet,
+                 periode.periodeType)
+
+    override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
+        return this.copy(datoFra = datoFra)
+    }
+
+    override fun medTil(datoTil: LocalDate): Vedtakshistorikkperiode {
+        return this.copy(datoTil = datoTil)
+    }
+}
+
+data class VedtakshistorikkperiodeBarnetilsyn(
+        override val datoFra: LocalDate,
+        override val datoTil: LocalDate,
+        val kontantstøtte: Int,
+        val tilleggsstønad: Int,
+        val utgifter: BigDecimal,
+        val antallBarn: Int
+) : Vedtakshistorikkperiode() {
+
+    constructor(periode: BeløpsperiodeBarnetilsynDto) :
+            this(periode.periode.fradato,
+                 periode.periode.tildato,
+                 periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
+                 periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
+                 periode.beregningsgrunnlag.utgifter,
+                 periode.beregningsgrunnlag.antallBarn
+            )
+
+    override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
+        return this.copy(datoFra = datoFra)
+    }
+
+    override fun medTil(datoTil: LocalDate): Vedtakshistorikkperiode {
+        return this.copy(datoTil = datoTil)
+    }
+}
+
 object VedtakHistorikkBeregner {
 
     private val beregningBarnetilsyn: BeregningBarnetilsynService = BeregningBarnetilsynService()
 
-    sealed class Vedtaksinformasjon {
-
-        abstract val datoFra: LocalDate
-        abstract val datoTil: LocalDate
-
-        abstract fun medFra(datoFra: LocalDate): Vedtaksinformasjon
-        abstract fun medTil(datoTil: LocalDate): Vedtaksinformasjon
-    }
-
-    data class VedtaksinformasjonOvergangsstønad(
-            override val datoFra: LocalDate,
-            override val datoTil: LocalDate,
-            val aktivitet: AktivitetType,
-            val periodeType: VedtaksperiodeType
-    ) : Vedtaksinformasjon() {
-
-        constructor(periode: VedtaksperiodeDto) :
-                this(periode.årMånedFra.atDay(1),
-                     periode.årMånedTil.atEndOfMonth(),
-                     periode.aktivitet,
-                     periode.periodeType)
-
-        override fun medFra(datoFra: LocalDate): Vedtaksinformasjon {
-            return this.copy(datoFra = datoFra)
-        }
-
-        override fun medTil(datoTil: LocalDate): Vedtaksinformasjon {
-            return this.copy(datoTil = datoTil)
-        }
-    }
-
-    data class VedtaksinformasjonBarnetilsyn(
-            override val datoFra: LocalDate,
-            override val datoTil: LocalDate,
-            val kontantstøtte: Int,
-            val tilleggsstønad: Int,
-            val utgifter: BigDecimal,
-            val antallBarn: Int
-    ) : Vedtaksinformasjon() {
-
-        constructor(beløpsperiodeBarnetilsynDto: BeløpsperiodeBarnetilsynDto) :
-                this(beløpsperiodeBarnetilsynDto.periode.fradato,
-                     beløpsperiodeBarnetilsynDto.periode.tildato,
-                     beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp.toInt(),
-                     beløpsperiodeBarnetilsynDto.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
-                     beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
-                     beløpsperiodeBarnetilsynDto.beregningsgrunnlag.antallBarn
-                )
-
-        override fun medFra(datoFra: LocalDate): Vedtaksinformasjon {
-            return this.copy(datoFra = datoFra)
-        }
-
-        override fun medTil(datoTil: LocalDate): Vedtaksinformasjon {
-            return this.copy(datoTil = datoTil)
-        }
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun lagVedtaksperioderPerBehandling(vedtaksliste: List<AndelHistorikkBeregner.BehandlingVedtakDto>,
-                                        datoOpprettetPerBehandling: Map<UUID, LocalDateTime>): Map<UUID, List<Vedtaksinformasjon>> {
+                                        datoOpprettetPerBehandling: Map<UUID, LocalDateTime>): Map<UUID, List<Vedtakshistorikkperiode>> {
         val sorterteVedtak = sorterVedtak(vedtaksliste, datoOpprettetPerBehandling)
-        return sorterteVedtak.fold(listOf<Pair<UUID, List<Vedtaksinformasjon>>>()) { acc, vedtak ->
+        return sorterteVedtak.fold(listOf<Pair<UUID, List<Vedtakshistorikkperiode>>>()) { acc, vedtak ->
             acc + Pair(vedtak.behandlingId, lagTotalbildeForNyttVedtak(vedtak.vedtakDto, acc))
         }.toMap()
     }
 
     private fun lagTotalbildeForNyttVedtak(vedtak: VedtakDto,
-                                           acc: List<Pair<UUID, List<Vedtaksinformasjon>>>): List<Vedtaksinformasjon> {
+                                           acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>): List<Vedtakshistorikkperiode> {
 
-        return if (vedtak is InnvilgelseOvergangsstønad) {
-            val nyePerioder = vedtak.perioder.map { VedtaksinformasjonOvergangsstønad(it) }
-            val førsteFraDato = nyePerioder.first().datoFra
-            avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder
-        } else if (vedtak is InnvilgelseBarnetilsyn) {
-            val perioder = beregningBarnetilsyn.beregnYtelseBarnetilsyn(vedtak).map { VedtaksinformasjonBarnetilsyn(it) }
-            val førsteFraDato = perioder.first().datoFra
-            avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + perioder
-        } else if (vedtak is Sanksjonert) {
-            splitOppPerioderSomErSanksjonert(acc, vedtak)
-        } else if (vedtak is Opphør) {
-            val opphørFom = vedtak.opphørFom
-            avkortTidligerePerioder(acc.lastOrNull(), opphørFom.atDay(1))
-        } else {
-            emptyList() //TODO
+        return when (vedtak) {
+            is InnvilgelseOvergangsstønad -> {
+                val nyePerioder = vedtak.perioder.map { VedtakshistorikkperiodeOvergangsstønad(it) }
+                val førsteFraDato = nyePerioder.first().datoFra
+                avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder
+            }
+            is InnvilgelseBarnetilsyn -> {
+                val perioder = beregningBarnetilsyn.beregnYtelseBarnetilsyn(vedtak).map { VedtakshistorikkperiodeBarnetilsyn(it) }
+                val førsteFraDato = perioder.first().datoFra
+                avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + perioder
+            }
+            is Sanksjonert -> {
+                splitOppPerioderSomErSanksjonert(acc, vedtak)
+            }
+            is Opphør -> {
+                val opphørFom = vedtak.opphørFom
+                avkortTidligerePerioder(acc.lastOrNull(), opphørFom.atDay(1))
+            }
+            else -> {
+                logger.error("Håndterer ikke ${vedtak::class.java.simpleName}")
+                emptyList()
+            }
         }
     }
 
-    private fun splitOppPerioderSomErSanksjonert(acc: List<Pair<UUID, List<Vedtaksinformasjon>>>,
-                                                 vedtak: Sanksjonert): List<Vedtaksinformasjon> {
-        val vedtaksperiodeSanksjon = VedtaksinformasjonOvergangsstønad(vedtak.periode.årMånedFra.atDay(1),
-                                                                       vedtak.periode.årMånedTil.atEndOfMonth(),
-                                                                       vedtak.periode.aktivitet,
-                                                                       vedtak.periode.periodeType)
+    private fun splitOppPerioderSomErSanksjonert(acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>,
+                                                 vedtak: Sanksjonert): List<Vedtakshistorikkperiode> {
+        val vedtaksperiodeSanksjon = VedtakshistorikkperiodeOvergangsstønad(vedtak.periode.årMånedFra.atDay(1),
+                                                                            vedtak.periode.årMånedTil.atEndOfMonth(),
+                                                                            vedtak.periode.aktivitet,
+                                                                            vedtak.periode.periodeType)
         val sanksjonsperiode = vedtak.periode.tilPeriode()
         return acc.last().second.flatMap {
             if (!sanksjonsperiode.overlapper(Periode(it.datoFra, it.datoTil))) {
                 return@flatMap listOf(it, vedtaksperiodeSanksjon)
             }
-            val nyePerioder = mutableListOf<Vedtaksinformasjon>()
+            val nyePerioder = mutableListOf<Vedtakshistorikkperiode>()
             if (sanksjonsperiode.fradato <= it.datoFra && sanksjonsperiode.tildato < it.datoTil) {
                 nyePerioder.add(vedtaksperiodeSanksjon)
                 nyePerioder.add(it.medFra(datoFra = sanksjonsperiode.tildato.plusDays(1)))
@@ -137,8 +147,8 @@ object VedtakHistorikkBeregner {
      * Då ett nytt vedtak splitter tidligere vedtaksperioder,
      * så må vi avkorte tidligere periode, då det nye vedtaket overskrever det seneste
      */
-    private fun avkortTidligerePerioder(sisteVedtak: Pair<UUID, List<Vedtaksinformasjon>>?,
-                                        datoSomTidligerePeriodeOpphør: LocalDate): List<Vedtaksinformasjon> {
+    private fun avkortTidligerePerioder(sisteVedtak: Pair<UUID, List<Vedtakshistorikkperiode>>?,
+                                        datoSomTidligerePeriodeOpphør: LocalDate): List<Vedtakshistorikkperiode> {
         if (sisteVedtak == null) return emptyList()
         return sisteVedtak.second.mapNotNull {
             if (it.datoFra >= datoSomTidligerePeriodeOpphør) {
