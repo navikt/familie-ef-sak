@@ -34,6 +34,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -65,7 +66,7 @@ class StepDefinitions {
                                                     fagsakService)
 
     private val slot = slot<TilkjentYtelse>()
-
+    private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
         vedtak = VedtakDomeneParser.mapVedtak(dataTable)
@@ -73,6 +74,7 @@ class StepDefinitions {
 
     @Gitt("følgende vedtak for barnetilsyn")
     fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
+        stønadstype = StønadType.BARNETILSYN
         vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
     }
 
@@ -114,7 +116,7 @@ class StepDefinitions {
 
         vedtakMedInntekt.forEach {
             val behandling = behandlinger.getValue(it.behandlingId)
-            val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId), behandling)
+            val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId, stønadstype = stønadstype), behandling)
             beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
         }
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
@@ -214,7 +216,18 @@ class StepDefinitions {
         forventetHistorikkEndring.beløp?.let {
             Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
         }
-
+        forventetHistorikkEndring.tilleggsstønad?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.tilleggsstønad).isEqualTo(it)
+        }
+        forventetHistorikkEndring.kontantstøtte?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.kontantstøtte).isEqualTo(it)
+        }
+        forventetHistorikkEndring.antallBarn?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.antallBarn).isEqualTo(it)
+        }
+        forventetHistorikkEndring.utgifter?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.utgifter.toInt()).isEqualTo(it)
+        }
         Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }
 

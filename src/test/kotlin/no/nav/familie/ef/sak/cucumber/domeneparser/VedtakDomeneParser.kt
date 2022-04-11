@@ -93,7 +93,7 @@ object VedtakDomeneParser {
                     datoFra = datoFra,
                     datoTil = datoTil,
                     utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad)?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
-                    barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(0, it).map { UUID.randomUUID() } }
+                    barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(1, it).map { UUID.randomUUID() } }
                            ?: emptyList()
             )
         }
@@ -103,7 +103,7 @@ object VedtakDomeneParser {
                                  dataTable: DataTable,
                                  oppdaterVedtak: (Vedtak, List<PeriodeMedBeløp>) -> Vedtak): List<Vedtak> {
         val beløpsperioder = dataTable.asMaps().groupBy {
-            UUID.fromString(it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel))
+            behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, it)]
         }.map { (behandlingId, rader) ->
             behandlingId to rader.map { rad ->
                 PeriodeMedBeløp(
@@ -157,7 +157,11 @@ object VedtakDomeneParser {
             val stønadTil: LocalDate,
             val inntekt: Int?,
             val beløp: Int?,
-            val aktivitetType: AktivitetType
+            val aktivitetType: AktivitetType?,
+            val kontantstøtte: Int?,
+            val tilleggsstønad: Int?,
+            val antallBarn: Int?,
+            val utgifter: Int?
     )
 
     fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
@@ -267,7 +271,11 @@ object VedtakDomeneParser {
                             .atEndOfMonth(),
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
-                    aktivitetType = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR
+                    aktivitetType = parseAktivitetType(rad),
+                    kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
+                    tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
+                    antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
+                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad)
             )
         }
     }
@@ -291,7 +299,9 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     ENDRING_TYPE("Endringstype"),
     OPPHØRSDATO("Opphørsdato"),
     UTGIFTER("Utgifter"),
-    ANTALL_BARN("Antall barn")
+    ANTALL_BARN("Antall barn"),
+    TILLEGGSSTØNAD("Tilleggsstønad"),
+    KONTANTSTØTTE("Kontantstøtte")
     ;
 
     override fun nøkkel(): String {

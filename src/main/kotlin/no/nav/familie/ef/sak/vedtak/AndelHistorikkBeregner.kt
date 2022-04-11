@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -36,19 +37,23 @@ data class AndelDto(
         val inntekt: Int,
         val inntektsreduksjon: Int,
         val samordningsfradrag: Int,
-        val kontantstøtte: Int = 0,
-        val tillegsstønad: Int = 0
+        val kontantstøtte: Int,
+        val tilleggsstønad: Int,
+        val antallBarn: Int,
+        val utgifter: BigDecimal = BigDecimal.ZERO
 ) {
 
-    constructor(andel: AndelTilkjentYtelse, kontantstøtte: Int, tillegsstønad: Int) : this(
+    constructor(andel: AndelTilkjentYtelse, vedtaksinformasjon: VedtakHistorikkBeregner.VedtaksinformasjonBarnetilsyn?) : this(
             beløp = andel.beløp,
             stønadFra = andel.stønadFom,
             stønadTil = andel.stønadTom,
             inntekt = andel.inntekt,
             inntektsreduksjon = andel.inntektsreduksjon,
             samordningsfradrag = andel.samordningsfradrag,
-            kontantstøtte = kontantstøtte,
-            tillegsstønad = tillegsstønad
+            kontantstøtte = vedtaksinformasjon?.kontantstøtte ?: 0,
+            tilleggsstønad = vedtaksinformasjon?.tilleggsstønad ?: 0,
+            utgifter = vedtaksinformasjon?.utgifter ?: BigDecimal.ZERO,
+            antallBarn = vedtaksinformasjon?.antallBarn ?: 0
     )
 }
 
@@ -119,22 +124,34 @@ object AndelHistorikkBeregner {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), vedtaksliste)
         val behandlingerPåId = behandlinger.associate { it.id to it.type }
 
-        return historikk.mapNotNull {
+        return historikk.map {
             val vedtaksperiode = it.vedtaksperiode
-            if (vedtaksperiode !is VedtakHistorikkBeregner.VedtaksinformasjonOvergangsstønad) {
-                return@mapNotNull null
+            if (vedtaksperiode is VedtakHistorikkBeregner.VedtaksinformasjonOvergangsstønad) {
+                AndelHistorikkDto(behandlingId = it.behandlingId,
+                                  behandlingType = behandlingerPåId.getValue(it.behandlingId),
+                                  vedtakstidspunkt = it.vedtakstidspunkt,
+                                  saksbehandler = it.saksbehandler,
+                                  andel = AndelDto(andel = it.andel,
+                                                   null
+                                  ),
+                                  aktivitet = vedtaksperiode.aktivitet,
+                                  periodeType = vedtaksperiode.periodeType,
+                                  endring = it.endring)
+            } else if (vedtaksperiode is VedtakHistorikkBeregner.VedtaksinformasjonBarnetilsyn) {
+                AndelHistorikkDto(behandlingId = it.behandlingId,
+                                  behandlingType = behandlingerPåId.getValue(it.behandlingId),
+                                  vedtakstidspunkt = it.vedtakstidspunkt,
+                                  saksbehandler = it.saksbehandler,
+                                  andel = AndelDto(andel = it.andel,
+                                                   vedtaksinformasjon = vedtaksperiode
+                                  ),
+                                  aktivitet = null,
+                                  periodeType = null,
+                                  endring = it.endring)
+            } else {
+                error("Støtter kun overgangsstønad og barnetilsyn")
             }
-            AndelHistorikkDto(behandlingId = it.behandlingId,
-                              behandlingType = behandlingerPåId.getValue(it.behandlingId),
-                              vedtakstidspunkt = it.vedtakstidspunkt,
-                              saksbehandler = it.saksbehandler,
-                              andel = AndelDto(andel = it.andel,
-                                               kontantstøtte = 0,
-                                               tillegsstønad = 0
-                              ),
-                              aktivitet = vedtaksperiode.aktivitet,
-                              periodeType = vedtaksperiode.periodeType,
-                              endring = it.endring)
+
         }
     }
 
@@ -167,7 +184,7 @@ object AndelHistorikkBeregner {
     private fun lagAndelerFraSanksjoner(vedtaksperioder: List<VedtakHistorikkBeregner.Vedtaksinformasjon>,
                                         tilkjentYtelse: TilkjentYtelse) =
             vedtaksperioder.mapNotNull {
-                if (it !is VedtakHistorikkBeregner.VedtaksinformasjonOvergangsstønad) {
+                if (it !is VedtakHistorikkBeregner.VedtaksinformasjonOvergangsstønad || it.periodeType != VedtaksperiodeType.SANKSJON) {
                     return@mapNotNull null
                 }
                 AndelTilkjentYtelse(beløp = 0,
@@ -235,6 +252,7 @@ object AndelHistorikkBeregner {
                                  vedtaksperiode = vedtaksperiode,
                                  kontrollert = tilkjentYtelse.id)
 
+    //TODO Sjekk på utgifter og andre barnetilsyn-spesifikke felter
     private fun AndelHistorikkHolder.finnEndringstype(tidligereAndel: AndelTilkjentYtelse,
                                                       vedtaksperiode: VedtakHistorikkBeregner.Vedtaksinformasjon): EndringType? {
         return when {
@@ -249,6 +267,7 @@ object AndelHistorikkBeregner {
         }
     }
 
+    //TODO Håndter sanksjon
     private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(tidligereAndel: AndelTilkjentYtelse,
                                                                 vedtaksperiode: VedtakHistorikkBeregner.Vedtaksinformasjon): Boolean {
         val thisVedtaksperiode = this.vedtaksperiode
