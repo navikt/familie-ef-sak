@@ -126,32 +126,19 @@ object AndelHistorikkBeregner {
 
         return historikk.map {
             val vedtaksperiode = it.vedtaksperiode
-            if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) {
-                AndelHistorikkDto(behandlingId = it.behandlingId,
-                                  behandlingType = behandlingerPåId.getValue(it.behandlingId),
-                                  vedtakstidspunkt = it.vedtakstidspunkt,
-                                  saksbehandler = it.saksbehandler,
-                                  andel = AndelDto(andel = it.andel,
-                                                   null
-                                  ),
-                                  aktivitet = vedtaksperiode.aktivitet,
-                                  periodeType = vedtaksperiode.periodeType,
-                                  endring = it.endring)
-            } else if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) {
-                AndelHistorikkDto(behandlingId = it.behandlingId,
-                                  behandlingType = behandlingerPåId.getValue(it.behandlingId),
-                                  vedtakstidspunkt = it.vedtakstidspunkt,
-                                  saksbehandler = it.saksbehandler,
-                                  andel = AndelDto(andel = it.andel,
-                                                   vedtaksinformasjon = vedtaksperiode
-                                  ),
-                                  aktivitet = null,
-                                  periodeType = null,
-                                  endring = it.endring)
-            } else {
-                error("Støtter kun overgangsstønad og barnetilsyn")
-            }
+            val aktivitet = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
+            val periodeType = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
+            val barnetilsyn = if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) vedtaksperiode else null
 
+            AndelHistorikkDto(behandlingId = it.behandlingId,
+                              behandlingType = behandlingerPåId.getValue(it.behandlingId),
+                              vedtakstidspunkt = it.vedtakstidspunkt,
+                              saksbehandler = it.saksbehandler,
+                              andel = AndelDto(andel = it.andel,
+                                               barnetilsyn),
+                              aktivitet = aktivitet,
+                              periodeType = periodeType,
+                              endring = it.endring)
         }
     }
 
