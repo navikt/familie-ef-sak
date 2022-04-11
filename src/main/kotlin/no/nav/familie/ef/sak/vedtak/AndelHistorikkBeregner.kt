@@ -168,6 +168,7 @@ object AndelHistorikkBeregner {
         return historikk
     }
 
+    //TODO Håndter sanksjon for barnetilsyn
     private fun lagAndelerFraSanksjoner(vedtaksperioder: List<Vedtakshistorikkperiode>,
                                         tilkjentYtelse: TilkjentYtelse) =
             vedtaksperioder.mapNotNull {

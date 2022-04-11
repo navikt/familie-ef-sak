@@ -1300,16 +1300,7 @@ internal class BeregnYtelseStegTest {
                               behandlingType = BehandlingType.REVURDERING,
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
-                              andel = AndelDto(beløp = 1,
-                                               stønadFra = fom.atDay(1),
-                                               stønadTil = tom.atEndOfMonth(),
-                                               inntekt = 0,
-                                               inntektsreduksjon = 0,
-                                               samordningsfradrag = 0,
-                                               kontantstøtte = 0,
-                                               tilleggsstønad = 0,
-                                               antallBarn = 0,
-                                               utgifter = BigDecimal.ZERO),
+                              andel = andelDto(1, fom, tom),
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null
@@ -1320,20 +1311,23 @@ internal class BeregnYtelseStegTest {
                               behandlingType = BehandlingType.REVURDERING,
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
-                              andel = AndelDto(beløp = 0,
-                                               stønadFra = sanksjonMåned.atDay(1),
-                                               stønadTil = sanksjonMåned.atEndOfMonth(),
-                                               inntekt = 0,
-                                               inntektsreduksjon = 0,
-                                               samordningsfradrag = 0,
-                                               kontantstøtte = 0,
-                                               tilleggsstønad = 0,
-                                               antallBarn = 0,
-                                               utgifter = BigDecimal.ZERO),
+                              andel = andelDto(0, sanksjonMåned, sanksjonMåned),
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null
             )
+
+    private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
+            AndelDto(beløp = beløp,
+                     stønadFra = fom.atDay(1),
+                     stønadTil = tom.atEndOfMonth(),
+                     inntekt = 0,
+                     inntektsreduksjon = 0,
+                     samordningsfradrag = 0,
+                     kontantstøtte = 0,
+                     tilleggsstønad = 0,
+                     antallBarn = 0,
+                     utgifter = BigDecimal.ZERO)
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
