@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -9,6 +11,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -29,7 +32,7 @@ internal class VedtakHistorikkBeregnerTest {
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(vedtaksperioderPerBehandling,
                        andreVedtak.behandlingId,
-                       listOf(førstePeriode.medTil(datoTil = LocalDate.of(2021, 1, 31))))
+                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk()))
     }
 
     @Test
@@ -88,7 +91,7 @@ internal class VedtakHistorikkBeregnerTest {
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(vedtaksperioderPerBehandling, andreVedtak.behandlingId,
-                       listOf(førstePeriode.medTil(datoTil = LocalDate.of(2021, 1, 31))) + andreVedtak.vedtaksperioder())
+                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk()) + andreVedtak.vedtaksperioder())
     }
 
     private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>) {
@@ -101,7 +104,7 @@ internal class VedtakHistorikkBeregnerTest {
         assertThat(vedtaksperioderPerBehandling.getValue(behandlingId)).isEqualTo(vedtaksperioder)
     }
 
-    private fun Vedtak.vedtaksperioder(): List<Vedtaksperiode> = this.perioder!!.perioder
+    private fun Vedtak.vedtaksperioder(): List<Vedtakshistorikkperiode> = this.perioder!!.perioder.map { it.tilHistorikk() }
 
     private fun lagVedtaksperioderPerBehandling(vedtak: List<Vedtak>): Map<UUID, List<Vedtakshistorikkperiode>> {
         var datoCount = 0L
@@ -112,11 +115,18 @@ internal class VedtakHistorikkBeregnerTest {
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingVedtakDto, behandlingPerDato)
     }
 
-    private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtakshistorikkperiode =
-            VedtakshistorikkperiodeOvergangsstønad(datoFra = fra,
-                                                   datoTil = til,
-                                                   aktivitet = AktivitetType.BARNET_ER_SYKT,
-                                                   periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+    private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
+            Vedtaksperiode(datoFra = fra,
+                           datoTil = til,
+                           aktivitet = AktivitetType.BARNET_ER_SYKT,
+                           periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+
+    private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
+            this.datoFra,
+            this.datoTil,
+            this.aktivitet,
+            this.periodeType
+    )
 
     private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(),
                           perioder: List<Vedtaksperiode>?,
@@ -128,7 +138,7 @@ internal class VedtakHistorikkBeregnerTest {
                       inntektBegrunnelse = null,
                       avslåBegrunnelse = null,
                       perioder = perioder?.let { PeriodeWrapper(it.toList()) },
-                      inntekter = null,
+                      inntekter = perioder?.let { InntektWrapper(listOfNotNull(it.firstOrNull()?.let { Inntektsperiode(it.datoFra, it.datoTil, BigDecimal.ZERO, BigDecimal.ZERO) }))  },
                       saksbehandlerIdent = null,
                       opphørFom = opphørFom,
                       beslutterIdent = null)
