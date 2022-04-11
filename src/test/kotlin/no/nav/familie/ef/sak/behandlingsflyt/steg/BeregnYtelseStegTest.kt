@@ -6,12 +6,15 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -66,6 +69,7 @@ internal class BeregnYtelseStegTest {
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
+    private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
@@ -74,6 +78,7 @@ internal class BeregnYtelseStegTest {
                                         simuleringService,
                                         vedtakService,
                                         tilbakekrevingService,
+                                        barnService,
                                         fagsakService)
 
     private val slot = slot<TilkjentYtelse>()
@@ -1272,6 +1277,24 @@ internal class BeregnYtelseStegTest {
             }
         }
 
+    }
+
+    @Nested
+    inner class Barnetilsyn {
+
+        @BeforeEach
+        internal fun setUp() {
+            val grunnlag = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0)
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, grunnlag))
+        }
+
+        @Test
+        internal fun `innvilger barnetilsyn skal validere at barn finnes`() {
+            utførSteg(lagSaksbehandling(stønadType = StønadType.BARNETILSYN), innvilgetBarnetilsyn())
+
+            verify(exactly = 1) { barnService.validerBarnFinnesPåBehandling(any(), any()) }
+        }
     }
 
     private fun innvilget(perioder: List<VedtaksperiodeDto>,

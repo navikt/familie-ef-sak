@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.steps
+package no.nav.familie.ef.sak.cucumber.steps
 
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.barn
 
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
@@ -111,5 +112,12 @@ class BarnService(
                                                                    ?: emptyList()
 
     fun finnBarnPåBehandling(behandlingId: UUID): List<BehandlingBarn> = barnRepository.findByBehandlingId(behandlingId)
+
+    fun validerBarnFinnesPåBehandling(behandlingId: UUID, barn: Set<UUID>) {
+        val barnPåBehandling = finnBarnPåBehandling(behandlingId).map { it.id }.toSet()
+        feilHvis(barn.any { !barnPåBehandling.contains(it) }) {
+            "Et barn som ikke finnes på behandling=$behandlingId er lagt til, innsendte=$barn"
+        }
+    }
 
 }
