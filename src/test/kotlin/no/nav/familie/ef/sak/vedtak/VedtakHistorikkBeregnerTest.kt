@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
-/*
+
 internal class VedtakHistorikkBeregnerTest {
 
     private val førsteFra = LocalDate.of(2021, 1, 1)
@@ -29,7 +29,7 @@ internal class VedtakHistorikkBeregnerTest {
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(vedtaksperioderPerBehandling,
                        andreVedtak.behandlingId,
-                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))))
+                       listOf(førstePeriode.medTil(datoTil = LocalDate.of(2021, 1, 31))))
     }
 
     @Test
@@ -88,22 +88,22 @@ internal class VedtakHistorikkBeregnerTest {
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(vedtaksperioderPerBehandling, andreVedtak.behandlingId,
-                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))) + andreVedtak.vedtaksperioder())
+                       listOf(førstePeriode.medTil(datoTil = LocalDate.of(2021, 1, 31))) + andreVedtak.vedtaksperioder())
     }
 
-    private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<VedtakHistorikkBeregner.Vedtaksinformasjon>>) {
+    private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>) {
         validerPeriode(vedtaksperioderPerBehandling, førsteVedtak.behandlingId, førsteVedtak.vedtaksperioder())
     }
 
-    private fun validerPeriode(vedtaksperioderPerBehandling: Map<UUID, List<VedtakHistorikkBeregner.Vedtaksinformasjon>>,
+    private fun validerPeriode(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>,
                                behandlingId: UUID,
-                               vedtaksperioder: List<VedtakHistorikkBeregner.Vedtaksinformasjon>) {
+                               vedtaksperioder: List<Vedtakshistorikkperiode>) {
         assertThat(vedtaksperioderPerBehandling.getValue(behandlingId)).isEqualTo(vedtaksperioder)
     }
 
     private fun Vedtak.vedtaksperioder(): List<Vedtaksperiode> = this.perioder!!.perioder
 
-    private fun lagVedtaksperioderPerBehandling(vedtak: List<Vedtak>): Map<UUID, List<VedtakHistorikkBeregner.Vedtaksinformasjon>> {
+    private fun lagVedtaksperioderPerBehandling(vedtak: List<Vedtak>): Map<UUID, List<Vedtakshistorikkperiode>> {
         var datoCount = 0L
         val behandlingPerDato = vedtak.associate {
             it.behandlingId to LocalDate.of(2021, 1, 1).atStartOfDay().plusDays(datoCount++)
@@ -112,11 +112,11 @@ internal class VedtakHistorikkBeregnerTest {
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingVedtakDto, behandlingPerDato)
     }
 
-    private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
-            Vedtaksperiode(datoFra = fra,
-                           datoTil = til,
-                           aktivitet = AktivitetType.BARNET_ER_SYKT,
-                           periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+    private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtakshistorikkperiode =
+            VedtakshistorikkperiodeOvergangsstønad(datoFra = fra,
+                                                   datoTil = til,
+                                                   aktivitet = AktivitetType.BARNET_ER_SYKT,
+                                                   periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
     private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(),
                           perioder: List<Vedtaksperiode>?,
@@ -135,4 +135,3 @@ internal class VedtakHistorikkBeregnerTest {
     }
 }
 
- */
