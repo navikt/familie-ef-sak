@@ -24,9 +24,9 @@ import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ef.sak.tilkjentytelse.AndelTilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.AndelDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -1300,12 +1300,12 @@ internal class BeregnYtelseStegTest {
                               behandlingType = BehandlingType.REVURDERING,
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
-                              andel = AndelTilkjentYtelseDto(beløp = 1,
-                                                             stønadFra = fom.atDay(1),
-                                                             stønadTil = tom.atEndOfMonth(),
-                                                             inntekt = 0,
-                                                             inntektsreduksjon = 0,
-                                                             samordningsfradrag = 0),
+                              andel = AndelDto(beløp = 1,
+                                               stønadFra = fom.atDay(1),
+                                               stønadTil = tom.atEndOfMonth(),
+                                               inntekt = 0,
+                                               inntektsreduksjon = 0,
+                                               samordningsfradrag = 0),
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null
@@ -1316,12 +1316,12 @@ internal class BeregnYtelseStegTest {
                               behandlingType = BehandlingType.REVURDERING,
                               vedtakstidspunkt = LocalDateTime.now(),
                               saksbehandler = "",
-                              andel = AndelTilkjentYtelseDto(beløp = 0,
-                                                             stønadFra = sanksjonMåned.atDay(1),
-                                                             stønadTil = sanksjonMåned.atEndOfMonth(),
-                                                             inntekt = 0,
-                                                             inntektsreduksjon = 0,
-                                                             samordningsfradrag = 0),
+                              andel = AndelDto(beløp = 0,
+                                               stønadFra = sanksjonMåned.atDay(1),
+                                               stønadTil = sanksjonMåned.atEndOfMonth(),
+                                               inntekt = 0,
+                                               inntektsreduksjon = 0,
+                                               samordningsfradrag = 0),
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null

@@ -30,7 +30,7 @@ class PeriodeController(private val tilgangService: TilgangService,
 
     @GetMapping("/fagsak/{fagsakId}/historikk")
     fun hentHistorikk(@PathVariable fagsakId: UUID,
-                      @RequestParam tilOgMedBehandlingId: UUID? = null): Ressurs<List<PeriodeHistorikkDto>> {
+                      @RequestParam tilOgMedBehandlingId: UUID? = null): Ressurs<List<AndelHistorikkDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentHistorikk(fagsakId, tilOgMedBehandlingId).reversed())
     }

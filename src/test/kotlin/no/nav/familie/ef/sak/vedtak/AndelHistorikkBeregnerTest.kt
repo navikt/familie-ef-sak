@@ -2,11 +2,11 @@ package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.tilDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.AKTIVITET
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BEHANDLING
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BELØP
@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TOM
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.values
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -30,6 +31,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.net.URL
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -309,17 +311,25 @@ object AndelHistorikkParser {
                         resultat = ResultatType.OPPHØRT
                         opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
                     }
+                    val inntekter = periodeWrapper?.perioder?.firstOrNull()
+                                            ?.let {
+                                                listOf(Inntektsperiode(it.datoFra,
+                                                                       it.datoTil,
+                                                                       BigDecimal.ZERO,
+                                                                       BigDecimal.ZERO))
+                                            } ?: emptyList()
                     Vedtak(behandlingId = behandlingId,
                            resultatType = resultat,
                            periodeBegrunnelse = null,
                            inntektBegrunnelse = null,
                            avslåBegrunnelse = null,
                            perioder = periodeWrapper,
-                           inntekter = null,
+                           inntekter = InntektWrapper(inntekter),
                            saksbehandlerIdent = null,
                            opphørFom = opphørFom,
                            beslutterIdent = null,
-                           sanksjonsårsak = sanksjonsårsak)
+                           sanksjonsårsak = sanksjonsårsak,
+                           internBegrunnelse = "")
 
                 }
     }
@@ -337,7 +347,7 @@ object AndelHistorikkParser {
                               behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                               vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
                               saksbehandler = "",
-                              andel = mapAndel(it).tilDto(),
+                              andel = AndelDto(mapAndel(it), 0, 0),
                               aktivitet = it.aktivitet!!,
                               periodeType = it.periodeType!!,
                               endring = it.type?.let { type ->

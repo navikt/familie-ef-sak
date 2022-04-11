@@ -23,20 +23,6 @@ object VedtakHistorikkBeregner {
         abstract fun medTil(datoTil: LocalDate): Vedtaksinformasjon
     }
 
-    data class VedtaksinformasjonSanksjon(
-            override val datoFra: LocalDate,
-            override val datoTil: LocalDate
-    ) : Vedtaksinformasjon() {
-
-        override fun medFra(datoFra: LocalDate): Vedtaksinformasjon {
-            return this.copy(datoFra = datoFra)
-        }
-
-        override fun medTil(datoTil: LocalDate): Vedtaksinformasjon {
-            return this.copy(datoTil = datoTil)
-        }
-    }
-
     data class VedtaksinformasjonOvergangsstønad(
             override val datoFra: LocalDate,
             override val datoTil: LocalDate,
@@ -87,8 +73,10 @@ object VedtakHistorikkBeregner {
 
     private fun splitOppPerioderSomErSanksjonert(acc: List<Pair<UUID, List<Vedtaksinformasjon>>>,
                                                  vedtak: Sanksjonert): List<Vedtaksinformasjon> {
-        val vedtaksperiodeSanksjon = VedtaksinformasjonSanksjon(vedtak.periode.årMånedFra.atDay(1),
-                                                                vedtak.periode.årMånedTil.atEndOfMonth())
+        val vedtaksperiodeSanksjon = VedtaksinformasjonOvergangsstønad(vedtak.periode.årMånedFra.atDay(1),
+                                                                       vedtak.periode.årMånedTil.atEndOfMonth(),
+                                                                       vedtak.periode.aktivitet,
+                                                                       vedtak.periode.periodeType)
         val sanksjonsperiode = vedtak.periode.tilPeriode()
         return acc.last().second.flatMap {
             if (!sanksjonsperiode.overlapper(Periode(it.datoFra, it.datoTil))) {
