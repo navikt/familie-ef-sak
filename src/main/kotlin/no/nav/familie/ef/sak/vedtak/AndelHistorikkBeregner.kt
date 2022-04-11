@@ -260,6 +260,7 @@ object AndelHistorikkBeregner {
             aktivitetEllerPeriodeTypeHarEndretSeg(vedtaksperiode) -> EndringType.ERSTATTET
             this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
             this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
+            erEndringerForBarnetilsyn(this.vedtaksperiode, vedtaksperiode) -> EndringType.ERSTATTET
             this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
             this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
             this.andel.kildeBehandlingId != tidligereAndel.kildeBehandlingId -> EndringType.FJERNET
@@ -267,7 +268,19 @@ object AndelHistorikkBeregner {
         }
     }
 
-    //TODO Håndter sanksjon
+    private fun erEndringerForBarnetilsyn(first: VedtakHistorikkBeregner.Vedtaksinformasjon,
+                                          second: VedtakHistorikkBeregner.Vedtaksinformasjon): Boolean {
+        if (first !is VedtakHistorikkBeregner.VedtaksinformasjonBarnetilsyn ||
+            second !is VedtakHistorikkBeregner.VedtaksinformasjonBarnetilsyn) {
+            return false
+        }
+        return first.antallBarn != second.antallBarn ||
+               first.utgifter != second.utgifter ||
+               first.kontantstøtte != second.kontantstøtte ||
+               first.tilleggsstønad != second.tilleggsstønad
+    }
+
+    //TODO Håndter sanksjon for barnetilsyn
     private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(tidligereAndel: AndelTilkjentYtelse,
                                                                 vedtaksperiode: VedtakHistorikkBeregner.Vedtaksinformasjon): Boolean {
         val thisVedtaksperiode = this.vedtaksperiode
