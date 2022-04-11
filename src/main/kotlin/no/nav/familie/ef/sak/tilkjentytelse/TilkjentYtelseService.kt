@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.PeriodeHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -79,7 +79,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         tilkjentYtelseRepository.findByBehandlingId(behandlingId)?.let { tilkjentYtelseRepository.deleteById(it.id) }
     }
 
-    fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+    fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<PeriodeHistorikkDto> {
         val tilkjenteYtelser = tilkjentYtelseRepository.finnAlleIverksatteForFagsak(fagsakId)
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()

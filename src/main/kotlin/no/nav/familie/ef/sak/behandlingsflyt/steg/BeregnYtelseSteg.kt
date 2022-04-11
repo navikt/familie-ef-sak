@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.taMedAndelerFremTilDato
+import no.nav.familie.ef.sak.vedtak.PeriodeHistorikkSanksjon
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -98,7 +99,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
         val nyesteSanksjonsperiode = tilkjentYtelseService.hentHistorikk(behandling.fagsakId, null)
-                .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
+                .lastOrNull { it is PeriodeHistorikkSanksjon }
         nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
             feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
                 "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
