@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
@@ -42,6 +43,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
                        private val tilbakekrevingService: TilbakekrevingService,
+                       private val barnService: BarnService,
                        private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
 
 
@@ -117,6 +119,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             brukerfeilHvis(!saksbehandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
+        }
+        if (data is InnvilgelseBarnetilsyn) {
+            barnService.validerBarnFinnesPåBehandling(saksbehandling.id, data.perioder.flatMap { it.barn }.toSet())
         }
     }
 

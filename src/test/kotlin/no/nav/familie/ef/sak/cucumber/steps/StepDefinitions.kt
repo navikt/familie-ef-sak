@@ -7,6 +7,7 @@ import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
@@ -55,6 +56,7 @@ class StepDefinitions {
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
+    private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
 
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
@@ -63,6 +65,7 @@ class StepDefinitions {
                                                     simuleringService,
                                                     vedtakService,
                                                     tilbakekrevingService,
+                                                    barnService,
                                                     fagsakService)
 
     private val slot = slot<TilkjentYtelse>()

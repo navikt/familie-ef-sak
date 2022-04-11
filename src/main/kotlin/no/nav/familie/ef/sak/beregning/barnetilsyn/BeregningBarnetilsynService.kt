@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
+import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -23,6 +26,10 @@ class BeregningBarnetilsynService {
                                 kontantstøttePerioder: List<PeriodeMedBeløpDto>,
                                 tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): List<BeløpsperiodeBarnetilsynDto> {
 
+        validerGyldigePerioder(utgiftsperioder,
+                               kontantstøttePerioder,
+                               tilleggsstønadsperioder)
+
         return utgiftsperioder.map { it.split() }
                 .flatten()
                 .map { utgiftsMåned ->
@@ -31,6 +38,59 @@ class BeregningBarnetilsynService {
                 }
                 .mergeSammenhengendePerioder()
     }
+
+    fun List<PeriodeMedBeløpDto>.tilPerioder(): List<Periode> =
+            this.map {
+                it.tilPeriode()
+            }
+
+    private fun validerGyldigePerioder(utgiftsperioderDto: List<UtgiftsperiodeDto>,
+                                       kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
+                                       tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>) {
+
+        val utgiftsperioder = utgiftsperioderDto.tilPerioder()
+        val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
+        val tilleggsstønadsperioder = tilleggsstønadsperioderDto.tilPerioder()
+
+        brukerfeilHvis(utgiftsperioder.isEmpty()) {
+            "Ingen utgiftsperioder"
+        }
+
+        brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder, kontantstøttePerioder)) {
+            "Urelevant kontantstøtteperiode kan fjernes"
+        }
+
+        brukerfeilHvis(harUrelevantReduksjonsPeriode(utgiftsperioder, tilleggsstønadsperioder)) {
+            "Urelevant tilleggsstønadsperiode kan fjernes"
+        }
+
+        brukerfeilHvis(utgiftsperioder.harOverlappende()) {
+            "Utgiftsperioder $utgiftsperioder overlapper"
+        }
+
+        brukerfeilHvis((kontantstøttePerioder.harOverlappende())) {
+            "Kontantstøtteperioder $kontantstøttePerioder overlapper"
+        }
+
+        brukerfeilHvis((tilleggsstønadsperioder.harOverlappende())) {
+            "Tilleggsstønadsperioder $tilleggsstønadsperioder overlapper"
+        }
+    }
+
+    private fun harUrelevantReduksjonsPeriode(utgiftsperioder: List<Periode>, reduksjonsperioder: List<Periode>): Boolean {
+        return reduksjonsperioder.isNotEmpty() && !reduksjonsperioder.any {
+            utgiftsperioder.any { ut ->
+                ut.overlapper(it)
+            }
+        }
+    }
+}
+
+private fun List<Periode>.harOverlappende(): Boolean {
+    val sortedBy = this.sortedBy { it.fradato }
+    return sortedBy.zipWithNext { a, b ->
+        a.overlapper(b)
+    }.any { it }
 }
 
 /**

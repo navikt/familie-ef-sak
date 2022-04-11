@@ -5,7 +5,14 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseBigDecimal
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.ANTALL_BARN
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.KONTANTSTØTTEBELØP
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.PERIODEDATO
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.PERIODEUTGIFT
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.TILLEGSSTØNADBELØP
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -17,21 +24,13 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     @Gitt("følgende data")
     fun data(dataTable: DataTable) {
-        inputData = dataTable.asMaps().map { mapRadTilPeriodeDataDto(it) }.first()
-    }
-
-    private fun mapRadTilPeriodeDataDto(it: MutableMap<String, String>): PeriodeDataDto {
-        val periodeutgift = it["Periodeutgift"]
-        val kontantstøttebeløp = it["Kontantstøttebeløp"]
-        val tillegsstønadbeløp = it["Tillegsstønadbeløp"]
-        val antallBarn = it["Antall barn"]
-        val årMåned = parseValgfriÅrMåned("Periodedato", it)!!
-        val periodeDataDto = PeriodeDataDto(periodeutgift = periodeutgift!!,
-                                            kontantstøtteBeløp = kontantstøttebeløp!!,
-                                            tillegstønadbeløp = tillegsstønadbeløp!!,
-                                            antallBarn = antallBarn!!,
-                                            årMåned = årMåned)
-        return periodeDataDto
+        inputData = dataTable.asMaps().map {
+            PeriodeDataDto(periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
+                           kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
+                           tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
+                           antallBarn = parseInt(ANTALL_BARN, it),
+                           årMåned = parseÅrMåned(PERIODEDATO, it))
+        }.first()
     }
 
     @Når("vi beregner barnetilsyn beløp")
@@ -40,10 +39,10 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     }
 
     private fun beregnPeriodebeløp(periodeDataDto: PeriodeDataDto) =
-            BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = periodeDataDto.periodeutgift.toBigDecimal(),
-                                                        kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp.toBigDecimal(),
-                                                        tillegstønadBeløp = periodeDataDto.tillegstønadbeløp.toBigDecimal(),
-                                                        antallBarn = periodeDataDto.antallBarn.toInt(),
+            BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = periodeDataDto.periodeutgift,
+                                                        kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp,
+                                                        tillegstønadBeløp = periodeDataDto.tillegstønadbeløp,
+                                                        antallBarn = periodeDataDto.antallBarn,
                                                         årMåned = periodeDataDto.årMåned)
 
     @Så("forventer vi barnetilsyn periodebeløp")
@@ -53,8 +52,8 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     }
 }
 
-data class PeriodeDataDto(val periodeutgift: String,
-                          val kontantstøtteBeløp: String,
-                          val tillegstønadbeløp: String,
-                          val antallBarn: String,
+data class PeriodeDataDto(val periodeutgift: BigDecimal,
+                          val kontantstøtteBeløp: BigDecimal,
+                          val tillegstønadbeløp: BigDecimal,
+                          val antallBarn: Int,
                           val årMåned: YearMonth)

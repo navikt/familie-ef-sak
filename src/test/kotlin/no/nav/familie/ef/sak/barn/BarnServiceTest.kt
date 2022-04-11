@@ -11,7 +11,9 @@ import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -27,7 +29,6 @@ internal class BarnServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadMock
     }
 
@@ -183,7 +184,48 @@ internal class BarnServiceTest {
         assertThat(barnSlot.captured).hasSize(4)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC, fnrBarnD)
         assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B", "Barn C", "Barn D")
+    }
 
+    @Nested
+    inner class ValiderBarnFinnesPåBehandling {
+
+        private val barn = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+        private val barn2 = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+        private val barn3 = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+
+        @Test
+        internal fun `tom liste med barn validerer`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn)
+            barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf())
+        }
+
+        @Test
+        internal fun `flere barn mangler`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn)
+            assertThatThrownBy {
+                barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn.id, barn2.id, barn3.id))
+            }.isInstanceOf(Feil::class.java)
+        }
+
+        @Test
+        internal fun `1 barn mangler`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn, barn3)
+            assertThatThrownBy {
+                barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn.id, barn2.id, barn3.id))
+            }.isInstanceOf(Feil::class.java)
+        }
+
+        @Test
+        internal fun `antall barn er eksakt like`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn, barn2)
+            barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn.id, barn2.id))
+        }
+
+        @Test
+        internal fun `innsendte barn er færre enn de som finnes på behandlingen`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn, barn2)
+            barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn2.id))
+        }
     }
 
     val fnrBarnA = "11111111111"
