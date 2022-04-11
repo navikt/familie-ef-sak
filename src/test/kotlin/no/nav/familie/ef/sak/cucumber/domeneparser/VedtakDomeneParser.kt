@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -144,9 +145,9 @@ object VedtakDomeneParser {
         }
     }
 
-    fun mapBehandlingForHistorikkEndring(dataTable: DataTable): List<ForventetHistorikk> {
+    fun mapBehandlingForHistorikkEndring(dataTable: DataTable, stønadstype: StønadType): List<ForventetHistorikk> {
         return dataTable.asMaps().map {
-            BehandlingForHistorikkEndringMapper().mapRad(it)
+            BehandlingForHistorikkEndringMapper().mapRad(it, stønadstype)
         }
     }
 
@@ -255,7 +256,9 @@ object VedtakDomeneParser {
 
     class BehandlingForHistorikkEndringMapper {
 
-        fun mapRad(rad: Map<String, String>): ForventetHistorikk {
+        fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
+            val aktivitetType = parseAktivitetType(rad)
+                                ?: if (stønadstype == StønadType.OVERGANGSSTØNAD) AktivitetType.BARN_UNDER_ETT_ÅR else null
             return ForventetHistorikk(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                     historikkEndring = parseEndringType(rad)?.let { endringType ->
@@ -271,7 +274,7 @@ object VedtakDomeneParser {
                             .atEndOfMonth(),
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
-                    aktivitetType = parseAktivitetType(rad),
+                    aktivitetType = aktivitetType,
                     kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
                     tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
                     antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),

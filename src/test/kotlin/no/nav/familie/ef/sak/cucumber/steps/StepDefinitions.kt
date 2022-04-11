@@ -158,7 +158,7 @@ class StepDefinitions {
 
     @Så("forvent følgende historikk")
     fun forvent_følgende_historik(dataTable: DataTable) {
-        val forventetHistorikkEndringer = VedtakDomeneParser.mapBehandlingForHistorikkEndring(dataTable)
+        val forventetHistorikkEndringer = VedtakDomeneParser.mapBehandlingForHistorikkEndring(dataTable, stønadstype)
 
         dataTable.asMaps().forEachIndexed { index, it ->
             val andelHistorikkDto = beregnetAndelHistorikkList[index]
