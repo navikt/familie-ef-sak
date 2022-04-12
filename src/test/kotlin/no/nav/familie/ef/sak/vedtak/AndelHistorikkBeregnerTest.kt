@@ -129,7 +129,7 @@ object AndelHistorikkRunner {
         }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
+        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId, mapOf())
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
@@ -355,7 +355,8 @@ object AndelHistorikkParser {
                                                    it.endretI
                                                    ?: error("Trenger id til behandling hvis det finnes en endring"),
                                                    LocalDateTime.now())
-                              })
+                              },
+                              aktivitetArbeid = null)
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
 

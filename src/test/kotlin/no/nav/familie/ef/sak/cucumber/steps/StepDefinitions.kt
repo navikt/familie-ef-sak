@@ -70,6 +70,7 @@ class StepDefinitions {
 
     private val slot = slot<TilkjentYtelse>()
     private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
         vedtak = VedtakDomeneParser.mapVedtak(dataTable)
@@ -125,7 +126,8 @@ class StepDefinitions {
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
                                                                          lagredeVedtak,
                                                                          behandlinger.values.toList(),
-                                                                         null)
+                                                                         null,
+                                                                         mapOf())
     }
 
     private fun mockLagreVedtak(): MutableList<Vedtak> {

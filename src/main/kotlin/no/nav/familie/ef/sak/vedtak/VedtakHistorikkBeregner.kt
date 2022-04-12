@@ -9,8 +9,8 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
-import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -54,16 +54,18 @@ data class VedtakshistorikkperiodeBarnetilsyn(
         val kontantstøtte: Int,
         val tilleggsstønad: Int,
         val utgifter: BigDecimal,
-        val antallBarn: Int
+        val antallBarn: Int,
+        val aktivitetArbeid: SvarId?
 ) : Vedtakshistorikkperiode() {
 
-    constructor(periode: BeløpsperiodeBarnetilsynDto) :
+    constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
             this(periode.periode.fradato,
                  periode.periode.tildato,
                  periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
                  periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
                  periode.beregningsgrunnlag.utgifter,
-                 periode.beregningsgrunnlag.antallBarn
+                 periode.beregningsgrunnlag.antallBarn,
+                 aktivitetArbeid
             )
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
@@ -81,17 +83,18 @@ object VedtakHistorikkBeregner {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<AndelHistorikkBeregner.BehandlingVedtakDto>,
+    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<AndelHistorikkBeregner.BehandlingHistorikkData>,
                                         datoOpprettetPerBehandling: Map<UUID, LocalDateTime>): Map<UUID, List<Vedtakshistorikkperiode>> {
         val sorterteVedtak = sorterVedtak(vedtaksliste, datoOpprettetPerBehandling)
         return sorterteVedtak.fold(listOf<Pair<UUID, List<Vedtakshistorikkperiode>>>()) { acc, vedtak ->
-            acc + Pair(vedtak.behandlingId, lagTotalbildeForNyttVedtak(vedtak.vedtakDto, acc))
+            acc + Pair(vedtak.behandlingId, lagTotalbildeForNyttVedtak(vedtak, acc))
         }.toMap()
     }
 
-    private fun lagTotalbildeForNyttVedtak(vedtak: VedtakDto,
+    private fun lagTotalbildeForNyttVedtak(behandlingHistorikkData: AndelHistorikkBeregner.BehandlingHistorikkData,
                                            acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>): List<Vedtakshistorikkperiode> {
 
+        val vedtak = behandlingHistorikkData.vedtakDto
         return when (vedtak) {
             is InnvilgelseOvergangsstønad -> {
                 val nyePerioder = vedtak.perioder.map { VedtakshistorikkperiodeOvergangsstønad(it) }
@@ -99,7 +102,7 @@ object VedtakHistorikkBeregner {
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + nyePerioder
             }
             is InnvilgelseBarnetilsyn -> {
-                val perioder = beregningBarnetilsyn.beregnYtelseBarnetilsyn(vedtak).map { VedtakshistorikkperiodeBarnetilsyn(it) }
+                val perioder = beregningBarnetilsyn.beregnYtelseBarnetilsyn(vedtak).map { VedtakshistorikkperiodeBarnetilsyn(it, behandlingHistorikkData.aktivitetArbeid) }
                 val førsteFraDato = perioder.first().datoFra
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFraDato) + perioder
             }
@@ -161,8 +164,8 @@ object VedtakHistorikkBeregner {
         }
     }
 
-    private fun sorterVedtak(vedtaksliste: List<AndelHistorikkBeregner.BehandlingVedtakDto>,
-                             datoOpprettetPerBehandling: Map<UUID, LocalDateTime>): List<AndelHistorikkBeregner.BehandlingVedtakDto> {
+    private fun sorterVedtak(vedtaksliste: List<AndelHistorikkBeregner.BehandlingHistorikkData>,
+                             datoOpprettetPerBehandling: Map<UUID, LocalDateTime>): List<AndelHistorikkBeregner.BehandlingHistorikkData> {
         return vedtaksliste.map { it to datoOpprettetPerBehandling.getValue(it.behandlingId) }
                 .sortedBy { it.second }
                 .map { it.first }

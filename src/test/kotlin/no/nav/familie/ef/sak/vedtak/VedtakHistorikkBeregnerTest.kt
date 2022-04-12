@@ -111,8 +111,8 @@ internal class VedtakHistorikkBeregnerTest {
         val behandlingPerDato = vedtak.associate {
             it.behandlingId to LocalDate.of(2021, 1, 1).atStartOfDay().plusDays(datoCount++)
         }
-        val behandlingVedtakDto = vedtak.map { AndelHistorikkBeregner.BehandlingVedtakDto(it.behandlingId, it.tilVedtakDto()) }
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingVedtakDto, behandlingPerDato)
+        val behandlingHistorikkData = vedtak.map { AndelHistorikkBeregner.BehandlingHistorikkData(it.behandlingId, it.tilVedtakDto(), null) }
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, behandlingPerDato)
     }
 
     private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
