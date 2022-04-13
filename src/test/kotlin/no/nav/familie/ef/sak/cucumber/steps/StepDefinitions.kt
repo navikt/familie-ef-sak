@@ -35,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.slf4j.Logger
@@ -70,6 +71,7 @@ class StepDefinitions {
 
     private val slot = slot<TilkjentYtelse>()
     private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+    private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
@@ -79,6 +81,8 @@ class StepDefinitions {
     @Gitt("følgende vedtak for barnetilsyn")
     fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
         stønadstype = StønadType.BARNETILSYN
+
+        behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
         vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
     }
 
@@ -127,7 +131,7 @@ class StepDefinitions {
                                                                          lagredeVedtak,
                                                                          behandlinger.values.toList(),
                                                                          null,
-                                                                         mapOf())
+                                                                         behandlingIdsToAktivitetArbeid)
     }
 
     private fun mockLagreVedtak(): MutableList<Vedtak> {
@@ -232,6 +236,9 @@ class StepDefinitions {
         }
         forventetHistorikkEndring.utgifter?.let {
             Assertions.assertThat(beregnetAndelHistorikk.andel.utgifter.toInt()).isEqualTo(it)
+        }
+        forventetHistorikkEndring.arbeidAktivitet?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.aktivitetArbeid?.name).isEqualTo(it.name)
         }
         Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }

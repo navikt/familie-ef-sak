@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
@@ -51,6 +52,19 @@ object VedtakDomeneParser {
 
             )
         }
+    }
+
+    fun mapAktivitetForBarnetilsyn(dataTable: DataTable): Map<UUID, SvarId?> {
+        val behandlingIdToArbeidAktivitet = mutableMapOf<UUID, SvarId?>()
+        dataTable.asMaps().groupBy {
+            it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
+        }.map { (_, rader) ->
+            val rad = rader.first()
+            val behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!
+            val arbeidAktivitet = parseArbeidAktivitet(rad)
+            behandlingIdToArbeidAktivitet.put(behandlingId, arbeidAktivitet)
+        }
+        return behandlingIdToArbeidAktivitet
     }
 
     fun mapVedtakForBarnetilsyn(dataTable: DataTable): List<Vedtak> {
@@ -162,7 +176,8 @@ object VedtakDomeneParser {
             val kontantstøtte: Int?,
             val tilleggsstønad: Int?,
             val antallBarn: Int?,
-            val utgifter: Int?
+            val utgifter: Int?,
+            val arbeidAktivitet: SvarId?
     )
 
     fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
@@ -278,7 +293,8 @@ object VedtakDomeneParser {
                     kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
                     tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
                     antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
-                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad)
+                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
+                    arbeidAktivitet = parseArbeidAktivitet(rad)
             )
         }
     }
@@ -296,6 +312,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     FRA_OG_MED_DATO("Fra og med dato"),
     TIL_OG_MED_DATO("Til og med dato"),
     AKTIVITET_TYPE("Aktivitet"),
+    ARBEID_AKTIVITET("Arbeid aktivitet"), //Inngangsvilkår i barnetilsyn
     VEDTAKSPERIODE_TYPE("Vedtaksperiode"),
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
