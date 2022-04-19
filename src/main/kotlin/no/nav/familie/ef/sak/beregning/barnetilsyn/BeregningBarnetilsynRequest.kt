@@ -18,3 +18,21 @@ data class UtgiftsMåned(
         val barn: List<UUID>,
         val utgifter: BigDecimal
 )
+
+fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+                                                tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): BeløpsperiodeBarnetilsynDto {
+    val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
+    val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
+
+    return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode = this,
+                                                                kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
+                                                                tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
+                                                                antallBarnIPeriode = this.barn.size)
+}
+
+private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int {
+    return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: 0
+}
+
+private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.omsluttesAv(it.årMånedFra, it.årMånedTil)
+

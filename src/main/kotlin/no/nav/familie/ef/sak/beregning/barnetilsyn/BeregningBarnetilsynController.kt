@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
@@ -21,7 +23,8 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class BeregningBarnetilsynController(private val beregningBarnetilsynService: BeregningBarnetilsynService,
                                      private val tilgangService: TilgangService,
-                                     private val vedtakService: VedtakService) {
+                                     private val vedtakService: VedtakService,
+                                     private val tilkjentYtelseService: TilkjentYtelseService) {
 
 
     @PostMapping
@@ -37,14 +40,10 @@ class BeregningBarnetilsynController(private val beregningBarnetilsynService: Be
     @GetMapping("/{behandlingId}")
     fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-
-
         val vedtak = vedtakService.hentVedtak(behandlingId).tilVedtakDto()
 
         if (vedtak is InnvilgelseBarnetilsyn) {
-            return Ressurs.success(beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak.perioder,
-                                                                                       vedtak.perioderKontantstøtte,
-                                                                                       vedtak.tilleggsstønad.perioder))
+            return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(vedtak))
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }
