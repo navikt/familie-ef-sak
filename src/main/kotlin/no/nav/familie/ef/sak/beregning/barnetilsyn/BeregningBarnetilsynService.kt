@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -125,22 +124,6 @@ fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: Beløpsp
         this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
 
-private fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-                                                        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): BeløpsperiodeBarnetilsynDto {
-    val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
-    val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
-
-    return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode = this,
-                                                                kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
-                                                                tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
-                                                                antallBarnIPeriode = this.barn.size)
-}
-
-private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int {
-    return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: 0
-}
-
-private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.omsluttesAv(it.årMånedFra, it.årMånedTil)
 
 fun YearMonth.omsluttesAv(fraOgMed: YearMonth, tilOgMed: YearMonth): Boolean = fraOgMed <= this && this <= tilOgMed
 
