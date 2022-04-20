@@ -38,7 +38,7 @@ class BeregningBarnetilsynStepDefinitions {
         dataTable.asMaps().map {
             val fraÅrMåned = parseÅrMåned(FRA_MND, it)
             val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
-            val beløp = parseBigDecimal(BELØP, it)
+            val beløp = parseInt(BELØP, it)
             val barn = parseInt(ANTALL_BARN, it)
             utgiftsperioder.add(UtgiftsperiodeDto(fraÅrMåned, tilÅrMåned, List(barn) { UUID.randomUUID() }, beløp))
         }

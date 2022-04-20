@@ -27,7 +27,6 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,7 +34,6 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -58,7 +56,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal innvilge vedtak for barnetilsyn `() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN, identer = setOf(PersonIdent(""))))
+        val fagsak =
+                testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN, identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.BEREGNE_YTELSE,
                                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -73,7 +72,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
                                                årMånedTil = YearMonth.of(2022, 3),
                                                barn = listOf(barn.id),
-                                               utgifter = BigDecimal(2500))
+                                               utgifter = 2500)
         val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
                                                perioder = listOf(utgiftsperiode),
                                                perioderKontantstøtte = listOf(),
@@ -82,16 +81,17 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                                                                                   begrunnelse = null))
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
-        val vedtak = Vedtak(behandlingId = behandling.id,
-                            resultatType = ResultatType.INNVILGE,
-                            avslåBegrunnelse = null,
-                            barnetilsyn = BarnetilsynWrapper(listOf(Barnetilsynperiode(datoFra = utgiftsperiode.årMånedFra.atDay(1),
-                                                                                       datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
-                                                                                       utgifter = utgiftsperiode.utgifter,
-                                                                                       barn = utgiftsperiode.barn)),
-                                                             begrunnelse = ""),
-                            kontantstøtte = KontantstøtteWrapper(emptyList()),
-                            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+        val vedtak = Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE,
+                avslåBegrunnelse = null,
+                barnetilsyn = BarnetilsynWrapper(listOf(Barnetilsynperiode(datoFra = utgiftsperiode.årMånedFra.atDay(1),
+                                                                           datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                                                                           utgifter = utgiftsperiode.utgifter.toBigDecimal(),
+                                                                           barn = utgiftsperiode.barn)),
+                                                 begrunnelse = ""),
+                kontantstøtte = KontantstøtteWrapper(emptyList()),
+                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
         )
 
         Assertions.assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)

@@ -298,13 +298,13 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             vedtak.perioder.filter { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
     private fun finnOpphørsperioder(vedtak: InnvilgelseBarnetilsyn) =
-            vedtak.perioder.filter { it.utgifter.compareTo(BigDecimal.ZERO) == 0 }.tilPerioder()
+            vedtak.perioder.filter { it.utgifter == 0 }.tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseOvergangsstønad) =
             vedtak.perioder.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) =
-            vedtak.perioder.filter { it.utgifter.compareTo(BigDecimal.ZERO) != 0 }.tilPerioder()
+            vedtak.perioder.filter { it.utgifter != 0 }.tilPerioder()
 
     private fun lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak: InnvilgelseOvergangsstønad,
                                                                saksbehandling: Saksbehandling) =

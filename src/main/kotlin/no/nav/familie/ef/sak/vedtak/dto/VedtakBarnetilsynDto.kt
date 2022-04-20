@@ -32,7 +32,7 @@ data class UtgiftsperiodeDto (
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
-        val utgifter: BigDecimal
+        val utgifter: Int
 ) {
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
@@ -45,7 +45,7 @@ fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> =
 fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
                            datoTil = this.årMånedTil.atEndOfMonth(),
-                           utgifter = this.utgifter,
+                           utgifter = this.utgifter.toBigDecimal(),
                            barn = this.barn)
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -62,7 +62,7 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
             perioder = barnetilsyn.perioder.map {
                 UtgiftsperiodeDto(årMånedFra = YearMonth.from(it.datoFra),
                                   årMånedTil = YearMonth.from(it.datoTil),
-                                  utgifter = it.utgifter,
+                                  utgifter = it.utgifter.toInt(),
                                   barn = it.barn)
             },
             perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
