@@ -50,14 +50,16 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
     private val barnBehandling2 = listOf(barn.copy(id = UUID.randomUUID(), behandlingId = behandling2.id))
     private val saksbehandling2 = saksbehandling(fagsak, behandling2)
 
-    private val årMånedFra = YearMonth.of(2021, 1)
-    private val årMånedTil = YearMonth.of(2021, 3)
+    private val januar = YearMonth.of(2021, 1)
+    private val februar = YearMonth.of(2021, 2)
+    private val mars = YearMonth.of(2021, 3)
+    private val april = YearMonth.of(2021, 4)
 
 
     @Test
     internal fun `kildeBehandlingId skal bli beholdt på andelen som ikke endrer seg`() {
-        val utgiftsperiode = opprettUtgiftsperiode(årMånedFra, årMånedTil, barnBehandling1.map { it.id }, BigDecimal(2000))
-        val utgiftsperiode2 = opprettUtgiftsperiode(årMånedTil, årMånedTil, barnBehandling2.map { it.id }, BigDecimal(2500))
+        val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(2000))
+        val utgiftsperiode2 = opprettUtgiftsperiode(mars, mars, barnBehandling2.map { it.id }, BigDecimal(2500))
         opprettBehandlinger()
         innvilg(saksbehandling, listOf(utgiftsperiode))
         settBehandlingTilIverksatt(behandling)
@@ -73,8 +75,8 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
 
     @Test
     internal fun `kildeBehandlingId skal bli endret når man skriver over hele perioden`() {
-        val utgiftsperiode1 = opprettUtgiftsperiode(årMånedTil, årMånedTil, barnBehandling1.map { it.id }, BigDecimal(2500))
-        val utgiftsperiode2 = opprettUtgiftsperiode(årMånedFra, årMånedTil, barnBehandling2.map { it.id }, BigDecimal(2000))
+        val utgiftsperiode1 = opprettUtgiftsperiode(mars, mars, barnBehandling1.map { it.id }, BigDecimal(2500))
+        val utgiftsperiode2 = opprettUtgiftsperiode(januar, mars, barnBehandling2.map { it.id }, BigDecimal(2000))
 
         opprettBehandlinger()
         innvilg(saksbehandling, listOf(utgiftsperiode1))
@@ -86,6 +88,59 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val andeler = hentAndeler(behandling2.id)
         assertThat(andeler).hasSize(1)
         assertThat(andeler[0].kildeBehandlingId).isEqualTo(behandling2.id)
+    }
+
+    @Test
+    internal fun `skal kunne midlertidig opphøre en periode ved å legge inn 0 i utgifter`() {
+        val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(2000))
+        val utgiftsperiode2 = opprettUtgiftsperiode(januar, januar, barnBehandling2.map { it.id }, BigDecimal(0))
+        val utgiftsperiode3 = opprettUtgiftsperiode(februar, mars, barnBehandling2.map { it.id }, BigDecimal(3000))
+        opprettBehandlinger()
+        innvilg(saksbehandling, listOf(utgiftsperiode))
+        settBehandlingTilIverksatt(behandling)
+        innvilg(saksbehandling2, listOf(utgiftsperiode2, utgiftsperiode3))
+        settBehandlingTilIverksatt(behandling2)
+
+        val andelerFørstegangsbehandling = hentAndeler(behandling.id)
+        assertThat(andelerFørstegangsbehandling).hasSize(1)
+        assertThat(andelerFørstegangsbehandling.first().stønadFom).isEqualTo(januar.atDay(1))
+        assertThat(andelerFørstegangsbehandling.first().stønadTom).isEqualTo(mars.atEndOfMonth())
+        assertThat(andelerFørstegangsbehandling.first().beløp).isBetween(1, 2000)
+
+        val andelerRevurdering = hentAndeler(behandling2.id)
+        assertThat(andelerRevurdering).hasSize(1)
+        assertThat(andelerRevurdering.first().stønadFom).isEqualTo(februar.atDay(1))
+        assertThat(andelerRevurdering.first().stønadTom).isEqualTo(mars.atEndOfMonth())
+        assertThat(andelerRevurdering.first().beløp).isBetween(1, 3000)
+    }
+
+    @Test
+    internal fun `skal kunne midlertidig opphøre en periode ved å legge inn 0 i utgifter samt ha hull til neste periode`() {
+        val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(2000))
+        val utgiftsperiode2 = opprettUtgiftsperiode(februar, februar, barnBehandling2.map { it.id }, BigDecimal(0))
+        val utgiftsperiode3 = opprettUtgiftsperiode(april, april, barnBehandling2.map { it.id }, BigDecimal(3000))
+        opprettBehandlinger()
+        innvilg(saksbehandling, listOf(utgiftsperiode))
+        settBehandlingTilIverksatt(behandling)
+        innvilg(saksbehandling2, listOf(utgiftsperiode2, utgiftsperiode3))
+        settBehandlingTilIverksatt(behandling2)
+
+        val andelerFørstegangsbehandling = hentAndeler(behandling.id)
+        assertThat(andelerFørstegangsbehandling).hasSize(1)
+        assertThat(andelerFørstegangsbehandling.first().stønadFom).isEqualTo(januar.atDay(1))
+        assertThat(andelerFørstegangsbehandling.first().stønadTom).isEqualTo(mars.atEndOfMonth())
+        assertThat(andelerFørstegangsbehandling.first().beløp).isBetween(1, 2000)
+
+        val andelerRevurdering = hentAndeler(behandling2.id)
+        assertThat(andelerRevurdering).hasSize(2)
+
+        assertThat(andelerRevurdering.first().stønadFom).isEqualTo(januar.atDay(1))
+        assertThat(andelerRevurdering.first().stønadTom).isEqualTo(januar.atEndOfMonth())
+        assertThat(andelerRevurdering.first().beløp).isBetween(1, 2000)
+
+        assertThat(andelerRevurdering.last().stønadFom).isEqualTo(april.atDay(1))
+        assertThat(andelerRevurdering.last().stønadTom).isEqualTo(april.atEndOfMonth())
+        assertThat(andelerRevurdering.last().beløp).isBetween(1, 3000)
     }
 
     fun settBehandlingTilIverksatt(behandling: Behandling) {
