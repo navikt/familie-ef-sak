@@ -28,9 +28,9 @@ Egenskap: Beregning av beløp og perioder når utgifter-reduksjon er større enn
 
     Gitt utgiftsperioder
       | Fra måned | Til og med måned | Beløp  | Antall barn |
-      | 01.2021   | 07.2021          | 100000 | 1           |
-      | 09.2021   | 07.2022          | 100000 | 2           |
-      | 08.2022   | 12.2022          | 100000 | 3           |
+      | 01.2021   | 07.2021          | 39000 | 1           |
+      | 09.2021   | 07.2022          | 39000 | 2           |
+      | 08.2022   | 12.2022          | 39000 | 3           |
 
     Og kontantstøtteperioder
       | Fra måned | Til og med måned | Beløp |
