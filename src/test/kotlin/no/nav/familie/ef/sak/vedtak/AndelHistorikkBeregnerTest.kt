@@ -347,7 +347,7 @@ object AndelHistorikkParser {
                               behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                               vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
                               saksbehandler = "",
-                              andel = AndelDto(mapAndel(it), null),
+                              andel = AndelMedGrunnlagDto(mapAndel(it), null),
                               aktivitet = it.aktivitet!!,
                               periodeType = it.periodeType!!,
                               endring = it.type?.let { type ->

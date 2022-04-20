@@ -134,12 +134,17 @@ class VurderingService(private val behandlingService: BehandlingService,
         tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
     }
 
-    fun aktivitetArbeidForBehandlingIds(behandlingIds: Collection<UUID>) : Map<UUID, SvarId?> {
-        val vilkårsvurderinger = vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, behandlingIds)
+    fun aktivitetArbeidForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, SvarId?> {
+        val vilkårsvurderinger =
+                vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, behandlingIds)
 
-        return vilkårsvurderinger.map { it.behandlingId to it.delvilkårsvurdering.delvilkårsvurderinger.map {
-            it.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
-        }.single() }.toMap()
+        return vilkårsvurderinger.associate { vilkårsvurdering ->
+            val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
+
+            vilkårsvurdering.behandlingId to delvilkårsvurderinger.map { delvilkårsvurdering ->
+                delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
+            }.single()
+        }
 
     }
 
