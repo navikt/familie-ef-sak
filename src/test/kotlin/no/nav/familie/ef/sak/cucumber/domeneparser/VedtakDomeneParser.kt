@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.tilkjentYtelseIdNummerTilUUID
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
@@ -30,9 +32,6 @@ import java.util.AbstractMap
 import java.util.UUID
 
 object VedtakDomeneParser {
-
-    val behandlingIdTilUUID = (1..10).associateWith { UUID.randomUUID() }
-    val tilkjentYtelseIdNummerTilUUID = (1..10).associateWith { UUID.randomUUID() }
 
     fun mapVedtak(dataTable: DataTable): List<Vedtak> {
         return dataTable.asMaps().groupBy {
@@ -71,9 +70,9 @@ object VedtakDomeneParser {
         return dataTable.asMaps().groupBy {
             it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
         }.map { (_, rader) ->
-            val perioder = mapPerioderForBarnetilsyn(rader)
             val rad = rader.first()
             val resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE
+            val perioder = if (resultatType == ResultatType.INNVILGE) mapPerioderForBarnetilsyn(rader) else emptyList()
             Vedtak(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                     resultatType = resultatType,
@@ -309,6 +308,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     INNTEKTSREDUKSJON("Inntektsreduksjon"),
     SAMORDNINGSFRADRAG("Samordningsfradrag"),
     BELØP("Beløp"),
+    BELØP_MELLOM("Beløp mellom"),
     FRA_OG_MED_DATO("Fra og med dato"),
     TIL_OG_MED_DATO("Til og med dato"),
     AKTIVITET_TYPE("Aktivitet"),
@@ -316,6 +316,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     VEDTAKSPERIODE_TYPE("Vedtaksperiode"),
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
+    KILDE_BEHANDLING_ID("Kildebehandling"),
     ENDRING_TYPE("Endringstype"),
     OPPHØRSDATO("Opphørsdato"),
     UTGIFTER("Utgifter"),
