@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
@@ -11,6 +12,14 @@ import java.time.YearMonth
 
 @Service
 class BeregningBarnetilsynService {
+
+    fun beregnYtelseBarnetilsyn(innvilgelseBarnetilsyn: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
+        return beregnYtelseBarnetilsyn(
+                innvilgelseBarnetilsyn.perioder,
+                innvilgelseBarnetilsyn.perioderKontantstøtte,
+                innvilgelseBarnetilsyn.tilleggsstønad.perioder
+        )
+    }
 
     fun beregnYtelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>,
                                 kontantstøttePerioder: List<PeriodeMedBeløpDto>,

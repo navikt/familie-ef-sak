@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -29,6 +30,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.OPPFYLT
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
@@ -36,6 +38,8 @@ import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
@@ -239,6 +243,23 @@ internal class VurderingServiceTest {
 
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
         assertThat(erAlleVilkårOppfylt).isFalse
+    }
+
+    @Test
+    internal fun `Skal returnere aktivitet i historikk`() {
+
+        val vilkårsvurderingList = VilkårType.hentVilkårForStønad(BARNETILSYN).map {
+            vilkårsvurdering(behandlingId = behandlingId,
+                             resultat = OPPFYLT,
+                             type = VilkårType.AKTIVITET_ARBEID,
+                             delvilkårsvurdering = listOf(Delvilkårsvurdering(OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)))))
+        }
+
+        every { vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, listOf (behandlingId)) } returns vilkårsvurderingList
+
+        val behandlingIdToSvarID = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandlingId))
+
+        assertThat(behandlingIdToSvarID[behandlingId]).isEqualTo(SvarId.ER_I_ARBEID)
     }
 
     private fun lagVilkårsvurderingerMedResultat(resultat1: Vilkårsresultat = OPPFYLT,
