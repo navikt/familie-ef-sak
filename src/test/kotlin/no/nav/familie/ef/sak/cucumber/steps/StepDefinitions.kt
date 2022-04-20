@@ -29,10 +29,14 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -66,15 +70,39 @@ class StepDefinitions {
                                                     fagsakService)
 
     private val slot = slot<TilkjentYtelse>()
+    private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+    private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
         vedtak = VedtakDomeneParser.mapVedtak(dataTable)
     }
 
+    @Gitt("følgende vedtak for barnetilsyn")
+    fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
+        stønadstype = StønadType.BARNETILSYN
+
+        behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
+        vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+    }
+
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
         inntekter = VedtakDomeneParser.mapInntekter(dataTable)
+    }
+
+    @Gitt("følgende kontantstøtte")
+    fun følgende_kontantstøtte(dataTable: DataTable) {
+        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+            vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
+        }
+    }
+
+    @Gitt("følgende tilleggsstønad")
+    fun følgende_tilleggsstønad(dataTable: DataTable) {
+        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+            vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
+        }
     }
 
     @Når("lag andelhistorikk kjøres")
@@ -84,9 +112,9 @@ class StepDefinitions {
 
         val behandlinger = vedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
             acc + behandling(id = id,
-                                        opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                                        type = BehandlingType.REVURDERING,
-                                        forrigeBehandlingId = acc.lastOrNull()?.id)
+                             opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
+                             type = BehandlingType.REVURDERING,
+                             forrigeBehandlingId = acc.lastOrNull()?.id)
         }.associateBy { it.id }
 
         //Skriver over inntekt hvis inntekter er definiert
@@ -96,13 +124,14 @@ class StepDefinitions {
 
         vedtakMedInntekt.forEach {
             val behandling = behandlinger.getValue(it.behandlingId)
-            val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId), behandling)
+            val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId, stønadstype = stønadstype), behandling)
             beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
         }
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
                                                                          lagredeVedtak,
                                                                          behandlinger.values.toList(),
-                                                                         null)
+                                                                         null,
+                                                                         behandlingIdsToAktivitetArbeid)
     }
 
     private fun mockLagreVedtak(): MutableList<Vedtak> {
@@ -135,7 +164,7 @@ class StepDefinitions {
 
     @Så("forvent følgende historikk")
     fun forvent_følgende_historik(dataTable: DataTable) {
-        val forventetHistorikkEndringer = VedtakDomeneParser.mapBehandlingForHistorikkEndring(dataTable)
+        val forventetHistorikkEndringer = VedtakDomeneParser.mapBehandlingForHistorikkEndring(dataTable, stønadstype)
 
         dataTable.asMaps().forEachIndexed { index, it ->
             val andelHistorikkDto = beregnetAndelHistorikkList[index]
@@ -196,7 +225,21 @@ class StepDefinitions {
         forventetHistorikkEndring.beløp?.let {
             Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
         }
-
+        forventetHistorikkEndring.tilleggsstønad?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.tilleggsstønad).isEqualTo(it)
+        }
+        forventetHistorikkEndring.kontantstøtte?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.kontantstøtte).isEqualTo(it)
+        }
+        forventetHistorikkEndring.antallBarn?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.antallBarn).isEqualTo(it)
+        }
+        forventetHistorikkEndring.utgifter?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.andel.utgifter.toInt()).isEqualTo(it)
+        }
+        forventetHistorikkEndring.arbeidAktivitet?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.aktivitetArbeid?.name).isEqualTo(it.name)
+        }
         Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }
 

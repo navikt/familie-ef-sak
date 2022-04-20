@@ -468,6 +468,91 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
+    inner class FlereAktivePerioder {
+
+        private val stønadFom = YearMonth.of(2021, 1)
+        private val periode1 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 1,
+                                                                            stønadFom = stønadFom.atDay(1),
+                                                                            stønadTom = LocalDate.of(2021, 1, 31),
+                                                                            beløp = 10)
+
+        @Test
+        internal fun `samme beløp som er sammenhengende`() {
+            val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 2,
+                                                                        stønadFom = LocalDate.of(2021, 2, 1),
+                                                                        stønadTom = LocalDate.of(2021, 3, 31),
+                                                                        beløp = 10)
+
+            every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                    InfotrygdPeriodeResponse(listOf(periode1, periode2), emptyList(), emptyList())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, stønadFom.minusMonths(1))
+            assertThat(migreringInfo.kanMigreres).isTrue
+        }
+
+        @Test
+        internal fun `ulik beløp som er sammenhengende`() {
+            val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 2,
+                                                                        stønadFom = LocalDate.of(2021, 2, 1),
+                                                                        stønadTom = LocalDate.of(2021, 3, 31),
+                                                                        beløp = 20)
+
+            every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                    InfotrygdPeriodeResponse(listOf(periode1, periode2), emptyList(), emptyList())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, stønadFom.minusMonths(1))
+            assertThat(migreringInfo.kanMigreres).isFalse
+            assertThat(migreringInfo.årsak).isEqualTo("Har fler enn 1 (2) aktiv periode")
+        }
+
+        @Test
+        internal fun `samme beløp men ikke sammenhengende`() {
+            val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 2,
+                                                                        stønadFom = LocalDate.of(2021, 3, 1),
+                                                                        stønadTom = LocalDate.of(2021, 3, 31),
+                                                                        beløp = 20)
+
+            every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                    InfotrygdPeriodeResponse(listOf(periode1, periode2), emptyList(), emptyList())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, stønadFom.minusMonths(1))
+            assertThat(migreringInfo.kanMigreres).isFalse
+            assertThat(migreringInfo.årsak).isEqualTo("Har fler enn 1 (2) aktiv periode")
+        }
+
+        @Test
+        internal fun `ulike aktiviteter`() {
+            val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 2,
+                                                                        stønadFom = LocalDate.of(2021, 2, 1),
+                                                                        stønadTom = LocalDate.of(2021, 3, 31),
+                                                                        beløp = 10,
+                                                                        aktivitetstype = InfotrygdAktivitetstype.IKKE_I_AKTIVITET)
+
+            every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                    InfotrygdPeriodeResponse(listOf(periode1, periode2), emptyList(), emptyList())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, stønadFom.minusMonths(1))
+            assertThat(migreringInfo.kanMigreres).isTrue
+        }
+
+        @Test
+        internal fun `flere perioder ulike aktiviteter, men der en av de er arbeidssøker`() {
+            val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(vedtakId = 2,
+                                                                        stønadFom = LocalDate.of(2021, 2, 1),
+                                                                        stønadTom = LocalDate.of(2021, 3, 31),
+                                                                        beløp = 10,
+                                                                        aktivitetstype = InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER)
+
+            every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                    InfotrygdPeriodeResponse(listOf(periode1, periode2), emptyList(), emptyList())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, stønadFom.minusMonths(1))
+            assertThat(migreringInfo.kanMigreres).isFalse
+            assertThat(migreringInfo.årsak).isEqualTo("Har fler enn 1 (2) aktiv periode")
+        }
+    }
+
+    @Nested
     inner class AutomatiskMigrering {
 
         @Test
