@@ -39,6 +39,55 @@ internal class BeregningBarnetilsynServiceTest {
 
 
     @Test
+    fun `Skal kaste feil når vi sender inn ufornuftige beløp `() {
+        val utgiftsperiode = listeMedEnUtgiftsperiode()
+        val utgiftsperiodeMedHøytBeløp = listeMedEnUtgiftsperiode(beløp = BigDecimal(50000))
+        val utgiftsperiodeMedNegativtBeløp = listeMedEnUtgiftsperiode(beløp = BigDecimal(-1))
+        val periodeMedHøytBeløp = listeMedEnPeriodeMedBeløp(beløp = 50000)
+        val periodeMedNegativtBeløp = listeMedEnPeriodeMedBeløp(beløp = -1)
+
+        val negativUtgiftsfeil = assertThrows<ApiFeil> {
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiodeMedNegativtBeløp,
+                                            kontantstøttePerioder = listOf(),
+                                            tilleggsstønadsperioder = listOf())
+        }
+        assertThat(negativUtgiftsfeil.message).isEqualTo("Utgifter kan ikke være mindre enn 0")
+
+
+        val forHøyUtgiftsfeil = assertThrows<ApiFeil> {
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiodeMedHøytBeløp,
+                                            kontantstøttePerioder = listOf(),
+                                            tilleggsstønadsperioder = listOf())
+        }
+        assertThat(forHøyUtgiftsfeil.message).isEqualTo("Utgifter på mer enn 40000 støttes ikke")
+
+        assertThrows<ApiFeil> {
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                            kontantstøttePerioder = listOf(),
+                                            tilleggsstønadsperioder = periodeMedHøytBeløp)
+        }
+
+        assertThrows<ApiFeil> {
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                            kontantstøttePerioder = periodeMedHøytBeløp,
+                                            tilleggsstønadsperioder = listOf())
+        }
+
+        assertThrows<ApiFeil> {
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                            kontantstøttePerioder = listOf(),
+                                            tilleggsstønadsperioder = periodeMedNegativtBeløp)
+        }
+
+        assertThrows<ApiFeil> {
+            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                            kontantstøttePerioder = periodeMedNegativtBeløp,
+                                            tilleggsstønadsperioder = listOf())
+        }
+    }
+
+
+    @Test
     fun `Skal kaste feil når vi sender inn urelevant kontantstøtteperiode`() {
         val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
         val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
@@ -374,15 +423,20 @@ internal class BeregningBarnetilsynServiceTest {
                                                                                                  antallBarn = 1))
     }
 
-    private fun listeMedEnPeriodeMedBeløp(fra: YearMonth = januar2022, til: YearMonth = februar2022) = listOf(PeriodeMedBeløpDto(
-            årMånedFra = fra,
-            årMånedTil = til,
-            beløp = 10))
+    private fun listeMedEnPeriodeMedBeløp(fra: YearMonth = januar2022,
+                                          til: YearMonth = februar2022,
+                                          beløp: Int = 10): List<PeriodeMedBeløpDto> {
+        return listOf(PeriodeMedBeløpDto(
+                årMånedFra = fra,
+                årMånedTil = til,
+                beløp = beløp))
+
+    }
+
 
     private fun listeMedEnUtgiftsperiode(fra: YearMonth = januar2022,
-                                         til: YearMonth = februar2022) = listOf(UtgiftsperiodeDto(fra,
-                                                                                                  til,
-                                                                                                  listOf(UUID.randomUUID()),
-                                                                                                  TEN))
-
+                                         til: YearMonth = februar2022,
+                                         beløp: BigDecimal = TEN): List<UtgiftsperiodeDto> {
+        return listOf(UtgiftsperiodeDto(fra, til, listOf(UUID.randomUUID()), beløp))
+    }
 }

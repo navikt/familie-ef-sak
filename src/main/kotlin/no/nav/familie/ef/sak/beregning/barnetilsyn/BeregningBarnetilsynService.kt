@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
+import java.math.BigDecimal.ZERO
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -25,9 +26,8 @@ class BeregningBarnetilsynService {
                                 kontantstøttePerioder: List<PeriodeMedBeløpDto>,
                                 tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): List<BeløpsperiodeBarnetilsynDto> {
 
-        validerGyldigePerioder(utgiftsperioder,
-                               kontantstøttePerioder,
-                               tilleggsstønadsperioder)
+        validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
+        validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
         return utgiftsperioder.map { it.split() }
                 .flatten()
@@ -36,6 +36,26 @@ class BeregningBarnetilsynService {
                                                                 tilleggsstønadsperioder)
                 }
                 .mergeSammenhengendePerioder()
+    }
+
+    /**
+     * Hva som er "fornuftige" beløp kan sikkert endre seg. Mulig vi kan justere beløp for å treffe bedre etterhvert.
+     * Denne valideringen vil bare fange opp relativt store overskidelser av hva vi anser som fornuftig.
+     */
+    private fun validerFornuftigeBeløp(utgiftsperioder: List<UtgiftsperiodeDto>,
+                                       kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+                                       tilleggsstønadsperioder: List<PeriodeMedBeløpDto>) {
+
+
+        brukerfeilHvis(utgiftsperioder.any { it.utgifter < ZERO }) { "Utgifter kan ikke være mindre enn 0" }
+        brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000.toBigDecimal() }) { "Utgifter på mer enn 40000 støttes ikke" }
+
+        brukerfeilHvis(kontantstøttePerioder.any { it.beløp < 0 }) { "Kontantstøtte kan ikke være mindre enn 0" }
+        brukerfeilHvis(kontantstøttePerioder.any { it.beløp > 45000 }) { "Kontantstøtte på over 45000 pr. mnd støttes ikke" }
+
+        brukerfeilHvis(tilleggsstønadsperioder.any { it.beløp < 0 }) { "Beløp tilleggsstønad kan ikke være mindre enn 0" }
+        brukerfeilHvis(tilleggsstønadsperioder.any { it.beløp > 20000 }) { "Tilleggsstønad større enn 20000 støttes ikke" }
+
     }
 
     fun List<PeriodeMedBeløpDto>.tilPerioder(): List<Periode> =
