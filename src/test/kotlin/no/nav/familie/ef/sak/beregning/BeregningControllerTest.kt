@@ -205,7 +205,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
 
     private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(localhost("/api/beregning/$id/fullfor"),
+        return restTemplate.exchange(localhost("/api/vedtak/$id/lagre-vedtak"),
                                      HttpMethod.POST,
                                      HttpEntity(vedtakDto, headers))
     }

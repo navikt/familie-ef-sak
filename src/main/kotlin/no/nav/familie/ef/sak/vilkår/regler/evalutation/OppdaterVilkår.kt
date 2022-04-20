@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
-import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -14,6 +13,7 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.ALLE_VILKÅRSREGLER
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelEvaluering.utledResultat
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.RegelValidering.validerVurdering
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -151,31 +151,26 @@ object OppdaterVilkår {
         return vilkårsreglerForStønad(stønadstype)
                 .flatMap { vilkårsregel ->
                     if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-                        metadata.barn
-                                .filter { skalLageVilkårsvurderingForBarnet(stønadstype, metadata, it) }
-                                .map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+                        metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
                     } else {
                         listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
                     }
                 }
     }
 
-    private fun skalLageVilkårsvurderingForBarnet(stønadstype: StønadType,
-                                                  metadata: HovedregelMetadata,
-                                                  barn: BehandlingBarn) =
-            when (stønadstype) {
-                OVERGANGSSTØNAD -> true
-                BARNETILSYN -> metadata.søktOmBarnetilsyn.contains(barn.id)
-                SKOLEPENGER -> error("Ikke implementert")
-            }
-
 
     fun lagVilkårsvurderingForNyttBarn(metadata: HovedregelMetadata,
                                        behandlingId: UUID,
-                                       barnId: UUID): Vilkårsvurdering = lagNyVilkårsvurdering(AleneomsorgRegel(),
-                                                                                               metadata,
-                                                                                               behandlingId,
-                                                                                               barnId)
+                                       barnId: UUID,
+                                       stønadstype: StønadType): List<Vilkårsvurdering> {
+        return when (stønadstype) {
+            OVERGANGSSTØNAD -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId))
+            BARNETILSYN -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
+                                  lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId))
+            SKOLEPENGER -> throw NotImplementedError("Ikke implementert for skolepenger")
+        }
+
+    }
 
 
     private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,

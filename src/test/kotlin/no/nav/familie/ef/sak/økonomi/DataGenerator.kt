@@ -30,9 +30,11 @@ object DataGenerator {
                                 samordningsfradrag = 0,
                                 personIdent = personIdent)
 
-    fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1) =
-            TilkjentYtelse(personident = tilfeldigFødselsnummer(),
-                           behandlingId = behandling.id,
-                           andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse,
-                                                                                        behandling.id))
+    fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1): TilkjentYtelse {
+        val andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse, behandling.id)
+        return TilkjentYtelse(personident = tilfeldigFødselsnummer(),
+                              behandlingId = behandling.id,
+                              startdato = andelerTilkjentYtelse.minOf { it.stønadFom },
+                              andelerTilkjentYtelse = andelerTilkjentYtelse)
+    }
 }

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
@@ -8,6 +9,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 
@@ -48,23 +50,22 @@ data class Barnetilsynperiode(val datoFra: LocalDate,
                               val utgifter: BigDecimal,
                               val barn: List<UUID>)
 
-data class Kontantstøtteperiode(val datoFra: LocalDate,
-                                val datoTil: LocalDate,
-                                val beløp: BigDecimal)
+data class PeriodeMedBeløp(val datoFra: LocalDate,
+                           val datoTil: LocalDate,
+                           val beløp: Int) {
 
-data class Tilleggsstønadperiode(val datoFra: LocalDate,
-                                 val datoTil: LocalDate,
-                                 val beløp: BigDecimal)
+    fun tilDto() = PeriodeMedBeløpDto(årMånedFra = YearMonth.from(datoFra),
+                                      årMånedTil = YearMonth.from(datoTil),
+                                      beløp = beløp)
+}
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
 data class TilleggsstønadWrapper(val harTilleggsstønad: Boolean,
-                                 val skalStønadReduseres: Boolean,
-                                 val perioder: List<Tilleggsstønadperiode>,
+                                 val perioder: List<PeriodeMedBeløp>,
                                  val begrunnelse: String?)
 
-data class KontantstøtteWrapper(val perioder: List<Kontantstøtteperiode>,
-                                val begrunnelse: String?)
+data class KontantstøtteWrapper(val perioder: List<PeriodeMedBeløp>)
 
 data class BarnetilsynWrapper(val perioder: List<Barnetilsynperiode>,
                               val begrunnelse: String?)

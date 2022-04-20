@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
+package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
@@ -24,8 +24,8 @@ import java.util.UUID
 
 object VedtakDomeneParser {
 
-    val behandlingIdTilUUID = (1..10).map { it to UUID.randomUUID() }.toMap()
-    val tilkjentYtelseIdNummerTilUUID = (1..10).map { it to UUID.randomUUID() }.toMap()
+    val behandlingIdTilUUID = (1..10).associateWith { UUID.randomUUID() }
+    val tilkjentYtelseIdNummerTilUUID = (1..10).associateWith { UUID.randomUUID() }
 
     fun mapVedtak(dataTable: DataTable): List<Vedtak> {
         return dataTable.asMaps().groupBy {
@@ -162,7 +162,8 @@ object VedtakDomeneParser {
                     personident = parseString(VedtakDomenebegrep.PERSONIDENT, rad),
                     vedtakstidspunkt = LocalDateTime.now(),
                     type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                    andelerTilkjentYtelse = listOf()
+                    andelerTilkjentYtelse = listOf(),
+                    startdato = LocalDate.now(),
             )
         }
     }

@@ -4,10 +4,14 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -34,7 +38,8 @@ class VedtakController(private val stegService: StegService,
                        private val behandlingService: BehandlingService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
-                       private val vedtakService: VedtakService) {
+                       private val vedtakService: VedtakService,
+                       private val vurderingService: VurderingService) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -69,6 +74,20 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
     }
 
+    @PostMapping("/{behandlingId}/lagre-vedtak")
+    fun lagreVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
+        return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
+    }
+
+    private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
+        if (vedtak is InnvilgelseOvergangsstønad) {
+            brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(behandlingId)) { "Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt" }
+        }
+    }
+
     @GetMapping("/eksternid/{eksternId}/inntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Int?> {
@@ -90,13 +109,27 @@ class VedtakController(private val stegService: StegService,
     @GetMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(): Ressurs<Map<String, Int?>> {
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val behandlingIds = behandlingService.finnGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD)
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
-        for (behandlingId in behandlingIds) {
-            val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.now().minusMonths(1))
-            val ident = behandlingService.hentAktivIdent(behandlingId)
-            identToForventetInntektMap[ident] = forventetInntekt
+        val chunkedBehandlingIdList = behandlingIds.chunked(500)
+
+        for (chunkedBehandlingIds in chunkedBehandlingIdList) {
+            val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForVedtakOgDato(chunkedBehandlingIds, LocalDate.now().minusMonths(1))
+            val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(chunkedBehandlingIds)
+            for (behandlingId in chunkedBehandlingIds) {
+                val ident = behandlingIdToAktivIdentMap.firstOrNull { it.first == behandlingId }
+                if (ident?.first == null || ident.second == null) {
+                    secureLogger.warn("Fant ikke ident knyttet til behandling $behandlingId - får ikke vurdert inntekt")
+                } else {
+                    val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
+                    identToForventetInntektMap.put(ident.second!!, forventetInntekt)
+                }
+            }
+            logger.info("hentPersonerMedAktivStonadOgForventetInntekt en chunk ferdig")
         }
+        logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
         return Ressurs.success(identToForventetInntektMap)
     }
 }
