@@ -29,7 +29,7 @@ import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelDto
+import no.nav.familie.ef.sak.vedtak.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -1343,16 +1343,16 @@ internal class BeregnYtelseStegTest {
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
-            AndelDto(beløp = beløp,
-                     stønadFra = fom.atDay(1),
-                     stønadTil = tom.atEndOfMonth(),
-                     inntekt = 0,
-                     inntektsreduksjon = 0,
-                     samordningsfradrag = 0,
-                     kontantstøtte = 0,
-                     tilleggsstønad = 0,
-                     antallBarn = 0,
-                     utgifter = BigDecimal.ZERO)
+            AndelMedGrunnlagDto(beløp = beløp,
+                                stønadFra = fom.atDay(1),
+                                stønadTil = tom.atEndOfMonth(),
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0,
+                                kontantstøtte = 0,
+                                tilleggsstønad = 0,
+                                antallBarn = 0,
+                                utgifter = BigDecimal.ZERO)
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
