@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
@@ -24,7 +25,7 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun forberedOppgaverForUfødteTerminbarn() {
 
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
