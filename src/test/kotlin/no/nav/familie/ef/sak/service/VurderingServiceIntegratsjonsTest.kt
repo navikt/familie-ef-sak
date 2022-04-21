@@ -45,7 +45,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kopierVurderingerTilNyBehandling - skal kopiere vurderinger til ny behandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
         val søknadskjema = lagreSøknad(behandling, fagsak)
         val barnPåFørsteSøknad = barnRepository.insertAll(søknadsBarnTilBehandlingBarn(søknadskjema.barn, behandling.id))

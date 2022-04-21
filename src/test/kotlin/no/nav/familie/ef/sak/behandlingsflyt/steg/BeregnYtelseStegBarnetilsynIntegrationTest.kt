@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -21,6 +22,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -55,14 +57,19 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
     private val mars = YearMonth.of(2021, 3)
     private val april = YearMonth.of(2021, 4)
 
+    @BeforeEach
+    internal fun setUp() {
+        testoppsettService.lagreFagsak(fagsak)
+    }
 
     @Test
     internal fun `kildeBehandlingId skal bli beholdt på andelen som ikke endrer seg`() {
         val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(2000))
         val utgiftsperiode2 = opprettUtgiftsperiode(mars, mars, barnBehandling2.map { it.id }, BigDecimal(2500))
-        opprettBehandlinger()
+        opprettBehandlingOgBarn(behandling, barnBehandling1)
         innvilg(saksbehandling, listOf(utgiftsperiode))
         settBehandlingTilIverksatt(behandling)
+        opprettBehandlingOgBarn(behandling2, barnBehandling2)
         innvilg(saksbehandling2, listOf(utgiftsperiode2))
         settBehandlingTilIverksatt(behandling2)
 
@@ -78,9 +85,10 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val utgiftsperiode1 = opprettUtgiftsperiode(mars, mars, barnBehandling1.map { it.id }, BigDecimal(2500))
         val utgiftsperiode2 = opprettUtgiftsperiode(januar, mars, barnBehandling2.map { it.id }, BigDecimal(2000))
 
-        opprettBehandlinger()
+        opprettBehandlingOgBarn(behandling, barnBehandling1)
         innvilg(saksbehandling, listOf(utgiftsperiode1))
         settBehandlingTilIverksatt(behandling)
+        opprettBehandlingOgBarn(behandling2, barnBehandling2)
         innvilg(saksbehandling2, listOf(utgiftsperiode2))
         settBehandlingTilIverksatt(behandling2)
 
@@ -95,9 +103,10 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(2000))
         val utgiftsperiode2 = opprettUtgiftsperiode(januar, januar, barnBehandling2.map { it.id }, BigDecimal(0))
         val utgiftsperiode3 = opprettUtgiftsperiode(februar, mars, barnBehandling2.map { it.id }, BigDecimal(3000))
-        opprettBehandlinger()
+        opprettBehandlingOgBarn(behandling, barnBehandling1)
         innvilg(saksbehandling, listOf(utgiftsperiode))
         settBehandlingTilIverksatt(behandling)
+        opprettBehandlingOgBarn(behandling2, barnBehandling2)
         innvilg(saksbehandling2, listOf(utgiftsperiode2, utgiftsperiode3))
         settBehandlingTilIverksatt(behandling2)
 
@@ -119,9 +128,10 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val utgiftsperiode = opprettUtgiftsperiode(januar, mars, barnBehandling1.map { it.id }, BigDecimal(2000))
         val utgiftsperiode2 = opprettUtgiftsperiode(februar, februar, barnBehandling2.map { it.id }, BigDecimal(0))
         val utgiftsperiode3 = opprettUtgiftsperiode(april, april, barnBehandling2.map { it.id }, BigDecimal(3000))
-        opprettBehandlinger()
+        opprettBehandlingOgBarn(behandling, barnBehandling1)
         innvilg(saksbehandling, listOf(utgiftsperiode))
         settBehandlingTilIverksatt(behandling)
+        opprettBehandlingOgBarn(behandling2, barnBehandling2)
         innvilg(saksbehandling2, listOf(utgiftsperiode2, utgiftsperiode3))
         settBehandlingTilIverksatt(behandling2)
 
@@ -167,11 +177,8 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }
 
-    fun opprettBehandlinger() {
-        testoppsettService.lagreFagsak(fagsak)
+    private fun opprettBehandlingOgBarn(behandling: Behandling, barn: List<BehandlingBarn>) {
         behandlingRepository.insert(behandling)
-        behandlingRepository.insert(behandling2)
-        barnRepository.insertAll(barnBehandling1)
-        barnRepository.insertAll(barnBehandling2)
+        barnRepository.insertAll(barn)
     }
 }

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingsjournalpostRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import org.assertj.core.api.Assertions.assertThat
@@ -19,7 +20,7 @@ internal class BehandlingsjournalpostRepositoryTest : OppslagSpringRunnerTest() 
     @Test
     internal fun `skal kunne lagre flere journalposter på samme behandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling1 = behandlingRepository.insert(behandling(fagsak))
+        val behandling1 = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling1.id, "1", Journalposttype.U))
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling1.id, "2", Journalposttype.U))

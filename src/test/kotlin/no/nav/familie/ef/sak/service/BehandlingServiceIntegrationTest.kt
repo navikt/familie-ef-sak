@@ -81,7 +81,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentBehandlinger - skal returnere behandlinger`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
 
         assertThat(behandlingService.hentBehandlinger(setOf(behandling.id, behandling2.id))).hasSize(2)
