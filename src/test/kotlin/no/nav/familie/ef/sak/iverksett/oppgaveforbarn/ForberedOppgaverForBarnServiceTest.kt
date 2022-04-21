@@ -74,7 +74,6 @@ internal class ForberedOppgaverForBarnServiceTest {
         verify(exactly = 0) { OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr() }
     }
 
-
     @Test
     fun `barn blir seks mnd om 1 uke minus en dag, sjekk om fyller innen 1 uke, forvent kall til beskrivelseBarnBlirSeksMnd`() {
         val fødselsdato = LocalDate.now().minusDays(182).plusWeeks(1).minusDays(1)

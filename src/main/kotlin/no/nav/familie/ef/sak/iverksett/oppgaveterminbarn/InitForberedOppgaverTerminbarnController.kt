@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.ForberedOppgaverForBarnTask
 import no.nav.familie.prosessering.domene.Task
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
