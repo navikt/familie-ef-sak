@@ -45,9 +45,8 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
         }
     }
 
-    private fun pdlBarnUnder18år(fødselsnummerSøker: String): List<BarnMedIdent> =
+    private fun pdlBarn(fødselsnummerSøker: String): List<BarnMedIdent> =
             GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(fødselsnummerSøker).barn)
-                    .filter { it.fødsel.gjeldende().erUnder18År() }
 
     private fun sendOppgaverTilIverksett(oppgaver: List<OppgaveForBarn>) {
         iverksettClient.sendOppgaverForTerminBarn(OppgaverForBarnDto(oppgaver))
