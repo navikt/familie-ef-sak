@@ -8,16 +8,22 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -47,7 +53,8 @@ class StepDefinitions {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    private var vedtak = listOf<Vedtak>()
+    private var gittVedtak = listOf<Vedtak>()
+    private var saksbehandlinger = listOf<Saksbehandling>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
@@ -72,10 +79,12 @@ class StepDefinitions {
     private val slot = slot<TilkjentYtelse>()
     private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
+    private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
+    private lateinit var lagredeVedtak: MutableList<Vedtak>
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
-        vedtak = VedtakDomeneParser.mapVedtak(dataTable)
+        gittVedtak = VedtakDomeneParser.mapVedtak(dataTable)
     }
 
     @Gitt("følgende vedtak for barnetilsyn")
@@ -83,8 +92,18 @@ class StepDefinitions {
         stønadstype = StønadType.BARNETILSYN
 
         behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
-        vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+        gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
     }
+
+    @Gitt("følgende saksbehandlinger")
+    fun følgende_saksbehandlinger(dataTable: DataTable) {
+        stønadstype = StønadType.BARNETILSYN
+
+        behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
+        gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+        saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable)
+    }
+
 
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
@@ -93,24 +112,23 @@ class StepDefinitions {
 
     @Gitt("følgende kontantstøtte")
     fun følgende_kontantstøtte(dataTable: DataTable) {
-        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+        gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
         }
     }
 
     @Gitt("følgende tilleggsstønad")
     fun følgende_tilleggsstønad(dataTable: DataTable) {
-        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+        gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
         }
     }
 
     @Når("lag andelhistorikk kjøres")
     fun `lag andelhistorikk kjøres`() {
-        val tilkjentYtelser = mockTilkjentYtelse()
-        val lagredeVedtak = mockLagreVedtak()
+        initialiserTilkjentYtelseOgVedtakMock()
 
-        val behandlinger = vedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
+        val behandlinger = gittVedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
             acc + behandling(id = id,
                              opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
                              type = BehandlingType.REVURDERING,
@@ -118,7 +136,7 @@ class StepDefinitions {
         }.associateBy { it.id }
 
         //Skriver over inntekt hvis inntekter er definiert
-        val vedtakMedInntekt = vedtak.map {
+        val vedtakMedInntekt = gittVedtak.map {
             it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
         }
 
@@ -132,6 +150,57 @@ class StepDefinitions {
                                                                          behandlinger.values.toList(),
                                                                          null,
                                                                          behandlingIdsToAktivitetArbeid)
+    }
+
+    @Når("vedtak vedtas")
+    fun `når vedtak vedtas`() {
+
+        initialiserTilkjentYtelseOgVedtakMock()
+
+        gittVedtak.map {
+            val saksbehandling = saksbehandlinger.find { saksbehandling -> saksbehandling.id == it.behandlingId }
+                                 ?: error("Fant ikke saksbehandling for vedtak")
+            beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
+        }
+    }
+
+    @Så("forvent følgende andeler lagret for behandling med id: {int}")
+    fun `forvent følgende andeler lagret`(behandling: Int, dataTable: DataTable) {
+        dataTable.asMaps().mapIndexed { index, it ->
+            val behandlingId = behandlingIdTilUUID[behandling]
+            val kildeBehandlingId =
+                    behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, it)]
+            val gjeldendeTilkjentYtelse: TilkjentYtelse =
+                    tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
+
+            val fraOgMed = parseDato(VedtakDomenebegrep.FRA_OG_MED_DATO, it)
+            val tilOgMed = parseDato(VedtakDomenebegrep.TIL_OG_MED_DATO, it)
+            val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, it)
+
+            val gjelendeAndel = gjeldendeTilkjentYtelse.andelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
+                                ?: error("Fant ingen andel med startdato $fraOgMed")
+
+            try {
+
+                Assertions.assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
+                Assertions.assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
+                beløpMellom?.let {
+                    Assertions.assertThat(gjelendeAndel.beløp)
+                            .isGreaterThanOrEqualTo(it.first)
+                            .isLessThanOrEqualTo(it.second)
+                }
+                Assertions.assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
+            } catch (e: Throwable) {
+                logger.info("Expected: {}", it)
+                logger.info("Actual: {}", gjelendeAndel)
+                throw Throwable("Feilet rad $index", e)
+            }
+        }
+    }
+
+    private fun initialiserTilkjentYtelseOgVedtakMock() {
+        tilkjentYtelser = mockTilkjentYtelse()
+        lagredeVedtak = mockLagreVedtak()
     }
 
     private fun mockLagreVedtak(): MutableList<Vedtak> {
@@ -205,7 +274,7 @@ class StepDefinitions {
     ) {
         val endringType = parseEndringType(it)
         val endretIBehandlingId =
-                VedtakDomeneParser.behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
+                behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
         val beregnetAndelHistorikk = andelHistorikkDto
         val forventetHistorikkEndring = forventetHistorikkEndringer[index]
 

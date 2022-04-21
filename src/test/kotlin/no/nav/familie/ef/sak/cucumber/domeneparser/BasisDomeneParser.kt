@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
 import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -157,6 +159,16 @@ fun parseValgfriInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int?
     return parseInt(domenebegrep, rad)
 }
 
+fun parseValgfriIntRange(domenebegrep: Domenenøkkel, rad: Map<String, String>): Pair<Int, Int>? {
+    val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad)
+    if (verdi == null) {
+        return null
+    }
+
+    return Pair(Integer.parseInt(verdi.split("-").first()),
+                Integer.parseInt(verdi.split("-").last()))
+}
+
 fun parseResultatType(rad: Map<String, String>): ResultatType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.RESULTAT_TYPE.nøkkel, rad) ?: return null
     return ResultatType.valueOf(verdi)
@@ -181,6 +193,11 @@ fun parseArbeidAktivitet(rad: Map<String, String>): SvarId? {
 fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null
     return VedtaksperiodeType.valueOf(verdi)
+}
+
+fun parseBehandlingstype(rad: Map<String, String>): BehandlingType? {
+    val verdi = valgfriVerdi(SaksbehandlingDomeneBegrep.BEHANDLINGSTYPE.nøkkel, rad) ?: return null
+    return BehandlingType.valueOf(verdi)
 }
 
 fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {
