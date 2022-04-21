@@ -77,8 +77,7 @@ private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: Loc
 private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<BarnMedIdent>): Boolean {
     return pdlBarn
             .map { Fødselsnummer(it.personIdent).fødselsdato }
-            .filter { matchBarn(this.termindatoBarn, it) }
-            .isNotEmpty()
+            .any { matchBarn(this.termindatoBarn, it) }
 }
 
 private fun TerminbarnTilUtplukkForOppgave.tilTerminbarnOppgave(): TerminbarnOppgave {
