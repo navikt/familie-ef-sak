@@ -1364,7 +1364,7 @@ internal class BeregnYtelseStegTest {
             InnvilgelseBarnetilsyn(perioder = listOf(UtgiftsperiodeDto(årMånedFra = YearMonth.from(startDato),
                                                                        årMånedTil = YearMonth.from(sluttDato),
                                                                        barn = emptyList(),
-                                                                       utgifter = BigDecimal(2500))),
+                                                                       utgifter = 2500)),
                                    perioderKontantstøtte = emptyList(),
                                    tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
                                    begrunnelse = null)

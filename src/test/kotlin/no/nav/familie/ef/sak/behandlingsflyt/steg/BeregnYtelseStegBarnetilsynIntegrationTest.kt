@@ -152,7 +152,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
             tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
     private fun opprettUtgiftsperiode(fra: YearMonth, til: YearMonth, barnId: List<UUID>, beløp: BigDecimal) =
-            UtgiftsperiodeDto(fra, til, barnId, beløp)
+            UtgiftsperiodeDto(fra, til, barnId, beløp.toInt())
 
     private fun innvilg(saksbehandling: Saksbehandling,
                         utgiftsperioder: List<UtgiftsperiodeDto>) {
