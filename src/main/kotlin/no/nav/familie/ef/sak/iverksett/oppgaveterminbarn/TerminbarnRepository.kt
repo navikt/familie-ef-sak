@@ -8,8 +8,9 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import java.util.UUID
 
-@Repository interface TerminbarnRepository : RepositoryInterface<TerminbarnOppgave, UUID>,
-                                             InsertUpdateRepository<TerminbarnOppgave> {
+@Repository
+interface TerminbarnRepository : RepositoryInterface<TerminbarnOppgave, UUID>,
+                                 InsertUpdateRepository<TerminbarnOppgave> {
 
     @Query
     fun existsByFagsakIdAndTermindato(fagsakId: UUID, termindato: LocalDate): Boolean
