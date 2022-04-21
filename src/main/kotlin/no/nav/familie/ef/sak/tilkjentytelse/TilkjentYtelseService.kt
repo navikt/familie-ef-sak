@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -20,7 +21,8 @@ import java.util.UUID
 class TilkjentYtelseService(private val behandlingService: BehandlingService,
                             private val vedtakService: VedtakService,
                             private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                            private val fagsakService: FagsakService) {
+                            private val fagsakService: FagsakService,
+                            private val vurderingService: VurderingService) {
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
@@ -88,7 +90,9 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         val behandlingIder = tilkjenteYtelser.map { it.behandlingId }.toSet()
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
-        return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser, vedtakForBehandlinger, behandlinger, tilOgMedBehandlingId)
+        // hent vilkår for viss type hvor behandlingIder sendes inn
+        val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
+        return AndelHistorikkBeregner.lagHistorikk(tilkjenteYtelser, vedtakForBehandlinger, behandlinger, tilOgMedBehandlingId, aktivitetArbeid)
     }
 
 }

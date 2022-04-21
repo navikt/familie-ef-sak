@@ -33,7 +33,7 @@ internal class OppdaterVilkårTest {
 
 
     @Test
-    fun `Skal bare lage ALDER_PÅ_BARN vurderinger for barn det er søkt om - barnetilsyn`() {
+    fun `Skal lage ALDER_PÅ_BARN-vurderinger for barn det er søkt om OG de andre barna som finnes - barnetilsyn`() {
 
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
@@ -44,22 +44,24 @@ internal class OppdaterVilkårTest {
                 navn = null,
                 fødselTermindato = null,
         )
+        val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata = HovedregelMetadata(sivilstandSøknad = null,
                                           sivilstandstype = GIFT,
                                           erMigrering = false,
-                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+                                          barn = listOf(barn, barnUtenSøknad),
                                           søktOmBarnetilsyn = listOf(barn.id))
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
                                                                  metadata,
                                                                  StønadType.BARNETILSYN)
 
-        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(1)
-        assertThat(nyeVilkårsvurderinger.find { it.type === VilkårType.ALDER_PÅ_BARN }?.barnId).isEqualTo(barn.id)
+        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(2)
+        val barnIdMedAlderPåBarnVilkår = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }.map { it.barnId }
+        assertThat(barnIdMedAlderPåBarnVilkår).containsAll(listOf(barn.id, barnUtenSøknad.id))
     }
 
     @Test
-    fun `Skal bare lage ALENEOMSORG vurderinger for barn det er søkt om - barnetilsyn`() {
+    fun `Skal lage ALENEOMSORG-vurderinger for barn det er søkt om OG barn det ikke er søkt om - barnetilsyn`() {
 
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
@@ -70,18 +72,20 @@ internal class OppdaterVilkårTest {
                 navn = null,
                 fødselTermindato = null,
         )
+        val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata = HovedregelMetadata(sivilstandSøknad = null,
                                           sivilstandstype = GIFT,
                                           erMigrering = false,
-                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+                                          barn = listOf(barn, barnUtenSøknad),
                                           søktOmBarnetilsyn = listOf(barn.id))
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
                                                                  metadata,
                                                                  StønadType.BARNETILSYN)
 
-        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(1)
-        assertThat(nyeVilkårsvurderinger.find { it.type === VilkårType.ALENEOMSORG }?.barnId).isEqualTo(barn.id)
+        assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(2)
+        val barnIdMedVilkårAleneomsorg = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }.map { it.barnId }
+        assertThat(barnIdMedVilkårAleneomsorg).containsAll(listOf(barn.id, barnUtenSøknad.id))
     }
 
     @Test

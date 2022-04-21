@@ -11,9 +11,9 @@ data class BehandlingBarn(@Id
                           val id: UUID = UUID.randomUUID(),
                           val behandlingId: UUID,
                           @Column("soknad_barn_id")
-                          val søknadBarnId: UUID?,
-                          val personIdent: String?,
-                          val navn: String?,
+                          val søknadBarnId: UUID? = null,
+                          val personIdent: String? = null,
+                          val navn: String? = null,
                           @Column("fodsel_termindato")
                           val fødselTermindato: LocalDate? = null,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)

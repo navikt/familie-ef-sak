@@ -17,6 +17,8 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -130,6 +132,20 @@ class VurderingService(private val behandlingService: BehandlingService,
 
         vilkårsvurderingRepository.insertAll(kopiAvVurderinger.values.toList() + nyeBarnVurderinger)
         tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
+    }
+
+    fun aktivitetArbeidForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, SvarId?> {
+        val vilkårsvurderinger =
+                vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, behandlingIds)
+
+        return vilkårsvurderinger.associate { vilkårsvurdering ->
+            val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
+
+            vilkårsvurdering.behandlingId to delvilkårsvurderinger.map { delvilkårsvurdering ->
+                delvilkårsvurdering.vurderinger.single { it.regelId == RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM }.svar
+            }.single()
+        }
+
     }
 
     private fun validerAtVurderingerKanKopieres(tidligereVurderinger: Map<UUID, Vilkårsvurdering>,

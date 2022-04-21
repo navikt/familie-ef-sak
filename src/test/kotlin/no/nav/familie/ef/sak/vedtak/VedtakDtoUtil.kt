@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.BarnetilsynperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
@@ -14,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -52,17 +52,17 @@ object VedtakDtoUtil {
             Sanksjonert(årsak, periode, begrunnelse)
 
     fun barnetilsynperiodeDto(barnId: UUID) =
-            BarnetilsynperiodeDto(
+            UtgiftsperiodeDto(
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),
-                    BigDecimal(500),
-                    listOf(barnId))
+                    listOf(barnId),
+                    500)
 
     fun periodeMedBeløpDto() =
             PeriodeMedBeløpDto(
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),
-                    BigDecimal(1000))
+                    1000)
 
     fun tilleggsstønadDto() =
             TilleggsstønadDto(
