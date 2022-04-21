@@ -13,9 +13,7 @@ import java.time.format.DateTimeFormatter
 @Service
 @TaskStepBeskrivelse(
         taskStepType = ForberedOppgaverTerminbarnTask.TYPE,
-        beskrivelse = "Oppretter oppgave for barn som fyller 1/2 eller 1 år",
-
-        )
+        beskrivelse = "Oppretter oppgave for ufødte terminbarn")
 class ForberedOppgaverTerminbarnTask(val taskRepository: TaskRepository,
                                      val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService,
                                      val featureToggleService: FeatureToggleService) : AsyncTaskStep {
