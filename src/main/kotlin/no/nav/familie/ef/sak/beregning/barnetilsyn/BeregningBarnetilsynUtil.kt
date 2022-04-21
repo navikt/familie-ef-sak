@@ -38,6 +38,7 @@ object BeregningBarnetilsynUtil {
 
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
                                            beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
+                                           beregnedeBeløp.beløpFørSatsjustering.roundUp().toInt(),
                                            BeregningsgrunnlagBarnetilsynDto(
                                                    utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
@@ -45,18 +46,23 @@ object BeregningBarnetilsynUtil {
                                                    antallBarn = antallBarnIPeriode))
     }
 
-    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val maksimaltBeløp: BigDecimal)
+    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørSatsjustering: BigDecimal)
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
                            kontantstøtteBeløp: BigDecimal,
                            tilleggsstønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth): BeregnedeBeløp {
-        val maksimaltBeløp = ((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tilleggsstønadBeløp
+        val maksimaltBeløp = kalkulerUtbetalingsbeløp(periodeutgift, kontantstøtteBeløp, tilleggsstønadBeløp)
         val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
 
-        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(maksimaltBeløp, satsBeløp)), maksimaltBeløp = maksimaltBeløp)
+        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(maksimaltBeløp, satsBeløp)), beløpFørSatsjustering = maksimaltBeløp)
     }
+
+    fun kalkulerUtbetalingsbeløp(periodeutgift: BigDecimal,
+                                 kontantstøtteBeløp: BigDecimal,
+                                 tilleggsstønadBeløp: BigDecimal) =
+            maxOf(BigDecimal.ZERO, ((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tilleggsstønadBeløp)
 
     private fun YearMonth.tilPeriode(): Periode {
         return Periode(this.atDay(1),

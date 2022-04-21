@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.felles.dto.Periode
@@ -55,11 +57,17 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
         val pair = perioder.getValue(YearMonth.from(it.stønadFom))
-        BeløpsperiodeBarnetilsynDto(Periode(it.stønadFom, it.stønadTom), it.beløp,
-                                    BeregningsgrunnlagBarnetilsynDto(pair.first.utgifter,
-                                                                     pair.second.beregningsgrunnlag.kontantstøttebeløp,
-                                                                     pair.second.beregningsgrunnlag.tilleggsstønadsbeløp,
-                                                                     pair.first.barn.size))
+        BeløpsperiodeBarnetilsynDto(periode = Periode(it.stønadFom, it.stønadTom),
+                                    beløp = it.beløp,
+                                    beløpFørSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløp(pair.first.utgifter,
+                                                                                                              pair.second.beregningsgrunnlag.kontantstøttebeløp,
+                                                                                                              pair.second.beregningsgrunnlag.tilleggsstønadsbeløp)
+                                            .roundUp()
+                                            .toInt(),
+                                    beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(pair.first.utgifter,
+                                                                                          pair.second.beregningsgrunnlag.kontantstøttebeløp,
+                                                                                          pair.second.beregningsgrunnlag.tilleggsstønadsbeløp,
+                                                                                          pair.first.barn.size))
     }
 }
 

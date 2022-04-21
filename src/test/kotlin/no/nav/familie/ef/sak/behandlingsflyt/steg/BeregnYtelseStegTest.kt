@@ -1286,7 +1286,7 @@ internal class BeregnYtelseStegTest {
         internal fun setUp() {
             val grunnlag = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0)
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, grunnlag))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, grunnlag))
         }
 
         @Test
