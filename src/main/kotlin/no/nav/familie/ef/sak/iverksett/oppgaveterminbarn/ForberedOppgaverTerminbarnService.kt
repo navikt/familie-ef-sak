@@ -33,16 +33,13 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
 
         logger.info("Fant totalt ${gjeldendeBarn.size} terminbarn")
 
-        gjeldendeBarn.keys.forEach {
-            val terminbarnPåSøknad = gjeldendeBarn[it] ?: emptyList()
-            if (terminbarnPåSøknad.isNotEmpty()) {
-                val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
-                val pdlBarnUnder18år = pdlBarnUnder18år(fødselsnummerSøker)
-                val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarnUnder18år) }
-                val oppgaver = lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
-                if (oppgaver.isNotEmpty()) {
-                    sendOppgaverTilIverksett(oppgaver)
-                }
+        gjeldendeBarn.values.forEach { terminbarnPåSøknad ->
+            val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
+            val pdlBarnUnder18år = pdlBarnUnder18år(fødselsnummerSøker)
+            val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarnUnder18år) }
+            val oppgaver = lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
+            if (oppgaver.isNotEmpty()) {
+                sendOppgaverTilIverksett(oppgaver)
             }
         }
     }
