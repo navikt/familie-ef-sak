@@ -56,7 +56,7 @@ object VedtakDtoUtil {
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),
                     listOf(barnId),
-                    BigDecimal(500))
+                    500)
 
     fun periodeMedBeløpDto() =
             PeriodeMedBeløpDto(

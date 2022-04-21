@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
-import java.math.BigDecimal.ZERO
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -47,8 +46,8 @@ class BeregningBarnetilsynService {
                                        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>) {
 
 
-        brukerfeilHvis(utgiftsperioder.any { it.utgifter < ZERO }) { "Utgifter kan ikke være mindre enn 0" }
-        brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000.toBigDecimal() }) { "Utgifter på mer enn 40000 støttes ikke" }
+        brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
+        brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000 }) { "Utgifter på mer enn 40000 støttes ikke" }
 
         brukerfeilHvis(kontantstøttePerioder.any { it.beløp < 0 }) { "Kontantstøtte kan ikke være mindre enn 0" }
         brukerfeilHvis(kontantstøttePerioder.any { it.beløp > 45000 }) { "Kontantstøtte på over 45000 pr. mnd støttes ikke" }
@@ -121,7 +120,7 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.årMånedFra
     while (måned <= this.årMånedTil) {
-        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter))
+        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal()))
         måned = måned.plusMonths(1)
     }
     return perioder
