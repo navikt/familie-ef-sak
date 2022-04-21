@@ -72,9 +72,11 @@ private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: Loc
            && søknadBarnTermindato.plusWeeks(4).isAfter(pdlBarnFødselsdato)
 }
 
-private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<BarnMedIdent>): Boolean {
+private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<PdlBarn>): Boolean {
     return pdlBarn
-            .map { Fødselsnummer(it.personIdent).fødselsdato }
+            .mapNotNull { it.fødsel.gjeldende().fødselsdato }
+            .any { matchBarn(this.termindatoBarn, it) }
+}
             .any { matchBarn(this.termindatoBarn, it) }
 }
 
