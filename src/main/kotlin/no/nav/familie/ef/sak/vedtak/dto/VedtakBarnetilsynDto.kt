@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -24,16 +23,18 @@ data class PeriodeMedBeløpDto(
         val årMånedTil: YearMonth,
         val beløp: Int
 
-){
+) {
+
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
 
-data class UtgiftsperiodeDto (
+data class UtgiftsperiodeDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
         val utgifter: Int
 ) {
+
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
 

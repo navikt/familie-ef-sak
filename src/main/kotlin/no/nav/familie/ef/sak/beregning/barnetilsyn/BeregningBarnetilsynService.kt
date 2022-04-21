@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
-import java.math.BigDecimal.ZERO
 import java.time.LocalDate
 import java.time.YearMonth
 
