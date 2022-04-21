@@ -14,12 +14,11 @@ import java.util.Properties
 
 @RestController
 @RequestMapping(path = ["/api/oppgaver-for-terminbarn"])
-@ProtectedWithClaims(issuer = "azuread")
 class InitForberedOppgaverForTerminBarnTaskController(private val forberedOppgaverTerminbarnTask: ForberedOppgaverTerminbarnTask) {
 
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
-        forberedOppgaverTerminbarnTask.doTask(Task(ForberedOppgaverForBarnTask.TYPE,
+        forberedOppgaverTerminbarnTask.doTask(Task(ForberedOppgaverTerminbarnTask.TYPE,
                                                    LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE),
                                                    Properties()))
         return ResponseEntity(HttpStatus.OK)

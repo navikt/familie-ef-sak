@@ -40,6 +40,6 @@ class ForberedOppgaverTerminbarnTask(val taskRepository: TaskRepository,
 
     companion object {
 
-        const val TYPE = "forberedOppgaverForBarnTask"
+        const val TYPE = "forberedOppgaverForTerminbarnTask"
     }
 }
