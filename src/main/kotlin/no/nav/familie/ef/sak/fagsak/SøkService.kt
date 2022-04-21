@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -18,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSø
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -31,6 +33,8 @@ class SøkService(
         private val adresseMapper: AdresseMapper,
         private val fagsakService: FagsakService
 ) {
+
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun søkPerson(personIdentFraRequest: String): Søkeresultat {
         val personIdenter = personService.hentPersonIdenter(personIdentFraRequest)
@@ -83,10 +87,15 @@ class SøkService(
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
                              ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
 
+        brukerfeilHvis(bostedsadresse.ukjentBosted != null) {
+            "Personen har ukjent bostedsadresse, kan ikke finne personer på samme adresse"
+        }
+
         val søkeKriterier = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse)
         if (søkeKriterier.isEmpty()) {
+            secureLogger.error("Får ikke laget søkekriterer for $aktivIdent med bostedsadresse=$bostedsadresse")
             throw Feil(
-                    message = "Får ikke laget søkekriterer for bostedsadresse=$bostedsadresse",
+                    message = "Får ikke laget søkekriterer for bostedsadresse",
                     frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
             )
         }

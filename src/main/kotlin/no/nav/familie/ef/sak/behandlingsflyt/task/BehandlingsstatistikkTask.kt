@@ -4,9 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.BLANKETT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -18,6 +18,10 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -38,7 +42,6 @@ import java.util.UUID
 
 class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                                 private val behandlingService: BehandlingService,
-                                private val fagsakService: FagsakService,
                                 private val søknadService: SøknadService,
                                 private val vedtakRepository: VedtakRepository,
                                 private val oppgaveService: OppgaveService,
@@ -56,7 +59,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
-        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak)
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling.stønadstype)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
@@ -67,6 +70,8 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
                 eksternBehandlingId = saksbehandling.eksternId,
                 personIdent = saksbehandling.ident,
                 gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
+                beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
+                              else null,
                 eksternFagsakId = saksbehandling.eksternFagsakId,
                 hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
                 behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
@@ -92,12 +97,15 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         return gsakOppgaveId?.let { oppgaveService.hentOppgave(it) }
     }
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?): String? {
+    private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
+
+
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, stønadType: StønadType): String? {
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE -> vedtak.periodeBegrunnelse
+                    ResultatType.INNVILGE -> utledBegrunnelseForInnvilgetVedtak(stønadType, vedtak)
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
@@ -107,20 +115,26 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         }
     }
 
+    private fun utledBegrunnelseForInnvilgetVedtak(stønadType: StønadType, vedtak: Vedtak) =
+            when (stønadType) {
+                OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
+                BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
+                SKOLEPENGER -> throw NotImplementedError("Skolepenger er ikke implementert")
+            }
+
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
                                                                     ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
-            Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.beslutterIdent ?: error("Mangler beslutter på vedtaket")
+            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
         }
     }
 
     private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
         return when (saksbehandling.type) {
-            FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
+            FØRSTEGANGSBEHANDLING, BLANKETT -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
             REVURDERING -> saksbehandling.opprettetTid
-            else -> error("Støtter ikke uthenting av mottatt-dato for ${saksbehandling.type}")
+            else -> error("Støtter ikke uthenting av henvendelsestidspunkt for sak med ${saksbehandling.type}")
         }
     }
 

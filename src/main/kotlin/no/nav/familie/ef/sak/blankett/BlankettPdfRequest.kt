@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 
 data class BlankettPdfRequest(
         val behandling: BlankettPdfBehandling,
@@ -14,7 +15,8 @@ data class BlankettPdfRequest(
 )
 
 data class BlankettPdfBehandling(
-        val årsak: BehandlingÅrsak
+        val årsak: BehandlingÅrsak,
+        val stønadstype: StønadType
 )
 
 data class PersonopplysningerDto(

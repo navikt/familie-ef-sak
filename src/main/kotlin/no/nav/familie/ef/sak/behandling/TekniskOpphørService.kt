@@ -38,12 +38,14 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
         val eksternFagsakId = fagsakService.hentEksternId(fagsakId)
         val behandling = opprettBehandlingTekniskOpphør(fagsakId)
         logger.info("Utfører teknisk opphør behandling=${behandling.id}")
+        val forrigeBehandlingId = behandling.forrigeBehandlingId ?: error("Mangler forrigeBehandlingId på behandling=$behandling.id")
         val tilkjentYtelseTilOpphør = opprettTilkjentYtelse(behandlingId = behandling.id,
+                                                            forrigeBehandlingId = forrigeBehandlingId,
                                                             personIdent = aktivIdent)
 
         taskRepository.save(PollStatusTekniskOpphør.opprettTask(behandling.id, aktivIdent))
 
-        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = behandling.forrigeBehandlingId!!,
+        iverksettClient.iverksettTekniskOpphør(TekniskOpphørDto(forrigeBehandlingId = forrigeBehandlingId,
                                                                 saksbehandlerId = tilkjentYtelseTilOpphør.sporbar.opprettetAv,
                                                                 eksternBehandlingId = behandling.eksternId.id,
                                                                 stønadstype = StønadType.OVERGANGSSTØNAD,
@@ -53,11 +55,16 @@ class TekniskOpphørService(val behandlingService: BehandlingService,
                                                                 vedtaksdato = LocalDate.now()))
     }
 
-    private fun opprettTilkjentYtelse(behandlingId: UUID, personIdent: String): TilkjentYtelse {
+    private fun opprettTilkjentYtelse(behandlingId: UUID,
+                                      forrigeBehandlingId: UUID,
+                                      personIdent: String): TilkjentYtelse {
+        val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(forrigeBehandlingId)
+                                    ?: error("Finner ikke forrige behandlingId=$forrigeBehandlingId")
         return tilkjentYtelseRepository.insert(TilkjentYtelse(behandlingId = behandlingId,
                                                               personident = personIdent,
                                                               type = TilkjentYtelseType.OPPHØR,
-                                                              andelerTilkjentYtelse = emptyList()))
+                                                              andelerTilkjentYtelse = emptyList(),
+                                                              startdato = forrigeTilkjentYtelse.startdato))
     }
 
     private fun opprettBehandlingTekniskOpphør(fagsakId: UUID): Behandling {

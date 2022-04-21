@@ -14,14 +14,19 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -52,7 +57,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                                           false,
                                           barnPåRevurdering,
                                           emptyList())
-        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata)
+        vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
 
@@ -89,9 +94,23 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         assertThat(catchThrowable {
             vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId,
                                                               revurdering.id,
-                                                              metadata)
+                                                              metadata, StønadType.OVERGANGSSTØNAD)
         })
                 .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
+    }
+
+    @Test
+    internal fun `aktivitet arbeid for behandlingIds`() {
+
+        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN))
+        val behandling = behandling(fagsak)
+        val førstegangsbehandling = behandlingRepository.insert(behandling)
+        val vilkårsvurdering = vilkårsvurdering(behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
+        listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)))))
+        vilkårsvurderingRepository.insert(vilkårsvurdering)
+
+        val behandlingIdToSvarId = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandling.id))
+        assertThat(behandlingIdToSvarId[behandling.id]).isEqualTo(SvarId.ER_I_ARBEID)
     }
 
     private fun opprettVilkårsvurderinger(søknadskjema: SøknadsskjemaOvergangsstønad,

@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -24,10 +25,12 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
+    private val vurderingService = mockk<VurderingService>()
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService,
                                                               mockk(),
                                                               tilkjentYtelseRepository,
-                                                              fagsakService)
+                                                              fagsakService,
+                                                              vurderingService)
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))
     private val behandling = behandling(fagsak = fagsak)

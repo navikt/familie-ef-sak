@@ -36,19 +36,6 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @Deprecated("bruk finnNyeEllerTidligereFødteBarn")
-    fun finnNyeBarnSidenGjeldendeBehandlingForPersonIdent(personIdent: PersonIdent): List<String> {
-        val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
-        val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
-                     ?: error("Kunne ikke finne fagsak for personident")
-
-        val nyeBarnSidenGjeldendeBehandling = finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
-
-        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarnSidenGjeldendeBehandling)
-
-        return nyeBarnSidenGjeldendeBehandling.map { it.personIdent }
-    }
-
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)

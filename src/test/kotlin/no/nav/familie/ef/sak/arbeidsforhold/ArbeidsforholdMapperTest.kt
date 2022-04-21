@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.arbeidsforhold
+package no.nav.familie.ef.sak.arbeidsforhold
 
-import no.nav.familie.ef.sak.arbeidsforhold.tilDto
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Ansettelsesperiode
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsavtaler
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold

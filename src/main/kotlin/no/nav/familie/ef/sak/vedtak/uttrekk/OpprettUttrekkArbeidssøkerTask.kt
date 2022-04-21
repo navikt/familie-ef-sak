@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak.uttrekk
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_ISO_YEAR_MONTH
+import no.nav.familie.ef.sak.felles.util.EnvUtil
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -10,6 +11,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
+/**
+ * Si at det er januar nå.
+ * Vi oppretter då en task for uttrekk i januar, som får triggertid i februar
+ * Vi henter då ut om personen er registrert som arbeidssøker i siste januar
+ */
 @Service
 @TaskStepBeskrivelse(
         taskStepType = OpprettUttrekkArbeidssøkerTask.TYPE,
@@ -41,13 +47,13 @@ class OpprettUttrekkArbeidssøkerTask(
                                                                        personIdent = aktiveIdenter[it.fagsakId]
                                                                                      ?: error("Kunne ikke finne fagsakID"))
             } catch (ex: Exception) {
-                val errorMelding = "Sjekk av utrekkArbeidssøker feiler fagsak=$it.fagsakId behandling=$it.behandlingId"
+                val errorMelding = "Sjekk av utrekkArbeidssøker feiler fagsak=${it.fagsakId} behandling=${it.behandlingId}"
                 logger.error(errorMelding)
                 secureLogger.error("$errorMelding - ${ex.message}", ex)
                 ++feilede
             }
         }
-        if (feilede > 0) {
+        if (feilede > 0 && !EnvUtil.erIDev()) {
             error("Kunne ikke opprette $feilede av ${uttrekk.size} uttrekk")
         }
     }
@@ -58,17 +64,16 @@ class OpprettUttrekkArbeidssøkerTask(
 
     fun opprettTaskForNesteMåned(task: Task) {
         val årMåned = YearMonth.parse(task.payload)
-        val nesteMåned = årMåned.plusMonths(1)
-        taskRepository.save(opprettTask(nesteMåned))
+        taskRepository.save(opprettTask(årMåned.plusMonths(1)))
     }
 
     companion object {
 
         const val TYPE = "opprettUttrekkArbeidssøker"
 
-        fun opprettTask(årMåned: YearMonth): Task {
-            val triggerTid = årMåned.atDay(1).atTime(5, 0)
-            return Task(TYPE, årMåned.format(DATE_FORMAT_ISO_YEAR_MONTH)).medTriggerTid(triggerTid)
+        fun opprettTask(utrekksmåned: YearMonth): Task {
+            val triggerTid = utrekksmåned.plusMonths(1).atDay(1).atTime(5, 0)
+            return Task(TYPE, utrekksmåned.format(DATE_FORMAT_ISO_YEAR_MONTH)).medTriggerTid(triggerTid)
         }
     }
 }

@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.simulering
+package no.nav.familie.ef.sak.simulering
 
-import no.nav.familie.ef.sak.simulering.hentSammenhengendePerioderMedFeilutbetaling
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsperiode

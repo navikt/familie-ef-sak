@@ -51,8 +51,9 @@ class JournalføringController(private val journalføringService: Journalføring
 
     @GetMapping("/{journalpostId}/dokument-pdf/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
     fun hentDokumentSomPdf(@PathVariable journalpostId: String, @PathVariable dokumentInfoId: String): ByteArray {
-        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
+        validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
         return journalføringService.hentDokument(journalpostId, dokumentInfoId)
     }
 

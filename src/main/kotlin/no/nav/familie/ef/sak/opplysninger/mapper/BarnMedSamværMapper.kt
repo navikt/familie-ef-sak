@@ -48,11 +48,10 @@ object BarnMedSamværMapper {
     }
 
     private fun mapBarnepass(behandlingBarn: BehandlingBarn, søknadBarn: SøknadBarn?): BarnepassDto {
-        val barnepass = søknadBarn?.barnepass
         return BarnepassDto(id = behandlingBarn.id,
                             skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: false,
-                            barnepassordninger = barnepass?.barnepassordninger?.map(this::mapBarnepassordning) ?: emptyList(),
-                            årsakBarnepass = barnepass?.årsakBarnepass)
+                            barnepassordninger = søknadBarn?.barnepassordninger?.map(this::mapBarnepassordning) ?: emptyList(),
+                            årsakBarnepass = søknadBarn?.årsakBarnepass)
     }
 
 

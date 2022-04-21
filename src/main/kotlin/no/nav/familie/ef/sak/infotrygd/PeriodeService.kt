@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InternPeriodeUtil.slåSammenPerioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -44,19 +44,23 @@ class PeriodeService(
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
     }
 
-    private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: StønadType): List<InternPeriode> {
+    private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: StønadType): EfInternPerioder? {
         return fagsakService.finnFagsak(personIdenter, stønadstype)
                        ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
-                       ?.let { hentPerioderFraEf(it) }
-                       // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
-                       // då vi ønsker de sortert på siste hendelsen først
-                       ?.sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
-               ?: emptyList()
+                       ?.let { behandling ->
+                           val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
+                           val internperioder = tilInternPeriode(tilkjentYtelse)
+                           val startdato = tilkjentYtelse.startdato ?: error("Mangler starto for behandling=${behandling.id}")
+                           EfInternPerioder(startdato, internperioder)
+                       }
     }
 
-    private fun hentPerioderFraEf(it: Behandling): List<InternPeriode> =
-            tilkjentYtelseService.hentForBehandling(it.id).andelerTilkjentYtelse
-                    .map(AndelTilkjentYtelse::tilInternPeriode)
+    private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
+            tilkjentYtelse.andelerTilkjentYtelse.map(AndelTilkjentYtelse::tilInternPeriode)
+                    // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
+                    // då vi ønsker de sortert på siste hendelsen først
+                    .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
+
 }
 
 private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriode(

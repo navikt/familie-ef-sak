@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
@@ -106,4 +107,16 @@ object PdlTestdataHelper {
                    fødested = null,
                    fødekommune = null,
                    fødeland = null)
+
+    fun ukjentBostedsadresse(bostedskommune: String = "1234",
+                             historisk: Boolean = false) =
+            Bostedsadresse(angittFlyttedato = null,
+                           gyldigFraOgMed = null,
+                           gyldigTilOgMed = null,
+                           coAdressenavn = null,
+                           utenlandskAdresse = null,
+                           vegadresse = null,
+                           ukjentBosted = UkjentBosted(bostedskommune),
+                           matrikkeladresse = null,
+                           metadata = Metadata(historisk))
 }

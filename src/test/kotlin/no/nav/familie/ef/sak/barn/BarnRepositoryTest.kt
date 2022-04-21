@@ -1,8 +1,6 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.barn
+package no.nav.familie.ef.sak.barn
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.barn.BarnRepository
-import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.repository.behandling

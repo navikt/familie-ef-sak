@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.barn
 
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -54,10 +56,12 @@ class BarnService(
     fun opprettBarnForRevurdering(behandlingId: UUID,
                                   forrigeBehandlingId: UUID,
                                   nyeBarnPåRevurdering: List<BehandlingBarn>,
-                                  grunnlagsdataBarn: List<BarnMedIdent>) {
+                                  grunnlagsdataBarn: List<BarnMedIdent>,
+                                  stønadstype: StønadType) {
         val kobledeBarn: List<MatchetBehandlingBarn> = kobleAktuelleBarn(forrigeBehandlingId = forrigeBehandlingId,
                                                                          nyeBarnPåRevurdering = nyeBarnPåRevurdering,
-                                                                         grunnlagsdataBarn = grunnlagsdataBarn)
+                                                                         grunnlagsdataBarn = grunnlagsdataBarn,
+                                                                         stønadstype = stønadstype)
 
         val alleBarnPåRevurdering = kobledeBarn.map {
             it.behandlingBarn.copy(id = UUID.randomUUID(),
@@ -69,11 +73,26 @@ class BarnService(
         barnRepository.insertAll(alleBarnPåRevurdering)
     }
 
+    private fun validerAtAlleBarnErMedPåRevurderingen(kobledeBarn: List<BehandlingBarn>,
+                                                      grunnlagsdataBarn: List<BarnMedIdent>) {
+        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.map { it.personIdent }
+        val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
+
+        feilHvisIkke(kobledeBarnIdenter.containsAll(grunnlagsdataBarnIdenter)) {
+            "Alle barn skal være med i revurderingen av en barnetilsynbehandling."
+        }
+    }
+
     private fun kobleAktuelleBarn(forrigeBehandlingId: UUID,
                                   nyeBarnPåRevurdering: List<BehandlingBarn>,
-                                  grunnlagsdataBarn: List<BarnMedIdent>): List<MatchetBehandlingBarn> {
+                                  grunnlagsdataBarn: List<BarnMedIdent>,
+                                  stønadstype: StønadType): List<MatchetBehandlingBarn> {
         val barnPåForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandlingId)
         val alleAktuelleBarn = barnPåForrigeBehandling + nyeBarnPåRevurdering
+
+        if (stønadstype == StønadType.BARNETILSYN) {
+            validerAtAlleBarnErMedPåRevurderingen(alleAktuelleBarn, grunnlagsdataBarn)
+        }
 
         return BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleAktuelleBarn, grunnlagsdataBarn)
     }
@@ -93,5 +112,12 @@ class BarnService(
                                                                    ?: emptyList()
 
     fun finnBarnPåBehandling(behandlingId: UUID): List<BehandlingBarn> = barnRepository.findByBehandlingId(behandlingId)
+
+    fun validerBarnFinnesPåBehandling(behandlingId: UUID, barn: Set<UUID>) {
+        val barnPåBehandling = finnBarnPåBehandling(behandlingId).map { it.id }.toSet()
+        feilHvis(barn.any { !barnPåBehandling.contains(it) }) {
+            "Et barn som ikke finnes på behandling=$behandlingId er lagt til, innsendte=$barn"
+        }
+    }
 
 }

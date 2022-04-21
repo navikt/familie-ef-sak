@@ -37,8 +37,10 @@ data class SøknadBarn(@Id
                       val skalHaBarnepass: Boolean? = null,
                       @Column("serlige_tilsynsbehov")
                       val særligeTilsynsbehov: String? = null,
-                      @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "barnepass_")
-                      val barnepass: Barnepass? = null,
+                      @Column("barnepass_arsak_barnepass")
+                      val årsakBarnepass: String? = null,
+                      @MappedCollection(idColumn = "barn_id")
+                      val barnepassordninger: Set<Barnepassordning> = emptySet(),
                       val lagtTilManuelt: Boolean) : IBarn
 
 interface IAnnenForelder {
@@ -51,11 +53,6 @@ data class AnnenForelder(val ikkeOppgittAnnenForelderBegrunnelse: String? = null
                          val land: String? = null,
                          @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL)
                          override val person: PersonMinimum? = null) : IAnnenForelder
-
-data class Barnepass(@Column("arsak_barnepass")
-                     val årsakBarnepass: String? = null,
-                     @MappedCollection(idColumn = "barn_id")
-                     val barnepassordninger: Set<Barnepassordning>?)
 
 @Table("soknad_barnepassordning")
 data class Barnepassordning(val hvaSlagsBarnepassordning: String,

@@ -3,16 +3,17 @@ package no.nav.familie.ef.sak.barn
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
+import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -28,7 +29,6 @@ internal class BarnServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadMock
     }
 
@@ -88,7 +88,7 @@ internal class BarnServiceTest {
     }
 
     @Test
-    internal fun `skal ta med ett nytt barn ved revurdering hvor to barn eksisterer fra før`() {
+    internal fun `skal ta med ett nytt barn ved revurdering av Overgangsstønad hvor to barn eksisterer fra før`() {
         val grunnlagsdatabarn = listOf(barnMedIdent(fnrBarnD, "Barn D"),
                                        barnMedIdent(fnrBarnC, "Barn C"),
                                        barnMedIdent(fnrBarnB, "Barn B"),
@@ -110,12 +110,122 @@ internal class BarnServiceTest {
         barnService.opprettBarnForRevurdering(behandlingId,
                                               forrigeBehandlingId,
                                               nyeBarnPåRevurdering,
-                                              grunnlagsdatabarn)
+                                              grunnlagsdatabarn,
+                                              StønadType.OVERGANGSSTØNAD)
 
         assertThat(barnSlot.captured).hasSize(3)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC)
         assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B", "Barn C")
 
+    }
+
+    @Test
+    internal fun `skal kaste feil ved revurdering av Barnetilsyn dersom man ikke tar med alle barna som finnes i grunnlagsdataene`() {
+        val grunnlagsdatabarn = listOf(barnMedIdent(fnrBarnD, "Barn D"),
+                                       barnMedIdent(fnrBarnC, "Barn C"),
+                                       barnMedIdent(fnrBarnB, "Barn B"),
+                                       barnMedIdent(fnrBarnA, "Barn A"))
+        val barnSlot = slot<List<BehandlingBarn>>()
+        val forrigeBehandlingId = UUID.randomUUID()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
+        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(setOf(barnPåSøknadA,
+                                                                                                      barnPåSøknadB),
+                                                                                                forrigeBehandlingId)
+        every { barnRepository.insertAll(capture(barnSlot)) } returns emptyList()
+
+        val nyeBarnPåRevurdering = listOf(BehandlingBarn(behandlingId = behandlingId,
+                                                         søknadBarnId = null,
+                                                         personIdent = fnrBarnC,
+                                                         navn = "Barn C")
+        )
+        val feil = assertThrows<Feil> {
+            barnService.opprettBarnForRevurdering(behandlingId,
+                                                  forrigeBehandlingId,
+                                                  nyeBarnPåRevurdering,
+                                                  grunnlagsdatabarn,
+                                                  StønadType.BARNETILSYN)
+        }
+
+        assertThat(feil.message).contains("Alle barn skal være med i revurderingen av en barnetilsynbehandling.")
+
+    }
+
+    @Test
+    internal fun `skal ta med alle nye barn ved revurdering av Barnetilsyn hvor to barn eksisterer fra før`() {
+        val grunnlagsdatabarn = listOf(barnMedIdent(fnrBarnD, "Barn D"),
+                                       barnMedIdent(fnrBarnC, "Barn C"),
+                                       barnMedIdent(fnrBarnB, "Barn B"),
+                                       barnMedIdent(fnrBarnA, "Barn A"))
+        val barnSlot = slot<List<BehandlingBarn>>()
+        val forrigeBehandlingId = UUID.randomUUID()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
+        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(setOf(barnPåSøknadA,
+                                                                                                      barnPåSøknadB),
+                                                                                                forrigeBehandlingId)
+        every { barnRepository.insertAll(capture(barnSlot)) } returns emptyList()
+
+        val nyeBarnPåRevurdering = listOf(BehandlingBarn(behandlingId = behandlingId,
+                                                         søknadBarnId = null,
+                                                         personIdent = fnrBarnD,
+                                                         navn = "Barn C"),
+                                          BehandlingBarn(behandlingId = behandlingId,
+                                                         søknadBarnId = null,
+                                                         personIdent = fnrBarnC,
+                                                         navn = "Barn C")
+        )
+        barnService.opprettBarnForRevurdering(behandlingId,
+                                              forrigeBehandlingId,
+                                              nyeBarnPåRevurdering,
+                                              grunnlagsdatabarn,
+                                              StønadType.BARNETILSYN)
+
+        assertThat(barnSlot.captured).hasSize(4)
+        assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC, fnrBarnD)
+        assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B", "Barn C", "Barn D")
+    }
+
+    @Nested
+    inner class ValiderBarnFinnesPåBehandling {
+
+        private val barn = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+        private val barn2 = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+        private val barn3 = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+
+        @Test
+        internal fun `tom liste med barn validerer`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn)
+            barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf())
+        }
+
+        @Test
+        internal fun `flere barn mangler`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn)
+            assertThatThrownBy {
+                barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn.id, barn2.id, barn3.id))
+            }.isInstanceOf(Feil::class.java)
+        }
+
+        @Test
+        internal fun `1 barn mangler`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn, barn3)
+            assertThatThrownBy {
+                barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn.id, barn2.id, barn3.id))
+            }.isInstanceOf(Feil::class.java)
+        }
+
+        @Test
+        internal fun `antall barn er eksakt like`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn, barn2)
+            barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn.id, barn2.id))
+        }
+
+        @Test
+        internal fun `innsendte barn er færre enn de som finnes på behandlingen`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barn, barn2)
+            barnService.validerBarnFinnesPåBehandling(UUID.randomUUID(), setOf(barn2.id))
+        }
     }
 
     val fnrBarnA = "11111111111"
@@ -141,18 +251,5 @@ internal class BarnServiceTest {
                                    lagtTilManuelt = false
     )
 
-    private fun barnMedIdent(fnr: String, navn: String): BarnMedIdent =
-            BarnMedIdent(adressebeskyttelse = emptyList(),
-                         bostedsadresse = emptyList(),
-                         deltBosted = emptyList(),
-                         dødsfall = emptyList(),
-                         forelderBarnRelasjon = emptyList(),
-                         fødsel = emptyList(),
-                         navn = Navn(fornavn = navn.split(" ")[0],
-                                     mellomnavn = null,
-                                     etternavn = navn.split(" ")[1],
-                                     metadata = Metadata(
-                                             historisk = false)),
-                         personIdent = fnr)
 
 }
