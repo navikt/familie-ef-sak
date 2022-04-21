@@ -53,7 +53,7 @@ class StepDefinitions {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    private var vedtak = listOf<Vedtak>()
+    private var gittVedtak = listOf<Vedtak>()
     private var saksbehandlinger = listOf<Saksbehandling>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
@@ -84,7 +84,7 @@ class StepDefinitions {
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
-        vedtak = VedtakDomeneParser.mapVedtak(dataTable)
+        gittVedtak = VedtakDomeneParser.mapVedtak(dataTable)
     }
 
     @Gitt("følgende vedtak for barnetilsyn")
@@ -92,7 +92,7 @@ class StepDefinitions {
         stønadstype = StønadType.BARNETILSYN
 
         behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
-        vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+        gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
     }
 
     @Gitt("følgende saksbehandlinger")
@@ -100,7 +100,7 @@ class StepDefinitions {
         stønadstype = StønadType.BARNETILSYN
 
         behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
-        vedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+        gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
         saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable)
     }
 
@@ -112,14 +112,14 @@ class StepDefinitions {
 
     @Gitt("følgende kontantstøtte")
     fun følgende_kontantstøtte(dataTable: DataTable) {
-        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+        gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
         }
     }
 
     @Gitt("følgende tilleggsstønad")
     fun følgende_tilleggsstønad(dataTable: DataTable) {
-        vedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(vedtak, dataTable) { vedtak, perioder ->
+        gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
         }
     }
@@ -128,7 +128,7 @@ class StepDefinitions {
     fun `lag andelhistorikk kjøres`() {
         initialiserTilkjentYtelseOgVedtakMock()
 
-        val behandlinger = vedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
+        val behandlinger = gittVedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
             acc + behandling(id = id,
                              opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
                              type = BehandlingType.REVURDERING,
@@ -136,7 +136,7 @@ class StepDefinitions {
         }.associateBy { it.id }
 
         //Skriver over inntekt hvis inntekter er definiert
-        val vedtakMedInntekt = vedtak.map {
+        val vedtakMedInntekt = gittVedtak.map {
             it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
         }
 
@@ -157,7 +157,7 @@ class StepDefinitions {
 
         initialiserTilkjentYtelseOgVedtakMock()
 
-        vedtak.map {
+        gittVedtak.map {
             val saksbehandling = saksbehandlinger.find { saksbehandling -> saksbehandling.id == it.behandlingId }
                                  ?: error("Fant ikke saksbehandling for vedtak")
             beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
@@ -185,8 +185,9 @@ class StepDefinitions {
                 Assertions.assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
                 Assertions.assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
                 beløpMellom?.let {
-                    Assertions.assertThat(gjelendeAndel.beløp).isGreaterThanOrEqualTo(it.first)
-                    Assertions.assertThat(gjelendeAndel.beløp).isLessThanOrEqualTo(it.second)
+                    Assertions.assertThat(gjelendeAndel.beløp)
+                            .isGreaterThanOrEqualTo(it.first)
+                            .isLessThanOrEqualTo(it.second)
                 }
                 Assertions.assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
             } catch (e: Throwable) {
