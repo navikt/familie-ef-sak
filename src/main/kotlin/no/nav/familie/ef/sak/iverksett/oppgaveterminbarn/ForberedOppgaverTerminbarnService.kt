@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
@@ -36,8 +35,8 @@ class ForberedOppgaverTerminbarnService(private val personService: PersonService
 
         gjeldendeBarn.values.forEach { terminbarnPåSøknad ->
             val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
-            val pdlBarnUnder18år = pdlBarnUnder18år(fødselsnummerSøker)
-            val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarnUnder18år) }
+            val pdlBarn = pdlBarn(fødselsnummerSøker)
+            val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarn) }
             val oppgaver = lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
             if (oppgaver.isNotEmpty()) {
                 sendOppgaverTilIverksett(oppgaver)
