@@ -64,7 +64,7 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
         val søknad = when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
             StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
-            else -> throw Feil("Ikke implementert støtte for Støndastype $stønadstype")
+            StønadType.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)
         }
 
         return if (søknad == null) {
