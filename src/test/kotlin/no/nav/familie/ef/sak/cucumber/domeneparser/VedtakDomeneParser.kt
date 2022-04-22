@@ -106,7 +106,7 @@ object VedtakDomeneParser {
             Barnetilsynperiode(
                     datoFra = datoFra,
                     datoTil = datoTil,
-                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad)?.let { it } ?: 0,
+                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                     barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(1, it).map { UUID.randomUUID() } }
                            ?: emptyList()
             )
