@@ -87,7 +87,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 avslåBegrunnelse = null,
                 barnetilsyn = BarnetilsynWrapper(listOf(Barnetilsynperiode(datoFra = utgiftsperiode.årMånedFra.atDay(1),
                                                                            datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
-                                                                           utgifter = utgiftsperiode.utgifter.toBigDecimal(),
+                                                                           utgifter = utgiftsperiode.utgifter,
                                                                            barn = utgiftsperiode.barn)),
                                                  begrunnelse = ""),
                 kontantstøtte = KontantstøtteWrapper(emptyList()),

@@ -177,7 +177,9 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
             StønadType.BARNETILSYN -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.barnetilsyn")) {
                 "Støtter ikke opprettelse av fagsak for barnetilsyn"
             }
-            StønadType.SKOLEPENGER -> throw Feil("Støtter ikke opprettelse av fagsak for skolepenger")
+            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.skolepenger")){
+                "Støtter ikke opprettelse av fagsak for skolepenger"
+            }
         }
     }
 
