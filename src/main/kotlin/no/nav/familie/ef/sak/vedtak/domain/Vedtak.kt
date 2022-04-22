@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -47,7 +46,7 @@ data class Vedtaksperiode(
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
 data class Barnetilsynperiode(val datoFra: LocalDate,
                               val datoTil: LocalDate,
-                              val utgifter: BigDecimal,
+                              val utgifter: Int,
                               val barn: List<UUID>)
 
 data class PeriodeMedBeløp(val datoFra: LocalDate,

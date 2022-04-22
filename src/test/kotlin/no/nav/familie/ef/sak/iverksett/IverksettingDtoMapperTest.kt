@@ -320,7 +320,7 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
         assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
         assertThat(vedtaksperiode.antallBarn).isEqualTo(1)
-        assertThat(vedtaksperiode.utgifter).isEqualTo(BigDecimal.TEN)
+        assertThat(vedtaksperiode.utgifter).isEqualTo(10)
 
         assertThat(vedtak.kontantstøtte).hasSize(1)
         val kontantstøtte = vedtak.kontantstøtte[0]
