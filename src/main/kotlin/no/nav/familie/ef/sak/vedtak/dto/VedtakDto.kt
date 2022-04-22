@@ -141,7 +141,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(behandlingId: UUID,
             StønadType.BARNETILSYN -> {
                 val vedtaksperiode = Barnetilsynperiode(periode.datoFra(),
                                                         periode.datoTil(),
-                                                        utgifter = BigDecimal.ZERO,
+                                                        utgifter = 0,
                                                         emptyList())
                 Vedtak(behandlingId = behandlingId,
                        sanksjonsårsak = this.sanksjonsårsak,
