@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -15,8 +16,8 @@ import java.util.UUID
 @Service
 class VedtakService(private val vedtakRepository: VedtakRepository) {
 
-    fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID): UUID {
-        return vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId)).behandlingId
+    fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
+        return vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId, stønadstype)).behandlingId
     }
 
     fun slettVedtakHvisFinnes(behandlingId: UUID) {

@@ -124,8 +124,8 @@ object VedtakHistorikkBeregner {
                                                  vedtak: Sanksjonert): List<Vedtakshistorikkperiode> {
         val vedtaksperiodeSanksjon = VedtakshistorikkperiodeOvergangsstønad(vedtak.periode.årMånedFra.atDay(1),
                                                                             vedtak.periode.årMånedTil.atEndOfMonth(),
-                                                                            vedtak.periode.aktivitet,
-                                                                            vedtak.periode.periodeType)
+                                                                            AktivitetType.IKKE_AKTIVITETSPLIKT,
+                                                                            VedtaksperiodeType.SANKSJON)
         val sanksjonsperiode = vedtak.periode.tilPeriode()
         return acc.last().second.flatMap {
             if (!sanksjonsperiode.overlapper(Periode(it.datoFra, it.datoTil))) {

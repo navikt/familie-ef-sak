@@ -26,7 +26,9 @@ class VedtaBlankettSteg(private val vedtakService: VedtakService, private val bl
         when (data) {
             is InnvilgelseOvergangsstønad, is Avslå -> {
                 vedtakService.slettVedtakHvisFinnes(saksbehandling.id)
-                vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandling.id)
+                vedtakService.lagreVedtak(vedtakDto = data,
+                                          behandlingId = saksbehandling.id,
+                                          stønadstype = saksbehandling.stønadstype)
                 blankettRepository.deleteById(saksbehandling.id)
             }
             else -> {

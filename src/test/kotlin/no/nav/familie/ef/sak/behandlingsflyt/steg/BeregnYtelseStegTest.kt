@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -1371,10 +1372,8 @@ internal class BeregnYtelseStegTest {
 
     private fun sanksjon(årMåned: YearMonth) =
             Sanksjonert(sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
-                        periode = VedtaksperiodeDto(årMånedFra = årMåned,
-                                                    årMånedTil = årMåned,
-                                                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                    periodeType = VedtaksperiodeType.SANKSJON),
+                        periode = SanksjonertPeriodeDto(årMånedFra = årMåned,
+                                                        årMånedTil = årMåned),
                         internBegrunnelse = "")
 
     private fun andelhistorikkInnvilget(fom: YearMonth, tom: YearMonth) =

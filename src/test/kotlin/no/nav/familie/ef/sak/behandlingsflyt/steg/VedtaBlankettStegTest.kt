@@ -39,7 +39,7 @@ internal class VedtaBlankettStegTest {
         )
 
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } returns behandling.id
 
         every {
@@ -71,7 +71,7 @@ internal class VedtaBlankettStegTest {
         )
 
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } returns behandling.id
 
         every {
@@ -105,7 +105,7 @@ internal class VedtaBlankettStegTest {
         )
 
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } returns behandling.id
 
         every {

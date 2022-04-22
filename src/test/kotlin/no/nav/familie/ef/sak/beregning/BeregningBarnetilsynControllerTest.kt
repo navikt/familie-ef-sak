@@ -115,7 +115,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
 
         søknadService.lagreSøknadForBarnetilsyn(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id)
+        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id, fagsak.stønadstype)
         grunnlagsdataService.opprettGrunnlagsdata(førstegangsbehandling.id)
 
         return Pair(fagsak, førstegangsbehandling)
@@ -155,7 +155,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                                                                                   perioder = listOf(),
                                                                                   begrunnelse = null))
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, revurdering.id)
+        vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
     }
 

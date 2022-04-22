@@ -74,3 +74,9 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
             )
     )
 }
+
+fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
+        SanksjonertPeriodeDto(
+                årMånedFra = YearMonth.from(datoFra),
+                årMånedTil = YearMonth.from(datoTil)
+        )
