@@ -30,6 +30,7 @@ data class AndelHistorikkDto(val behandlingId: UUID,
                              val aktivitet: AktivitetType?,
                              val aktivitetArbeid: SvarId?,
                              val periodeType: VedtaksperiodeType?,
+                             val erSanksjon: Boolean,
                              val endring: HistorikkEndring?)
 
 data class AndelMedGrunnlagDto(
@@ -159,7 +160,8 @@ object AndelHistorikkBeregner {
                               aktivitet = aktivitet,
                               periodeType = periodeType,
                               endring = it.endring,
-                              aktivitetArbeid = barnetilsyn?.aktivitetArbeid)
+                              aktivitetArbeid = barnetilsyn?.aktivitetArbeid,
+                              erSanksjon = vedtaksperiode.erSanksjon)
         }
     }
 
@@ -189,13 +191,9 @@ object AndelHistorikkBeregner {
         return historikk
     }
 
-    //TODO Håndter sanksjon for barnetilsyn
     private fun lagAndelerFraSanksjoner(vedtaksperioder: List<Vedtakshistorikkperiode>,
                                         tilkjentYtelse: TilkjentYtelse) =
-            vedtaksperioder.mapNotNull {
-                if (it !is VedtakshistorikkperiodeOvergangsstønad || it.periodeType != VedtaksperiodeType.SANKSJON) {
-                    return@mapNotNull null
-                }
+            vedtaksperioder.filter { it.erSanksjon }.map {
                 AndelTilkjentYtelse(beløp = 0,
                                     stønadFom = it.datoFra,
                                     stønadTom = it.datoTil,

@@ -1385,7 +1385,8 @@ internal class BeregnYtelseStegTest {
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null,
-                              aktivitetArbeid = null
+                              aktivitetArbeid = null,
+                              erSanksjon = false
             )
 
     private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
@@ -1397,7 +1398,8 @@ internal class BeregnYtelseStegTest {
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null,
-                              aktivitetArbeid = null
+                              aktivitetArbeid = null,
+                              erSanksjon = true
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =

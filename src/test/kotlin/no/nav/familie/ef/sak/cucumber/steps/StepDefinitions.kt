@@ -309,6 +309,9 @@ class StepDefinitions {
         forventetHistorikkEndring.arbeidAktivitet?.let {
             Assertions.assertThat(beregnetAndelHistorikk.aktivitetArbeid?.name).isEqualTo(it.name)
         }
+        forventetHistorikkEndring.erSanksjon?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.erSanksjon).isEqualTo(it)
+        }
         Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }
 
