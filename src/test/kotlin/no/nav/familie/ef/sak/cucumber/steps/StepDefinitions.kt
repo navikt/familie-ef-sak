@@ -17,11 +17,15 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.repository.behandling
@@ -41,12 +45,15 @@ import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class StepDefinitions {
@@ -75,6 +82,8 @@ class StepDefinitions {
                                                     tilbakekrevingService,
                                                     barnService,
                                                     fagsakService)
+
+    private val vedtakHistorikkService = VedtakHistorikkService(tilkjentYtelseService)
 
     private val slot = slot<TilkjentYtelse>()
     private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
@@ -154,7 +163,6 @@ class StepDefinitions {
 
     @Når("vedtak vedtas")
     fun `når vedtak vedtas`() {
-
         initialiserTilkjentYtelseOgVedtakMock()
 
         gittVedtak.map {
@@ -162,6 +170,40 @@ class StepDefinitions {
                                  ?: error("Fant ikke saksbehandling for vedtak")
             beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
         }
+    }
+
+    @Så("forvent følgende vedtaksperioder fra dato: {}")
+    fun `forvent følgende vedtaksperiodene fra dato`(årMåned: String, dataTable: DataTable) {
+        val vedtak = vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
+        val perioder = vedtak.perioder
+        dataTable.asMaps().mapIndexed { index, rad ->
+            val periode = perioder[index]
+
+            val fraOgMed = parseÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)
+            val tilOgMed = parseÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)
+            assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
+            assertThat(periode.årMånedTil).isEqualTo(tilOgMed)
+
+            assertThat(periode.aktivitet).isEqualTo(parseAktivitetType(rad))
+            assertThat(periode.periodeType).isEqualTo(parseVedtaksperiodeType(rad))
+        }
+        assertThat(dataTable.asMaps()).hasSize(perioder.size)
+    }
+
+    @Så("forvent følgende inntektsperioder fra dato: {}")
+    fun `forvent følgende inntektsperioder fra dato`(årMåned: String, dataTable: DataTable) {
+        val vedtak = vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
+        val perioder = vedtak.inntekter
+        dataTable.asMaps().mapIndexed { index, rad ->
+            val periode = perioder[index]
+
+            val fraOgMed = parseÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)
+            assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
+
+            assertThat(periode.forventetInntekt?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.INNTEKT, rad))
+            assertThat(periode.samordningsfradrag?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad))
+        }
+        assertThat(dataTable.asMaps()).hasSize(perioder.size)
     }
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")
@@ -182,14 +224,14 @@ class StepDefinitions {
 
             try {
 
-                Assertions.assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
-                Assertions.assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
+                assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
+                assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
                 beløpMellom?.let {
-                    Assertions.assertThat(gjelendeAndel.beløp)
+                    assertThat(gjelendeAndel.beløp)
                             .isGreaterThanOrEqualTo(it.first)
                             .isLessThanOrEqualTo(it.second)
                 }
-                Assertions.assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
+                assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
             } catch (e: Throwable) {
                 logger.info("Expected: {}", it)
                 logger.info("Actual: {}", gjelendeAndel)
@@ -227,6 +269,9 @@ class StepDefinitions {
             tilkjentYtelseService.hentForBehandling(any())
         } answers {
             tilkjentYtelser.getValue(firstArg())
+        }
+        every { tilkjentYtelseService.hentHistorikk(any(), any()) } answers {
+            beregnetAndelHistorikkList
         }
         return tilkjentYtelser
     }
@@ -278,41 +323,41 @@ class StepDefinitions {
         val beregnetAndelHistorikk = andelHistorikkDto
         val forventetHistorikkEndring = forventetHistorikkEndringer[index]
 
-        Assertions.assertThat(beregnetAndelHistorikk).isNotNull
-        Assertions.assertThat(beregnetAndelHistorikk.andel.stønadFra).isEqualTo(forventetHistorikkEndring.stønadFra)
-        Assertions.assertThat(beregnetAndelHistorikk.andel.stønadTil).isEqualTo(forventetHistorikkEndring.stønadTil)
-        Assertions.assertThat(beregnetAndelHistorikk.behandlingId).isEqualTo(forventetHistorikkEndring.behandlingId)
+        assertThat(beregnetAndelHistorikk).isNotNull
+        assertThat(beregnetAndelHistorikk.andel.stønadFra).isEqualTo(forventetHistorikkEndring.stønadFra)
+        assertThat(beregnetAndelHistorikk.andel.stønadTil).isEqualTo(forventetHistorikkEndring.stønadTil)
+        assertThat(beregnetAndelHistorikk.behandlingId).isEqualTo(forventetHistorikkEndring.behandlingId)
         if (endringType == null) {
-            Assertions.assertThat(beregnetAndelHistorikk.endring).isNull()
+            assertThat(beregnetAndelHistorikk.endring).isNull()
         } else {
-            Assertions.assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
-            Assertions.assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
+            assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
+            assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
         }
         forventetHistorikkEndring.inntekt?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(it)
         }
         forventetHistorikkEndring.beløp?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.andel.beløp).isEqualTo(it)
         }
         forventetHistorikkEndring.tilleggsstønad?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.andel.tilleggsstønad).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.andel.tilleggsstønad).isEqualTo(it)
         }
         forventetHistorikkEndring.kontantstøtte?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.andel.kontantstøtte).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.andel.kontantstøtte).isEqualTo(it)
         }
         forventetHistorikkEndring.antallBarn?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.andel.antallBarn).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.andel.antallBarn).isEqualTo(it)
         }
         forventetHistorikkEndring.utgifter?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.andel.utgifter.toInt()).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.andel.utgifter.toInt()).isEqualTo(it)
         }
         forventetHistorikkEndring.arbeidAktivitet?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.aktivitetArbeid?.name).isEqualTo(it.name)
+            assertThat(beregnetAndelHistorikk.aktivitetArbeid?.name).isEqualTo(it.name)
         }
         forventetHistorikkEndring.erSanksjon?.let {
-            Assertions.assertThat(beregnetAndelHistorikk.erSanksjon).isEqualTo(it)
+            assertThat(beregnetAndelHistorikk.erSanksjon).isEqualTo(it)
         }
-        Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+        assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }
 
 }

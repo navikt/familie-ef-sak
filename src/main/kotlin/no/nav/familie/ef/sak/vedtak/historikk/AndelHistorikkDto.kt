@@ -27,6 +27,9 @@ data class AndelHistorikkDto(val behandlingId: UUID,
                              val erSanksjon: Boolean,
                              val endring: HistorikkEndring?)
 
+fun AndelHistorikkDto.erIkkeFjernet() =
+        this.endring?.type == null || this.endring.type == EndringType.SPLITTET
+
 data class AndelMedGrunnlagDto(
         val beløp: Int,
         val stønadFra: LocalDate,
