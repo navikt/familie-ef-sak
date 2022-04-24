@@ -1285,7 +1285,7 @@ internal class BeregnYtelseStegTest {
 
         @BeforeEach
         internal fun setUp() {
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
                     listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, grunnlag()))
         }
 
@@ -1306,7 +1306,7 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
                     listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
@@ -1334,7 +1334,7 @@ internal class BeregnYtelseStegTest {
             val nyAndelTom = LocalDate.of(2022, 1, 31)
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
                     listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
