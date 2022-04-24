@@ -279,7 +279,6 @@ object AndelHistorikkBeregner {
                first.tilleggsstønad != second.tilleggsstønad
     }
 
-    //TODO Håndter sanksjon for barnetilsyn
     private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(tidligereAndel: AndelTilkjentYtelse,
                                                                 tidligerePeriode: Vedtakshistorikkperiode): Boolean {
         val vedtaksperiode = this.vedtaksperiode
@@ -287,7 +286,7 @@ object AndelHistorikkBeregner {
             tidligerePeriode !is VedtakshistorikkperiodeOvergangsstønad) {
             return false
         }
-        return vedtaksperiode.periodeType == VedtaksperiodeType.SANKSJON && tidligerePeriode.periodeType == VedtaksperiodeType.SANKSJON
+        return vedtaksperiode.erSanksjon && tidligerePeriode.erSanksjon
                && vedtaksperiode.datoFra == tidligereAndel.stønadFom && vedtaksperiode.datoTil == tidligereAndel.stønadTom
     }
 
