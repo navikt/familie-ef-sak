@@ -16,6 +16,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
+@Deprecated("Brukes kun i blankettbehandling - skal fases ut etterhvert")
 @Service
 class BlankettSteg(
         private val behandlingService: BehandlingService,
