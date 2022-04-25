@@ -45,14 +45,13 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
         val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
-        val alleBarnEver = hentHistorikk(fagsak.id, behandlingId)
+        val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandlingId)
                 .filter { it.endring?.type != EndringType.FJERNET }
                 .filter { it.endring?.type != EndringType.ERSTATTET }
-                .filter { it.endring?.type != EndringType.SPLITTET } // ?? Hva betyr det?
                 .filter { it.andel.beløp > 0 && it.andel.stønadFra <= behandling.sporbar.opprettetTid.toLocalDate() && it.andel.stønadTil >= behandling.sporbar.opprettetTid.toLocalDate() }
                 .map { it.andel.barn }
                 .flatten()
-        val behandlingsbarn = barnService.hentBarnPåSøknadBarnIder(alleBarnEver)
+        val behandlingsbarn = barnService.hentBehandlingBarnForBarnIder(barnIdForAlleAktuelleBehandlinger)
         return barnPåBehandling.filter { barnetViSerPå -> behandlingsbarn.any { it.personIdent == barnetViSerPå.personIdent } }
                 .map { it.id }
     }
