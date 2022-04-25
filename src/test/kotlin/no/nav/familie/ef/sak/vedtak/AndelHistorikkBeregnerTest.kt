@@ -356,7 +356,8 @@ object AndelHistorikkParser {
                                                    ?: error("Trenger id til behandling hvis det finnes en endring"),
                                                    LocalDateTime.now())
                               },
-                              aktivitetArbeid = null)
+                              aktivitetArbeid = null,
+                              erSanksjon = false)
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
 
