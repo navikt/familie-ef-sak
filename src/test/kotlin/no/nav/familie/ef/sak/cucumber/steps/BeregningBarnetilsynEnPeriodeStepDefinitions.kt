@@ -35,13 +35,13 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     @Når("vi beregner barnetilsyn beløp")
     fun `vi beregner barnetilsyn beløp`() {
-        resultat = beregnPeriodebeløp(inputData)
+        resultat = beregnPeriodebeløp(inputData).utbetaltBeløp
     }
 
     private fun beregnPeriodebeløp(periodeDataDto: PeriodeDataDto) =
             BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = periodeDataDto.periodeutgift,
                                                         kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp,
-                                                        tillegstønadBeløp = periodeDataDto.tillegstønadbeløp,
+                                                        tilleggsstønadBeløp = periodeDataDto.tillegstønadbeløp,
                                                         antallBarn = periodeDataDto.antallBarn,
                                                         årMåned = periodeDataDto.årMåned)
 

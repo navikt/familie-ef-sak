@@ -3,6 +3,9 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
@@ -48,9 +51,16 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
     val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
-        BeløpsperiodeBarnetilsynDto(it.periode,
-                                    it.beløp,
-                                    perioder.getValue(YearMonth.from(it.stønadFom)).beregningsgrunnlag)
+        val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
+        BeløpsperiodeBarnetilsynDto(periode = Periode(it.stønadFom, it.stønadTom),
+                                    beløp = it.beløp,
+                                    beløpFørSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløp(
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.tilleggsstønadsbeløp)
+                                            .roundUp()
+                                            .toInt(),
+                                    beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag)
     }
 }
 

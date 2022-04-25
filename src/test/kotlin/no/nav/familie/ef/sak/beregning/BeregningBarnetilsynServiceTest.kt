@@ -421,6 +421,7 @@ class BeregningBarnetilsynServiceTest {
                                  beløp: BigDecimal = BigDecimal(100)): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(periode = Periode(fraDato, tilDato),
                                            beløp = beløp.roundUp().toInt(),
+                                           beløpFørSatsjustering = beløp.roundUp().toInt(),
                                            beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgifter = ZERO,
                                                                                                  kontantstøttebeløp = ZERO,
                                                                                                  tilleggsstønadsbeløp = ZERO,
