@@ -28,16 +28,18 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var barnRepository: BarnRepository
 
     @Test
-    internal fun `ett av to utgåtte terminbarn, forvent ett treff`() {
+    internal fun `to av tre utgåtte terminbarn, forvent to treff`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling = lagreInnvilgetBehandling(fagsak)
         barnRepository.insertAll(listOf(barn(behandlingId = behandling.id, termindato = LocalDate.now()),
                                         barn(behandlingId = behandling.id,
-                                             termindato = LocalDate.now().minusWeeks(5))))
+                                             termindato = LocalDate.now().minusWeeks(5)),
+                                        barn(behandlingId = behandling.id,
+                                             termindato = LocalDate.now().minusWeeks(10))))
 
         val barnForUtplukk =
                 terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
-        assertThat(barnForUtplukk.size).isEqualTo(1)
+        assertThat(barnForUtplukk.size).isEqualTo(2)
     }
 
     @Test
@@ -54,15 +56,17 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `insert og hent utgått terminbarn, forvent existByFagsakIdAndTermindato er lik true`() {
+    internal fun `insert og hent utgått terminbarn, forvent ingen treff`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling = lagreInnvilgetBehandling(fagsak)
         val utgåttTermindato = LocalDate.now().minusWeeks(5)
         barnRepository.insertAll(listOf(barn(behandlingId = behandling.id, termindato = LocalDate.now()),
                                         barn(behandlingId = behandling.id, termindato = utgåttTermindato)))
-
         terminbarnRepository.insert(opprettTerminbarnOppgave(fagsak = fagsak.id, termindato = utgåttTermindato))
-        assertThat(terminbarnRepository.existsByFagsakIdAndTermindato(fagsakId = fagsak.id, termindato = utgåttTermindato)).isTrue()
+
+        val barnForUtplukk =
+                terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
+        assertThat(barnForUtplukk.size).isEqualTo(0)
     }
 
     private fun opprettTerminbarnOppgave(fagsak: UUID = UUID.randomUUID(),
