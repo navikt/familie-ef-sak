@@ -53,16 +53,16 @@ object BeregningBarnetilsynUtil {
                            tilleggsstønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth): BeregnedeBeløp {
-        val maksimaltBeløp = kalkulerUtbetalingsbeløp(periodeutgift, kontantstøtteBeløp, tilleggsstønadBeløp)
+        val beløpFørSatsjustering = kalkulerUtbetalingsbeløp(periodeutgift, kontantstøtteBeløp, tilleggsstønadBeløp)
         val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
 
-        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(maksimaltBeløp, satsBeløp)), beløpFørSatsjustering = maksimaltBeløp)
+        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(beløpFørSatsjustering, satsBeløp)), beløpFørSatsjustering = beløpFørSatsjustering)
     }
 
     fun kalkulerUtbetalingsbeløp(periodeutgift: BigDecimal,
                                  kontantstøtteBeløp: BigDecimal,
                                  tilleggsstønadBeløp: BigDecimal) =
-            maxOf(BigDecimal.ZERO, ((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tilleggsstønadBeløp)
+            maxOf(ZERO, ((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tilleggsstønadBeløp)
 
     private fun YearMonth.tilPeriode(): Periode {
         return Periode(this.atDay(1),

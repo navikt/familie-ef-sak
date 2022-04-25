@@ -2,6 +2,10 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.tilkjentYtelseIdNummerTilUUID
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
@@ -30,9 +34,6 @@ import java.util.AbstractMap
 import java.util.UUID
 
 object VedtakDomeneParser {
-
-    val behandlingIdTilUUID = (1..10).associateWith { UUID.randomUUID() }
-    val tilkjentYtelseIdNummerTilUUID = (1..10).associateWith { UUID.randomUUID() }
 
     fun mapVedtak(dataTable: DataTable): List<Vedtak> {
         return dataTable.asMaps().groupBy {
@@ -71,9 +72,17 @@ object VedtakDomeneParser {
         return dataTable.asMaps().groupBy {
             it.getValue(VedtakDomenebegrep.BEHANDLING_ID.nøkkel)
         }.map { (_, rader) ->
-            val perioder = mapPerioderForBarnetilsyn(rader)
             val rad = rader.first()
             val resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE
+            val perioder = when (resultatType) {
+                ResultatType.INNVILGE -> mapPerioderForBarnetilsyn(rader)
+                ResultatType.SANKSJONERE -> {
+                    val perioderForBarnetilsyn = mapPerioderForBarnetilsyn(rader)
+                    validerSanksjon(perioderForBarnetilsyn)
+                    perioderForBarnetilsyn
+                }
+                else -> emptyList()
+            }
             Vedtak(
                     behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
                     resultatType = resultatType,
@@ -84,6 +93,16 @@ object VedtakDomeneParser {
                     kontantstøtte = KontantstøtteWrapper(emptyList()), // overskreves i egen "Gitt"
                     tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null) // overskreves i egen "Gitt"
             )
+        }
+    }
+
+    private fun validerSanksjon(perioderForBarnetilsyn: List<Barnetilsynperiode>) {
+        feilHvisIkke(perioderForBarnetilsyn.size == 1) {
+            "Antall rader for sanksjonering må være 1, per behandlingId"
+        }
+        val periode = perioderForBarnetilsyn.single()
+        feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
+            "Sanksjon strekker seg ikke 1 måned: ${periode.datoFra} - ${periode.datoTil}"
         }
     }
 
@@ -107,7 +126,7 @@ object VedtakDomeneParser {
             Barnetilsynperiode(
                     datoFra = datoFra,
                     datoTil = datoTil,
-                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad)?.let { BigDecimal(it) } ?: BigDecimal.ZERO,
+                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                     barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(1, it).map { UUID.randomUUID() } }
                            ?: emptyList()
             )
@@ -177,7 +196,8 @@ object VedtakDomeneParser {
             val tilleggsstønad: Int?,
             val antallBarn: Int?,
             val utgifter: Int?,
-            val arbeidAktivitet: SvarId?
+            val arbeidAktivitet: SvarId?,
+            val erSanksjon: Boolean?
     )
 
     fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
@@ -294,7 +314,8 @@ object VedtakDomeneParser {
                     tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
                     antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
                     utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
-                    arbeidAktivitet = parseArbeidAktivitet(rad)
+                    arbeidAktivitet = parseArbeidAktivitet(rad),
+                    erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
             )
         }
     }
@@ -309,6 +330,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     INNTEKTSREDUKSJON("Inntektsreduksjon"),
     SAMORDNINGSFRADRAG("Samordningsfradrag"),
     BELØP("Beløp"),
+    BELØP_MELLOM("Beløp mellom"),
     FRA_OG_MED_DATO("Fra og med dato"),
     TIL_OG_MED_DATO("Til og med dato"),
     AKTIVITET_TYPE("Aktivitet"),
@@ -316,12 +338,14 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     VEDTAKSPERIODE_TYPE("Vedtaksperiode"),
     BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
+    KILDE_BEHANDLING_ID("Kildebehandling"),
     ENDRING_TYPE("Endringstype"),
     OPPHØRSDATO("Opphørsdato"),
     UTGIFTER("Utgifter"),
     ANTALL_BARN("Antall barn"),
     TILLEGGSSTØNAD("Tilleggsstønad"),
-    KONTANTSTØTTE("Kontantstøtte")
+    KONTANTSTØTTE("Kontantstøtte"),
+    ER_SANKSJON("Er sanksjon"),
     ;
 
     override fun nøkkel(): String {

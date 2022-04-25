@@ -31,7 +31,6 @@ import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -58,7 +57,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId).hentAktivIdent()
         val saksbehandlingMedOppdatertIdent = saksbehandling.copy(ident = aktivIdent)
         nullstillEksisterendeVedtakPåBehandling(saksbehandlingMedOppdatertIdent.id)
-        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandlingMedOppdatertIdent.id)
+        vedtakService.lagreVedtak(vedtakDto = data,
+                                  behandlingId = saksbehandlingMedOppdatertIdent.id,
+                                  stønadstype = saksbehandlingMedOppdatertIdent.stønadstype)
 
         when (data) {
             is InnvilgelseOvergangsstønad -> {
@@ -298,13 +299,13 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             vedtak.perioder.filter { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
     private fun finnOpphørsperioder(vedtak: InnvilgelseBarnetilsyn) =
-            vedtak.perioder.filter { it.utgifter.compareTo(BigDecimal.ZERO) == 0 }.tilPerioder()
+            vedtak.perioder.filter { it.utgifter == 0 }.tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseOvergangsstønad) =
             vedtak.perioder.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) =
-            vedtak.perioder.filter { it.utgifter.compareTo(BigDecimal.ZERO) != 0 }.tilPerioder()
+            vedtak.perioder.filter { it.utgifter != 0 }.tilPerioder()
 
     private fun lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak: InnvilgelseOvergangsstønad,
                                                                saksbehandling: Saksbehandling) =
@@ -322,9 +323,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak: InnvilgelseBarnetilsyn,
                                                            saksbehandling: Saksbehandling) =
-            beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak.perioder,
-                                                                vedtak.perioderKontantstøtte,
-                                                                vedtak.tilleggsstønad.perioder)
+            beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
                     .map {
                         AndelTilkjentYtelse(beløp = it.beløp,
                                             stønadFom = it.periode.fradato,

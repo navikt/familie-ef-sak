@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -47,7 +48,7 @@ object VedtakDtoUtil {
             Opphør(fom, begrunnelse)
 
     fun sanksjonertDto(årsak: Sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
-                       periode: VedtaksperiodeDto = vedtaksperiodeDto(),
+                       periode: SanksjonertPeriodeDto = sanksjonertPeriodeDto(),
                        begrunnelse: String = "begrunnelse") =
             Sanksjonert(årsak, periode, begrunnelse)
 
@@ -56,7 +57,7 @@ object VedtakDtoUtil {
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),
                     listOf(barnId),
-                    BigDecimal(500))
+                    500)
 
     fun periodeMedBeløpDto() =
             PeriodeMedBeløpDto(
@@ -76,5 +77,10 @@ object VedtakDtoUtil {
                     YearMonth.of(2021, 12),
                     AktivitetType.BARN_UNDER_ETT_ÅR,
                     VedtaksperiodeType.HOVEDPERIODE)
+
+    fun sanksjonertPeriodeDto() =
+            SanksjonertPeriodeDto(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 12))
 
 }

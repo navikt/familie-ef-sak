@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -53,7 +54,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         vedtakService.slettVedtakHvisFinnes(behandling.id)
 
         /** Opprett */
-        vedtakService.lagreVedtak(vedtakRequest, behandling.id)
+        vedtakService.lagreVedtak(vedtakRequest, behandling.id, fagsak.stønadstype)
 
         /** Verifiser opprettet */
         val vedtakLagret = vedtakRepository.findByIdOrNull(behandling.id)
@@ -65,7 +66,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 InnvilgelseOvergangsstønad("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         assertThat(vedtakRepository.findAll()).isEmpty()
-        vedtakService.lagreVedtak(vedtakRequestMedPeriodeBegrunnelse, behandling.id)
+        vedtakService.lagreVedtak(vedtakRequestMedPeriodeBegrunnelse, behandling.id, fagsak.stønadstype)
 
         /** Verifiser nytt **/
         val nyttVedtakLagret = vedtakRepository.findByIdOrNull(behandling.id)
@@ -85,7 +86,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val tomBegrunnelse = ""
         val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
-        vedtakService.lagreVedtak(vedtakDto, behandling.id)
+        vedtakService.lagreVedtak(vedtakDto, behandling.id, fagsak.stønadstype)
 
         assertThat(vedtakService.hentVedtakHvisEksisterer(behandling.id)).usingRecursiveComparison().isEqualTo(vedtakDto)
     }
@@ -101,7 +102,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val tomBegrunnelse = ""
         val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
-        vedtakService.lagreVedtak(vedtakDto, behandling.id)
+        vedtakService.lagreVedtak(vedtakDto, behandling.id, fagsak.stønadstype)
         val saksbehandlerIdent = "S123456"
         vedtakService.oppdaterSaksbehandler(behandlingId = behandling.id, saksbehandlerIdent = saksbehandlerIdent)
         assertThat(vedtakService.hentVedtak(behandling.id).saksbehandlerIdent).isEqualTo(saksbehandlerIdent)
@@ -118,7 +119,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val tomBegrunnelse = ""
         val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
 
-        vedtakService.lagreVedtak(vedtakDto, behandling.id)
+        vedtakService.lagreVedtak(vedtakDto, behandling.id, fagsak.stønadstype)
         val beslutterIdent = "B123456"
         vedtakService.oppdaterBeslutter(behandlingId = behandling.id, beslutterIdent = beslutterIdent)
         assertThat(vedtakService.hentVedtak(behandling.id).beslutterIdent).isEqualTo(beslutterIdent)
@@ -134,14 +135,14 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentVedtakForBehandlinger - skal returnere vedtak`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak)).id
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)).id
         val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
         val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
                                                    inntektBegrunnelse = "tomBegrunnelse",
                                                    perioder = emptyList(),
                                                    inntekter = emptyList())
-        vedtakService.lagreVedtak(vedtakDto, behandling)
-        vedtakService.lagreVedtak(vedtakDto, behandling2)
+        vedtakService.lagreVedtak(vedtakDto, behandling, fagsak.stønadstype)
+        vedtakService.lagreVedtak(vedtakDto, behandling2, fagsak.stønadstype)
 
         assertThat(vedtakService.hentVedtakForBehandlinger(setOf(behandling, behandling2))).hasSize(2)
     }
@@ -195,15 +196,16 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                     .isNotEqualTo(innvilgelseOvergangsstønadDto())
         }
 
-        private fun opprettBehandling(): UUID {
+        private fun opprettBehandling(): Saksbehandling {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
-            return behandlingRepository.insert(behandling(fagsak)).id
+            val behandlingId = behandlingRepository.insert(behandling(fagsak)).id
+            return behandlingRepository.finnSaksbehandling(behandlingId)
         }
 
         private fun assertInnsendtVedtakErLikHentetVedtak(vedtak: VedtakDto,
-                                                          behandling: UUID) {
-            vedtakService.lagreVedtak(vedtak, behandling)
-            val hentetVedtak = vedtakService.hentVedtak(behandling).tilVedtakDto()
+                                                          behandling: Saksbehandling) {
+            vedtakService.lagreVedtak(vedtak, behandling.id, behandling.stønadstype)
+            val hentetVedtak = vedtakService.hentVedtak(behandling.id).tilVedtakDto()
             assertThat(vedtak).isEqualTo(hentetVedtak)
         }
     }

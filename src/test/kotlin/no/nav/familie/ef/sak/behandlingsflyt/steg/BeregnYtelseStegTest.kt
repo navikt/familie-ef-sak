@@ -29,7 +29,7 @@ import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelDto
+import no.nav.familie.ef.sak.vedtak.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -40,8 +40,10 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
@@ -484,7 +486,7 @@ internal class BeregnYtelseStegTest {
 
             assertThatThrownBy {
                 utførSteg(lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD),
-                          innvilgetBarnetilsyn())
+                          innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31)))
             }.isInstanceOf(Feil::class.java).hasMessageContaining("Feil stønadstype")
         }
     }
@@ -1284,16 +1286,71 @@ internal class BeregnYtelseStegTest {
 
         @BeforeEach
         internal fun setUp() {
-            val grunnlag = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0)
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, grunnlag))
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, grunnlag()))
         }
 
         @Test
         internal fun `innvilger barnetilsyn skal validere at barn finnes`() {
-            utførSteg(lagSaksbehandling(stønadType = StønadType.BARNETILSYN), innvilgetBarnetilsyn())
+            utførSteg(lagSaksbehandling(stønadType = StønadType.BARNETILSYN),
+                      innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31)))
 
             verify(exactly = 1) { barnService.validerBarnFinnesPåBehandling(any(), any()) }
+        }
+
+        @Test
+        internal fun `revurdering - nye andeler legges til etter forrige andeler`() {
+            val forrigeAndelFom = LocalDate.of(2021, 1, 1)
+            val forrigeAndelTom = LocalDate.of(2021, 3, 31)
+            val nyAndelFom = LocalDate.of(2022, 1, 1)
+            val nyAndelTom = LocalDate.of(2022, 1, 31)
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns
+                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, grunnlag()))
+
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.REVURDERING,
+                                     forrigeBehandlingId = UUID.randomUUID()),
+                      innvilgetBarnetilsyn(nyAndelFom, nyAndelTom))
+
+            val andeler = slot.captured.andelerTilkjentYtelse
+            assertThat(andeler).hasSize(2)
+            assertThat(andeler[0].stønadFom).isEqualTo(forrigeAndelFom)
+            assertThat(andeler[0].stønadTom).isEqualTo(forrigeAndelTom)
+
+            assertThat(andeler[1].stønadFom).isEqualTo(nyAndelFom)
+            assertThat(andeler[1].stønadTom).isEqualTo(nyAndelTom)
+
+            assertThat(andeler[0].kildeBehandlingId).isNotEqualTo(andeler[1].kildeBehandlingId)
+            verify(exactly = 1) {
+                simuleringService.hentOgLagreSimuleringsresultat(any())
+            }
+        }
+
+        @Test
+        internal fun `revurdering - førstegangsbehandling er avslått - kun nye andeler som skal gjelde`() {
+            val nyAndelFom = LocalDate.of(2022, 1, 1)
+            val nyAndelTom = LocalDate.of(2022, 1, 31)
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, grunnlag()))
+
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.REVURDERING,
+                                     forrigeBehandlingId = null),
+                      innvilgetBarnetilsyn(nyAndelFom, nyAndelTom))
+
+            val andeler = slot.captured.andelerTilkjentYtelse
+            assertThat(andeler).hasSize(1)
+            assertThat(andeler[0].stønadFom).isEqualTo(nyAndelFom)
+            assertThat(andeler[0].stønadTom).isEqualTo(nyAndelTom)
+
+            verify(exactly = 1) {
+                simuleringService.hentOgLagreSimuleringsresultat(any())
+            }
         }
     }
 
@@ -1304,18 +1361,19 @@ internal class BeregnYtelseStegTest {
                                        inntektBegrunnelse = "null",
                                        periodeBegrunnelse = "null")
 
-    private fun innvilgetBarnetilsyn() =
-            InnvilgelseBarnetilsyn(perioder = emptyList(),
+    private fun innvilgetBarnetilsyn(startDato: LocalDate, sluttDato: LocalDate) =
+            InnvilgelseBarnetilsyn(perioder = listOf(UtgiftsperiodeDto(årMånedFra = YearMonth.from(startDato),
+                                                                       årMånedTil = YearMonth.from(sluttDato),
+                                                                       barn = emptyList(),
+                                                                       utgifter = 2500)),
                                    perioderKontantstøtte = emptyList(),
                                    tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
                                    begrunnelse = null)
 
     private fun sanksjon(årMåned: YearMonth) =
             Sanksjonert(sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
-                        periode = VedtaksperiodeDto(årMånedFra = årMåned,
-                                                    årMånedTil = årMåned,
-                                                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                    periodeType = VedtaksperiodeType.SANKSJON),
+                        periode = SanksjonertPeriodeDto(årMånedFra = årMåned,
+                                                        årMånedTil = årMåned),
                         internBegrunnelse = "")
 
     private fun andelhistorikkInnvilget(fom: YearMonth, tom: YearMonth) =
@@ -1327,7 +1385,8 @@ internal class BeregnYtelseStegTest {
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null,
-                              aktivitetArbeid = null
+                              aktivitetArbeid = null,
+                              erSanksjon = false
             )
 
     private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
@@ -1339,20 +1398,21 @@ internal class BeregnYtelseStegTest {
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null,
-                              aktivitetArbeid = null
+                              aktivitetArbeid = null,
+                              erSanksjon = true
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
-            AndelDto(beløp = beløp,
-                     stønadFra = fom.atDay(1),
-                     stønadTil = tom.atEndOfMonth(),
-                     inntekt = 0,
-                     inntektsreduksjon = 0,
-                     samordningsfradrag = 0,
-                     kontantstøtte = 0,
-                     tilleggsstønad = 0,
-                     antallBarn = 0,
-                     utgifter = BigDecimal.ZERO)
+            AndelMedGrunnlagDto(beløp = beløp,
+                                stønadFra = fom.atDay(1),
+                                stønadTil = tom.atEndOfMonth(),
+                                inntekt = 0,
+                                inntektsreduksjon = 0,
+                                samordningsfradrag = 0,
+                                kontantstøtte = 0,
+                                tilleggsstønad = 0,
+                                antallBarn = 0,
+                                utgifter = BigDecimal.ZERO)
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
@@ -1394,4 +1454,5 @@ internal class BeregnYtelseStegTest {
         return saksbehandling(fagsak, behandling(fagsak, type = type, forrigeBehandlingId = forrigeBehandlingId))
     }
 
+    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0)
 }

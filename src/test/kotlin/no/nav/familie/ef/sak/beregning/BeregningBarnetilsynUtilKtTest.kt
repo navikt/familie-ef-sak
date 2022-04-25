@@ -1,8 +1,9 @@
-package no.nav.familie.ef.sak.beregning.barnetilsyn
+package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil.satserForBarnetilsyn
+import no.nav.familie.ef.sak.beregning.barnetilsyn.hentSatsFor
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 internal class BeregningBarnetilsynUtilKtTest {

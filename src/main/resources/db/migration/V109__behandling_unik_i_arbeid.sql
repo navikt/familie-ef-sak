@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX behandlinger_i_arbeid ON behandling (fagsak_id) WHERE (status <> 'FERDIGSTILT');

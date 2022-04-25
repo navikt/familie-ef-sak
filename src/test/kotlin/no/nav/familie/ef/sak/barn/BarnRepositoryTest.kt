@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.barn
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -55,7 +56,7 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ha 2 barn med ulik ident på ulike behandlinger`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
 
         barnRepository.insert(lagBarn(behandling, personIdent = "1"))
@@ -68,7 +69,7 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `kan ha 2 barn med termindato på ulike behandlinger`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val behandling2 = behandlingRepository.insert(behandling(fagsak))
 
         barnRepository.insert(lagBarn(behandling, fødselTermindato = LocalDate.now()))

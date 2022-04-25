@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
@@ -9,6 +10,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -91,7 +93,8 @@ internal class VedtakHistorikkBeregnerTest {
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(vedtaksperioderPerBehandling, andreVedtak.behandlingId,
-                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk()) + andreVedtak.vedtaksperioder())
+                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
+                                      .tilHistorikk()) + andreVedtak.vedtaksperioder())
     }
 
     private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>) {
@@ -108,11 +111,18 @@ internal class VedtakHistorikkBeregnerTest {
 
     private fun lagVedtaksperioderPerBehandling(vedtak: List<Vedtak>): Map<UUID, List<Vedtakshistorikkperiode>> {
         var datoCount = 0L
-        val behandlingPerDato = vedtak.associate {
-            it.behandlingId to LocalDate.of(2021, 1, 1).atStartOfDay().plusDays(datoCount++)
+        val tilkjenteytelser = vedtak.associate {
+            val tilkjentYtelse = lagTilkjentYtelse(emptyList(), behandlingId = it.behandlingId)
+            val opprettetTid = LocalDate.of(2021, 1, 1).atStartOfDay().plusDays(datoCount++)
+            it.behandlingId to tilkjentYtelse.copy(sporbar = Sporbar(opprettetTid = opprettetTid))
         }
-        val behandlingHistorikkData = vedtak.map { AndelHistorikkBeregner.BehandlingHistorikkData(it.behandlingId, it.tilVedtakDto(), null) }
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, behandlingPerDato)
+        val behandlingHistorikkData = vedtak.map {
+            BehandlingHistorikkData(it.behandlingId,
+                                    it.tilVedtakDto(),
+                                    null,
+                                    tilkjenteytelser.getValue(it.behandlingId))
+        }
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData)
     }
 
     private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
@@ -138,7 +148,15 @@ internal class VedtakHistorikkBeregnerTest {
                       inntektBegrunnelse = null,
                       avslåBegrunnelse = null,
                       perioder = perioder?.let { PeriodeWrapper(it.toList()) },
-                      inntekter = perioder?.let { InntektWrapper(listOfNotNull(it.firstOrNull()?.let { Inntektsperiode(it.datoFra, it.datoTil, BigDecimal.ZERO, BigDecimal.ZERO) }))  },
+                      inntekter = perioder?.let {
+                          InntektWrapper(listOfNotNull(it.firstOrNull()
+                                                               ?.let {
+                                                                   Inntektsperiode(it.datoFra,
+                                                                                   it.datoTil,
+                                                                                   BigDecimal.ZERO,
+                                                                                   BigDecimal.ZERO)
+                                                               }))
+                      },
                       saksbehandlerIdent = null,
                       opphørFom = opphørFom,
                       beslutterIdent = null)

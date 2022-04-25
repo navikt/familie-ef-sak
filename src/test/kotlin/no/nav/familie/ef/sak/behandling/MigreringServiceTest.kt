@@ -387,7 +387,35 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.stønadFom).isEqualTo(stønadFom)
-        assertThat(migreringInfo.stønadFom).isEqualTo(stønadTom)
+        assertThat(migreringInfo.stønadTom).isEqualTo(stønadTom)
+    }
+
+    @Test
+    internal fun `hentMigreringInfo - har periode frem i tiden og i aktuell måned - kan ikke migreres pga flere aktive perioder`() {
+        val nå = YearMonth.of(2021, 1)
+        val stønadFom = nå.plusMonths(10)
+        val stønadTom = nå.plusMonths(10)
+        val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadFom = nå.atDay(1),
+                stønadTom = nå.atEndOfMonth(),
+                inntektsgrunnlag = 10,
+                samordningsfradrag = 5)
+
+        val infotrygdPeriode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+                vedtakId = 2,
+                stønadFom = stønadFom.atDay(1),
+                stønadTom = stønadTom.atEndOfMonth(),
+                inntektsgrunnlag = 10,
+                samordningsfradrag = 5)
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+                InfotrygdPeriodeResponse(listOf(infotrygdPeriode, infotrygdPeriode2), emptyList(), emptyList())
+        val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
+
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, nå)
+
+        assertThat(migreringInfo.kanMigreres).isFalse
+        assertThat(migreringInfo.årsak).contains("Har fler enn 1 (2) aktiv periode")
     }
 
     @Test

@@ -7,7 +7,6 @@ import java.util.UUID
 
 data class Vedtaksbrev(@Id
                        val behandlingId: UUID,
-                      // val saksbehandlerBrevrequest: String,
                        val saksbehandlerHtml: String? = null,
                        val brevmal: String,
                        val saksbehandlersignatur: String,

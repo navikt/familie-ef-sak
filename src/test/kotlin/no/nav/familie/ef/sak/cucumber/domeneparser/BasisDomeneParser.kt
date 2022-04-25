@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
 import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -65,13 +67,14 @@ fun parseBoolean(domenebegrep: Domenenøkkel, rad: Map<String, String>): Boolean
     }
 }
 
-fun parseValgfriBoolean(domenebegrep: String, rad: Map<String, String?>): Boolean? {
+fun parseValgfriBoolean(domenebegrep: Domenenøkkel, rad: Map<String, String?>): Boolean? {
 
-    if (rad.get(domenebegrep) == null || rad.get(domenebegrep) == "") {
+    val verdi = rad[domenebegrep.nøkkel()]
+    if (verdi == null || verdi == "") {
         return null
     }
 
-    return when (rad.get(domenebegrep)) {
+    return when (verdi) {
         "Ja" -> true
         "Nei" -> false
         else -> null
@@ -79,7 +82,7 @@ fun parseValgfriBoolean(domenebegrep: String, rad: Map<String, String?>): Boolea
 }
 
 fun parseDato(domenebegrep: String, rad: Map<String, String>): LocalDate {
-    val dato = rad.get(domenebegrep)!!
+    val dato = rad[domenebegrep]!!
 
     return if (dato.contains(".")) {
         LocalDate.parse(dato, norskDatoFormatter)
@@ -89,33 +92,33 @@ fun parseDato(domenebegrep: String, rad: Map<String, String>): LocalDate {
 }
 
 fun parseValgfriDato(domenebegrep: String, rad: Map<String, String?>): LocalDate? {
-    if (rad.get(domenebegrep) == null || rad.get(domenebegrep) == "") {
+    val verdi = rad[domenebegrep]
+    if (verdi == null || verdi == "") {
         return null
     }
-    val dato = rad.get(domenebegrep)!!
 
-    return if (dato.contains(".")) {
-        LocalDate.parse(dato, norskDatoFormatter)
+    return if (verdi.contains(".")) {
+        LocalDate.parse(verdi, norskDatoFormatter)
     } else {
-        LocalDate.parse(dato, isoDatoFormatter)
+        LocalDate.parse(verdi, isoDatoFormatter)
     }
 }
 
 fun parseValgfriÅrMåned(domenebegrep: String, rad: Map<String, String?>): YearMonth? {
-    if (rad.get(domenebegrep) == null || rad.get(domenebegrep) == "") {
+    val verdi = rad[domenebegrep]
+    if (verdi == null || verdi == "") {
         return null
     }
-    val dato = rad.get(domenebegrep)!!
 
-    return if (dato.contains(".")) {
-        YearMonth.parse(dato, norskÅrMånedFormatter)
+    return if (verdi.contains(".")) {
+        YearMonth.parse(verdi, norskÅrMånedFormatter)
     } else {
-        YearMonth.parse(dato, isoÅrMånedFormatter)
+        YearMonth.parse(verdi, isoÅrMånedFormatter)
     }
 }
 
 fun verdi(nøkkel: String, rad: Map<String, String>): String {
-    val verdi = rad.get(nøkkel)
+    val verdi = rad[nøkkel]
 
     if (verdi == null || verdi == "") {
         throw java.lang.RuntimeException("Fant ingen verdi for $nøkkel")
@@ -125,7 +128,7 @@ fun verdi(nøkkel: String, rad: Map<String, String>): String {
 }
 
 fun valgfriVerdi(nøkkel: String, rad: Map<String, String>): String? {
-    return rad.get(nøkkel)
+    return rad[nøkkel]
 }
 
 fun parseInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int {
@@ -149,12 +152,16 @@ fun parseValgfriDouble(domenebegrep: Domenenøkkel, rad: Map<String, String>): D
 }
 
 fun parseValgfriInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int? {
-    val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad)
-    if (verdi == null) {
-        return null
-    }
+    valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
 
     return parseInt(domenebegrep, rad)
+}
+
+fun parseValgfriIntRange(domenebegrep: Domenenøkkel, rad: Map<String, String>): Pair<Int, Int>? {
+    val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
+
+    return Pair(Integer.parseInt(verdi.split("-").first()),
+                Integer.parseInt(verdi.split("-").last()))
 }
 
 fun parseResultatType(rad: Map<String, String>): ResultatType? {
@@ -181,6 +188,11 @@ fun parseArbeidAktivitet(rad: Map<String, String>): SvarId? {
 fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null
     return VedtaksperiodeType.valueOf(verdi)
+}
+
+fun parseBehandlingstype(rad: Map<String, String>): BehandlingType? {
+    val verdi = valgfriVerdi(SaksbehandlingDomeneBegrep.BEHANDLINGSTYPE.nøkkel, rad) ?: return null
+    return BehandlingType.valueOf(verdi)
 }
 
 fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {

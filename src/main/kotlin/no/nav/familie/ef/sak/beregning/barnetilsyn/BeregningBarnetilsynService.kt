@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
-import java.math.BigDecimal.ZERO
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -29,12 +28,8 @@ class BeregningBarnetilsynService {
         validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
-        return utgiftsperioder.map { it.split() }
-                .flatten()
-                .map { utgiftsMåned ->
-                    utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder,
-                                                                tilleggsstønadsperioder)
-                }
+        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(kontantstøttePerioder, tilleggsstønadsperioder)
+                .values.toList()
                 .mergeSammenhengendePerioder()
     }
 
@@ -47,8 +42,8 @@ class BeregningBarnetilsynService {
                                        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>) {
 
 
-        brukerfeilHvis(utgiftsperioder.any { it.utgifter < ZERO }) { "Utgifter kan ikke være mindre enn 0" }
-        brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000.toBigDecimal() }) { "Utgifter på mer enn 40000 støttes ikke" }
+        brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
+        brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000 }) { "Utgifter på mer enn 40000 støttes ikke" }
 
         brukerfeilHvis(kontantstøttePerioder.any { it.beløp < 0 }) { "Kontantstøtte kan ikke være mindre enn 0" }
         brukerfeilHvis(kontantstøttePerioder.any { it.beløp > 45000 }) { "Kontantstøtte på over 45000 pr. mnd støttes ikke" }
@@ -112,6 +107,19 @@ private fun List<Periode>.harOverlappende(): Boolean {
     }.any { it }
 }
 
+fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =
+        this.perioder.tilBeløpsperioderPerUtgiftsmåned(this.perioderKontantstøtte,
+                                                       this.tilleggsstønad.perioder)
+
+fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
+        kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+) = this.map { it.split() }
+        .flatten().associate { utgiftsMåned ->
+            utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder,
+                                                                                tilleggsstønadsperioder)
+        }
+
 /**
  * Del opp utgiftsperioder i atomiske deler (mnd).
  * Eksempel: 1stk UtgiftsperiodeDto fra januar til mars deles opp i 3:
@@ -121,7 +129,7 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.årMånedFra
     while (måned <= this.årMånedTil) {
-        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter))
+        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal()))
         måned = måned.plusMonths(1)
     }
     return perioder

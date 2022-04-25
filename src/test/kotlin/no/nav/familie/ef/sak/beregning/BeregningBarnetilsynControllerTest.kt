@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.beregning.barnetilsyn
+package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.beregning.Beløpsperiode
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -36,7 +36,6 @@ import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -103,7 +102,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
                                                årMånedTil = YearMonth.of(2022, 4),
                                                barn = listOf(barn.id),
-                                               utgifter = BigDecimal(2500))
+                                               utgifter = 2500)
 
         val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
                                                perioder = listOf(utgiftsperiode),
@@ -116,7 +115,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
 
         søknadService.lagreSøknadForBarnetilsyn(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id)
+        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id, fagsak.stønadstype)
         grunnlagsdataService.opprettGrunnlagsdata(førstegangsbehandling.id)
 
         return Pair(fagsak, førstegangsbehandling)
@@ -147,7 +146,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 3),
                                                    årMånedTil = YearMonth.of(2022, 6),
                                                    barn = barn.map { it.id },
-                                                   utgifter = BigDecimal(3000))
+                                                   utgifter = 3000)
 
         val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
                                                perioder = listOf(utgiftsperiode),
@@ -156,7 +155,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                                                                                   perioder = listOf(),
                                                                                   begrunnelse = null))
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, revurdering.id)
+        vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
     }
 

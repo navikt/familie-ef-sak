@@ -8,19 +8,25 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -75,10 +81,19 @@ data class Opphør(val opphørFom: YearMonth,
                   val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
 
 data class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
-                       val periode: VedtaksperiodeDto,
+                       val periode: SanksjonertPeriodeDto,
                        val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
-fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
+data class SanksjonertPeriodeDto(val årMånedFra: YearMonth,
+                                 val årMånedTil: YearMonth) {
+
+    fun datoFra() = årMånedFra.atDay(1)
+    fun datoTil() = årMånedTil.atEndOfMonth()
+
+    fun tilPeriode() = Periode(fradato = datoFra(), tildato = datoTil())
+}
+
+fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak = when (this) {
     is Avslå -> Vedtak(behandlingId = behandlingId,
                        avslåÅrsak = this.avslåÅrsak,
                        avslåBegrunnelse = this.avslåBegrunnelse,
@@ -106,13 +121,36 @@ fun VedtakDto.tilVedtak(behandlingId: UUID): Vedtak = when (this) {
                avslåBegrunnelse = begrunnelse,
                resultatType = ResultatType.OPPHØRT,
                opphørFom = opphørFom.atDay(1))
-    is Sanksjonert ->
-        Vedtak(behandlingId = behandlingId,
-               sanksjonsårsak = this.sanksjonsårsak,
-               perioder = PeriodeWrapper(listOf(this.periode).tilDomene()),
-               internBegrunnelse = this.internBegrunnelse,
-               resultatType = ResultatType.SANKSJONERE)
+    is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
+
+private fun Sanksjonert.sanksjonertTilVedtak(behandlingId: UUID,
+                                             stønadstype: StønadType) =
+        when (stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> {
+                val vedtaksperiode = Vedtaksperiode(periode.datoFra(),
+                                                    periode.datoTil(),
+                                                    AktivitetType.IKKE_AKTIVITETSPLIKT,
+                                                    VedtaksperiodeType.SANKSJON)
+                Vedtak(behandlingId = behandlingId,
+                       sanksjonsårsak = this.sanksjonsårsak,
+                       perioder = PeriodeWrapper(listOf(vedtaksperiode)),
+                       internBegrunnelse = this.internBegrunnelse,
+                       resultatType = ResultatType.SANKSJONERE)
+            }
+            StønadType.BARNETILSYN -> {
+                val vedtaksperiode = Barnetilsynperiode(periode.datoFra(),
+                                                        periode.datoTil(),
+                                                        utgifter = 0,
+                                                        emptyList())
+                Vedtak(behandlingId = behandlingId,
+                       sanksjonsårsak = this.sanksjonsårsak,
+                       barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
+                       internBegrunnelse = this.internBegrunnelse,
+                       resultatType = ResultatType.SANKSJONERE)
+            }
+            StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+        }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
@@ -133,7 +171,9 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             )
             ResultatType.SANKSJONERE -> Sanksjonert(
                     sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
-                    periode = (this.perioder?.perioder ?: emptyList()).fraDomeneForSanksjon(),
+                    periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
+                              ?: this.barnetilsyn?.perioder?.single()?.fraDomeneForSanksjon()
+                              ?: error("Mangler perioder for sanksjon"),
                     internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
             )
             else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")

@@ -2,9 +2,7 @@
   "sanksjonsårsak": "SAGT_OPP_STILLING",
   "periode": {
     "årMånedFra": "2021-01",
-    "årMånedTil": "2021-12",
-    "aktivitet": "BARN_UNDER_ETT_ÅR",
-    "periodeType": "HOVEDPERIODE"
+    "årMånedTil": "2021-12"
   },
   "internBegrunnelse": "begrunnelse",
   "resultatType": "SANKSJONERE",

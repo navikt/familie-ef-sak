@@ -462,9 +462,12 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     }
 
     private fun opprettdata() {
-        opprettBehandlinger()
+        testoppsettService.lagreFagsak(fagsak)
+        behandlingRepository.insert(behandling)
         innvilg(fagsak, behandling, listOf(vedtaksperiode))
         ferdigstillBehandling(behandling)
+
+        behandlingRepository.insert(behandling2)
         innvilg(fagsak,
                 behandling2,
                 listOf(vedtaksperiode2, vedtaksperiode3),
