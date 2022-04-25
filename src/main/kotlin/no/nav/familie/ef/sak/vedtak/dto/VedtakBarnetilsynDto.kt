@@ -46,7 +46,7 @@ fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> =
 fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
                            datoTil = this.årMånedTil.atEndOfMonth(),
-                           utgifter = this.utgifter.toBigDecimal(),
+                           utgifter = this.utgifter,
                            barn = this.barn)
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -74,3 +74,9 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
             )
     )
 }
+
+fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
+        SanksjonertPeriodeDto(
+                årMånedFra = YearMonth.from(datoFra),
+                årMånedTil = YearMonth.from(datoTil)
+        )

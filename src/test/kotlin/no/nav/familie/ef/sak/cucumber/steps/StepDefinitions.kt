@@ -206,9 +206,9 @@ class StepDefinitions {
     private fun mockLagreVedtak(): MutableList<Vedtak> {
         val lagredeVedtak = mutableListOf<Vedtak>()
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } answers {
-            lagredeVedtak.add(firstArg<VedtakDto>().tilVedtak(secondArg()))
+            lagredeVedtak.add(firstArg<VedtakDto>().tilVedtak(secondArg(), thirdArg()))
             secondArg()
         }
         return lagredeVedtak
@@ -308,6 +308,9 @@ class StepDefinitions {
         }
         forventetHistorikkEndring.arbeidAktivitet?.let {
             Assertions.assertThat(beregnetAndelHistorikk.aktivitetArbeid?.name).isEqualTo(it.name)
+        }
+        forventetHistorikkEndring.erSanksjon?.let {
+            Assertions.assertThat(beregnetAndelHistorikk.erSanksjon).isEqualTo(it)
         }
         Assertions.assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }

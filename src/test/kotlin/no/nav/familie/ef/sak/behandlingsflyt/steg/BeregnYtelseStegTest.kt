@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -1285,8 +1286,8 @@ internal class BeregnYtelseStegTest {
 
         @BeforeEach
         internal fun setUp() {
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, grunnlag()))
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, grunnlag()))
         }
 
         @Test
@@ -1306,8 +1307,8 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, grunnlag()))
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                                      type = BehandlingType.REVURDERING,
@@ -1334,8 +1335,8 @@ internal class BeregnYtelseStegTest {
             val nyAndelTom = LocalDate.of(2022, 1, 31)
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, grunnlag()))
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                                      type = BehandlingType.REVURDERING,
@@ -1371,10 +1372,8 @@ internal class BeregnYtelseStegTest {
 
     private fun sanksjon(årMåned: YearMonth) =
             Sanksjonert(sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
-                        periode = VedtaksperiodeDto(årMånedFra = årMåned,
-                                                    årMånedTil = årMåned,
-                                                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                    periodeType = VedtaksperiodeType.SANKSJON),
+                        periode = SanksjonertPeriodeDto(årMånedFra = årMåned,
+                                                        årMånedTil = årMåned),
                         internBegrunnelse = "")
 
     private fun andelhistorikkInnvilget(fom: YearMonth, tom: YearMonth) =
@@ -1386,7 +1385,8 @@ internal class BeregnYtelseStegTest {
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null,
-                              aktivitetArbeid = null
+                              aktivitetArbeid = null,
+                              erSanksjon = false
             )
 
     private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
@@ -1398,7 +1398,8 @@ internal class BeregnYtelseStegTest {
                               aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null,
-                              aktivitetArbeid = null
+                              aktivitetArbeid = null,
+                              erSanksjon = true
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =

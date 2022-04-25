@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -64,7 +63,7 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
         val søknad = when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
             StønadType.BARNETILSYN -> søknadService.hentBarnetilsyn(behandlingId)
-            else -> throw Feil("Ikke implementert støtte for Støndastype $stønadstype")
+            StønadType.SKOLEPENGER -> søknadService.hentSkolepenger(behandlingId)
         }
 
         return if (søknad == null) {

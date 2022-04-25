@@ -3,9 +3,10 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.Beregningsgrunnlag
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
-import no.nav.familie.ef.sak.beregning.barnetilsyn.split
-import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperiodeBarnetilsynDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
+import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -47,20 +48,19 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
 
 fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
     val startDato = vedtak.perioder.first().årMånedFra.atDay(1)
-    val perioder = vedtak.perioder.map { it.split() }.flatten().associate {
-        it.årMåned to Pair(it,
-                           it.tilBeløpsperiodeBarnetilsynDto(vedtak.perioderKontantstøtte,
-                                                             vedtak.tilleggsstønad.perioder))
-    }
+    val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
-        val pair = perioder.getValue(YearMonth.from(it.stønadFom))
-        BeløpsperiodeBarnetilsynDto(Periode(it.stønadFom, it.stønadTom), it.beløp,
-                                    BeregningsgrunnlagBarnetilsynDto(pair.first.utgifter,
-                                                                     pair.second.beregningsgrunnlag.kontantstøttebeløp,
-                                                                     pair.second.beregningsgrunnlag.tilleggsstønadsbeløp,
-                                                                     pair.first.barn.size,
-                                                                     pair.first.barn))
+        val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
+        BeløpsperiodeBarnetilsynDto(periode = Periode(it.stønadFom, it.stønadTom),
+                                    beløp = it.beløp,
+                                    beløpFørSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløp(
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.tilleggsstønadsbeløp)
+                                            .roundUp()
+                                            .toInt(),
+                                    beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag)
     }
 }
 
