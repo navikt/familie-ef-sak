@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -12,13 +13,13 @@ import java.util.Properties
 
 @RestController
 @RequestMapping(path = ["/api/oppgaver-for-terminbarn"])
-class InitForberedOppgaverForTerminBarnTaskController(private val forberedOppgaverTerminbarnTask: ForberedOppgaverTerminbarnTask) {
+class InitForberedOppgaverForTerminBarnTaskController(private val taskService: TaskService) {
 
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
-        forberedOppgaverTerminbarnTask.doTask(Task(ForberedOppgaverTerminbarnTask.TYPE,
-                                                   LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE),
-                                                   Properties()))
+        taskService.save(Task(ForberedOppgaverTerminbarnTask.TYPE,
+                              LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE),
+                              Properties()))
         return ResponseEntity(HttpStatus.OK)
     }
 }
