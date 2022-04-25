@@ -57,7 +57,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId).hentAktivIdent()
         val saksbehandlingMedOppdatertIdent = saksbehandling.copy(ident = aktivIdent)
         nullstillEksisterendeVedtakPåBehandling(saksbehandlingMedOppdatertIdent.id)
-        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandlingMedOppdatertIdent.id)
+        vedtakService.lagreVedtak(vedtakDto = data,
+                                  behandlingId = saksbehandlingMedOppdatertIdent.id,
+                                  stønadstype = saksbehandlingMedOppdatertIdent.stønadstype)
 
         when (data) {
             is InnvilgelseOvergangsstønad -> {

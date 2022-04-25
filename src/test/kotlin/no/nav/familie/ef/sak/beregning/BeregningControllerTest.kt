@@ -162,7 +162,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id)
+        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id, fagsak.stønadstype)
         grunnlagsdataService.opprettGrunnlagsdata(førstegangsbehandling.id)
 
         return Pair(fagsak, førstegangsbehandling)
@@ -193,7 +193,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                       periodeType = VedtaksperiodeType.HOVEDPERIODE)),
                                                    inntekter = emptyList())
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, revurdering.id)
+        vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
     }
 
