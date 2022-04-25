@@ -28,12 +28,8 @@ class BeregningBarnetilsynService {
         validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
-        return utgiftsperioder.map { it.split() }
-                .flatten()
-                .map { utgiftsMåned ->
-                    utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder,
-                                                                tilleggsstønadsperioder)
-                }
+        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(kontantstøttePerioder, tilleggsstønadsperioder)
+                .values.toList()
                 .mergeSammenhengendePerioder()
     }
 
@@ -110,6 +106,19 @@ private fun List<Periode>.harOverlappende(): Boolean {
         a.overlapper(b)
     }.any { it }
 }
+
+fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =
+        this.perioder.tilBeløpsperioderPerUtgiftsmåned(this.perioderKontantstøtte,
+                                                       this.tilleggsstønad.perioder)
+
+fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
+        kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+) = this.map { it.split() }
+        .flatten().associate { utgiftsMåned ->
+            utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder,
+                                                                                tilleggsstønadsperioder)
+        }
 
 /**
  * Del opp utgiftsperioder i atomiske deler (mnd).
