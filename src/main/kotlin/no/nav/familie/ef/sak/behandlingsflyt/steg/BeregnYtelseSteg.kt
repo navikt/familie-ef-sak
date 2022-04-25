@@ -323,9 +323,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak: InnvilgelseBarnetilsyn,
                                                            saksbehandling: Saksbehandling) =
-            beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak.perioder,
-                                                                vedtak.perioderKontantstøtte,
-                                                                vedtak.tilleggsstønad.perioder)
+            beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
                     .map {
                         AndelTilkjentYtelse(beløp = it.beløp,
                                             stønadFom = it.periode.fradato,
