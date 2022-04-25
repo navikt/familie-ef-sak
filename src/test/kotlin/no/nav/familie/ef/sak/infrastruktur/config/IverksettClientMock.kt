@@ -42,8 +42,8 @@ class IverksettClientMock {
         fun mockSimulering(iverksettClient: IverksettClient, etterbetaling: Int = 0, feilutbetaling: Int = 0) {
             val oppsummering = Simuleringsoppsummering(perioder = emptyList(),
                                                        fomDatoNestePeriode = null,
-                                                       etterbetaling = BigDecimal(etterbetaling),
-                                                       feilutbetaling = BigDecimal(feilutbetaling),
+                                                       etterbetaling = BigDecimal.ZERO,
+                                                       feilutbetaling = BigDecimal.ZERO,
                                                        fom = null,
                                                        tomDatoNestePeriode = null,
                                                        forfallsdatoNestePeriode = null,
