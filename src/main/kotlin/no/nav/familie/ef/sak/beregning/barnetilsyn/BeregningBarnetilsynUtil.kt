@@ -6,6 +6,7 @@ import java.math.BigDecimal.ZERO
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 data class MaxbeløpBarnetilsynSats(val fraOgMedDato: LocalDate,
                                    val tilOgMedDato: LocalDate,
@@ -28,12 +29,12 @@ object BeregningBarnetilsynUtil {
     fun lagBeløpsPeriodeBarnetilsyn(utgiftsperiode: UtgiftsMåned,
                                     kontantstøtteBeløp: BigDecimal,
                                     tilleggsstønadBeløp: BigDecimal,
-                                    antallBarnIPeriode: Int): BeløpsperiodeBarnetilsynDto {
+                                    barn: List<UUID>): BeløpsperiodeBarnetilsynDto {
         val beløpPeriode: BigDecimal =
                 beregnPeriodeBeløp(utgiftsperiode.utgifter,
                                    kontantstøtteBeløp,
                                    tilleggsstønadBeløp,
-                                   antallBarnIPeriode,
+                                   barn.size,
                                    utgiftsperiode.årMåned)
 
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
@@ -42,7 +43,8 @@ object BeregningBarnetilsynUtil {
                                                    utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
                                                    tilleggsstønadsbeløp = tilleggsstønadBeløp,
-                                                   antallBarn = antallBarnIPeriode))
+                                                   antallBarn = barn.size,
+                                                   barn = barn))
     }
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
@@ -50,7 +52,7 @@ object BeregningBarnetilsynUtil {
                            tillegstønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth) =
-            maxOf(ZERO, minOf(((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()) ) - tillegstønadBeløp,
+            maxOf(ZERO, minOf(((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tillegstønadBeløp,
                               satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {
@@ -62,7 +64,7 @@ object BeregningBarnetilsynUtil {
 fun BigDecimal.roundUp(): BigDecimal = this.setScale(0, RoundingMode.UP)
 
 fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
-    if(antallBarn==0){
+    if (antallBarn == 0) {
         return 0
     }
     val maxbeløpBarnetilsynSats = this.singleOrNull {

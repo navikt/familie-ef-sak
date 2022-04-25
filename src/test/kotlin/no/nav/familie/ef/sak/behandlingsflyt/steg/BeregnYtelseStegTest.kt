@@ -1411,7 +1411,8 @@ internal class BeregnYtelseStegTest {
                                 kontantstøtte = 0,
                                 tilleggsstønad = 0,
                                 antallBarn = 0,
-                                utgifter = BigDecimal.ZERO)
+                                utgifter = BigDecimal.ZERO,
+                                barn = emptyList())
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
@@ -1453,5 +1454,9 @@ internal class BeregnYtelseStegTest {
         return saksbehandling(fagsak, behandling(fagsak, type = type, forrigeBehandlingId = forrigeBehandlingId))
     }
 
-    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0)
+    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO,
+                                                              BigDecimal.ZERO,
+                                                              BigDecimal.ZERO,
+                                                              0,
+                                                              emptyList())
 }

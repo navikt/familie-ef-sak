@@ -54,7 +54,8 @@ data class VedtakshistorikkperiodeBarnetilsyn(
         val tilleggsstønad: Int,
         val utgifter: BigDecimal,
         val antallBarn: Int,
-        val aktivitetArbeid: SvarId?
+        val aktivitetArbeid: SvarId?,
+        val barn: List<UUID>
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
@@ -64,7 +65,8 @@ data class VedtakshistorikkperiodeBarnetilsyn(
                  periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
                  periode.beregningsgrunnlag.utgifter,
                  periode.beregningsgrunnlag.antallBarn,
-                 aktivitetArbeid
+                 aktivitetArbeid,
+                 periode.beregningsgrunnlag.barn
             )
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {

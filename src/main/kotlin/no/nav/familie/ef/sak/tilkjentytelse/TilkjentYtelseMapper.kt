@@ -59,7 +59,8 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
                                     BeregningsgrunnlagBarnetilsynDto(pair.first.utgifter,
                                                                      pair.second.beregningsgrunnlag.kontantstøttebeløp,
                                                                      pair.second.beregningsgrunnlag.tilleggsstønadsbeløp,
-                                                                     pair.first.barn.size))
+                                                                     pair.first.barn.size,
+                                                                     pair.first.barn))
     }
 }
 

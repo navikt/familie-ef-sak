@@ -120,4 +120,9 @@ class BarnService(
         }
     }
 
+    fun hentBarnPåSøknadBarnIder(søknadBarnIder: List<UUID>): List<BehandlingBarn> {
+
+        return søknadBarnIder.map { barnRepository.findBySøknadBarnId(it) }
+    }
+
 }

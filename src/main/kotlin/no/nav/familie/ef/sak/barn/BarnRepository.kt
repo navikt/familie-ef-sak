@@ -10,4 +10,6 @@ interface BarnRepository : RepositoryInterface<BehandlingBarn, UUID>, InsertUpda
 
     fun findByBehandlingId(behandlingId: UUID): List<BehandlingBarn>
 
+    fun findBySøknadBarnId(søknadBarnId: UUID): BehandlingBarn
+
 }

@@ -316,8 +316,10 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal lage 2 perioder når vi går over to satser over to år med 1 til 2 barn når man ikke overskyter maksbeløp`() {
-        val utgiftsperiode21 =
-                UtgiftsperiodeDto(januar2021, desember2021, barn = listOf(UUID.randomUUID()), utgifter = 1)
+        val utgiftsperiode21 = UtgiftsperiodeDto(januar2021,
+                                                 desember2021,
+                                                 barn = listOf(UUID.randomUUID()),
+                                                 utgifter = 1)
         val utgiftsperiode22 = UtgiftsperiodeDto(januar2022,
                                                  desember2022,
                                                  barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
@@ -424,7 +426,8 @@ class BeregningBarnetilsynServiceTest {
                                            beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgifter = ZERO,
                                                                                                  kontantstøttebeløp = ZERO,
                                                                                                  tilleggsstønadsbeløp = ZERO,
-                                                                                                 antallBarn = 1))
+                                                                                                 antallBarn = 1,
+                                                                                                 barn = emptyList()))
     }
 
     private fun listeMedEnPeriodeMedBeløp(fra: YearMonth = januar2022,

@@ -22,4 +22,12 @@ class TilkjentYtelseController(private val tilkjentYtelseService: TilkjentYtelse
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilDto())
     }
+
+    @GetMapping("/barn/{behandlingId}")
+    fun hentBarnMedLøpendeUtbetalinger(@PathVariable behandlingId: UUID): Ressurs<List<UUID>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(tilkjentYtelseService.utledLøpendeUtbetalingForBarnIBarnetilsyn(behandlingId))
+    }
+
+
 }
