@@ -299,13 +299,14 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal lage 1 perioder når vi går over to satser over to år med 2 barn når man ikke overskyter maksbeløp`() {
+        val listeAvBarn = listOf(UUID.randomUUID(), UUID.randomUUID())
         val utgiftsperiode21 = UtgiftsperiodeDto(januar2021,
                                                  desember2021,
-                                                 barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
+                                                 barn = listeAvBarn,
                                                  utgifter = 1)
         val utgiftsperiode22 = UtgiftsperiodeDto(januar2022,
                                                  desember2022,
-                                                 barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
+                                                 barn = listeAvBarn,
                                                  utgifter = 1)
         val beregnYtelseBarnetilsyn =
                 service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode21, utgiftsperiode22),
