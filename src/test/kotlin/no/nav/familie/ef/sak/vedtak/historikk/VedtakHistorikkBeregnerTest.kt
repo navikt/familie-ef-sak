@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.felles.domain.Sporbar
