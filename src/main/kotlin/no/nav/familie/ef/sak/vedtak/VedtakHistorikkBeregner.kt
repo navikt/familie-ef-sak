@@ -60,6 +60,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
         val utgifter: BigDecimal,
         val antallBarn: Int,
         val aktivitetArbeid: SvarId?,
+        val barn: List<UUID>
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
@@ -71,6 +72,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
                  periode.beregningsgrunnlag.utgifter,
                  periode.beregningsgrunnlag.antallBarn,
                  aktivitetArbeid,
+                 periode.beregningsgrunnlag.barn
             )
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
@@ -163,7 +165,9 @@ object VedtakHistorikkBeregner {
                                                        utgifter = BigDecimal.ZERO,
                                                        antallBarn = 0,
                                                        aktivitetArbeid = null,
-                                                       erSanksjon = true)
+                                                       erSanksjon = true,
+                                                       barn = emptyList()
+                    )
             }
 
     /**

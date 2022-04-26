@@ -27,7 +27,7 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder: List<P
     return BeregningBarnetilsynUtil.lagBeløpsPeriodeBarnetilsyn(utgiftsperiode = this,
                                                                 kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
                                                                 tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
-                                                                antallBarnIPeriode = this.barn.size)
+                                                                barn = this.barn)
 }
 
 private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int {

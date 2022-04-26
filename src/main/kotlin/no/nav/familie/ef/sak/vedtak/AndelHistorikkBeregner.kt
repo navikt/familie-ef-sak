@@ -43,7 +43,8 @@ data class AndelMedGrunnlagDto(
         val kontantstøtte: Int,
         val tilleggsstønad: Int,
         val antallBarn: Int,
-        val utgifter: BigDecimal = BigDecimal.ZERO
+        val utgifter: BigDecimal = BigDecimal.ZERO,
+        val barn: List<UUID>
 ) {
 
     constructor(andel: AndelTilkjentYtelse,
@@ -57,7 +58,8 @@ data class AndelMedGrunnlagDto(
             kontantstøtte = vedtaksinformasjon?.kontantstøtte ?: 0,
             tilleggsstønad = vedtaksinformasjon?.tilleggsstønad ?: 0,
             utgifter = vedtaksinformasjon?.utgifter ?: BigDecimal.ZERO,
-            antallBarn = vedtaksinformasjon?.antallBarn ?: 0
+            antallBarn = vedtaksinformasjon?.antallBarn ?: 0,
+            barn = vedtaksinformasjon?.barn ?: emptyList()
     )
 }
 

@@ -94,6 +94,10 @@ class PdlClientConfig {
                 .returns(mapOf("123" to PdlIdent("ny123", false),
                                "456" to PdlIdent("ny456", false)))
 
+        every { pdlClient.hentIdenterBolk(listOf("456", "123")) }
+                .returns(mapOf("123" to PdlIdent("ny123", false),
+                               "456" to PdlIdent("ny456", false)))
+
         every { pdlClient.hentIdenterBolk(listOf("111", "222")) }
                 .returns(mapOf("111" to PdlIdent("111", false),
                                "222" to PdlIdent("222", false)))

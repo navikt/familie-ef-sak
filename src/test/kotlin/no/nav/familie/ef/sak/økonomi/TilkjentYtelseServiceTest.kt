@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.økonomi
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -26,11 +27,13 @@ class TilkjentYtelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val vurderingService = mockk<VurderingService>()
+    private val barnService = mockk<BarnService>()
     private val tilkjentYtelseService = TilkjentYtelseService(behandlingService,
                                                               mockk(),
                                                               tilkjentYtelseRepository,
                                                               fagsakService,
-                                                              vurderingService)
+                                                              vurderingService,
+                                                              barnService)
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))
     private val behandling = behandling(fagsak = fagsak)

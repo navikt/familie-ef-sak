@@ -6,6 +6,7 @@ import java.math.BigDecimal.ZERO
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 data class MaxbeløpBarnetilsynSats(val fraOgMedDato: LocalDate,
                                    val tilOgMedDato: LocalDate,
@@ -28,12 +29,12 @@ object BeregningBarnetilsynUtil {
     fun lagBeløpsPeriodeBarnetilsyn(utgiftsperiode: UtgiftsMåned,
                                     kontantstøtteBeløp: BigDecimal,
                                     tilleggsstønadBeløp: BigDecimal,
-                                    antallBarnIPeriode: Int): BeløpsperiodeBarnetilsynDto {
+                                    barn: List<UUID>): BeløpsperiodeBarnetilsynDto {
         val beregnedeBeløp: BeregnedeBeløp =
                 beregnPeriodeBeløp(utgiftsperiode.utgifter,
                                    kontantstøtteBeløp,
                                    tilleggsstønadBeløp,
-                                   antallBarnIPeriode,
+                                   barn.size,
                                    utgiftsperiode.årMåned)
 
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
@@ -44,7 +45,8 @@ object BeregningBarnetilsynUtil {
                                                    utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
                                                    tilleggsstønadsbeløp = tilleggsstønadBeløp,
-                                                   antallBarn = antallBarnIPeriode))
+                                                   antallBarn = barn.size,
+                                                   barn = barn))
     }
 
     data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørSatsjustering: BigDecimal, val makssats: Int)
