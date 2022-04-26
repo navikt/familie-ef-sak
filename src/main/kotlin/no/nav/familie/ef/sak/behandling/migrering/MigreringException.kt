@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
-class MigreringException(val årsak: String, val type: MigreringExceptionType) : RuntimeException(årsak)
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import org.springframework.http.HttpStatus
+
+class MigreringException(val årsak: String, val type: MigreringExceptionType) : ApiFeil(årsak, HttpStatus.BAD_REQUEST)
 
 enum class MigreringExceptionType(val kanGåVidereTilJournalføring: Boolean = false) {
     ÅPEN_SAK,

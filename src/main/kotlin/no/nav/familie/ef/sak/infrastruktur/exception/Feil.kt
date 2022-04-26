@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-data class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException(feil)
+open class ApiFeil(val feil: String, val httpStatus: HttpStatus) : RuntimeException(feil)
 
 class Feil(message: String,
            val frontendFeilmelding: String? = null,
