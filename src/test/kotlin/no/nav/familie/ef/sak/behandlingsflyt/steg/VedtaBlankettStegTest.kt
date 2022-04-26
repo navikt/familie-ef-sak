@@ -13,8 +13,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -31,8 +30,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = Innvilget(
-                resultatType = ResultatType.INNVILGE,
+        val request = InnvilgelseOvergangsstønad(
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
                 emptyList(),
@@ -41,7 +39,7 @@ internal class VedtaBlankettStegTest {
         )
 
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } returns behandling.id
 
         every {
@@ -64,8 +62,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.FØRSTEGANGSBEHANDLING)
-        val request = Innvilget(
-                resultatType = ResultatType.INNVILGE,
+        val request = InnvilgelseOvergangsstønad(
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
                 emptyList(),
@@ -74,7 +71,7 @@ internal class VedtaBlankettStegTest {
         )
 
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } returns behandling.id
 
         every {
@@ -99,8 +96,7 @@ internal class VedtaBlankettStegTest {
                                     steg = StegType.VILKÅR,
                                     status = BehandlingStatus.UTREDES,
                                     type = BehandlingType.BLANKETT)
-        val request = Innvilget(
-                resultatType = ResultatType.INNVILGE,
+        val request = InnvilgelseOvergangsstønad(
                 "En periodebegrunnelse",
                 "En inntektBegrunnelse",
                 emptyList(),
@@ -109,7 +105,7 @@ internal class VedtaBlankettStegTest {
         )
 
         every {
-            vedtakService.lagreVedtak(any(), any())
+            vedtakService.lagreVedtak(any(), any(), any())
         } returns behandling.id
 
         every {

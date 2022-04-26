@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -18,8 +20,8 @@ class InfotrygdPeriodeValideringService(
         private val infotrygdService: InfotrygdService
 ) {
 
-    fun validerKanJournalføreUtenÅMigrere(personIdent: String, stønadType: StønadType) {
-        brukerfeilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
+    fun validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
+        feilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
             "Har ikke støtte for å sjekke migrering av stønadstypen $stønadType"
         }
         if (trengerMigrering(personIdent)) {
@@ -27,6 +29,10 @@ class InfotrygdPeriodeValideringService(
                           "Vennligst søk opp personen og migrer før du journalfører denne journalposten",
                           HttpStatus.BAD_REQUEST)
         }
+    }
+
+    fun validerHarIkkeÅpenSakIInfotrygd(fagsak: Fagsak) {
+        validerSakerIInfotrygd(fagsak.hentAktivIdent(), fagsak.stønadstype)
     }
 
     private fun trengerMigrering(personIdent: String): Boolean {
@@ -41,7 +47,7 @@ class InfotrygdPeriodeValideringService(
     }
 
     fun hentPeriodeForMigrering(personIdent: String, kjøremåned: YearMonth = YearMonth.now()): SummertInfotrygdPeriodeDto {
-        validerSakerIInfotrygd(personIdent)
+        validerSakerIInfotrygd(personIdent, StønadType.OVERGANGSSTØNAD)
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
         validerHarKunEnIdentPåPerioder(perioder, personIdent)
         return periodeFremEllerBakITiden(perioder, kjøremåned)
@@ -50,7 +56,7 @@ class InfotrygdPeriodeValideringService(
     private fun periodeFremEllerBakITiden(perioder: InfotrygdStønadPerioderDto,
                                           kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = perioder.summert
-        val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= førsteDagenINesteMåned(kjøremåned) }
+        val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= kjøremåned.atDay(1) }
         if (perioderFremITiden.isNotEmpty()) {
             return gjeldendePeriodeFremITiden(perioderFremITiden, kjøremåned)
         }
@@ -72,8 +78,9 @@ class InfotrygdPeriodeValideringService(
     /**
      * Perioder frem i tiden migreres fra neste måned
      */
-    private fun gjeldendePeriodeFremITiden(gjeldendePerioder: List<SummertInfotrygdPeriodeDto>,
+    private fun gjeldendePeriodeFremITiden(perioderFremITiden: List<SummertInfotrygdPeriodeDto>,
                                            kjøremåned: YearMonth): SummertInfotrygdPeriodeDto {
+        val gjeldendePerioder = slåSammenFremtidligePerioderHvisLike(perioderFremITiden)
         if (gjeldendePerioder.size > 1) {
             throw MigreringException("Har fler enn 1 (${gjeldendePerioder.size}) aktiv periode",
                                      MigreringExceptionType.FLERE_AKTIVE_PERIODER)
@@ -83,6 +90,37 @@ class InfotrygdPeriodeValideringService(
         validerTomDato(periode)
         return periode.copy(stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom))
     }
+
+    private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> {
+        return perioderFremITiden.sortedBy { it.stønadFom }
+                .fold<SummertInfotrygdPeriodeDto, MutableList<SummertInfotrygdPeriodeDto>>(mutableListOf()) { acc, periode ->
+                    val last = acc.removeLastOrNull()
+                    if (last == null) {
+                        acc.add(periode)
+                    } else if (perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(last, periode)) {
+                        acc.add(last.copy(stønadTom = periode.stønadTom))
+                    } else {
+                        acc.add(last)
+                        acc.add(periode)
+                    }
+                    acc
+                }
+                .toList()
+    }
+
+    /**
+     * Då vi mapper aktivitet for perioder som er arbeidssøker er det viktig at de er like, og trenger ikke å sjekke periodetype
+     */
+    private fun perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(last: SummertInfotrygdPeriodeDto,
+                                                                       periode: SummertInfotrygdPeriodeDto) =
+            last.stønadTom.plusDays(1) == periode.stønadFom &&
+            sammeAktivitetEllerIkkeArbeidssøker(last, periode) &&
+            last.månedsbeløp == periode.månedsbeløp
+
+    private fun sammeAktivitetEllerIkkeArbeidssøker(last: SummertInfotrygdPeriodeDto,
+                                                    periode: SummertInfotrygdPeriodeDto) =
+            last.aktivitet == periode.aktivitet ||
+            (last.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER && periode.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER)
 
     /**
      * Henter siste måneden for en periode bak i tiden
@@ -124,12 +162,12 @@ class InfotrygdPeriodeValideringService(
         }
     }
 
-    private fun validerSakerIInfotrygd(personIdent: String): List<InfotrygdSak> {
-        val sakerForOvergangsstønad =
-                infotrygdService.hentSaker(personIdent).saker.filter { it.stønadType == StønadType.OVERGANGSSTØNAD }
-        validerFinnesIkkeÅpenSak(sakerForOvergangsstønad)
-        validerSakerInneholderKunEnIdent(sakerForOvergangsstønad, personIdent)
-        return sakerForOvergangsstønad
+    private fun validerSakerIInfotrygd(personIdent: String, stønadType: StønadType): List<InfotrygdSak> {
+        val sakerForStønad =
+                infotrygdService.hentSaker(personIdent).saker.filter { it.stønadType == stønadType }
+        validerFinnesIkkeÅpenSak(sakerForStønad)
+        validerSakerInneholderKunEnIdent(sakerForStønad, personIdent)
+        return sakerForStønad
     }
 
     private fun validerHarKunEnIdentPåPerioder(perioder: InfotrygdStønadPerioderDto,
@@ -140,7 +178,6 @@ class InfotrygdPeriodeValideringService(
                                      MigreringExceptionType.FLERE_IDENTER_VEDTAK)
         }
     }
-
     private fun validerSakerInneholderKunEnIdent(sakerForOvergangsstønad: List<InfotrygdSak>,
                                                  personIdent: String) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
@@ -158,10 +195,9 @@ class InfotrygdPeriodeValideringService(
         }
     }
 
-    private fun førsteDagenINesteMåned(yearMonth: YearMonth) = yearMonth.plusMonths(1).atDay(1)
-
     private fun lagSakFeilinfo(sak: InfotrygdSak): String {
         return "saksblokk=${sak.saksblokk} saksnr=${sak.saksnr} " +
                "registrertDato=${sak.registrertDato} mottattDato=${sak.mottattDato}"
     }
+
 }

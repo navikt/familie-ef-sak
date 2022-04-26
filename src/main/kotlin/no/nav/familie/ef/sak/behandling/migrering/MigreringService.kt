@@ -30,8 +30,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
-import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -101,7 +100,7 @@ class MigreringService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerOvergangsstønadAutomatisk(personIdent: String) {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
-        migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId)
+        migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId, kunAktivStønad = true)
     }
 
     /**
@@ -118,15 +117,19 @@ class MigreringService(
         }
     }
 
-    private fun migrerOvergangsstønadForFagsakPerson(fagsakPersonId: UUID): UUID {
+    private fun migrerOvergangsstønadForFagsakPerson(fagsakPersonId: UUID, kunAktivStønad: Boolean = false): UUID {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         val personIdent = fagsakPerson.hentAktivIdent()
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
+        val til = til(periode)
+        if (kunAktivStønad && YearMonth.now() > til) {
+            throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
+        }
         return opprettMigrering(fagsak = fagsak,
                                 fra = fra(periode),
-                                til = til(periode),
+                                til = til,
                                 inntektsgrunnlag = periode.inntektsgrunnlag,
                                 samordningsfradrag = periode.samordningsfradrag,
                                 erReellArbeidssøker = erReellArbeidssøker(periode)).id
@@ -157,11 +160,10 @@ class MigreringService(
         val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
         val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
-        beregnYtelseSteg.utførSteg(saksbehandling, Innvilget(resultatType = ResultatType.INNVILGE,
-                                                             periodeBegrunnelse = null,
-                                                             inntektBegrunnelse = null,
-                                                             perioder = vedtaksperioder,
-                                                             inntekter = inntekter))
+        beregnYtelseSteg.utførSteg(saksbehandling, InnvilgelseOvergangsstønad(periodeBegrunnelse = null,
+                                                                              inntektBegrunnelse = null,
+                                                                              perioder = vedtaksperioder,
+                                                                              inntekter = inntekter))
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
@@ -259,8 +261,14 @@ class MigreringService(
                                      MigreringExceptionType.FEIL_STØNADSTYPE)
         } else if (fagsak.migrert) {
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
-        } else if (behandlingService.hentBehandlinger(fagsak.id).any { it.type != BehandlingType.BLANKETT }) {
-            throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
+        } else {
+            val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
+            if (behandlinger.any { it.type != BehandlingType.BLANKETT }) {
+                throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
+            } else if (behandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+                throw MigreringException("Fagsaken har behandling som ikke er ferdigstilt",
+                                         MigreringExceptionType.IKKE_FERDIGSTILT_BEHANDLING)
+            }
         }
     }
 

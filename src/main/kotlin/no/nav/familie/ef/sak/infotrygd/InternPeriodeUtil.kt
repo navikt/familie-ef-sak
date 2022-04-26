@@ -6,17 +6,18 @@ object InternPeriodeUtil {
      * Slår sammen perioder tvers kilder
      * Når vi skal slå sammen perioder fra infotrygd og EF så er det EF sine perioder som er de som skriver over infotrygd sine
      */
-    fun slåSammenPerioder(efPerioder: List<InternPeriode>, infotrygdperioder: List<InternPeriode>): List<InternPeriode> {
-        val førstePerioden = efPerioder.minByOrNull { it.stønadFom } ?: return infotrygdperioder
+    fun slåSammenPerioder(efPerioder: EfInternPerioder?,
+                          infotrygdperioder: List<InternPeriode>): List<InternPeriode> {
+        val startdato = efPerioder?.startdato ?: return infotrygdperioder
         val perioderFraInfotrygdSomBeholdes = infotrygdperioder.mapNotNull {
-            if (it.stønadFom >= førstePerioden.stønadFom) {
+            if (it.stønadFom >= startdato) {
                 null
-            } else if (it.stønadTom > førstePerioden.stønadFom) {
-                it.copy(stønadTom = førstePerioden.stønadFom.minusDays(1))
+            } else if (it.stønadTom > startdato) {
+                it.copy(stønadTom = startdato.minusDays(1))
             } else {
                 it
             }
         }
-        return efPerioder + perioderFraInfotrygdSomBeholdes
+        return efPerioder.internperioder + perioderFraInfotrygdSomBeholdes
     }
 }

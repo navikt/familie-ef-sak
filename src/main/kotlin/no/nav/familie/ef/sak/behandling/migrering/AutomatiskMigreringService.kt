@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,7 +23,7 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
 
     @Transactional
     fun migrerAutomatisk(antall: Int) {
-        val personerForMigrering = infotrygdReplikaClient.hentPersonerForMigrering(500)
+        val personerForMigrering = infotrygdReplikaClient.hentPersonerForMigrering(1000)
         val alleredeMigrert = migreringsstatusRepository.findAllByIdentIn(personerForMigrering).map { it.ident }
 
         val filtrerteIdenter = personerForMigrering.filterNot { alleredeMigrert.contains(it) }
@@ -30,12 +31,23 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })
-        taskRepository.saveAll(filtrerteIdenter.map { personIdent ->
-            AutomatiskMigreringTask.opprettTask(personIdent).apply {
-                this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-                this.metadata["personIdent"] = personIdent
-            }
-        })
+        taskRepository.saveAll(filtrerteIdenter.map { personIdent -> opprettTask(personIdent) })
+    }
+
+    private fun opprettTask(personIdent: String): Task {
+        return AutomatiskMigreringTask.opprettTask(personIdent).apply {
+            this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+            this.metadata["personIdent"] = personIdent
+        }
+    }
+
+    fun rekjør(personIdent: String) {
+        taskRepository.save(opprettTask(personIdent))
+    }
+
+    fun rekjør(årsak: MigreringExceptionType) {
+        val identer = migreringsstatusRepository.findAllByÅrsak(årsak).map { it.ident }
+        taskRepository.saveAll(identer.map { personIdent -> opprettTask(personIdent) })
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -48,7 +60,7 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         try {
             secureLogger.info("Automatisk migrering av ident=$personIdent")
             migreringService.migrerOvergangsstønadAutomatisk(personIdent)
-            migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.OK))
+            migreringsstatusRepository.update(migreringStatus.copy(status = MigreringResultat.OK, årsak = null))
             secureLogger.info("Automatisk migrering av ident=$personIdent utført=OK")
         } catch (e: MigreringException) {
             secureLogger.warn("Kan ikke migrere ident=$personIdent årsak=${e.type} msg=${e.årsak}")

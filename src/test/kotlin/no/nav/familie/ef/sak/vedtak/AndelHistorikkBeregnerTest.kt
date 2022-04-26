@@ -2,11 +2,11 @@ package no.nav.familie.ef.sak.vedtak
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.tilDto
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.AKTIVITET
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BEHANDLING
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BELØP
@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TOM
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.values
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -30,6 +31,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.net.URL
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -127,7 +129,7 @@ object AndelHistorikkRunner {
         }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId)
+        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId, mapOf())
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
@@ -309,17 +311,25 @@ object AndelHistorikkParser {
                         resultat = ResultatType.OPPHØRT
                         opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
                     }
+                    val inntekter = periodeWrapper?.perioder?.firstOrNull()
+                                            ?.let {
+                                                listOf(Inntektsperiode(it.datoFra,
+                                                                       it.datoTil,
+                                                                       BigDecimal.ZERO,
+                                                                       BigDecimal.ZERO))
+                                            } ?: emptyList()
                     Vedtak(behandlingId = behandlingId,
                            resultatType = resultat,
                            periodeBegrunnelse = null,
                            inntektBegrunnelse = null,
                            avslåBegrunnelse = null,
                            perioder = periodeWrapper,
-                           inntekter = null,
+                           inntekter = InntektWrapper(inntekter),
                            saksbehandlerIdent = null,
                            opphørFom = opphørFom,
                            beslutterIdent = null,
-                           sanksjonsårsak = sanksjonsårsak)
+                           sanksjonsårsak = sanksjonsårsak,
+                           internBegrunnelse = "")
 
                 }
     }
@@ -337,7 +347,7 @@ object AndelHistorikkParser {
                               behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                               vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
                               saksbehandler = "",
-                              andel = mapAndel(it).tilDto(),
+                              andel = AndelMedGrunnlagDto(mapAndel(it), null),
                               aktivitet = it.aktivitet!!,
                               periodeType = it.periodeType!!,
                               endring = it.type?.let { type ->
@@ -345,7 +355,9 @@ object AndelHistorikkParser {
                                                    it.endretI
                                                    ?: error("Trenger id til behandling hvis det finnes en endring"),
                                                    LocalDateTime.now())
-                              })
+                              },
+                              aktivitetArbeid = null,
+                              erSanksjon = false)
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
 
@@ -364,19 +376,20 @@ object AndelHistorikkParser {
                     }
                     acc
                 }
-                .map {
+                .map { holder ->
                     val andelerTilkjentYtelse =
-                            if (it.andeler.contains(null)) {
-                                feilHvis(it.andeler.size > 1) {
+                            if (holder.andeler.contains(null)) {
+                                feilHvis(holder.andeler.size > 1) {
                                     "Andeler kan kun inneholde ett element som mangler stønadFom/stønadTom savnes"
                                 }
                                 emptyList()
-                            } else it.andeler as List<AndelTilkjentYtelse>
+                            } else holder.andeler as List<AndelTilkjentYtelse>
 
-                    TilkjentYtelse(behandlingId = it.behandlingId,
+                    TilkjentYtelse(behandlingId = holder.behandlingId,
                                    vedtakstidspunkt = LocalDateTime.now(),
                                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                   personident = PERSON_IDENT)
+                                   personident = PERSON_IDENT,
+                                   startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now())
                 }
     }
 }

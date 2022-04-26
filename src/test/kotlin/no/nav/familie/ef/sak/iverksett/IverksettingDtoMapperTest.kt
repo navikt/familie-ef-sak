@@ -8,7 +8,10 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -39,12 +42,21 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.felles.RegelId
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
+import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
-import no.nav.familie.kontrakter.ef.iverksett.SvarId
+import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -57,7 +69,13 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg as TilbakekrevingsvalgKontrakt
+import no.nav.familie.kontrakter.ef.felles.BehandlingType as BehandlingTypeIverksett
+import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
+import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
+import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatIverksett
+import no.nav.familie.kontrakter.ef.iverksett.AktivitetType as AktivitetTypeIverksett
+import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType as VedtaksperiodeTypeIverksett
 
 internal class IverksettingDtoMapperTest {
 
@@ -96,7 +114,9 @@ internal class IverksettingDtoMapperTest {
         every { fagsakService.hentFagsakForBehandling(behandling.id) } returns fagsak
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.INNVILGE)
         val behandlingshistorikk =
-                Behandlingshistorikk(behandlingId = behandling.id, opprettetAv = "opprettetAv", steg = StegType.SEND_TIL_BESLUTTER)
+                Behandlingshistorikk(behandlingId = behandling.id,
+                                     opprettetAv = "opprettetAv",
+                                     steg = StegType.SEND_TIL_BESLUTTER)
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
     }
@@ -146,18 +166,67 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
-    internal fun `map fra Saksbehandling til IverksettDto - sjekk alle felter`() {
-
+    internal fun `map overgangsstønad til IverksettDto - sjekk alle felter`() {
         val behandlingId = mockReturnerObjekterMedAlleFelterFylt()
 
-        val saksbehandlingFraJson = objectMapper.readValue<Saksbehandling>(saksbehandlingJson)
-        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandlingFraJson, "beslutter")
+        val saksbehandling = saksbehandling()
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
 
-        assertAlleFelterIverksettDto(iverksettDto, behandlingId)
+        assertAlleFelter(iverksettDto as IverksettOvergangsstønadDto, behandlingId)
     }
 
-    private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?) {
+    @Test
+    internal fun `map barnetilsyn til IverksettDto - sjekk alle felter`() {
+        val behandlingId = mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(stønadType = StønadType.BARNETILSYN)
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+
+        assertAlleFelter(iverksettDto as IverksettBarnetilsynDto, behandlingId)
+    }
+
+    @Test
+    internal fun `skal kunne mappe alle enums`() {
+        BehandlingType.values().forEach { BehandlingTypeIverksett.valueOf(it.name) }
+
+        RegelId.values().forEach { RegelIdIverksett.valueOf(it.name) }
+        SvarId.values().forEach { SvarIdIverksett.valueOf(it.name) }
+        VilkårType.values().forEach { VilkårTypeIverksett.valueOf(it.name) }
+        Vilkårsresultat.values().forEach { VilkårsresultatIverksett.valueOf(it.name) }
+
+        AktivitetType.values().forEach { AktivitetTypeIverksett.valueOf(it.name) }
+        VedtaksperiodeType.values()
+                .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+                .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
+    }
+
+    private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.OVERGANGSSTØNAD)
+        assertVedtaksperiode(iverksettDto.vedtak)
+    }
+
+    private fun assertAlleFelter(iverksettDto: IverksettBarnetilsynDto, behandlingId: UUID?) {
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.BARNETILSYN)
+        assertVedtaksperiode(iverksettDto.vedtak)
+    }
+
+    private fun assertAlleFelterIverksettDto(iverksettDto: IverksettDto, behandlingId: UUID?, stønadType: StønadType) {
         val behandling = iverksettDto.behandling
+        assertFagsak(iverksettDto.fagsak, stønadType)
+        assertSøker(iverksettDto.søker)
+        assertBehandling(behandling, behandlingId)
+        assertVilkårsvurdering(behandling.vilkårsvurderinger)
+        assertVedtak(iverksettDto.vedtak)
+    }
+
+    private fun assertFagsak(fagsak: FagsakdetaljerDto, stønadType: StønadType) {
+        assertThat(fagsak.eksternId).isEqualTo(4)
+        assertThat(fagsak.fagsakId).isEqualTo(UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"))
+        assertThat(fagsak.stønadstype).isEqualTo(stønadType)
+    }
+
+    private fun assertBehandling(behandling: BehandlingsdetaljerDto,
+                                 behandlingId: UUID?) {
         assertThat(behandling.behandlingId).isEqualTo(behandlingId)
         assertThat(behandling.behandlingType.name).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING.name)
         assertThat(behandling.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
@@ -166,69 +235,104 @@ internal class IverksettingDtoMapperTest {
         assertThat(behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
         assertThat(behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(behandling.vilkårsvurderinger.size).isEqualTo(1)
+    }
 
-        val vilkårsvurdering = behandling.vilkårsvurderinger.first()
-        assertThat(vilkårsvurdering.resultat.name).isEqualTo(Vilkårsresultat.OPPFYLT.name)
-        assertThat(vilkårsvurdering.vilkårType.name).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP.name)
-        assertThat(vilkårsvurdering.delvilkårsvurderinger.size).isEqualTo(1)
+    private fun assertSøker(søker: SøkerDto) {
+        assertThat(søker.personIdent).isEqualTo("3")
+        assertThat(søker.barn.size).isEqualTo(1)
+        assertThat(søker.barn.first().personIdent).isEqualTo("123")
+        assertThat(søker.barn.first().termindato).isEqualTo(LocalDate.of(2022, 3, 25))
+        assertThat(søker.tilhørendeEnhet).isEqualTo("4489")
+        assertThat(søker.adressebeskyttelse?.name).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT.name)
+    }
 
-        val delvilkårsvurdering = vilkårsvurdering.delvilkårsvurderinger.first()
-        assertThat(delvilkårsvurdering.resultat.name).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL.name)
-        assertThat(delvilkårsvurdering.vurderinger.size).isEqualTo(1)
-        assertThat(delvilkårsvurdering.vurderinger.first().regelId.name).isEqualTo(RegelId.MEDLEMSKAP_UNNTAK.name)
-        assertThat(delvilkårsvurdering.vurderinger.first().svar?.name).isEqualTo(SvarId.JA.name)
-        assertThat(delvilkårsvurdering.vurderinger.first().begrunnelse).isEqualTo("begrunnelse")
-
-        assertThat(iverksettDto.fagsak.eksternId).isEqualTo(4)
-        assertThat(iverksettDto.fagsak.fagsakId).isEqualTo(UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"))
-        assertThat(iverksettDto.fagsak.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
-
-        assertThat(iverksettDto.søker.personIdent).isEqualTo("3")
-        assertThat(iverksettDto.søker.barn.size).isEqualTo(1)
-        assertThat(iverksettDto.søker.barn.first().personIdent).isEqualTo("123")
-        assertThat(iverksettDto.søker.barn.first().termindato).isEqualTo(LocalDate.of(2022, 3, 25))
-        assertThat(iverksettDto.søker.tilhørendeEnhet).isEqualTo("4489")
-        assertThat(iverksettDto.søker.adressebeskyttelse?.name).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT.name)
-
-        val vedtak = iverksettDto.vedtak
+    private fun assertVedtak(vedtak: VedtaksdetaljerDto) {
         assertThat(vedtak.beslutterId).isEqualTo("beslutter")
-        assertThat(vedtak.brevmottakere.size).isEqualTo(2)
-        assertThat(vedtak.brevmottakere[0].ident).isEqualTo("personIdent")
-        assertThat(vedtak.brevmottakere[0].navn).isEqualTo("fornavn etternavn")
-        assertThat(vedtak.brevmottakere[0].identType.name).isEqualTo(Brevmottaker.IdentType.PERSONIDENT.name)
-        assertThat(vedtak.brevmottakere[0].mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
+        assertThat(vedtak.brevmottakere).hasSize(2)
 
-        assertThat(vedtak.brevmottakere[1].ident).isEqualTo("organisasjonsnummer")
-        assertThat(vedtak.brevmottakere[1].navn).isEqualTo("organisasjonsnavn")
-        assertThat(vedtak.brevmottakere[1].identType.name).isEqualTo(Brevmottaker.IdentType.ORGANISASJONSNUMMER.name)
-        assertThat(vedtak.brevmottakere[1].mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
+        val brevmottaker = vedtak.brevmottakere[0]
+        assertThat(brevmottaker.ident).isEqualTo("personIdent")
+        assertThat(brevmottaker.navn).isEqualTo("fornavn etternavn")
+        assertThat(brevmottaker.identType.name).isEqualTo(Brevmottaker.IdentType.PERSONIDENT.name)
+        assertThat(brevmottaker.mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
+
+        val brevmottaker2 = vedtak.brevmottakere[1]
+        assertThat(brevmottaker2.ident).isEqualTo("organisasjonsnummer")
+        assertThat(brevmottaker2.navn).isEqualTo("organisasjonsnavn")
+        assertThat(brevmottaker2.identType.name).isEqualTo(Brevmottaker.IdentType.ORGANISASJONSNUMMER.name)
+        assertThat(brevmottaker2.mottakerRolle.name).isEqualTo(MottakerRolle.BRUKER.name)
 
         assertThat(vedtak.opphørÅrsak).isNull() // Burde ha verdi i test?
         assertThat(vedtak.resultat).isEqualTo(Vedtaksresultat.INNVILGET)
         assertThat(vedtak.saksbehandlerId).isEqualTo("opprettetAv")
 
         val tilbakekrevingMedVarsel = vedtak.tilbakekreving?.tilbakekrevingMedVarsel
-        assertThat(tilbakekrevingMedVarsel?.perioder?.size).isEqualTo(1)
+        assertThat(tilbakekrevingMedVarsel?.perioder).hasSize(1)
         assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(2022, 3, 30))
         assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.tom).isEqualTo(LocalDate.of(2022, 3, 31))
         assertThat(tilbakekrevingMedVarsel?.varseltekst).isEqualTo("varseltekst")
         assertThat(tilbakekrevingMedVarsel?.sumFeilutbetaling).isEqualTo(BigDecimal("1000.0"))
         assertThat(vedtak.tilbakekreving?.tilbakekrevingsvalg)
-                .isEqualTo(TilbakekrevingsvalgKontrakt.OPPRETT_TILBAKEKREVING_MED_VARSEL)
+                .isEqualTo(no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
 
         assertThat(vedtak.tilkjentYtelse?.startdato).isEqualTo(LocalDate.of(2022, 4, 7))
         //opphørsdato ikke i bruk?
 
-        assertThat(vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(1)
+        assertThat(vedtak.tilkjentYtelse?.andelerTilkjentYtelse).hasSize(1)
+        //assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
+    }
 
-        assertThat(vedtak.vedtaksperioder.size).isEqualTo(1)
-        val vedtaksperiode = vedtak.vedtaksperioder.first()
+    private fun assertVilkårsvurdering(vilkårsvurderinger: List<VilkårsvurderingDto>) {
+        assertThat(vilkårsvurderinger).hasSize(1)
+        val vilkårsvurdering = vilkårsvurderinger[0]
+
+        val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurderinger
+        assertThat(delvilkårsvurderinger).hasSize(1)
+
+        val delvilkårsvurdering = delvilkårsvurderinger[0]
+        assertThat(vilkårsvurdering.resultat.name).isEqualTo(Vilkårsresultat.OPPFYLT.name)
+        assertThat(vilkårsvurdering.vilkårType.name).isEqualTo(VilkårType.FORUTGÅENDE_MEDLEMSKAP.name)
+        assertThat(delvilkårsvurderinger).hasSize(1)
+
+        assertThat(delvilkårsvurdering.resultat.name).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL.name)
+        val vurderinger = delvilkårsvurdering.vurderinger
+        assertThat(vurderinger).hasSize(1)
+
+        val vurdering = vurderinger[0]
+        assertThat(vurdering.regelId.name).isEqualTo(RegelId.MEDLEMSKAP_UNNTAK.name)
+        assertThat(vurdering.svar?.name).isEqualTo(SvarIdIverksett.JA.name)
+        assertThat(vurdering.begrunnelse).isEqualTo("begrunnelse")
+    }
+
+    private fun assertVedtaksperiode(vedtak: VedtaksdetaljerOvergangsstønadDto) {
+        assertThat(vedtak.vedtaksperioder).hasSize(1)
+        val vedtaksperiode = vedtak.vedtaksperioder[0]
         assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
         assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
         assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
         assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
-        //assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
+    }
+
+    private fun assertVedtaksperiode(vedtak: VedtaksdetaljerBarnetilsynDto) {
+        assertThat(vedtak.vedtaksperioder).hasSize(1)
+        val vedtaksperiode = vedtak.vedtaksperioder[0]
+        assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
+        assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
+        assertThat(vedtaksperiode.antallBarn).isEqualTo(1)
+        assertThat(vedtaksperiode.utgifter).isEqualTo(10)
+
+        assertThat(vedtak.kontantstøtte).hasSize(1)
+        val kontantstøtte = vedtak.kontantstøtte[0]
+        assertThat(kontantstøtte.fraOgMed).isEqualTo(LocalDate.of(2021, 3, 27))
+        assertThat(kontantstøtte.tilOgMed).isEqualTo(LocalDate.of(2021, 3, 28))
+        assertThat(kontantstøtte.beløp).isEqualTo(1)
+        assertThat(vedtak.tilleggsstønad).hasSize(1)
+
+        val tilleggsstønad = vedtak.tilleggsstønad[0]
+        assertThat(tilleggsstønad.fraOgMed).isEqualTo(LocalDate.of(2021, 4, 27))
+        assertThat(tilleggsstønad.tilOgMed).isEqualTo(LocalDate.of(2021, 4, 28))
+        assertThat(tilleggsstønad.beløp).isEqualTo(2)
     }
 
     private fun mockReturnerObjekterMedAlleFelterFylt(): UUID? {
@@ -260,27 +364,25 @@ internal class IverksettingDtoMapperTest {
     }
 
 
-    private val saksbehandlingJson = """
-        {
-          "id": "73144d90-d238-41d2-833b-fc719dae23cb",
-          "eksternId": 1,
-          "forrigeBehandlingId": "73144d90-d238-41d2-833b-fc719dae23cc",
-          "type": "FØRSTEGANGSBEHANDLING",
-          "status": "OPPRETTET",
-          "steg": "VILKÅR",
-          "årsak": "SØKNAD",
-          "kravMottatt": "2022-03-01T05:36:39.553",
-          "resultat": "IKKE_SATT",
-          "henlagtÅrsak": "FEILREGISTRERT",
-          "ident": "3",
-          "fagsakId": "65811679-17ed-4c3c-b1ab-c1678acdfa7b",
-          "eksternFagsakId": 4,
-          "stønadstype": "OVERGANGSSTØNAD",
-          "migrert": false,
-          "opprettetTid": "2022-03-02T05:36:39.553",
-          "endretTid": "2022-03-03T05:36:39.556"
-        }
-    """.trimIndent()
+    private fun saksbehandling(stønadType: StønadType = StønadType.OVERGANGSSTØNAD) = Saksbehandling(
+            id = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb"),
+            eksternId = 1,
+            forrigeBehandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc"),
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            status = BehandlingStatus.OPPRETTET,
+            steg = StegType.VILKÅR,
+            årsak = BehandlingÅrsak.SØKNAD,
+            kravMottatt = LocalDate.of(2022, 3, 1),
+            resultat = BehandlingResultat.IKKE_SATT,
+            henlagtÅrsak = HenlagtÅrsak.FEILREGISTRERT,
+            ident = "3",
+            fagsakId = UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"),
+            eksternFagsakId = 4,
+            stønadstype = stønadType,
+            migrert = false,
+            opprettetTid = LocalDateTime.parse("2022-03-02T05:36:39.553"),
+            endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556")
+    )
 
     private val behandlingBarnJson = """
         {
@@ -347,6 +449,28 @@ internal class IverksettingDtoMapperTest {
                     "datoTil": "2022-03-28",
                     "aktivitet": "BARN_UNDER_ETT_ÅR",
                     "periodeType": "HOVEDPERIODE"
+                }] 
+            },
+            "barnetilsyn": {
+                "perioder": [{
+                    "datoFra": "2022-03-27",
+                    "datoTil": "2022-03-28",
+                    "utgifter": 10,
+                    "barn": ["d1d105bb-a573-4870-932e-21def0226cfa"]
+                }] 
+            },
+            "kontantstøtte": {
+                "perioder": [{
+                    "datoFra": "2021-03-27",
+                    "datoTil": "2021-03-28",
+                    "beløp": 1
+                }] 
+            },
+            "tilleggsstønad": {
+                "perioder": [{
+                    "datoFra": "2021-04-27",
+                    "datoTil": "2021-04-28",
+                    "beløp": 2
                 }] 
             },
             "samordningsfradragType": "UFØRETRYGD",

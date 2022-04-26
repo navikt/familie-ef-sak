@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
@@ -84,9 +84,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 steg = StegType.VEDTA_BLANKETT,
                                                                 type = BehandlingType.BLANKETT,
                                                                 status = BehandlingStatus.UTREDES))
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
-                                  inntektBegrunnelse = "inntekt begrunnelse")
+        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
+                                                   inntektBegrunnelse = "inntekt begrunnelse")
 
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
         val vedtak = Vedtak(behandlingId = behandling.id,
@@ -104,9 +103,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga valideringsfeil`() {
         val (_, behandling) = lagFagsakOgBehandling()
 
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
-                                  inntektBegrunnelse = "inntekt begrunnelse")
+        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
+                                                   inntektBegrunnelse = "inntekt begrunnelse")
 
         vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
 
@@ -152,20 +150,19 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                        beløp = 10_000,
                                                        tilOgMed = LocalDate.of(2022, 4, 30),
                                                )))
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
-                                  inntektBegrunnelse = "inntekt begrunnelse",
-                                  perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 1),
+        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
+                                                   inntektBegrunnelse = "inntekt begrunnelse",
+                                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 1),
                                                                       årMånedTil = YearMonth.of(2022, 4),
                                                                       aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
                                                                       periodeType = VedtaksperiodeType.HOVEDPERIODE)),
-                                  inntekter = emptyList())
+                                                   inntekter = emptyList())
 
 
 
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id)
+        vedtakService.lagreVedtak(vedtakDto, førstegangsbehandling.id, fagsak.stønadstype)
         grunnlagsdataService.opprettGrunnlagsdata(førstegangsbehandling.id)
 
         return Pair(fagsak, førstegangsbehandling)
@@ -188,16 +185,15 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                                                                 kildeBehandlingId = revurdering.id,
                                                                 tilOgMed = LocalDate.of(2022, 6, 30))))
 
-        val vedtakDto = Innvilget(resultatType = ResultatType.INNVILGE,
-                                  periodeBegrunnelse = "periode begrunnelse",
-                                  inntektBegrunnelse = "inntekt begrunnelse",
-                                  perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 3),
+        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
+                                                   inntektBegrunnelse = "inntekt begrunnelse",
+                                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 3),
                                                                       årMånedTil = YearMonth.of(2022, 6),
                                                                       aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
                                                                       periodeType = VedtaksperiodeType.HOVEDPERIODE)),
-                                  inntekter = emptyList())
+                                                   inntekter = emptyList())
         tilkjentYtelseRepository.insert(tilkjentYtelse)
-        vedtakService.lagreVedtak(vedtakDto, revurdering.id)
+        vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
     }
 
@@ -209,7 +205,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
 
     private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(localhost("/api/beregning/$id/fullfor"),
+        return restTemplate.exchange(localhost("/api/vedtak/$id/lagre-vedtak"),
                                      HttpMethod.POST,
                                      HttpEntity(vedtakDto, headers))
     }

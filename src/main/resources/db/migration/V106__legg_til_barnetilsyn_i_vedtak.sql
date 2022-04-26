@@ -1,0 +1,1 @@
+ALTER SEQUENCE fagsak_ekstern_id_seq INCREMENT BY 1;

@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
@@ -19,12 +22,14 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
-import no.nav.familie.ef.sak.vedtak.dto.Innvilget
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -33,9 +38,11 @@ import java.util.UUID
 @Service
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
+                       private val beregningBarnetilsynService: BeregningBarnetilsynService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
                        private val tilbakekrevingService: TilbakekrevingService,
+                       private val barnService: BarnService,
                        private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
 
 
@@ -44,16 +51,25 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
+        validerStønadstype(saksbehandling, data)
         validerGyldigeVedtaksperioder(saksbehandling, data)
+
         val aktivIdent = fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId).hentAktivIdent()
         val saksbehandlingMedOppdatertIdent = saksbehandling.copy(ident = aktivIdent)
         nullstillEksisterendeVedtakPåBehandling(saksbehandlingMedOppdatertIdent.id)
-        vedtakService.lagreVedtak(vedtakDto = data, behandlingId = saksbehandlingMedOppdatertIdent.id)
+        vedtakService.lagreVedtak(vedtakDto = data,
+                                  behandlingId = saksbehandlingMedOppdatertIdent.id,
+                                  stønadstype = saksbehandlingMedOppdatertIdent.stønadstype)
 
         when (data) {
-            is Innvilget -> {
+            is InnvilgelseOvergangsstønad -> {
                 validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
-                opprettTilkjentYtelseForInnvilgetBehandling(data, saksbehandlingMedOppdatertIdent)
+                opprettTilkjentYtelseForInnvilgetOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
+            }
+            is InnvilgelseBarnetilsyn -> {
+                validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
+                opprettTilkjentYtelseForInnvilgetBarnetilsyn(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Opphør -> {
@@ -71,7 +87,13 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         }
     }
 
-    private fun validerStartTidEtterSanksjon(innvilget: Innvilget, behandling: Saksbehandling) {
+    private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+        innvilget.perioder.firstOrNull()?.let {
+            validerStartTidEtterSanksjon(it.årMånedFra, behandling)
+        }
+    }
+
+    private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
         innvilget.perioder.firstOrNull()?.let {
             validerStartTidEtterSanksjon(it.årMånedFra, behandling)
         }
@@ -89,7 +111,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
 
     private fun validerGyldigeVedtaksperioder(saksbehandling: Saksbehandling, data: VedtakDto) {
-        if (data is Innvilget) {
+        if (data is InnvilgelseOvergangsstønad) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             val harInnvilgedePerioder = data.perioder.any { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
@@ -99,9 +121,26 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
         }
+        if (data is InnvilgelseBarnetilsyn) {
+            barnService.validerBarnFinnesPåBehandling(saksbehandling.id, data.perioder.flatMap { it.barn }.toSet())
+        }
     }
 
-    private fun harPeriodeEllerAktivitetMigrering(data: Innvilget) =
+    private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
+        when (data) {
+            is InnvilgelseOvergangsstønad -> validerStønadstype(saksbehandling, data, StønadType.OVERGANGSSTØNAD)
+            is InnvilgelseBarnetilsyn -> validerStønadstype(saksbehandling, data, StønadType.BARNETILSYN)
+            else -> return
+        }
+    }
+
+    private fun validerStønadstype(saksbehandling: Saksbehandling, vedtak: VedtakDto, stønadstype: StønadType) {
+        feilHvis(saksbehandling.stønadstype != stønadstype) {
+            "Feil stønadstype=${saksbehandling.stønadstype} for gitt vedtakstype ${vedtak::class.java.simpleName}"
+        }
+    }
+
+    private fun harPeriodeEllerAktivitetMigrering(data: InnvilgelseOvergangsstønad) =
             data.perioder.any { it.periodeType == VedtaksperiodeType.MIGRERING || it.aktivitet == AktivitetType.MIGRERING }
 
     private fun nullstillEksisterendeVedtakPåBehandling(behandlingId: UUID) {
@@ -111,7 +150,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun opprettTilkjentYtelseForOpphørtBehandling(saksbehandling: Saksbehandling,
                                                           vedtak: Opphør) {
-        brukerfeilHvis(saksbehandling.type != BehandlingType.REVURDERING) { "Kan kun opphøre ved revurdering" }
+        brukerfeilHvis(saksbehandling.type != REVURDERING) { "Kan kun opphøre ved revurdering" }
         val opphørsdato = vedtak.opphørFom.atDay(1)
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(saksbehandling)
         val nyeAndeler = andelerForOpphør(forrigeTilkjenteYtelse, opphørsdato)
@@ -124,24 +163,26 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun beregnNyttOpphørsdatoForRevurdering(nyeAndeler: List<AndelTilkjentYtelse>,
-                                                    opphørsdato: LocalDate?,
-                                                    forrigeTilkjenteYtelse: TilkjentYtelse): LocalDate? {
+                                                    opphørsdato: LocalDate,
+                                                    forrigeTilkjenteYtelse: TilkjentYtelse): LocalDate {
         val opphørsdatoHvisFørTidligereAndeler = if (nyeAndeler.isEmpty()) opphørsdato else null
-        return min(opphørsdatoHvisFørTidligereAndeler, forrigeTilkjenteYtelse.startdato)
+        @Suppress("FoldInitializerAndIfToElvis")
+        if (opphørsdatoHvisFørTidligereAndeler == null) return forrigeTilkjenteYtelse.startdato
+
+        return minOf(opphørsdatoHvisFørTidligereAndeler, forrigeTilkjenteYtelse.startdato)
     }
 
-    private fun opprettTilkjentYtelseForInnvilgetBehandling(vedtak: Innvilget,
-                                                            saksbehandling: Saksbehandling) {
+    private fun opprettTilkjentYtelseForInnvilgetOvergangsstønad(vedtak: InnvilgelseOvergangsstønad,
+                                                                 saksbehandling: Saksbehandling) {
 
         brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgetVedtak(vedtak, saksbehandling)
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
+                lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING ->
-                andelerTilkjentYtelse to startdatoForFørstegangsbehandling(
-                        andelerTilkjentYtelse)
-            BehandlingType.REVURDERING -> nyeAndelerForRevurderingMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
+            FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+            REVURDERING -> nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -153,32 +194,61 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                                    startdato = startdato))
     }
 
+    private fun opprettTilkjentYtelseForInnvilgetBarnetilsyn(vedtak: InnvilgelseBarnetilsyn,
+                                                             saksbehandling: Saksbehandling) {
+
+        // TODO: Må periodene være sammenhengende?
+        //  brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
+        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+
+        val (nyeAndeler, startdato) = when (saksbehandling.type) {
+            FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+            REVURDERING -> nyeAndelerForRevurderingAvBarnetilsynMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
+            else -> error("Steg ikke støttet for type=${saksbehandling.type}")
+        }
+
+
+        tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = saksbehandling.ident,
+                                                                   behandlingId = saksbehandling.id,
+                                                                   andelerTilkjentYtelse = nyeAndeler,
+                                                                   startdato = startdato))
+    }
+
     private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate {
         return andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: error("Må ha med en periode i førstegangsbehandling")
     }
 
-    private fun nyeAndelerForRevurderingMedStartdato(saksbehandling: Saksbehandling,
-                                                     vedtak: Innvilget,
-                                                     andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
-            : Pair<List<AndelTilkjentYtelse>, LocalDate?> {
+    private fun nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(saksbehandling: Saksbehandling,
+                                                                      vedtak: InnvilgelseOvergangsstønad,
+                                                                      andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
+            : Pair<List<AndelTilkjentYtelse>, LocalDate> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
-        validerStartdato(forrigeTilkjenteYtelse)
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
         val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
-        val startdato = nyttStartdato(vedtak, forrigeOpphørsdato)
+        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeOpphørsdato)
         return nyeAndeler to startdato
     }
 
-    // TODO denne kan fjernes når startdato blir not null
-    private fun validerStartdato(forrigeTilkjenteYtelse: TilkjentYtelse?) {
-        feilHvis(forrigeTilkjenteYtelse != null && forrigeTilkjenteYtelse.startdato == null) {
-            "Mangler startdato på tilkjent ytelse behandlingId=${forrigeTilkjenteYtelse?.behandlingId}"
-        }
+    private fun nyeAndelerForRevurderingAvBarnetilsynMedStartdato(saksbehandling: Saksbehandling,
+                                                                  vedtak: InnvilgelseBarnetilsyn,
+                                                                  andelerTilkjentYtelse: List<AndelTilkjentYtelse>)
+            : Pair<List<AndelTilkjentYtelse>, LocalDate> {
+        val opphørsperioder = finnOpphørsperioder(vedtak)
+
+        val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
+        validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
+
+        val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
+
+        val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
+        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeOpphørsdato)
+        return nyeAndeler to startdato
     }
 
     private fun validerOpphørsperioder(opphørsperioder: List<Periode>,
@@ -201,8 +271,14 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             } ?: andelerTilkjentYtelse
 
 
-    private fun nyttStartdato(innvilget: Innvilget, forrigeOpphørsdato: LocalDate?): LocalDate? {
-        return min(innvilget.perioder.minOfOrNull { it.årMånedFra.atDay(1) }, forrigeOpphørsdato)
+    private fun nyttStartdato(behandlingId: UUID,
+                              perioder: List<Periode>,
+                              forrigeOpphørsdato: LocalDate?): LocalDate {
+        val startdato = min(perioder.minOfOrNull { it.fradato }, forrigeOpphørsdato)
+        feilHvis(startdato == null) {
+            "Klarer ikke å beregne startdato for behandling=$behandlingId"
+        }
+        return startdato
     }
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(vedtak: Sanksjonert,
@@ -219,14 +295,20 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                                    startdato = forrigeTilkjenteYtelse.startdato))
     }
 
-    private fun finnOpphørsperioder(vedtak: Innvilget) =
+    private fun finnOpphørsperioder(vedtak: InnvilgelseOvergangsstønad) =
             vedtak.perioder.filter { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
-    private fun finnInnvilgedePerioder(vedtak: Innvilget) =
+    private fun finnOpphørsperioder(vedtak: InnvilgelseBarnetilsyn) =
+            vedtak.perioder.filter { it.utgifter == 0 }.tilPerioder()
+
+    private fun finnInnvilgedePerioder(vedtak: InnvilgelseOvergangsstønad) =
             vedtak.perioder.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
 
-    private fun lagBeløpsperioderForInnvilgetVedtak(vedtak: Innvilget,
-                                                    saksbehandling: Saksbehandling) =
+    private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) =
+            vedtak.perioder.filter { it.utgifter != 0 }.tilPerioder()
+
+    private fun lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak: InnvilgelseOvergangsstønad,
+                                                               saksbehandling: Saksbehandling) =
             beregningService.beregnYtelse(finnInnvilgedePerioder(vedtak), vedtak.inntekter.tilInntektsperioder())
                     .map {
                         AndelTilkjentYtelse(beløp = it.beløp.toInt(),
@@ -237,6 +319,20 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                             samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
                                             inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
                                             inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0)
+                    }
+
+    private fun lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak: InnvilgelseBarnetilsyn,
+                                                           saksbehandling: Saksbehandling) =
+            beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
+                    .map {
+                        AndelTilkjentYtelse(beløp = it.beløp,
+                                            stønadFom = it.periode.fradato,
+                                            stønadTom = it.periode.tildato,
+                                            kildeBehandlingId = saksbehandling.id,
+                                            inntekt = 0,
+                                            samordningsfradrag = 0,
+                                            inntektsreduksjon = 0,
+                                            personIdent = saksbehandling.ident)
                     }
 
     fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
@@ -288,7 +384,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
         }
 
         brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
-                       forrigeTilkjentYtelse.startdato != null && forrigeTilkjentYtelse.startdato <= opphørFom) {
+                       forrigeTilkjentYtelse.startdato <= opphørFom) {
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
         }
 

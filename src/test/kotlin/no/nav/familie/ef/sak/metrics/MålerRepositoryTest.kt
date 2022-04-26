@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.metrics
+package no.nav.familie.ef.sak.metrics
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.metrics.domain.MålerRepository
 import no.nav.familie.ef.sak.metrics.domain.VedtakPerUke
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
@@ -20,7 +21,6 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -37,31 +37,6 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 
-    @BeforeEach
-    fun init() {
-        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.BARNETILSYN)
-        val fagsakOvergangsstønad = fagsak(setOf(PersonIdent("2")), stønadstype = StønadType.OVERGANGSSTØNAD)
-        val fagsakSkolepenger = fagsak(setOf(PersonIdent("3")), stønadstype = StønadType.SKOLEPENGER)
-        val fagsaker = listOf(fagsakBarneTilsyn, fagsakOvergangsstønad, fagsakSkolepenger)
-
-        fagsaker.forEach(testoppsettService::lagreFagsak)
-
-        repeat(3) { // 3 behandlinger
-            fagsaker.forEach { fagsak -> // per stønadstype
-                BehandlingStatus.values().forEach { status -> // per status
-                    if (status == BehandlingStatus.FERDIGSTILT) {
-                        BehandlingResultat.values().forEach { resultat -> // per resultat for ferdigstilte
-                            behandlingRepository.insert(behandling(fagsak = fagsak, status = status, resultat = resultat))
-                        }
-                    } else {
-                        behandlingRepository.insert(behandling(fagsak = fagsak, status = status))
-                    }
-                }
-            }
-        }
-
-    }
-
     @Test
     internal fun `finnAntallBehandlingerAvÅrsak - finner riktig antall`() {
         assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(0)
@@ -75,6 +50,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `finnÅpneBehandlinger finner data for åpne behandlinger`() {
+        opprettBehandlingerTestdata()
         val finnÅpneBehandlinger = målerRepository.finnÅpneBehandlingerPerUke()
 
         assertThat(finnÅpneBehandlinger.size).isEqualTo(3)
@@ -87,6 +63,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `finnKlarTilBehandling finner antall klar til behandling`() {
+        opprettBehandlingerTestdata()
         val finnKlarTilBehandling = målerRepository.finnÅpneBehandlinger()
 
         assertThat(finnKlarTilBehandling.size).isEqualTo(15)
@@ -111,6 +88,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `finnVedtak finner data om utførte vedtak`() {
+        opprettBehandlingerTestdata()
         val finnVedtak = målerRepository.finnVedtakPerUke()
 
         assertThat(finnVedtak.size).isEqualTo(15)
@@ -135,6 +113,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `finnAntallLøpendeSaker finner ingen løpende saker når det ikke finnes noen`() {
+        opprettBehandlingerTestdata()
         val now = YearMonth.now()
         assertThat(målerRepository.finnAntallLøpendeSaker(now.atDay(1), now.plusMonths(1).atEndOfMonth()))
                 .isEmpty()
@@ -142,6 +121,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal finne løpende behandlinger`() {
+        opprettBehandlingerTestdata()
         val now = YearMonth.now()
         val fagsak1 = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
         val fagsak2 = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("4")), StønadType.OVERGANGSSTØNAD))
@@ -193,4 +173,23 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
         val andeler = andelTilkjentYtelse.map { it.copy(kildeBehandlingId = behandling.id) }.toList()
         tilkjentYtelseRepository.insert(lagTilkjentYtelse(andeler, behandlingId = behandling.id))
     }
+
+    private fun opprettBehandlingerTestdata() {
+        var fnr = 50000;
+        repeat(3) { // 3 behandlinger
+            StønadType.values().forEach { stønadType ->
+                BehandlingStatus.values().forEach { status -> // per status
+                    val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("${++fnr}"), stønadstype = stønadType))
+                    if (status == BehandlingStatus.FERDIGSTILT) {
+                        BehandlingResultat.values().forEach { resultat -> // per resultat for ferdigstilte
+                            behandlingRepository.insert(behandling(fagsak = fagsak, status = status, resultat = resultat))
+                        }
+                    } else {
+                        behandlingRepository.insert(behandling(fagsak = fagsak, status = status))
+                    }
+                }
+            }
+        }
+    }
+
 }

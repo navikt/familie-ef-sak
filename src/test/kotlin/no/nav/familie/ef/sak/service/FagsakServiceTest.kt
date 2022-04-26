@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.service
 
-import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -15,8 +14,6 @@ import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -34,7 +31,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var fagsakService: FagsakService
     @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var pdlClient: PdlClient
 
     @AfterEach
     internal fun tearDown() {
@@ -46,18 +42,19 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         private val fagsakTilknyttetPesonIdent123 = fagsak(setOf(PersonIdent("123")))
         private val fagsakTilknyttetPesonIdent456 = fagsak(setOf(PersonIdent("456")))
+        private val fagsakTilknyttetPesonIdent111 = fagsak(setOf(PersonIdent("111")))
+        private val fagsakTilknyttetPesonIdent222 = fagsak(setOf(PersonIdent("222")))
 
         @BeforeEach
         fun setUp() {
             testoppsettService.lagreFagsak(fagsakTilknyttetPesonIdent123)
             testoppsettService.lagreFagsak(fagsakTilknyttetPesonIdent456)
+            testoppsettService.lagreFagsak(fagsakTilknyttetPesonIdent111)
+            testoppsettService.lagreFagsak(fagsakTilknyttetPesonIdent222)
         }
 
         @Test
         fun `skal returnere fagsaker med oppdatert peronIdent fra Pdl når det finnes ny ident`() {
-            every { pdlClient.hentIdenterBolk(listOf("123", "456")) }
-                    .returns(mapOf("123" to PdlIdent("ny123", false),
-                                   "456" to PdlIdent("ny456", false)))
 
             val fagsakerMedOppdatertePersonIdenter =
                     fagsakService.fagsakerMedOppdatertePersonIdenter(listOf(fagsakTilknyttetPesonIdent123.id,
@@ -71,18 +68,15 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         fun `skal returnere fagsaker med eksiterende peronIdent når det ikke finnes ny ident i pdl`() {
-            every { pdlClient.hentIdenterBolk(listOf("123", "456")) }
-                    .returns(mapOf("123" to PdlIdent("123", false),
-                                   "456" to PdlIdent("456", false)))
 
             val fagsakerMedOppdatertePersonIdenter =
-                    fagsakService.fagsakerMedOppdatertePersonIdenter(listOf(fagsakTilknyttetPesonIdent123.id,
-                                                                            fagsakTilknyttetPesonIdent456.id))
+                    fagsakService.fagsakerMedOppdatertePersonIdenter(listOf(fagsakTilknyttetPesonIdent111.id,
+                                                                            fagsakTilknyttetPesonIdent222.id))
 
-            assertThat(fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent123.id }
-                               .hentAktivIdent()).isEqualTo("123")
-            assertThat(fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent456.id }
-                               .hentAktivIdent()).isEqualTo("456")
+            assertThat(fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent111.id }
+                               .hentAktivIdent()).isEqualTo("111")
+            assertThat(fagsakerMedOppdatertePersonIdenter.first { it.id == fagsakTilknyttetPesonIdent222.id }
+                               .hentAktivIdent()).isEqualTo("222")
         }
 
     }

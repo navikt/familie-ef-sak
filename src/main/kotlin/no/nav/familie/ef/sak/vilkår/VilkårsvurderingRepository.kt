@@ -20,4 +20,6 @@ interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, U
     @Modifying
     @Query("UPDATE vilkarsvurdering SET opprettet_av = 'VL', endret_av = 'VL' WHERE id = :id")
     fun settMaskinelltOpprettet(id: UUID)
+
+    fun findByTypeAndBehandlingIdIn(vilkårtype: VilkårType, behandlingIds: Collection<UUID>): List<Vilkårsvurdering>
 }

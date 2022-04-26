@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -23,7 +24,7 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal kopiere søknadskjema til ny behandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
 
         val søknadsskjema = lagreSøknad(behandling, fagsak)
@@ -35,7 +36,7 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal opprette ny søknad til grunnlag som bruker den samme søknadsskjemaet`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
 
         lagreSøknad(behandling, fagsak)

@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser
+package no.nav.familie.ef.sak.cucumber.domeneparser
 
 enum class Domenebegrep(val nøkkel: String) : Domenenøkkel {
     BEHANDLING_ID("BehandlingId"),

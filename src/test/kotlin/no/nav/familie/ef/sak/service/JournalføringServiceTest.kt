@@ -284,8 +284,8 @@ internal class JournalføringServiceTest {
         } returns Testsøknad.søknadOvergangsstønad
 
         every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns false
-        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(any(), any()) } throws ApiFeil("feil",
-                                                                                                                   BAD_REQUEST)
+        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(any(), any()) } throws ApiFeil("feil",
+                                                                                                                                  BAD_REQUEST)
 
         assertThatThrownBy {
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
