@@ -1287,7 +1287,7 @@ internal class BeregnYtelseStegTest {
         @BeforeEach
         internal fun setUp() {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, grunnlag()))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, 6284, grunnlag()))
         }
 
         @Test
@@ -1308,7 +1308,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, grunnlag()))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, 6284, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                                      type = BehandlingType.REVURDERING,
@@ -1336,7 +1336,7 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, grunnlag()))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, 6284, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                                      type = BehandlingType.REVURDERING,
