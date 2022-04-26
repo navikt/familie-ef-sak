@@ -78,6 +78,7 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         return håndterSteg(saksbehandling, behandlingSteg, data)
     }
 
+    @Deprecated("Brukes kun i blankettbehandling - skal fases ut etterhvert")
     @Transactional
     fun håndterBlankett(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)

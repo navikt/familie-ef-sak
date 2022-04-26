@@ -8,6 +8,7 @@ data class BeløpsperiodeBarnetilsynDto(
         val periode: Periode,
         val beløp: Int,
         val beløpFørSatsjustering: Int,
+        val sats: Int,
         val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
 )
 

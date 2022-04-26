@@ -40,6 +40,7 @@ object BeregningBarnetilsynUtil {
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
                                            beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
                                            beregnedeBeløp.beløpFørSatsjustering.roundUp().toInt(),
+                                           beregnedeBeløp.makssats,
                                            BeregningsgrunnlagBarnetilsynDto(
                                                    utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
@@ -48,7 +49,7 @@ object BeregningBarnetilsynUtil {
                                                    barn = barn))
     }
 
-    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørSatsjustering: BigDecimal)
+    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørSatsjustering: BigDecimal, val makssats: Int)
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
                            kontantstøtteBeløp: BigDecimal,
@@ -58,8 +59,7 @@ object BeregningBarnetilsynUtil {
         val beløpFørSatsjustering = kalkulerUtbetalingsbeløp(periodeutgift, kontantstøtteBeløp, tilleggsstønadBeløp)
         val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
 
-        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(beløpFørSatsjustering, satsBeløp)),
-                              beløpFørSatsjustering = beløpFørSatsjustering)
+        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(beløpFørSatsjustering, satsBeløp)), beløpFørSatsjustering = beløpFørSatsjustering, satsBeløp.toInt())
     }
 
     fun kalkulerUtbetalingsbeløp(periodeutgift: BigDecimal,

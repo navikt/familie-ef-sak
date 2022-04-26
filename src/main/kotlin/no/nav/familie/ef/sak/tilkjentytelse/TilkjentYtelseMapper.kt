@@ -59,6 +59,7 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
                                             beløpsperiodeBarnetilsynDto.beregningsgrunnlag.tilleggsstønadsbeløp)
                                             .roundUp()
                                             .toInt(),
+                                    sats = beløpsperiodeBarnetilsynDto.sats,
                                     beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag)
     }
 }
