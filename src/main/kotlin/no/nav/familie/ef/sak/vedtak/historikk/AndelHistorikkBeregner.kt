@@ -1,15 +1,15 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import java.math.BigDecimal
 import java.time.LocalDate
