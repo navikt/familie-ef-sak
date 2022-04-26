@@ -173,7 +173,14 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak: Fagsak) {
         if (!behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(fagsak.id)) {
-            infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrere(fagsak.hentAktivIdent(), fagsak.stønadstype)
+            when (fagsak.stønadstype) {
+                StønadType.OVERGANGSSTØNAD ->
+                    infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(fagsak.hentAktivIdent(),
+                                                                                                       fagsak.stønadstype)
+                StønadType.BARNETILSYN ->
+                    infotrygdPeriodeValideringService.validerHarIkkeÅpenSakIInfotrygd(fagsak)
+                StønadType.SKOLEPENGER -> error("Ikke implementert validering perioder infotrygd for skolepenger")
+            }
         }
     }
 

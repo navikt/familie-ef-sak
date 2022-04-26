@@ -8,9 +8,14 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.tilSummertInfotrygdperiodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.StønadType
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -37,7 +42,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
         internal fun `skal kunne journalføre når personen ikke har noen saker i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns infotrygdPerioderDto(emptyList())
 
-            service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, StønadType.OVERGANGSSTØNAD)
         }
 
         @Test
@@ -47,7 +52,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1",
                                                                     stønadFom = dato.atDay(1),
                                                                     stønadTom = dato.atEndOfMonth())))
-            service.validerKanJournalføreUtenÅMigrere(personIdent, no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD)
+            service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
 
         @Test
@@ -55,7 +60,10 @@ internal class InfotrygdPeriodeValideringServiceTest {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))
 
-            assertThatThrownBy { service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD) }
+            assertThatThrownBy {
+                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent,
+                                                                         StønadType.OVERGANGSSTØNAD)
+            }
                     .isInstanceOf(ApiFeil::class.java)
         }
 
@@ -65,8 +73,38 @@ internal class InfotrygdPeriodeValideringServiceTest {
                     infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1", vedtakId = 1),
                                                 lagInfotrygdPeriode(personIdent = "2", vedtakId = 2)))
 
-            assertThatThrownBy { service.validerKanJournalføreUtenÅMigrere(personIdent, StønadType.OVERGANGSSTØNAD) }
+            assertThatThrownBy {
+                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent,
+                                                                         StønadType.OVERGANGSSTØNAD)
+            }
                     .isInstanceOf(ApiFeil::class.java)
+        }
+    }
+
+    @Nested
+    inner class ValiderHarÅpenBarnetilsynSakIInfotrygd {
+
+        @Test
+        fun `skal ikke kunne journalføre barnetilsyn når åpen sak i innfotrygd`() {
+            val fagsak = fagsak(stønadstype = BARNETILSYN)
+            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(saker = listOf(InfotrygdSak(personIdent = fagsak.hentAktivIdent(),
+                                                                                                                 stønadType = fagsak.stønadstype,
+                                                                                                                 resultat = InfotrygdSakResultat.ÅPEN_SAK)))
+
+            assertThatThrownBy { service.validerHarIkkeÅpenSakIInfotrygd(fagsak) }
+                    .isInstanceOf(MigreringException::class.java)
+                    .extracting("type")
+                    .isInstanceOf(MigreringExceptionType.ÅPEN_SAK::class.java)
+        }
+
+        @Test
+        fun `skal kunne journalføre barnetilsyn med ferdigstilt sak i innfotrygd`() {
+            val fagsak = fagsak(stønadstype = BARNETILSYN)
+            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(saker = listOf(InfotrygdSak(personIdent = fagsak.hentAktivIdent(),
+                                                                                                                 stønadType = fagsak.stønadstype,
+                                                                                                                 resultat = InfotrygdSakResultat.INNVILGET)))
+
+           service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
         }
     }
 
