@@ -119,12 +119,12 @@ class VedtakController(private val stegService: StegService,
                 vedtakService.hentForventetInntektForVedtakOgDato(behandlingIds, LocalDate.now().minusMonths(1))
         val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(behandlingIds)
         for (behandlingId in behandlingIds) {
-            val ident = behandlingIdToAktivIdentMap.firstOrNull { it.first == behandlingId }
-            if (ident?.first == null || ident.second == null) {
+            val ident = behandlingIdToAktivIdentMap[behandlingId]
+            if (ident == null) {
                 secureLogger.warn("Fant ikke ident knyttet til behandling $behandlingId - får ikke vurdert inntekt")
             } else {
                 val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
-                identToForventetInntektMap.put(ident.second!!, forventetInntekt)
+                identToForventetInntektMap.put(ident, forventetInntekt)
             }
         }
 

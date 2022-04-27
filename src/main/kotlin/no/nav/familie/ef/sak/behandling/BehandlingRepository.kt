@@ -156,17 +156,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """)
     fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>, stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): Set<UUID>
 
-
-    // language=PostgreSQL
-    @Query("""SELECT pi.ident FROM fagsak f
-                    JOIN behandling b ON f.id = b.fagsak_id
-                    JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
-                    WHERE b.id = :behandlingId
-                    ORDER BY pi.endret_tid DESC 
-                    LIMIT 1
-                    """)
-    fun finnAktivIdent2(behandlingId: UUID): String
-
     fun existsByFagsakIdAndTypeIn(fagsakId: UUID, typer: Set<BehandlingType>): Boolean
 
 }
