@@ -66,6 +66,7 @@ fun behandling(fagsak: Fagsak = fagsak(),
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
                opprettetTid: LocalDateTime = SporbarUtils.now(),
                forrigeBehandlingId: UUID? = null,
+               grunnbeløpsdato: LocalDate = LocalDate.of(2021, 5, 28),
                årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT): Behandling =
         Behandling(fagsakId = fagsak.id,
@@ -75,6 +76,7 @@ fun behandling(fagsak: Fagsak = fagsak(),
                    status = status,
                    steg = steg,
                    resultat = resultat,
+                   grunnbeløpsdato = grunnbeløpsdato,
                    sporbar = Sporbar(opprettetTid = opprettetTid),
                    årsak = årsak,
                    henlagtÅrsak = henlagtÅrsak)
@@ -155,7 +157,6 @@ fun fagsakDao(id: UUID = UUID.randomUUID(),
         FagsakDomain(id = id,
                      fagsakPersonId = personId,
                      stønadstype = stønadstype,
-                     sistGOmregnet = LocalDate.of(2021, 5, 28),
                      eksternId = eksternId)
 
 fun Fagsak.tilFagsakDao() =
