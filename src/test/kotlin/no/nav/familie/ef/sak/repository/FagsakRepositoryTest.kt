@@ -74,10 +74,10 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal ikke være mulig med flere stønader av samme typen for samme person`() {
         val person = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         StønadType.values().forEach {
-            fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it))
+            fagsakRepository.insert(fagsakDomain(personId = person.id, stønadstype = it))
         }
         StønadType.values().forEach {
-            assertThatThrownBy { fagsakRepository.insert(fagsakDao(personId = person.id, stønadstype = it)) }
+            assertThatThrownBy { fagsakRepository.insert(fagsakDomain(personId = person.id, stønadstype = it)) }
                     .hasRootCauseInstanceOf(PSQLException::class.java)
                     .has(hasCauseMessageContaining("ERROR: duplicate key value violates " +
                                                    "unique constraint \"fagsak_person_unique\""))
@@ -88,8 +88,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `2 ulike personer skal kunne ha samme type stønad`() {
         val person1 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         val person2 = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
-        fagsakRepository.insert(fagsakDao(personId = person1.id, stønadstype = StønadType.OVERGANGSSTØNAD))
-        fagsakRepository.insert(fagsakDao(personId = person2.id, stønadstype = StønadType.OVERGANGSSTØNAD))
+        fagsakRepository.insert(fagsakDomain(personId = person1.id, stønadstype = StønadType.OVERGANGSSTØNAD))
+        fagsakRepository.insert(fagsakDomain(personId = person2.id, stønadstype = StønadType.OVERGANGSSTØNAD))
     }
 
     @Test
@@ -134,7 +134,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.SKOLEPENGER)
         assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.OVERGANGSSTØNAD)
-        assertThat(fagsaker).containsExactlyInAnyOrder(fagsak1.tilFagsakDao(), fagsak2.tilFagsakDao())
+        assertThat(fagsaker).containsExactlyInAnyOrder(fagsak1.tilfagsakDomain(), fagsak2.tilfagsakDomain())
     }
 
     @Test
@@ -143,7 +143,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
                               ?: error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
-        assertThat(findByEksternId).isEqualTo(fagsak.tilFagsakDao())
+        assertThat(findByEksternId).isEqualTo(fagsak.tilfagsakDomain())
     }
 
     @Test
