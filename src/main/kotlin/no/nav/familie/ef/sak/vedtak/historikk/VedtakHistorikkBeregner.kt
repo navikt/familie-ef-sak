@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.felles.dto.Periode

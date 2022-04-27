@@ -31,8 +31,6 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
@@ -41,6 +39,8 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions

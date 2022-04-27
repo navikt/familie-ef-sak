@@ -8,10 +8,10 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkBeregner
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
-import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.ef.StønadType

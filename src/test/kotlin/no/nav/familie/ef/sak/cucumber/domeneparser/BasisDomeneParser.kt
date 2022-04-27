@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
-import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import java.math.BigDecimal
 import java.time.LocalDate
