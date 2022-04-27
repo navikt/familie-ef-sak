@@ -100,7 +100,8 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     post(urlEqualTo(integrasjonerConfig.navKontorUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(navKontorEnhet))),
                     post(urlEqualTo(integrasjonerConfig.adressebeskyttelse.path))
-                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING.UGRADERT)))),
+                            .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(ADRESSEBESKYTTELSEGRADERING
+                                                                                                       .UGRADERT)))),
 
 
                     )
@@ -113,7 +114,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
     @Bean("mock-integrasjoner")
     @Profile("mock-integrasjoner")
     fun integrationMockServer(): WireMockServer {
-        val mockServer = WireMockServer(8385)
+        val mockServer = WireMockServer()
         responses.forEach {
             mockServer.stubFor(it)
         }

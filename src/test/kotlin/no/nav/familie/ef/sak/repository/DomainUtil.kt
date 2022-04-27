@@ -155,6 +155,7 @@ fun fagsakDao(id: UUID = UUID.randomUUID(),
         FagsakDomain(id = id,
                      fagsakPersonId = personId,
                      stønadstype = stønadstype,
+                     sistGOmregnet = LocalDate.of(2021, 5, 28),
                      eksternId = eksternId)
 
 fun Fagsak.tilFagsakDao() =
