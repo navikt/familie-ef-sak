@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -18,6 +19,7 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -43,6 +45,11 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { terminbarnRepository.insert(any()) } returns mockk()
         every { fødsel.erUnder18År() } returns true
         mockkObject(GrunnlagsdataMapper)
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        unmockkObject(GrunnlagsdataMapper)
     }
 
     @Test
