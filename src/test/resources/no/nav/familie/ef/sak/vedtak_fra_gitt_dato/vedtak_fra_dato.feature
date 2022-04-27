@@ -119,4 +119,29 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
       | 04.2021         | 10      | 20                 |
 
 
-    # TODO hva skjer hvis vi revurderer bak i tiden, der personen ikke har noen periode? Eks 2 måneder før tidligere vedtak
+  Scenario: Behandling med hull, henter vedtaksperioder og inntekt fra hull
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Aktivitet         | Vedtaksperiode |
+      | 1            | 01.2021         | 02.2021         | INNVILGE        | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+      | 2            | 05.2021         | 06.2021         | INNVILGE        | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+
+    Og følgende inntekter
+      | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 1            | 01.2021         | 10      | 20                 |
+      | 2            | 05.2021         | 20      | 10                 |
+
+    Når lag andelhistorikk kjøres
+
+    Så forvent følgende vedtaksperioder fra dato: 03.2021
+      | Fra og med dato | Til og med dato | Aktivitet         | Vedtaksperiode |
+      | 05.2021         | 06.2021         | BARN_UNDER_ETT_ÅR | HOVEDPERIODE   |
+
+    Så forvent følgende inntektsperioder fra dato: 02.2021
+      | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 02.2021         | 10      | 20                 |
+      # TODO: her kan lønen vært noe annet?
+      | 05.2021         | 20      | 10                 |
+
+    Så forvent følgende inntektsperioder fra dato: 03.2021
+      | Fra og med dato | Inntekt | Samordningsfradrag |
+      | 05.2021         | 20      | 10                 |

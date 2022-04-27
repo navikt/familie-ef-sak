@@ -65,7 +65,6 @@ class VedtakHistorikkService(
                 .sortedBy { it.andel.stønadFra }
     }
 
-
     private fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
         val dato = fra.atDay(1)
         return this.mapNotNull {
@@ -91,7 +90,6 @@ class VedtakHistorikkService(
             acc
         }
     }
-
 
     private fun sammenhengende(first: AndelHistorikkDto,
                                second: AndelHistorikkDto) =
