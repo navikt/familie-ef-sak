@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.felles.util.TokenUtil
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.TerminbarnOppgave
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
@@ -130,6 +131,7 @@ abstract class OppslagSpringRunnerTest {
                 Grunnlagsdata::class,
                 Tilbakekreving::class,
                 Behandling::class,
+                TerminbarnOppgave::class,
                 FagsakDomain::class,
                 FagsakPerson::class,
                 TaskLogg::class,
