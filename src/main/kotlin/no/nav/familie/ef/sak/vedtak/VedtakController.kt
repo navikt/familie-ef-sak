@@ -111,20 +111,21 @@ class VedtakController(private val stegService: StegService,
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<Map<String, Int?>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
-        val behandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter)
+        val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
 
         val behandlingIdToForventetInntektMap =
-                vedtakService.hentForventetInntektForVedtakOgDato(behandlingIds, LocalDate.now().minusMonths(1))
-        val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(behandlingIds)
-        for (behandlingId in behandlingIds) {
-            val ident = behandlingIdToAktivIdentMap[behandlingId]
-            if (ident == null) {
-                secureLogger.warn("Fant ikke ident knyttet til behandling $behandlingId - får ikke vurdert inntekt")
+                vedtakService.hentForventetInntektForVedtakOgDato(personIdentToBehandlingIds.values,
+                                                                  LocalDate.now().minusMonths(1))
+
+        for (personIdent in personIdentToBehandlingIds.keys) {
+            val behandlingId = personIdentToBehandlingIds[personIdent]
+            if (behandlingIdToForventetInntektMap[behandlingId] == null) {
+                secureLogger.warn("Fant behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {
                 val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
-                identToForventetInntektMap.put(ident, forventetInntekt)
+                identToForventetInntektMap[personIdent] = forventetInntekt
             }
         }
 
