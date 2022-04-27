@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 
@@ -39,7 +41,8 @@ class VedtakController(private val stegService: StegService,
                        private val totrinnskontrollService: TotrinnskontrollService,
                        private val tilgangService: TilgangService,
                        private val vedtakService: VedtakService,
-                       private val vurderingService: VurderingService) {
+                       private val vurderingService: VurderingService,
+                       private val vedtakHistorikkService: VedtakHistorikkService) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -72,6 +75,13 @@ class VedtakController(private val stegService: StegService,
     fun hentVedtak(@PathVariable behandlingId: UUID): Ressurs<VedtakDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakService.hentVedtakHvisEksisterer(behandlingId))
+    }
+
+    @GetMapping("fagsak/{fagsakId}/historikk/{fra}")
+    fun hentVedtak(@PathVariable fagsakId: UUID,
+                   @PathVariable fra: YearMonth): Ressurs<VedtakDto> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
@@ -116,7 +126,8 @@ class VedtakController(private val stegService: StegService,
         val chunkedBehandlingIdList = behandlingIds.chunked(500)
 
         for (chunkedBehandlingIds in chunkedBehandlingIdList) {
-            val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForVedtakOgDato(chunkedBehandlingIds, LocalDate.now().minusMonths(1))
+            val behandlingIdToForventetInntektMap =
+                    vedtakService.hentForventetInntektForVedtakOgDato(chunkedBehandlingIds, LocalDate.now().minusMonths(1))
             val behandlingIdToAktivIdentMap = behandlingService.hentAktiveIdenter(chunkedBehandlingIds)
             for (behandlingId in chunkedBehandlingIds) {
                 val ident = behandlingIdToAktivIdentMap.firstOrNull { it.first == behandlingId }
