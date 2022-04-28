@@ -17,3 +17,4 @@ data class AndelTilkjentYtelseDto(val beløp: Int,
                                   val inntekt: Int,
                                   val inntektsreduksjon: Int,
                                   val samordningsfradrag: Int)
+data class BarnMedLøpendeStønad(val barn: List<UUID>, val dato: LocalDate)
