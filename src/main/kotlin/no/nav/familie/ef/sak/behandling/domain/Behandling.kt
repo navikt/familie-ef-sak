@@ -37,8 +37,6 @@ data class Behandling(@Id
                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                       val sporbar: Sporbar = Sporbar(),
                       val resultat: BehandlingResultat,
-                      @Column("grunnbelopsdato")
-                      val grunnbeløpsdato: LocalDate? = null,
                       @Column("henlagt_arsak")
                       val henlagtÅrsak: HenlagtÅrsak? = null) {
 

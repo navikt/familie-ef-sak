@@ -21,6 +21,9 @@ data class TilkjentYtelse(@Id
                           val samordningsfradragType: SamordningsfradragType? = null,
                           @Column("opphorsdato")
                           val startdato: LocalDate,
+                          @Column("grunnbelopsdato")
+                          val grunnbeløpsdato: LocalDate = LocalDate.of(2021, 5, 1),
+                          val gOmregningVersjon: LocalDateTime = LocalDateTime.of(2021,5,1,0,0),
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar())
 

@@ -76,7 +76,6 @@ fun behandling(fagsak: Fagsak = fagsak(),
                    status = status,
                    steg = steg,
                    resultat = resultat,
-                   grunnbeløpsdato = grunnbeløpsdato,
                    sporbar = Sporbar(opprettetTid = opprettetTid),
                    årsak = årsak,
                    henlagtÅrsak = henlagtÅrsak)
