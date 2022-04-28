@@ -30,7 +30,7 @@
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
         <kotlin.version>1.6.20</kotlin.version>
-        <kotlin-coroutines.version>1.6.1</kotlin-coroutines.version>
+        <kotlin-coroutines.version>1.6.1-native-mt</kotlin-coroutines.version>
         <springdoc.version>1.6.7</springdoc.version>
         <mockk.version>1.12.3</mockk.version>
         <felles.version>1.20220406150627_c699e0a</felles.version>
