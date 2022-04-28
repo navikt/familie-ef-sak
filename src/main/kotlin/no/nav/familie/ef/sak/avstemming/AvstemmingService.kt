@@ -21,17 +21,17 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
         val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList())
         val tilkjenteYtelser = tilkjentYtelseService
                 .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
-        val transaksjon = UUID.randomUUID()
+        val transaksjonId = UUID.randomUUID()
         val chunks = tilkjenteYtelser.chunked(1000)
-        loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjon, chunks.size)
-        iverksettClient.konsistensavstemming(emptyDto, true, false, transaksjon)
+        loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjonId, chunks.size)
+        iverksettClient.konsistensavstemming(emptyDto, true, false, transaksjonId)
         chunks.forEach {
             iverksettClient.konsistensavstemming(KonsistensavstemmingDto(stønadstype, tilkjenteYtelser),
                                                  false,
                                                  false,
-                                                 transaksjon)
+                                                 transaksjonId)
         }
-        iverksettClient.konsistensavstemming(emptyDto, false, true, transaksjon)
+        iverksettClient.konsistensavstemming(emptyDto, false, true, transaksjonId)
     }
 
     private fun loggKonsistensavstemming(stønadstype: StønadType,

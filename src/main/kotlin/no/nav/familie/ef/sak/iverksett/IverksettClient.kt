@@ -94,11 +94,11 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     fun konsistensavstemming(request: KonsistensavstemmingDto,
                              sendStartmelding: Boolean = true,
                              sendAvsluttmelding: Boolean = true,
-                             transaksjonsId: UUID = UUID.randomUUID()) {
+                             transaksjonId: UUID = UUID.randomUUID()) {
         val url = UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
                 .queryParam("sendStartmelding", sendStartmelding)
                 .queryParam("sendAvsluttmelding", sendAvsluttmelding)
-                .queryParam("transaksjonsId", transaksjonsId.toString())
+                .queryParam("transaksjonId", transaksjonId.toString())
                 .build().toUri()
         postForEntity<Any>(url, request)
     }
