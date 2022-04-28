@@ -39,8 +39,8 @@ class VedleggService(private val behandlingService: BehandlingService,
         return sistejournalposter + hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter, behandlingsjournalposter)
     }
 
-    fun finnDokumentInfo(personIdent: String): List<DokumentinfoDto> {
-        val journalposter = journalføringService.finnJournalposter(personIdent)
+    fun finnVedleggForPerson(personIdent: String): List<DokumentinfoDto> {
+        val journalposter = journalføringService.finnJournalposter(personIdent, antall = 200)
 
         return journalposter
                 .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
