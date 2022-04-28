@@ -157,7 +157,7 @@ fun fagsakDomain(id: UUID = UUID.randomUUID(),
                      stønadstype = stønadstype,
                      eksternId = eksternId)
 
-fun Fagsak.tilfagsakDomain() =
+fun Fagsak.tilFagsakDomain() =
         FagsakDomain(id = id,
                      fagsakPersonId = fagsakPersonId,
                      stønadstype = stønadstype,

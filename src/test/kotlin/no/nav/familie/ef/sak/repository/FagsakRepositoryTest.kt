@@ -134,7 +134,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.SKOLEPENGER)
         assertThat(fagsaker.map { it.stønadstype }).contains(StønadType.OVERGANGSSTØNAD)
-        assertThat(fagsaker).containsExactlyInAnyOrder(fagsak1.tilfagsakDomain(), fagsak2.tilfagsakDomain())
+        assertThat(fagsaker).containsExactlyInAnyOrder(fagsak1.tilFagsakDomain(), fagsak2.tilFagsakDomain())
     }
 
     @Test
@@ -143,7 +143,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         val findByEksternId = fagsakRepository.finnMedEksternId(fagsak.eksternId.id)
                               ?: error("Fagsak med ekstern id ${fagsak.eksternId} finnes ikke")
 
-        assertThat(findByEksternId).isEqualTo(fagsak.tilfagsakDomain())
+        assertThat(findByEksternId).isEqualTo(fagsak.tilFagsakDomain())
     }
 
     @Test
