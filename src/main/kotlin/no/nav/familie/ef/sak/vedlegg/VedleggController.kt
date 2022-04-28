@@ -27,6 +27,6 @@ class VedleggController(private val vedleggService: VedleggService,
     @GetMapping("/person/{personIdent}")
     fun finnVedleggForPerson(@PathVariable personIdent: String): Ressurs<List<DokumentinfoDto>> {
         tilgangService.validerTilgangTilPerson(personIdent, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(vedleggService.finnDokumentInfo(personIdent))
+        return Ressurs.success(vedleggService.finnVedleggForPerson(personIdent))
     }
 }
