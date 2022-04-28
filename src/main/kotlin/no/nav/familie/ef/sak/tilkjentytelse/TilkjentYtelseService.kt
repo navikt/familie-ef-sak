@@ -42,19 +42,24 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
     }
 
     fun utledLøpendeUtbetalingForBarnIBarnetilsyn(behandlingId: UUID): List<UUID> {
-        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandling = behandlingService.hentBehandling(behandlingId)
-        val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
-        val opprettetTid = behandling.sporbar.opprettetTid.toLocalDate()
-        val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandlingId)
-                .filter { it.endring?.type != EndringType.FJERNET }
-                .filter { it.endring?.type != EndringType.ERSTATTET }
-                .filter { it.andel.beløp > 0 && it.andel.stønadFra <= opprettetTid && it.andel.stønadTil >= opprettetTid }
-                .map { it.andel.barn }
-                .flatten()
-        val behandlingsbarn = barnService.hentBehandlingBarnForBarnIder(barnIdForAlleAktuelleBehandlinger)
-        return barnPåBehandling.filter { barnetViSerPå -> behandlingsbarn.any { it.personIdent == barnetViSerPå.personIdent } }
-                .map { it.id }
+
+        return behandling.forrigeBehandlingId?.let {
+
+            val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
+            val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
+            val opprettetTid = behandling.sporbar.opprettetTid.toLocalDate()
+
+            val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
+                    .filter { it.endring?.type != EndringType.FJERNET }
+                    .filter { it.endring?.type != EndringType.ERSTATTET }
+                    .filter { it.andel.beløp > 0 && it.andel.stønadFra <= opprettetTid && it.andel.stønadTil >= opprettetTid }
+                    .map { it.andel.barn }
+                    .flatten()
+            val behandlingsbarn = barnService.hentBehandlingBarnForBarnIder(barnIdForAlleAktuelleBehandlinger)
+            return barnPåBehandling.filter { barnetViSerPå -> behandlingsbarn.any { it.personIdent == barnetViSerPå.personIdent } }
+                    .map { it.id }
+        } ?: emptyList()
     }
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: StønadType,

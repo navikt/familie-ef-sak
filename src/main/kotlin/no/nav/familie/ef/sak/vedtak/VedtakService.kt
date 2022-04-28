@@ -64,13 +64,13 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         return null
     }
 
-    fun hentForventetInntektForVedtakOgDato(behandlingIds: List<UUID>, dato: LocalDate): Map<UUID, Int?> {
+    fun hentForventetInntektForVedtakOgDato(behandlingIds: Collection<UUID>, dato: LocalDate): Map<UUID, Int?> {
         val vedtakList = vedtakRepository.findAllById(behandlingIds)
         val map = mutableMapOf<UUID, Int?>()
         for (vedtak in vedtakList) {
             if (vedtak?.perioder?.perioder?.any { it.datoFra.isEqualOrBefore(dato.minusMonths(1)) } == true) {
                 map.put(vedtak.behandlingId, vedtak.inntekter?.inntekter?.firstOrNull {
-                    dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
+                    dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato.minusMonths(1))
                 }?.inntekt?.toInt())
             }
         }
