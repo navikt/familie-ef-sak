@@ -20,18 +20,18 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal kaste exception hvis man bruker save eller saveAll`() {
         assertThat(catchThrowable {
-            fagsakRepository.save(fagsakDao())
+            fagsakRepository.save(fagsakDomain())
         }).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(catchThrowable {
-            fagsakRepository.saveAll(listOf(fagsakDao(), fagsakDao()))
+            fagsakRepository.saveAll(listOf(fagsakDomain(), fagsakDomain()))
         }).isInstanceOf(DbActionExecutionException::class.java)
     }
 
     @Test
     internal fun `skal lagre entitet`() {
         val person = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
-        fagsakRepository.insert(fagsakDao(personId = person.id))
+        fagsakRepository.insert(fagsakDomain(personId = person.id))
         assertThat(fagsakRepository.count()).isEqualTo(1)
     }
 
@@ -39,14 +39,14 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     internal fun `skal lagre entiteter`() {
         val person1 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val person2 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
-        fagsakRepository.insertAll(listOf(fagsakDao(personId = person1.id), fagsakDao(personId = person2.id)))
+        fagsakRepository.insertAll(listOf(fagsakDomain(personId = person1.id), fagsakDomain(personId = person2.id)))
         assertThat(fagsakRepository.count()).isEqualTo(2)
     }
 
     @Test
     internal fun `skal oppdatere entitet`() {
         val person = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
-        val fagsak = fagsakRepository.insert(fagsakDao(stønadstype = StønadType.BARNETILSYN, personId = person.id))
+        val fagsak = fagsakRepository.insert(fagsakDomain(stønadstype = StønadType.BARNETILSYN, personId = person.id))
         fagsakRepository.update(fagsak.copy(stønadstype = StønadType.OVERGANGSSTØNAD))
 
         assertThat(fagsakRepository.count()).isEqualTo(1)
@@ -59,8 +59,9 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     internal fun `skal oppdatere entiteter`() {
         val person1 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val person2 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
-        val fagsaker = fagsakRepository.insertAll(listOf(fagsakDao(stønadstype = StønadType.BARNETILSYN, personId = person1.id),
-                                                         fagsakDao(stønadstype = StønadType.SKOLEPENGER, personId = person2.id)))
+        val fagsaker =
+                fagsakRepository.insertAll(listOf(fagsakDomain(stønadstype = StønadType.BARNETILSYN, personId = person1.id),
+                                                  fagsakDomain(stønadstype = StønadType.SKOLEPENGER, personId = person2.id)))
         fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = StønadType.OVERGANGSSTØNAD) })
 
         assertThat(fagsakRepository.count()).isEqualTo(2)
@@ -95,11 +96,11 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal kaste exception hvis man oppdaterer entiteter som ikke finnes`() {
         assertThat(catchThrowable {
-            fagsakRepository.update(fagsakDao())
+            fagsakRepository.update(fagsakDomain())
         }).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(catchThrowable {
-            fagsakRepository.updateAll(listOf(fagsakDao(), fagsakDao()))
+            fagsakRepository.updateAll(listOf(fagsakDomain(), fagsakDomain()))
         }).isInstanceOf(DbActionExecutionException::class.java)
     }
 

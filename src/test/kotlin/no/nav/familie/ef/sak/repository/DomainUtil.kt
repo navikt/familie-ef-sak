@@ -148,16 +148,16 @@ fun fagsak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
                   sporbar = sporbar)
 }
 
-fun fagsakDao(id: UUID = UUID.randomUUID(),
-              stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
-              personId: UUID = UUID.randomUUID(),
-              eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
+fun fagsakDomain(id: UUID = UUID.randomUUID(),
+                 stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
+                 personId: UUID = UUID.randomUUID(),
+                 eksternId: EksternFagsakId = EksternFagsakId()): FagsakDomain =
         FagsakDomain(id = id,
                      fagsakPersonId = personId,
                      stønadstype = stønadstype,
                      eksternId = eksternId)
 
-fun Fagsak.tilFagsakDao() =
+fun Fagsak.tilFagsakDomain() =
         FagsakDomain(id = id,
                      fagsakPersonId = fagsakPersonId,
                      stønadstype = stønadstype,
