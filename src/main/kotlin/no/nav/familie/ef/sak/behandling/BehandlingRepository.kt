@@ -42,7 +42,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id in (:behandlingIds)
             """)
-    fun finnAktiveIdenter(behandlingIds: Collection<UUID>): List<Pair<UUID, String?>>
+    fun finnAktiveIdenter(behandlingIds: Collection<UUID>): List<Pair<UUID, String>>
 
 
     // language=PostgreSQL
