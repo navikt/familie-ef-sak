@@ -66,6 +66,7 @@ fun behandling(fagsak: Fagsak = fagsak(),
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
                opprettetTid: LocalDateTime = SporbarUtils.now(),
                forrigeBehandlingId: UUID? = null,
+               grunnbeløpsdato: LocalDate = LocalDate.of(2021, 5, 28),
                årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT): Behandling =
         Behandling(fagsakId = fagsak.id,
