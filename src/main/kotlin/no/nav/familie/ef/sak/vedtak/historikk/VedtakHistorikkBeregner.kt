@@ -60,19 +60,24 @@ data class VedtakshistorikkperiodeBarnetilsyn(
         val utgifter: BigDecimal,
         val antallBarn: Int,
         val aktivitetArbeid: SvarId?,
-        val barn: List<UUID>
+        val barn: List<UUID>,
+        val sats: Int,
+        val beløpFørSatsjustering: Int,
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
-            this(periode.periode.fradato,
-                 periode.periode.tildato,
-                 false,
-                 periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
-                 periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
-                 periode.beregningsgrunnlag.utgifter,
-                 periode.beregningsgrunnlag.antallBarn,
-                 aktivitetArbeid,
-                 periode.beregningsgrunnlag.barn
+            this(
+                    periode.periode.fradato,
+                    periode.periode.tildato,
+                    false,
+                    periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
+                    periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
+                    periode.beregningsgrunnlag.utgifter,
+                    periode.beregningsgrunnlag.antallBarn,
+                    aktivitetArbeid,
+                    periode.beregningsgrunnlag.barn,
+                    periode.sats,
+                    periode.beløpFørSatsjustering,
             )
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
@@ -158,16 +163,19 @@ object VedtakHistorikkBeregner {
                                                            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                                                            periodeType = VedtaksperiodeType.SANKSJON)
                 is VedtakshistorikkperiodeBarnetilsyn ->
-                    VedtakshistorikkperiodeBarnetilsyn(datoFra = vedtak.periode.datoFra(),
-                                                       datoTil = vedtak.periode.datoTil(),
-                                                       kontantstøtte = 0,
-                                                       tilleggsstønad = 0,
-                                                       utgifter = BigDecimal.ZERO,
-                                                       antallBarn = 0,
-                                                       aktivitetArbeid = null,
-                                                       erSanksjon = true,
-                                                       barn = emptyList()
-                    )
+                    VedtakshistorikkperiodeBarnetilsyn(
+                            datoFra = vedtak.periode.datoFra(),
+                            datoTil = vedtak.periode.datoTil(),
+                            kontantstøtte = 0,
+                            tilleggsstønad = 0,
+                            utgifter = BigDecimal.ZERO,
+                            antallBarn = 0,
+                            aktivitetArbeid = null,
+                            erSanksjon = true,
+                            barn = emptyList(),
+                            sats = 0, //TODO: hva skal vi sette her?
+                            beløpFørSatsjustering = 0,
+                            )
             }
 
     /**
