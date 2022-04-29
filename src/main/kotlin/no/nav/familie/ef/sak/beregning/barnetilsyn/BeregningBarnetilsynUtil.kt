@@ -56,16 +56,18 @@ object BeregningBarnetilsynUtil {
                            tilleggsstønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth): BeregnedeBeløp {
-        val beløpFørSatsjustering = kalkulerUtbetalingsbeløp(periodeutgift, kontantstøtteBeløp, tilleggsstønadBeløp)
+        val beløpFørFratrekkOgSatsjustering = kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)
         val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
 
-        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(beløpFørSatsjustering, satsBeløp)), beløpFørSatsjustering = beløpFørSatsjustering, satsBeløp.toInt())
+        val beløpFørFratrekk = minOf(beløpFørFratrekkOgSatsjustering, satsBeløp)
+        val utbetaltBeløp = beløpFørFratrekk - tilleggsstønadBeløp
+
+        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, utbetaltBeløp), beløpFørSatsjustering = beløpFørFratrekkOgSatsjustering, satsBeløp.toInt())
     }
 
-    fun kalkulerUtbetalingsbeløp(periodeutgift: BigDecimal,
-                                 kontantstøtteBeløp: BigDecimal,
-                                 tilleggsstønadBeløp: BigDecimal) =
-            maxOf(ZERO, ((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tilleggsstønadBeløp)
+    fun kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift: BigDecimal,
+                                                           kontantstøtteBeløp: BigDecimal) =
+            maxOf(ZERO, (periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {
         return Periode(this.atDay(1),

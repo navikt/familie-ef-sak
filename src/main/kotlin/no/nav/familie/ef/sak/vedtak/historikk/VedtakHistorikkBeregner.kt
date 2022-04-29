@@ -77,7 +77,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
                     aktivitetArbeid,
                     periode.beregningsgrunnlag.barn,
                     periode.sats,
-                    periode.beløpFørSatsjustering,
+                    periode.beløpFørFratrekkOgSatsjustering,
             )
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
