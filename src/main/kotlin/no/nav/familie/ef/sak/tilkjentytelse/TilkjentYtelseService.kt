@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
@@ -50,10 +51,8 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
 
             val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
             val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
-            val vedtaksdatoEllerDagensdato = vedtakService.hentVedtakHvisEksisterer(behandling.id)
-                                                     ?.tilVedtak(behandling.id,
-                                                                 StønadType.BARNETILSYN)?.perioder?.perioder?.firstOrNull()?.datoFra
-                                             ?: LocalDate.now()
+            val vedtaksdatoEllerDagensdato =
+                    finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling)
 
             val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
                     .filter { it.endring?.type != EndringType.FJERNET }
@@ -68,6 +67,14 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
             return BarnMedLøpendeStønad(barn = barnMedLøpendeStønad, dato = vedtaksdatoEllerDagensdato)
         } ?: BarnMedLøpendeStønad(barn = emptyList(), dato = LocalDate.now())
     }
+
+    private fun finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling: Behandling) =
+            (vedtakService.hentVedtakHvisEksisterer(behandling.id)
+                     ?.let {
+                         tilkjentYtelseRepository.findByBehandlingId(behandling.id)?.vedtakstidspunkt?.toLocalDate()
+                         ?: behandling.sporbar.opprettetTid.toLocalDate()
+                     }
+             ?: LocalDate.now())
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: StønadType,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
