@@ -62,7 +62,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
         val aktivitetArbeid: SvarId?,
         val barn: List<UUID>,
         val sats: Int,
-        val beløpFørSatsjustering: Int,
+        val beløpFørFratrekkOgSatsjustering: Int,
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
@@ -174,7 +174,7 @@ object VedtakHistorikkBeregner {
                             erSanksjon = true,
                             barn = emptyList(),
                             sats = 0, //TODO: hva skal vi sette her?
-                            beløpFørSatsjustering = 0,
+                            beløpFørFratrekkOgSatsjustering = 0,
                             )
             }
 

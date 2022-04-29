@@ -1415,7 +1415,7 @@ internal class BeregnYtelseStegTest {
                                 utgifter = BigDecimal.ZERO,
                                 barn = emptyList(),
                                 sats = 0,
-                                beløpFørSatsJustering = 0)
+                                beløpFørFratrekkOgSatsJustering = 0)
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
