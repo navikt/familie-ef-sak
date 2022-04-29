@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -26,8 +27,9 @@ internal class VedleggServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
     private val journalføringService = mockk<JournalføringService>()
+    private val fagsakPersonService = mockk<FagsakPersonService>()
 
-    private val vedleggService = VedleggService(behandlingService, journalføringService)
+    private val vedleggService = VedleggService(behandlingService, fagsakPersonService, journalføringService)
 
     @BeforeEach
     internal fun setUp() {
