@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
+import no.nav.familie.ef.sak.beregning.sisteGrunnbeløp
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
@@ -22,27 +23,26 @@ data class TilkjentYtelse(@Id
                           @Column("opphorsdato")
                           val startdato: LocalDate,
                           @Column("grunnbelopsdato")
-                          val grunnbeløpsdato: LocalDate = LocalDate.of(2021, 5, 1),
+                          val grunnbeløpsdato: LocalDate = sisteGrunnbeløp.fraOgMedDato,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar())
+                          val sporbar: Sporbar = Sporbar()) {
 
-fun TilkjentYtelse.stønadFom(): LocalDate? = this.andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
-fun TilkjentYtelse.stønadTom(): LocalDate? = this.andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
+    fun stønadFom(): LocalDate? = andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
+    fun stønadTom(): LocalDate? = andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
 
-fun TilkjentYtelse.taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = this.andelerTilkjentYtelse
-        .filter { andel -> andel.stønadTom < fom || (andel.erStønadOverlappende(fom)) }
-        .map { andel ->
-            if (andel.erStønadOverlappende(fom)) {
-                andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
-            } else {
-                andel
+    fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
+            .filter { andel -> andel.stønadTom < fom || (andel.erStønadOverlappende(fom)) }
+            .map { andel ->
+                if (andel.erStønadOverlappende(fom)) {
+                    andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
+                } else {
+                    andel
+                }
             }
-        }
-
+}
 
 enum class TilkjentYtelseType {
     FØRSTEGANGSBEHANDLING,
     OPPHØR,
     ENDRING
 }
-

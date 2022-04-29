@@ -573,3 +573,5 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
                         gjennomsnittPerÅr = 5400.toBigDecimal()
                 )
         )
+
+val sisteGrunnbeløp = grunnbeløpsperioder.maxByOrNull { it.fraOgMedDato }!!
