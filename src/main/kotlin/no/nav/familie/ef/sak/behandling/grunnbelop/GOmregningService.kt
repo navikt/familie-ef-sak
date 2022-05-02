@@ -10,8 +10,7 @@ class GOmregningService(val behandlingRepository: BehandlingRepository,
                         val taskRepository: TaskRepository) {
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
-        //val behandlingIds = behandlingRepository.findBehandlingerMedUtdatertG()
-        val behandlingIds = listOf<UUID>()
+        val behandlingIds = behandlingRepository.finnBehandlingerMedUtdatertGBelop()
         val gOmregningTasks = GOmregningTask.opprettTasks(behandlingIds)
         taskRepository.saveAll(gOmregningTasks)
         return gOmregningTasks.size
