@@ -48,7 +48,7 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
         val forventetBeløp = dataTable.asMaps().map { it["Beløp"]!!.toBigDecimal() }.first()
-        assertThat(forventetBeløp).isEqualByComparingTo(resultat)
+        assertThat(resultat).isEqualByComparingTo(forventetBeløp)
     }
 }
 
