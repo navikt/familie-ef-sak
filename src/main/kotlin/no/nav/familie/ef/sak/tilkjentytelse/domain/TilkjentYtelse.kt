@@ -27,9 +27,6 @@ data class TilkjentYtelse(@Id
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar()) {
 
-    fun stønadFom(): LocalDate? = andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
-    fun stønadTom(): LocalDate? = andelerTilkjentYtelse.minByOrNull { it.stønadFom }?.stønadFom
-
     fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
             .filter { andel -> andel.stønadTom < fom || (andel.erStønadOverlappende(fom)) }
             .map { andel ->
