@@ -42,7 +42,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id in (:behandlingIds)
             """)
-    fun finnAktiveIdenter(behandlingIds: List<UUID>): List<Pair<UUID, String?>>
+    fun finnAktiveIdenter(behandlingIds: Collection<UUID>): List<Pair<UUID, String>>
 
 
     // language=PostgreSQL
@@ -146,6 +146,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
     fun finnSisteIverksatteBehandlinger(stønadstype: StønadType): Set<UUID>
+
+    @Query("""SELECT pi.ident AS first, gib.id AS second FROM gjeldende_iverksatte_behandlinger gib 
+        JOIN behandling b ON b.id = gib.id
+        JOIN fagsak f ON f.id = b.fagsak_id
+        JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+        WHERE pi.ident IN (:personidenter)
+        AND gib.stonadstype=:stønadstype
+    """)
+    fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>, stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<Pair<String, UUID>>
 
     fun existsByFagsakIdAndTypeIn(fagsakId: UUID, typer: Set<BehandlingType>): Boolean
 

@@ -51,7 +51,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
-    fun hentAktiveIdenter(behandlingIds: List<UUID>): List<Pair<UUID, String?>> = behandlingRepository.finnAktiveIdenter(behandlingIds)
+    fun hentAktiveIdenter(behandlingIds: Collection<UUID>): Map<UUID, String> =
+            behandlingRepository.finnAktiveIdenter(behandlingIds).toMap()
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
                                                               ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
