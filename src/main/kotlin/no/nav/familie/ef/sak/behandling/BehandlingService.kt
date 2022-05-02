@@ -107,7 +107,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         feilHvis(erMigrering && !featureToggleService.isEnabled("familie.ef.sak.migrering")) {
             "Feature toggle for migrering er disabled"
         }
-
+        feilHvis(behandlingsårsak == BehandlingÅrsak.G_OMREGNING && !featureToggleService.isEnabled("familie.ef.sak.g-beregning")) {
+            "Feature toggle for g-omregning er disabled"
+        }
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling, erMigrering)
