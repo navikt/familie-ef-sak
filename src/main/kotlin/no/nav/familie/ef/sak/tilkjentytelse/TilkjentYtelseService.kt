@@ -69,12 +69,12 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
     }
 
     private fun finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling: Behandling) =
-            (vedtakService.hentVedtakHvisEksisterer(behandling.id)
-                     ?.let {
-                         tilkjentYtelseRepository.findByBehandlingId(behandling.id)?.vedtakstidspunkt?.toLocalDate()
-                         ?: behandling.sporbar.opprettetTid.toLocalDate()
-                     }
-             ?: LocalDate.now())
+            vedtakService.hentVedtakHvisEksisterer(behandling.id)
+                    ?.let {
+                        tilkjentYtelseRepository.findByBehandlingId(behandling.id)?.vedtakstidspunkt?.toLocalDate()
+                        ?: behandling.sporbar.opprettetTid.toLocalDate()
+                    }
+            ?: LocalDate.now()
 
     fun finnTilkjentYtelserTilKonsistensavstemming(stønadstype: StønadType,
                                                    datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
