@@ -28,9 +28,9 @@ internal class AvstemmingServiceTest {
         service.konsistensavstemOppdrag(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
         verifyOrder {
-            iverksettClient.konsistensavstemming(any(), true, false, any())
-            iverksettClient.konsistensavstemming(any(), false, false, any())
-            iverksettClient.konsistensavstemming(any(), false, true, any())
+            iverksettClient.sendStartmeldingKonsistensavstemming(any(), any())
+            iverksettClient.sendKonsistensavstemming(any(), any())
+            iverksettClient.sendSluttmeldingKonsistensavstemming(any(), any())
         }
     }
 }

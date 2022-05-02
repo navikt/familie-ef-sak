@@ -24,14 +24,11 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
         val transaksjonId = UUID.randomUUID()
         val chunks = tilkjenteYtelser.chunked(1000)
         loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjonId, chunks.size)
-        iverksettClient.konsistensavstemming(emptyDto, true, false, transaksjonId)
+        iverksettClient.sendStartmeldingKonsistensavstemming(emptyDto, transaksjonId)
         chunks.forEach {
-            iverksettClient.konsistensavstemming(KonsistensavstemmingDto(stønadstype, tilkjenteYtelser),
-                                                 false,
-                                                 false,
-                                                 transaksjonId)
+            iverksettClient.sendKonsistensavstemming(KonsistensavstemmingDto(stønadstype, tilkjenteYtelser), transaksjonId)
         }
-        iverksettClient.konsistensavstemming(emptyDto, false, true, transaksjonId)
+        iverksettClient.sendSluttmeldingKonsistensavstemming(emptyDto, transaksjonId)
     }
 
     private fun loggKonsistensavstemming(stønadstype: StønadType,
@@ -39,7 +36,8 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
                                          transaksjon: UUID,
                                          chunks: Int) {
         val beløp = konsistensavstemming.sumOf { it.andelerTilkjentYtelse.sumOf(AndelTilkjentYtelseDto::beløp) }
-        logger.info("Konsistensavstemming stønad=$stønadstype antall=${konsistensavstemming.size} beløp=$beløp chunks=$chunks")
+        logger.info("Konsistensavstemming stønad=$stønadstype transaksjon=$transaksjon antall=${konsistensavstemming.size} " +
+                    "beløp=$beløp chunks=$chunks")
     }
 
 }
