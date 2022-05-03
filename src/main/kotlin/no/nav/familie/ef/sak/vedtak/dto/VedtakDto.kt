@@ -34,6 +34,7 @@ import java.util.UUID
 enum class ResultatType {
 
     INNVILGE,
+    INNVILGE_UTEN_UTBETALING,
     AVSLÅ,
     HENLEGGE,
     OPPHØRT,
@@ -50,6 +51,7 @@ enum class Sanksjonsårsak {
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
     ResultatType.INNVILGE -> Vedtaksresultat.INNVILGET
+    ResultatType.INNVILGE_UTEN_UTBETALING -> Vedtaksresultat.INNVILGET // TODO: Må kanskje være litt smart her???
     ResultatType.HENLEGGE -> error("Vedtaksresultat kan ikke være henlegge")
     ResultatType.AVSLÅ -> Vedtaksresultat.AVSLÅTT
     ResultatType.OPPHØRT -> Vedtaksresultat.OPPHØRT
@@ -59,7 +61,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
 /*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
               include = JsonTypeInfo.As.PROPERTY,
               property = "_type")*/
-sealed class VedtakDto(val resultatType: ResultatType, val _type: String) {
+sealed class VedtakDto(open val resultatType: ResultatType, val _type: String) {
 
     fun erInnvilgeMedOpphør(): Boolean {
         return this is InnvilgelseOvergangsstønad && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
@@ -154,9 +156,9 @@ private fun Sanksjonert.sanksjonertTilVedtak(behandlingId: UUID,
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
-            ResultatType.INNVILGE -> {
+            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
                 when {
-                    this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn()
+                    this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn(this.resultatType)
                     this.perioder != null -> mapInnvilgelseOvergangsstønad()
                     else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
                 }
@@ -201,6 +203,10 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         // før vi har tatt i bruk @JsonTypeInfo så brukes denne for å mappe InnvilgelseBarnetilsyn
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsyn") {
             return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+        }
+
+        if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
+            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java).copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {

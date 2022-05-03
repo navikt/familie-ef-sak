@@ -11,8 +11,9 @@ import java.util.UUID
 data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
                                   val perioder: List<UtgiftsperiodeDto> = emptyList(),
                                   val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
-                                  val tilleggsstønad: TilleggsstønadDto) : VedtakDto(ResultatType.INNVILGE,
-                                                                                     "InnvilgelseBarnetilsyn")
+                                  val tilleggsstønad: TilleggsstønadDto,
+                                  override val resultatType: ResultatType = ResultatType.INNVILGE) : VedtakDto(resultatType,
+                                                                                                               "InnvilgelseBarnetilsyn")
 
 data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
                              val perioder: List<PeriodeMedBeløpDto> = emptyList(),
@@ -54,7 +55,7 @@ fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
                         datoTil = this.årMånedTil.atEndOfMonth(),
                         beløp = this.beløp)
 
-fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
+fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.INNVILGE): InnvilgelseBarnetilsyn {
     feilHvis(this.barnetilsyn == null || this.kontantstøtte == null || this.tilleggsstønad == null) {
         "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
     }
@@ -71,7 +72,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(): InnvilgelseBarnetilsyn {
                     harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                     perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
                     begrunnelse = this.tilleggsstønad.begrunnelse
-            )
+            ),
+            resultatType = resultatType
     )
 }
 
