@@ -62,13 +62,14 @@ object BeregningUtils {
     private fun justerInntektsperiode(inntektsperiode: Inntektsperiode,
                                       sistBrukteGrunnbeløp: Grunnbeløp): List<Inntektsperiode> {
         val (startDato, sluttDato, inntekt, samordningefradrag) = inntektsperiode
-        return finnGrunnbeløpsPerioder(startDato, sluttDato).map {
-            if (it.periode.fradato > sistBrukteGrunnbeløp.fraOgMedDato && it.beløp != sistBrukteGrunnbeløp.grunnbeløp) {
-                val faktor = it.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
+        return finnGrunnbeløpsPerioder(startDato, sluttDato).map { grunnbeløp ->
+            if (grunnbeløp.periode.fradato > sistBrukteGrunnbeløp.fraOgMedDato
+                && grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp) {
+                val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
                 val justerInntekt = inntekt.multiply(faktor).setScale(0, RoundingMode.HALF_UP)
-                Inntektsperiode(it.periode.fradato, it.periode.tildato, justerInntekt, samordningefradrag)
+                Inntektsperiode(grunnbeløp.periode.fradato, grunnbeløp.periode.tildato, justerInntekt, samordningefradrag)
             } else {
-                Inntektsperiode(it.periode.fradato, it.periode.tildato, inntekt, samordningefradrag)
+                Inntektsperiode(grunnbeløp.periode.fradato, grunnbeløp.periode.tildato, inntekt, samordningefradrag)
             }
         }
     }

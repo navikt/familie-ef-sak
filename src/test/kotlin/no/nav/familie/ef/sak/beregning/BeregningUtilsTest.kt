@@ -113,7 +113,7 @@ internal class BeregningUtilsTest {
         fun `skal ikke endre periode før siste brukte grunnbeløpsdato`() {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
-                                           LocalDate.of(2021, 1, 30),
+                                           LocalDate.of(2021, 4, 30),
                                            BigDecimal(1000),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
@@ -131,7 +131,7 @@ internal class BeregningUtilsTest {
         fun `skal returnere listen urørt hvis siste grunnbeløpsdato er fradato for nyeste grunnbeløp`() {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
-                                           LocalDate.of(2021, 1, 30),
+                                           LocalDate.of(2021, 4, 30),
                                            BigDecimal(1000),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
@@ -150,7 +150,7 @@ internal class BeregningUtilsTest {
         fun `skal justere inntekt for perioder som har fått nytt grunnbeløp`() {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
-                                           LocalDate.of(2021, 1, 30),
+                                           LocalDate.of(2021, 4, 30),
                                            1000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
@@ -170,10 +170,37 @@ internal class BeregningUtilsTest {
         }
 
         @Test
+        fun `skal justere inntekt og splitte perioder når nytt grunnbeløp etter fradato på siste periode`() {
+            val inntektsperioder: List<Inntektsperiode> =
+                    listOf(Inntektsperiode(LocalDate.of(2020, 1, 1),
+                                           LocalDate.of(2020, 4, 30),
+                                           1000.toBigDecimal(),
+                                           BigDecimal(10)),
+                           Inntektsperiode(LocalDate.of(2020, 5, 1),
+                                           LocalDate.of(2021, 12, 31),
+                                           1000.toBigDecimal(),
+                                           BigDecimal(10)))
+
+            val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(LocalDate.of(2020, 5, 1),
+                                                                         inntektsperioder)
+
+            assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
+            assertThat(indeksjusterInntekt[1].startDato).isEqualTo(inntektsperioder[1].startDato)
+            assertThat(indeksjusterInntekt[1].sluttDato).isEqualTo(LocalDate.of(2021, 4, 30))
+            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(1000.toBigDecimal())
+            assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
+            assertThat(indeksjusterInntekt[2].startDato).isEqualTo(LocalDate.of(2021, 5, 1))
+            assertThat(indeksjusterInntekt[2].sluttDato).isEqualTo(inntektsperioder[1].sluttDato)
+            assertThat(indeksjusterInntekt[2].inntekt).isEqualTo(1050.toBigDecimal())
+            assertThat(indeksjusterInntekt[2].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
+
+        }
+
+        @Test
         fun `skal justere inntekt også ved flere endringer i grunnbeløp`() {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
-                                           LocalDate.of(2021, 1, 30),
+                                           LocalDate.of(2021, 4, 30),
                                            1000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
