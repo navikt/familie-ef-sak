@@ -76,7 +76,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(url, request, headers)
     }
 
-    fun iverksettMigrering(iverksettDto: IverksettDto) {
+    fun iverksettUtenBrev(iverksettDto: IverksettDto) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett/migrering")
         postForEntity<Any>(url, iverksettDto)
     }
