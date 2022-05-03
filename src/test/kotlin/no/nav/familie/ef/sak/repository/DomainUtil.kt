@@ -204,7 +204,8 @@ fun tilkjentYtelse(behandlingId: UUID,
                           personident = personIdent,
                           vedtakstidspunkt = LocalDateTime.now(),
                           startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
-                          andelerTilkjentYtelse = andeler)
+                          andelerTilkjentYtelse = andeler,
+                          grunnbeløpsdato = LocalDate.of(2020, 5, 1))
 }
 
 fun vedtak(behandlingId: UUID,
