@@ -12,8 +12,9 @@ data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
                                   val perioder: List<UtgiftsperiodeDto> = emptyList(),
                                   val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
                                   val tilleggsstønad: TilleggsstønadDto,
-                                  override val resultatType: ResultatType = ResultatType.INNVILGE) : VedtakDto(resultatType,
-                                                                                                               "InnvilgelseBarnetilsyn")
+                                  override val resultatType: ResultatType = ResultatType.INNVILGE,
+                                  override val _type: String = "InnvilgelseBarnetilsyn") : VedtakDto(resultatType,
+                                                                                                     "InnvilgelseBarnetilsyn")
 
 data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
                              val perioder: List<PeriodeMedBeløpDto> = emptyList(),
@@ -73,7 +74,12 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                     perioder = this.tilleggsstønad.perioder.map { it.tilDto() },
                     begrunnelse = this.tilleggsstønad.begrunnelse
             ),
-            resultatType = resultatType
+            resultatType = resultatType,
+            _type = when (resultatType) {
+                ResultatType.INNVILGE -> "InnvilgelseBarnetilsyn"
+                ResultatType.INNVILGE_UTEN_UTBETALING -> "InnvilgelseBarnetilsynUtenUtbetaling"
+                else -> error("Ugyldig resultattype $this")
+            }
     )
 }
 

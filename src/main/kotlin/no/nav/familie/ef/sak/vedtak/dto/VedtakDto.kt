@@ -61,7 +61,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
 /*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
               include = JsonTypeInfo.As.PROPERTY,
               property = "_type")*/
-sealed class VedtakDto(open val resultatType: ResultatType, val _type: String) {
+sealed class VedtakDto(open val resultatType: ResultatType, open val _type: String) {
 
     fun erInnvilgeMedOpphør(): Boolean {
         return this is InnvilgelseOvergangsstønad && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
