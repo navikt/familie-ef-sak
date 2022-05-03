@@ -85,7 +85,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
         when (resultat) {
-            ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
