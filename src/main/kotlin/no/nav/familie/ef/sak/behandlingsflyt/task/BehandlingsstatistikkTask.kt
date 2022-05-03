@@ -105,7 +105,7 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE -> utledBegrunnelseForInnvilgetVedtak(stønadType, vedtak)
+                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(stønadType, vedtak)
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
