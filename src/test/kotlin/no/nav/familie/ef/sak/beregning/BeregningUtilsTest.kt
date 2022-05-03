@@ -12,27 +12,6 @@ import java.time.LocalDate
 internal class BeregningUtilsTest {
 
 
-    @Test
-    fun `beregn stønad for innteh`() {
-
-        val inntektsperioder: List<Inntektsperiode> =
-                listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
-                                       LocalDate.of(2021, 1, 30),
-                                       BigDecimal(1000),
-                                       BigDecimal(10)),
-                       Inntektsperiode(LocalDate.of(2021, 5, 1),
-                                       LocalDate.of(2021, 12, 31),
-                                       BigDecimal(1000),
-                                       BigDecimal(10)))
-
-        beregnStønadForInntekt(Inntektsperiode(LocalDate.of(2021, 5, 1),
-                                               LocalDate.of(2021, 12, 31),
-                                               BigDecimal(1000),
-                                               BigDecimal(10)))
-
-
-    }
-
     @Nested
     inner class FinnStartDatoOgSluttDatoForBeløpsperiode {
 
