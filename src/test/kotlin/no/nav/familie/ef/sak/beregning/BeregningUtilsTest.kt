@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.beregning.BeregningUtils.beregnStønadForInntekt
 import no.nav.familie.ef.sak.beregning.BeregningUtils.finnStartDatoOgSluttDatoForBeløpsperiode
 import no.nav.familie.ef.sak.felles.dto.Periode
 import org.assertj.core.api.Assertions.assertThat
@@ -118,7 +117,7 @@ internal class BeregningUtilsTest {
                                            BigDecimal(1000),
                                            BigDecimal(10)))
 
-            val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(sisteGrunnbeløp.fraOgMedDato,
+            val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(nyesteGrunnbeløp.fraOgMedDato,
                                                                          inntektsperioder)
 
             assertThat(indeksjusterInntekt).isSameAs(inntektsperioder)

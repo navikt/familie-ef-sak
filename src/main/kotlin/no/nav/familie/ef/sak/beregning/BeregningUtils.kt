@@ -47,11 +47,11 @@ object BeregningUtils {
     }
 
 
-    fun indeksjusterInntekt(sisteGrunnbeløpsdato: LocalDate,
+    fun indeksjusterInntekt(sisteBrukteGrunnbeløpsdato: LocalDate,
                             inntekter: List<Inntektsperiode> = emptyList()): List<Inntektsperiode> {
 
-        val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteGrunnbeløpsdato)
-        if (sisteGrunnbeløp == sistBrukteGrunnbeløp) {
+        val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
+        if (nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
             return inntekter
         }
 
