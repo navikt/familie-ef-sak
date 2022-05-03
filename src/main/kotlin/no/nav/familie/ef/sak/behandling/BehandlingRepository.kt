@@ -19,6 +19,16 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
 
     // language=PostgreSQL
+    @Query("""
+        SELECT DISTINCT b.id FROM behandling b 
+            JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
+            JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
+        WHERE aty.stonad_tom > '2022-05-01' AND ty.grunnbelopsdato='2021-05-01'
+        AND b.status = 'FERDIGSTILT'
+    """)
+    fun finnBehandlingerMedUtdatertGBelop(): List<UUID>
+
+    // language=PostgreSQL
     @Query("""SELECT b.*, be.id AS eksternid_id         
                      FROM behandling b         
                      JOIN behandling_ekstern be 

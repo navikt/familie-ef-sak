@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -307,6 +306,22 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
+                behandling.id)
+    }
+
+    @Test
+    internal fun `finnBehandlingerMedUtdatertGBelop - finn alle behandlinger med innvilget tilkjent ytelse etter 01-05-2022 med gammel grunnbeløpsdato`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                status = FERDIGSTILT,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                opprettetTid = LocalDateTime.now().minusDays(2)))
+        behandlingRepository.insert(behandling(fagsak2,
+                                               status = UTREDES,
+                                               resultat = BehandlingResultat.INNVILGET))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022))
+        assertThat(behandlingRepository.finnBehandlingerMedUtdatertGBelop()).containsExactly(
                 behandling.id)
     }
 
