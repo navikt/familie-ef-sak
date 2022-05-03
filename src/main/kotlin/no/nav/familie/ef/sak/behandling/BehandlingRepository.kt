@@ -20,7 +20,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
-        SELECT b.id FROM behandling b 
+        SELECT DISTINCT b.id FROM behandling b 
             JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
             JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
         WHERE aty.stonad_tom > '2022-05-01' AND ty.grunnbelopsdato='2021-05-01'
