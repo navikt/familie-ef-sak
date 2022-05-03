@@ -197,7 +197,8 @@ object VedtakDomeneParser {
             val antallBarn: Int?,
             val utgifter: Int?,
             val arbeidAktivitet: SvarId?,
-            val erSanksjon: Boolean?
+            val erSanksjon: Boolean?,
+            val sanksjonsårsak: Sanksjonsårsak?,
     )
 
     fun mapAndelTilkjentYtelse(dataTable: DataTable): List<AndelTilkjentYtelse?> {
@@ -315,7 +316,8 @@ object VedtakDomeneParser {
                     antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
                     utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
                     arbeidAktivitet = parseArbeidAktivitet(rad),
-                    erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
+                    erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad),
+                    sanksjonsårsak = parseSanksjonsårsak(rad)
             )
         }
     }
@@ -346,6 +348,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     TILLEGGSSTØNAD("Tilleggsstønad"),
     KONTANTSTØTTE("Kontantstøtte"),
     ER_SANKSJON("Er sanksjon"),
+    SANKSJONSÅRSAK("Sanksjonsårsak"),
     ;
 
     override fun nøkkel(): String {
