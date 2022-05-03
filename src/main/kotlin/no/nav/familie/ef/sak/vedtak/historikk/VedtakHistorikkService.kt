@@ -1,11 +1,14 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.harPåfølgendeMåned
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -13,10 +16,15 @@ import java.util.UUID
 
 @Service
 class VedtakHistorikkService(
+        private val fagsakService: FagsakService,
         private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
     fun hentVedtakForOvergangsstønadFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseOvergangsstønad {
+        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
+        feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
+            "Kan kun hente data for overgangsstønad fra denne, men prøvde å hente for $stønadstype fagsak=$fagsakId"
+        }
         val historikk = hentAktivHistorikk(fagsakId)
         return InnvilgelseOvergangsstønad(
                 periodeBegrunnelse = null,

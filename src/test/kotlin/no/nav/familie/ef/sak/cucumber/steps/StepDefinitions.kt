@@ -50,6 +50,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -72,7 +73,7 @@ class StepDefinitions {
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnService = mockk<BarnService>(relaxed = true)
-    private val fagsakService = mockk<FagsakService>(relaxed = true)
+    private val fagsakService = mockFagsakService()
 
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
                                                     beregningService,
@@ -83,7 +84,7 @@ class StepDefinitions {
                                                     barnService,
                                                     fagsakService)
 
-    private val vedtakHistorikkService = VedtakHistorikkService(tilkjentYtelseService)
+    private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
 
     private val slot = slot<TilkjentYtelse>()
     private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
@@ -274,6 +275,12 @@ class StepDefinitions {
             beregnetAndelHistorikkList
         }
         return tilkjentYtelser
+    }
+
+    private fun mockFagsakService(): FagsakService {
+        val mock = mockk<FagsakService>(relaxed = true)
+        every { mock.hentFagsak(any()) } answers { fagsak(stønadstype = stønadstype) }
+        return mock
     }
 
     @Så("forvent følgende historikk")
