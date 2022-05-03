@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
-import no.nav.familie.ef.sak.beregning.sisteGrunnbeløp
+import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløp
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
@@ -23,7 +23,7 @@ data class TilkjentYtelse(@Id
                           @Column("opphorsdato")
                           val startdato: LocalDate,
                           @Column("grunnbelopsdato")
-                          val grunnbeløpsdato: LocalDate = sisteGrunnbeløp.fraOgMedDato,
+                          val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.fraOgMedDato,
                           @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
                           val sporbar: Sporbar = Sporbar()) {
 
