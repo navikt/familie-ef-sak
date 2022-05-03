@@ -48,9 +48,15 @@ data class Behandling(@Id
         if (resultat == BehandlingResultat.HENLAGT) {
             brukerfeilHvis(henlagtÅrsak == null) { "Kan ikke henlegge behandling uten en årsak" }
             when (henlagtÅrsak) {
-                BEHANDLES_I_GOSYS -> feilHvis(this.type !== BehandlingType.BLANKETT) { "Bare blankett kan henlegges med årsak BEHANDLES_I_GOSYS" }
-                FEILREGISTRERT -> feilHvis(this.type == BehandlingType.BLANKETT) { "Blankett kan bare henlegges med årsak BEHANDLES_I_GOSYS" }
-                TRUKKET_TILBAKE -> feilHvis(this.type == BehandlingType.BLANKETT) { "Blankett kan bare henlegges med årsak BEHANDLES_I_GOSYS" }
+                BEHANDLES_I_GOSYS -> feilHvis(this.type !== BehandlingType.BLANKETT) {
+                    "Bare blankett kan henlegges med årsak BEHANDLES_I_GOSYS"
+                }
+                FEILREGISTRERT -> feilHvis(this.type == BehandlingType.BLANKETT) {
+                    "Blankett kan bare henlegges med årsak BEHANDLES_I_GOSYS"
+                }
+                TRUKKET_TILBAKE -> feilHvis(this.type == BehandlingType.BLANKETT) {
+                    "Blankett kan bare henlegges med årsak BEHANDLES_I_GOSYS"
+                }
             }
         }
     }

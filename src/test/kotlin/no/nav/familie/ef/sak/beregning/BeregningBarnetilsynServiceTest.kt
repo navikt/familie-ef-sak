@@ -11,11 +11,13 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -41,115 +43,129 @@ class BeregningBarnetilsynServiceTest {
     val februar2000 = YearMonth.of(2000, 2)
     val mars2000 = YearMonth.of(2000, 3)
 
+    @Nested
+    inner class BeregningBarnetilsynValidering {
 
-    @Test
-    internal fun `Skal kaste feil når vi sender inn ufornuftige beløp `() {
-        val utgiftsperiode = listeMedEnUtgiftsperiode()
-        val utgiftsperiodeMedHøytBeløp = listeMedEnUtgiftsperiode(beløp = 50000)
-        val utgiftsperiodeMedNegativtBeløp = listeMedEnUtgiftsperiode(beløp = -1)
-        val periodeMedHøytBeløp = listeMedEnPeriodeMedBeløp(beløp = 50000)
-        val periodeMedNegativtBeløp = listeMedEnPeriodeMedBeløp(beløp = -1)
-
-        val negativUtgiftsfeil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiodeMedNegativtBeløp,
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = listOf())
-        }
-        assertThat(negativUtgiftsfeil.message).isEqualTo("Utgifter kan ikke være mindre enn 0")
-
-
-        val forHøyUtgiftsfeil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiodeMedHøytBeløp,
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = listOf())
-        }
-        assertThat(forHøyUtgiftsfeil.message).isEqualTo("Utgifter på mer enn 40000 støttes ikke")
-
-        assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = periodeMedHøytBeløp)
+        @Test
+        internal fun `Skal kaste feil når vi sender inn kontantstøtteperiode-fradrag før kontantstøtte ble innført`() {
+            val utgiftsperiode = listeMedEnUtgiftsperiode()
+            val perioderMedTidligDato = listeMedEnPeriodeMedBeløp(fra = YearMonth.of(2020, Month.FEBRUARY))
+            val kontantstøtteperiodeStarterForTidlig = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                                kontantstøttePerioder = perioderMedTidligDato,
+                                                tilleggsstønadsperioder = listOf())
+            }
+            assertThat(kontantstøtteperiodeStarterForTidlig.message).isEqualTo("Fradrag for innvilget kontantstøtte trår i kraft: 2020-03")
         }
 
-        assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
-                                            kontantstøttePerioder = periodeMedHøytBeløp,
-                                            tilleggsstønadsperioder = listOf())
+        @Test
+        internal fun `Skal kaste feil når vi sender inn ufornuftige beløp `() {
+            val utgiftsperiode = listeMedEnUtgiftsperiode()
+            val utgiftsperiodeMedHøytBeløp = listeMedEnUtgiftsperiode(beløp = 50000)
+            val utgiftsperiodeMedNegativtBeløp = listeMedEnUtgiftsperiode(beløp = -1)
+            val periodeMedHøytBeløp = listeMedEnPeriodeMedBeløp(beløp = 50000)
+            val periodeMedNegativtBeløp = listeMedEnPeriodeMedBeløp(beløp = -1)
+
+            val negativUtgiftsfeil = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiodeMedNegativtBeløp,
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = listOf())
+            }
+            assertThat(negativUtgiftsfeil.message).isEqualTo("Utgifter kan ikke være mindre enn 0")
+
+
+            val forHøyUtgiftsfeil = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiodeMedHøytBeløp,
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = listOf())
+            }
+            assertThat(forHøyUtgiftsfeil.message).isEqualTo("Utgifter på mer enn 40000 støttes ikke")
+
+            assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = periodeMedHøytBeløp)
+            }
+
+            assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                                kontantstøttePerioder = periodeMedHøytBeløp,
+                                                tilleggsstønadsperioder = listOf())
+            }
+
+            assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = periodeMedNegativtBeløp)
+            }
+
+            assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
+                                                kontantstøttePerioder = periodeMedNegativtBeløp,
+                                                tilleggsstønadsperioder = listOf())
+            }
         }
 
-        assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = periodeMedNegativtBeløp)
+
+        @Test
+        fun `Skal kaste feil når vi sender inn urelevant kontantstøtteperiode`() {
+            val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
+            val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
+            assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
+                                                kontantstøttePerioder = urelevant,
+                                                tilleggsstønadsperioder = listOf())
+            }
         }
 
-        assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperiode,
-                                            kontantstøttePerioder = periodeMedNegativtBeløp,
-                                            tilleggsstønadsperioder = listOf())
+        @Test
+        fun `Skal kaste feil når vi sender inn urelevant tilleggsstønadsperiode`() {
+            val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
+            val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
+            assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = urelevant)
+            }
+        }
+
+        @Test
+        fun `Skal kaste feil hvis utgiftsperioder er overlappende`() {
+            val utgiftsperiode1 = UtgiftsperiodeDto(januar2022, april2022, barn = listOf(UUID.randomUUID()), utgifter = 10)
+            val utgiftsperiode2 = UtgiftsperiodeDto(mars2022, juli2022, barn = listOf(UUID.randomUUID()), utgifter = 10)
+            val feil = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1, utgiftsperiode2),
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = listOf())
+            }
+            assertThat(feil.message).contains("Utgiftsperioder")
+        }
+
+        @Test
+        fun `Skal kaste brukerfeil hvis kontantstøtteperioder er overlappende`() {
+            val overlappende = listeMedEnPeriodeMedBeløp(januar2022, april2022) + listeMedEnPeriodeMedBeløp(april2022, april2022)
+
+            val feil = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
+                                                kontantstøttePerioder = overlappende,
+                                                tilleggsstønadsperioder = listOf())
+            }
+            assertThat(feil.message).contains("Kontantstøtteperioder [Periode(fradato=2022-01-01, tildato=2022-04-30), Periode(fradato=2022-04-01, tildato=2022-04-30)] overlapper")
+        }
+
+
+        @Test
+        fun `Skal kaste brukerfeil hvis tilleggsstønadperioder er overlappende`() {
+            val overlappendePerioder =
+                    listeMedEnPeriodeMedBeløp(april2022, april2022) + listeMedEnPeriodeMedBeløp(januar2022, april2022)
+            val feil = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
+                                                kontantstøttePerioder = listOf(),
+                                                tilleggsstønadsperioder = overlappendePerioder)
+            }
+            assertThat(feil.message).contains("Tilleggsstønadsperioder")
         }
     }
-
-
-    @Test
-    fun `Skal kaste feil når vi sender inn urelevant kontantstøtteperiode`() {
-        val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
-        val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
-        assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
-                                            kontantstøttePerioder = urelevant,
-                                            tilleggsstønadsperioder = listOf())
-        }
-    }
-
-    @Test
-    fun `Skal kaste feil når vi sender inn urelevant tilleggsstønadsperiode`() {
-        val januarTilApril = listeMedEnUtgiftsperiode(januar2022, april2022)
-        val urelevant = listeMedEnPeriodeMedBeløp(juli2022, desember2022)
-        assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = januarTilApril,
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = urelevant)
-        }
-    }
-
-    @Test
-    fun `Skal kaste feil hvis utgiftsperioder er overlappende`() {
-        val utgiftsperiode1 = UtgiftsperiodeDto(januar2022, april2022, barn = listOf(UUID.randomUUID()), utgifter = 10)
-        val utgiftsperiode2 = UtgiftsperiodeDto(mars2022, juli2022, barn = listOf(UUID.randomUUID()), utgifter = 10)
-        val feil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = listOf(utgiftsperiode1, utgiftsperiode2),
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = listOf())
-        }
-        assertThat(feil.message).contains("Utgiftsperioder")
-    }
-
-    @Test
-    fun `Skal kaste brukerfeil hvis kontantstøtteperioder er overlappende`() {
-        val overlappende = listeMedEnPeriodeMedBeløp(januar2022, april2022) + listeMedEnPeriodeMedBeløp(april2022, april2022)
-
-        val feil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
-                                            kontantstøttePerioder = overlappende,
-                                            tilleggsstønadsperioder = listOf())
-        }
-        assertThat(feil.message).contains("Kontantstøtteperioder [Periode(fradato=2022-01-01, tildato=2022-04-30), Periode(fradato=2022-04-01, tildato=2022-04-30)] overlapper")
-    }
-
-
-    @Test
-    fun `Skal kaste brukerfeil hvis tilleggsstønadperioder er overlappende`() {
-        val overlappendePerioder =
-                listeMedEnPeriodeMedBeløp(april2022, april2022) + listeMedEnPeriodeMedBeløp(januar2022, april2022)
-        val feil = assertThrows<ApiFeil> {
-            service.beregnYtelseBarnetilsyn(utgiftsperioder = listeMedEnUtgiftsperiode(januar2022, april2022),
-                                            kontantstøttePerioder = listOf(),
-                                            tilleggsstønadsperioder = overlappendePerioder)
-        }
-        assertThat(feil.message).contains("Tilleggsstønadsperioder")
-    }
-
 
     @Test
     fun `Skal lage tre perioder når tre forskjellige beløp i en 12,md periode`() {
@@ -424,7 +440,7 @@ class BeregningBarnetilsynServiceTest {
                                  beløp: BigDecimal = BigDecimal(100)): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(periode = Periode(fraDato, tilDato),
                                            beløp = beløp.roundUp().toInt(),
-                                           beløpFørSatsjustering = beløp.roundUp().toInt(),
+                                           beløpFørFratrekkOgSatsjustering = beløp.roundUp().toInt(),
                                            sats = 6284,
                                            beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(utgifter = ZERO,
                                                                                                  kontantstøttebeløp = ZERO,

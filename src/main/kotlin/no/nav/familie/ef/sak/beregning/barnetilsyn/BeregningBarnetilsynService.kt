@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 
 @Service
@@ -89,6 +90,12 @@ class BeregningBarnetilsynService {
         brukerfeilHvis((tilleggsstønadsperioder.harOverlappende())) {
             "Tilleggsstønadsperioder $tilleggsstønadsperioder overlapper"
         }
+
+        val innføringsMndKontantstøttefradrag = YearMonth.of(2020, Month.MARCH)
+        brukerfeilHvis((kontantstøttePerioder.harPeriodeFør(innføringsMndKontantstøttefradrag))) {
+            "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
+        }
+
     }
 
     private fun harUrelevantReduksjonsPeriode(utgiftsperioder: List<Periode>, reduksjonsperioder: List<Periode>): Boolean {
@@ -98,6 +105,10 @@ class BeregningBarnetilsynService {
             }
         }
     }
+}
+
+private fun List<Periode>.harPeriodeFør(årMåned: YearMonth): Boolean {
+    return this.any {  it.fradato.yearMonth() < årMåned}
 }
 
 private fun List<Periode>.harOverlappende(): Boolean {

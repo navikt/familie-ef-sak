@@ -24,7 +24,7 @@ internal class RepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal oppdatere sporbar automatisk når en entitet oppdateres`() {
         val opprinneligEndret = Endret(endretAv = "~", endretTid = LocalDateTime.MIN)
         val person = testoppsettService.opprettPerson(FagsakPerson(identer = setOf()))
-        val fagsak = fagsakRepository.insert(fagsakDao(personId = person.id))
+        val fagsak = fagsakRepository.insert(fagsakDomain(personId = person.id))
         val opprettetSporbar = fagsakRepository.findByIdOrThrow(fagsak.id).sporbar
         val opprettetTid = fagsak.sporbar.opprettetTid
         val opprettetAv = "VL"
