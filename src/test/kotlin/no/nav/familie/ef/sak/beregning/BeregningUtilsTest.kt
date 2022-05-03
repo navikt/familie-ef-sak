@@ -161,7 +161,7 @@ internal class BeregningUtilsTest {
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(LocalDate.of(2020, 5, 1),
                                                                          inntektsperioder)
 
-            assertThat(indeksjusterInntekt.first()).isSameAs(inntektsperioder.first())
+            assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
             assertThat(indeksjusterInntekt[1].startDato).isEqualTo(inntektsperioder[1].startDato)
             assertThat(indeksjusterInntekt[1].sluttDato).isEqualTo(inntektsperioder[1].sluttDato)
             assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(1050.toBigDecimal())
