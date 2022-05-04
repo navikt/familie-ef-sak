@@ -16,7 +16,6 @@ data class SøknadsskjemaBarnetilsyn(@Id
                                     @Column("fodselsnummer")
                                     override val fødselsnummer: String,
                                     override val navn: String,
-                                    override val telefonnummer: String?,
                                     override val datoMottatt: LocalDateTime,
                                     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "sivilstand_")
                                     val sivilstand: Sivilstand,
