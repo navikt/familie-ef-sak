@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -178,6 +179,7 @@ class InfotrygdPeriodeValideringService(
                                      MigreringExceptionType.FLERE_IDENTER_VEDTAK)
         }
     }
+
     private fun validerSakerInneholderKunEnIdent(sakerForOvergangsstønad: List<InfotrygdSak>,
                                                  personIdent: String) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
@@ -189,10 +191,12 @@ class InfotrygdPeriodeValideringService(
     }
 
     private fun validerFinnesIkkeÅpenSak(sakerForOvergangsstønad: List<InfotrygdSak>) {
-        sakerForOvergangsstønad.find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
-            throw MigreringException("Har åpen sak. ${lagSakFeilinfo(it)}",
-                                     MigreringExceptionType.ÅPEN_SAK)
-        }
+        sakerForOvergangsstønad
+                .filter { it.type != InfotrygdSakType.KLAGE }
+                .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
+                    throw MigreringException("Har åpen sak. ${lagSakFeilinfo(it)}",
+                                             MigreringExceptionType.ÅPEN_SAK)
+                }
     }
 
     private fun lagSakFeilinfo(sak: InfotrygdSak): String {
