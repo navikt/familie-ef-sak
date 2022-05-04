@@ -19,7 +19,7 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun konsistensavstemOppdrag(stønadstype: StønadType, datoForAvstemming: LocalDate) {
-        val avstemmingstidspunkt = LocalDateTime.now()
+        val avstemmingstidspunkt = datoForAvstemming.atStartOfDay()
         val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList(), avstemmingstidspunkt)
         val tilkjenteYtelser = tilkjentYtelseService
                 .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
