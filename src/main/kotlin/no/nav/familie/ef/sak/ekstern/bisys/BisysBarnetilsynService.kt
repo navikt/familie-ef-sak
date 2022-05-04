@@ -31,7 +31,7 @@ class BisysBarnetilsynService(
         val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
                 .filter { it.endring?.type != EndringType.FJERNET }
                 .filter { it.endring?.type != EndringType.ERSTATTET }
-                .filter { it.andel.beløp > 0 && it.andel.stønadFra >= fomDato }
+                .filter { it.andel.beløp > 0 && it.andel.stønadFra <= fomDato && it.andel.stønadTil >= fomDato }
 
         val barnetilsynBisysPerioder = historikk.map {
             BarnetilsynBisysPeriode(Periode(it.andel.stønadFra, it.andel.stønadTil),
