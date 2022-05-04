@@ -29,8 +29,7 @@ class BisysBarnetilsynService(
                              ?: error("Kunne ikke finne fagsak for personident")
 
         val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
-                .filter { it.endring?.type != EndringType.FJERNET }
-                .filter { it.endring?.type != EndringType.ERSTATTET }
+                .filter { it.erIkkeFjernet() }
                 .filter { it.andel.beløp > 0 && it.andel.stønadFra <= fomDato && it.andel.stønadTil >= fomDato }
 
         val barnIdenter = historikk.flatMap { it.andel.barn }
