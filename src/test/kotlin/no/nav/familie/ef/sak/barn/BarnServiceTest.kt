@@ -77,13 +77,24 @@ internal class BarnServiceTest {
     }
 
     @Test
-    internal fun `skal feile hvis man prøver å opprette barn for skolepenger`() {
-        assertThrows<NotImplementedError> {
-            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId,
-                                                              UUID.randomUUID(),
-                                                              emptyList(),
-                                                              StønadType.SKOLEPENGER)
-        }
+    internal fun `skal kun ha med barn fra søknad for skolepenger`() {
+        val grunnlagsdatabarn = listOf(barnMedIdent(fnrBarnD, "Barn D"),
+                                       barnMedIdent(fnrBarnC, "Barn C"),
+                                       barnMedIdent(fnrBarnB, "Barn B"),
+                                       barnMedIdent(fnrBarnA, "Barn A"))
+        val barnSlot = slot<List<BehandlingBarn>>()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
+        every { barnRepository.insertAll(capture(barnSlot)) } returns emptyList()
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId,
+                                                          UUID.randomUUID(),
+                                                          grunnlagsdatabarn,
+                                                          StønadType.SKOLEPENGER)
+
+        assertThat(barnSlot.captured).hasSize(2)
+        assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB)
+        assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B")
+
 
     }
 
