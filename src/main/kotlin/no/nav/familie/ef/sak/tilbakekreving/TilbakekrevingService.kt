@@ -93,6 +93,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
                                                    feilutbetaltePerioderDto = feilutbetaltePerioderDto,
                                                    fagsystem = Fagsystem.EF,
                                                    eksternFagsakId = saksbehandling.eksternFagsakId.toString(),
+                                                   fagsystemsbehandlingId = saksbehandling.eksternId.toString(),
                                                    ident = saksbehandling.ident,
                                                    verge = null)
         return tilbakekrevingClient.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest = request)
