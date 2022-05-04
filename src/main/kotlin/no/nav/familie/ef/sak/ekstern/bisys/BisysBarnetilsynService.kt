@@ -33,11 +33,16 @@ class BisysBarnetilsynService(
                 .filter { it.endring?.type != EndringType.ERSTATTET }
                 .filter { it.andel.beløp > 0 && it.andel.stønadFra <= fomDato && it.andel.stønadTil >= fomDato }
 
-        val barnetilsynBisysPerioder = historikk.map {
-            BarnetilsynBisysPeriode(Periode(it.andel.stønadFra, it.andel.stønadTil),
-                                    barnService.hentBehandlingBarnForBarnIder(it.andel.barn)
-                                            .map { barn -> barn.personIdent ?: error("Fant ingen personident for barn") },
-                                    it.andel.beløp,
+        val barnIdenter = historikk.flatMap { it.andel.barn }
+                .distinct()
+                .let { barnService.hentBehandlingBarnForBarnIder(it) }
+                .associate { it.id to it.personIdent }
+
+        val barnetilsynBisysPerioder = historikk.map { andel ->
+            BarnetilsynBisysPeriode(Periode(andel.andel.stønadFra, andel.andel.stønadTil),
+                                    andel.andel.barn.map { barnIdenter[it]
+                                                           ?: error("Fant ingen personident for barn=$it") },
+                                    andel.andel.beløp,
                                     Datakilde.EF)
         }
         return BarnetilsynBisysResponse(barnetilsynBisysPerioder)
