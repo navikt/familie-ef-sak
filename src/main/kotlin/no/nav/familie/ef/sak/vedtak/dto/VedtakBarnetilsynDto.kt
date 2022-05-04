@@ -13,8 +13,7 @@ data class InnvilgelseBarnetilsyn(val begrunnelse: String?,
                                   val perioderKontantstøtte: List<PeriodeMedBeløpDto>,
                                   val tilleggsstønad: TilleggsstønadDto,
                                   override val resultatType: ResultatType = ResultatType.INNVILGE,
-                                  override val _type: String = "InnvilgelseBarnetilsyn") : VedtakDto(resultatType,
-                                                                                                     "InnvilgelseBarnetilsyn")
+                                  override val _type: String = "InnvilgelseBarnetilsyn") : VedtakDto(resultatType, _type)
 
 data class TilleggsstønadDto(val harTilleggsstønad: Boolean,
                              val perioder: List<PeriodeMedBeløpDto> = emptyList(),
