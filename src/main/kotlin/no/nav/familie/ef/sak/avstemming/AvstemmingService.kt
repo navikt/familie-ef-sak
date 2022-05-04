@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -18,7 +19,8 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun konsistensavstemOppdrag(stønadstype: StønadType, datoForAvstemming: LocalDate) {
-        val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList())
+        val avstemmingstidspunkt = LocalDateTime.now()
+        val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList(), avstemmingstidspunkt)
         val tilkjenteYtelser = tilkjentYtelseService
                 .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
         val transaksjonId = UUID.randomUUID()
@@ -26,7 +28,8 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
         loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjonId, chunks.size)
         iverksettClient.sendStartmeldingKonsistensavstemming(emptyDto, transaksjonId)
         chunks.forEach {
-            iverksettClient.sendKonsistensavstemming(KonsistensavstemmingDto(stønadstype, tilkjenteYtelser), transaksjonId)
+            val request = KonsistensavstemmingDto(stønadstype, tilkjenteYtelser, avstemmingstidspunkt)
+            iverksettClient.sendKonsistensavstemming(request, transaksjonId)
         }
         iverksettClient.sendSluttmeldingKonsistensavstemming(emptyDto, transaksjonId)
     }
