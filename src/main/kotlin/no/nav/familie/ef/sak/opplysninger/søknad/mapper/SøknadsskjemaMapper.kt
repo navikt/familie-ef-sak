@@ -64,7 +64,7 @@ object SøknadsskjemaMapper {
         return SøknadsskjemaOvergangsstønad(fødselsnummer = kontraktsøknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                             navn = kontraktsøknad.personalia.verdi.navn.verdi,
                                             type = SøknadType.OVERGANGSSTØNAD,
-                                            telefonnummer = kontraktsøknad.personalia.verdi.telefonnummer?.verdi,
+                                            telefonnummer = null, //TODO ikke i bruk - fjern fra tabell
                                             datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
                                             sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
                                             medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
@@ -81,7 +81,7 @@ object SøknadsskjemaMapper {
         return SøknadsskjemaBarnetilsyn(fødselsnummer = kontraktsøknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                         navn = kontraktsøknad.personalia.verdi.navn.verdi,
                                         type = SøknadType.BARNETILSYN,
-                                        telefonnummer = kontraktsøknad.personalia.verdi.telefonnummer?.verdi,
+                                        telefonnummer = null,  //TODO ikke i bruk - fjern fra tabell
                                         datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
                                         sivilstand = tilDomene(kontraktsøknad.sivilstandsdetaljer.verdi),
                                         medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
@@ -98,7 +98,7 @@ object SøknadsskjemaMapper {
         return SøknadsskjemaSkolepenger(fødselsnummer = kontraktsøknad.personalia.verdi.fødselsnummer.verdi.verdi,
                                         navn = kontraktsøknad.personalia.verdi.navn.verdi,
                                         type = SøknadType.SKOLEPENGER,
-                                        telefonnummer = kontraktsøknad.personalia.verdi.telefonnummer?.verdi,
+                                        telefonnummer = null,  //TODO ikke i bruk - fjern fra tabell
                                         datoMottatt = kontraktsøknad.innsendingsdetaljer.verdi.datoMottatt.verdi,
                                         medlemskap = tilDomene(kontraktsøknad.medlemskapsdetaljer.verdi),
                                         bosituasjon = tilDomene(kontraktsøknad.bosituasjon.verdi),

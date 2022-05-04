@@ -27,6 +27,9 @@ data class AndelHistorikkDto(val behandlingId: UUID,
                              val erSanksjon: Boolean,
                              val endring: HistorikkEndring?)
 
+fun AndelHistorikkDto.erIkkeFjernet() =
+        this.endring?.type == null || this.endring.type == EndringType.SPLITTET
+
 data class AndelMedGrunnlagDto(
         val beløp: Int,
         val stønadFra: LocalDate,
@@ -38,7 +41,9 @@ data class AndelMedGrunnlagDto(
         val tilleggsstønad: Int,
         val antallBarn: Int,
         val utgifter: BigDecimal = BigDecimal.ZERO,
-        val barn: List<UUID>
+        val barn: List<UUID>,
+        val sats: Int,
+        val beløpFørFratrekkOgSatsJustering: Int,
 ) {
 
     constructor(andel: AndelTilkjentYtelse,
@@ -53,7 +58,9 @@ data class AndelMedGrunnlagDto(
             tilleggsstønad = vedtaksinformasjon?.tilleggsstønad ?: 0,
             utgifter = vedtaksinformasjon?.utgifter ?: BigDecimal.ZERO,
             antallBarn = vedtaksinformasjon?.antallBarn ?: 0,
-            barn = vedtaksinformasjon?.barn ?: emptyList()
+            barn = vedtaksinformasjon?.barn ?: emptyList(),
+            sats = vedtaksinformasjon?.sats ?: 0,
+            beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0,
     )
 }
 

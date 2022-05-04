@@ -84,6 +84,10 @@ fun parseValgfriBoolean(domenebegrep: Domenenøkkel, rad: Map<String, String?>):
 fun parseDato(domenebegrep: String, rad: Map<String, String>): LocalDate {
     val dato = rad[domenebegrep]!!
 
+    return parseDato(dato)
+}
+
+fun parseDato(dato: String): LocalDate {
     return if (dato.contains(".")) {
         LocalDate.parse(dato, norskDatoFormatter)
     } else {
@@ -110,6 +114,10 @@ fun parseValgfriÅrMåned(domenebegrep: String, rad: Map<String, String?>): Year
         return null
     }
 
+    return parseÅrMåned(verdi)
+}
+
+fun parseÅrMåned(verdi: String): YearMonth {
     return if (verdi.contains(".")) {
         YearMonth.parse(verdi, norskÅrMånedFormatter)
     } else {

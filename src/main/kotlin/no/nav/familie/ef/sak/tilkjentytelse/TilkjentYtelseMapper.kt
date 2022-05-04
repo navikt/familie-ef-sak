@@ -53,10 +53,9 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
         val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
         BeløpsperiodeBarnetilsynDto(periode = Periode(it.stønadFom, it.stønadTom),
                                     beløp = it.beløp,
-                                    beløpFørSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløp(
+                                    beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
                                             beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
-                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
-                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.tilleggsstønadsbeløp)
+                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp)
                                             .roundUp()
                                             .toInt(),
                                     sats = beløpsperiodeBarnetilsynDto.sats,

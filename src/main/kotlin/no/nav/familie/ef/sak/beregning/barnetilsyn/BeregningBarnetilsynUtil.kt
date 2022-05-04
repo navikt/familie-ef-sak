@@ -39,7 +39,7 @@ object BeregningBarnetilsynUtil {
 
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
                                            beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
-                                           beregnedeBeløp.beløpFørSatsjustering.roundUp().toInt(),
+                                           beregnedeBeløp.beløpFørFratrekkOgSatsjustering.roundUp().toInt(),
                                            beregnedeBeløp.makssats,
                                            BeregningsgrunnlagBarnetilsynDto(
                                                    utgifter = utgiftsperiode.utgifter,
@@ -49,23 +49,25 @@ object BeregningBarnetilsynUtil {
                                                    barn = barn))
     }
 
-    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørSatsjustering: BigDecimal, val makssats: Int)
+    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørFratrekkOgSatsjustering: BigDecimal, val makssats: Int)
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
                            kontantstøtteBeløp: BigDecimal,
                            tilleggsstønadBeløp: BigDecimal,
                            antallBarn: Int,
                            årMåned: YearMonth): BeregnedeBeløp {
-        val beløpFørSatsjustering = kalkulerUtbetalingsbeløp(periodeutgift, kontantstøtteBeløp, tilleggsstønadBeløp)
+        val beløpFørFratrekkOgSatsjustering = kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)
         val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
 
-        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, minOf(beløpFørSatsjustering, satsBeløp)), beløpFørSatsjustering = beløpFørSatsjustering, satsBeløp.toInt())
+        val beløpFørFratrekk = minOf(beløpFørFratrekkOgSatsjustering, satsBeløp)
+        val utbetaltBeløp = beløpFørFratrekk - tilleggsstønadBeløp
+
+        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, utbetaltBeløp), beløpFørFratrekkOgSatsjustering = beløpFørFratrekkOgSatsjustering, satsBeløp.toInt())
     }
 
-    fun kalkulerUtbetalingsbeløp(periodeutgift: BigDecimal,
-                                 kontantstøtteBeløp: BigDecimal,
-                                 tilleggsstønadBeløp: BigDecimal) =
-            maxOf(ZERO, ((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal())) - tilleggsstønadBeløp)
+    fun kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift: BigDecimal,
+                                                           kontantstøtteBeløp: BigDecimal) =
+            maxOf(ZERO, (periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {
         return Periode(this.atDay(1),
