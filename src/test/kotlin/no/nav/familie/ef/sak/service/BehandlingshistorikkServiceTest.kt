@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilHendelseshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -99,6 +100,38 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                                                                    endretTid = endretTid))
     }
 
+    @Test
+    fun `finn sist endret tispunkt for to forskjellige behandlinger, ignorer feil stegtype`() {
+        val stegType = StegType.SEND_TIL_BESLUTTER
+        val fagsak1 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("16"))))
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("17"))))
+        val fagsak3 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("18"))))
+        val behandling1 = behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak = fagsak2, steg = stegType))
+        val behandlingSomIkkeSkalTasMed = behandlingRepository.insert(behandling(fagsak = fagsak3, steg = StegType.VILKÅR))
+
+        val tid1 = LocalDateTime.now()
+
+        insert(behandling1, "A", tid1.minusDays(1))
+        insert(behandling1, "A", tid1.plusDays(1))
+        insert(behandling1, "A", tid1)
+
+        val tid2 = LocalDateTime.now()
+
+        insert(behandlingSomIkkeSkalTasMed, "A", tid1.minusDays(1))
+        insert(behandlingSomIkkeSkalTasMed, "A", tid1.plusDays(1))
+        insert(behandlingSomIkkeSkalTasMed, "A", tid1)
+
+        insert(behandling2, "A", tid2.minusDays(1))
+        insert(behandling2, "A", tid2.plusDays(1))
+        insert(behandling2, "A", tid2)
+
+        val sistEndret = behandlingshistorikkRepository.finnSisteEndringstidspunktForBehandlinger(listOf(behandling1.id, behandling2.id), stegType)
+                .sortedBy { it.second }
+        assertThat(sistEndret.size).isEqualTo(2)
+        assertThat(sistEndret.get(0).second.toLocalDateTime()).isEqualTo(tid1.plusDays(1))
+        assertThat(sistEndret.get(1).second.toLocalDateTime()).isEqualTo(tid2.plusDays(1))
+    }
 
 }
 
