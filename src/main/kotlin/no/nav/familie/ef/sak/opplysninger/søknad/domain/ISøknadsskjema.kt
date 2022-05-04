@@ -11,7 +11,6 @@ interface ISøknadsskjema {
     val type: SøknadType
     val fødselsnummer: String
     val navn: String
-    val telefonnummer: String?
     val barn: Set<IBarn>
     val datoMottatt: LocalDateTime
 }
