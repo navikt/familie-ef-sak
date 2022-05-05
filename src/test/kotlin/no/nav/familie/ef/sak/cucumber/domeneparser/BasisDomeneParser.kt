@@ -3,10 +3,11 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
-import no.nav.familie.ef.sak.vedtak.EndringType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -84,6 +85,10 @@ fun parseValgfriBoolean(domenebegrep: Domenenøkkel, rad: Map<String, String?>):
 fun parseDato(domenebegrep: String, rad: Map<String, String>): LocalDate {
     val dato = rad[domenebegrep]!!
 
+    return parseDato(dato)
+}
+
+fun parseDato(dato: String): LocalDate {
     return if (dato.contains(".")) {
         LocalDate.parse(dato, norskDatoFormatter)
     } else {
@@ -110,6 +115,10 @@ fun parseValgfriÅrMåned(domenebegrep: String, rad: Map<String, String?>): Year
         return null
     }
 
+    return parseÅrMåned(verdi)
+}
+
+fun parseÅrMåned(verdi: String): YearMonth {
     return if (verdi.contains(".")) {
         YearMonth.parse(verdi, norskÅrMånedFormatter)
     } else {
@@ -184,6 +193,10 @@ fun parseArbeidAktivitet(rad: Map<String, String>): SvarId? {
     return SvarId.valueOf(verdi)
 }
 
+fun parseSanksjonsårsak(rad: Map<String, String>): Sanksjonsårsak? {
+    val verdi = valgfriVerdi(VedtakDomenebegrep.SANKSJONSÅRSAK.nøkkel, rad) ?: return null
+    return Sanksjonsårsak.valueOf(verdi)
+}
 
 fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null

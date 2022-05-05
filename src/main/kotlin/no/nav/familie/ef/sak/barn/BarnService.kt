@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -33,7 +34,7 @@ class BarnService(
                     )
                 }
             }
-            StønadType.OVERGANGSSTØNAD -> {
+            StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
                 val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId)
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                         .map {
@@ -45,9 +46,6 @@ class BarnService(
                                            fødselTermindato = it.behandlingBarn.fødselTermindato)
                         }
 
-            }
-            else -> {
-                throw NotImplementedError("Støtter kun overgangsstønad og barnetilsyn")
             }
         }
         barnRepository.insertAll(barnPåBehandlingen)
@@ -118,6 +116,10 @@ class BarnService(
         feilHvis(barn.any { !barnPåBehandling.contains(it) }) {
             "Et barn som ikke finnes på behandling=$behandlingId er lagt til, innsendte=$barn"
         }
+    }
+
+    fun hentBehandlingBarnForBarnIder(barnId: List<UUID>): List<BehandlingBarn> {
+        return barnRepository.findAllByIdOrThrow(barnId.toSet()) {it.id}
     }
 
 }

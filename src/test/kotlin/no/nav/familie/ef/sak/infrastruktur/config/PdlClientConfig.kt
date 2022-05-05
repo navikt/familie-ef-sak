@@ -90,6 +90,18 @@ class PdlClientConfig {
         every { pdlClient.hentPersonidenter(any(), eq(true)) } answers
                 { PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true))) }
 
+        every { pdlClient.hentIdenterBolk(listOf("123", "456")) }
+                .returns(mapOf("123" to PdlIdent("ny123", false),
+                               "456" to PdlIdent("ny456", false)))
+
+        every { pdlClient.hentIdenterBolk(listOf("456", "123")) }
+                .returns(mapOf("123" to PdlIdent("ny123", false),
+                               "456" to PdlIdent("ny456", false)))
+
+        every { pdlClient.hentIdenterBolk(listOf("111", "222")) }
+                .returns(mapOf("111" to PdlIdent("111", false),
+                               "222" to PdlIdent("222", false)))
+
         return pdlClient
     }
 

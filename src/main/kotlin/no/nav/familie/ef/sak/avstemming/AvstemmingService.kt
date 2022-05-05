@@ -9,6 +9,8 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class AvstemmingService(private val iverksettClient: IverksettClient,
@@ -17,15 +19,28 @@ class AvstemmingService(private val iverksettClient: IverksettClient,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun konsistensavstemOppdrag(stønadstype: StønadType, datoForAvstemming: LocalDate) {
+        val avstemmingstidspunkt = datoForAvstemming.atStartOfDay()
+        val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList(), avstemmingstidspunkt)
         val tilkjenteYtelser = tilkjentYtelseService
                 .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
-        loggKonsistensavstemming(tilkjenteYtelser)
-        iverksettClient.konsistensavstemming(KonsistensavstemmingDto(stønadstype, tilkjenteYtelser))
+        val transaksjonId = UUID.randomUUID()
+        val chunks = tilkjenteYtelser.chunked(1000)
+        loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjonId, chunks.size)
+        iverksettClient.sendStartmeldingKonsistensavstemming(emptyDto, transaksjonId)
+        chunks.forEach {
+            val request = KonsistensavstemmingDto(stønadstype, tilkjenteYtelser, avstemmingstidspunkt)
+            iverksettClient.sendKonsistensavstemming(request, transaksjonId)
+        }
+        iverksettClient.sendSluttmeldingKonsistensavstemming(emptyDto, transaksjonId)
     }
 
-    private fun loggKonsistensavstemming(konsistensavstemming: List<KonsistensavstemmingTilkjentYtelseDto>) {
+    private fun loggKonsistensavstemming(stønadstype: StønadType,
+                                         konsistensavstemming: List<KonsistensavstemmingTilkjentYtelseDto>,
+                                         transaksjon: UUID,
+                                         chunks: Int) {
         val beløp = konsistensavstemming.sumOf { it.andelerTilkjentYtelse.sumOf(AndelTilkjentYtelseDto::beløp) }
-        logger.info("Konsistensavstemming antall=${konsistensavstemming.size} beløp=$beløp")
+        logger.info("Konsistensavstemming stønad=$stønadstype transaksjon=$transaksjon antall=${konsistensavstemming.size} " +
+                    "beløp=$beløp chunks=$chunks")
     }
 
 }

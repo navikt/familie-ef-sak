@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.felles.domain.Sporbar
@@ -134,8 +134,9 @@ internal class VedtakHistorikkBeregnerTest {
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
             this.datoFra,
             this.datoTil,
+            sanksjonsårsak = null,
             this.aktivitet,
-            this.periodeType
+            this.periodeType,
     )
 
     private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(),

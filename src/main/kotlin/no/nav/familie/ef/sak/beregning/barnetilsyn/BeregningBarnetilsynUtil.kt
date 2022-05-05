@@ -6,6 +6,7 @@ import java.math.BigDecimal.ZERO
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 data class MaxbeløpBarnetilsynSats(val fraOgMedDato: LocalDate,
                                    val tilOgMedDato: LocalDate,
@@ -28,30 +29,45 @@ object BeregningBarnetilsynUtil {
     fun lagBeløpsPeriodeBarnetilsyn(utgiftsperiode: UtgiftsMåned,
                                     kontantstøtteBeløp: BigDecimal,
                                     tilleggsstønadBeløp: BigDecimal,
-                                    antallBarnIPeriode: Int): BeløpsperiodeBarnetilsynDto {
-        val beløpPeriode: BigDecimal =
+                                    barn: List<UUID>): BeløpsperiodeBarnetilsynDto {
+        val beregnedeBeløp: BeregnedeBeløp =
                 beregnPeriodeBeløp(utgiftsperiode.utgifter,
                                    kontantstøtteBeløp,
                                    tilleggsstønadBeløp,
-                                   antallBarnIPeriode,
+                                   barn.size,
                                    utgiftsperiode.årMåned)
 
         return BeløpsperiodeBarnetilsynDto(utgiftsperiode.årMåned.tilPeriode(),
-                                           beløpPeriode.roundUp().toInt(),
+                                           beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
+                                           beregnedeBeløp.beløpFørFratrekkOgSatsjustering.roundUp().toInt(),
+                                           beregnedeBeløp.makssats,
                                            BeregningsgrunnlagBarnetilsynDto(
                                                    utgifter = utgiftsperiode.utgifter,
                                                    kontantstøttebeløp = kontantstøtteBeløp,
                                                    tilleggsstønadsbeløp = tilleggsstønadBeløp,
-                                                   antallBarn = antallBarnIPeriode))
+                                                   antallBarn = barn.size,
+                                                   barn = barn))
     }
+
+    data class BeregnedeBeløp(val utbetaltBeløp: BigDecimal, val beløpFørFratrekkOgSatsjustering: BigDecimal, val makssats: Int)
 
     fun beregnPeriodeBeløp(periodeutgift: BigDecimal,
                            kontantstøtteBeløp: BigDecimal,
-                           tillegstønadBeløp: BigDecimal,
+                           tilleggsstønadBeløp: BigDecimal,
                            antallBarn: Int,
-                           årMåned: YearMonth) =
-            maxOf(ZERO, minOf(((periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()) ) - tillegstønadBeløp,
-                              satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()))
+                           årMåned: YearMonth): BeregnedeBeløp {
+        val beløpFørFratrekkOgSatsjustering = kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)
+        val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
+
+        val beløpFørFratrekk = minOf(beløpFørFratrekkOgSatsjustering, satsBeløp)
+        val utbetaltBeløp = beløpFørFratrekk - tilleggsstønadBeløp
+
+        return BeregnedeBeløp(utbetaltBeløp = maxOf(ZERO, utbetaltBeløp), beløpFørFratrekkOgSatsjustering = beløpFørFratrekkOgSatsjustering, satsBeløp.toInt())
+    }
+
+    fun kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift: BigDecimal,
+                                                           kontantstøtteBeløp: BigDecimal) =
+            maxOf(ZERO, (periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()))
 
     private fun YearMonth.tilPeriode(): Periode {
         return Periode(this.atDay(1),
@@ -62,7 +78,7 @@ object BeregningBarnetilsynUtil {
 fun BigDecimal.roundUp(): BigDecimal = this.setScale(0, RoundingMode.UP)
 
 fun List<MaxbeløpBarnetilsynSats>.hentSatsFor(antallBarn: Int, årMåned: YearMonth): Int {
-    if(antallBarn==0){
+    if (antallBarn == 0) {
         return 0
     }
     val maxbeløpBarnetilsynSats = this.singleOrNull {

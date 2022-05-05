@@ -29,8 +29,6 @@ import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelMedGrunnlagDto
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
@@ -46,6 +44,8 @@ import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -1287,7 +1287,7 @@ internal class BeregnYtelseStegTest {
         @BeforeEach
         internal fun setUp() {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, grunnlag()))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, 6284, grunnlag()))
         }
 
         @Test
@@ -1308,7 +1308,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                     lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, grunnlag()))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, 6284, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                                      type = BehandlingType.REVURDERING,
@@ -1336,7 +1336,7 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
-                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, grunnlag()))
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, 6284, grunnlag()))
 
             utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
                                      type = BehandlingType.REVURDERING,
@@ -1386,7 +1386,8 @@ internal class BeregnYtelseStegTest {
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null,
                               aktivitetArbeid = null,
-                              erSanksjon = false
+                              erSanksjon = false,
+                              sanksjonsårsak = null
             )
 
     private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
@@ -1399,7 +1400,8 @@ internal class BeregnYtelseStegTest {
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null,
                               aktivitetArbeid = null,
-                              erSanksjon = true
+                              erSanksjon = true,
+                              sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
@@ -1412,7 +1414,10 @@ internal class BeregnYtelseStegTest {
                                 kontantstøtte = 0,
                                 tilleggsstønad = 0,
                                 antallBarn = 0,
-                                utgifter = BigDecimal.ZERO)
+                                utgifter = BigDecimal.ZERO,
+                                barn = emptyList(),
+                                sats = 0,
+                                beløpFørFratrekkOgSatsJustering = 0)
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
             Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
@@ -1454,5 +1459,9 @@ internal class BeregnYtelseStegTest {
         return saksbehandling(fagsak, behandling(fagsak, type = type, forrigeBehandlingId = forrigeBehandlingId))
     }
 
-    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0)
+    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO,
+                                                              BigDecimal.ZERO,
+                                                              BigDecimal.ZERO,
+                                                              0,
+                                                              emptyList())
 }

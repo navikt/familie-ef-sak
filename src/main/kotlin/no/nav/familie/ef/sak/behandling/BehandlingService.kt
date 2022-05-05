@@ -51,8 +51,8 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
-    fun hentAktiveIdenter(behandlingIds: List<UUID>): List<Pair<UUID, String?>> = behandlingRepository.finnAktiveIdenter(
-            behandlingIds)
+    fun hentAktiveIdenter(behandlingIds: Collection<UUID>): Map<UUID, String> =
+            behandlingRepository.finnAktiveIdenter(behandlingIds).toMap()
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
                                                               ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
@@ -107,11 +107,13 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         feilHvis(erMigrering && !featureToggleService.isEnabled("familie.ef.sak.migrering")) {
             "Feature toggle for migrering er disabled"
         }
+        feilHvis(behandlingsårsak == BehandlingÅrsak.G_OMREGNING && !featureToggleService.isEnabled("familie.ef.sak.g-beregning")) {
+            "Feature toggle for g-omregning er disabled"
+        }
         feilHvis(behandlingsårsak == BehandlingÅrsak.KORRIGERING &&
                  !featureToggleService.isEnabled("familie.ef.sak.behandling-korrigering")) {
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }
-
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling, erMigrering)

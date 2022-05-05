@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.vedtak
+package no.nav.familie.ef.sak.vedtak.historikk
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -7,19 +7,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.AKTIVITET
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BEHANDLING
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.BELØP
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.ENDRET_I
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.FOM
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKT
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.INNTEKTSREDUKSJON
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.PERIODE_TYPE
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.SAMORDNINGSFRADRAG
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TEST_TYPE
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TOM
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.TYPE_ENDRING
-import no.nav.familie.ef.sak.vedtak.AndelHistorikkHeader.values
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
@@ -28,6 +15,19 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.AKTIVITET
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.BEHANDLING
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.BELØP
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.ENDRET_I
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.FOM
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.INNTEKT
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.INNTEKTSREDUKSJON
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.PERIODE_TYPE
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.SAMORDNINGSFRADRAG
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TEST_TYPE
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TOM
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TYPE_ENDRING
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.values
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -357,7 +357,8 @@ object AndelHistorikkParser {
                                                    LocalDateTime.now())
                               },
                               aktivitetArbeid = null,
-                              erSanksjon = false)
+                              erSanksjon = false,
+                              sanksjonsårsak = null)
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
 

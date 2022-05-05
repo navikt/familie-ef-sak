@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.UUID
 
@@ -51,6 +52,10 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
 
     fun sendOppgaverForBarn(oppgaverForBarn: OppgaverForBarnDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-barns-alder/opprett"), oppgaverForBarn)
+    }
+
+    fun sendOppgaverForTerminBarn(oppgaverForBarn: OppgaverForBarnDto) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-terminbarn"), oppgaverForBarn)
     }
 
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
@@ -86,8 +91,25 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         return getForEntity(url, HttpHeaders().medContentTypeJsonUTF8())
     }
 
-    fun konsistensavstemming(request: KonsistensavstemmingDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/konsistensavstemming"), request)
+    fun sendStartmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
+            konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
+
+    fun sendSluttmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
+            konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
+
+    fun sendKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
+            konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
+
+    private fun konsistensavstemming(request: KonsistensavstemmingDto,
+                                     sendStartmelding: Boolean = true,
+                                     sendAvsluttmelding: Boolean = true,
+                                     transaksjonId: UUID = UUID.randomUUID()) {
+        val url = UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
+                .queryParam("sendStartmelding", sendStartmelding)
+                .queryParam("sendAvsluttmelding", sendAvsluttmelding)
+                .queryParam("transaksjonId", transaksjonId.toString())
+                .build().toUri()
+        postForEntity<Any>(url, request)
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {

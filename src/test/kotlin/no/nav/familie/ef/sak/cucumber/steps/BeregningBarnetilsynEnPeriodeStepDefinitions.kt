@@ -35,20 +35,20 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
 
     @Når("vi beregner barnetilsyn beløp")
     fun `vi beregner barnetilsyn beløp`() {
-        resultat = beregnPeriodebeløp(inputData)
+        resultat = beregnPeriodebeløp(inputData).utbetaltBeløp
     }
 
     private fun beregnPeriodebeløp(periodeDataDto: PeriodeDataDto) =
             BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = periodeDataDto.periodeutgift,
                                                         kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp,
-                                                        tillegstønadBeløp = periodeDataDto.tillegstønadbeløp,
+                                                        tilleggsstønadBeløp = periodeDataDto.tillegstønadbeløp,
                                                         antallBarn = periodeDataDto.antallBarn,
                                                         årMåned = periodeDataDto.årMåned)
 
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
         val forventetBeløp = dataTable.asMaps().map { it["Beløp"]!!.toBigDecimal() }.first()
-        assertThat(forventetBeløp).isEqualByComparingTo(resultat)
+        assertThat(resultat).isEqualByComparingTo(forventetBeløp)
     }
 }
 

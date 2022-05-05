@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedlegg
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostDatoUtil.mestRelevanteDato
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
@@ -12,6 +14,7 @@ import java.util.UUID
 
 @Service
 class VedleggService(private val behandlingService: BehandlingService,
+                     private val fagsakPersonService: FagsakPersonService,
                      private val journalføringService: JournalføringService) {
 
 
@@ -39,8 +42,13 @@ class VedleggService(private val behandlingService: BehandlingService,
         return sistejournalposter + hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter, behandlingsjournalposter)
     }
 
-    fun finnDokumentInfo(personIdent: String): List<DokumentinfoDto> {
-        val journalposter = journalføringService.finnJournalposter(personIdent)
+    fun finnVedleggForPerson(fagsakPersonId: UUID): List<DokumentinfoDto> {
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        return finnVedleggForPerson(aktivIdent)
+    }
+
+    fun finnVedleggForPerson(personIdent: String): List<DokumentinfoDto> {
+        val journalposter = journalføringService.finnJournalposter(personIdent, antall = 200)
 
         return journalposter
                 .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
