@@ -7,6 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -74,15 +75,6 @@ internal class BeslutteVedtakStegTest {
                                                         featureToggleService = featureToggleService)
 
     private val innloggetBeslutter = "sign2"
-    private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
-                                          brevmal = "mal",
-                                          saksbehandlerHtml = "",
-                                          saksbehandlersignatur = "sign1",
-                                          besluttersignatur = innloggetBeslutter,
-                                          beslutterPdf = Fil("123".toByteArray()),
-                                          enhet = "enhet",
-                                          saksbehandlerident = "saksbIdent",
-                                          beslutterident = innloggetBeslutter)
 
     private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
                                 identer = setOf(PersonIdent(ident = "12345678901")))
@@ -112,8 +104,13 @@ internal class BeslutteVedtakStegTest {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
         every { iverksett.iverksett(any(), any()) } just Runs
+        every { iverksett.iverksettUtenBrev(any()) } just Runs
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         every { featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null") } returns false
+        every { vedtakService.oppdaterBeslutter(any(), any()) } just Runs
+        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
+            behandling(fagsak, id = behandlingId, resultat = secondArg())
+        }
     }
 
     @AfterEach
@@ -123,16 +120,11 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
-        every { vedtakService.oppdaterBeslutter(behandlingId, any()) } just Runs
         every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-
-        every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
-            behandling(fagsak, resultat = secondArg())
-        }
-
         every { vedtaksbrevService.lagEndeligBeslutterbrev(any()) } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
+
         assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
@@ -140,11 +132,12 @@ internal class BeslutteVedtakStegTest {
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
                 .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
+        verify(exactly = 1) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
     }
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
-
         every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
 
         val nesteSteg = utførTotrinnskontroll(godkjent = false)
@@ -157,16 +150,26 @@ internal class BeslutteVedtakStegTest {
         assertThat(deserializedPayload.oppgavetype).isEqualTo(Oppgavetype.BehandleUnderkjentVedtak)
     }
 
-    private fun utførTotrinnskontroll(godkjent: Boolean): StegType {
+    @Test
+    internal fun `skal ikke sende brev hvis årsaken er korrigering uten brev`() {
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.KORRIGERING_UTEN_BREV))
 
-        return beslutteVedtakSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak,
-                                                                          Behandling(id = behandlingId,
-                                                                                     fagsakId = fagsak.id,
-                                                                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                                     status = BehandlingStatus.FATTER_VEDTAK,
-                                                                                     steg = beslutteVedtakSteg.stegType(),
-                                                                                     resultat = BehandlingResultat.IKKE_SATT,
-                                                                                     årsak = BehandlingÅrsak.SØKNAD)),
+        verify(exactly = 0) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {
+        return beslutteVedtakSteg.utførOgReturnerNesteSteg(saksbehandling,
                                                            BeslutteVedtakDto(godkjent = godkjent))
     }
+
+    private fun opprettSaksbehandling(årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD) =
+            saksbehandling(fagsak,
+                           Behandling(id = behandlingId,
+                                      fagsakId = fagsak.id,
+                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                      status = BehandlingStatus.FATTER_VEDTAK,
+                                      steg = beslutteVedtakSteg.stegType(),
+                                      resultat = BehandlingResultat.IKKE_SATT,
+                                      årsak = årsak))
 }
