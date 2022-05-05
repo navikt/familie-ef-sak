@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -62,7 +63,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
         val vedtaksresultat = vedtakService.hentVedtaksresultat(saksbehandling.id)
-        if (vedtaksresultat == INNVILGE) {
+        if (vedtaksresultat == INNVILGE_UTEN_UTBETALING || vedtaksresultat == INNVILGE) {
             brukerfeilHvisIkke(vurderingService.erAlleVilkårOppfylt(saksbehandling.id)) {
                 "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${saksbehandling.id}"
             }

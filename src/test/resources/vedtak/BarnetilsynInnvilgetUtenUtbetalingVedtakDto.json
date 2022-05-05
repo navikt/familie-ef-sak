@@ -1,0 +1,33 @@
+{
+  "begrunnelse": "begrunnelse",
+  "perioder": [
+    {
+      "årMånedFra": "2021-01",
+      "årMånedTil": "2021-12",
+      "utgifter": 500,
+      "barn": [
+        "4ab497b2-a19c-4415-bf00-556ff8e9ce86"
+      ]
+    }
+  ],
+  "perioderKontantstøtte": [
+    {
+      "årMånedFra": "2021-01",
+      "årMånedTil": "2021-12",
+      "beløp": 1000
+    }
+  ],
+  "tilleggsstønad": {
+    "harTilleggsstønad": true,
+    "perioder": [
+      {
+        "årMånedFra": "2021-01",
+        "årMånedTil": "2021-12",
+        "beløp": 1000
+      }
+    ],
+    "begrunnelse": "begrunnelse tilleggstønad"
+  },
+  "resultatType": "INNVILGE_UTEN_UTBETALING",
+  "_type": "InnvilgelseBarnetilsynUtenUtbetaling"
+}

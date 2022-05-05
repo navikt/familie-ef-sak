@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -24,6 +25,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
@@ -321,18 +323,35 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                     }
 
     private fun lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak: InnvilgelseBarnetilsyn,
-                                                           saksbehandling: Saksbehandling) =
-            beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
-                    .map {
-                        AndelTilkjentYtelse(beløp = it.beløp,
-                                            stønadFom = it.periode.fradato,
-                                            stønadTom = it.periode.tildato,
-                                            kildeBehandlingId = saksbehandling.id,
-                                            inntekt = 0,
-                                            samordningsfradrag = 0,
-                                            inntektsreduksjon = 0,
-                                            personIdent = saksbehandling.ident)
-                    }
+                                                           saksbehandling: Saksbehandling): List<AndelTilkjentYtelse> {
+        val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
+        validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
+        return beløpsperioder
+                .map {
+                    AndelTilkjentYtelse(beløp = it.beløp,
+                                        stønadFom = it.periode.fradato,
+                                        stønadTom = it.periode.tildato,
+                                        kildeBehandlingId = saksbehandling.id,
+                                        inntekt = 0,
+                                        samordningsfradrag = 0,
+                                        inntektsreduksjon = 0,
+                                        personIdent = saksbehandling.ident)
+                }
+    }
+
+    private fun validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder: List<BeløpsperiodeBarnetilsynDto>,
+                                                                 vedtak: InnvilgelseBarnetilsyn) {
+
+        if (beløpsperioder.all { it.beregningsgrunnlag.kontantstøttebeløp > it.beregningsgrunnlag.utgifter }) {
+            brukerfeilHvis(vedtak.resultatType == ResultatType.INNVILGE) {
+                "Kontantstøttebeløp overstiger utgiftsbeløp for alle perioder - kan ikke innvilge. Husk å trykk Beregn før du lagrer vedtaket."
+            }
+        } else {
+            brukerfeilHvis(vedtak.resultatType == ResultatType.INNVILGE_UTEN_UTBETALING) {
+                "Vedtaket har ugyldig resultattype. Husk å trykk Beregn før du lagrer vedtaket."
+            }
+        }
+    }
 
     fun slåSammenAndelerSomSkalVidereføres(beløpsperioder: List<AndelTilkjentYtelse>,
                                            forrigeTilkjentYtelse: TilkjentYtelse,
