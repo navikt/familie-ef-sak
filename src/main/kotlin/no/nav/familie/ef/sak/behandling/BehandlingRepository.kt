@@ -157,12 +157,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
     fun finnSisteIverksatteBehandlinger(stønadstype: StønadType): Set<UUID>
 
-    @Query("""SELECT pi.ident AS first, gib.id AS second FROM gjeldende_iverksatte_behandlinger gib 
-        JOIN behandling b ON b.id = gib.id
-        JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+    // language=PostgreSQL
+    @Query("""
+        SELECT pi.ident AS first, gib.id AS second 
+        FROM gjeldende_iverksatte_behandlinger gib 
+            JOIN behandling b ON b.id = gib.id
+            JOIN fagsak f ON f.id = b.fagsak_id
+            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
         WHERE pi.ident IN (:personidenter)
-        AND gib.stonadstype=:stønadstype
+            AND gib.stonadstype=:stønadstype
     """)
     fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>, stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<Pair<String, UUID>>
 

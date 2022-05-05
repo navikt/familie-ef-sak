@@ -104,7 +104,7 @@ class VedtakController(private val stegService: StegService,
     fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
-        val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato ?: LocalDate.now())
+        val forventetInntekt = vedtakService.hentForventetInntektForBehandlingIds(behandlingId, dato ?: LocalDate.now())
         return Ressurs.success(forventetInntekt)
     }
 
@@ -126,8 +126,7 @@ class VedtakController(private val stegService: StegService,
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
 
         val behandlingIdToForventetInntektMap =
-                vedtakService.hentForventetInntektForVedtakOgDato(personIdentToBehandlingIds.values,
-                                                                  LocalDate.now().minusMonths(1))
+                vedtakService.hentForventetInntektForBehandlingIds(personIdentToBehandlingIds.values)
 
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
