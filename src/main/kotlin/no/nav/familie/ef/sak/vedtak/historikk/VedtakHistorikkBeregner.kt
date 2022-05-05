@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import org.slf4j.LoggerFactory
@@ -21,6 +22,7 @@ sealed class Vedtakshistorikkperiode {
     abstract val datoFra: LocalDate
     abstract val datoTil: LocalDate
     abstract val erSanksjon: Boolean
+    abstract val sanksjonsårsak: Sanksjonsårsak?
 
     abstract fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode
     abstract fun medTil(datoTil: LocalDate): Vedtakshistorikkperiode
@@ -30,17 +32,18 @@ sealed class Vedtakshistorikkperiode {
 data class VedtakshistorikkperiodeOvergangsstønad(
         override val datoFra: LocalDate,
         override val datoTil: LocalDate,
+        override val sanksjonsårsak: Sanksjonsårsak? = null,
         val aktivitet: AktivitetType,
-        val periodeType: VedtaksperiodeType
+        val periodeType: VedtaksperiodeType,
 ) : Vedtakshistorikkperiode() {
 
     override val erSanksjon = periodeType == VedtaksperiodeType.SANKSJON
 
     constructor(periode: VedtaksperiodeDto) :
-            this(periode.årMånedFra.atDay(1),
-                 periode.årMånedTil.atEndOfMonth(),
-                 periode.aktivitet,
-                 periode.periodeType)
+            this(datoFra = periode.årMånedFra.atDay(1),
+                 datoTil = periode.årMånedTil.atEndOfMonth(),
+                 aktivitet = periode.aktivitet,
+                 periodeType = periode.periodeType)
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
         return this.copy(datoFra = datoFra)
@@ -55,6 +58,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
         override val datoFra: LocalDate,
         override val datoTil: LocalDate,
         override val erSanksjon: Boolean,
+        override val sanksjonsårsak: Sanksjonsårsak? = null,
         val kontantstøtte: Int,
         val tilleggsstønad: Int,
         val utgifter: BigDecimal,
@@ -67,17 +71,17 @@ data class VedtakshistorikkperiodeBarnetilsyn(
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
             this(
-                    periode.periode.fradato,
-                    periode.periode.tildato,
-                    false,
-                    periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
-                    periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
-                    periode.beregningsgrunnlag.utgifter,
-                    periode.beregningsgrunnlag.antallBarn,
-                    aktivitetArbeid,
-                    periode.beregningsgrunnlag.barn,
-                    periode.sats,
-                    periode.beløpFørFratrekkOgSatsjustering,
+                    datoFra = periode.periode.fradato,
+                    datoTil = periode.periode.tildato,
+                    erSanksjon = false,
+                    kontantstøtte = periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
+                    tilleggsstønad = periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),
+                    utgifter = periode.beregningsgrunnlag.utgifter,
+                    antallBarn = periode.beregningsgrunnlag.antallBarn,
+                    aktivitetArbeid = aktivitetArbeid,
+                    barn = periode.beregningsgrunnlag.barn,
+                    sats = periode.sats,
+                    beløpFørFratrekkOgSatsjustering = periode.beløpFørFratrekkOgSatsjustering,
             )
 
     override fun medFra(datoFra: LocalDate): Vedtakshistorikkperiode {
@@ -161,7 +165,8 @@ object VedtakHistorikkBeregner {
                     VedtakshistorikkperiodeOvergangsstønad(datoFra = vedtak.periode.datoFra(),
                                                            datoTil = vedtak.periode.datoTil(),
                                                            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                           periodeType = VedtaksperiodeType.SANKSJON)
+                                                           periodeType = VedtaksperiodeType.SANKSJON,
+                                                           sanksjonsårsak = vedtak.sanksjonsårsak)
                 is VedtakshistorikkperiodeBarnetilsyn ->
                     VedtakshistorikkperiodeBarnetilsyn(
                             datoFra = vedtak.periode.datoFra(),
@@ -173,9 +178,10 @@ object VedtakHistorikkBeregner {
                             aktivitetArbeid = null,
                             erSanksjon = true,
                             barn = emptyList(),
-                            sats = 0, //TODO: hva skal vi sette her?
+                            sats = 0,
                             beløpFørFratrekkOgSatsjustering = 0,
-                            )
+                            sanksjonsårsak = vedtak.sanksjonsårsak,
+                    )
             }
 
     /**

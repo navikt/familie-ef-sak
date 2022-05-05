@@ -21,9 +21,9 @@ Egenskap: Andelhistorikk: Sanksjon av barnetilsyn
     Når lag andelhistorikk kjøres
 
     Så forvent følgende historikk
-      | BehandlingId | Endringstype | Fra og med dato | Til og med dato | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp | Er sanksjon |
-      | 1            | SPLITTET     | 01.2021         | 01.2021         | 2                     | 10            | 15             | 1           | 200      | 107   | Nei         |
-      | 1            | FJERNET      | 02.2021         | 03.2021         | 2                     | 10            | 15             | 1           | 200      | 107   | Nei         |
-      | 2            |              | 02.2021         | 02.2021         |                       | 0             | 0              | 0           | 0        | 0     | Ja         |
-      | 2            |              | 03.2021         | 03.2021         |                       | 10            | 15             | 1           | 200      | 107   | Nei         |
+      | BehandlingId | Endringstype | Fra og med dato | Til og med dato | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp | Er sanksjon | Sanksjonsårsak        |
+      | 1            | SPLITTET     | 01.2021         | 01.2021         | 2                     | 10            | 15             | 1           | 200      | 107   | Nei         |                       |
+      | 1            | FJERNET      | 02.2021         | 03.2021         | 2                     | 10            | 15             | 1           | 200      | 107   | Nei         |                       |
+      | 2            |              | 02.2021         | 02.2021         |                       | 0             | 0              | 0           | 0        | 0     | Ja          | NEKTET_TILBUDT_ARBEID |
+      | 2            |              | 03.2021         | 03.2021         |                       | 10            | 15             | 1           | 200      | 107   | Nei         |                       |
 

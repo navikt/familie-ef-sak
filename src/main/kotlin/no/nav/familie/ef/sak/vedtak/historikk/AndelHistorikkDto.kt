@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -25,6 +26,7 @@ data class AndelHistorikkDto(val behandlingId: UUID,
                              val aktivitetArbeid: SvarId?,
                              val periodeType: VedtaksperiodeType?,
                              val erSanksjon: Boolean,
+                             val sanksjonsårsak: Sanksjonsårsak?,
                              val endring: HistorikkEndring?)
 
 fun AndelHistorikkDto.erIkkeFjernet() =

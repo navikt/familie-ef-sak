@@ -1386,7 +1386,8 @@ internal class BeregnYtelseStegTest {
                               periodeType = VedtaksperiodeType.HOVEDPERIODE,
                               endring = null,
                               aktivitetArbeid = null,
-                              erSanksjon = false
+                              erSanksjon = false,
+                              sanksjonsårsak = null
             )
 
     private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
@@ -1399,7 +1400,8 @@ internal class BeregnYtelseStegTest {
                               periodeType = VedtaksperiodeType.SANKSJON,
                               endring = null,
                               aktivitetArbeid = null,
-                              erSanksjon = true
+                              erSanksjon = true,
+                              sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
