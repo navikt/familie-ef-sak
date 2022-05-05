@@ -35,7 +35,8 @@ fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = n
                       opprettet = this.sporbar.opprettetTid,
                       behandlingsårsak = this.årsak,
                       stønadstype = stønadstype,
-                      vedtaksdato = vedtaksdato)
+                      vedtaksdato = vedtaksdato
+                                    ?: (if (this.status == BehandlingStatus.FERDIGSTILT) this.sporbar.endret.endretTid else null))
 
 fun Saksbehandling.tilDto(): BehandlingDto =
         BehandlingDto(id = this.id,
