@@ -49,6 +49,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.util.Properties
 import java.util.UUID
@@ -209,8 +210,18 @@ internal class SendTilBeslutterStegTest {
         mockBrukerContext("Saksbehandler B")
 
         assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(behandling) }
+    }
 
-        clearBrukerContext()
+    @Test
+    internal fun `skal ikke hente brev når man håndterer behandling med årsak korrigering uten brev`() {
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
+        val behandling = behandling.copy(årsak = BehandlingÅrsak.KORRIGERING_UTEN_BREV)
+
+        beslutteVedtakSteg.validerSteg(behandling)
+
+        verify(exactly = 0) {
+            vedtaksbrevRepository.findByIdOrNull(any())
+        }
     }
 
     private fun verifiserVedtattBehandlingsstatistikkTask() {

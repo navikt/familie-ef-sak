@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
@@ -17,17 +18,16 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         iverksettClient.hentStatus(saksbehandling.id).let {
             when {
-                erMigreringOgOk(saksbehandling, it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
+                skalIkkeSendeBrev(saksbehandling, it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
                 it == IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
                 else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${saksbehandling.id}")
             }
         }
     }
 
-    private fun erMigreringOgOk(saksbehandling: Saksbehandling,
-                                it: IverksettStatus): Boolean {
-        val erMigrering = saksbehandling.erMigrering()
-        if (!erMigrering) {
+    private fun skalIkkeSendeBrev(saksbehandling: Saksbehandling,
+                                  it: IverksettStatus): Boolean {
+        if (!saksbehandling.erMigrering() && saksbehandling.årsak != BehandlingÅrsak.KORRIGERING_UTEN_BREV) {
             return false
         }
         return it == IverksettStatus.OK_MOT_OPPDRAG ||
