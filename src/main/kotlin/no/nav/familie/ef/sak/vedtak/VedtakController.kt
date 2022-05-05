@@ -132,7 +132,7 @@ class VedtakController(private val stegService: StegService,
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
             if (behandlingIdToForventetInntektMap[behandlingId] == null) {
-                secureLogger.warn("Fant behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
+                secureLogger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {
                 val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
                 identToForventetInntektMap[personIdent] = forventetInntekt

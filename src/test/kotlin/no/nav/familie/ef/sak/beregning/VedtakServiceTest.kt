@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
@@ -20,12 +21,14 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
+import no.nav.familie.ef.sak.vedtak.erVedtakAktivtForDato
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 import java.util.UUID
 
 internal class VedtakServiceTest : OppslagSpringRunnerTest() {
@@ -145,6 +148,25 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         vedtakService.lagreVedtak(vedtakDto, behandling2, fagsak.stønadstype)
 
         assertThat(vedtakService.hentVedtakForBehandlinger(setOf(behandling, behandling2))).hasSize(2)
+    }
+
+    @Test
+    internal fun `hentForventetInntektForVedtakOgDato - filtrer vekk vedtak som slutter en måned frem i tid`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        val vedtak = vedtakRepository.insert(vedtak(behandling.id))
+        val behandlingIds = listOf(behandling.id)
+        val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForVedtakOgDato(behandlingIds, LocalDate.of(2022, 5, 6))
+
+        assertThat(behandlingIdToForventetInntektMap[behandling.id]).isNull()
+    }
+
+    @Test
+    internal fun `er vedtak aktivt`() {
+        //Vedtak som varer fra 1.1.2021 - 31.12-2021
+        assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2021,6,1))).isTrue
+        assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2020,12,31))).isFalse
+        assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2022,1,1))).isFalse
     }
 
     @Nested
