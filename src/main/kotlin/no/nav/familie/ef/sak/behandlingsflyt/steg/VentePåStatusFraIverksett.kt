@@ -18,15 +18,18 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         iverksettClient.hentStatus(saksbehandling.id).let {
             when {
-                skalIkkeSendeBrev(saksbehandling, it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
+                erBrevløsIverksettingOk(saksbehandling, it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
                 it == IverksettStatus.OK -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
                 else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${saksbehandling.id}")
             }
         }
     }
 
-    private fun skalIkkeSendeBrev(saksbehandling: Saksbehandling,
-                                  it: IverksettStatus): Boolean {
+    /**
+     * Migreringer og behandlinger med årsak [BehandlingÅrsak.KORRIGERING_UTEN_BREV] er brevløse
+     */
+    private fun erBrevløsIverksettingOk(saksbehandling: Saksbehandling,
+                                        it: IverksettStatus): Boolean {
         if (!saksbehandling.erMigrering() && saksbehandling.årsak != BehandlingÅrsak.KORRIGERING_UTEN_BREV) {
             return false
         }
