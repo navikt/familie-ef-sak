@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.tilDomene
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -84,7 +85,7 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         val feilutbetaltePerioderDto = lagFeilutbetaltePerioderDto(saksbehandling)
         val navEnhet = arbeidsfordelingService.hentNavEnhet(saksbehandling.ident)
         val request = ForhåndsvisVarselbrevRequest(varseltekst = varseltekst,
-                                                   ytelsestype = Ytelsestype.OVERGANGSSTØNAD,
+                                                   ytelsestype = Ytelsestype.valueOf(saksbehandling.stønadstype.name),
                                                    behandlendeEnhetId = navEnhet?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET,
                                                    behandlendeEnhetsNavn = navEnhet?.enhetNavn ?: "Ukjent",
                                                    saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(strict = true),
