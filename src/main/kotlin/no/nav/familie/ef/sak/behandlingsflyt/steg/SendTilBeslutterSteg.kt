@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus
@@ -46,7 +47,9 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
-        if (saksbehandling.type !== BehandlingType.BLANKETT && !vedtaksbrevRepository.existsById(saksbehandling.id)) {
+        if (saksbehandling.type !== BehandlingType.BLANKETT &&
+            saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
+            !vedtaksbrevRepository.existsById(saksbehandling.id)) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
         }
         brukerfeilHvis(saksbehandlerMåTaStilingTilTilbakekreving(saksbehandling)) {
@@ -70,7 +73,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         if (erIkkeRelevantForTilbakekreving(saksbehandling)) {
             return false
         }
-        val feilutbetaling = simuleringService.hentLagretSimuleringsoppsummering(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
+        val feilutbetaling =
+                simuleringService.hentLagretSimuleringsoppsummering(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
         val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
         if (feilutbetaling && harIkkeTattStillingTil) {
             return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(saksbehandling.id)
@@ -81,7 +85,10 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
 
     private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
         val resultatType = vedtakService.hentVedtaksresultat(saksbehandling.id)
-        return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || saksbehandling.type == BehandlingType.BLANKETT || resultatType == ResultatType.AVSLÅ || resultatType == ResultatType.HENLEGGE
+        return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING ||
+               saksbehandling.type == BehandlingType.BLANKETT ||
+               resultatType == ResultatType.AVSLÅ ||
+               resultatType == ResultatType.HENLEGGE
     }
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
@@ -116,6 +123,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
+        if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV) return
+
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 
         brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) {
