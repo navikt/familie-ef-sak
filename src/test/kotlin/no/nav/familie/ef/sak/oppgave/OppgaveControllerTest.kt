@@ -85,7 +85,7 @@ internal class OppgaveControllerTest {
 
         every {
             tilgangService.validerHarSaksbehandlerrolle()
-        } throws ManglerTilgang("Bruker mangler tilgang")
+        } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang")
 
         assertThrows<ManglerTilgang> {
             oppgaveController.fordelOppgave(123, "dummy saksbehandler")
