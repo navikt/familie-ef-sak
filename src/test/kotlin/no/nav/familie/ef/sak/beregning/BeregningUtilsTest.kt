@@ -92,11 +92,11 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
                                            LocalDate.of(2021, 4, 30),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
                                            LocalDate.of(2021, 12, 31),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)))
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(LocalDate.of(2022, 5, 1),
@@ -110,11 +110,11 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
                                            LocalDate.of(2021, 4, 30),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
                                            LocalDate.of(2021, 12, 31),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)))
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(nyesteGrunnbeløp.fraOgMedDato,
@@ -129,11 +129,11 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
                                            LocalDate.of(2021, 4, 30),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
                                            LocalDate.of(2021, 12, 31),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)))
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(LocalDate.of(2020, 5, 1),
@@ -142,7 +142,7 @@ internal class BeregningUtilsTest {
             assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
             assertThat(indeksjusterInntekt[1].startDato).isEqualTo(inntektsperioder[1].startDato)
             assertThat(indeksjusterInntekt[1].sluttDato).isEqualTo(inntektsperioder[1].sluttDato)
-            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(209900.toBigDecimal())
+            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(209_900.toBigDecimal())
             assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
 
         }
@@ -152,11 +152,11 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2020, 1, 1),
                                            LocalDate.of(2020, 4, 30),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2020, 5, 1),
                                            LocalDate.of(2021, 12, 31),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)))
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(LocalDate.of(2020, 5, 1),
@@ -165,11 +165,11 @@ internal class BeregningUtilsTest {
             assertThat(indeksjusterInntekt.first()).isEqualTo(inntektsperioder.first())
             assertThat(indeksjusterInntekt[1].startDato).isEqualTo(inntektsperioder[1].startDato)
             assertThat(indeksjusterInntekt[1].sluttDato).isEqualTo(LocalDate.of(2021, 4, 30))
-            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(200000.toBigDecimal())
+            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(200_000.toBigDecimal())
             assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
             assertThat(indeksjusterInntekt[2].startDato).isEqualTo(LocalDate.of(2021, 5, 1))
             assertThat(indeksjusterInntekt[2].sluttDato).isEqualTo(inntektsperioder[1].sluttDato)
-            assertThat(indeksjusterInntekt[2].inntekt).isEqualTo(209900.toBigDecimal())
+            assertThat(indeksjusterInntekt[2].inntekt).isEqualTo(209_900.toBigDecimal())
             assertThat(indeksjusterInntekt[2].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
 
         }
@@ -179,11 +179,11 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                     listOf(Inntektsperiode(LocalDate.of(2021, 1, 1),
                                            LocalDate.of(2021, 4, 30),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)),
                            Inntektsperiode(LocalDate.of(2021, 5, 1),
                                            LocalDate.of(2021, 12, 31),
-                                           200000.toBigDecimal(),
+                                           200_000.toBigDecimal(),
                                            BigDecimal(10)))
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(LocalDate.of(2019, 5, 1),
@@ -191,11 +191,11 @@ internal class BeregningUtilsTest {
 
             assertThat(indeksjusterInntekt.first().startDato).isEqualTo(inntektsperioder.first().startDato)
             assertThat(indeksjusterInntekt.first().sluttDato).isEqualTo(inntektsperioder.first().sluttDato)
-            assertThat(indeksjusterInntekt.first().inntekt).isEqualTo(202900.toBigDecimal())
+            assertThat(indeksjusterInntekt.first().inntekt).isEqualTo(202_900.toBigDecimal())
             assertThat(indeksjusterInntekt.first().samordningsfradrag).isEqualTo(inntektsperioder.first().samordningsfradrag)
             assertThat(indeksjusterInntekt[1].startDato).isEqualTo(inntektsperioder[1].startDato)
             assertThat(indeksjusterInntekt[1].sluttDato).isEqualTo(inntektsperioder[1].sluttDato)
-            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(213100.toBigDecimal())
+            assertThat(indeksjusterInntekt[1].inntekt).isEqualTo(213_100.toBigDecimal())
             assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
 
         }
