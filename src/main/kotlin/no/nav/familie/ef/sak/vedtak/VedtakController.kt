@@ -117,6 +117,12 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(forventetInntekt)
     }
 
+    @GetMapping("/personerMedAktivStonad")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    fun hentPersonerMedAktivStonad(): Ressurs<List<String>> {
+        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonad())
+    }
+
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<Map<String, Int?>> {

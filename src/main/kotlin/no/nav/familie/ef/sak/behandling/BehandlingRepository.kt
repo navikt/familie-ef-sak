@@ -159,6 +159,17 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     // language=PostgreSQL
     @Query("""
+        SELECT DISTINCT pi.ident 
+        FROM gjeldende_iverksatte_behandlinger gib 
+            JOIN behandling b ON b.id = gib.id
+            JOIN fagsak f ON f.id = b.fagsak_id
+            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+        WHERE gib.stonadstype=:stønadstype
+    """)
+    fun finnPersonerMedAktivStonad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
+
+    // language=PostgreSQL
+    @Query("""
         SELECT pi.ident AS first, gib.id AS second 
         FROM gjeldende_iverksatte_behandlinger gib 
             JOIN behandling b ON b.id = gib.id
