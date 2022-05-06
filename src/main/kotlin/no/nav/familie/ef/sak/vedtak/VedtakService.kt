@@ -72,7 +72,7 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         for (vedtak in vedtakList) {
             if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
                 map.put(vedtak.behandlingId, vedtak.inntekter?.inntekter?.firstOrNull {
-                    dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato.minusMonths(1))
+                    dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato)
                 }?.inntekt?.toInt())
             } else {
                 map.put(vedtak.behandlingId, null)
