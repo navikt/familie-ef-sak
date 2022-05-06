@@ -36,13 +36,13 @@ class VedtakServiceTest {
     fun `finn inntekt for tidspunkt`() {
 
         val ingenAndelInnenGittTidspunkt =
-                vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.of(2020, 1, 26))
+                vedtakService.hentForventetInntektForBehandlingIds(behandlingId, LocalDate.of(2020, 1, 26))
         Assertions.assertThat(ingenAndelInnenGittTidspunkt).isNull()
         val inntektPaaTidspunktUtenInntekt =
-                vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.of(2021, 2, 1))
+                vedtakService.hentForventetInntektForBehandlingIds(behandlingId, LocalDate.of(2021, 2, 1))
         Assertions.assertThat(inntektPaaTidspunktUtenInntekt).isEqualTo(0)
         val inntektPaaTidspunktMedInntekt =
-                vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, LocalDate.of(2022, 12, 31))
+                vedtakService.hentForventetInntektForBehandlingIds(behandlingId, LocalDate.of(2022, 12, 31))
         Assertions.assertThat(inntektPaaTidspunktMedInntekt).isEqualTo(400000)
 
     }
