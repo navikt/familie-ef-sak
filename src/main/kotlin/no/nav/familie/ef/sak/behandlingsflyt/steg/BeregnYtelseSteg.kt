@@ -342,7 +342,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder: List<BeløpsperiodeBarnetilsynDto>,
                                                                  vedtak: InnvilgelseBarnetilsyn) {
 
-        if (beløpsperioder.all { it.beregningsgrunnlag.kontantstøttebeløp > it.beregningsgrunnlag.utgifter }) {
+        if (beløpsperioder.all { it.beregningsgrunnlag.kontantstøttebeløp >= it.beregningsgrunnlag.utgifter }) {
             brukerfeilHvis(vedtak.resultatType == ResultatType.INNVILGE) {
                 "Kontantstøttebeløp overstiger utgiftsbeløp for alle perioder - kan ikke innvilge. Husk å trykk Beregn før du lagrer vedtaket."
             }

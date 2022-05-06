@@ -37,6 +37,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
@@ -1352,6 +1353,31 @@ internal class BeregnYtelseStegTest {
                 simuleringService.hentOgLagreSimuleringsresultat(any())
             }
         }
+
+        @Test
+        internal fun `dersom kontantstøttebeløp er større enn utgiftsbeløp skal det kastes feil dersom resultatypen er innvilget`() {
+            val nyAndelFom = LocalDate.of(2022, 1, 1)
+            val nyAndelTom = LocalDate.of(2022, 1, 31)
+
+            every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+                    listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom),
+                                                       0,
+                                                       0,
+                                                       6284,
+                                                       BeregningsgrunnlagBarnetilsynDto(utgifter = BigDecimal.TEN,
+                                                                                        kontantstøttebeløp = BigDecimal.TEN,
+                                                                                        tilleggsstønadsbeløp = BigDecimal.ZERO,
+                                                                                        1,
+                                                                                        emptyList())))
+
+            assertThrows<ApiFeil> {
+                utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                         type = BehandlingType.REVURDERING,
+                                         forrigeBehandlingId = null),
+                          innvilgetBarnetilsyn(nyAndelFom, nyAndelTom).copy(resultatType = ResultatType.INNVILGE))
+            }
+        }
     }
 
     private fun innvilget(perioder: List<VedtaksperiodeDto>,
@@ -1391,17 +1417,18 @@ internal class BeregnYtelseStegTest {
             )
 
     private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
-            AndelHistorikkDto(behandlingId = UUID.randomUUID(),
-                              behandlingType = BehandlingType.REVURDERING,
-                              vedtakstidspunkt = LocalDateTime.now(),
-                              saksbehandler = "",
-                              andel = andelDto(0, sanksjonMåned, sanksjonMåned),
-                              aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
-                              periodeType = VedtaksperiodeType.SANKSJON,
-                              endring = null,
-                              aktivitetArbeid = null,
-                              erSanksjon = true,
-                              sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+            AndelHistorikkDto(
+                    behandlingId = UUID.randomUUID(),
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakstidspunkt = LocalDateTime.now(),
+                    saksbehandler = "",
+                    andel = andelDto(0, sanksjonMåned, sanksjonMåned),
+                    aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                    periodeType = VedtaksperiodeType.SANKSJON,
+                    endring = null,
+                    aktivitetArbeid = null,
+                    erSanksjon = true,
+                    sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
             )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
@@ -1459,7 +1486,7 @@ internal class BeregnYtelseStegTest {
         return saksbehandling(fagsak, behandling(fagsak, type = type, forrigeBehandlingId = forrigeBehandlingId))
     }
 
-    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ZERO,
+    private fun grunnlag() = BeregningsgrunnlagBarnetilsynDto(BigDecimal.ONE,
                                                               BigDecimal.ZERO,
                                                               BigDecimal.ZERO,
                                                               0,
