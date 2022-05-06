@@ -5,8 +5,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
@@ -80,6 +80,10 @@ data class BarnMedIdent(
         val navn: Navn,
         val personIdent: String,
 )
+
+data class ForelderBarnRelasjon(val relatertPersonsIdent: String,
+                                val relatertPersonsRolle: Familierelasjonsrolle,
+                                val minRolleForPerson: Familierelasjonsrolle?)
 
 data class SivilstandMedNavn(val type: Sivilstandstype,
                              val gyldigFraOgMed: LocalDate?,

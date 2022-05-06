@@ -53,7 +53,7 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
     private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
         return pdlSøker.forelderBarnRelasjon
                 .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
+                .mapNotNull { it.relatertPersonsIdent }
                 .let { pdlClient.hentBarn(it) }
     }
 
@@ -62,7 +62,7 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
                                      barneforeldrePersonIdentFraSøknad: List<String>): Map<String, PdlAnnenForelder> {
         return barn.flatMap { it.value.forelderBarnRelasjon }
                 .filter { it.relatertPersonsIdent != personIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
-                .map { it.relatertPersonsIdent }
+                .mapNotNull { it.relatertPersonsIdent }
                 .plus(barneforeldrePersonIdentFraSøknad)
                 .distinct()
                 .let { pdlClient.hentAndreForeldre(it) }
