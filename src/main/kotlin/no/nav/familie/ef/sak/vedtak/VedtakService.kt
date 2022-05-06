@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
@@ -53,9 +54,9 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         vedtakRepository.update(oppdatertVedtak)
     }
 
-    fun hentForventetInntektForVedtakOgDato(behandlingId: UUID, dato: LocalDate): Int? {
+    fun hentForventetInntektForBehandlingIds(behandlingId: UUID, dato: LocalDate): Int? {
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
-        if (vedtak?.perioder?.perioder?.any { it.datoFra.isEqualOrBefore(dato.minusMonths(1)) } == true) {
+        if (vedtak?.erVedtakAktivtForDato(dato) == true) {
             return vedtak.inntekter?.inntekter?.firstOrNull {
                 dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
             }?.inntekt?.toInt()
@@ -64,14 +65,17 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         return null
     }
 
-    fun hentForventetInntektForVedtakOgDato(behandlingIds: Collection<UUID>, dato: LocalDate): Map<UUID, Int?> {
+    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, Int?> {
         val vedtakList = vedtakRepository.findAllById(behandlingIds)
+        val dagensDatoMinusEnMåned = LocalDate.now().minusMonths(1)
         val map = mutableMapOf<UUID, Int?>()
         for (vedtak in vedtakList) {
-            if (vedtak?.perioder?.perioder?.any { it.datoFra.isEqualOrBefore(dato.minusMonths(1)) } == true) {
+            if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
                 map.put(vedtak.behandlingId, vedtak.inntekter?.inntekter?.firstOrNull {
-                    dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato.minusMonths(1))
+                    dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato.minusMonths(1))
                 }?.inntekt?.toInt())
+            } else {
+                map.put(vedtak.behandlingId, null)
             }
         }
 
@@ -87,3 +91,4 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
 fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)
 fun LocalDate.isEqualOrBefore(dato: LocalDate) = this.equals(dato) || this.isBefore(dato)
+fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any { Periode(it.datoFra, it.datoTil).omslutter(dato) } ?: false
