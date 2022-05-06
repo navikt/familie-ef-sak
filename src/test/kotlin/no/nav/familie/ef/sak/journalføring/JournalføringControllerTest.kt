@@ -86,7 +86,7 @@ internal class JournalføringControllerTest {
 
         every {
             tilgangService.validerTilgangTilPersonMedBarn(any(), any())
-        } throws ManglerTilgang("Ingen tilgang")
+        } throws ManglerTilgang("Ingen tilgang", "Mangler tilgang til bruker")
 
         assertFailsWith<ManglerTilgang> {
             journalføringController.hentJournalPost(journalpostId)
@@ -120,7 +120,7 @@ internal class JournalføringControllerTest {
 
         every {
             tilgangService.validerHarSaksbehandlerrolle()
-        } throws ManglerTilgang("Bruker mangler tilgang")
+        } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang til bruker")
 
         assertThrows<ManglerTilgang> {
             journalføringController.fullførJournalpost(journalpostMedFødselsnummer.journalpostId,

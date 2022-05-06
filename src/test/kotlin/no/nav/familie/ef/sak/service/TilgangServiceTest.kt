@@ -89,9 +89,16 @@ internal class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste ManglerTilgang dersom saksbehandler ikke har tilgang til behandling`() {
-        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(false)
+        val tilgangsfeilNavAnsatt = Tilgang(false, "NAV-ansatt")
+        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns tilgangsfeilNavAnsatt
 
-        assertFailsWith<ManglerTilgang> { tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS) }
+        val feil = assertFailsWith<ManglerTilgang> {
+            tilgangService.validerTilgangTilBehandling(behandling.id,
+                                                       AuditLoggerEvent.ACCESS)
+        }
+
+        assertThat(feil.frontendFeilmelding).contains(tilgangsfeilNavAnsatt.begrunnelse)
+        assertThat(feil.frontendFeilmelding).contains(tilgangsfeilNavAnsatt.utledÅrsakstekst())
     }
 
     @Test

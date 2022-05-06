@@ -43,4 +43,4 @@ inline fun brukerfeilHvisIkke(boolean: Boolean, httpStatus: HttpStatus = HttpSta
     brukerfeilHvis(!boolean, httpStatus) { lazyMessage() }
 }
 
-class ManglerTilgang(val melding: String) : RuntimeException(melding)
+class ManglerTilgang(val melding: String, val frontendFeilmelding: String) : RuntimeException(melding)
