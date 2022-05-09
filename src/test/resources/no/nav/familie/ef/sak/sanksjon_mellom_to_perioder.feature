@@ -6,10 +6,10 @@ Egenskap: Andelhistorikk: Sanksjon
   Scenario: Sanksjon mellom to innvilgelser skal være med i vedtakshistorikken
 
     Gitt følgende vedtak
-      | BehandlingId | Vedtaksresultat | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato |
-      | 1            | INNVILGE        | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
-      | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |
+      | BehandlingId | Vedtaksresultat | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato | Sanksjonsårsak |
+      | 1            | INNVILGE        | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |                |
+      | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |                |
+      | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |                |
 
     Når lag andelhistorikk kjøres
 

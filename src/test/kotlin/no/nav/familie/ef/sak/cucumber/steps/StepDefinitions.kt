@@ -363,6 +363,10 @@ class StepDefinitions {
         }
         forventetHistorikkEndring.erSanksjon?.let {
             assertThat(beregnetAndelHistorikk.erSanksjon).isEqualTo(it)
+            if(beregnetAndelHistorikk.erSanksjon) {
+                assertThat(beregnetAndelHistorikk.sanksjonsårsak).isNotNull
+            }
+            assertThat(beregnetAndelHistorikk.sanksjonsårsak).isEqualTo(forventetHistorikkEndring.sanksjonsårsak)
         }
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
     }

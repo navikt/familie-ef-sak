@@ -70,7 +70,7 @@ class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Ressurs(data = null,
                               status = Ressurs.Status.IKKE_TILGANG,
-                              frontendFeilmelding = "Mangler tilgang til opplysningene",
+                              frontendFeilmelding = manglerTilgang.frontendFeilmelding,
                               melding = manglerTilgang.melding,
                               stacktrace = null
                 ))

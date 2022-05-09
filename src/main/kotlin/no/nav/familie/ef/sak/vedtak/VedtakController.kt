@@ -104,7 +104,7 @@ class VedtakController(private val stegService: StegService,
     fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
-        val forventetInntekt = vedtakService.hentForventetInntektForVedtakOgDato(behandlingId, dato ?: LocalDate.now())
+        val forventetInntekt = vedtakService.hentForventetInntektForBehandlingIds(behandlingId, dato ?: LocalDate.now())
         return Ressurs.success(forventetInntekt)
     }
 
@@ -117,6 +117,12 @@ class VedtakController(private val stegService: StegService,
         return Ressurs.success(forventetInntekt)
     }
 
+    @GetMapping("/personerMedAktivStonad")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    fun hentPersonerMedAktivStonad(): Ressurs<List<String>> {
+        return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonad())
+    }
+
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<Map<String, Int?>> {
@@ -126,13 +132,12 @@ class VedtakController(private val stegService: StegService,
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
 
         val behandlingIdToForventetInntektMap =
-                vedtakService.hentForventetInntektForVedtakOgDato(personIdentToBehandlingIds.values,
-                                                                  LocalDate.now().minusMonths(1))
+                vedtakService.hentForventetInntektForBehandlingIds(personIdentToBehandlingIds.values)
 
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
             if (behandlingIdToForventetInntektMap[behandlingId] == null) {
-                secureLogger.warn("Fant behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
+                secureLogger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {
                 val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
                 identToForventetInntektMap[personIdent] = forventetInntekt

@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.Saksbeh
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import java.math.BigDecimal
@@ -192,6 +193,10 @@ fun parseArbeidAktivitet(rad: Map<String, String>): SvarId? {
     return SvarId.valueOf(verdi)
 }
 
+fun parseSanksjonsårsak(rad: Map<String, String>): Sanksjonsårsak? {
+    val verdi = valgfriVerdi(VedtakDomenebegrep.SANKSJONSÅRSAK.nøkkel, rad) ?: return null
+    return Sanksjonsårsak.valueOf(verdi)
+}
 
 fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null

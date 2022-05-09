@@ -2,28 +2,28 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,10 +43,6 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var vilkårsvurderingService: VurderingService
-    @Autowired private lateinit var søknadService: SøknadService
-    @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
     @Autowired private lateinit var barnRepository: BarnRepository
 
 
@@ -56,8 +53,140 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal innvilge vedtak for barnetilsyn `() {
-        val fagsak =
-                testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN, identer = setOf(PersonIdent(""))))
+        val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
+        val utgiftsperiode = lagUtgiftsperioder(barn)
+        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
+                                               perioder = listOf(utgiftsperiode),
+                                               perioderKontantstøtte = listOf(),
+                                               tilleggsstønad = tomTillegsstønad())
+
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+        val vedtak = Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE,
+                avslåBegrunnelse = null,
+                barnetilsyn = BarnetilsynWrapper(
+                        perioder = listOf(Barnetilsynperiode(datoFra = utgiftsperiode.årMånedFra.atDay(1),
+                                                             datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                                                             utgifter = utgiftsperiode.utgifter,
+                                                             barn = utgiftsperiode.barn)),
+                        begrunnelse = ""),
+                kontantstøtte = KontantstøtteWrapper(emptyList()),
+                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+        )
+
+        val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
+
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
+        Assertions.assertThat(vedtakRespons.body.data).isNotNull
+        Assertions.assertThat(vedtakRespons.body.data?.resultatType).isEqualTo(ResultatType.INNVILGE)
+        Assertions.assertThat(vedtakRespons.body.data?._type).isEqualTo("InnvilgelseBarnetilsyn")
+    }
+
+
+    @Test
+    internal fun `Skal innvilge uten utbetaling når kontantstøtte overstiger utgifter `() {
+        val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
+        val utgiftsperiode = lagUtgiftsperioder(barn)
+        val kontantstøttePeriode = lagKontantstøttePeriode(3000)
+        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
+                                               perioder = listOf(utgiftsperiode),
+                                               perioderKontantstøtte = listOf(kontantstøttePeriode),
+                                               tilleggsstønad = tomTillegsstønad(),
+                                               _type = "InnvilgelseBarnetilsynUtenUtbetaling"
+        )
+
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+        val vedtak = Vedtak(
+                behandlingId = behandling.id,
+                resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
+                avslåBegrunnelse = null,
+                barnetilsyn = BarnetilsynWrapper(
+                        perioder = listOf(
+                                Barnetilsynperiode(datoFra = utgiftsperiode.årMånedFra.atDay(1),
+                                                   datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                                                   utgifter = utgiftsperiode.utgifter,
+                                                   barn = utgiftsperiode.barn)),
+                        begrunnelse = ""),
+                kontantstøtte = KontantstøtteWrapper(
+                        listOf(PeriodeMedBeløp(datoFra = kontantstøttePeriode.årMånedFra.atDay(1),
+                                               datoTil = kontantstøttePeriode.årMånedTil.atEndOfMonth(),
+                                               beløp = kontantstøttePeriode.beløp
+
+                        ))),
+                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+        )
+
+        val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
+
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
+        Assertions.assertThat(vedtakRespons.body.data).isNotNull
+        Assertions.assertThat(vedtakRespons.body.data?.resultatType).isEqualTo(ResultatType.INNVILGE_UTEN_UTBETALING)
+        Assertions.assertThat(vedtakRespons.body.data?._type).isEqualTo("InnvilgelseBarnetilsynUtenUtbetaling")
+
+    }
+
+    @Test
+    internal fun `Skal feile hvis vi innvilger uten utbetaling når kontantstøtte ikke overstiger utgifter`() {
+        val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
+        val utgiftsperiode = lagUtgiftsperioder(barn)
+        val kontantstøttePeriode = lagKontantstøttePeriode(0)
+        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
+                                               perioder = listOf(utgiftsperiode),
+                                               perioderKontantstøtte = listOf(kontantstøttePeriode),
+                                               tilleggsstønad = tomTillegsstønad(),
+                                               _type = "InnvilgelseBarnetilsynUtenUtbetaling"
+        )
+
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+
+        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        Assertions.assertThat(respons.body?.data).isNull()
+    }
+
+
+    @Test
+    internal fun `Skal feile hvis vi innvilger når kontantstøtte overstiger utgifter`() {
+        val (behandling, barn) = opprettFagsakOgBehandlingMedBarn()
+        val utgiftsperiode = lagUtgiftsperioder(barn)
+        val kontantstøttePeriode = lagKontantstøttePeriode(3000)
+        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
+                                               perioder = listOf(utgiftsperiode),
+                                               perioderKontantstøtte = listOf(kontantstøttePeriode),
+                                               tilleggsstønad = tomTillegsstønad(),
+                                               _type = "InnvilgelseBarnetilsyn"
+        )
+
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+
+        Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        Assertions.assertThat(respons.body?.data).isNull()
+    }
+
+    private fun tomTillegsstønad() = TilleggsstønadDto(harTilleggsstønad = false,
+                                                       perioder = listOf(),
+                                                       begrunnelse = null)
+
+    private fun lagKontantstøttePeriode(beløp: Int): PeriodeMedBeløpDto = PeriodeMedBeløpDto(
+            årMånedFra = YearMonth.of(2022, 1),
+            årMånedTil = YearMonth.of(2022, 3),
+            beløp = beløp)
+
+    private fun lagUtgiftsperioder(barn: BehandlingBarn): UtgiftsperiodeDto {
+        val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
+                                               årMånedTil = YearMonth.of(2022, 3),
+                                               barn = listOf(barn.id),
+                                               utgifter = 2500)
+        return utgiftsperiode
+    }
+
+    private fun opprettFagsakOgBehandlingMedBarn(): Pair<Behandling, BehandlingBarn> {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN,
+                                                           identer = setOf(PersonIdent(""))))
         val behandling = behandlingRepository.insert(behandling(fagsak,
                                                                 steg = StegType.BEREGNE_YTELSE,
                                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -69,37 +198,18 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                                                         "01012212345",
                                                         "Junior",
                                                         LocalDate.now()))
-        val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
-                                               årMånedTil = YearMonth.of(2022, 3),
-                                               barn = listOf(barn.id),
-                                               utgifter = 2500)
-        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
-                                               perioder = listOf(utgiftsperiode),
-                                               perioderKontantstøtte = listOf(),
-                                               tilleggsstønad = TilleggsstønadDto(harTilleggsstønad = false,
-                                                                                  perioder = listOf(),
-                                                                                  begrunnelse = null))
-
-        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
-        val vedtak = Vedtak(
-                behandlingId = behandling.id,
-                resultatType = ResultatType.INNVILGE,
-                avslåBegrunnelse = null,
-                barnetilsyn = BarnetilsynWrapper(listOf(Barnetilsynperiode(datoFra = utgiftsperiode.årMånedFra.atDay(1),
-                                                                           datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
-                                                                           utgifter = utgiftsperiode.utgifter,
-                                                                           barn = utgiftsperiode.barn)),
-                                                 begrunnelse = ""),
-                kontantstøtte = KontantstøtteWrapper(emptyList()),
-                tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
-        )
-
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
+        return Pair(behandling, barn)
     }
 
     private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
         return restTemplate.exchange(localhost("/api/vedtak/$id/lagre-vedtak"),
                                      HttpMethod.POST,
                                      HttpEntity(vedtakDto, headers))
+    }
+
+    private fun hentVedtak(id: UUID): ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> {
+        return restTemplate.exchange(localhost("/api/vedtak/$id"),
+                                     HttpMethod.GET,
+                                     HttpEntity<Ressurs<InnvilgelseBarnetilsyn?>>(headers))
     }
 }

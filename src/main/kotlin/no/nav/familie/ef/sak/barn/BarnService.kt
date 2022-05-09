@@ -34,7 +34,7 @@ class BarnService(
                     )
                 }
             }
-            StønadType.OVERGANGSSTØNAD -> {
+            StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
                 val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId)
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                         .map {
@@ -46,9 +46,6 @@ class BarnService(
                                            fødselTermindato = it.behandlingBarn.fødselTermindato)
                         }
 
-            }
-            else -> {
-                throw NotImplementedError("Støtter kun overgangsstønad og barnetilsyn")
             }
         }
         barnRepository.insertAll(barnPåBehandlingen)

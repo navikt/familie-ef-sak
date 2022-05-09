@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
@@ -32,7 +33,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
                     private val behandlingService: BehandlingService,
                     private val pdlClient: PdlClient,
                     private val featureToggleService: FeatureToggleService,
-                    private val infotrygdService: InfotrygdService) {
+                    private val infotrygdService: InfotrygdService,
+                    private val behandlingshistorikkService: BehandlingshistorikkService) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: StønadType): FagsakDto {
         return fagsakTilDto(hentEllerOpprettFagsak(personIdent, stønadstype))
@@ -85,7 +87,8 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
-        return fagsak.tilDto(behandlinger = behandlinger.map{ it.tilDto(fagsak.stønadstype)}, erLøpende = erLøpende)
+        val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(behandlinger.map { it.id })
+        return fagsak.tilDto(behandlinger = behandlinger.map { it.tilDto(fagsak.stønadstype, vedtaksdatoPåBehandlingId.get(it.id))}, erLøpende = erLøpende)
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
@@ -177,7 +180,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
             StønadType.BARNETILSYN -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.barnetilsyn")) {
                 "Støtter ikke opprettelse av fagsak for barnetilsyn"
             }
-            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.skolepenger")){
+            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.skolepenger")) {
                 "Støtter ikke opprettelse av fagsak for skolepenger"
             }
         }

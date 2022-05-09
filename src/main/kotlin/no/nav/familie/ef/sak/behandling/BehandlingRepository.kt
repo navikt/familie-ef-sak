@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -23,10 +24,10 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT DISTINCT b.id FROM behandling b 
             JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
             JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
-        WHERE aty.stonad_tom > '2022-05-01' AND ty.grunnbelopsdato='2021-05-01'
+        WHERE aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
         AND b.status = 'FERDIGSTILT'
     """)
-    fun finnBehandlingerMedUtdatertGBelop(): List<UUID>
+    fun finnBehandlingerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
 
     // language=PostgreSQL
     @Query("""SELECT b.*, be.id AS eksternid_id         
@@ -168,12 +169,26 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
     fun finnSisteIverksatteBehandlinger(stønadstype: StønadType): Set<UUID>
 
-    @Query("""SELECT pi.ident AS first, gib.id AS second FROM gjeldende_iverksatte_behandlinger gib 
-        JOIN behandling b ON b.id = gib.id
-        JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+    // language=PostgreSQL
+    @Query("""
+        SELECT DISTINCT pi.ident 
+        FROM gjeldende_iverksatte_behandlinger gib 
+            JOIN behandling b ON b.id = gib.id
+            JOIN fagsak f ON f.id = b.fagsak_id
+            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+        WHERE gib.stonadstype=:stønadstype
+    """)
+    fun finnPersonerMedAktivStonad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT pi.ident AS first, gib.id AS second 
+        FROM gjeldende_iverksatte_behandlinger gib 
+            JOIN behandling b ON b.id = gib.id
+            JOIN fagsak f ON f.id = b.fagsak_id
+            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
         WHERE pi.ident IN (:personidenter)
-        AND gib.stonadstype=:stønadstype
+            AND gib.stonadstype=:stønadstype
     """)
     fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>, stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<Pair<String, UUID>>
 
