@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
@@ -14,6 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon as ForelderBarnRelasjonPdl
 
 object GrunnlagsdataMapper {
 
@@ -28,7 +30,7 @@ object GrunnlagsdataMapper {
                          bostedsadresse = pdlBarn.bostedsadresse,
                          dødsfall = pdlBarn.dødsfall,
                          deltBosted = pdlBarn.deltBosted,
-                         forelderBarnRelasjon = pdlBarn.forelderBarnRelasjon,
+                         forelderBarnRelasjon = pdlBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
                          personIdent = personIdent)
 
     fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
@@ -48,7 +50,7 @@ object GrunnlagsdataMapper {
             adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
             bostedsadresse = pdlSøker.bostedsadresse,
             dødsfall = pdlSøker.dødsfall.gjeldende(),
-            forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon,
+            forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
             fullmakt = mapFullmakt(pdlSøker, andrePersoner),
             fødsel = pdlSøker.fødsel,
             folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
@@ -64,6 +66,15 @@ object GrunnlagsdataMapper {
             utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
             vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner)
     )
+
+    private fun List<ForelderBarnRelasjonPdl>.mapForelderBarnRelasjon() =
+            this.mapNotNull {
+                it.relatertPersonsIdent?.let { relatertPersonsIdent ->
+                    ForelderBarnRelasjon(relatertPersonsIdent,
+                                         it.relatertPersonsRolle,
+                                         it.minRolleForPerson)
+                }
+            }
 
     /**
      * Legger inn navn fra [andrePersoner] hvis personIdent finnes

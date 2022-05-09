@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -60,17 +61,21 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                     stegType().hentNesteSteg(saksbehandling.type)
                 }
                 else -> {
-                    val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
                     val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
                     oppdaterResultatPåBehandling(saksbehandling.id)
                     opprettPollForStatusOppgave(saksbehandling.id)
                     opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-                    iverksettClient.iverksett(iverksettDto, fil)
+                    if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV) {
+                        iverksettClient.iverksettUtenBrev(iverksettDto)
+                    } else {
+                        val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
+                        iverksettClient.iverksett(iverksettDto, fil)
+                    }
                     StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
                 }
             }
         } else {
-            if (!featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")){
+            if (!featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")) {
                 vedtaksbrevService.slettVedtaksbrev(saksbehandling)
             }
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
@@ -85,7 +90,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
         when (resultat) {
-            ResultatType.INNVILGE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)

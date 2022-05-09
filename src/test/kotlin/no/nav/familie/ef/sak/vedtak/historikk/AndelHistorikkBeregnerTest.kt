@@ -357,7 +357,8 @@ object AndelHistorikkParser {
                                                    LocalDateTime.now())
                               },
                               aktivitetArbeid = null,
-                              erSanksjon = false)
+                              erSanksjon = false,
+                              sanksjonsårsak = null)
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
 

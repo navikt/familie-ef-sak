@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
 
     private val funksjonsbrytere = listOf("familie.ef.sak.tekniskopphor",
+                                          "familie.ef.sak.behandling-korrigering",
                                           "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
                                           "familie.ef.sak.frontend-vis-oppdatering-av-registeropplysninger",
                                           "familie.ef.sak.brevmottakere-verge-og-fullmakt",

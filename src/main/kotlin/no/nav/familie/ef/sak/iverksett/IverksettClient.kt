@@ -76,8 +76,8 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
         postForEntity<Any>(url, request, headers)
     }
 
-    fun iverksettMigrering(iverksettDto: IverksettDto) {
-        val url = URI.create("$familieEfIverksettUri/api/iverksett/migrering")
+    fun iverksettUtenBrev(iverksettDto: IverksettDto) {
+        val url = URI.create("$familieEfIverksettUri/api/iverksett/uten-brev")
         postForEntity<Any>(url, iverksettDto)
     }
 
@@ -95,7 +95,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
             konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
 
     fun sendSluttmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
-            konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
+            konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
 
     fun sendKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
             konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)

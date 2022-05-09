@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -53,5 +55,9 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
                     JsonWrapper(objectMapper.writeValueAsString(it))
                 }))
     }
+
+    fun finnVedtaksdatoForBehandlinger(behandlingsIder: List<UUID>): Map<UUID, LocalDateTime> =
+            behandlingshistorikkRepository.finnSisteEndringstidspunktForBehandlinger(behandlingsIder, StegType.SEND_TIL_BESLUTTER)
+                    .associate { it.first to it.second.toLocalDateTime() }
 
 }
