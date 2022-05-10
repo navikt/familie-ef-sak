@@ -181,7 +181,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
         }
 
-private fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
+fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
     feilHvis(this.perioder == null || this.inntekter == null) {
         "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
     }

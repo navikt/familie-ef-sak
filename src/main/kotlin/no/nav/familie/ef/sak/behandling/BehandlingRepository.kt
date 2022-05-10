@@ -24,7 +24,10 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT DISTINCT b.id FROM behandling b 
             JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
             JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
-        WHERE aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
+            JOIN fagsak f ON b.fagsak_id = f.id
+            AND f.stonadstype = 'OVERGANGSSTØNAD'
+        WHERE aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato 
+        AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
         AND b.status = 'FERDIGSTILT'
     """)
     fun finnBehandlingerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
@@ -143,6 +146,17 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         LIMIT 1
     """)
     fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
+
+    // language=PostgreSQL
+    @Query("""
+        SELECT b.*, be.id AS eksternid_id
+        FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
+        WHERE b.fagsak_id = :fagsakId
+        ORDER BY b.opprettet_tid DESC
+        LIMIT 1
+    """)
+    fun finnSisteBehandling(fagsakId: UUID): Behandling?
 
     // language=PostgreSQL
     @Query("""
