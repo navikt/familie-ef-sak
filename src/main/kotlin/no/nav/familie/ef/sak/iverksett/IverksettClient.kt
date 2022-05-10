@@ -77,7 +77,7 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun iverksettUtenBrev(iverksettDto: IverksettDto) {
-        val url = URI.create("http://localhost:8002/api/iverksett/uten-brev")
+        val url = URI.create("$familieEfIverksettUri/api/iverksett/uten-brev")
         postForEntity<Any>(url, iverksettDto)
     }
 
