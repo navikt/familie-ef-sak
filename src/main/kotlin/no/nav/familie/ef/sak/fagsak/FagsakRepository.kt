@@ -29,7 +29,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
                     JOIN behandling b 
                         ON b.fagsak_id = f.id 
                     WHERE b.id = :behandlingId""")
-    fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDomain?
+    fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDomain
 
     // language=PostgreSQL
     @Query("""SELECT DISTINCT f.*, fe.id AS eksternid_id FROM fagsak f 

@@ -7,7 +7,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -34,7 +33,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
 
     @Autowired lateinit var omregningService: OmregningService
-    @Autowired lateinit var behandlingService: BehandlingService
     @Autowired lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var vedtakRepository: VedtakRepository
     @Autowired lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
@@ -50,7 +48,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun utførGOmregning() {
+    fun `utførGOmregning kaller iverksettUtenBrev med korrekt iverksettDto `() {
 
         val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
         val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
@@ -59,28 +57,23 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                                                                 fagsak = fagsak,
                                                                 resultat = BehandlingResultat.INNVILGET,
                                                                 status = BehandlingStatus.FERDIGSTILT))
-
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
         vedtakRepository.insert(vedtak(behandling.id))
+
         omregningService.utførGOmregning(behandling.id)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
-        val expectedIverksettDto = objectMapper.readValue<IverksettOvergangsstønadDto>(readFile("expectedIverksettDto.json")) //Kan ikke sjekke direkte da ny behandlingId endrer seg
-        assertThat(iverksettDtoSlot.captured.behandling.behandlingÅrsak).isEqualTo(expectedIverksettDto.behandling.behandlingÅrsak)
-        assertThat(iverksettDtoSlot.captured.behandling.forrigeBehandlingId).isEqualTo(expectedIverksettDto.behandling.forrigeBehandlingId)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.size)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].beløp).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].beløp)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].inntekt).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].inntekt)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].inntektsreduksjon).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].inntektsreduksjon)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].fraOgMed).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].fraOgMed)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].tilOgMed).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[0].tilOgMed)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].beløp).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].beløp)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].inntekt).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].inntekt)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].inntektsreduksjon).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].inntektsreduksjon)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].fraOgMed).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].fraOgMed)
-        assertThat(iverksettDtoSlot.captured.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].tilOgMed).isEqualTo(expectedIverksettDto.vedtak.tilkjentYtelse!!.andelerTilkjentYtelse[1].tilOgMed)
+        val expectedIverksettDto =
+                objectMapper.readValue<IverksettOvergangsstønadDto>(readFile("expectedIverksettDto.json"))
+        // Ignorerer behandlingId siden denne endrer seg.
+        assertThat(iverksettDtoSlot.captured)
+                .usingRecursiveComparison()
+                .ignoringFields("behandling.behandlingId",
+                                "vedtak.tilkjentYtelse.andelerTilkjentYtelse.kildeBehandlingId",
+                                "vedtak.vedtakstidspunkt")
+                .isEqualTo(expectedIverksettDto)
     }
 
     private fun readFile(filnavn: String): String {

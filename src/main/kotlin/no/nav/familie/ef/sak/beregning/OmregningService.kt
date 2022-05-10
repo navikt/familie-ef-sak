@@ -19,7 +19,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
-import no.nav.familie.ef.sak.vedtak.dto.mapInnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -58,13 +57,13 @@ class OmregningService(private val behandlingService: BehandlingService,
         }
 
         val fagsak = fagsakRepository.finnFagsakTilBehandling(ferdigstiltBehandlingIdMedGammelG)
-        feilHvis(fagsak == null) {
-            "Kan ikke omberegne: Fant ikke fagsak for behandling ${ferdigstiltBehandlingIdMedGammelG}"
-        }
+
         val fagsakMedOppdatertPersonIdent = fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id)
-        val sisteBehandling = behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(fagsakMedOppdatertPersonIdent.stønadstype,
-                                                                                        fagsakMedOppdatertPersonIdent.personIdenter.map { it.ident }
-                                                                                                .toSet())
+        val sisteBehandling =
+                behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(fagsakMedOppdatertPersonIdent.stønadstype,
+                                                                          fagsakMedOppdatertPersonIdent.personIdenter.map {
+                                                                              it.ident
+                                                                          }.toSet())
 
         feilHvis(sisteBehandling == null) {
             "Kan ikke omberegne: Fant ikke sisteBehandlingId for fagsak ${fagsak.id}"
@@ -81,16 +80,9 @@ class OmregningService(private val behandlingService: BehandlingService,
 
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(ferdigstiltBehandlingIdMedGammelG)
 
-        val vedtak = vedtakService.hentVedtak(ferdigstiltBehandlingIdMedGammelG)
-
         val innvilgelseOvergangsstønad =
-                if (vedtak.perioder?.perioder?.any { it.datoTil > nyesteGrunnbeløpFraOgMedDato() } == true) {
-                    vedtak.mapInnvilgelseOvergangsstønad()
-                } else {
-                    vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsak.id,
-                                                                               YearMonth.of(nyesteGrunnbeløp.fraOgMedDato.year,
-                                                                                            nyesteGrunnbeløp.fraOgMedDato.month))
-                }
+                vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsak.id,
+                                                                           YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForOmregning(behandling)
