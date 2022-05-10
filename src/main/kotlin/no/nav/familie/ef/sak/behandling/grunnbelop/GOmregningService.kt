@@ -13,8 +13,8 @@ class GOmregningService(val behandlingRepository: BehandlingRepository,
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
-        val nyesteGrunnbeløp = finnGrunnbeløp(LocalDate.now()).fraOgMedDato
-        val behandlingIds = behandlingRepository.finnBehandlingerMedUtdatertGBelop(nyesteGrunnbeløp)
+        val nyesteGrunnbeløpFraOgMedDato = finnGrunnbeløp(LocalDate.now()).fraOgMedDato
+        val behandlingIds = behandlingRepository.finnBehandlingerMedUtdatertGBelop(nyesteGrunnbeløpFraOgMedDato)
         val gOmregningTasks = GOmregningTask.opprettTasks(behandlingIds)
         taskRepository.saveAll(gOmregningTasks)
         return gOmregningTasks.size

@@ -89,7 +89,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
         return tilDto(saksbehandling, saksbehandler, beslutter)
     }
 
-    fun tilMigreringDto(saksbehandling: Saksbehandling): IverksettDto {
+    fun tilDtoMaskineltBehandlet(saksbehandling: Saksbehandling): IverksettDto {
         return tilDto(saksbehandling, SikkerhetContext.SYSTEM_FORKORTELSE, SikkerhetContext.SYSTEM_FORKORTELSE)
     }
 

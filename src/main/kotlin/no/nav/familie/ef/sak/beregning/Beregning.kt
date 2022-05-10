@@ -39,6 +39,8 @@ fun finnGrunnbeløp(dato: LocalDate) = grunnbeløpsperioder.find {
     Periode(it.fraOgMedDato, it.tilOgMedDato).omslutter(dato)
 } ?: error("Grunnbeløp finnes ikke for dato $dato")
 
+fun nyesteGrunnbeløpFraOgMedDato() = finnGrunnbeløp(LocalDate.now()).fraOgMedDato
+
 private fun overlapper(grunnbeløpsperiode: Grunnbeløp,
                        fraOgMedDato: LocalDate,
                        tilDato: LocalDate) =

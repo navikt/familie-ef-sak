@@ -1,0 +1,306 @@
+{
+  "fagsak": {
+    "fagsakId": "3549f9e2-ddd1-467d-82be-bfdb6c7f07e1",
+    "eksternId": 200000000,
+    "stønadstype": "OVERGANGSSTØNAD"
+  },
+  "behandling": {
+    "behandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d",
+    "forrigeBehandlingId": "39c7dc82-adc1-43db-a6f9-64b8e4352ff6",
+    "eksternId": 2,
+    "behandlingType": "REVURDERING",
+    "behandlingÅrsak": "G_OMREGNING",
+    "vilkårsvurderinger": [
+      {
+        "vilkårType": "TIDLIGERE_VEDTAKSPERIODER",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD",
+                "svar": "NEI",
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "SAGT_OPP_ELLER_REDUSERT",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "SAGT_OPP_ELLER_REDUSERT",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "AKTIVITET",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "FYLLER_BRUKER_AKTIVITETSPLIKT",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "NYTT_BARN_SAMME_PARTNER",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "ALENEOMSORG",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "SKRIFTLIG_AVTALE_OM_DELT_BOSTED",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "NÆRE_BOFORHOLD",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "MER_AV_DAGLIG_OMSORG",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "SAMLIV",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "LEVER_IKKE_MED_ANNEN_FORELDER",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "SIVILSTAND",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_AKTUELL",
+            "vurderinger": [
+              {
+                "regelId": "KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_AKTUELL",
+            "vurderinger": [
+              {
+                "regelId": "SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_AKTUELL",
+            "vurderinger": [
+              {
+                "regelId": "SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          },
+          {
+            "resultat": "IKKE_AKTUELL",
+            "vurderinger": [
+              {
+                "regelId": "SIVILSTAND_UNNTAK",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "MOR_ELLER_FAR",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "LOVLIG_OPPHOLD",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "BOR_OG_OPPHOLDER_SEG_I_NORGE",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "FORUTGÅENDE_MEDLEMSKAP",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "IKKE_TATT_STILLING_TIL",
+            "vurderinger": [
+              {
+                "regelId": "SØKER_MEDLEM_I_FOLKETRYGDEN",
+                "svar": null,
+                "begrunnelse": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "aktivitetspliktInntrefferDato": null,
+    "kravMottatt": null
+  },
+  "søker": {
+    "personIdent": "321",
+    "barn": [],
+    "tilhørendeEnhet": "4489",
+    "adressebeskyttelse": "UGRADERT"
+  },
+  "vedtak": {
+    "resultat": "INNVILGET",
+    "vedtakstidspunkt": "2022-05-10T09:34:10.159156",
+    "opphørÅrsak": null,
+    "saksbehandlerId": "VL",
+    "beslutterId": "VL",
+    "tilkjentYtelse": {
+      "andelerTilkjentYtelse": [
+        {
+          "beløp": 16653,
+          "periodetype": "MÅNED",
+          "inntekt": 100000,
+          "inntektsreduksjon": 1850,
+          "samordningsfradrag": 500,
+          "fraOgMed": "2021-01-01",
+          "tilOgMed": "2021-04-30",
+          "kildeBehandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d"
+        },
+        {
+          "beløp": 17508,
+          "periodetype": "MÅNED",
+          "inntekt": 104981,
+          "inntektsreduksjon": 1942,
+          "samordningsfradrag": 500,
+          "fraOgMed": "2021-05-01",
+          "tilOgMed": "2021-12-31",
+          "kildeBehandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d"
+        }
+      ],
+      "startdato": "2021-01-01"
+    },
+    "vedtaksperioder": [
+      {
+        "fraOgMed": "2021-01-01",
+        "tilOgMed": "2021-12-31",
+        "aktivitet": "BARN_UNDER_ETT_ÅR",
+        "periodeType": "HOVEDPERIODE"
+      }
+    ],
+    "tilbakekreving": null,
+    "brevmottakere": []
+  }
+}
