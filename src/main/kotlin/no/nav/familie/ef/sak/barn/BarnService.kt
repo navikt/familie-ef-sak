@@ -40,6 +40,7 @@ class BarnService(
                 }
             }
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
+                // TODO skal vi ha terminabarn for skolepenger?
                 val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId) +
                                     terminbarn.map { it.tilBehandlingBarn(behandlingId) }
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
@@ -112,8 +113,8 @@ class BarnService(
         }
     }
 
-    private fun hentSøknadsbarnForBehandling(behandlingId: UUID) = søknadService.hentSøknadsgrunnlag(behandlingId)?.barn
-                                                                   ?: emptyList()
+    private fun hentSøknadsbarnForBehandling(behandlingId: UUID) =
+            søknadService.hentSøknadsgrunnlag(behandlingId)?.barn ?: emptyList()
 
     fun finnBarnPåBehandling(behandlingId: UUID): List<BehandlingBarn> = barnRepository.findByBehandlingId(behandlingId)
 

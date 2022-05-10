@@ -173,7 +173,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId = behandling.id,
                                                           fagsakId = fagsak.id,
                                                           grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-                                                          stønadstype = fagsak.stønadstype)
+                                                          stønadstype = fagsak.stønadstype,
+                                                          terminbarn = terminbarn)
         return behandling
     }
 
