@@ -26,8 +26,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
             JOIN fagsak f ON b.fagsak_id = f.id
             AND f.stonadstype = 'OVERGANGSSTØNAD'
-        WHERE aty.stonad_tom > :gjeldendegrunnbeløpfraogmeddato 
-        AND ty.grunnbelopsdato <= :gjeldendegrunnbeløpfraogmeddato
+        WHERE aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato 
+        AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
         AND b.status = 'FERDIGSTILT'
     """)
     fun finnBehandlingerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
