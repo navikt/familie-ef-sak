@@ -17,7 +17,9 @@ import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
+import no.nav.familie.ef.sak.journalføring.dto.ManueltInntastetTerminbarn
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
+import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -86,6 +88,7 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
+        journalføringRequest.valider()
         return if (journalføringRequest.skalJournalførePåEksisterendeBehandling()) {
             journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpostId)
         } else {
@@ -119,7 +122,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
                                                                  fagsak = fagsak,
-                                                                 journalpost = journalpost)
+                                                                 journalpost = journalpost,
+                                                                 terminbarn = journalføringRequest.terminbarn)
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
@@ -145,7 +149,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = journalføringRequest.behandlingstype,
                                                                  fagsak = fagsak,
-                                                                 journalpost = journalpost)
+                                                                 journalpost = journalpost,
+                                                                 terminbarn = emptyList())
 
         opprettBehandlingsstatistikkTask(behandling.id)
 
@@ -154,7 +159,8 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
     private fun opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype: BehandlingType,
                                                         fagsak: Fagsak,
-                                                        journalpost: Journalpost): Behandling {
+                                                        journalpost: Journalpost,
+                                                        terminbarn: List<ManueltInntastetTerminbarn>): Behandling {
         feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN && !featureToggleService.isEnabled("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning")) {
             "Journalføring av barnetilsyn er ikke skrudd på"
         }

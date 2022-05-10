@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.barn
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.journalføring.dto.ManueltInntastetTerminbarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -21,9 +22,13 @@ class BarnService(
     fun opprettBarnPåBehandlingMedSøknadsdata(behandlingId: UUID,
                                               fagsakId: UUID,
                                               grunnlagsdataBarn: List<BarnMedIdent>,
-                                              stønadstype: StønadType) {
+                                              stønadstype: StønadType,
+                                              terminbarn: List<ManueltInntastetTerminbarn> = emptyList()) {
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
             StønadType.BARNETILSYN -> {
+                feilHvis(terminbarn.isNotEmpty()) {
+                    "Kan ikke håndtere terminbarn i barnetilsyn"
+                }
                 val søknadsbarnForBarnetilsyn = hentSøknadsbarnForBehandling(behandlingId)
                 grunnlagsdataBarn.map { barn ->
                     BehandlingBarn(
@@ -35,7 +40,8 @@ class BarnService(
                 }
             }
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
-                val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId)
+                val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId) +
+                                    terminbarn.map { it.tilBehandlingBarn(behandlingId) }
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                         .map {
                             BehandlingBarn(id = it.behandlingBarn.id,
@@ -119,7 +125,7 @@ class BarnService(
     }
 
     fun hentBehandlingBarnForBarnIder(barnId: List<UUID>): List<BehandlingBarn> {
-        return barnRepository.findAllByIdOrThrow(barnId.toSet()) {it.id}
+        return barnRepository.findAllByIdOrThrow(barnId.toSet()) { it.id }
     }
 
 }
