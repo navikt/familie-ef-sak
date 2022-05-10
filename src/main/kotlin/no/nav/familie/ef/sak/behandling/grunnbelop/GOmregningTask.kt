@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -15,11 +16,11 @@ import java.util.UUID
                      settTilManuellOppfølgning = true,
                      triggerTidVedFeilISekunder = 15 * 60L,
                      beskrivelse = "G-omregning")
-class GOmregningTask(private val gOmregningService: GOmregningService) : AsyncTaskStep {
+class GOmregningTask(private val omregningService: OmregningService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = objectMapper.readValue<GOmregningTaskPayload>(task.payload).behandlingId
-        gOmregningService.oppdaterBehandlingMedNyG(behandlingId)
+        omregningService.utførGOmregning(behandlingId)
     }
 
     companion object {

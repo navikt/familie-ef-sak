@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class GOmregningService(val behandlingRepository: BehandlingRepository,
-                        val taskRepository: TaskRepository) {
+class GOmregningTaskService(val behandlingRepository: BehandlingRepository,
+                            val taskRepository: TaskRepository) {
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
@@ -18,7 +18,4 @@ class GOmregningService(val behandlingRepository: BehandlingRepository,
         return gOmregningTasks.size
     }
 
-    fun oppdaterBehandlingMedNyG(behandlingId: UUID) {
-        TODO("Not yet implemented")
-    }
 }
