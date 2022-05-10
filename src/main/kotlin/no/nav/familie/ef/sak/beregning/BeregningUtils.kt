@@ -61,7 +61,7 @@ object BeregningUtils {
 
     private fun justerInntektsperiode(inntektsperiode: Inntektsperiode,
                                       sistBrukteGrunnbeløp: Grunnbeløp): List<Inntektsperiode> {
-        val (startDato, sluttDato, inntekt, samordningefradrag) = inntektsperiode
+        val (startDato, sluttDato, inntekt, samordningfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(startDato, sluttDato).map { grunnbeløp ->
             if (grunnbeløp.periode.fradato > sistBrukteGrunnbeløp.fraOgMedDato
                 && grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp) {
@@ -71,9 +71,9 @@ object BeregningUtils {
                 Inntektsperiode(grunnbeløp.periode.fradato,
                                 grunnbeløp.periode.tildato,
                                 BigDecimal(justerInntektAvrundetNedTilNærmeste100),
-                                samordningefradrag)
+                                samordningfradrag)
             } else {
-                Inntektsperiode(grunnbeløp.periode.fradato, grunnbeløp.periode.tildato, inntekt, samordningefradrag)
+                Inntektsperiode(grunnbeløp.periode.fradato, grunnbeløp.periode.tildato, inntekt, samordningfradrag)
             }
         }
     }
