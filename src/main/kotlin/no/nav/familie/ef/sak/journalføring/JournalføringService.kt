@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -117,8 +118,10 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         val journalpost = hentJournalpost(journalpostId)
         val behandlingstype = journalføringRequest.behandling.behandlingstype
                               ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
-        brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        brukerfeilHvis(!journalpost.harStrukturertSøknad() && fagsak.stønadstype == StønadType.SKOLEPENGER) {
+            "Journalposten inneholder ikke en digital søknad"
+        }
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
                                                                  fagsak = fagsak,
