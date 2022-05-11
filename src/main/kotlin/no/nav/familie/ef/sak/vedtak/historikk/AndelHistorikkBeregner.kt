@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.historikk.BehandlingHistorikkUtil.lagBehandlingHistorikkData
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -85,7 +84,8 @@ object AndelHistorikkBeregner {
                               periodeType = periodeType,
                               endring = it.endring,
                               aktivitetArbeid = barnetilsyn?.aktivitetArbeid,
-                              erSanksjon = vedtaksperiode.erSanksjon)
+                              erSanksjon = vedtaksperiode.erSanksjon,
+                              sanksjonsårsak = vedtaksperiode.sanksjonsårsak)
         }
     }
 

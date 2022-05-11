@@ -60,6 +60,9 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
+    fun finnSisteBehandling(fagsakId: UUID) =
+            behandlingRepository.finnSisteBehandling(fagsakId)
+
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
             behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
             ?: hentBehandlinger(fagsakId).lastOrNull {
@@ -109,6 +112,10 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         }
         feilHvis(behandlingsårsak == BehandlingÅrsak.G_OMREGNING && !featureToggleService.isEnabled("familie.ef.sak.g-beregning")) {
             "Feature toggle for g-omregning er disabled"
+        }
+        feilHvis(behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
+                 !featureToggleService.isEnabled("familie.ef.sak.behandling-korrigering")) {
+            "Feature toggle for korrigering er ikke skrudd på for bruker"
         }
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)

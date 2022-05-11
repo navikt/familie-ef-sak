@@ -134,8 +134,9 @@ internal class VedtakHistorikkBeregnerTest {
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
             this.datoFra,
             this.datoTil,
+            sanksjonsårsak = null,
             this.aktivitet,
-            this.periodeType
+            this.periodeType,
     )
 
     private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(),

@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -31,6 +32,16 @@ class VedtakDtoMapperTest {
         val vedtak = innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
         assertErLik(vedtak, vedtakJson)
         //assertErLikUtenType(vedtak, vedtakJson) Må få type fra frontend når barnetilsyn blir tatt i bruk
+    }
+
+    @Test
+    fun `deserialiser og serialiser innvilget barnetilsyn uten utbetaling vedtak dto`() {
+        val vedtakJson = readFile("BarnetilsynInnvilgetUtenUtbetalingVedtakDto.json")
+
+        val vedtak = innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
+                .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
+                      _type = "InnvilgelseBarnetilsynUtenUtbetaling")
+        assertErLik(vedtak, vedtakJson)
     }
 
     @Test

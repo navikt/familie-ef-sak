@@ -170,8 +170,8 @@ class MigreringService(
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
 
-        val iverksettDto = iverksettingDtoMapper.tilMigreringDto(saksbehandling)
-        iverksettClient.iverksettMigrering(iverksettDto)
+        val iverksettDto = iverksettingDtoMapper.tilDtoMaskineltBehandlet(saksbehandling)
+        iverksettClient.iverksettUtenBrev(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
         if (til >= YearMonth.now()) {

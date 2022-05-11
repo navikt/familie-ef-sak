@@ -27,6 +27,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -321,7 +322,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                status = UTREDES,
                                                resultat = BehandlingResultat.INNVILGET))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022))
-        assertThat(behandlingRepository.finnBehandlingerMedUtdatertGBelop()).containsExactly(
+        assertThat(behandlingRepository.finnBehandlingerMedUtdatertGBelop(LocalDate.of(2022, 5,1))).containsExactly(
                 behandling.id)
     }
 

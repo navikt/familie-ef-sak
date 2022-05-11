@@ -579,3 +579,5 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
         )
 
 val nyesteGrunnbeløp = grunnbeløpsperioder.maxByOrNull { it.fraOgMedDato }!!
+
+val nyesteGrunnbeløpGyldigFraOgMed = nyesteGrunnbeløp.fraOgMedDato
