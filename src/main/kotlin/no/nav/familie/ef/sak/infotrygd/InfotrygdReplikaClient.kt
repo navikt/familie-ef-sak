@@ -27,7 +27,7 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
             UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
     private val perioderInfotrygdUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/barnetilsyn-bidrag").build().toUri()
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/barnetilsyn-bidrag").build().toUri()
 
 
     private val finnSakerUri: URI =
