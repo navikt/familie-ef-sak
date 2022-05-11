@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -26,6 +27,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
@@ -45,6 +47,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setup() {
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("321", false)))
+        clearMocks(iverksettClient, answers = false)
     }
 
     @Test
@@ -60,7 +63,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
         vedtakRepository.insert(vedtak(behandling.id))
 
-        omregningService.utførGOmregning(behandling.id)
+        omregningService.utførGOmregning(behandling.id, true)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
@@ -74,6 +77,25 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                                 "vedtak.tilkjentYtelse.andelerTilkjentYtelse.kildeBehandlingId",
                                 "vedtak.vedtakstidspunkt")
                 .isEqualTo(expectedIverksettDto)
+    }
+
+    @Test
+    fun `utførGOmregning kjørt med liveRun=false kaster exception og etterlater seg ingen spor i databasen`() {
+
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
+        vedtakRepository.insert(vedtak(behandling.id))
+
+        assertThrows<DryRunException> { omregningService.utførGOmregning(behandling.id, false) }
+
+        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
+        verify(exactly = 0) { iverksettClient.simuler(any()) }
+        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
+
     }
 
     private fun readFile(filnavn: String): String {
