@@ -58,6 +58,7 @@ class BisysBarnetilsynService(
         return BarnetilsynBisysResponse(infotrygdPerioder.map {
             BarnetilsynBisysPeriode(periode = Periode(it.periode.stønadFom, it.periode.stønadTom),
                                     barnIdenter = it.barnIdenter,
+                                    // TODO : Endre totalbeløp til månedsbeløp (og avklare om det er månedsbeløp vi skal ha med)
                                     totalbeløp = it.periode.månedsbeløp,
                                     datakilde = Datakilde.INFOTRYGD)
         })
