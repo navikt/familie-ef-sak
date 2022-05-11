@@ -3,15 +3,16 @@ package no.nav.familie.ef.sak.ekstern.bisys
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysResponse
 import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.eksterne.kontrakter.bisys.Periode
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -21,7 +22,8 @@ class BisysBarnetilsynService(
         private val personService: PersonService,
         private val fagsakService: FagsakService,
         private val barnService: BarnService,
-        private val tilkjentYtelseService: TilkjentYtelseService) {
+        private val tilkjentYtelseService: TilkjentYtelseService,
+        private val infotrygdReplikaClient: InfotrygdReplikaClient) {
 
     fun hentPerioderBarnetilsyn(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
 
@@ -40,13 +42,28 @@ class BisysBarnetilsynService(
 
         val barnetilsynBisysPerioder = historikk.map { andel ->
             BarnetilsynBisysPeriode(Periode(andel.andel.stønadFra, andel.andel.stønadTil),
-                                    andel.andel.barn.map { barnIdenter[it]
-                                                           ?: error("Fant ingen personident for barn=$it") },
+                                    andel.andel.barn.map {
+                                        barnIdenter[it]
+                                        ?: error("Fant ingen personident for barn=$it")
+                                    },
                                     andel.andel.beløp,
                                     Datakilde.EF)
         }
         return BarnetilsynBisysResponse(barnetilsynBisysPerioder)
     }
 
+    fun hentPerioderBarnetilsynInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
+        val infotrygdPerioder: List<PeriodeMedBarn> =
+                infotrygdReplikaClient.hentPerioderFraInfotrygd(PeriodeBarnetilsynRequest(personIdent))
+        return BarnetilsynBisysResponse(infotrygdPerioder.map {
+            BarnetilsynBisysPeriode(periode = Periode(it.periode.stønadFom, it.periode.stønadTom),
+                                    barnIdenter = it.barnIdenter,
+                                    totalbeløp = it.periode.månedsbeløp,
+                                    datakilde = Datakilde.INFOTRYGD)
+        })
+    }
 }
 
+// TODO : Flyttes til kontrakter
+data class PeriodeMedBarn(val periode: InfotrygdPeriode, val barnIdenter: List<String>)
+data class PeriodeBarnetilsynRequest(val personIdent: String)

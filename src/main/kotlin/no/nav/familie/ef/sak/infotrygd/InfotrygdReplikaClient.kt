@@ -1,5 +1,8 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.ekstern.bisys.BisysBarnetilsynService
+import no.nav.familie.ef.sak.ekstern.bisys.PeriodeBarnetilsynRequest
+import no.nav.familie.ef.sak.ekstern.bisys.PeriodeMedBarn
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
@@ -23,6 +26,10 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
     private val perioderUri: URI =
             UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
+    private val perioderInfotrygdUri: URI =
+            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/barnetilsyn-bidrag").build().toUri()
+
+
     private val finnSakerUri: URI =
             UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
 
@@ -37,6 +44,10 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
                     .toUri()
 
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
+        return postForEntity(perioderUri, request)
+    }
+
+    fun hentPerioderFraInfotrygd(request: PeriodeBarnetilsynRequest): List<PeriodeMedBarn> {
         return postForEntity(perioderUri, request)
     }
 

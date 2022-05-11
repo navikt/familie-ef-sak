@@ -17,4 +17,11 @@ class BisysBarnetilsynController(val bisysBarnetilsynService: BisysBarnetilsynSe
     fun hentPerioderBarnetilsyn(@RequestBody barnetilsynBisysRequest: BarnetilsynBisysRequest): BarnetilsynBisysResponse {
         return bisysBarnetilsynService.hentPerioderBarnetilsyn(barnetilsynBisysRequest.ident, barnetilsynBisysRequest.fomDato)
     }
+
+    @Deprecated("test")
+    @PostMapping("/perioder-barnetilsyn-infotrygd")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun hentPerioderBarnetilsynInfotrygd(@RequestBody barnetilsynBisysRequest: BarnetilsynBisysRequest): BarnetilsynBisysResponse {
+        return bisysBarnetilsynService.hentPerioderBarnetilsynInfotrygd(barnetilsynBisysRequest.ident, barnetilsynBisysRequest.fomDato)
+    }
 }
