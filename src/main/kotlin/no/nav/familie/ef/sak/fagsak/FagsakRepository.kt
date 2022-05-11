@@ -77,23 +77,13 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
     fun harLøpendeUtbetaling(fagsakId: UUID): Boolean
 
     // language=PostgreSQL
-    @Query("""
-        SELECT DISTINCT f.id 
-        FROM fagsak f 
-            JOIN (SELECT b.id, b.fagsak_id FROM behandling b WHERE b.fagsak_id = f.id
-                  AND b.type != 'BLANKETT'
-                  AND b.resultat IN ('OPPHØRT', 'INNVILGET')
-                  AND b.status = 'FERDIGSTILT'
-                  ORDER BY b.opprettet_tid DESC
-                  LIMIT 1) AS beh ON beh.fagsak_id = f.id
-            JOIN tilkjent_ytelse ty ON beh.id = ty.behandling_id
-            AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
-            JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
-            AND aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato
-            WHERE f.stonadstype = 'OVERGANGSSTØNAD'
-    """)
+    @Query("""SELECT DISTINCT b.fagsak_id 
+              FROM gjeldende_iverksatte_behandlinger b   
+              JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
+              AND ty.grunnbelopsdato <= :gjeldendegrunnbeløpfraogmeddato
+              JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
+              AND aty.stonad_tom > :gjeldendegrunnbeløpfraogmeddato
+              WHERE b.stonadstype = 'OVERGANGSSTØNAD'""")
     fun finnFagsakerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
-
-
 
 }
