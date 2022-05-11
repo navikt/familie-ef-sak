@@ -60,7 +60,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
         vedtakRepository.insert(vedtak(behandling.id))
 
-        omregningService.utførGOmregning(behandling.id)
+        omregningService.utførGOmregning(fagsakId)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()

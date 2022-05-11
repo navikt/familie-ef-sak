@@ -3,20 +3,15 @@ package no.nav.familie.ef.sak.repository
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions.assertThat
@@ -27,17 +22,12 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository
-    @Autowired private lateinit var søknadService: SøknadService
 
     private val ident = "123"
 
@@ -60,11 +50,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun findByFagsakAndStatus() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET))
 
-        assertThat(behandlingRepository.findByFagsakIdAndStatus(UUID.randomUUID(), BehandlingStatus.OPPRETTET)).isEmpty()
+        assertThat(behandlingRepository.findByFagsakIdAndStatus(UUID.randomUUID(), OPPRETTET)).isEmpty()
         assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, FERDIGSTILT)).isEmpty()
-        assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, BehandlingStatus.OPPRETTET)).containsOnly(behandling)
+        assertThat(behandlingRepository.findByFagsakIdAndStatus(fagsak.id, OPPRETTET)).containsOnly(behandling)
     }
 
     @Test
@@ -75,7 +65,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                                                       sporbar = Sporbar(endret = Endret(endretTid = LocalDateTime.now()
                                                               .plusDays(2)))),
                                           PersonIdent(ident = "3"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.OPPRETTET))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET))
 
         val behandlingServiceObject = behandlingRepository.finnSaksbehandling(behandling.id)
 
@@ -307,22 +297,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
         behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
         assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
-                behandling.id)
-    }
-
-    @Test
-    internal fun `finnBehandlingerMedUtdatertGBelop - finn alle behandlinger med innvilget tilkjent ytelse etter 01-05-2022 med gammel grunnbeløpsdato`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                status = FERDIGSTILT,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                opprettetTid = LocalDateTime.now().minusDays(2)))
-        behandlingRepository.insert(behandling(fagsak2,
-                                               status = UTREDES,
-                                               resultat = BehandlingResultat.INNVILGET))
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022))
-        assertThat(behandlingRepository.finnBehandlingerMedUtdatertGBelop(LocalDate.of(2022, 5,1))).containsExactly(
                 behandling.id)
     }
 
