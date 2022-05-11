@@ -48,7 +48,7 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
     }
 
     fun hentPerioderFraInfotrygd(request: PeriodeBarnetilsynRequest): List<PeriodeMedBarn> {
-        return postForEntity(perioderUri, request)
+        return postForEntity(perioderInfotrygdUri, request)
     }
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
