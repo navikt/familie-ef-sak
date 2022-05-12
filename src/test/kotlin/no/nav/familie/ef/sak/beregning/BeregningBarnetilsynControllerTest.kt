@@ -69,7 +69,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(2000)
 
-        val responsRevurdering: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> = hentBeløpsperioderForBehandling(revurdering.id)
+        val responsRevurdering: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
+                hentBeløpsperioderForBehandling(revurdering.id)
         val beløpsperioderRevurdering = responsRevurdering.body.data
         Assertions.assertThat(beløpsperioderRevurdering).hasSize(1)
         Assertions.assertThat(beløpsperioderRevurdering?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
@@ -102,7 +103,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
                                                årMånedTil = YearMonth.of(2022, 4),
                                                barn = listOf(barn.id),
-                                               utgifter = 2500)
+                                               utgifter = 2500,
+                                               erMidlertidigOpphør = false)
 
         val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
                                                perioder = listOf(utgiftsperiode),
@@ -144,9 +146,10 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                 .map { it.copy(behandlingId = revurdering.id, id = UUID.randomUUID()) }
         barnRepository.insertAll(barn)
         val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 3),
-                                                   årMånedTil = YearMonth.of(2022, 6),
-                                                   barn = barn.map { it.id },
-                                                   utgifter = 3000)
+                                               årMånedTil = YearMonth.of(2022, 6),
+                                               barn = barn.map { it.id },
+                                               utgifter = 3000,
+                                               erMidlertidigOpphør = false)
 
         val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
                                                perioder = listOf(utgiftsperiode),

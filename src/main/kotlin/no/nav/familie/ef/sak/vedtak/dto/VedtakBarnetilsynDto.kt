@@ -34,8 +34,7 @@ data class UtgiftsperiodeDto(
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
         val utgifter: Int,
-        val erMidlertidigOpphør: Boolean? = false
-
+        val erMidlertidigOpphør: Boolean
 ) {
 
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
@@ -68,7 +67,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 UtgiftsperiodeDto(årMånedFra = YearMonth.from(it.datoFra),
                                   årMånedTil = YearMonth.from(it.datoTil),
                                   utgifter = it.utgifter.toInt(),
-                                  barn = it.barn)
+                                  barn = it.barn,
+                                  erMidlertidigOpphør = it.erMidlertidigOpphør?: false)
             },
             perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
             tilleggsstønad = TilleggsstønadDto(

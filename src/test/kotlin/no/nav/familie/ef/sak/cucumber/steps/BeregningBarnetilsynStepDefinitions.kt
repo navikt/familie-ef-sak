@@ -7,7 +7,6 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseBigDecimal
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
@@ -40,7 +39,7 @@ class BeregningBarnetilsynStepDefinitions {
             val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
             val beløp = parseInt(BELØP, it)
             val barn = parseInt(ANTALL_BARN, it)
-            utgiftsperioder.add(UtgiftsperiodeDto(fraÅrMåned, tilÅrMåned, List(barn) { UUID.randomUUID() }, beløp))
+            utgiftsperioder.add(UtgiftsperiodeDto(fraÅrMåned, tilÅrMåned, List(barn) { UUID.randomUUID() }, beløp, false))
         }
     }
 

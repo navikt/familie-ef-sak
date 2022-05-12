@@ -57,7 +57,8 @@ object VedtakDtoUtil {
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),
                     listOf(barnId),
-                    500)
+                    500,
+                    false)
 
     fun periodeMedBeløpDto() =
             PeriodeMedBeløpDto(
