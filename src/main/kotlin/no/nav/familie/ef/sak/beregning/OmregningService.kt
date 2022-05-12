@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.barn.BarnService
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -35,7 +34,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.slf4j.MarkerFactory
 import org.springframework.stereotype.Service
@@ -49,10 +48,8 @@ import java.util.UUID
 
 @Service
 class OmregningService(private val behandlingService: BehandlingService,
-                       private val fagsakService: FagsakService,
                        private val vedtakHistorikkService: VedtakHistorikkService,
-                       private val taskRepository: TaskRepository,
-                       private val behandlingRepository: BehandlingRepository,
+                       private val taskService: TaskService,
                        private val iverksettClient: IverksettClient,
                        private val ytelseService: TilkjentYtelseService,
                        private val grunnlagsdataService: GrunnlagsdataService,
@@ -72,26 +69,17 @@ class OmregningService(private val behandlingService: BehandlingService,
             "Feature toggle for omberegning er disabled"
         }
 
+        val sisteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
+                              ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
 
-        val fagsakMedOppdatertPersonIdent = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
-        val sisteBehandling =
-                behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(fagsakMedOppdatertPersonIdent.stønadstype,
-                                                                          fagsakMedOppdatertPersonIdent.personIdenter.map {
-                                                                              it.ident
-                                                                          }.toSet())
-
-        feilHvis(sisteBehandling == null) {
-            "Kan ikke omberegne: Fant ikke sisteBehandlingId for fagsak $fagsakId"
-        }
-        feilHvisIkke(sisteBehandling.erAvsluttet()) {
-            "Kan ikke omberegne fagsak med åpen behandling, id=${sisteBehandling.id}"
+        feilHvis(behandlingService.finnesÅpenBehandling(fagsakId)) {
+            "Kan ikke omberegne, det finnes åpen behandling på fagsak: $fagsakId"
         }
 
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
                                                              fagsakId = fagsakId,
                                                              behandlingsårsak = BehandlingÅrsak.G_OMREGNING)
         logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
-
 
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(sisteBehandling.id)
 
@@ -129,7 +117,7 @@ class OmregningService(private val behandlingService: BehandlingService,
         val iverksettDto = iverksettingDtoMapper.tilDtoMaskineltBehandlet(saksbehandling)
         if (liveRun) {
             iverksettClient.iverksettUtenBrev(iverksettDto)
-            taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
+            taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
         } else {
             loggTilGrafana(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
             throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")

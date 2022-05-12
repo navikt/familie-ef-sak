@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import no.nav.familie.ef.sak.beregning.DryRunException
 import no.nav.familie.ef.sak.beregning.OmregningService
+import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -9,6 +10,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Properties
 import java.util.UUID
 
 @Service
@@ -38,7 +40,10 @@ class GOmregningTask(private val omregningService: OmregningService,
         const val TYPE = "G-omregning"
 
         fun opprettTask(fagsakId: UUID): Task {
-            return Task(TYPE, fagsakId.toString())
+            return Task(TYPE, fagsakId.toString(), Properties().apply {
+                this["fagsakId"] = fagsakId
+                this["grunnbeløpsdato"] = nyesteGrunnbeløpGyldigFraOgMed
+            })
         }
 
         fun opprettTasks(fagsakIder: List<UUID>): List<Task> {
