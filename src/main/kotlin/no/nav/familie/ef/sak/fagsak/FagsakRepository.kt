@@ -80,9 +80,9 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
     @Query("""SELECT DISTINCT b.fagsak_id 
               FROM gjeldende_iverksatte_behandlinger b   
               JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
-              AND ty.grunnbelopsdato <= :gjeldendegrunnbeløpfraogmeddato
+              AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
               JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
-              AND aty.stonad_tom > :gjeldendegrunnbeløpfraogmeddato
+              AND aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato
               WHERE b.stonadstype = 'OVERGANGSSTØNAD'""")
     fun finnFagsakerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
 
