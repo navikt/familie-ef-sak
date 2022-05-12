@@ -128,7 +128,7 @@ internal class EksternBehandlingControllerTest {
                         lagAndelTilkjentYtelse(
                                 beløp = 1,
                                 fraOgMed = LocalDate.of(2020, 1, 1),
-                                tilOgMed = LocalDate.now().minusMonths(11)
+                                tilOgMed = LocalDate.now().plusMonths(11)
                         )
                 )
         )
