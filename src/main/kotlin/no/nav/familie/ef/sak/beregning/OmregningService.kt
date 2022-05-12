@@ -151,7 +151,7 @@ class OmregningService(private val behandlingService: BehandlingService,
                                                     forrigeTilkjentYtelse,
                                                     omberegnetTilkjentYtelse)
 
-        logger.info(MarkerFactory.getMarker("G-Omberegning"), "FagsakId: $fagsakId \n" + perioder.joinToString("\n"))
+        logger.info(MarkerFactory.getMarker("G-Omberegning"), perioder.joinToString("\n"))
     }
 
     fun mapTilSammenlignbarePerioder(fagsakId: UUID,
@@ -171,7 +171,8 @@ class OmregningService(private val behandlingService: BehandlingService,
         }.map {
             val omberegnetAndelTilkjentYtelse =
                     omberegnetMap[it.stønadFom] ?: error("Forentet omberegnet andelTilkjenYtelse med fradato ${it.stønadFom}")
-            RapportDto(it.stønadFom,
+            RapportDto(fagsakId,
+                       it.stønadFom,
                        it.stønadTom,
                        it.beløp,
                        omberegnetAndelTilkjentYtelse.beløp,
@@ -181,7 +182,8 @@ class OmregningService(private val behandlingService: BehandlingService,
 
     }
 
-    data class RapportDto(val fom: LocalDate,
+    data class RapportDto(val fagsakId: UUID,
+                          val fom: LocalDate,
                           val tom: LocalDate,
                           val gammelStønad: Int,
                           val omberegnetStønad: Int,
