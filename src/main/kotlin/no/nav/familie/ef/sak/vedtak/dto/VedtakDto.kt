@@ -26,7 +26,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -141,10 +140,12 @@ private fun Sanksjonert.sanksjonertTilVedtak(behandlingId: UUID,
                        resultatType = ResultatType.SANKSJONERE)
             }
             StønadType.BARNETILSYN -> {
-                val vedtaksperiode = Barnetilsynperiode(periode.datoFra(),
-                                                        periode.datoTil(),
+                val vedtaksperiode = Barnetilsynperiode(datoFra = periode.datoFra(),
+                                                        datoTil = periode.datoTil(),
                                                         utgifter = 0,
-                                                        emptyList())
+                                                        barn = emptyList(),
+                                                        erMidlertidigOpphør = true
+                )
                 Vedtak(behandlingId = behandlingId,
                        sanksjonsårsak = this.sanksjonsårsak,
                        barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
@@ -206,7 +207,8 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
-            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java).copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
+            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+                    .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {

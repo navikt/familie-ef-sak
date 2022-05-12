@@ -47,7 +47,8 @@ data class Vedtaksperiode(
 data class Barnetilsynperiode(val datoFra: LocalDate,
                               val datoTil: LocalDate,
                               val utgifter: Int,
-                              val barn: List<UUID>)
+                              val barn: List<UUID>,
+                              val erMidlertidigOpphør: Boolean? = false)
 
 data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val datoTil: LocalDate,

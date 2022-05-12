@@ -33,7 +33,9 @@ data class UtgiftsperiodeDto(
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
         val barn: List<UUID>,
-        val utgifter: Int
+        val utgifter: Int,
+        val erMidlertidigOpphør: Boolean? = false
+
 ) {
 
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
@@ -48,7 +50,8 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
                            datoTil = this.årMånedTil.atEndOfMonth(),
                            utgifter = this.utgifter,
-                           barn = this.barn)
+                           barn = this.barn,
+                           erMidlertidigOpphør = this.erMidlertidigOpphør)
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
         PeriodeMedBeløp(datoFra = this.årMånedFra.atDay(1),
