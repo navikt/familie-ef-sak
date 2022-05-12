@@ -79,27 +79,27 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {
         val finnesBehandlingForPerson =
-                eksternBehandlingController.harStønadSiste12MånederForPersonidenter(emptySet())
+                eksternBehandlingController.harAktivStønad(emptySet())
         assertThat(finnesBehandlingForPerson.status).isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test
     internal fun `opprett en ikke-utdatert og en utdatert andelsliste, forvent at en stønad for det siste året finnes`() {
         mockOpprettTilkjenteYtelser(opprettIkkeUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
-        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(true)
+        assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(true)
     }
 
     @Test
     internal fun `opprett bare utdaterte andeler, forvent at stønad for det siste året ikke finnes`() {
         mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
-        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+        assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
     }
 
     @Test
     internal fun `tomme lister med andeler, forvent at stønad for det siste året ikke finnes`() {
         mockOpprettTilkjenteYtelser(lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
                                     lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()))
-        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+        assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
     }
 
     @Test
