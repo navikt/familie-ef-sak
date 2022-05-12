@@ -63,7 +63,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
         vedtakRepository.insert(vedtak(behandling.id))
 
-        omregningService.utførGOmregning(behandling.id, true)
+        omregningService.utførGOmregning(fagsakId, true)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
@@ -89,7 +89,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321"))
         vedtakRepository.insert(vedtak(behandling.id))
 
-        assertThrows<DryRunException> { omregningService.utførGOmregning(behandling.id, false) }
+        assertThrows<DryRunException> { omregningService.utførGOmregning(fagsak.id, false) }
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
