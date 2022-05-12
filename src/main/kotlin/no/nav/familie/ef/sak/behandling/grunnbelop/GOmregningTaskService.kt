@@ -1,19 +1,18 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
+import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
-class GOmregningTaskService(val behandlingRepository: BehandlingRepository,
+class GOmregningTaskService(val fagsakRepository: FagsakRepository,
                             val taskRepository: TaskRepository) {
 
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
-        val behandlingIds = behandlingRepository.finnBehandlingerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
-        val gOmregningTasks = GOmregningTask.opprettTasks(behandlingIds)
+        val fagsakIder = fagsakRepository.finnFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
+        val gOmregningTasks = GOmregningTask.opprettTasks(fagsakIder)
         taskRepository.saveAll(gOmregningTasks)
         return gOmregningTasks.size
     }

@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -74,5 +75,15 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
               WHERE b.fagsak_id = :fagsakId
               LIMIT 1""")
     fun harLøpendeUtbetaling(fagsakId: UUID): Boolean
+
+    // language=PostgreSQL
+    @Query("""SELECT DISTINCT b.fagsak_id 
+              FROM gjeldende_iverksatte_behandlinger b   
+              JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
+              AND ty.grunnbelopsdato < :gjeldendeGrunnbeløpFraOgMedDato
+              JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
+              AND aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato
+              WHERE b.stonadstype = 'OVERGANGSSTØNAD'""")
+    fun finnFagsakerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
 
 }
