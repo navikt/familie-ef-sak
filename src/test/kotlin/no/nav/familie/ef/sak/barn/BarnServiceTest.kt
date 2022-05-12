@@ -3,11 +3,8 @@ package no.nav.familie.ef.sak.barn
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.journalføring.dto.ManueltInntastetTerminbarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
+import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
@@ -23,7 +20,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 internal class BarnServiceTest {
@@ -209,7 +205,7 @@ internal class BarnServiceTest {
                                                               fagsakId,
                                                               emptyList(),
                                                               StønadType.OVERGANGSSTØNAD,
-                                                              listOf(ManueltInntastetTerminbarn(termindato)))
+                                                              listOf(BarnSomSkalFødes(termindato)))
             assertThat(barnSlot.captured).hasSize(1)
             assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(termindato)
             assertThat(barnSlot.captured[0].behandlingId).isEqualTo(behandlingId)
@@ -228,7 +224,7 @@ internal class BarnServiceTest {
                                                               fagsakId,
                                                               listOf(barnMedIdent),
                                                               StønadType.OVERGANGSSTØNAD,
-                                                              listOf(ManueltInntastetTerminbarn(termindato)))
+                                                              listOf(BarnSomSkalFødes(termindato)))
             assertThat(barnSlot.captured).hasSize(1)
             assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(termindato)
             assertThat(barnSlot.captured[0].behandlingId).isEqualTo(behandlingId)

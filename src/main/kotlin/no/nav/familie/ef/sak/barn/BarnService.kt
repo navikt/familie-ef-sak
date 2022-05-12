@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.barn
 
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.journalføring.dto.ManueltInntastetTerminbarn
+import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -23,11 +23,11 @@ class BarnService(
                                               fagsakId: UUID,
                                               grunnlagsdataBarn: List<BarnMedIdent>,
                                               stønadstype: StønadType,
-                                              terminbarn: List<ManueltInntastetTerminbarn> = emptyList()) {
+                                              barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()) {
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
             StønadType.BARNETILSYN -> {
-                feilHvis(terminbarn.isNotEmpty()) {
-                    "Kan ikke håndtere terminbarn i barnetilsyn"
+                feilHvis(barnSomSkalFødes.isNotEmpty()) {
+                    "Kan ikke håndtere barnSomSkalFødes i barnetilsyn"
                 }
                 val søknadsbarnForBarnetilsyn = hentSøknadsbarnForBehandling(behandlingId)
                 grunnlagsdataBarn.map { barn ->
@@ -42,7 +42,7 @@ class BarnService(
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
                 // TODO skal vi ha terminabarn for skolepenger?
                 val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId) +
-                                    terminbarn.map { it.tilBehandlingBarn(behandlingId) }
+                                    barnSomSkalFødes.map { it.tilBehandlingBarn(behandlingId) }
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
                         .map {
                             BehandlingBarn(id = it.behandlingBarn.id,

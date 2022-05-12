@@ -11,9 +11,9 @@ data class JournalføringRequest(val dokumentTitler: Map<String, String>? = null
                                 val oppgaveId: String,
                                 val behandling: JournalføringBehandling,
                                 val journalførendeEnhet: String,
-                                val terminbarn: List<ManueltInntastetTerminbarn> = emptyList())
+                                val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList())
 
-data class ManueltInntastetTerminbarn(val fødselTerminDato: LocalDate) {
+data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 
     fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn = BehandlingBarn(
             behandlingId = behandlingId,
@@ -28,8 +28,8 @@ data class JournalføringTilNyBehandlingRequest(val fagsakId: UUID,
                                                val behandlingstype: BehandlingType)
 
 fun JournalføringRequest.valider() {
-    feilHvis(this.behandling.behandlingsId != null && terminbarn.isNotEmpty()) {
-        "Kan ikke sende inn terminbarn når man journalfører på en eksisterende behandling"
+    feilHvis(this.behandling.behandlingsId != null && barnSomSkalFødes.isNotEmpty()) {
+        "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
     }
 }
 
