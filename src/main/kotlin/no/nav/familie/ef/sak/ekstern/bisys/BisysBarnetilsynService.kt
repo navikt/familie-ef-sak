@@ -23,8 +23,7 @@ class BisysBarnetilsynService(
         private val personService: PersonService,
         private val fagsakService: FagsakService,
         private val barnService: BarnService,
-        private val tilkjentYtelseService: TilkjentYtelseService,
-        private val infotrygdReplikaClient: InfotrygdReplikaClient) {
+        private val tilkjentYtelseService: TilkjentYtelseService) {
 
     fun hentPerioderBarnetilsyn(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
 
@@ -52,26 +51,4 @@ class BisysBarnetilsynService(
         }
         return BarnetilsynBisysResponse(barnetilsynBisysPerioder)
     }
-
-    fun hentPerioderBarnetilsynInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
-        val infotrygdPerioder: List<PeriodeMedBarn> =
-                infotrygdReplikaClient.hentPerioderFraInfotrygd(PeriodeBarnetilsynRequest(personIdent))
-        secureLogger.info("infotrygdPerioder hentet: ${infotrygdPerioder.size}: " +
-                          "first vedtakid: ${infotrygdPerioder.first().periode.vedtakId} first: barneliste: ${infotrygdPerioder.first().barnIdenter}" )
-        val barnetilsynBisysPerioder = infotrygdPerioder.map {
-            BarnetilsynBisysPeriode(periode = Periode(it.periode.stønadFom, it.periode.stønadTom),
-                                    barnIdenter = it.barnIdenter,
-                    // TODO : Endre totalbeløp til månedsbeløp (og avklare om det er månedsbeløp vi skal ha med)
-                                    totalbeløp = it.periode.månedsbeløp,
-                                    datakilde = Datakilde.INFOTRYGD)
-        }
-
-        secureLogger.info("Mappet - first: ${barnetilsynBisysPerioder.first().barnIdenter}: " )
-
-        return BarnetilsynBisysResponse(barnetilsynBisysPerioder)
-    }
 }
-
-// TODO : Flyttes til kontrakter
-data class PeriodeMedBarn(val periode: InfotrygdPeriode, val barnIdenter: List<String>)
-data class PeriodeBarnetilsynRequest(val personIdent: String)
