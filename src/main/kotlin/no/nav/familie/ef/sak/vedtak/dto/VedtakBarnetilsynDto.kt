@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.felles.util.erPåfølgende
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
@@ -44,6 +45,20 @@ fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> =
         this.map {
             it.tilPeriode()
         }
+
+fun List<UtgiftsperiodeDto>.midlertidigOpphørErSammenhengende(): Boolean = this.foldIndexed(true) { index, acc, periode ->
+    if (index == 0) {
+        acc
+    } else {
+        if (periode.erMidlertidigOpphør) {
+            val forrigePeriode = this[index - 1]
+            when {
+                forrigePeriode.årMånedTil.erPåfølgende(periode.årMånedFra) -> acc
+                else -> false
+            }
+        } else acc
+    }
+}
 
 fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
