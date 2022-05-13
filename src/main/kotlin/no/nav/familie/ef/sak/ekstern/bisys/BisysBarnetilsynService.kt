@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
@@ -55,13 +56,19 @@ class BisysBarnetilsynService(
     fun hentPerioderBarnetilsynInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
         val infotrygdPerioder: List<PeriodeMedBarn> =
                 infotrygdReplikaClient.hentPerioderFraInfotrygd(PeriodeBarnetilsynRequest(personIdent))
-        return BarnetilsynBisysResponse(infotrygdPerioder.map {
+        secureLogger.info("infotrygdPerioder hentet: ${infotrygdPerioder.size}: " +
+                          "first vedtakid: ${infotrygdPerioder.first().periode.vedtakId} first: barneliste: ${infotrygdPerioder.first().barnIdenter}" )
+        val barnetilsynBisysPerioder = infotrygdPerioder.map {
             BarnetilsynBisysPeriode(periode = Periode(it.periode.stønadFom, it.periode.stønadTom),
                                     barnIdenter = it.barnIdenter,
-                                    // TODO : Endre totalbeløp til månedsbeløp (og avklare om det er månedsbeløp vi skal ha med)
+                    // TODO : Endre totalbeløp til månedsbeløp (og avklare om det er månedsbeløp vi skal ha med)
                                     totalbeløp = it.periode.månedsbeløp,
                                     datakilde = Datakilde.INFOTRYGD)
-        })
+        }
+
+        secureLogger.info("Mappet - first: ${barnetilsynBisysPerioder.first().barnIdenter}: " )
+
+        return BarnetilsynBisysResponse(barnetilsynBisysPerioder)
     }
 }
 
