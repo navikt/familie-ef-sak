@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("!prod")
 class TestGOmregningController(private val gOmregningTaskService: GOmregningTaskService) {
 
-    @GetMapping(path = ["gomregning"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["gomregning"])
     fun opprettGOmregningTasksForBehandlingerMedGammeltGBelop(): Ressurs<Int> {
         val antallTaskerOpprettet = gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
         return Ressurs.success(antallTaskerOpprettet)
