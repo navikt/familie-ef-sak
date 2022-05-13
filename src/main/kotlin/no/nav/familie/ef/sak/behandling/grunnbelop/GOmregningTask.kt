@@ -41,8 +41,8 @@ class GOmregningTask(private val omregningService: OmregningService,
 
         fun opprettTask(fagsakId: UUID): Task {
             return Task(TYPE, fagsakId.toString(), Properties().apply {
-                this["fagsakId"] = fagsakId
-                this["grunnbeløpsdato"] = nyesteGrunnbeløpGyldigFraOgMed
+                setProperty("fagsakId", fagsakId.toString())
+                setProperty("grunnbeløpsdato", nyesteGrunnbeløpGyldigFraOgMed.toString())
             })
         }
 
