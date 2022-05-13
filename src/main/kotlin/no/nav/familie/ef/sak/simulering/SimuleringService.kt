@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -81,11 +83,15 @@ class SimuleringService(private val iverksettClient: IverksettClient,
                     nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
                     forrigeBehandlingId = saksbehandling.forrigeBehandlingId
             ))
-        } catch (exception: Exception) {
+        } catch (e: Exception) {
+            val personFinnesIkkeITps = "Personen finnes ikke i TPS"
+            brukerfeilHvis(e is RessursException && e.ressurs.melding == personFinnesIkkeITps) {
+                personFinnesIkkeITps
+            }
             throw Feil(message = "Kunne ikke utføre simulering",
                        frontendFeilmelding = "Kunne ikke utføre simulering. Vennligst prøv på nytt",
                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = exception)
+                       throwable = e)
         }
     }
 
