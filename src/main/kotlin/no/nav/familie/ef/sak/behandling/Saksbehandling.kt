@@ -33,6 +33,7 @@ data class Saksbehandling(val id: UUID,
                           val opprettetTid: LocalDateTime,
                           val endretTid: LocalDateTime) {
 
-    fun erMigrering(): Boolean = årsak == BehandlingÅrsak.MIGRERING
+    val erMigrering get() = årsak == BehandlingÅrsak.MIGRERING
 
+    val erOmregning get() = årsak == BehandlingÅrsak.G_OMREGNING
 }
