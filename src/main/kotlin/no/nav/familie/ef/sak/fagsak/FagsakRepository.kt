@@ -83,7 +83,10 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
               AND ty.grunnbelopsdato < :gjeldendeGrunnbeløpFraOgMedDato
               JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
               AND aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato
-              WHERE b.stonadstype = 'OVERGANGSSTØNAD'""")
-    fun finnFagsakerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
+              WHERE b.stonadstype = 'OVERGANGSSTØNAD'
+              AND b.fagsak_id NOT IN (SELECT b2.fagsak_id FROM behandling b2 
+                                      WHERE b2.fagsak_id = b.fagsak_id
+                                      AND b2.status <> 'FERDIGSTILT')""")
+    fun finnFerdigstilteFagsakerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
 
 }

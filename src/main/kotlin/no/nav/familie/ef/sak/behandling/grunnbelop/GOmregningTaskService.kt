@@ -17,7 +17,7 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
             "Feature toggle for omberegning er disabled"
         }
-        val fagsakIder = fagsakRepository.finnFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
+        val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
         val gOmregningTasks = GOmregningTask.opprettTasks(fagsakIder)
         taskRepository.saveAll(gOmregningTasks)
         return gOmregningTasks.size
