@@ -58,6 +58,7 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         simuleringsresultatRepository.deleteById(behandlingId)
     }
 
+    @Transactional
     fun hentOgLagreSimuleringsresultat(saksbehandling: Saksbehandling): Simuleringsresultat {
         tilgangService.validerHarSaksbehandlerrolle()
 
