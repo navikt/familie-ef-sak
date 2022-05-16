@@ -155,7 +155,7 @@ class OmregningService(private val behandlingService: BehandlingService,
             }
         }.map {
             val omberegnetAndelTilkjentYtelse =
-                    omberegnetMap[it.stønadFom] ?: error("Forentet omberegnet andelTilkjenYtelse med fradato ${it.stønadFom}")
+                    omberegnetMap[it.stønadFom] ?: error("Forventet omberegnet andelTilkjenYtelse med fradato ${it.stønadFom}")
             RapportDto(fagsakId,
                        it.stønadFom,
                        it.stønadTom,

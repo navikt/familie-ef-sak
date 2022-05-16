@@ -118,7 +118,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
                 "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
             }
-            brukerfeilHvis(!saksbehandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
+            brukerfeilHvis(!saksbehandling.erMigrering
+                           && !saksbehandling.erOmregning
+                           && harPeriodeEllerAktivitetMigrering(data)) {
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
         }
