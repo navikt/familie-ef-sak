@@ -233,7 +233,7 @@ class DryRunSimuleringService(iverksettClient: IverksettClient,
         throw IllegalAccessException("Forventer ikke kall til hentLagretSimmuleringsresultat fra BeregnYtelseSteg.")
     }
 
-    override fun slettSimuleringForBehandling(behandlingId: UUID) {}
+    override fun slettSimuleringForBehandling(saksbehandling: Saksbehandling) {}
 
     override fun hentOgLagreSimuleringsresultat(saksbehandling: Saksbehandling): Simuleringsresultat {
         return Simuleringsresultat(behandlingId = UUID.randomUUID(),
