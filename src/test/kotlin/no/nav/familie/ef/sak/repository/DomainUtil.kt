@@ -191,8 +191,9 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
 fun tilkjentYtelse(behandlingId: UUID,
                    personIdent: String,
                    stønadsår: Int = 2021,
-                   startdato: LocalDate? = null): TilkjentYtelse {
-    val andeler = listOf(AndelTilkjentYtelse(beløp = 9500,
+                   startdato: LocalDate? = null,
+                   beløp: Int? = null): TilkjentYtelse {
+    val andeler = listOf(AndelTilkjentYtelse(beløp = beløp?: 9500,
                                              stønadFom = LocalDate.of(stønadsår, 1, 1),
                                              stønadTom = LocalDate.of(stønadsår, 12, 31),
                                              personIdent = personIdent,

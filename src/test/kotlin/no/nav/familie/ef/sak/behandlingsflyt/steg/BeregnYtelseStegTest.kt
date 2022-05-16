@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
@@ -23,6 +24,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
@@ -1373,12 +1375,123 @@ internal class BeregnYtelseStegTest {
 
             assertThrows<ApiFeil> {
                 utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
-                                         type = BehandlingType.REVURDERING,
+                                         type = BehandlingType.FØRSTEGANGSBEHANDLING,
                                          forrigeBehandlingId = null),
                           innvilgetBarnetilsyn(nyAndelFom, nyAndelTom).copy(resultatType = ResultatType.INNVILGE))
             }
         }
     }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør dersom det finnes et barn på andelen`() {
+        val barn = listOf<UUID>(UUID.randomUUID())
+        val andelFom = LocalDate.of(2022, 1, 1)
+        val andelTom = LocalDate.of(2022, 1, 31)
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(barn)
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                     forrigeBehandlingId = null),
+                      innvilgetBarnetilsyn(andelFom, andelTom, barn, utgifter = 0, erMidlertidigOpphør = true))
+        }
+        assertThat(feil.feil).contains("Kan ikke ta med barn på en periode som er et midlertidig opphør, på behandling=")
+    }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør det finnes en utgift større enn null på andelen`() {
+        val andelFom = LocalDate.of(2022, 1, 1)
+        val andelTom = LocalDate.of(2022, 1, 31)
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                     forrigeBehandlingId = null),
+                      innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, erMidlertidigOpphør = true))
+        }
+        assertThat(feil.feil).contains("kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør, på behandling=")
+    }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør og strekker seg over mer enn en måned`() {
+        val andelFom = LocalDate.of(2022, 1, 1)
+        val andelTom = LocalDate.of(2022, 3, 31)
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                     forrigeBehandlingId = null),
+                      innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, erMidlertidigOpphør = true))
+        }
+        assertThat(feil.feil).contains("En periode som er midlertidig opphør må være av lengde èn måned, på behandling=")
+    }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør som første andel i en førstegangsbehandling`() {
+        val andelFom = LocalDate.of(2022, 1, 1)
+        val andelTom = LocalDate.of(2022, 1, 31)
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                     forrigeBehandlingId = null),
+                      innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, erMidlertidigOpphør = true))
+        }
+        assertThat(feil.feil).contains("Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=")
+    }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør dersom det ikke har blitt innvilget beløp på tidligere vedtak`() {
+        val andelFom = LocalDate.of(2022, 1, 1)
+        val andelTom = LocalDate.of(2022, 1, 31)
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(behandlingId = UUID.randomUUID(),
+                                                                                        personIdent = "",
+                                                                                        startdato = LocalDate.of(2021, 12, 1),
+                                                                                        beløp = 0)
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.REVURDERING,
+                                     forrigeBehandlingId = UUID.randomUUID()),
+                      innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, erMidlertidigOpphør = true))
+        }
+        assertThat(feil.feil).contains("Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=")
+    }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør dersom andelen ikke henger sammen med neste andelsperiode`() {
+        val utgiftFom1 = LocalDate.of(2022, 1, 1)
+        val utgiftTom1 = LocalDate.of(2022, 1, 31)
+        val andelMidlertidigOpphørFom = LocalDate.of(2022, 3, 1)
+        val andelMidlertidigOpphørTom = LocalDate.of(2022, 3, 31)
+        val utgiftFom2 = LocalDate.of(2022, 4, 1)
+        val utgiftTom2 = LocalDate.of(2022, 4, 30)
+
+        val data = listOf(DatoBarnOgUtgifter(utgiftFom1, utgiftTom1, listOf(UUID.randomUUID()), utgifter = 2500),
+                          DatoBarnOgUtgifter(andelMidlertidigOpphørFom, andelMidlertidigOpphørTom, listOf(), utgifter = 0),
+                          DatoBarnOgUtgifter(utgiftFom2, utgiftTom2, listOf(UUID.randomUUID()), utgifter = 2500))
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                                     forrigeBehandlingId = null),
+                      innvilgetBarnetilsynMedFlerePerioder(data))
+        }
+        assertThat(feil.feil).contains("Perioder som er midlertidig opphør må være sammenhengende, på behandling=")
+    }
+
+    private fun identerTilBehandlingBarn(identer: List<UUID>) = identer.map { BehandlingBarn(it, UUID.randomUUID()) }
 
     private fun innvilget(perioder: List<VedtaksperiodeDto>,
                           inntekter: List<Inntekt>) =
@@ -1387,15 +1500,34 @@ internal class BeregnYtelseStegTest {
                                        inntektBegrunnelse = "null",
                                        periodeBegrunnelse = "null")
 
-    private fun innvilgetBarnetilsyn(startDato: LocalDate, sluttDato: LocalDate) =
+    private fun innvilgetBarnetilsyn(startDato: LocalDate,
+                                     sluttDato: LocalDate,
+                                     barn: List<UUID>? = null,
+                                     utgifter: Int? = null,
+                                     erMidlertidigOpphør: Boolean? = null) =
             InnvilgelseBarnetilsyn(perioder = listOf(UtgiftsperiodeDto(årMånedFra = YearMonth.from(startDato),
                                                                        årMånedTil = YearMonth.from(sluttDato),
-                                                                       barn = emptyList(),
-                                                                       utgifter = 2500,
-                                                                       erMidlertidigOpphør = false)),
+                                                                       barn = barn ?: emptyList(),
+                                                                       utgifter = utgifter ?: 2500,
+                                                                       erMidlertidigOpphør = erMidlertidigOpphør ?: false)),
                                    perioderKontantstøtte = emptyList(),
                                    tilleggsstønad = TilleggsstønadDto(true, emptyList(), null),
                                    begrunnelse = null)
+
+    data class DatoBarnOgUtgifter(val andelFom: LocalDate, val andelTom: LocalDate, val barn: List<UUID>, val utgifter: Int)
+
+    private fun innvilgetBarnetilsynMedFlerePerioder(data: List<DatoBarnOgUtgifter>) = InnvilgelseBarnetilsyn(perioder = data.map {
+        UtgiftsperiodeDto(årMånedFra = YearMonth.from(it.andelFom),
+                          årMånedTil = YearMonth.from(it.andelTom),
+                          barn = if (it.utgifter > 0) it.barn else emptyList(),
+                          utgifter = it.utgifter,
+                          erMidlertidigOpphør = if (it.utgifter > 0) false else true)
+    }, perioderKontantstøtte = emptyList(),
+                                                                                                              tilleggsstønad = TilleggsstønadDto(
+                                                                                                                      true,
+                                                                                                                      emptyList(),
+                                                                                                                      null),
+                                                                                                              begrunnelse = null)
 
     private fun sanksjon(årMåned: YearMonth) =
             Sanksjonert(sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
