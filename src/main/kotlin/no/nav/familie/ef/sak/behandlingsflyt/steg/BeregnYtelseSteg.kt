@@ -79,7 +79,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Avslå -> {
-                simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent.id)
+                simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent)
                 tilbakekrevingService.slettTilbakekreving(saksbehandlingMedOppdatertIdent.id)
             }
             is Sanksjonert -> {
