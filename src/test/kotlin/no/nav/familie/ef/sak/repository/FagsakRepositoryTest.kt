@@ -35,7 +35,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     inner class FinnFagsakerMedUtdatertGBelop {
 
         @Test
-        fun `finner alle fagsaker med innvilget tilkjent ytelse etter 01-05-2022 med gammel grunnbeløpsdato`() {
+        fun `finner alle ferdigstilte fagsaker med innvilget tilkjent ytelse etter 01-05-2022 med gammel grunnbeløpsdato`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
             val behandling = behandlingRepository.insert(behandling(fagsak,
@@ -46,8 +46,27 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
                                                    status = BehandlingStatus.UTREDES,
                                                    resultat = BehandlingResultat.INNVILGET))
             tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022))
-            assertThat(fagsakRepository.finnFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)))
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)))
                     .containsExactly(fagsak.id)
+        }
+
+        @Test
+        fun `tar ikke med ferdigstilte fagsaker som har en åpen behandling`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
+            val behandlingFerdig = behandlingRepository.insert(behandling(fagsak,
+                                                                          status = BehandlingStatus.FERDIGSTILT,
+                                                                          resultat = BehandlingResultat.INNVILGET,
+                                                                          opprettetTid = LocalDateTime.now().minusDays(5)))
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = BehandlingStatus.FATTER_VEDTAK,
+                                                   resultat = BehandlingResultat.INNVILGET,
+                                                   opprettetTid = LocalDateTime.now().minusDays(2)))
+            behandlingRepository.insert(behandling(fagsak2,
+                                                   status = BehandlingStatus.UTREDES,
+                                                   resultat = BehandlingResultat.INNVILGET))
+            tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingFerdig.id, fagsak.personIdenter.first().ident, 2022))
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
         }
     }
     @Test
