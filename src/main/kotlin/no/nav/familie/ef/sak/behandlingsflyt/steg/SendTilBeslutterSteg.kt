@@ -125,7 +125,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
-        if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV) return
+        if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING) return
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 
