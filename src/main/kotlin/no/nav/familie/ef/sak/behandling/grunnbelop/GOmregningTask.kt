@@ -7,9 +7,12 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.util.Properties
 import java.util.UUID
 
@@ -20,6 +23,7 @@ import java.util.UUID
                      triggerTidVedFeilISekunder = 15 * 60L,
                      beskrivelse = "G-omregning")
 class GOmregningTask(private val omregningService: OmregningService,
+                     private val taskService: TaskService,
                      private val featureToggleService: FeatureToggleService) : AsyncTaskStep {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -36,19 +40,26 @@ class GOmregningTask(private val omregningService: OmregningService,
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettTask(fagsakId: UUID) {
+
+        val eksisterendeTask = taskService.finnTaskMedPayloadOgType(fagsakId.toString(), TYPE)
+
+        if (eksisterendeTask != null) {
+            return
+        }
+
+        val task = Task(TYPE, fagsakId.toString(), Properties().apply {
+            setProperty("fagsakId", fagsakId.toString())
+            setProperty("grunnbeløpsdato", nyesteGrunnbeløpGyldigFraOgMed.toString())
+        })
+
+        taskService.save(task)
+
+    }
+
     companion object {
 
         const val TYPE = "G-omregning"
-
-        fun opprettTask(fagsakId: UUID): Task {
-            return Task(TYPE, fagsakId.toString(), Properties().apply {
-                setProperty("fagsakId", fagsakId.toString())
-                setProperty("grunnbeløpsdato", nyesteGrunnbeløpGyldigFraOgMed.toString())
-            })
-        }
-
-        fun opprettTasks(fagsakIder: List<UUID>): List<Task> {
-            return fagsakIder.map { opprettTask(it) }
-        }
     }
 }
