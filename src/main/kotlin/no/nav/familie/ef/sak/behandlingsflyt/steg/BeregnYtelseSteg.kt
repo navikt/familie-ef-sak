@@ -186,7 +186,10 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     private fun opprettTilkjentYtelseForInnvilgetOvergangsstønad(vedtak: InnvilgelseOvergangsstønad,
                                                                  saksbehandling: Saksbehandling) {
 
-        brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
+        brukerfeilHvis(!saksbehandling.erOmregning && !vedtak.perioder.erSammenhengende()) {
+            "Periodene må være sammenhengende"
+        }
+
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
                 lagBeløpsperioderForInnvilgelseOvergangsstønad(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
