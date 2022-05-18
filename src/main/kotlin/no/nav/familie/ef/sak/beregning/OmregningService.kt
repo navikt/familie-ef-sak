@@ -63,6 +63,7 @@ class OmregningService(private val behandlingService: BehandlingService,
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun utførGOmregning(fagsakId: UUID,
+                        samordningsfradrag: BigDecimal?,
                         liveRun: Boolean) {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
@@ -86,7 +87,9 @@ class OmregningService(private val behandlingService: BehandlingService,
         val innvilgelseOvergangsstønad =
                 vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
                                                                            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
-
+        feilHvis(innvilgelseOvergangsstønad.samordningsfradragType != null && samordningsfradrag == null) {
+            "Eksisterende ytelse har samordningsfradrag. G-omregning av faksagId: $fagsakId må gjøres manuelt."
+        }
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForOmregning(behandling)
 
@@ -94,6 +97,10 @@ class OmregningService(private val behandlingService: BehandlingService,
         val indeksjusterInntekt =
                 BeregningUtils.indeksjusterInntekt(forrigeTilkjentYtelse.grunnbeløpsdato,
                                                    innvilgelseOvergangsstønad.inntekter.tilInntektsperioder())
+                        .map {
+                            if (samordningsfradrag != null) it.copy(samordningsfradrag = samordningsfradrag) else it
+                        }
+
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
 
         if (liveRun) {
