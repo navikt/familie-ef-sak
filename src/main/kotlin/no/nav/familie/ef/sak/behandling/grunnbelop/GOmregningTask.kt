@@ -29,6 +29,7 @@ class GOmregningTask(private val omregningService: OmregningService,
         val fagsakId = UUID.fromString(task.payload)
         try {
             omregningService.utførGOmregning(fagsakId,
+                                             null,
                                              featureToggleService.isEnabled("familie.ef.sak.omberegning.live.run"))
         } catch (e: DryRunException) {
             logger.info("G-OmberegningTask for fagsakId $fagsakId ruller tilbake fordi den er kjørt i dry run-modus.")
