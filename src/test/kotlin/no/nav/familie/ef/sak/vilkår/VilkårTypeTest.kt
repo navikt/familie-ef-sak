@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType.SAGT_OPP_ELLER_REDUSERT
 import no.nav.familie.ef.sak.vilkår.VilkårType.SAMLIV
 import no.nav.familie.ef.sak.vilkår.VilkårType.SIVILSTAND
 import no.nav.familie.ef.sak.vilkår.VilkårType.TIDLIGERE_VEDTAKSPERIODER
+import no.nav.familie.ef.sak.vilkår.VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
@@ -45,6 +46,7 @@ internal class VilkårTypeTest {
             AKTIVITET_ARBEID,
             INNTEKT,
             ALDER_PÅ_BARN,
+            DOKUMENTASJON_TILSYNSUTGIFTER,
     )
 
     @Test
