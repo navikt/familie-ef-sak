@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -129,6 +130,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 BrevmottakerePersonerTilPGobjectConverter(),
                 PGobjectTilBrevmottakerOrganisasjoner(),
                 BrevmottakereOrganisasjonerTilPGobjectConverter(),
+                PGobjectTilSkolepengerConverter(),
+                SkolepengerTilPGobjectConverter()
         ))
     }
 
@@ -340,6 +343,25 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class BarnetilsynTilPGobjectConverter : Converter<BarnetilsynWrapper, PGobject> {
 
         override fun convert(barnetilsyn: BarnetilsynWrapper): PGobject =
+                PGobject().apply {
+                    type = "json"
+                    value = objectMapper.writeValueAsString(barnetilsyn)
+                }
+    }
+
+    @ReadingConverter
+    class PGobjectTilSkolepengerConverter : Converter<PGobject, SkolepengerWrapper> {
+
+        override fun convert(pGobject: PGobject): SkolepengerWrapper {
+            val barnetilsynVerdi: SkolepengerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            return barnetilsynVerdi ?: SkolepengerWrapper(perioder = emptyList(), begrunnelse = null)
+        }
+    }
+
+    @WritingConverter
+    class SkolepengerTilPGobjectConverter : Converter<SkolepengerWrapper, PGobject> {
+
+        override fun convert(barnetilsyn: SkolepengerWrapper): PGobject =
                 PGobject().apply {
                     type = "json"
                     value = objectMapper.writeValueAsString(barnetilsyn)
