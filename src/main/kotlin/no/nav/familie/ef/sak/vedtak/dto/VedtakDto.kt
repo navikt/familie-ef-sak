@@ -26,7 +26,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -158,6 +157,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
             ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
                 when {
+                    this.skolepenger != null -> mapInnvilgelseSkolepenger()
                     this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn(this.resultatType)
                     this.perioder != null -> mapInnvilgelseOvergangsstønad()
                     else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
@@ -203,6 +203,10 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         // før vi har tatt i bruk @JsonTypeInfo så brukes denne for å mappe InnvilgelseBarnetilsyn
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsyn") {
             return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+        }
+
+        if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseSkolepenger") {
+            return mapper.treeToValue(node, InnvilgelseSkolepenger::class.java)
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {

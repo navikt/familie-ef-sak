@@ -32,6 +32,7 @@ data class Vedtak(@Id
                   val kontantstøtte: KontantstøtteWrapper? = null,
                   @Column("tilleggsstonad")
                   val tilleggsstønad: TilleggsstønadWrapper? = null,
+                  val skolepenger: SkolepengerWrapper? = null,
                   val beslutterIdent: String? = null,
                   @Column("sanksjon_arsak")
                   val sanksjonsårsak: Sanksjonsårsak? = null,
@@ -48,6 +49,10 @@ data class Barnetilsynperiode(val datoFra: LocalDate,
                               val datoTil: LocalDate,
                               val utgifter: Int,
                               val barn: List<UUID>)
+
+data class Skolepengerperiode(val datoFra: LocalDate,
+                              val datoTil: LocalDate,
+                              val utgifter: Int)
 
 data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val datoTil: LocalDate,
@@ -67,6 +72,9 @@ data class TilleggsstønadWrapper(val harTilleggsstønad: Boolean,
 data class KontantstøtteWrapper(val perioder: List<PeriodeMedBeløp>)
 
 data class BarnetilsynWrapper(val perioder: List<Barnetilsynperiode>,
+                              val begrunnelse: String?)
+
+data class SkolepengerWrapper(val perioder: List<Skolepengerperiode>,
                               val begrunnelse: String?)
 
 enum class VedtaksperiodeType {
