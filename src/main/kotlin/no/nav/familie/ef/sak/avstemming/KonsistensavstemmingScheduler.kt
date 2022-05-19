@@ -48,10 +48,13 @@ class KonsistensavstemmingService(private val repository: KonsistensavstemmingJo
         val tidspunkt = LocalDate.now().plusDays(2)
         val jobber = repository.findAllByOpprettetIsFalseAndTriggerdatoIsBefore(tidspunkt)
         jobber.forEach {
-            val triggerTid = it.triggerdato.atTime(8, 0)
-            logger.info("Oppretter task for triggerTid=$triggerTid")
-            val payload = KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerTid)
-            taskRepository.save(KonsistensavstemmingTask.opprettTask(payload))
+            val triggerdato = it.triggerdato
+            logger.info("Oppretter tasks for konsistensavstemming for dato=${triggerdato}")
+            taskRepository.saveAll(listOf(
+                    KonsistensavstemmingTask.opprettTask(KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerdato),
+                                                         triggerdato.atTime(8, 0)),
+                    KonsistensavstemmingTask.opprettTask(KonsistensavstemmingPayload(StønadType.BARNETILSYN, triggerdato),
+                                                         triggerdato.atTime(8, 20))))
         }
         repository.updateAll(jobber.map { it.copy(opprettet = true) })
     }
