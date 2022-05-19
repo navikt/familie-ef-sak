@@ -35,7 +35,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     inner class FinnFagsakerMedUtdatertGBelop {
 
         @Test
-        fun `finner alle ferdigstilte fagsaker med innvilget tilkjent ytelse etter 01-05-2022 med gammel grunnbeløpsdato`() {
+        fun `finner alle ferdigstilte fagsaker med innvilget tilkjent ytelse etter ny G-dato med gammel grunnbeløpsdato`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
             val behandling = behandlingRepository.insert(behandling(fagsak,
@@ -45,7 +45,8 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             behandlingRepository.insert(behandling(fagsak2,
                                                    status = BehandlingStatus.UTREDES,
                                                    resultat = BehandlingResultat.INNVILGET))
-            tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022))
+            tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022,
+                                                           grunnbeløpsdato = LocalDate.of(2021, 5, 1)))
             assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)))
                     .containsExactly(fagsak.id)
         }
