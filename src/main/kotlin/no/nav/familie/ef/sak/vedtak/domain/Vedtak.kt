@@ -50,9 +50,15 @@ data class Barnetilsynperiode(val datoFra: LocalDate,
                               val utgifter: Int,
                               val barn: List<UUID>)
 
-data class Skolepengerperiode(val datoFra: LocalDate,
+data class Skolepengerperiode(val studietype: SkolepengerStudietype,
+                              val datoFra: LocalDate,
                               val datoTil: LocalDate,
+                              val studiebelastning: Int,
                               val utgifter: Int)
+
+enum class SkolepengerStudietype {
+     HØGSKOLE_UNIVERSITET
+}
 
 data class PeriodeMedBeløp(val datoFra: LocalDate,
                            val datoTil: LocalDate,

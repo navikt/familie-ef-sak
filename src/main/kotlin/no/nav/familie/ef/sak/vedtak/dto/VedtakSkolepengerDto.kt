@@ -3,21 +3,33 @@ package no.nav.familie.ef.sak.vedtak.dto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
+import no.nav.familie.ef.sak.vedtak.domain.Skolepengerperiode
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 
-data class InnvilgelseSkolepenger(val perioder: List<Skolepengerperiode>,
-                                  val begrunnelse: String?)
+data class InnvilgelseSkolepenger(val begrunnelse: String?,
+                                  val perioder: List<SkolepengerperiodeDto>)
     : VedtakDto(resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger")
 
-data class Skolepengerperiode(
+data class SkolepengerperiodeDto(
+        val studietype: SkolepengerStudietype,
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
-        val beløp: Int
+        val studiebelastning: Int,
+        val utgifter: Int
 ) {
 
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
+
+fun SkolepengerperiodeDto.tilDomene(): Skolepengerperiode = Skolepengerperiode(
+        studietype = this.studietype,
+        datoFra = this.årMånedFra.atDay(1),
+        datoTil = this.årMånedTil.atEndOfMonth(),
+        studiebelastning = this.studiebelastning,
+        utgifter = this.utgifter
+)
 
 fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.INNVILGE): InnvilgelseSkolepenger {
     feilHvis(this.skolepenger == null) {
@@ -26,20 +38,16 @@ fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.I
     return InnvilgelseSkolepenger(
             begrunnelse = this.skolepenger.begrunnelse,
             perioder = this.skolepenger.perioder.map {
-                Skolepengerperiode(årMånedFra = YearMonth.from(it.datoFra),
-                                   årMånedTil = YearMonth.from(it.datoTil),
-                                   beløp = it.utgifter.toInt())
-            },
-            resultatType = resultatType,
-            _type = when (resultatType) {
-                ResultatType.INNVILGE -> "InnvilgelseBarnetilsyn"
-                ResultatType.INNVILGE_UTEN_UTBETALING -> "InnvilgelseBarnetilsynUtenUtbetaling"
-                else -> error("Ugyldig resultattype $this")
+                SkolepengerperiodeDto(studietype = it.studietype,
+                                      årMånedFra = YearMonth.from(it.datoFra),
+                                      årMånedTil = YearMonth.from(it.datoTil),
+                                      studiebelastning = it.studiebelastning,
+                                      utgifter = it.utgifter)
             }
     )
 }
 
-fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
+fun Skolepengerperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
         SanksjonertPeriodeDto(
                 årMånedFra = YearMonth.from(datoFra),
                 årMånedTil = YearMonth.from(datoTil)

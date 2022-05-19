@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -117,6 +118,13 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
                 tilleggsstønad = TilleggsstønadWrapper(harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                                                        perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
                                                        begrunnelse = this.tilleggsstønad.begrunnelse))
+    is InnvilgelseSkolepenger ->
+        Vedtak(
+                resultatType = this.resultatType,
+                behandlingId = behandlingId,
+                skolepenger = SkolepengerWrapper(perioder = this.perioder.map { it.tilDomene() },
+                                                 begrunnelse = this.begrunnelse)
+        )
     is Opphør ->
         Vedtak(behandlingId = behandlingId,
                avslåBegrunnelse = begrunnelse,
@@ -210,7 +218,8 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
-            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java).copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
+            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+                    .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
