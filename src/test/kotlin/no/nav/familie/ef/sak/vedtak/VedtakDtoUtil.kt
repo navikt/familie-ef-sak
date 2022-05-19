@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
-import no.nav.familie.ef.sak.vedtak.dto.SkolepengerperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
@@ -87,7 +87,7 @@ object VedtakDtoUtil {
                     VedtaksperiodeType.HOVEDPERIODE)
 
     fun skolepengerperiodeDto() =
-            SkolepengerperiodeDto(
+            UtgiftsperiodeSkolepengerDto(
                     SkolepengerStudietype.HØGSKOLE_UNIVERSITET,
                     YearMonth.of(2021, 1),
                     YearMonth.of(2021, 12),

@@ -2,17 +2,16 @@ package no.nav.familie.ef.sak.vedtak.dto
 
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.Skolepengerperiode
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 
 data class InnvilgelseSkolepenger(val begrunnelse: String?,
-                                  val perioder: List<SkolepengerperiodeDto>)
+                                  val perioder: List<UtgiftsperiodeSkolepengerDto>)
     : VedtakDto(resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger")
 
-data class SkolepengerperiodeDto(
+data class UtgiftsperiodeSkolepengerDto(
         val studietype: SkolepengerStudietype,
         val årMånedFra: YearMonth,
         val årMånedTil: YearMonth,
@@ -23,7 +22,7 @@ data class SkolepengerperiodeDto(
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
 
-fun SkolepengerperiodeDto.tilDomene(): Skolepengerperiode = Skolepengerperiode(
+fun UtgiftsperiodeSkolepengerDto.tilDomene(): Skolepengerperiode = Skolepengerperiode(
         studietype = this.studietype,
         datoFra = this.årMånedFra.atDay(1),
         datoTil = this.årMånedTil.atEndOfMonth(),
@@ -38,11 +37,11 @@ fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.I
     return InnvilgelseSkolepenger(
             begrunnelse = this.skolepenger.begrunnelse,
             perioder = this.skolepenger.perioder.map {
-                SkolepengerperiodeDto(studietype = it.studietype,
-                                      årMånedFra = YearMonth.from(it.datoFra),
-                                      årMånedTil = YearMonth.from(it.datoTil),
-                                      studiebelastning = it.studiebelastning,
-                                      utgifter = it.utgifter)
+                UtgiftsperiodeSkolepengerDto(studietype = it.studietype,
+                                             årMånedFra = YearMonth.from(it.datoFra),
+                                             årMånedTil = YearMonth.from(it.datoTil),
+                                             studiebelastning = it.studiebelastning,
+                                             utgifter = it.utgifter)
             }
     )
 }
