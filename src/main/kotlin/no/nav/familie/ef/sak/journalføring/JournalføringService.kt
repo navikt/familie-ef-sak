@@ -170,7 +170,9 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
 
         val behandling = opprettBehandlingMedBehandlingstype(behandlingstype, fagsak.id)
         iverksettService.startBehandling(behandling, fagsak)
-        settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
+        if (journalpost.harStrukturertSøknad()) {
+            settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
+        }
         knyttJournalpostTilBehandling(journalpost, behandling)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         barnService.opprettBarnPåBehandlingMedSøknadsdata(behandlingId = behandling.id,
