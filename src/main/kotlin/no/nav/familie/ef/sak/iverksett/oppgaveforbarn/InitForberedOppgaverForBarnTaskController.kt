@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
@@ -14,13 +15,13 @@ import java.time.LocalDate
 )
 @Unprotected
 class InitForberedOppgaverForBarnTaskController(
-        private val forberedOppgaverForBarnTask: ForberedOppgaverForBarnTask,
+        private val taskRepository: TaskRepository,
         private val forberedOppgaverForBarnService: ForberedOppgaverForBarnService
 ) {
 
     @PostMapping("/initialiser")
     fun opprettTask() {
-        forberedOppgaverForBarnTask.doTask(ForberedOppgaverForBarnTask.opprettTask(LocalDate.of(2022, 5, 20)))
+        taskRepository.save(ForberedOppgaverForBarnTask.opprettTask(LocalDate.of(2022, 5, 20)))
     }
 
     @PostMapping("/dry-run")
