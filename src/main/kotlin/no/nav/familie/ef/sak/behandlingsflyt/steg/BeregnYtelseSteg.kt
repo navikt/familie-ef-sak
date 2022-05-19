@@ -79,7 +79,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Avslå -> {
-                simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent.id)
+                simuleringService.slettSimuleringForBehandling(saksbehandlingMedOppdatertIdent)
                 tilbakekrevingService.slettTilbakekreving(saksbehandlingMedOppdatertIdent.id)
             }
             is Sanksjonert -> {
@@ -89,12 +89,20 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+        if (behandling.erOmregning) {
+            return
+        }
+
         innvilget.perioder.firstOrNull()?.let {
             validerStartTidEtterSanksjon(it.årMånedFra, behandling)
         }
     }
 
     private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
+        if (behandling.erOmregning) {
+            return
+        }
+
         innvilget.perioder.firstOrNull()?.let {
             validerStartTidEtterSanksjon(it.årMånedFra, behandling)
         }
@@ -118,7 +126,9 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
                 "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
             }
-            brukerfeilHvis(!saksbehandling.erMigrering() && harPeriodeEllerAktivitetMigrering(data)) {
+            brukerfeilHvis(!saksbehandling.erMigrering
+                           && !saksbehandling.erOmregning
+                           && harPeriodeEllerAktivitetMigrering(data)) {
                 "Kan ikke inneholde aktivitet eller periode av type migrering"
             }
         }

@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 import java.util.UUID
 
 @Repository
@@ -18,19 +17,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
-
-    // language=PostgreSQL
-    @Query("""
-        SELECT DISTINCT b.id FROM behandling b 
-            JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
-            JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse = ty.id
-            JOIN fagsak f ON b.fagsak_id = f.id
-            AND f.stonadstype = 'OVERGANGSSTØNAD'
-        WHERE aty.stonad_tom > :gjeldendeGrunnbeløpFraOgMedDato 
-        AND ty.grunnbelopsdato <= :gjeldendeGrunnbeløpFraOgMedDato
-        AND b.status = 'FERDIGSTILT'
-    """)
-    fun finnBehandlingerMedUtdatertGBelop(gjeldendeGrunnbeløpFraOgMedDato: LocalDate): List<UUID>
 
     // language=PostgreSQL
     @Query("""SELECT b.*, be.id AS eksternid_id         
@@ -147,16 +133,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     """)
     fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
 
-    // language=PostgreSQL
-    @Query("""
-        SELECT b.*, be.id AS eksternid_id
-        FROM behandling b
-        JOIN behandling_ekstern be ON b.id = be.behandling_id
-        WHERE b.fagsak_id = :fagsakId
-        ORDER BY b.opprettet_tid DESC
-        LIMIT 1
-    """)
-    fun finnSisteBehandling(fagsakId: UUID): Behandling?
+    fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 
     // language=PostgreSQL
     @Query("""
@@ -193,7 +170,9 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE pi.ident IN (:personidenter)
             AND gib.stonadstype=:stønadstype
     """)
-    fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>, stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<Pair<String, UUID>>
+    fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>,
+                                                        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD)
+            : List<Pair<String, UUID>>
 
     fun existsByFagsakIdAndTypeIn(fagsakId: UUID, typer: Set<BehandlingType>): Boolean
 

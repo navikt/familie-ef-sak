@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PSQLException
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +31,44 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var fagsakRepository: FagsakRepository
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
+    @Nested
+    inner class FinnFagsakerMedUtdatertGBelop {
+
+        @Test
+        fun `finner alle ferdigstilte fagsaker med innvilget tilkjent ytelse etter 01-05-2022 med gammel grunnbeløpsdato`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
+            val behandling = behandlingRepository.insert(behandling(fagsak,
+                                                                    status = BehandlingStatus.FERDIGSTILT,
+                                                                    resultat = BehandlingResultat.INNVILGET,
+                                                                    opprettetTid = LocalDateTime.now().minusDays(2)))
+            behandlingRepository.insert(behandling(fagsak2,
+                                                   status = BehandlingStatus.UTREDES,
+                                                   resultat = BehandlingResultat.INNVILGET))
+            tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, fagsak.personIdenter.first().ident, 2022))
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)))
+                    .containsExactly(fagsak.id)
+        }
+
+        @Test
+        fun `tar ikke med ferdigstilte fagsaker som har en åpen behandling`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("1"))))
+            val behandlingFerdig = behandlingRepository.insert(behandling(fagsak,
+                                                                          status = BehandlingStatus.FERDIGSTILT,
+                                                                          resultat = BehandlingResultat.INNVILGET,
+                                                                          opprettetTid = LocalDateTime.now().minusDays(5)))
+            behandlingRepository.insert(behandling(fagsak,
+                                                   status = BehandlingStatus.FATTER_VEDTAK,
+                                                   resultat = BehandlingResultat.INNVILGET,
+                                                   opprettetTid = LocalDateTime.now().minusDays(2)))
+            behandlingRepository.insert(behandling(fagsak2,
+                                                   status = BehandlingStatus.UTREDES,
+                                                   resultat = BehandlingResultat.INNVILGET))
+            tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingFerdig.id, fagsak.personIdenter.first().ident, 2022))
+            assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
+        }
+    }
     @Test
     fun `harLøpendeUtbetaling returnerer true for fagsak med ferdigstilt behandling med aktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))
@@ -179,7 +218,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
         fagsak = testoppsettService.lagreFagsak(fagsak)
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val finnFagsakTilBehandling = fagsakRepository.finnFagsakTilBehandling(behandling.id)!!
+        val finnFagsakTilBehandling = fagsakRepository.finnFagsakTilBehandling(behandling.id)
 
         assertThat(finnFagsakTilBehandling.id).isEqualTo(fagsak.id)
         assertThat(finnFagsakTilBehandling.eksternId).isEqualTo(fagsak.eksternId)

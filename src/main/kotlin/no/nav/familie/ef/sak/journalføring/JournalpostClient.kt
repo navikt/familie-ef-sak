@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.journalføring
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
@@ -19,6 +21,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.NavHttpHeaders
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
@@ -30,7 +33,6 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
                         integrasjonerConfig: IntegrasjonerConfig)
     : AbstractPingableRestClient(restOperations, "oppgave") {
 
-
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
@@ -41,7 +43,16 @@ class JournalpostClient(@Qualifier("azure") restOperations: RestOperations,
     }
 
     fun hentJournalpost(journalpostId: String): Journalpost {
-        return getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}")).getDataOrThrow()
+        val ressurs = try {
+            getForEntity<Ressurs<Journalpost>>(URI.create("${journalpostURI}?journalpostId=${journalpostId}"))
+        } catch (e: RessursException) {
+            if (e.message?.contains("Fant ikke journalpost i fagarkivet") == true) {
+                throw ApiFeil("Finner ikke journalpost i fagarkivet", HttpStatus.BAD_REQUEST)
+            } else {
+                throw e
+            }
+        }
+        return ressurs.getDataOrThrow()
     }
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String, dokumentVariantformat: DokumentVariantformat): ByteArray {

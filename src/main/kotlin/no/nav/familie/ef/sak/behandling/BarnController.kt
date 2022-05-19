@@ -1,5 +1,8 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.kontrakter.ef.personhendelse.NyeBarnDto
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -18,18 +21,22 @@ import java.util.UUID
 @RequestMapping(path = ["/api/behandling/barn"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BarnController(val nyeBarnService: NyeBarnService) {
+class BarnController(private val nyeBarnService: NyeBarnService,
+                     private val tilgangService: TilgangService) {
 
     @PostMapping("nye-eller-tidligere-fodte-barn")
     // denne skal kalles på fra ef-personhendelse(client_credential) for å opprette oppgaver for nye eller for tidligt fødte barn
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun finnNyeEllerTidligereFødteBarn(@RequestBody personIdent: PersonIdent): Ressurs<NyeBarnDto> {
+        if (!SikkerhetContext.erMaskinTilMaskinToken()) {
+            tilgangService.validerTilgangTilPerson(personIdent.ident, AuditLoggerEvent.ACCESS)
+        }
         return Ressurs.success(nyeBarnService.finnNyeEllerTidligereFødteBarn(personIdent))
     }
 
     @GetMapping("fagsak/{fagsakId}/nye-barn")
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(@PathVariable("fagsakId")
                                                      fagsakId: UUID): Ressurs<List<BarnMinimumDto>> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId))
     }
 }

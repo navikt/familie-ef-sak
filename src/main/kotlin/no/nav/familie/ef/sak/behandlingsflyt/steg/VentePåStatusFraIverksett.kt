@@ -25,12 +25,11 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
         }
     }
 
-    /**
-     * Migreringer og behandlinger med årsak [BehandlingÅrsak.KORRIGERING_UTEN_BREV] er brevløse
-     */
     private fun erBrevløsIverksettingOk(saksbehandling: Saksbehandling,
                                         it: IverksettStatus): Boolean {
-        if (!saksbehandling.erMigrering() && saksbehandling.årsak != BehandlingÅrsak.KORRIGERING_UTEN_BREV) {
+        if (saksbehandling.årsak !in setOf(BehandlingÅrsak.KORRIGERING_UTEN_BREV,
+                                           BehandlingÅrsak.G_OMREGNING,
+                                           BehandlingÅrsak.MIGRERING)) {
             return false
         }
         return it == IverksettStatus.OK_MOT_OPPDRAG ||
