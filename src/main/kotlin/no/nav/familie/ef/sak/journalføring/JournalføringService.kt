@@ -122,11 +122,15 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
         brukerfeilHvis(!journalpost.harStrukturertSøknad() && fagsak.stønadstype == StønadType.SKOLEPENGER) {
             "Journalposten inneholder ikke en digital søknad"
         }
+        feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak != null) {
+            "Kan ikke sende inn årsak når journalposten har strukturert søknad"
+        }
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype = behandlingstype,
                                                                  fagsak = fagsak,
                                                                  journalpost = journalpost,
-                                                                 barnSomSkalFødes = journalføringRequest.barnSomSkalFødes)
+                                                                 barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
+                                                                 årsak = journalføringRequest.behandling.årsak)
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
@@ -163,12 +167,15 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
     private fun opprettBehandlingOgPopulerGrunnlagsdata(behandlingstype: BehandlingType,
                                                         fagsak: Fagsak,
                                                         journalpost: Journalpost,
-                                                        barnSomSkalFødes: List<BarnSomSkalFødes>): Behandling {
+                                                        barnSomSkalFødes: List<BarnSomSkalFødes>,
+                                                        årsak: BehandlingÅrsak? = null): Behandling {
         feilHvis(fagsak.stønadstype == StønadType.BARNETILSYN && !featureToggleService.isEnabled("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning")) {
             "Journalføring av barnetilsyn er ikke skrudd på"
         }
 
-        val behandling = opprettBehandlingMedBehandlingstype(behandlingstype, fagsak.id)
+        val behandling = behandlingService.opprettBehandling(behandlingType = behandlingstype,
+                                                             fagsakId = fagsak.id,
+                                                             behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD)
         iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {
             settSøknadPåBehandling(journalpost.journalpostId, fagsak, behandling.id)
@@ -254,12 +261,6 @@ class JournalføringService(private val journalpostClient: JournalpostClient,
             hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
             ?: error("Finner ikke behandling med id=${journalføringRequest.behandling.behandlingsId}")
 
-
-    private fun opprettBehandlingMedBehandlingstype(behandlingsType: BehandlingType, fagsakId: UUID): Behandling {
-        return behandlingService.opprettBehandling(behandlingType = behandlingsType,
-                                                   fagsakId = fagsakId,
-                                                   behandlingsårsak = BehandlingÅrsak.SØKNAD)
-    }
 
     private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {
         return behandlingId?.let { behandlingService.hentBehandling(it) }
