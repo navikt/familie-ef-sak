@@ -3,15 +3,14 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseUtil.tilPeriodeType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
@@ -81,11 +80,15 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
 
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
 
-        return tilkjentYtelser.chunked(PdlClient.MAKS_ANTALL_IDENTER).map { mapTilDto(it, datoForAvstemming) }.flatten()
+        return tilkjentYtelser.chunked(PdlClient.MAKS_ANTALL_IDENTER)
+                .map { mapTilDto(stønadstype, it, datoForAvstemming) }
+                .flatten()
     }
 
-    private fun mapTilDto(tilkjenteYtelser: List<TilkjentYtelse>,
+    private fun mapTilDto(stønadstype: StønadType,
+                          tilkjenteYtelser: List<TilkjentYtelse>,
                           datoForAvstemming: LocalDate): List<KonsistensavstemmingTilkjentYtelseDto> {
+        val periodeType = stønadstype.tilPeriodeType()
         val behandlinger = behandlingService.hentBehandlinger(tilkjenteYtelser.map { it.behandlingId }.toSet())
                 .associateBy { it.id }
 
@@ -99,7 +102,7 @@ class TilkjentYtelseService(private val behandlingService: BehandlingService,
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
                     .filter { it.stønadTom.isEqualOrAfter(datoForAvstemming) }
                     .filter { it.beløp > 0 }
-                    .map { it.tilIverksettDto() }
+                    .map { it.tilIverksettDto(periodeType) }
 
             val fagsakMedOppdatertPersonIdent = fagsakerMedOppdatertPersonIdenter[behandling.fagsakId]
                                                 ?: error("Finner ikke fagsak for fagsakId=${behandling.fagsakId}")

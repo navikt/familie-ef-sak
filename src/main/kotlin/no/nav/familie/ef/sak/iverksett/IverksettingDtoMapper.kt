@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -17,6 +16,8 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseUtil.tilPeriodeType
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
@@ -74,7 +75,6 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val barnService: BarnService,
                             private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
-                            private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
                             private val tilbakekrevingService: TilbakekrevingService,
                             private val grunnlagsdataService: GrunnlagsdataService,
@@ -194,7 +194,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                               opphørÅrsak = null,
                                               saksbehandlerId = saksbehandler,
                                               beslutterId = beslutter,
-                                              tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
+                                              tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(StønadType.OVERGANGSSTØNAD),
                                               vedtaksperioder = vedtak.perioder?.tilVedtaksperiodeOvergangsstønadDto()
                                                                 ?: emptyList(),
                                               tilbakekreving = tilbakekreving,
@@ -212,7 +212,7 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                                           opphørÅrsak = null,
                                           saksbehandlerId = saksbehandler,
                                           beslutterId = beslutter,
-                                          tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
+                                          tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(StønadType.BARNETILSYN),
                                           vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperiodeBarnetilsynDto()
                                                             ?: emptyList(),
                                           tilbakekreving = tilbakekreving,
@@ -261,19 +261,24 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 }
 
 
-fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
-        andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel ->
-            AndelTilkjentYtelseDto(beløp = andel.beløp,
-                                   fraOgMed = andel.stønadFom,
-                                   tilOgMed = andel.stønadTom,
-                                   inntekt = andel.inntekt,
-                                   samordningsfradrag = andel.samordningsfradrag,
-                                   inntektsreduksjon = andel.inntektsreduksjon,
-                                   kildeBehandlingId = andel.kildeBehandlingId,
-                                   periodetype = Periodetype.MÅNED)
-        },
-        startdato = startdato ?: error("Mangler startdato for ty=${this.id} behandling=${this.behandlingId}")
-)
+fun TilkjentYtelse.tilIverksettDto(stønadstype: StønadType): TilkjentYtelseDto {
+    val periodetype = stønadstype.tilPeriodeType()
+    return TilkjentYtelseDto(
+            andelerTilkjentYtelse = andelerTilkjentYtelse.map { it.tilIverksettDto(periodetype) },
+            startdato = startdato
+    )
+}
+
+fun AndelTilkjentYtelse.tilIverksettDto(periodetype: Periodetype): AndelTilkjentYtelseDto {
+    return AndelTilkjentYtelseDto(beløp = this.beløp,
+                                  periodetype = periodetype,
+                                  inntekt = this.inntekt,
+                                  inntektsreduksjon = this.inntektsreduksjon,
+                                  samordningsfradrag = this.samordningsfradrag,
+                                  fraOgMed = this.stønadFom,
+                                  tilOgMed = this.stønadTom,
+                                  kildeBehandlingId = this.kildeBehandlingId)
+}
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
         regelId = RegelIdIverksett.valueOf(this.regelId.name),

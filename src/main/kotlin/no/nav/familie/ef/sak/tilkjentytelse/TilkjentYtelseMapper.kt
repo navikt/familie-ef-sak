@@ -67,7 +67,7 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId: String,
                                                 eksternBehandlingId: Long,
                                                 stønadstype: StønadType,
                                                 eksternFagsakId: Long): TilkjentYtelseMedMetadata {
-    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(),
+    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(stønadstype),
                                      saksbehandlerId = saksbehandlerId,
                                      eksternBehandlingId = eksternBehandlingId,
                                      stønadstype = stønadstype,
