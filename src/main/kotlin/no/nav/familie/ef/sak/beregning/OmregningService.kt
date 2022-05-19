@@ -128,13 +128,13 @@ class OmregningService(private val behandlingService: BehandlingService,
             iverksettClient.iverksettUtenBrev(iverksettDto)
             taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
         } else {
-            loggResuktat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
+            loggResultat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
             throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")
         }
 
     }
 
-    fun loggResuktat(forrigeTilkjentYtelse: TilkjentYtelse,
+    fun loggResultat(forrigeTilkjentYtelse: TilkjentYtelse,
                      innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
                      fagsakId: UUID,
                      behandlingId: UUID) {
