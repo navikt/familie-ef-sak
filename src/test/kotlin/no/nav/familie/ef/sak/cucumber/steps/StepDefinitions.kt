@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -57,7 +58,7 @@ class StepDefinitions {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private var gittVedtak = listOf<Vedtak>()
-    private var saksbehandlinger = listOf<Saksbehandling>()
+    private var saksbehandlinger = mapOf<UUID, Pair<Behandling, Saksbehandling>>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
@@ -81,19 +82,26 @@ class StepDefinitions {
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
 
-    private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+    private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
     private lateinit var lagredeVedtak: MutableList<Vedtak>
 
+    @Gitt("følgende behandlinger for {}")
+    fun følgende_behandlinger(stønadTypeArg: String, dataTable: DataTable) {
+        stønadstype = StønadType.valueOf(stønadTypeArg.uppercase())
+        saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable, stønadstype)
+    }
+
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
+        validerOgSettStønadstype(StønadType.OVERGANGSSTØNAD)
         gittVedtak = VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
     }
 
     @Gitt("følgende vedtak for barnetilsyn")
     fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
-        stønadstype = StønadType.BARNETILSYN
+        validerOgSettStønadstype(StønadType.BARNETILSYN)
 
         behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
         gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
@@ -102,13 +110,16 @@ class StepDefinitions {
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
         feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
-            "Kan kun ette inntekter på overgangsstønad"
+            "Kan kun sette inntekter på overgangsstønad"
         }
         inntekter = VedtakDomeneParser.mapInntekter(dataTable)
     }
 
     @Gitt("følgende kontantstøtte")
     fun følgende_kontantstøtte(dataTable: DataTable) {
+        feilHvis(stønadstype != StønadType.BARNETILSYN) {
+            "Kan kun sette kontantstøtte på barnetilsyn"
+        }
         gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
         }
@@ -116,6 +127,9 @@ class StepDefinitions {
 
     @Gitt("følgende tilleggsstønad")
     fun følgende_tilleggsstønad(dataTable: DataTable) {
+        feilHvis(stønadstype != StønadType.BARNETILSYN) {
+            "Kan kun sette tilleggsstønad på barnetilsyn"
+        }
         gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
         }
@@ -123,6 +137,9 @@ class StepDefinitions {
 
     @Når("lag andelhistorikk kjøres")
     fun `lag andelhistorikk kjøres`() {
+        feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
+            "Kan kun kjøre lag andelhistorikk kjøres for overgangsstønad"
+        }
         initialiserTilkjentYtelseOgVedtakMock()
 
         val behandlinger = mapBehandlinger()
@@ -220,7 +237,15 @@ class StepDefinitions {
         }
     }
 
+    private fun validerOgSettStønadstype(stønadType: StønadType) {
+        feilHvis(this::stønadstype.isInitialized && this.stønadstype != stønadType) {
+            "Kan ikke bruke 2 ulike stønadstyper, ${this.stønadstype} er allerede satt, prøver å sette $stønadType"
+        }
+        stønadstype = stønadType
+    }
+
     private fun mapBehandlinger(): Map<UUID, Pair<Behandling, Saksbehandling>> {
+        if(saksbehandlinger.isNotEmpty()) return saksbehandlinger
         val fagsak = fagsak(stønadstype = stønadstype)
 
         return gittVedtak
@@ -345,7 +370,7 @@ class StepDefinitions {
         }
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
 
-        if(beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
+        if (beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
             assertThat(beregnetAndelHistorikk.endring?.type).isEqualTo(forventetHistorikkEndring.historikkEndring?.type)
             assertThat(beregnetAndelHistorikk.endring?.behandlingId)
                     .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)

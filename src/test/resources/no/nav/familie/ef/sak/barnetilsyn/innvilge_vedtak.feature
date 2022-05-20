@@ -5,6 +5,10 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget førstegangsbehandling med en periode uten reduksjon
 
+    Gitt følgende behandlinger for barnetilsyn
+      | BehandlingId | Behandlingstype       |
+      | 1            | FØRSTEGANGSBEHANDLING |
+
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
@@ -17,6 +21,10 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
 
   Scenario: Innvilget førstegangsbehandling med to perioder uten reduksjon
+    Gitt følgende behandlinger for barnetilsyn
+      | BehandlingId | Behandlingstype |
+      | 1            | REVURDERING     |
+
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |

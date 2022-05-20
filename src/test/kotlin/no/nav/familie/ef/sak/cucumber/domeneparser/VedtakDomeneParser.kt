@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdT
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.tilkjentYtelseIdNummerTilUUID
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
@@ -44,9 +45,8 @@ object VedtakDomeneParser {
     }
 
     fun mapAktivitetForBarnetilsyn(dataTable: DataTable): Map<UUID, SvarId?> {
-        return dataTable.forHverBehandling { _, rader ->
+        return dataTable.forHverBehandling { behandlingId, rader ->
             val rad = rader.first()
-            val behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!
             val arbeidAktivitet = parseArbeidAktivitet(rad)
             behandlingId to arbeidAktivitet
         }.toMap()
@@ -80,14 +80,9 @@ object VedtakDomeneParser {
         }
     }
 
-    private fun <T> DataTable.forHverBehandling(mapper: (behandlingId: UUID, rader: List<Map<String, String>>) -> T) =
-            this.asMaps().groupBy {
-                behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, it)]!!
-            }.map { (behandlingId, rader) -> mapper(behandlingId, rader) }
-
     private fun mapVedtakDomene(rad: Map<String, String>,
                                 resultatType: ResultatType) =
-            Vedtak(behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
+            Vedtak(behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                    resultatType = resultatType,
                    opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1),
                    sanksjonsårsak = if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null,
@@ -202,7 +197,7 @@ object VedtakDomeneParser {
             val aktivitetType = parseAktivitetType(rad)
                                 ?: if (stønadstype == StønadType.OVERGANGSSTØNAD) AktivitetType.BARN_UNDER_ETT_ÅR else null
             return ForventetHistorikk(
-                    behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.BEHANDLING_ID, rad)]!!,
+                    behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                     historikkEndring = parseEndringType(rad)?.let { endringType ->
                         HistorikkEndring(
                                 type = endringType,
@@ -244,7 +239,6 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     AKTIVITET_TYPE("Aktivitet"),
     ARBEID_AKTIVITET("Arbeid aktivitet"), //Inngangsvilkår i barnetilsyn
     VEDTAKSPERIODE_TYPE("Vedtaksperiode"),
-    BEHANDLING_ID("BehandlingId"),
     ENDRET_I_BEHANDLING_ID("Endret i behandlingId"),
     KILDE_BEHANDLING_ID("Kildebehandling"),
     ENDRING_TYPE("Endringstype"),
