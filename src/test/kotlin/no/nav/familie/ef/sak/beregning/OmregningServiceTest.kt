@@ -26,6 +26,7 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,6 +51,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         clearMocks(iverksettClient, answers = false)
     }
 
+    @Disabled
     @Test
     fun `utførGOmregning kaller iverksettUtenBrev med korrekt iverksettDto `() {
 
