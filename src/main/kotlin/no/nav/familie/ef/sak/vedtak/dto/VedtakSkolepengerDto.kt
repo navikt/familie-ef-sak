@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.vedtak.dto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
-import no.nav.familie.ef.sak.vedtak.domain.UtgiftsperideSkolepenger
+import no.nav.familie.ef.sak.vedtak.domain.UtgiftsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 
@@ -22,7 +22,7 @@ data class UtgiftsperiodeSkolepengerDto(
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
 
-fun UtgiftsperiodeSkolepengerDto.tilDomene(): UtgiftsperideSkolepenger = UtgiftsperideSkolepenger(
+fun UtgiftsperiodeSkolepengerDto.tilDomene(): UtgiftsperiodeSkolepenger = UtgiftsperiodeSkolepenger(
         studietype = this.studietype,
         datoFra = this.årMånedFra.atDay(1),
         datoTil = this.årMånedTil.atEndOfMonth(),
@@ -46,7 +46,7 @@ fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.I
     )
 }
 
-fun UtgiftsperideSkolepenger.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
+fun UtgiftsperiodeSkolepenger.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
         SanksjonertPeriodeDto(
                 årMånedFra = YearMonth.from(datoFra),
                 årMånedTil = YearMonth.from(datoTil)

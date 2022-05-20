@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AktivitetArbeidRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AktivitetRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.DokumentasjonTilsynsutgifterRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.ForutgåendeMedlemskapRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.InntektRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.MorEllerFarRegel
@@ -42,10 +43,11 @@ private val alleVilkårsregler = listOf(
         TidligareVedtaksperioderRegel(),
         AktivitetArbeidRegel(),
         InntektRegel(),
-        AlderPåBarnRegel()
+        AlderPåBarnRegel(),
+        DokumentasjonTilsynsutgifterRegel()
 )
 
-fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
+fun  vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
         when (stønadstype) {
             OVERGANGSSTØNAD -> listOf(
                     ForutgåendeMedlemskapRegel(),
@@ -70,6 +72,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
                     AktivitetArbeidRegel(),
                     InntektRegel(),
                     AlderPåBarnRegel(),
+                    DokumentasjonTilsynsutgifterRegel(),
             )
 
             //TODO fiks denne
