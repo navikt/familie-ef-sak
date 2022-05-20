@@ -56,8 +56,10 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
                 }))
     }
 
-    fun finnVedtaksdatoForBehandlinger(behandlingsIder: List<UUID>): Map<UUID, LocalDateTime> =
-            behandlingshistorikkRepository.finnSisteEndringstidspunktForBehandlinger(behandlingsIder, StegType.SEND_TIL_BESLUTTER)
-                    .associate { it.first to it.second.toLocalDateTime() }
+    fun finnVedtaksdatoForBehandlinger(fagsakId: UUID): Map<UUID, LocalDateTime> {
+        return behandlingshistorikkRepository
+                .finnSisteEndringstidspunktForBehandlinger(fagsakId, StegType.SEND_TIL_BESLUTTER)
+                .associate { it.first to it.second.toLocalDateTime() }
+    }
 
 }

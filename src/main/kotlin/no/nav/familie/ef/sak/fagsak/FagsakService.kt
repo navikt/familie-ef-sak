@@ -87,7 +87,7 @@ class FagsakService(private val fagsakRepository: FagsakRepository,
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
-        val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(behandlinger.map { it.id })
+        val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(fagsak.id)
         return fagsak.tilDto(behandlinger = behandlinger.map { it.tilDto(fagsak.stønadstype, vedtaksdatoPåBehandlingId.get(it.id))}, erLøpende = erLøpende)
     }
 
