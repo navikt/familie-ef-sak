@@ -88,7 +88,7 @@ class StepDefinitions {
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
-        gittVedtak = VedtakDomeneParser.mapVedtak(dataTable)
+        gittVedtak = VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
     }
 
     @Gitt("følgende vedtak for barnetilsyn")
@@ -292,26 +292,6 @@ class StepDefinitions {
                 throw Throwable("Feilet rad $index", e)
             }
         }
-
-        /*
-        for (forventetBehandlingMedHistorikkEndring in forventetHistorikkEndringer) {
-            val andelHistorikkDto =
-                    beregnetAndelHistorikkList.first { it.behandlingId == forventetBehandlingMedHistorikkEndring.id }
-
-            if (forventetBehandlingMedHistorikkEndring.historikkEndring == null) {
-                Assertions.assertThat(andelHistorikkDto.endring).isNull()
-                if (forventetBehandlingMedHistorikkEndring.inntekt > 0) {
-                    Assertions.assertThat(andelHistorikkDto.andel.inntekt).isEqualTo(forventetBehandlingMedHistorikkEndring.inntekt)
-                }
-            } else {
-                Assertions.assertThat(forventetBehandlingMedHistorikkEndring.historikkEndring.behandlingId)
-                        .isEqualTo(andelHistorikkDto.endring?.behandlingId)
-                Assertions.assertThat(forventetBehandlingMedHistorikkEndring.historikkEndring.type)
-                        .isEqualTo(andelHistorikkDto.endring?.type)
-                Assertions.assertThat(forventetBehandlingMedHistorikkEndring.inntekt).isEqualTo(andelHistorikkDto.andel.inntekt)
-            }
-        }
-         */
     }
 
     private fun assertBeregnetAndel(it: MutableMap<String, String>,
@@ -364,6 +344,12 @@ class StepDefinitions {
             assertThat(beregnetAndelHistorikk.sanksjonsårsak).isEqualTo(forventetHistorikkEndring.sanksjonsårsak)
         }
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+
+        if(beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
+            assertThat(beregnetAndelHistorikk.endring?.type).isEqualTo(forventetHistorikkEndring.historikkEndring?.type)
+            assertThat(beregnetAndelHistorikk.endring?.behandlingId)
+                    .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)
+        }
     }
 
 }
