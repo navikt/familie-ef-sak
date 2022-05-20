@@ -26,7 +26,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
                                           "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
                                           "familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning",
                                           "familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-barnetilsyn",
-                                          "familie.ef.sak.frontend-journalføring-kan-legge-til-terminbarn"
+                                          "familie.ef.sak.frontend-journalforing-kan-legge-til-terminbarn"
     )
 
     @GetMapping
