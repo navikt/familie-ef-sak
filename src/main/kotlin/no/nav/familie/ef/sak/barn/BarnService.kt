@@ -40,7 +40,6 @@ class BarnService(
                 }
             }
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER -> {
-                // TODO skal vi ha terminabarn for skolepenger?
                 val barnFraSøknad = finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId) +
                                     barnSomSkalFødes.map { it.tilBehandlingBarn(behandlingId) }
                 BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnFraSøknad, grunnlagsdataBarn)
