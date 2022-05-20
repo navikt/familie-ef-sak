@@ -15,7 +15,7 @@ Egenskap: Andelhistorikk: Nytt vedtak sletter andel og en ny periode
       | 1            | 01.2021         |
       | 2            | 02.2021         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |

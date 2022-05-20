@@ -14,7 +14,7 @@ Egenskap: Andelhistorikk: Nytt vedtak sletter en andel
       | 1            | BARN_UNDER_ETT_ÅR | 01.2021         | 02.2021         |
       | 2            | BARN_UNDER_ETT_ÅR | 01.2021         | 01.2021         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Fra og med dato | Til og med dato |

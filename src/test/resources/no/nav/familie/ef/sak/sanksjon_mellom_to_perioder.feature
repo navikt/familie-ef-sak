@@ -11,7 +11,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |                |
       | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |                |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
@@ -30,7 +30,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | 5            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 02.2022         | 02.2022         |
       | 6            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 03.2022         | 04.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
@@ -49,7 +49,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
       | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
@@ -66,7 +66,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 02.2022         | 02.2022         |
       | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 02.2022         | 03.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |

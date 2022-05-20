@@ -17,7 +17,7 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
       | BehandlingId | Beløp |
       | 1            | 15    |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp | Arbeid aktivitet          |
@@ -38,7 +38,7 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
       | BehandlingId | Beløp |
       | 1            | 15    |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp |
