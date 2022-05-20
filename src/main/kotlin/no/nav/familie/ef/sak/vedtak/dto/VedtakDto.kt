@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -26,7 +27,6 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -118,6 +118,13 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
                 tilleggsstønad = TilleggsstønadWrapper(harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                                                        perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
                                                        begrunnelse = this.tilleggsstønad.begrunnelse))
+    is InnvilgelseSkolepenger ->
+        Vedtak(
+                resultatType = this.resultatType,
+                behandlingId = behandlingId,
+                skolepenger = SkolepengerWrapper(perioder = this.perioder.map { it.tilDomene() },
+                                                 begrunnelse = this.begrunnelse)
+        )
     is Opphør ->
         Vedtak(behandlingId = behandlingId,
                avslåBegrunnelse = begrunnelse,
@@ -158,6 +165,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
         when (this.resultatType) {
             ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
                 when {
+                    this.skolepenger != null -> mapInnvilgelseSkolepenger()
                     this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn(this.resultatType)
                     this.perioder != null -> mapInnvilgelseOvergangsstønad()
                     else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
@@ -205,8 +213,13 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
             return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
         }
 
+        if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseSkolepenger") {
+            return mapper.treeToValue(node, InnvilgelseSkolepenger::class.java)
+        }
+
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
-            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java).copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
+            return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
+                    .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
