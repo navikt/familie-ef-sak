@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.kotest.matchers.equality.shouldBeEqualToComparingFieldsExcept
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -26,7 +25,6 @@ import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
-import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
