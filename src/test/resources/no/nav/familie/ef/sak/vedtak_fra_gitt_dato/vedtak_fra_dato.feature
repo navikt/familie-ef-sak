@@ -13,7 +13,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
       | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
       | 1            | 01.2021         | 10      | 20                 |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     # vedtaksperioder
     Så forvent følgende vedtaksperioder fra dato: 11.2020
@@ -68,7 +68,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
       | 1            | 01.2021         | 10      | 20                 |
       | 2            | 02.2021         | 20      | 10                 |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende vedtaksperioder fra dato: 01.2021
       | Fra og med dato | Til og med dato | Aktivitet            | Vedtaksperiode |
@@ -104,7 +104,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
       | BehandlingId | Fra og med dato | Inntekt | Samordningsfradrag |
       | 1            | 01.2021         | 10      | 20                 |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende vedtaksperioder fra dato: 01.2021
       | Fra og med dato | Til og med dato | Aktivitet            | Vedtaksperiode |
@@ -130,7 +130,7 @@ Egenskap: hentVedtakForOvergangsstønadFraDato
       | 1            | 01.2021         | 10      | 20                 |
       | 2            | 05.2021         | 20      | 10                 |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende vedtaksperioder fra dato: 03.2021
       | Fra og med dato | Til og med dato | Aktivitet         | Vedtaksperiode |

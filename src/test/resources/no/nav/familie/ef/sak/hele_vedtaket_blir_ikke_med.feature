@@ -15,7 +15,7 @@ Egenskap: Andelhistorikk: Nytt vedtak som overlapper delvis med forrige vedtak
       | 1            | 01.2021         | 200000  |
       | 2            | 02.2021         | 300000  |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Fra og med dato | Til og med dato | Beløp | Aktivitet         |

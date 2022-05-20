@@ -18,7 +18,7 @@ Egenskap: Andelhistorikk: Sanksjon av barnetilsyn
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |
       | 1            | 15    | 01.2021         | 03.2021         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Fra og med dato | Til og med dato | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp | Er sanksjon | Sanksjonsårsak        |

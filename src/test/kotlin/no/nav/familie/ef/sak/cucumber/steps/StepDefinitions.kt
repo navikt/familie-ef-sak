@@ -135,38 +135,27 @@ class StepDefinitions {
         }
     }
 
-    @Når("lag andelhistorikk kjøres")
-    fun `lag andelhistorikk kjøres`() {
-        feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
-            "Kan kun kjøre lag andelhistorikk kjøres for overgangsstønad"
-        }
+    @Når("beregner ytelse")
+    fun `beregner ytelse`() {
         initialiserTilkjentYtelseOgVedtakMock()
 
         val behandlinger = mapBehandlinger()
 
-        //Skriver over inntekt hvis inntekter er definiert
-        gittVedtak = gittVedtak.map {
-            it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
+        if (stønadstype == StønadType.OVERGANGSSTØNAD) {
+            //Skriver over inntekt hvis inntekter er definiert
+            gittVedtak = gittVedtak.map {
+                it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
+            }
         }
 
-        beregnYtelseSteg(behandlinger)
+        gittVedtak.map {
+            beregnYtelseSteg.utførSteg(behandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
+        }
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
                                                                          lagredeVedtak,
                                                                          behandlinger.values.map { it.first }.toList(),
                                                                          null,
                                                                          behandlingIdsToAktivitetArbeid)
-    }
-
-    @Når("vedtak vedtas")
-    fun `når vedtak vedtas`() {
-        initialiserTilkjentYtelseOgVedtakMock()
-        beregnYtelseSteg(mapBehandlinger())
-    }
-
-    private fun beregnYtelseSteg(behandlinger: Map<UUID, Pair<Behandling, Saksbehandling>>) {
-        gittVedtak.map {
-            beregnYtelseSteg.utførSteg(behandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
-        }
     }
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
@@ -245,7 +234,7 @@ class StepDefinitions {
     }
 
     private fun mapBehandlinger(): Map<UUID, Pair<Behandling, Saksbehandling>> {
-        if(saksbehandlinger.isNotEmpty()) return saksbehandlinger
+        if (saksbehandlinger.isNotEmpty()) return saksbehandlinger
         val fagsak = fagsak(stønadstype = stønadstype)
 
         return gittVedtak

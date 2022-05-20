@@ -13,7 +13,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |
@@ -30,7 +30,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
       | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |
@@ -48,7 +48,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |
       | 1            | 100   | 01.2021         | 01.2021         |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |
@@ -70,7 +70,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |
       | 1            | 50    | 01.2021         | 05.2021         |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |
@@ -85,7 +85,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
       | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 07.2021         |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |
@@ -104,7 +104,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 2            | INNVILGE        | 2           | 0        | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 02.2021         |
       | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 03.2021         | 07.2021         |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |
@@ -123,7 +123,7 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 2            | OPPHØRT         |             |          |                           |                 |                 | 02.2021     |
       | 3            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 05.2021         | 07.2021         |             |
 
-    Når vedtak vedtas
+    Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Beløp mellom | Fra og med dato | Til og med dato | Kildebehandling |

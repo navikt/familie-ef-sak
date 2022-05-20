@@ -12,7 +12,7 @@ Egenskap: Andelhistorikk: Vedtak med to perioder blir erstattet med nytt vedtak
       | 2            | BARN_UNDER_ETT_ÅR  | 06.2021         | 07.2021         |
       | 2            | FORSØRGER_I_ARBEID | 08.2021         | 01.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Fra og med dato | Til og med dato | Aktivitet          |
