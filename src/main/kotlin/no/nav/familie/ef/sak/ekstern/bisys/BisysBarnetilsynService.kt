@@ -3,17 +3,14 @@ package no.nav.familie.ef.sak.ekstern.bisys
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysResponse
 import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.eksterne.kontrakter.bisys.Periode
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -33,7 +30,7 @@ class BisysBarnetilsynService(
 
         val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
                 .filter { it.erIkkeFjernet() }
-                .filter { it.andel.beløp > 0 && it.andel.stønadFra <= fomDato && it.andel.stønadTil >= fomDato }
+                .filter { it.andel.beløp > 0 && it.andel.stønadTil >= fomDato }
 
         val barnIdenter = historikk.flatMap { it.andel.barn }
                 .distinct()
