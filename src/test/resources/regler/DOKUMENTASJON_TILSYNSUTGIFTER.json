@@ -1,0 +1,18 @@
+{
+  "vilkårType" : "DOKUMENTASJON_TILSYNSUTGIFTER",
+  "regler" : {
+    "HAR_DOKUMENTERTE_TILSYNSUTGIFTER" : {
+      "regelId" : "HAR_DOKUMENTERTE_TILSYNSUTGIFTER",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}

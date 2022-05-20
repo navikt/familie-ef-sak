@@ -73,6 +73,7 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     TIDLIGERE_VEDTAKSPERIODER("Tidligere vedtaksperioder", listOf(OVERGANGSSTØNAD)),
     INNTEKT("§15-10 Inntekt", listOf(BARNETILSYN)),
     ALDER_PÅ_BARN("Alder på barn", listOf(BARNETILSYN)),
+    DOKUMENTASJON_TILSYNSUTGIFTER("Dokumentasjon av tilsynsutgifter", listOf(BARNETILSYN))
     ;
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN
