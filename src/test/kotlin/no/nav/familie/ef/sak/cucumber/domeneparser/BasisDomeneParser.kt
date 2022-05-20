@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -201,11 +199,6 @@ fun parseSanksjonsårsak(rad: Map<String, String>): Sanksjonsårsak? {
 fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
     val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null
     return VedtaksperiodeType.valueOf(verdi)
-}
-
-fun parseBehandlingstype(rad: Map<String, String>): BehandlingType? {
-    val verdi = valgfriVerdi(SaksbehandlingDomeneBegrep.BEHANDLINGSTYPE.nøkkel, rad) ?: return null
-    return BehandlingType.valueOf(verdi)
 }
 
 fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {

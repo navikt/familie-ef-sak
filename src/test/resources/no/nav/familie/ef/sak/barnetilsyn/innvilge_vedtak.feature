@@ -4,9 +4,6 @@
 Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget førstegangsbehandling med en periode uten reduksjon
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
 
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
@@ -20,10 +17,6 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
 
   Scenario: Innvilget førstegangsbehandling med to perioder uten reduksjon
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
@@ -38,10 +31,6 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
 
   Scenario: Innvilget førstegangsbehandling med to perioder med reduksjon
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
@@ -60,10 +49,6 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 1-350        | 01.04.2021      | 31.07.2021      | 1               |
 
   Scenario: Innvilget førstegangsbehandling med to perioder med reduksjon og kontantstøtte
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
@@ -87,13 +72,6 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 1-350        | 01.06.2021      | 31.07.2021      | 1               |
 
   Scenario: Innvilget revurdering
-
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       | Forrige behandling |
-      | 1            | FØRSTEGANGSBEHANDLING |                    |
-      | 2            | REVURDERING           | 1                  |
-
-
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         |
@@ -112,13 +90,6 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
 
   Scenario: Innvilget revurdering med 0-periode
-
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       | Forrige behandling |
-      | 1            | FØRSTEGANGSBEHANDLING |                    |
-      | 2            | REVURDERING           | 1                  |
-
-
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 07.2021         |
@@ -138,14 +109,6 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
 
   Scenario: Innvilget opphør og revurdering
-
-    Gitt følgende saksbehandlinger
-      | BehandlingId | Behandlingstype       | Forrige behandling |
-      | 1            | FØRSTEGANGSBEHANDLING |                    |
-      | 2            | REVURDERING           | 1                  |
-      | 3            | REVURDERING           | 2                  |
-
-
     Og følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Opphørsdato |
       | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 04.2021         |             |
