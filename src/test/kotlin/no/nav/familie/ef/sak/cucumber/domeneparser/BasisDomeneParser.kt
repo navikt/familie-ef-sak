@@ -172,33 +172,27 @@ fun parseValgfriIntRange(domenebegrep: Domenenøkkel, rad: Map<String, String>):
 }
 
 fun parseResultatType(rad: Map<String, String>): ResultatType? {
-    val verdi = valgfriVerdi(VedtakDomenebegrep.RESULTAT_TYPE.nøkkel, rad) ?: return null
-    return ResultatType.valueOf(verdi)
+    return parseValgfriEnum<ResultatType>(VedtakDomenebegrep.RESULTAT_TYPE, rad)
 }
 
 fun parseEndringType(rad: Map<String, String>): EndringType? {
-    val verdi = valgfriVerdi(VedtakDomenebegrep.ENDRING_TYPE.nøkkel, rad) ?: return null
-    return EndringType.valueOf(verdi)
+    return parseValgfriEnum<EndringType>(VedtakDomenebegrep.ENDRING_TYPE, rad)
 }
 
 fun parseAktivitetType(rad: Map<String, String>): AktivitetType? {
-    val verdi = valgfriVerdi(VedtakDomenebegrep.AKTIVITET_TYPE.nøkkel, rad) ?: return null
-    return AktivitetType.valueOf(verdi)
+    return parseValgfriEnum<AktivitetType>(VedtakDomenebegrep.AKTIVITET_TYPE, rad)
 }
 
 fun parseArbeidAktivitet(rad: Map<String, String>): SvarId? {
-    val verdi = valgfriVerdi(VedtakDomenebegrep.ARBEID_AKTIVITET.nøkkel, rad) ?: return null
-    return SvarId.valueOf(verdi)
+    return parseValgfriEnum<SvarId>(VedtakDomenebegrep.ARBEID_AKTIVITET, rad)
 }
 
 fun parseSanksjonsårsak(rad: Map<String, String>): Sanksjonsårsak? {
-    val verdi = valgfriVerdi(VedtakDomenebegrep.SANKSJONSÅRSAK.nøkkel, rad) ?: return null
-    return Sanksjonsårsak.valueOf(verdi)
+    return parseValgfriEnum<Sanksjonsårsak>(VedtakDomenebegrep.SANKSJONSÅRSAK, rad)
 }
 
 fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? {
-    val verdi = valgfriVerdi(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE.nøkkel, rad) ?: return null
-    return VedtaksperiodeType.valueOf(verdi)
+    return parseValgfriEnum<VedtaksperiodeType>(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
 }
 
 inline fun <reified T : Enum<T>> parseValgfriEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T? {
