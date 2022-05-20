@@ -80,6 +80,9 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                             .withQueryParam("journalpostId", equalTo("1234"))
                             .willReturn(okJson(objectMapper.writeValueAsString(journalpost))),
+                    get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                            .withQueryParam("journalpostId", equalTo("2345"))
+                            .willReturn(okJson(objectMapper.writeValueAsString(journalpostPapirsøknad))),
                     post(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                             .willReturn(okJson(objectMapper.writeValueAsString(journalposter))),
                     get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
@@ -161,8 +164,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
                             journalforendeEnhet = "4817",
                             kanal = "SKAN_IM",
-                            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(),
-                                                                  "DATO_REGISTRERT")),
+                            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
                             dokumenter =
                             listOf(DokumentInfo(dokumentInfoId = "12345",
                                                 tittel = "Søknad om overgangsstønad - dokument 1",
@@ -214,7 +216,29 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                                    )
                             )
                 )
+        private val journalpostPapirsøknadFraIntegrasjoner =
+                Journalpost(journalpostId = "1234",
+                            journalposttype = Journalposttype.I,
+                            journalstatus = Journalstatus.MOTTATT,
+                            tema = "ENF",
+                            behandlingstema = "ab0071",
+                            tittel = "abrakadabra",
+                            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+                            journalforendeEnhet = "4817",
+                            kanal = "SKAN_IM",
+                            relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
+                            dokumenter =
+                            listOf(DokumentInfo(dokumentInfoId = "12345",
+                                                tittel = "Søknad om overgangsstønad - dokument 1",
+                                                brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                                                dokumentvarianter =
+                                                listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)))
+                            )
+                )
+
+
         private val journalpost = Ressurs.success(journalpostFraIntegrasjoner)
+        private val journalpostPapirsøknad = Ressurs.success(journalpostPapirsøknadFraIntegrasjoner)
         private val journalposter = Ressurs.success(listOf(journalpostFraIntegrasjoner))
         private val navKontorEnhet = Ressurs.success(NavKontorEnhet(enhetId = 100000194,
                                                                     navn = "NAV Kristiansand",

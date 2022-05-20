@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.infrastruktur.config
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
+import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
@@ -31,7 +32,7 @@ class OppgaveClientMock {
         val oppgaveClient: OppgaveClient = mockk()
 
         val oppgaver: MutableMap<Long, Oppgave> =
-                listOf(oppgave1, oppgave2, oppgave3, tilbakekreving1).associateBy { it.id!! }.toMutableMap()
+                listOf(oppgave1, oppgave2, oppgave3, tilbakekreving1, oppgavePapirsøknad).associateBy { it.id!! }.toMutableMap()
         var maxId: Long = oppgaver.values.maxOf { it.id!! }
         every {
             oppgaveClient.hentOppgaver(any())
@@ -126,6 +127,8 @@ class OppgaveClientMock {
     private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
+    private val oppgavePapirsøknad =
+            lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "familie-ef-sak", journalpostId="2345")
     private val tilbakekreving1 = lagOppgave(4L,
                                              Oppgavetype.BehandleSak,
                                              beskivelse = "",
@@ -139,7 +142,8 @@ class OppgaveClientMock {
                                                  "Denne teksten kan jo være lang, kort eller ikke inneholde noenting. ",
                            journalpostId: String? = "1234",
                            behandlingstype: String? = null,
-                           behandlesAvApplikasjon: String): Oppgave {
+                           behandlesAvApplikasjon: String,
+                           behandlingstema: Behandlingstema = Behandlingstema.Overgangsstønad): Oppgave {
         return Oppgave(id = oppgaveId,
                        aktoerId = "1234",
                        identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
@@ -151,7 +155,7 @@ class OppgaveClientMock {
                        behandlesAvApplikasjon = behandlesAvApplikasjon,
                        beskrivelse = beskivelse,
                        tema = Tema.ENF,
-                       behandlingstema = "ab0071",
+                       behandlingstema = behandlingstema.value,
                        oppgavetype = oppgavetype.value,
                        opprettetTidspunkt = LocalDate.of(2020, 1, 1).toString(),
                        fristFerdigstillelse = LocalDate.of(2020, 2, 1).toString(),
