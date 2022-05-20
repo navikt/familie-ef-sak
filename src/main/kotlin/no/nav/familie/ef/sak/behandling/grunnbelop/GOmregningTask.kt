@@ -18,7 +18,7 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = GOmregningTask.TYPE,
-                     maxAntallFeil = 1,
+                     maxAntallFeil = 3,
                      settTilManuellOppfølgning = true,
                      triggerTidVedFeilISekunder = 15 * 60L,
                      beskrivelse = "G-omregning")
