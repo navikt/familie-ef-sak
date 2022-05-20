@@ -270,32 +270,32 @@
     "tilkjentYtelse": {
       "andelerTilkjentYtelse": [
         {
-          "beløp": 16653,
+          "beløp": 11554,
           "periodetype": "MÅNED",
-          "inntekt": 100000,
-          "inntektsreduksjon": 1850,
-          "samordningsfradrag": 500,
-          "fraOgMed": "2021-01-01",
-          "tilOgMed": "2021-04-30",
+          "inntekt": 277100,
+          "inntektsreduksjon": 8396,
+          "samordningsfradrag": 0,
+          "fraOgMed": "2022-01-01",
+          "tilOgMed": "2022-04-30",
           "kildeBehandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d"
         },
         {
-          "beløp": 17508,
+          "beløp": 12135,
           "periodetype": "MÅNED",
-          "inntekt": 104981,
-          "inntektsreduksjon": 1942,
-          "samordningsfradrag": 500,
-          "fraOgMed": "2021-05-01",
-          "tilOgMed": "2021-12-31",
+          "inntekt": 291000,
+          "inntektsreduksjon": 8817,
+          "samordningsfradrag": 0,
+          "fraOgMed": "2022-05-01",
+          "tilOgMed": "2022-12-31",
           "kildeBehandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d"
         }
       ],
-      "startdato": "2021-01-01"
+      "startdato": "2022-01-01"
     },
     "vedtaksperioder": [
       {
-        "fraOgMed": "2021-01-01",
-        "tilOgMed": "2021-12-31",
+        "fraOgMed": "2022-05-01",
+        "tilOgMed": "2022-12-31",
         "aktivitet": "BARN_UNDER_ETT_ÅR",
         "periodeType": "HOVEDPERIODE"
       }
