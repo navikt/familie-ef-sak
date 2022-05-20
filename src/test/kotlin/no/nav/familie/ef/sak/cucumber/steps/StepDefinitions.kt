@@ -98,16 +98,21 @@ class StepDefinitions {
 
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
-        validerOgSettStønadstype(StønadType.OVERGANGSSTØNAD)
-        gittVedtak = VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
+        følgende_vedtak(StønadType.OVERGANGSSTØNAD.name, dataTable)
     }
 
-    @Gitt("følgende vedtak for barnetilsyn")
-    fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
-        validerOgSettStønadstype(StønadType.BARNETILSYN)
-
-        behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
-        gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+    @Gitt("følgende vedtak for {}")
+    fun følgende_vedtak(stønadTypeArg: String, dataTable: DataTable) {
+        val stønadstype = StønadType.valueOf(stønadTypeArg.uppercase())
+        validerOgSettStønadstype(stønadstype)
+        gittVedtak = when (stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
+            StønadType.BARNETILSYN -> {
+                behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
+                VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
+            }
+            StønadType.SKOLEPENGER -> VedtakDomeneParser.mapVedtakForSkolepenger(dataTable)
+        }
     }
 
     @Gitt("følgende inntekter")
@@ -154,6 +159,8 @@ class StepDefinitions {
         gittVedtak.map {
             beregnYtelseSteg.utførSteg(behandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
         }
+        // kan ikke beregne historikk ennå
+        if(stønadstype == StønadType.SKOLEPENGER) return
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
                                                                          lagredeVedtak,
                                                                          behandlinger.values.map { it.first }.toList(),
@@ -207,6 +214,7 @@ class StepDefinitions {
             val fraOgMed = parseDato(VedtakDomenebegrep.FRA_OG_MED_DATO, it)
             val tilOgMed = parseDato(VedtakDomenebegrep.TIL_OG_MED_DATO, it)
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, it)
+            val beløp = parseValgfriIntRange(VedtakDomenebegrep.BELØP, it)
 
             val gjelendeAndel = gjeldendeTilkjentYtelse.andelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
                                 ?: error("Fant ingen andel med startdato $fraOgMed")
@@ -220,6 +228,7 @@ class StepDefinitions {
                             .isGreaterThanOrEqualTo(it.first)
                             .isLessThanOrEqualTo(it.second)
                 }
+                beløp?.let { assertThat(gjelendeAndel.beløp).isEqualTo(it) }
                 assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
             } catch (e: Throwable) {
                 logger.info("Expected: {}", it)
