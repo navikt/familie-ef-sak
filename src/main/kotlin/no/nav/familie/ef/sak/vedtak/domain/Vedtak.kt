@@ -50,11 +50,11 @@ data class Barnetilsynperiode(val datoFra: LocalDate,
                               val utgifter: Int,
                               val barn: List<UUID>)
 
-data class UtgiftsperideSkolepenger(val studietype: SkolepengerStudietype,
-                                    val datoFra: LocalDate,
-                                    val datoTil: LocalDate,
-                                    val studiebelastning: Int,
-                                    val utgifter: Int)
+data class UtgiftsperiodeSkolepenger(val studietype: SkolepengerStudietype,
+                                     val datoFra: LocalDate,
+                                     val datoTil: LocalDate,
+                                     val studiebelastning: Int,
+                                     val utgifter: Int)
 
 enum class SkolepengerStudietype {
      HØGSKOLE_UNIVERSITET
@@ -80,7 +80,7 @@ data class KontantstøtteWrapper(val perioder: List<PeriodeMedBeløp>)
 data class BarnetilsynWrapper(val perioder: List<Barnetilsynperiode>,
                               val begrunnelse: String?)
 
-data class SkolepengerWrapper(val perioder: List<UtgiftsperideSkolepenger>,
+data class SkolepengerWrapper(val perioder: List<UtgiftsperiodeSkolepenger>,
                               val begrunnelse: String?)
 
 enum class VedtaksperiodeType {

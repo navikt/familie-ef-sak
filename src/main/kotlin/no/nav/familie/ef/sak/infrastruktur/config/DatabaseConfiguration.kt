@@ -353,8 +353,8 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class PGobjectTilSkolepengerConverter : Converter<PGobject, SkolepengerWrapper> {
 
         override fun convert(pGobject: PGobject): SkolepengerWrapper {
-            val barnetilsynVerdi: SkolepengerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
-            return barnetilsynVerdi ?: SkolepengerWrapper(perioder = emptyList(), begrunnelse = null)
+            val eksisterendeVerdi: SkolepengerWrapper? = pGobject.value?.let { objectMapper.readValue(it) }
+            return eksisterendeVerdi ?: SkolepengerWrapper(perioder = emptyList(), begrunnelse = null)
         }
     }
 
