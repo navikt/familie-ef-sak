@@ -52,9 +52,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
                 Grunnbeløp(
                         fraOgMedDato = LocalDate.parse("2022-05-01"),
                         tilOgMedDato = LocalDate.MAX,
-                        grunnbeløp = 111_744.toBigDecimal(),
-                        perMnd = 9_312.toBigDecimal(),
-                        gjennomsnittPerÅr = 109_962.toBigDecimal()
+                        grunnbeløp = 111_477.toBigDecimal(),
+                        perMnd = 9_290.toBigDecimal(),
+                        gjennomsnittPerÅr = 109_784.toBigDecimal()
                 ),
                 Grunnbeløp(
                         fraOgMedDato = LocalDate.parse("2021-05-01"),
