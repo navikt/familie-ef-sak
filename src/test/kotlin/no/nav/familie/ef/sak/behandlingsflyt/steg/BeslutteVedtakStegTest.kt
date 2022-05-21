@@ -158,6 +158,14 @@ internal class BeslutteVedtakStegTest {
         verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
     }
 
+    @Test
+    internal fun `skal ikke sende brev hvis årsaken er g-omregning`() {
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.G_OMREGNING))
+
+        verify(exactly = 0) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
+    }
+
     private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {
         return beslutteVedtakSteg.utførOgReturnerNesteSteg(saksbehandling,
                                                            BeslutteVedtakDto(godkjent = godkjent))
