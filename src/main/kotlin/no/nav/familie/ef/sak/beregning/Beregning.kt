@@ -50,8 +50,15 @@ private fun overlapper(grunnbeløpsperiode: Grunnbeløp,
 val grunnbeløpsperioder: List<Grunnbeløp> =
         listOf(
                 Grunnbeløp(
-                        fraOgMedDato = LocalDate.parse("2021-05-01"),
+                        fraOgMedDato = LocalDate.parse("2022-05-01"),
                         tilOgMedDato = LocalDate.MAX,
+                        grunnbeløp = 111_477.toBigDecimal(),
+                        perMnd = 9_290.toBigDecimal(),
+                        gjennomsnittPerÅr = 109_784.toBigDecimal()
+                ),
+                Grunnbeløp(
+                        fraOgMedDato = LocalDate.parse("2021-05-01"),
+                        tilOgMedDato = LocalDate.parse("2022-04-30"),
                         grunnbeløp = 106399.toBigDecimal(),
                         perMnd = 8867.toBigDecimal(),
                         gjennomsnittPerÅr = 104716.toBigDecimal()

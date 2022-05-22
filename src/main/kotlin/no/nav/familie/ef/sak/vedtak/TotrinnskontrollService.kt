@@ -4,17 +4,21 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.IKKE_AUTORISERT
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.KAN_FATTE_VEDTAK
@@ -31,7 +35,8 @@ import java.util.UUID
 @Service
 class TotrinnskontrollService(private val behandlingshistorikkService: BehandlingshistorikkService,
                               private val behandlingService: BehandlingService,
-                              private val tilgangService: TilgangService) {
+                              private val tilgangService: TilgangService,
+                              private val tilkjentYtelseRepository: TilkjentYtelseRepository) {
 
     /**
      * Lagrer data om besluttning av totrinnskontroll
@@ -41,7 +46,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
     fun lagreTotrinnskontrollOgReturnerBehandler(saksbehandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
         val sisteBehandlingshistorikk =
                 behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
-
+        validerHarGammelGOgKanLagres(saksbehandling)
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
             throw Feil(message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
                        frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt")
@@ -88,6 +93,20 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
             behandlingStatus == BehandlingStatus.FERDIGSTILT
             || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
             || behandlingStatus == BehandlingStatus.OPPRETTET
+
+    fun validerHarGammelGOgKanLagres(saksbehandling: Saksbehandling) {
+
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id)
+        val erGammelG = tilkjentYtelse?.grunnbeløpsdato?.isBefore(nyesteGrunnbeløpGyldigFraOgMed) ?: false
+        val starterEtterNyG =
+                tilkjentYtelse?.andelerTilkjentYtelse?.any { it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed } ?: false
+        if (saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING || saksbehandling.type == BehandlingType.REVURDERING) {
+            brukerfeilHvis(erGammelG && starterEtterNyG) {
+                "Kan ikke fullføre behandling: Det må revurderes fra $nyesteGrunnbeløpGyldigFraOgMed for at beregning av ny G blir riktig"
+            }
+        }
+    }
+
 
     /**
      * Hvis behandlingsstatus er FATTER_VEDTAK så sjekkes det att saksbehandleren er autorisert til å fatte vedtak

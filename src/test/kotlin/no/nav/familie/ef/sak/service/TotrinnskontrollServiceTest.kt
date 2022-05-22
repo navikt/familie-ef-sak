@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
@@ -30,7 +31,8 @@ internal class TotrinnskontrollServiceTest {
     private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val tilgangService = mockk<TilgangService>()
-    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService)
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService, tilkjentYtelseRepository)
 
     @BeforeEach
     internal fun setUp() {
