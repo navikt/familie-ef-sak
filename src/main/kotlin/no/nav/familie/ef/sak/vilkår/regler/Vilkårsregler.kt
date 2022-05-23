@@ -75,7 +75,10 @@ fun  vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
                     DokumentasjonTilsynsutgifterRegel(),
             )
 
-            else -> error("Ikke implmentert - TODO")
+            //TODO fiks denne
+            else -> listOf(
+                    ForutgåendeMedlemskapRegel()
+            )
         }
 
 

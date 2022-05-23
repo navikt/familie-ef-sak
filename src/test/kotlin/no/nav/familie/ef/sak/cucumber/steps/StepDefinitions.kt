@@ -6,7 +6,6 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -14,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
@@ -23,10 +23,10 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -48,13 +48,10 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 class StepDefinitions {
@@ -62,13 +59,14 @@ class StepDefinitions {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     private var gittVedtak = listOf<Vedtak>()
-    private var saksbehandlinger = listOf<Saksbehandling>()
+    private var saksbehandlinger = mapOf<UUID, Pair<Behandling, Saksbehandling>>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val beregningService = BeregningService()
     private val beregningBarnetilsynService = BeregningBarnetilsynService()
+    private val beregningSkolepengerService = BeregningSkolepengerService()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
@@ -78,6 +76,7 @@ class StepDefinitions {
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
                                                     beregningService,
                                                     beregningBarnetilsynService,
+                                                    beregningSkolepengerService,
                                                     simuleringService,
                                                     vedtakService,
                                                     tilbakekrevingService,
@@ -86,42 +85,44 @@ class StepDefinitions {
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
 
-    private val slot = slot<TilkjentYtelse>()
-    private var stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+    private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
     private lateinit var lagredeVedtak: MutableList<Vedtak>
 
+    @Gitt("følgende behandlinger for {}")
+    fun følgende_behandlinger(stønadTypeArg: String, dataTable: DataTable) {
+        stønadstype = StønadType.valueOf(stønadTypeArg.uppercase())
+        saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable, stønadstype)
+    }
+
     @Gitt("følgende vedtak")
     fun følgende_vedtak(dataTable: DataTable) {
-        gittVedtak = VedtakDomeneParser.mapVedtak(dataTable)
+        validerOgSettStønadstype(StønadType.OVERGANGSSTØNAD)
+        gittVedtak = VedtakDomeneParser.mapVedtakOvergangsstønad(dataTable)
     }
 
     @Gitt("følgende vedtak for barnetilsyn")
     fun følgende_vedtak_barnetilsyn(dataTable: DataTable) {
-        stønadstype = StønadType.BARNETILSYN
+        validerOgSettStønadstype(StønadType.BARNETILSYN)
 
         behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
         gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
     }
-
-    @Gitt("følgende saksbehandlinger")
-    fun følgende_saksbehandlinger(dataTable: DataTable) {
-        stønadstype = StønadType.BARNETILSYN
-
-        behandlingIdsToAktivitetArbeid.putAll(VedtakDomeneParser.mapAktivitetForBarnetilsyn(dataTable))
-        gittVedtak = VedtakDomeneParser.mapVedtakForBarnetilsyn(dataTable)
-        saksbehandlinger = SaksbehandlingDomeneParser.mapSaksbehandlinger(dataTable)
-    }
-
 
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
+        feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
+            "Kan kun sette inntekter på overgangsstønad"
+        }
         inntekter = VedtakDomeneParser.mapInntekter(dataTable)
     }
 
     @Gitt("følgende kontantstøtte")
     fun følgende_kontantstøtte(dataTable: DataTable) {
+        feilHvis(stønadstype != StønadType.BARNETILSYN) {
+            "Kan kun sette kontantstøtte på barnetilsyn"
+        }
         gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(kontantstøtte = KontantstøtteWrapper(perioder))
         }
@@ -129,48 +130,35 @@ class StepDefinitions {
 
     @Gitt("følgende tilleggsstønad")
     fun følgende_tilleggsstønad(dataTable: DataTable) {
+        feilHvis(stønadstype != StønadType.BARNETILSYN) {
+            "Kan kun sette tilleggsstønad på barnetilsyn"
+        }
         gittVedtak = VedtakDomeneParser.mapOgSettPeriodeMedBeløp(gittVedtak, dataTable) { vedtak, perioder ->
             vedtak.copy(tilleggsstønad = TilleggsstønadWrapper(true, perioder, null))
         }
     }
 
-    @Når("lag andelhistorikk kjøres")
-    fun `lag andelhistorikk kjøres`() {
+    @Når("beregner ytelse")
+    fun `beregner ytelse`() {
         initialiserTilkjentYtelseOgVedtakMock()
 
-        val behandlinger = gittVedtak.map { it.behandlingId }.distinct().foldIndexed(listOf<Behandling>()) { index, acc, id ->
-            acc + behandling(id = id,
-                             opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                             type = BehandlingType.REVURDERING,
-                             forrigeBehandlingId = acc.lastOrNull()?.id)
-        }.associateBy { it.id }
+        val behandlinger = mapBehandlinger()
 
-        //Skriver over inntekt hvis inntekter er definiert
-        val vedtakMedInntekt = gittVedtak.map {
-            it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
+        if (stønadstype == StønadType.OVERGANGSSTØNAD) {
+            //Skriver over inntekt hvis inntekter er definiert
+            gittVedtak = gittVedtak.map {
+                it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
+            }
         }
 
-        vedtakMedInntekt.forEach {
-            val behandling = behandlinger.getValue(it.behandlingId)
-            val saksbehandling = saksbehandling(fagsak(id = behandling.fagsakId, stønadstype = stønadstype), behandling)
-            beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
+        gittVedtak.map {
+            beregnYtelseSteg.utførSteg(behandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
         }
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
                                                                          lagredeVedtak,
-                                                                         behandlinger.values.toList(),
+                                                                         behandlinger.values.map { it.first }.toList(),
                                                                          null,
                                                                          behandlingIdsToAktivitetArbeid)
-    }
-
-    @Når("vedtak vedtas")
-    fun `når vedtak vedtas`() {
-        initialiserTilkjentYtelseOgVedtakMock()
-
-        gittVedtak.map {
-            val saksbehandling = saksbehandlinger.find { saksbehandling -> saksbehandling.id == it.behandlingId }
-                                 ?: error("Fant ikke saksbehandling for vedtak")
-            beregnYtelseSteg.utførSteg(saksbehandling, it.tilVedtakDto())
-        }
     }
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
@@ -241,6 +229,30 @@ class StepDefinitions {
         }
     }
 
+    private fun validerOgSettStønadstype(stønadType: StønadType) {
+        feilHvis(this::stønadstype.isInitialized && this.stønadstype != stønadType) {
+            "Kan ikke bruke 2 ulike stønadstyper, ${this.stønadstype} er allerede satt, prøver å sette $stønadType"
+        }
+        stønadstype = stønadType
+    }
+
+    private fun mapBehandlinger(): Map<UUID, Pair<Behandling, Saksbehandling>> {
+        if (saksbehandlinger.isNotEmpty()) return saksbehandlinger
+        val fagsak = fagsak(stønadstype = stønadstype)
+
+        return gittVedtak
+                .map { it.behandlingId }
+                .distinct()
+                .foldIndexed<UUID, List<Behandling>>(listOf()) { index, acc, id ->
+                    acc + behandling(id = id,
+                                     opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
+                                     type = BehandlingType.REVURDERING,
+                                     forrigeBehandlingId = acc.lastOrNull()?.id)
+                }
+                .map { it to saksbehandling(fagsak, it) }
+                .associateBy { it.first.id }
+    }
+
     private fun initialiserTilkjentYtelseOgVedtakMock() {
         tilkjentYtelser = mockTilkjentYtelse()
         lagredeVedtak = mockLagreVedtak()
@@ -297,26 +309,6 @@ class StepDefinitions {
                 throw Throwable("Feilet rad $index", e)
             }
         }
-
-        /*
-        for (forventetBehandlingMedHistorikkEndring in forventetHistorikkEndringer) {
-            val andelHistorikkDto =
-                    beregnetAndelHistorikkList.first { it.behandlingId == forventetBehandlingMedHistorikkEndring.id }
-
-            if (forventetBehandlingMedHistorikkEndring.historikkEndring == null) {
-                Assertions.assertThat(andelHistorikkDto.endring).isNull()
-                if (forventetBehandlingMedHistorikkEndring.inntekt > 0) {
-                    Assertions.assertThat(andelHistorikkDto.andel.inntekt).isEqualTo(forventetBehandlingMedHistorikkEndring.inntekt)
-                }
-            } else {
-                Assertions.assertThat(forventetBehandlingMedHistorikkEndring.historikkEndring.behandlingId)
-                        .isEqualTo(andelHistorikkDto.endring?.behandlingId)
-                Assertions.assertThat(forventetBehandlingMedHistorikkEndring.historikkEndring.type)
-                        .isEqualTo(andelHistorikkDto.endring?.type)
-                Assertions.assertThat(forventetBehandlingMedHistorikkEndring.inntekt).isEqualTo(andelHistorikkDto.andel.inntekt)
-            }
-        }
-         */
     }
 
     private fun assertBeregnetAndel(it: MutableMap<String, String>,
@@ -363,12 +355,18 @@ class StepDefinitions {
         }
         forventetHistorikkEndring.erSanksjon?.let {
             assertThat(beregnetAndelHistorikk.erSanksjon).isEqualTo(it)
-            if(beregnetAndelHistorikk.erSanksjon) {
+            if (beregnetAndelHistorikk.erSanksjon) {
                 assertThat(beregnetAndelHistorikk.sanksjonsårsak).isNotNull
             }
             assertThat(beregnetAndelHistorikk.sanksjonsårsak).isEqualTo(forventetHistorikkEndring.sanksjonsårsak)
         }
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+
+        if (beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
+            assertThat(beregnetAndelHistorikk.endring?.type).isEqualTo(forventetHistorikkEndring.historikkEndring?.type)
+            assertThat(beregnetAndelHistorikk.endring?.behandlingId)
+                    .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)
+        }
     }
 
 }

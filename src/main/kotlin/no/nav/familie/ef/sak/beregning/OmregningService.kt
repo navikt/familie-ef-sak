@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -191,6 +192,7 @@ class DryRunBeregnYtelseSteg(tilkjentYtelseService: TilkjentYtelseService,
                              beregningService: BeregningService,
                              dryRunSimuleringService: DryRunSimuleringService,
                              beregningBarnetilsynService: BeregningBarnetilsynService,
+                             beregningSkolepengerService: BeregningSkolepengerService,
                              vedtakService: VedtakService,
                              tilbakekrevingService: TilbakekrevingService,
                              barnService: BarnService,
@@ -199,6 +201,7 @@ class DryRunBeregnYtelseSteg(tilkjentYtelseService: TilkjentYtelseService,
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
                                                     beregningService,
                                                     beregningBarnetilsynService,
+                                                    beregningSkolepengerService,
                                                     dryRunSimuleringService,
                                                     vedtakService,
                                                     tilbakekrevingService,

@@ -1,0 +1,14 @@
+{
+  "begrunnelse": "begrunnelse",
+  "perioder": [
+    {
+      "studietype": "HØGSKOLE_UNIVERSITET",
+      "årMånedFra": "2021-01",
+      "årMånedTil": "2021-12",
+      "studiebelastning": 50,
+      "utgifter": 500
+    }
+  ],
+  "resultatType": "INNVILGE",
+  "_type": "InnvilgelseSkolepenger"
+}

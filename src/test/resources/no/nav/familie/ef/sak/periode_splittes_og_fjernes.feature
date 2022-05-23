@@ -18,7 +18,7 @@ Egenskap: Andelhistorikk: Splitting og fjerning av periode
       | 3            | 01.2021         | 02.2021         |
       | 3            | 03.2021         | 04.2021         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |

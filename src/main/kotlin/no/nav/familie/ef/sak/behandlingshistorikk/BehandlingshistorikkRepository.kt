@@ -28,8 +28,10 @@ interface BehandlingshistorikkRepository : RepositoryInterface<Behandlingshistor
                 SELECT bh.behandling_id AS first, bh.endret_tid AS second,
                     ROW_NUMBER() OVER (PARTITION BY bh.behandling_id ORDER BY bh.endret_tid DESC) AS rn
                 FROM behandlingshistorikk bh
-                WHERE bh.steg = :behandlingsteg) q
+                JOIN behandling b ON b.id = bh.behandling_id
+                WHERE bh.steg = :behandlingsteg
+                AND b.fagsak_id = :fagsakId
+                ) q
               WHERE rn = 1""")
-    fun finnSisteEndringstidspunktForBehandlinger(behandlingsIder: List<UUID>, behandlingsteg: StegType): List<Pair<UUID, Timestamp>>
-
+    fun finnSisteEndringstidspunktForBehandlinger(fagsakId: UUID, behandlingsteg: StegType): List<Pair<UUID, Timestamp>>
 }
