@@ -84,6 +84,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingServiceObject.eksternFagsakId).isEqualTo(fagsak.eksternId.id)
         assertThat(behandlingServiceObject.stønadstype).isEqualTo(fagsak.stønadstype)
         assertThat(behandlingServiceObject.migrert).isEqualTo(fagsak.migrert)
+        assertThat(behandlingServiceObject.opprettetAv).isEqualTo(behandling.sporbar.opprettetAv)
         assertThat(behandlingServiceObject.opprettetTid).isEqualTo(behandling.sporbar.opprettetTid)
         assertThat(behandlingServiceObject.endretTid).isEqualTo(behandling.sporbar.endret.endretTid)
     }
