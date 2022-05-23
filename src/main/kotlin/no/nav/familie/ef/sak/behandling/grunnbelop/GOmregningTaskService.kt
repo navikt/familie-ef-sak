@@ -12,7 +12,7 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
                             val featureToggleService: FeatureToggleService,
                             val gOmregningTask: GOmregningTask) {
 
-    @Scheduled(cron = "0 0 12 23 5 ?")
+    @Scheduled(cron = "0 15 12 23 5 ?")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
