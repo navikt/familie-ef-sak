@@ -66,6 +66,7 @@ class OmregningService(private val behandlingService: BehandlingService,
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun utførGOmregning(fagsakId: UUID,
                         liveRun: Boolean) {
+        logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
             "Feature toggle for omberegning er disabled"
@@ -84,6 +85,10 @@ class OmregningService(private val behandlingService: BehandlingService,
         logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
 
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(sisteBehandling.id)
+
+        feilHvis(forrigeTilkjentYtelse.grunnbeløpsdato == nyesteGrunnbeløpGyldigFraOgMed) {
+            "Skal ikke utføre g-omregning når forrige tilkjent ytelse allerede har nyeste grunnbeløpsdato"
+        }
 
         val innvilgelseOvergangsstønad =
                 vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
