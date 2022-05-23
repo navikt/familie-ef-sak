@@ -4,8 +4,11 @@ import no.nav.familie.ef.sak.beregning.DryRunException
 import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
+import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
@@ -41,20 +44,20 @@ class GOmregningTask(private val omregningService: OmregningService,
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettTask(fagsakId: UUID) {
-
         val eksisterendeTask = taskService.finnTaskMedPayloadOgType(fagsakId.toString(), TYPE)
 
         if (eksisterendeTask != null) {
             return
         }
 
-        val task = Task(TYPE, fagsakId.toString(), Properties().apply {
+        val properties = Properties().apply {
             setProperty("fagsakId", fagsakId.toString())
             setProperty("grunnbeløpsdato", nyesteGrunnbeløpGyldigFraOgMed.toString())
-        })
+            setProperty(MDCConstants.MDC_CALL_ID, IdUtils.generateId())
+        }
+        val task = Task(TYPE, fagsakId.toString()).copy(metadataWrapper = PropertiesWrapper(properties))
 
         taskService.save(task)
-
     }
 
     companion object {
