@@ -86,7 +86,7 @@ class OmregningService(private val behandlingService: BehandlingService,
         val innvilgelseOvergangsstønad =
                 vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
                                                                            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
-        if (innvilgelseOvergangsstønad.inntekter.all { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
+        if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
             logger.info(MarkerFactory.getMarker("G-Omberegning - samordningsfradrag"),
                         "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
             return
