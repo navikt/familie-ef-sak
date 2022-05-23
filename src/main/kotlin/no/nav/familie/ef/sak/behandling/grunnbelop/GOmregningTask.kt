@@ -18,7 +18,7 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(taskStepType = GOmregningTask.TYPE,
-                     maxAntallFeil = 1,
+                     maxAntallFeil = 3,
                      settTilManuellOppfølgning = true,
                      triggerTidVedFeilISekunder = 15 * 60L,
                      beskrivelse = "G-omregning")
@@ -33,7 +33,6 @@ class GOmregningTask(private val omregningService: OmregningService,
         val fagsakId = UUID.fromString(task.payload)
         try {
             omregningService.utførGOmregning(fagsakId,
-                                             null,
                                              featureToggleService.isEnabled("familie.ef.sak.omberegning.live.run"))
         } catch (e: DryRunException) {
             logger.info("G-OmberegningTask for fagsakId $fagsakId ruller tilbake fordi den er kjørt i dry run-modus.")

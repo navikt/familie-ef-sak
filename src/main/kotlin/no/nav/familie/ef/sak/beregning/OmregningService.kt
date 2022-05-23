@@ -64,7 +64,6 @@ class OmregningService(private val behandlingService: BehandlingService,
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun utførGOmregning(fagsakId: UUID,
-                        samordningsfradrag: BigDecimal?,
                         liveRun: Boolean) {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
@@ -88,8 +87,8 @@ class OmregningService(private val behandlingService: BehandlingService,
         val innvilgelseOvergangsstønad =
                 vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
                                                                            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
-        if (innvilgelseOvergangsstønad.samordningsfradragType != null && samordningsfradrag == null) {
-            logger.info(MarkerFactory.getMarker("G-Omberegning"),
+        if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
+            logger.info(MarkerFactory.getMarker("G-Omberegning - samordningsfradrag"),
                         "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
             return
         }
@@ -100,9 +99,6 @@ class OmregningService(private val behandlingService: BehandlingService,
         val indeksjusterInntekt =
                 BeregningUtils.indeksjusterInntekt(forrigeTilkjentYtelse.grunnbeløpsdato,
                                                    innvilgelseOvergangsstønad.inntekter.tilInntektsperioder())
-                        .map {
-                            if (samordningsfradrag != null) it.copy(samordningsfradrag = samordningsfradrag) else it
-                        }
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
 
@@ -129,13 +125,13 @@ class OmregningService(private val behandlingService: BehandlingService,
             iverksettClient.iverksettUtenBrev(iverksettDto)
             taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
         } else {
-            loggResuktat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
+            loggResultat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
             throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")
         }
 
     }
 
-    fun loggResuktat(forrigeTilkjentYtelse: TilkjentYtelse,
+    fun loggResultat(forrigeTilkjentYtelse: TilkjentYtelse,
                      innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
                      fagsakId: UUID,
                      behandlingId: UUID) {

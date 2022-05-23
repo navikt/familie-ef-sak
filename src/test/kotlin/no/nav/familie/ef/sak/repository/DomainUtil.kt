@@ -66,7 +66,6 @@ fun behandling(fagsak: Fagsak = fagsak(),
                resultat: BehandlingResultat = BehandlingResultat.IKKE_SATT,
                opprettetTid: LocalDateTime = SporbarUtils.now(),
                forrigeBehandlingId: UUID? = null,
-               grunnbeløpsdato: LocalDate = LocalDate.of(2021, 5, 28),
                årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
                henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT): Behandling =
         Behandling(fagsakId = fagsak.id,
@@ -191,13 +190,14 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
 fun tilkjentYtelse(behandlingId: UUID,
                    personIdent: String,
                    stønadsår: Int = 2021,
-                   startdato: LocalDate? = null): TilkjentYtelse {
-    val andeler = listOf(AndelTilkjentYtelse(beløp = 9500,
+                   startdato: LocalDate? = null,
+                   grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår-1, 5, 1)): TilkjentYtelse {
+    val andeler = listOf(AndelTilkjentYtelse(beløp = 11554,
                                              stønadFom = LocalDate.of(stønadsår, 1, 1),
                                              stønadTom = LocalDate.of(stønadsår, 12, 31),
                                              personIdent = personIdent,
-                                             inntektsreduksjon = 0,
-                                             inntekt = 0,
+                                             inntektsreduksjon = 8396,
+                                             inntekt = 277100,
                                              samordningsfradrag = 0,
                                              kildeBehandlingId = behandlingId))
     return TilkjentYtelse(behandlingId = behandlingId,
@@ -205,13 +205,14 @@ fun tilkjentYtelse(behandlingId: UUID,
                           vedtakstidspunkt = LocalDateTime.now(),
                           startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
                           andelerTilkjentYtelse = andeler,
-                          grunnbeløpsdato = LocalDate.of(2020, 5, 1))
+                          grunnbeløpsdato = grunnbeløpsdato)
 }
 
 fun vedtak(behandlingId: UUID,
            resultatType: ResultatType = ResultatType.INNVILGE,
-           inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode())),
-           perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode()))): Vedtak =
+           år: Int = 2021,
+           inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode(år = år))),
+           perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(år = år)))): Vedtak =
         Vedtak(behandlingId = behandlingId,
                resultatType = resultatType,
                periodeBegrunnelse = "OK",
@@ -220,14 +221,16 @@ fun vedtak(behandlingId: UUID,
                perioder = perioder,
                inntekter = inntekter)
 
-fun inntektsperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
-                    sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+fun inntektsperiode(år: Int = 2021,
+                    startDato: LocalDate = LocalDate.of(år, 1, 1),
+                    sluttDato: LocalDate = LocalDate.of(år, 12, 1),
                     inntekt: BigDecimal = BigDecimal.valueOf(100000),
                     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)) =
         Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
 
-fun vedtaksperiode(startDato: LocalDate = LocalDate.of(2021, 1, 1),
-                   sluttDato: LocalDate = LocalDate.of(2021, 12, 1),
+fun vedtaksperiode(år: Int = 2021,
+                   startDato: LocalDate = LocalDate.of(år, 1, 1),
+                   sluttDato: LocalDate = LocalDate.of(år, 12, 1),
                    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
                    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE) =
         Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)

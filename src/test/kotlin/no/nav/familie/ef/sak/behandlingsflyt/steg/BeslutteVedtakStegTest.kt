@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -153,6 +152,14 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal ikke sende brev hvis årsaken er korrigering uten brev`() {
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.KORRIGERING_UTEN_BREV))
+
+        verify(exactly = 0) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    internal fun `skal ikke sende brev hvis årsaken er g-omregning`() {
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.G_OMREGNING))
 
         verify(exactly = 0) { iverksett.iverksett(any(), any()) }
         verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
