@@ -10,7 +10,7 @@ Egenskap: Andelhistorikk: Vedtak opphører midt i periode
       | 1            | 01.2021         | 01.2021         |                 |             |
       | 2            | 01.2021         | 01.2021         | OPPHØRT         | 01.2021     |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |
@@ -24,7 +24,7 @@ Egenskap: Andelhistorikk: Vedtak opphører midt i periode
       | 1            | 01.2021         | 03.2021         |
       | 2            | 02.2021         |                 |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |

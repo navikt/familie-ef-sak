@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -41,7 +42,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
                            private val vedtakService: VedtakService,
                            private val simuleringService: SimuleringService,
                            private val tilbakekrevingService: TilbakekrevingService,
-                           private val vurderingService: VurderingService) : BehandlingSteg<Void?> {
+                           private val vurderingService: VurderingService,
+                           private val validerOmregningService: ValiderOmregningService) : BehandlingSteg<Void?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
         if (saksbehandling.steg != stegType()) {
@@ -59,7 +61,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         }
         validerRiktigTilstandVedInvilgelse(saksbehandling)
         validerSaksbehandlersignatur(saksbehandling)
-
+        validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
     }
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
@@ -24,6 +25,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
@@ -40,6 +42,7 @@ import java.util.UUID
 class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val beregningService: BeregningService,
                        private val beregningBarnetilsynService: BeregningBarnetilsynService,
+                       private val beregningSkolepengerService: BeregningSkolepengerService,
                        private val simuleringService: SimuleringService,
                        private val vedtakService: VedtakService,
                        private val tilbakekrevingService: TilbakekrevingService,
@@ -73,6 +76,11 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 opprettTilkjentYtelseForInnvilgetBarnetilsyn(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
+            is InnvilgelseSkolepenger -> {
+                validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
+                opprettTilkjentYtelseForInnvilgetSkolepenger(data, saksbehandlingMedOppdatertIdent)
+                simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
+            }
             is Opphør -> {
                 validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
@@ -89,6 +97,16 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
     }
 
     private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+        if (behandling.erOmregning) {
+            return
+        }
+
+        innvilget.perioder.firstOrNull()?.let {
+            validerStartTidEtterSanksjon(it.årMånedFra, behandling)
+        }
+    }
+
+    private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseSkolepenger, behandling: Saksbehandling) {
         if (behandling.erOmregning) {
             return
         }
@@ -210,7 +228,6 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
     private fun opprettTilkjentYtelseForInnvilgetBarnetilsyn(vedtak: InnvilgelseBarnetilsyn,
                                                              saksbehandling: Saksbehandling) {
-
         // TODO: Må periodene være sammenhengende?
         //  brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
         val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
@@ -222,6 +239,22 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
+        tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = saksbehandling.ident,
+                                                                   behandlingId = saksbehandling.id,
+                                                                   andelerTilkjentYtelse = nyeAndeler,
+                                                                   startdato = startdato))
+    }
+
+    private fun opprettTilkjentYtelseForInnvilgetSkolepenger(vedtak: InnvilgelseSkolepenger,
+                                                             saksbehandling: Saksbehandling) {
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
+        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
+
+        val (nyeAndeler, startdato) = when (saksbehandling.type) {
+            FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
+            REVURDERING -> error("Håndterer ikke revurdering ennå") // TODO
+            else -> error("Steg ikke støttet for type=${saksbehandling.type}")
+        }
 
         tilkjentYtelseService.opprettTilkjentYtelse(TilkjentYtelse(personident = saksbehandling.ident,
                                                                    behandlingId = saksbehandling.id,
@@ -339,6 +372,22 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                            saksbehandling: Saksbehandling): List<AndelTilkjentYtelse> {
         val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
+        return beløpsperioder
+                .map {
+                    AndelTilkjentYtelse(beløp = it.beløp,
+                                        stønadFom = it.periode.fradato,
+                                        stønadTom = it.periode.tildato,
+                                        kildeBehandlingId = saksbehandling.id,
+                                        inntekt = 0,
+                                        samordningsfradrag = 0,
+                                        inntektsreduksjon = 0,
+                                        personIdent = saksbehandling.ident)
+                }
+    }
+
+    private fun lagBeløpsperioderForInnvilgelseSkolepenger(vedtak: InnvilgelseSkolepenger,
+                                                           saksbehandling: Saksbehandling): List<AndelTilkjentYtelse> {
+        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak)
         return beløpsperioder
                 .map {
                     AndelTilkjentYtelse(beløp = it.beløp,

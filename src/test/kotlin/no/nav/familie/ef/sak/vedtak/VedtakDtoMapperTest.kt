@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider.objectMap
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -41,6 +42,14 @@ class VedtakDtoMapperTest {
         val vedtak = innvilgelseBarnetilsynDto(UUID.fromString("4ab497b2-a19c-4415-bf00-556ff8e9ce86"))
                 .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING,
                       _type = "InnvilgelseBarnetilsynUtenUtbetaling")
+        assertErLik(vedtak, vedtakJson)
+    }
+
+    @Test
+    fun `deserialiser og serialiser innvilget skolepenger vedtak dto`() {
+        val vedtakJson = readFile("SkolepengerInnvilgetVedtakDto.json")
+
+        val vedtak = innvilgelseSkolepengerDto()
         assertErLik(vedtak, vedtakJson)
     }
 
