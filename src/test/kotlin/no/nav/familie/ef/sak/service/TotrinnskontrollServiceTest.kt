@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -32,11 +33,13 @@ internal class TotrinnskontrollServiceTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val tilgangService = mockk<TilgangService>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService, tilkjentYtelseRepository)
+    private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService, validerOmregningService)
 
     @BeforeEach
     internal fun setUp() {
         every { tilgangService.harTilgangTilRolle(any()) } returns true
+        every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns null
     }
 
     @Test
