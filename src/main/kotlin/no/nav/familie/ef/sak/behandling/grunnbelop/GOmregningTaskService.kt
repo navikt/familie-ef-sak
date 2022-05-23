@@ -16,7 +16,7 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(cron = "0 45 12 23 5 ?")
+    @Scheduled(cron = "0 0 15 23 5 ?")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
