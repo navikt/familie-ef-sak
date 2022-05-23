@@ -31,9 +31,6 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -49,15 +46,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
 
 internal class BeslutteVedtakStegTest {
 
     private val taskRepository = mockk<TaskRepository>()
-    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val fagsakService = mockk<FagsakService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
@@ -140,42 +134,6 @@ internal class BeslutteVedtakStegTest {
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }
         verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
     }
-
-    @Test
-    internal fun `skal ikke opprette iverksettMotOppdragTask dersom det revurderes med gammel g og ikke fra og med nyeste g`() {
-        every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any()) } returns Fil("123".toByteArray())
-        every { tilkjentYtelseRepository.findByBehandlingId(behandlingId) } returns tilkjentYtelseEtterNyG()
-        val nesteSteg = utførTotrinnskontroll(godkjent = true)
-
-        assertThat(nesteSteg).isEqualTo(StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
-        assertThat(taskSlot[0].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
-        assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
-        assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-        assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
-                .isEqualTo(Hendelse.BESLUTTET)
-        verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
-        verify(exactly = 1) { iverksett.iverksett(any(), any()) }
-        verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
-    }
-
-    fun tilkjentYtelseEtterNyG() : TilkjentYtelse {
-        val andeler = listOf(AndelTilkjentYtelse(beløp = 9500,
-                                                 stønadFom = LocalDate.of(2022, 6, 1),
-                                                 stønadTom = LocalDate.of(2022, 12, 31),
-                                                 personIdent = "12345678901",
-                                                 inntektsreduksjon = 0,
-                                                 inntekt = 0,
-                                                 samordningsfradrag = 0,
-                                                 kildeBehandlingId = behandlingId))
-        return TilkjentYtelse(behandlingId = behandlingId,
-                              personident = "12345678901",
-                              vedtakstidspunkt = LocalDateTime.now(),
-                              startdato = LocalDate.of(2022, 6 ,1) ?: error("Må sette startdato"),
-                              andelerTilkjentYtelse = andeler,
-                              grunnbeløpsdato = LocalDate.of(2020, 5, 1))
-    }
-
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
