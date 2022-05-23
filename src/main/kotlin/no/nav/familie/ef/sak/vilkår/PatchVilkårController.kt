@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 
 @RestController
@@ -18,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 @Validated
 class PatchVilkårController(private val patchVilkårRepository: PatchVilkårRepository,
-                            private val vilkårsvurderingRepository: VilkårsvurderingRepository) {
+                            private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+                            private val fagsakService: FagsakService,
+                            private val fagsakPersonService: FagsakPersonService) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -34,37 +39,36 @@ class PatchVilkårController(private val patchVilkårRepository: PatchVilkårRep
                             .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)) {
                 secureLogger.info("det finnes allerede et delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
             } else {
-                secureLogger.info("finner ut om vilkår for inntekt finnes fra før på behandling med id=${it.id}")
-                val gammelVilkårsvurdering = eksisterendeVilkår.find { it.type == VilkårType.INNTEKT }
+                secureLogger.info("bygger opp nytt delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
+                val gammelVilkårsvurderingEllerNull = eksisterendeVilkår.find { vilkår -> vilkår.type == VilkårType.INNTEKT }
 
-                if (liveRun.skalPersistere) {
-                    if (gammelVilkårsvurdering != null) {
-                        val nyDelvilkårsvurdering = lagNyDelvilkårsvurdering()
-                        val oppdatertVilkårsvurdering =
-                                lagOppdatertVilkårsvurdering(gammelVilkårsvurdering, nyDelvilkårsvurdering)
+                if (gammelVilkårsvurderingEllerNull != null) {
+                    val nyDelvilkårsvurdering = lagNyDelvilkårsvurdering(it.id)
+                    if (liveRun.skalPersistere) {
                         secureLogger.info("persistererer delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
-                        vilkårsvurderingRepository.insert(oppdatertVilkårsvurdering)
-                    } else {
-                        secureLogger.info("persistererer ikke delvilkår - vilkåret for inntekt fantes ikke fra før på behandling med id=${it.id}")
+                        vilkårsvurderingRepository.update(gammelVilkårsvurderingEllerNull.copy(delvilkårsvurdering = DelvilkårsvurderingWrapper(
+                                delvilkårsvurderinger = gammelVilkårsvurderingEllerNull.delvilkårsvurdering.delvilkårsvurderinger.plusElement(
+                                        nyDelvilkårsvurdering))))
                     }
+                } else {
+                    secureLogger.info("persisterer ikke delvilkår - fantes ingen vilkår for inntekt på behandling med id=${it.id}")
                 }
             }
         }
         return if (liveRun.skalPersistere) Ressurs.success("patching av inntektsvilkår ble kjørt") else Ressurs.success("patching av inntektsvilkår ble ikke kjørt")
     }
 
-    private fun lagOppdatertVilkårsvurdering(gammel: Vilkårsvurdering, ny: Delvilkårsvurdering): Vilkårsvurdering {
-        return Vilkårsvurdering(behandlingId = gammel.behandlingId,
-                                resultat = gammel.resultat,
-                                type = gammel.type,
-                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger = gammel.delvilkårsvurdering.delvilkårsvurderinger.plusElement(
-                                        ny)))
-    }
+    private fun lagNyDelvilkårsvurdering(id: UUID): Delvilkårsvurdering {
+        val fagsak = fagsakService.hentFagsakForBehandling(id)
+        val person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
+        val svar = if (fagsaker.overgangsstønad != null) SvarId.JA else SvarId.BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD
 
-    private fun lagNyDelvilkårsvurdering(): Delvilkårsvurdering = Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                                                      vurderinger = listOf(Vurdering(regelId = RegelId.INNTEKT_SAMSVARER_MED_OS,
-                                                                                                                     svar = SvarId.JA,
-                                                                                                                     begrunnelse = "")))
+        return Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
+                                   vurderinger = listOf(Vurdering(regelId = RegelId.INNTEKT_SAMSVARER_MED_OS,
+                                                                  svar = svar,
+                                                                  begrunnelse = "Nytt delvilkår - automatisk lagt inn i ettertid")))
+    }
 }
 
 data class LiveRun(val skalPersistere: Boolean)
