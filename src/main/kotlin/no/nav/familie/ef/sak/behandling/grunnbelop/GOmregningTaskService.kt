@@ -14,7 +14,7 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
                             val featureToggleService: FeatureToggleService,
                             val gOmregningTask: GOmregningTask) {
 
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(cron = "0 0 15 23 5 ?")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
