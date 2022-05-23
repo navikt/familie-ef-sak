@@ -380,6 +380,7 @@ internal class IverksettingDtoMapperTest {
             eksternFagsakId = 4,
             stønadstype = stønadType,
             migrert = false,
+            opprettetAv = "z094239",
             opprettetTid = LocalDateTime.parse("2022-03-02T05:36:39.553"),
             endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556")
     )

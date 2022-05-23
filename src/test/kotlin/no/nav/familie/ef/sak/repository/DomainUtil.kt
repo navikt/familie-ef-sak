@@ -117,6 +117,7 @@ fun saksbehandling(fagsak: Fagsak = fagsak(),
                        eksternFagsakId = fagsak.eksternId.id,
                        stønadstype = fagsak.stønadstype,
                        migrert = fagsak.migrert,
+                       opprettetAv = behandling.sporbar.opprettetAv,
                        opprettetTid = behandling.sporbar.opprettetTid,
                        endretTid = behandling.sporbar.endret.endretTid)
 
