@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
@@ -87,6 +88,10 @@ class OmregningService(private val behandlingService: BehandlingService,
         val innvilgelseOvergangsstønad =
                 vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
                                                                            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
+        feilHvis(innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
+            "Omregning av vedtak med sanksjon må manuellt behandles"
+        }
+
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
             logger.info(MarkerFactory.getMarker("G-Omberegning - samordningsfradrag"),
                         "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
