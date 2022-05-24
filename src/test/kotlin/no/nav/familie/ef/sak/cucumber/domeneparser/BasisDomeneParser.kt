@@ -36,10 +36,6 @@ fun parseValgfriÅrMåned(domenebegrep: Domenenøkkel, rad: Map<String, String?>
     return parseValgfriÅrMåned(domenebegrep.nøkkel(), rad)
 }
 
-fun parseValgfriÅrMånedEllerDato(domenebegrep: Domenenøkkel, rad: Map<String, String?>): YearMonth? {
-    return parseValgfriÅrMåned(domenebegrep.nøkkel(), rad)
-}
-
 fun parseString(domenebegrep: Domenenøkkel, rad: Map<String, String>): String {
     return verdi(domenebegrep.nøkkel(), rad)
 }
@@ -131,7 +127,7 @@ fun parseÅrMåned(verdi: String): YearMonth {
     }
 }
 
-fun parseValgriÅrMånedEllerDato(domenebegrep: Domenenøkkel, rad: Map<String, String?>): ÅrMånedEllerDato? {
+fun parseValgfriÅrMånedEllerDato(domenebegrep: Domenenøkkel, rad: Map<String, String?>): ÅrMånedEllerDato? {
     val verdi = rad[domenebegrep.nøkkel()]
     if (verdi == null || verdi == "") {
         return null
