@@ -240,12 +240,6 @@ object VedtakDomeneParser {
             val sanksjonsårsak: Sanksjonsårsak?,
     )
 
-    private fun parseFraOgMed(rad: Map<String, String>) =
-            parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: LocalDate.now()
-
-    private fun parseTilOgMed(rad: Map<String, String>) =
-            parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: LocalDate.now()
-
     class BehandlingForHistorikkEndringMapper {
 
         fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
@@ -260,10 +254,8 @@ object VedtakDomeneParser {
                                 vedtakstidspunkt = LocalDateTime.now()
                         )
                     },
-                    stønadFra = parseValgfriÅrMåned(VedtakDomenebegrep.FRA_OG_MED_DATO, rad)?.atDay(1) ?: YearMonth.now()
-                            .atDay(1),
-                    stønadTil = parseValgfriÅrMåned(VedtakDomenebegrep.TIL_OG_MED_DATO, rad)?.atEndOfMonth() ?: YearMonth.now()
-                            .atEndOfMonth(),
+                    stønadFra = parseFraOgMed(rad),
+                    stønadTil = parseTilOgMed(rad),
                     inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
                     aktivitetType = aktivitetType,
@@ -289,8 +281,6 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     SAMORDNINGSFRADRAG("Samordningsfradrag"),
     BELØP("Beløp"),
     BELØP_MELLOM("Beløp mellom"),
-    FRA_OG_MED_DATO("Fra og med dato"),
-    TIL_OG_MED_DATO("Til og med dato"),
     AKTIVITET_TYPE("Aktivitet"),
     ARBEID_AKTIVITET("Arbeid aktivitet"), //Inngangsvilkår i barnetilsyn
     VEDTAKSPERIODE_TYPE("Vedtaksperiode"),
