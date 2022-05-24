@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneBegrep
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.ÅrMånedEllerDato
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -32,6 +33,10 @@ fun parseÅrMåned(domenebegrep: Domenenøkkel, rad: Map<String, String?>): Year
 }
 
 fun parseValgfriÅrMåned(domenebegrep: Domenenøkkel, rad: Map<String, String?>): YearMonth? {
+    return parseValgfriÅrMåned(domenebegrep.nøkkel(), rad)
+}
+
+fun parseValgfriÅrMånedEllerDato(domenebegrep: Domenenøkkel, rad: Map<String, String?>): YearMonth? {
     return parseValgfriÅrMåned(domenebegrep.nøkkel(), rad)
 }
 
@@ -126,6 +131,19 @@ fun parseÅrMåned(verdi: String): YearMonth {
     }
 }
 
+fun parseValgriÅrMånedEllerDato(domenebegrep: Domenenøkkel, rad: Map<String, String?>): ÅrMånedEllerDato? {
+    val verdi = rad[domenebegrep.nøkkel()]
+    if (verdi == null || verdi == "") {
+        return null
+    }
+    val dato = when (verdi.toList().count { it == '.' || it == '-' }) {
+        2 -> parseDato(verdi)
+        1 -> parseÅrMåned(verdi)
+        else -> error("Er datoet=$verdi riktigt formatert? Trenger å være på norskt eller iso-format")
+    }
+    return ÅrMånedEllerDato(dato)
+}
+
 fun verdi(nøkkel: String, rad: Map<String, String>): String {
     val verdi = rad[nøkkel]
 
@@ -141,7 +159,7 @@ fun valgfriVerdi(nøkkel: String, rad: Map<String, String>): String? {
 }
 
 fun parseInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int {
-    val verdi = verdi(domenebegrep.nøkkel(), rad)
+    val verdi = verdi(domenebegrep.nøkkel(), rad).replace("_", "")
 
     return Integer.parseInt(verdi)
 }
