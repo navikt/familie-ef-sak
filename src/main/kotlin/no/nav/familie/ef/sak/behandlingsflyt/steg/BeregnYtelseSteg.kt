@@ -253,7 +253,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> error("Håndterer ikke revurdering ennå") // TODO
+            // TODO hvordan skal vi håndtere revurdering? Man kan ikke revurdere fra dato x? Risikerer å avkorte en tidligere periode?
+            REVURDERING -> error("Håndterer ikke revurdering ennå")
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -393,7 +394,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                 .map {
                     AndelTilkjentYtelse(beløp = it.beløp,
                                         stønadFom = it.periode.fradato,
-                                        stønadTom = it.periode.tildato,
+                                        stønadTom = YearMonth.from(it.periode.fradato).atEndOfMonth(), // settes til en måned
                                         kildeBehandlingId = saksbehandling.id,
                                         inntekt = 0,
                                         samordningsfradrag = 0,
