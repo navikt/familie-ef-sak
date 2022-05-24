@@ -143,8 +143,7 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     }
 
     private fun settInnBeslutterSignaturIHtml(html: String, signaturMedEnhet: SignaturDto): String {
-
-        feilHvisIkke(html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)) {
+        feilHvis(!signaturMedEnhet.skjulBeslutter && !html.contains(BESLUTTER_SIGNATUR_PLACEHOLDER)) {
             "Brev-HTML mangler placeholder for besluttersignatur"
         }
 
