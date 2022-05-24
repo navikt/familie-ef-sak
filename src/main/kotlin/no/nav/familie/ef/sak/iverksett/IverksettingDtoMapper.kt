@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -32,7 +31,6 @@ import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.iverksett.AdressebeskyttelseGradering
 import no.nav.familie.kontrakter.ef.iverksett.AktivitetType
-import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.BarnDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
@@ -42,7 +40,6 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingMedVarselDto
@@ -74,7 +71,6 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
                             private val barnService: BarnService,
                             private val behandlingshistorikkService: BehandlingshistorikkService,
                             private val tilkjentYtelseService: TilkjentYtelseService,
-                            private val fagsakService: FagsakService,
                             private val simuleringService: SimuleringService,
                             private val tilbakekrevingService: TilbakekrevingService,
                             private val grunnlagsdataService: GrunnlagsdataService,
@@ -262,17 +258,8 @@ class IverksettingDtoMapper(private val arbeidsfordelingService: Arbeidsfordelin
 
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
-        andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel ->
-            AndelTilkjentYtelseDto(beløp = andel.beløp,
-                                   fraOgMed = andel.stønadFom,
-                                   tilOgMed = andel.stønadTom,
-                                   inntekt = andel.inntekt,
-                                   samordningsfradrag = andel.samordningsfradrag,
-                                   inntektsreduksjon = andel.inntektsreduksjon,
-                                   kildeBehandlingId = andel.kildeBehandlingId,
-                                   periodetype = Periodetype.MÅNED)
-        },
-        startdato = startdato ?: error("Mangler startdato for ty=${this.id} behandling=${this.behandlingId}")
+        andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
+        startdato = startdato
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
