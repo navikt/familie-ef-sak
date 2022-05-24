@@ -16,9 +16,9 @@ Egenskap: Skolepenger
     Når beregner ytelse
 
     # TODO riktig til og med dato
-    Så forvent følgende andeler lagret for behandling med id: 1
-      | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
-      | 01.01.2021      | 31.03.2021      | 100   | 1               |
+    #Så forvent følgende andeler lagret for behandling med id: 1
+    #  | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
+    #  | 01.01.2021      | 31.03.2021      | 100   | 1               |
 
     # TODO håndterer ikke historikk ennå
     #Så forvent følgende historikk
