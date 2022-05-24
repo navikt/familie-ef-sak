@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import no.nav.familie.ef.sak.beregning.DryRunException
+import no.nav.familie.ef.sak.beregning.OmregningMedSamordningsfradragException
 import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -39,6 +40,8 @@ class GOmregningTask(private val omregningService: OmregningService,
                                              featureToggleService.isEnabled("familie.ef.sak.omberegning.live.run"))
         } catch (e: DryRunException) {
             logger.info("G-OmberegningTask for fagsakId $fagsakId ruller tilbake fordi den er kjørt i dry run-modus.")
+        } catch (e: OmregningMedSamordningsfradragException) {
+            logger.warn("G-OmberegningTask for fagsakId $fagsakId ruller tilbake fordi den inneholder samordningsfradrag.")
         }
     }
 
