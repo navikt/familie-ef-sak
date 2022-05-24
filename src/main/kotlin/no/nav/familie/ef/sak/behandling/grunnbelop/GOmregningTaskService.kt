@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
@@ -16,7 +18,7 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @Scheduled(cron = "0 0 15 23 5 ?")
+    @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
@@ -24,10 +26,19 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
         }
         logger.info("Starter opprettelse av tasker for G-omregning.")
         val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
-        fagsakIder.forEach {
-            gOmregningTask.opprettTask(it)
+        try {
+            fagsakIder.forEach {
+                gOmregningTask.opprettTask(it)
+            }
+            logger.info("Opprettet ${fagsakIder.size} tasker for G-omregning.")
+        } catch (e: DbActionExecutionException) {
+            if (e.cause == DuplicateKeyException::class.java) {
+                // To podder har forsøkt å gjøre samme jobben. Stenger ned den ene.
+                return 0
+            } else {
+                throw e
+            }
         }
-        logger.info("Opprettet ${fagsakIder.size} tasker for G-omregning.")
         return fagsakIder.size
     }
 

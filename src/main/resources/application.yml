@@ -186,6 +186,9 @@ FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
 
 GYLDIGE_SERVICE_BRUKERE: srvArena
 
+G_OMREGNING_CRON_EXPRESSION: 0 0 15 * * WED
+
+
 rolle:
   veileder: "31778fd8-3b71-4867-8db6-a81235fbe001"
   saksbehandler: "6406aba2-b930-41d3-a85b-dd13731bc974"

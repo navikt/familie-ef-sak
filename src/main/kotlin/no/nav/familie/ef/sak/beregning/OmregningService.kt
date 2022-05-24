@@ -76,7 +76,7 @@ class OmregningService(private val behandlingService: BehandlingService,
                               ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
 
         feilHvis(behandlingService.finnesÅpenBehandling(fagsakId)) {
-            "Kan ikke omberegne, det finnes åpen behandling på fagsak: $fagsakId"
+            "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
         }
 
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
@@ -98,7 +98,7 @@ class OmregningService(private val behandlingService: BehandlingService,
         }
 
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
-            logger.info(MarkerFactory.getMarker("G-Omberegning - samordningsfradrag"),
+            logger.info(MarkerFactory.getMarker("G-Omregning - samordningsfradrag"),
                         "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
             return
         }
@@ -152,7 +152,7 @@ class OmregningService(private val behandlingService: BehandlingService,
                                                     forrigeTilkjentYtelse,
                                                     omberegnetTilkjentYtelse)
 
-        logger.info(MarkerFactory.getMarker("G-Omberegning"), perioder.joinToString("\n"))
+        logger.info(MarkerFactory.getMarker("G-Omregning"), perioder.joinToString("\n"))
     }
 
     fun mapTilSammenlignbarePerioder(fagsakId: UUID,
@@ -172,7 +172,7 @@ class OmregningService(private val behandlingService: BehandlingService,
             val omberegnetAndelTilkjentYtelse =
                     omberegnetTilkjentYtelse.andelerTilkjentYtelse.firstOrNull { andel ->
                         it.periode.omslutter(andel.periode) || it.periode.omsluttesAv(andel.periode)
-                    } ?: error("Forventet omberegnet andelTilkjenYtelse med fradato ${it.stønadFom}")
+                    } ?: error("Forventet omregnet andelTilkjentYtelse med fradato ${it.stønadFom}")
             RapportDto(fagsakId,
                        it.stønadFom,
                        it.stønadTom,
