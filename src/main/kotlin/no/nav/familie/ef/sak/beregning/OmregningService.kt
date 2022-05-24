@@ -88,14 +88,16 @@ class OmregningService(private val behandlingService: BehandlingService,
         val innvilgelseOvergangsstønad =
                 vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
                                                                            YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
-        feilHvis(innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
-            "Omregning av vedtak med sanksjon må manuellt behandles"
+        if(innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
+            logger.warn(MarkerFactory.getMarker("G-Omregning - Manuell"),
+                        "Fagsak med id $fagsakId har sanksjon og må manuelt behandles")
+            return
         }
 
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
-            logger.info(MarkerFactory.getMarker("G-Omregning - samordningsfradrag"),
+            logger.warn(MarkerFactory.getMarker("G-Omregning - Manuell"),
                         "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
-            throw OmregningMedSamordningsfradragException()
+            return
         }
 
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
@@ -263,4 +265,3 @@ class DryRunSimuleringService(iverksettClient: IverksettClient,
 }
 
 class DryRunException(melding: String) : IllegalStateException(melding)
-class OmregningMedSamordningsfradragException() : IllegalStateException()
