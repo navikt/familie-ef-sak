@@ -32,8 +32,8 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
             }
             logger.info("Opprettet ${fagsakIder.size} tasker for G-omregning.")
         } catch (e: DbActionExecutionException) {
-            if (e.cause == DuplicateKeyException::class.java) {
-                // To podder har forsøkt å gjøre samme jobben. Stenger ned den ene.
+            if (e.cause is DuplicateKeyException) {
+                logger.info("To podder har forsøkt å starte G-omregning samtidig. Stopper den ene.")
                 return 0
             } else {
                 throw e
