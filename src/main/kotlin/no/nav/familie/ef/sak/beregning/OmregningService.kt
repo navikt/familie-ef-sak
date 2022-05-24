@@ -79,11 +79,6 @@ class OmregningService(private val behandlingService: BehandlingService,
             "Kan ikke omberegne, det finnes åpen behandling på fagsak: $fagsakId"
         }
 
-        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
-                                                             fagsakId = fagsakId,
-                                                             behandlingsårsak = BehandlingÅrsak.G_OMREGNING)
-        logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
-
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(sisteBehandling.id)
 
         feilHvis(forrigeTilkjentYtelse.grunnbeløpsdato == nyesteGrunnbeløpGyldigFraOgMed) {
@@ -100,8 +95,14 @@ class OmregningService(private val behandlingService: BehandlingService,
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
             logger.info(MarkerFactory.getMarker("G-Omberegning - samordningsfradrag"),
                         "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
-            return
+            throw OmregningMedSamordningsfradragException()
         }
+
+        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
+                                                             fagsakId = fagsakId,
+                                                             behandlingsårsak = BehandlingÅrsak.G_OMREGNING)
+        logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
+
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForOmregning(behandling)
 
@@ -262,3 +263,4 @@ class DryRunSimuleringService(iverksettClient: IverksettClient,
 }
 
 class DryRunException(melding: String) : IllegalStateException(melding)
+class OmregningMedSamordningsfradragException() : IllegalStateException()

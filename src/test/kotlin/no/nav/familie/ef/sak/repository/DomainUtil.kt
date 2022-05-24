@@ -192,14 +192,15 @@ fun tilkjentYtelse(behandlingId: UUID,
                    personIdent: String,
                    stønadsår: Int = 2021,
                    startdato: LocalDate? = null,
-                   grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår-1, 5, 1)): TilkjentYtelse {
+                   grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår-1, 5, 1),
+                   samordningsfradrag: Int = 0): TilkjentYtelse {
     val andeler = listOf(AndelTilkjentYtelse(beløp = 11554,
                                              stønadFom = LocalDate.of(stønadsår, 1, 1),
                                              stønadTom = LocalDate.of(stønadsår, 12, 31),
                                              personIdent = personIdent,
                                              inntektsreduksjon = 8396,
                                              inntekt = 277100,
-                                             samordningsfradrag = 0,
+                                             samordningsfradrag = samordningsfradrag,
                                              kildeBehandlingId = behandlingId))
     return TilkjentYtelse(behandlingId = behandlingId,
                           personident = personIdent,
