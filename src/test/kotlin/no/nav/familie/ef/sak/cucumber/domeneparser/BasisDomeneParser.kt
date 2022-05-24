@@ -207,7 +207,7 @@ inline fun <reified T : Enum<T>> parseValgfriEnum(domenebegrep: Domenenøkkel, r
 }
 
 inline fun <reified T : Enum<T>> parseEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T {
-    return enumValueOf(verdi(domenebegrep.nøkkel(), rad))
+    return parseValgfriEnum<T>(domenebegrep, rad)!!
 }
 
 fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {

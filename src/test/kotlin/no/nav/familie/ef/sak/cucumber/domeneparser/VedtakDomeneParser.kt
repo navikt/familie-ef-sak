@@ -3,13 +3,9 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
-import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.tilkjentYtelseIdNummerTilUUID
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
@@ -17,7 +13,9 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
+import no.nav.familie.ef.sak.vedtak.domain.UtgiftsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -25,13 +23,11 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
-import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.AbstractMap
 import java.util.UUID
 
 object VedtakDomeneParser {
@@ -69,14 +65,51 @@ object VedtakDomeneParser {
         }
     }
 
+    fun mapVedtakForSkolepenger(dataTable: DataTable): List<Vedtak> {
+        val gyldigeKolonner = listOf(
+                Domenebegrep.BEHANDLING_ID,
+                VedtakDomenebegrep.RESULTAT_TYPE,
+                Domenebegrep.FRA_OG_MED_DATO,
+                Domenebegrep.TIL_OG_MED_DATO,
+                VedtakDomenebegrep.STUDIETYPE,
+                VedtakDomenebegrep.STUDIEBELASTNING,
+                VedtakDomenebegrep.UTGIFTER,
+        )
+        return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
+            val perioder = when (vedtak.resultatType) {
+                ResultatType.INNVILGE -> mapPerioderForSkolepenger(rader)
+                ResultatType.SANKSJONERE -> {
+                    val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
+                    validerSanksjonSkolepenger(perioderForBarnetilsyn)
+                    perioderForBarnetilsyn
+                }
+                else -> emptyList()
+            }
+            vedtak.copy(skolepenger = SkolepengerWrapper(perioder, null))
+        }
+    }
+
     private fun mapVedtak(
             dataTable: DataTable,
+            gyldigeKolonner: List<Domenenøkkel> = emptyList(),
             vedtakDecorator: (vedtak: Vedtak, rader: List<Map<String, String>>) -> Vedtak = { vedtak, _ -> vedtak }
     ): List<Vedtak> {
+        validerKolonner(dataTable, gyldigeKolonner)
         return dataTable.forHverBehandling { _, rader ->
             val rad = rader.first()
             val resultatType = parseResultatType(rad) ?: ResultatType.INNVILGE
             vedtakDecorator.invoke(mapVedtakDomene(rad, resultatType), rader)
+        }
+    }
+
+    private fun validerKolonner(dataTable: DataTable,
+                                gyldigeKolonner: List<Domenenøkkel>) {
+        if (gyldigeKolonner.isNotEmpty()) {
+            val kolonneVerdier = gyldigeKolonner.map { it.nøkkel() }.toSet()
+            dataTable.row(0)
+                    .filter { !kolonneVerdier.contains(it) }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { error("Ugyldige kolonner: $it") }
         }
     }
 
@@ -89,6 +122,16 @@ object VedtakDomeneParser {
                    internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null)
 
     private fun validerSanksjon(perioder: List<Barnetilsynperiode>) {
+        feilHvisIkke(perioder.size == 1) {
+            "Antall rader for sanksjonering må være 1, per behandlingId"
+        }
+        val periode = perioder.single()
+        feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
+            "Sanksjon strekker seg ikke 1 måned: ${periode.datoFra} - ${periode.datoTil}"
+        }
+    }
+
+    private fun validerSanksjonSkolepenger(perioder: List<UtgiftsperiodeSkolepenger>) {
         feilHvisIkke(perioder.size == 1) {
             "Antall rader for sanksjonering må være 1, per behandlingId"
         }
@@ -117,6 +160,18 @@ object VedtakDomeneParser {
                     utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                     barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(1, it).map { UUID.randomUUID() } }
                            ?: emptyList()
+            )
+        }
+    }
+
+    private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<UtgiftsperiodeSkolepenger> {
+        return rader.map { rad ->
+            UtgiftsperiodeSkolepenger(
+                    studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
+                    datoFra = parseFraOgMed(rad),
+                    datoTil = parseTilOgMed(rad),
+                    studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
+                    utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             )
         }
     }
