@@ -188,7 +188,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                                                                    behandlingId = saksbehandling.id,
                                                                    andelerTilkjentYtelse = nyeAndeler,
                                                                    samordningsfradragType = null,
-                                                                   startdato = nyttOpphørsdato))
+                                                                   startdato = nyttOpphørsdato,
+                                                                   grunnbeløpsdato = forrigeTilkjenteYtelse.grunnbeløpsdato))
     }
 
     private fun beregnNyttOpphørsdatoForRevurdering(nyeAndeler: List<AndelTilkjentYtelse>,

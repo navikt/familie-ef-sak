@@ -27,8 +27,9 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
-        if (saksbehandling.erMigrering) {
-            logger.info("Oppretter ikke saksbehandlingsblankett for behandling=${saksbehandling.id}, behandling er migrering")
+        if (saksbehandling.erMigrering || saksbehandling.erMaskinellOmregning) {
+            logger.info("Oppretter ikke saksbehandlingsblankett for behandling=${saksbehandling.id}, " +
+                        "behandling er migrering eller maskinell g-omregning")
         } else {
             val blankettPdf = blankettService.lagBlankett(saksbehandling.id)
             logger.info("Journalfører blankett for behandling=${saksbehandling.id}")

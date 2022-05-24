@@ -65,7 +65,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                     oppdaterResultatPåBehandling(saksbehandling.id)
                     opprettPollForStatusOppgave(saksbehandling.id)
                     opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-                    if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV) {
+                    if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning) {
                         iverksettClient.iverksettUtenBrev(iverksettDto)
                     } else {
                         val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
