@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask.FerdigstillOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.brev.VedtaksbrevRepository
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -32,7 +33,6 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -62,10 +62,10 @@ internal class SendTilBeslutterStegTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val vedtakService = mockk<VedtakService>()
-    private val vedtakRepository = mockk<VedtakRepository>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val vurderingService = mockk<VurderingService>()
+    private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
     private val simuleringsoppsummering = Simuleringsoppsummering(perioder = listOf(),
                                                                   fomDatoNestePeriode = null,
                                                                   etterbetaling = BigDecimal.ZERO,
@@ -85,7 +85,8 @@ internal class SendTilBeslutterStegTest {
                                  vedtakService,
                                  simuleringService,
                                  tilbakekrevingService,
-                                 vurderingService)
+                                 vurderingService,
+                                 validerOmregningService)
     private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
                                 identer = setOf(PersonIdent(ident = "12345678901")))
     private val saksbehandlerNavn = "saksbehandlernavn"

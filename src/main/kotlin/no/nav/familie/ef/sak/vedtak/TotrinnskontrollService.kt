@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -31,7 +32,8 @@ import java.util.UUID
 @Service
 class TotrinnskontrollService(private val behandlingshistorikkService: BehandlingshistorikkService,
                               private val behandlingService: BehandlingService,
-                              private val tilgangService: TilgangService) {
+                              private val tilgangService: TilgangService,
+                              private val validerOmregningService: ValiderOmregningService) {
 
     /**
      * Lagrer data om besluttning av totrinnskontroll
@@ -41,7 +43,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
     fun lagreTotrinnskontrollOgReturnerBehandler(saksbehandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
         val sisteBehandlingshistorikk =
                 behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
-
+        validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
             throw Feil(message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
                        frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt")
@@ -88,6 +90,7 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
             behandlingStatus == BehandlingStatus.FERDIGSTILT
             || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
             || behandlingStatus == BehandlingStatus.OPPRETTET
+
 
     /**
      * Hvis behandlingsstatus er FATTER_VEDTAK så sjekkes det att saksbehandleren er autorisert til å fatte vedtak

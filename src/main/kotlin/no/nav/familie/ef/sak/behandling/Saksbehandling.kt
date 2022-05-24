@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.relational.core.mapping.Column
@@ -30,10 +31,13 @@ data class Saksbehandling(val id: UUID,
                           @Column("stonadstype")
                           val stønadstype: StønadType,
                           val migrert: Boolean = false,
+                          val opprettetAv: String,
                           val opprettetTid: LocalDateTime,
                           val endretTid: LocalDateTime) {
 
     val erMigrering get() = årsak == BehandlingÅrsak.MIGRERING
 
     val erOmregning get() = årsak == BehandlingÅrsak.G_OMREGNING
+
+    val erMaskinellOmregning get() = erOmregning && opprettetAv == SYSTEM_FORKORTELSE
 }
