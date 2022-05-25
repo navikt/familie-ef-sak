@@ -74,7 +74,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
 
-        omregningService.utførGOmregning(fagsakId, true)
+        omregningService.validerOgutførGOmregning(fagsakId, true)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
@@ -96,7 +96,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
 
-        assertThrows<DryRunException> { omregningService.utførGOmregning(fagsak.id, false) }
+        assertThrows<DryRunException> { omregningService.validerOgutførGOmregning(fagsak.id, false) }
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
@@ -115,7 +115,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
 
-        omregningService.utførGOmregning(fagsak.id, false)
+        omregningService.validerOgutførGOmregning(fagsak.id, false)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
@@ -133,7 +133,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
 
-        omregningService.utførGOmregning(fagsak.id, true)
+        omregningService.validerOgutførGOmregning(fagsak.id, true)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
@@ -155,7 +155,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                                        inntekter = InntektWrapper(listOf(inntektsperiode)),
                                        perioder = PeriodeWrapper(listOf(vedtaksperiode))))
 
-        omregningService.utførGOmregning(fagsak.id, false)
+        omregningService.validerOgutførGOmregning(fagsak.id, false)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
@@ -177,7 +177,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                                        inntekter = InntektWrapper(listOf(inntektsperiode)),
                                        perioder = PeriodeWrapper(listOf(vedtaksperiode))))
 
-        omregningService.utførGOmregning(fagsak.id, true)
+        omregningService.validerOgutførGOmregning(fagsak.id, true)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)

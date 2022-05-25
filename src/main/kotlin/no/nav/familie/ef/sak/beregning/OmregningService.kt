@@ -64,14 +64,39 @@ class OmregningService(private val behandlingService: BehandlingService,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun utførGOmregning(fagsakId: UUID,
-                        liveRun: Boolean) {
-        logger.info("Starter på g-omregning av fagsak=$fagsakId")
+    fun validerOgutførGOmregning(fagsakId: UUID,
+                                 liveRun: Boolean) {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
             "Feature toggle for omberegning er disabled"
         }
 
+        val forrigeTilkjentYtelse = validerBehandlingOgHentSisteTilkjentYtelse(fagsakId)
+        val innvilgelseOvergangsstønad = hentInnvilgelseForOvergangsstønad(fagsakId) ?: return
+
+        utførGOmregning(fagsakId, forrigeTilkjentYtelse, innvilgelseOvergangsstønad, liveRun)
+
+    }
+
+    private fun hentInnvilgelseForOvergangsstønad(fagsakId: UUID): InnvilgelseOvergangsstønad? {
+        val innvilgelseOvergangsstønad =
+                vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
+                                                                           YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
+        if (innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
+            logger.warn(MarkerFactory.getMarker("G-Omregning - Manuell"),
+                        "Fagsak med id $fagsakId har sanksjon og må manuelt behandles")
+            return null
+        }
+
+        if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
+            logger.warn(MarkerFactory.getMarker("G-Omregning - Manuell"),
+                        "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
+            return null
+        }
+        return innvilgelseOvergangsstønad
+    }
+
+    private fun validerBehandlingOgHentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse {
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
                               ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
 
@@ -79,26 +104,22 @@ class OmregningService(private val behandlingService: BehandlingService,
             "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
         }
 
+
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(sisteBehandling.id)
 
         feilHvis(forrigeTilkjentYtelse.grunnbeløpsdato == nyesteGrunnbeløpGyldigFraOgMed) {
             "Skal ikke utføre g-omregning når forrige tilkjent ytelse allerede har nyeste grunnbeløpsdato"
         }
+        return forrigeTilkjentYtelse
 
-        val innvilgelseOvergangsstønad =
-                vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
-                                                                           YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
-        if(innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
-            logger.warn(MarkerFactory.getMarker("G-Omregning - Manuell"),
-                        "Fagsak med id $fagsakId har sanksjon og må manuelt behandles")
-            return
-        }
+    }
 
-        if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
-            logger.warn(MarkerFactory.getMarker("G-Omregning - Manuell"),
-                        "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
-            return
-        }
+    private fun utførGOmregning(fagsakId: UUID,
+                                forrigeTilkjentYtelse: TilkjentYtelse,
+                                innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
+                                liveRun: Boolean) {
+
+        logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
                                                              fagsakId = fagsakId,
@@ -141,7 +162,6 @@ class OmregningService(private val behandlingService: BehandlingService,
             loggResultat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
             throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")
         }
-
     }
 
     fun loggResultat(forrigeTilkjentYtelse: TilkjentYtelse,
