@@ -169,7 +169,7 @@ internal class BisysBarnetilsynServiceTest {
         val fomDato = LocalDate.now()
         assertThat(barnetilsynBisysService.hentAllePerioder(personident, fomDato).barnetilsynBisysPerioder).hasSize(1)
         assertThat(barnetilsynBisysService.hentAllePerioder(personident, fomDato)
-                           .barnetilsynBisysPerioder.first().barnIdenter).contains(personIdentBarnAndelHistorikk)
+                           .barnetilsynBisysPerioder.first().datakilde).isEqualTo(Datakilde.EF)
     }
 
     @Test
@@ -189,7 +189,7 @@ internal class BisysBarnetilsynServiceTest {
         val fomDato = LocalDate.now()
         assertThat(barnetilsynBisysService.hentAllePerioder(personident, fomDato).barnetilsynBisysPerioder).hasSize(1)
         assertThat(barnetilsynBisysService.hentAllePerioder(personident, fomDato)
-                           .barnetilsynBisysPerioder.first().barnIdenter).doesNotContain(personIdentBarnAndelHistorikk)
+                           .barnetilsynBisysPerioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
     }
 }
 
