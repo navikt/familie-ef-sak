@@ -23,9 +23,12 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
@@ -103,7 +106,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
 
     @Test
-    fun `utførGOmregning med samordningsfradrag kaster exception og etterlater seg ingen spor i databasen`() {
+    fun `utførGOmregning med samordningsfradrag returner og etterlater seg ingen spor i databasen i dry run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
         val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
                                                                 resultat = BehandlingResultat.INNVILGET,
@@ -112,7 +115,69 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
 
-        assertThrows<OmregningMedSamordningsfradragException> { omregningService.utførGOmregning(fagsak.id, false) }
+        omregningService.utførGOmregning(fagsak.id, false)
+
+        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
+        verify(exactly = 0) { iverksettClient.simuler(any()) }
+        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    fun `utførGOmregning med samordningsfradrag returner og etterlater seg ingen spor i databasen i live run`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
+        val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
+        vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
+
+        omregningService.utførGOmregning(fagsak.id, true)
+
+        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
+        verify(exactly = 0) { iverksettClient.simuler(any()) }
+        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    fun `utførGOmregning med sanksjon returner og etterlater seg ingen spor i databasen i dry run`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
+        val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
+        val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
+        vedtakRepository.insert(vedtak(behandlingId = behandling.id,
+                                       år = år,
+                                       inntekter = InntektWrapper(listOf(inntektsperiode)),
+                                       perioder = PeriodeWrapper(listOf(vedtaksperiode))))
+
+        omregningService.utførGOmregning(fagsak.id, false)
+
+        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
+        verify(exactly = 0) { iverksettClient.simuler(any()) }
+        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    fun `utførGOmregning med sanksjon returner og etterlater seg ingen spor i databasen i live run`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
+        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
+                                                                resultat = BehandlingResultat.INNVILGET,
+                                                                status = BehandlingStatus.FERDIGSTILT))
+        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
+        val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
+        val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
+        vedtakRepository.insert(vedtak(behandlingId = behandling.id,
+                                       år = år,
+                                       inntekter = InntektWrapper(listOf(inntektsperiode)),
+                                       perioder = PeriodeWrapper(listOf(vedtaksperiode))))
+
+        omregningService.utførGOmregning(fagsak.id, true)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
