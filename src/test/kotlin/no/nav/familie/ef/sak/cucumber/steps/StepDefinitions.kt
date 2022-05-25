@@ -83,7 +83,8 @@ class StepDefinitions {
                                                     vedtakService,
                                                     tilbakekrevingService,
                                                     barnService,
-                                                    fagsakService)
+                                                    fagsakService,
+                                                    mockk())
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
 
