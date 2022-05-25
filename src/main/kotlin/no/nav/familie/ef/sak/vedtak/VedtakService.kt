@@ -110,7 +110,7 @@ data class ForventetInntektForBehandling(
         val forventetInntektToMånederTilbake: Int?
 )
 
-data class ForventetInntektResponse(
+data class ForventetInntektForPersonIdent(
         val personIdent: String,
         val forventetInntektForrigeMåned: Int?,
         val forventetInntektToMånederTilbake: Int?

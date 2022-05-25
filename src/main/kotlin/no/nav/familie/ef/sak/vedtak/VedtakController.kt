@@ -126,7 +126,7 @@ class VedtakController(private val stegService: StegService,
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody
-                                                     personIdenter: List<String>): Ressurs<List<ForventetInntektResponse>> {
+                                                     personIdenter: List<String>): Ressurs<List<ForventetInntektForPersonIdent>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
@@ -147,7 +147,7 @@ class VedtakController(private val stegService: StegService,
 
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
         return Ressurs.success(personIdentMedForventetInntektList.map {
-            ForventetInntektResponse(it.personIdent,
+            ForventetInntektForPersonIdent(it.personIdent,
                                      it.forventetInntektForMåned.forventetInntektForrigeMåned,
                                      it.forventetInntektForMåned.forventetInntektToMånederTilbake)
         })
