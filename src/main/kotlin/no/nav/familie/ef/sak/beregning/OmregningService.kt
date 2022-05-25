@@ -64,8 +64,8 @@ class OmregningService(private val behandlingService: BehandlingService,
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun validerOgutførGOmregning(fagsakId: UUID,
-                                 liveRun: Boolean) {
+    fun utførGOmregning(fagsakId: UUID,
+                        liveRun: Boolean) {
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
             "Feature toggle for omberegning er disabled"
