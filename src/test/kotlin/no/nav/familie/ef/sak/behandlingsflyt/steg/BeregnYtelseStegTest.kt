@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
@@ -76,6 +77,7 @@ internal class BeregnYtelseStegTest {
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
+    private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(tilkjentYtelseService,
                                         beregningService,
@@ -86,7 +88,7 @@ internal class BeregnYtelseStegTest {
                                         tilbakekrevingService,
                                         barnService,
                                         fagsakService,
-                                        mockk())
+                                        validerOmregningService)
 
     private val slot = slot<TilkjentYtelse>()
 
