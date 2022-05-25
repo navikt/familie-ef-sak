@@ -5,27 +5,25 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
-import no.nav.familie.kontrakter.ef.iverksett.Periodetype
+import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
 class ValiderOmregningService(private val vedtakService: VedtakService,
                               private val tilkjentYtelseRepository: TilkjentYtelseRepository,
                               private val beregningService: BeregningService,
-                              private val tilkjentYtelseService: TilkjentYtelseService,
+                              private val vedtakHistorikkService: VedtakHistorikkService,
                               private val featureToggleService: FeatureToggleService) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -44,21 +42,21 @@ class ValiderOmregningService(private val vedtakService: VedtakService,
     }
 
     private fun validerHarSammePerioderSomTidligereVedtak(data: InnvilgelseOvergangsstønad,
-                                                          tidligerePerioder: Map<LocalDate, AndelHistorikkDto>) {
+                                                          tidligerePerioder: Map<YearMonth, VedtaksperiodeDto>) {
         brukerfeilHvis(tidligerePerioder.isEmpty()) {
             "Denne skal ikke g-omregnes då den ikke har noen tidligere perioder som er etter $nyesteGrunnbeløpGyldigFraOgMed"
         }
         brukerfeilHvis(data.perioder.size != tidligerePerioder.size) {
-            val tidligereDatoer = tidligerePerioder.values.joinToString(", ") { "${it.andel.stønadFra}-${it.andel.stønadTil}" }
+            val tidligereDatoer = tidligerePerioder.values.joinToString(", ") { "${it.årMånedFra}-${it.årMånedTil}" }
             "Antall vedtaksperioder er ulikt fra tidligere vedtak, tidligerePerioder=$tidligereDatoer"
         }
         data.perioder.forEach {
             val fra = it.årMånedFra
-            val tidligerePeriode = tidligerePerioder[fra.atDay(1)]
+            val tidligerePeriode = tidligerePerioder[fra]
                                    ?: throw ApiFeil("Finner ikke periode fra $fra", HttpStatus.BAD_REQUEST)
-            brukerfeilHvis(tidligerePeriode.andel.stønadTil != it.tilPeriode().tildato) {
+            brukerfeilHvis(tidligerePeriode.årMånedTil != it.årMånedTil) {
                 "Perioden fra $fra har annet tom-dato(${it.årMånedTil} enn " +
-                "tidligere periode (${YearMonth.from(tidligerePeriode.andel.stønadTil)})"
+                "tidligere periode (${tidligerePeriode.årMånedTil})"
             }
             brukerfeilHvis(tidligerePeriode.aktivitet != AktivitetType.MIGRERING &&
                            tidligerePeriode.aktivitet != it.aktivitet) {
@@ -73,16 +71,11 @@ class ValiderOmregningService(private val vedtakService: VedtakService,
     }
 
     private fun hentVedtakshistorikkFraNyesteGrunnbeløp(saksbehandling: Saksbehandling) =
-            tilkjentYtelseService.hentHistorikk(saksbehandling.fagsakId, null)
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(saksbehandling.fagsakId,
+                                                                       YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
+                    .perioder
                     .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
-                    .filter { it.andel.stønadTil > nyesteGrunnbeløpGyldigFraOgMed }
-                    .map {
-                        if (it.andel.stønadFra < nyesteGrunnbeløpGyldigFraOgMed) {
-                            it.copy(andel = it.andel.copy(stønadFra = nyesteGrunnbeløpGyldigFraOgMed))
-                        } else {
-                            it
-                        }
-                    }.associateBy { it.andel.stønadFra }
+                    .associateBy { it.årMånedFra }
 
     fun validerHarGammelGOgKanLagres(saksbehandling: Saksbehandling) {
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) return
