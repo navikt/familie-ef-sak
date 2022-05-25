@@ -15,7 +15,7 @@ class BisysBarnetilsynController(val bisysBarnetilsynService: BisysBarnetilsynSe
     @PostMapping("/perioder-barnetilsyn")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun hentPerioderBarnetilsyn(@RequestBody barnetilsynBisysRequest: BarnetilsynBisysRequest): BarnetilsynBisysResponse {
-        return bisysBarnetilsynService.hentPerioderBarnetilsyn(barnetilsynBisysRequest.ident, barnetilsynBisysRequest.fomDato)
+        return bisysBarnetilsynService.hentAllePerioder(barnetilsynBisysRequest.ident, barnetilsynBisysRequest.fomDato)
     }
 
 }
