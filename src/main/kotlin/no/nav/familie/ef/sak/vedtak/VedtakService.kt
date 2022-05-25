@@ -110,6 +110,12 @@ data class ForventetInntektForBehandling(
         val forventetInntektToMånederTilbake: Int?
 )
 
+data class ForventetInntektResponse(
+        val personIdent: String,
+        val forventetInntektForrigeMåned: Int?,
+        val forventetInntektToMånederTilbake: Int?
+)
+
 fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)
 fun LocalDate.isEqualOrBefore(dato: LocalDate) = this.equals(dato) || this.isBefore(dato)
 fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
