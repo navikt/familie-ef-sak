@@ -85,7 +85,8 @@ internal class BeregnYtelseStegTest {
                                         vedtakService,
                                         tilbakekrevingService,
                                         barnService,
-                                        fagsakService)
+                                        fagsakService,
+                                        mockk())
 
     private val slot = slot<TilkjentYtelse>()
 
