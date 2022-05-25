@@ -203,7 +203,8 @@ class DryRunBeregnYtelseSteg(tilkjentYtelseService: TilkjentYtelseService,
                              vedtakService: VedtakService,
                              tilbakekrevingService: TilbakekrevingService,
                              barnService: BarnService,
-                             fagsakService: FagsakService) {
+                             fagsakService: FagsakService,
+                             validerOmregningService: ValiderOmregningService) {
 
     private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
                                                     beregningService,
@@ -213,7 +214,8 @@ class DryRunBeregnYtelseSteg(tilkjentYtelseService: TilkjentYtelseService,
                                                     vedtakService,
                                                     tilbakekrevingService,
                                                     barnService,
-                                                    fagsakService)
+                                                    fagsakService,
+                                                    validerOmregningService)
 
     fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
         beregnYtelseSteg.utførSteg(saksbehandling, data)
