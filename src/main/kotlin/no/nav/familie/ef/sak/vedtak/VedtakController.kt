@@ -125,26 +125,26 @@ class VedtakController(private val stegService: StegService,
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<Map<String, Int?>> {
+    fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<List<PersonIdentMedForventetInntekt>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
-        val identToForventetInntektMap = mutableMapOf<String, Int?>()
 
-        val behandlingIdToForventetInntektMap =
+        val personIdentMedForventetInntektList = mutableListOf<PersonIdentMedForventetInntekt>()
+        val forventetInntektForBehandling =
                 vedtakService.hentForventetInntektForBehandlingIds(personIdentToBehandlingIds.values)
 
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
-            if (behandlingIdToForventetInntektMap[behandlingId] == null) {
+            if (forventetInntektForBehandling.firstOrNull { it.behandlingId == behandlingId } == null) {
                 secureLogger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {
-                val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
-                identToForventetInntektMap[personIdent] = forventetInntekt
+                val forventetInntekt = forventetInntektForBehandling.first { it.behandlingId == behandlingId }
+                personIdentMedForventetInntektList.add(PersonIdentMedForventetInntekt(personIdent, forventetInntekt))
             }
         }
 
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
-        return Ressurs.success(identToForventetInntektMap)
+        return Ressurs.success(personIdentMedForventetInntektList)
     }
 }

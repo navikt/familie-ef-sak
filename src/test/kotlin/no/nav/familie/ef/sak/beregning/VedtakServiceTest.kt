@@ -165,9 +165,10 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val vedtak = vedtakRepository.insert(vedtak(behandling.id))
         val behandlingIds = listOf(behandling.id)
-        val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForBehandlingIds(behandlingIds)
+        val forventetInntektForBehandling = vedtakService.hentForventetInntektForBehandlingIds(behandlingIds)
 
-        assertThat(behandlingIdToForventetInntektMap[behandling.id]).isNull()
+        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandling.id }.forventetInntektForrigeMåned).isNull()
+        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandling.id }.forventetInntektToMånederTilbake).isNull()
     }
 
     @Test
@@ -176,11 +177,43 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandlingIdInnenforPeriode = insertVedtakMedPeriode(forrigeMåned.atDay(1), YearMonth.now().atEndOfMonth())
         val behandlingIdMedInntektForrigeMåned = insertVedtakMedPeriode(forrigeMåned.atDay(1), forrigeMåned.atEndOfMonth())
 
-        val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdInnenforPeriode, behandlingIdMedInntektForrigeMåned))
+        val forventetInntektForBehandling = vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdInnenforPeriode,
+                                                                                                      behandlingIdMedInntektForrigeMåned))
 
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdInnenforPeriode]).isEqualTo(500_000)
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedInntektForrigeMåned]).isNull()
+        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandlingIdInnenforPeriode }.forventetInntektForrigeMåned).isEqualTo(
+                500_000)
+        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandlingIdMedInntektForrigeMåned }.forventetInntektForrigeMåned).isNull()
+        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandlingIdMedInntektForrigeMåned }.forventetInntektToMånederTilbake).isNull()
     }
+
+    @Test
+    internal fun `hentForventetInntektForVedtakOgDato - forskjellig inntekt mellom to måneder`() {
+        val vedtakFraOgMedDato = LocalDate.of(2022, 1, 1)
+        val vedtakTilOgMedDato = LocalDate.of(2023, 12, 31)
+
+        val inntektsperiodeToMånederTilbake =
+                Inntektsperiode(vedtakFraOgMedDato,
+                                YearMonth.now().minusMonths(2).atEndOfMonth(),
+                                BigDecimal(500_000),
+                                BigDecimal.ZERO)
+        val inntektsperiodeForrigeMåned = Inntektsperiode(
+                YearMonth.now().minusMonths(1).atDay(1),
+                vedtakTilOgMedDato,
+                BigDecimal(400_000),
+                BigDecimal.ZERO)
+        val behandlingIdMedForskjelligInntektsperioder =
+                insertVedtakMedPeriode(vedtakFraOgMedDato,
+                                       vedtakTilOgMedDato,
+                                       listOf(inntektsperiodeToMånederTilbake, inntektsperiodeForrigeMåned))
+
+
+        val forventetInntektForBehandling =
+                vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdMedForskjelligInntektsperioder))
+
+        assertThat(forventetInntektForBehandling.first().forventetInntektToMånederTilbake).isEqualTo(500_000)
+        assertThat(forventetInntektForBehandling.first().forventetInntektForrigeMåned).isEqualTo(400_000)
+    }
+
 
     @Test
     internal fun `er vedtak aktivt`() {
@@ -190,21 +223,23 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2022, 1, 1))).isFalse
     }
 
-    private fun insertVedtakMedPeriode(fraOgMedDato: LocalDate, tilOgMedDato: LocalDate) : UUID {
-        val fagsakInnenforPeriode = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(UUID.randomUUID().toString()))))
-        val behandlingIdMedInntektInnenforPeriode = behandlingRepository.insert(behandling(fagsakInnenforPeriode, status = BehandlingStatus.FERDIGSTILT)).id
+    private fun insertVedtakMedPeriode(fraOgMedDato: LocalDate,
+                                       tilOgMedDato: LocalDate,
+                                       inntektsperiode: List<Inntektsperiode> = listOf(Inntektsperiode(fraOgMedDato,
+                                                                                                       tilOgMedDato,
+                                                                                                       BigDecimal(500_000),
+                                                                                                       BigDecimal.ZERO))): UUID {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(UUID.randomUUID().toString()))))
+        val behandlingId = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)).id
 
-        val inntektsperiodeTilOgMedDenneMåneden =
-                Inntektsperiode(fraOgMedDato, tilOgMedDato, BigDecimal(500_000), BigDecimal.ZERO)
-        val vedtaksperiodeTilOgMedDenneMåneden = Vedtaksperiode(fraOgMedDato,
-                                                                tilOgMedDato,
-                                                                AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                                VedtaksperiodeType.HOVEDPERIODE)
-        vedtakRepository.insert(vedtak(behandlingIdMedInntektInnenforPeriode,
-                                       inntekter = InntektWrapper(listOf(inntektsperiodeTilOgMedDenneMåneden)),
-                                       perioder = PeriodeWrapper(
-                                               listOf(vedtaksperiodeTilOgMedDenneMåneden))))
-        return behandlingIdMedInntektInnenforPeriode
+        val vedtaksperiode = Vedtaksperiode(fraOgMedDato,
+                                            tilOgMedDato,
+                                            AktivitetType.BARN_UNDER_ETT_ÅR,
+                                            VedtaksperiodeType.HOVEDPERIODE)
+        vedtakRepository.insert(vedtak(behandlingId,
+                                       inntekter = InntektWrapper(inntektsperiode),
+                                       perioder = PeriodeWrapper(listOf(vedtaksperiode))))
+        return behandlingId
     }
 
     @Nested

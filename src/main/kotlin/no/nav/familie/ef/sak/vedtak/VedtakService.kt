@@ -65,22 +65,32 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         return null
     }
 
-    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, Int?> {
+    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): List<ForventetInntektForBehandling> {
         val vedtakList = vedtakRepository.findAllById(behandlingIds)
-        val dagensDatoMinusEnMåned = LocalDate.now().minusMonths(1)
-        val map = mutableMapOf<UUID, Int?>()
+        val list = mutableListOf<ForventetInntektForBehandling>()
         for (vedtak in vedtakList) {
             if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
-                map.put(vedtak.behandlingId, vedtak.inntekter?.inntekter?.firstOrNull {
-                    dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato)
-                }?.inntekt?.toInt())
+                list.add(createForventetInntektForBehandling(vedtak))
             } else {
-                map.put(vedtak.behandlingId, null)
+                list.add(ForventetInntektForBehandling(vedtak.behandlingId, null, null))
             }
         }
 
-        return map
+        return list
     }
+
+    private fun createForventetInntektForBehandling(vedtak: Vedtak): ForventetInntektForBehandling {
+        return ForventetInntektForBehandling(vedtak.behandlingId,
+                                             createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(1)),
+                                             createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(2))
+        )
+    }
+
+    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: LocalDate) =
+            vedtak.inntekter?.inntekter?.firstOrNull {
+                forventetInntektForDato.isEqualOrAfter(it.startDato) && forventetInntektForDato.isEqualOrBefore(
+                        it.sluttDato)
+            }?.inntekt?.toInt()
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
         return hentVedtak(behandlingId).perioder?.perioder?.any {
@@ -89,6 +99,20 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 }
 
+data class PersonIdentMedForventetInntekt(
+        val personIdent: String,
+        val forventetInntektForMåned: ForventetInntektForBehandling
+)
+
+data class ForventetInntektForBehandling(
+        val behandlingId: UUID,
+        val forventetInntektForrigeMåned: Int?,
+        val forventetInntektToMånederTilbake: Int?
+)
+
 fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)
 fun LocalDate.isEqualOrBefore(dato: LocalDate) = this.equals(dato) || this.isBefore(dato)
-fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any { Periode(it.datoFra, it.datoTil).omslutter(dato) } ?: false
+fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
+    Periode(it.datoFra,
+            it.datoTil).omslutter(dato)
+} ?: false
