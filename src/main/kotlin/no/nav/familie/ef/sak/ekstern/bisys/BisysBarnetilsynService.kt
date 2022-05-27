@@ -24,11 +24,12 @@ class BisysBarnetilsynService(
         private val tilkjentYtelseService: TilkjentYtelseService,
         private val infotrygdService: InfotrygdService) {
 
-    fun hentAllePerioder(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
-        return BarnetilsynBisysResponse(bisysPerioderEfOgInfotrygd(personIdent, fomDato))
+    fun hentBarnetilsynperioderFraEfOgInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
+        return BarnetilsynBisysResponse(kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent, fomDato))
     }
 
-    private fun bisysPerioderEfOgInfotrygd(personIdent: String, fomDato: LocalDate): List<BarnetilsynBisysPeriode> {
+    private fun kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent: String,
+                                                            fomDato: LocalDate): List<BarnetilsynBisysPeriode> {
         return (hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato) + hentPerioderBarnetilsyn(personIdent, fomDato))
                 .sortedBy { it.periode.fom }
     }
@@ -62,7 +63,8 @@ class BisysBarnetilsynService(
 
     private fun hentInfotrygdPerioderBarnetilsyn(personIdent: String, fomDato: LocalDate): List<BarnetilsynBisysPeriode> {
         val barnetilsynBisysPerioder =
-                infotrygdService.hentPerioderFraReplika(personIdent).barnetilsyn.filter { it.stønadTom >= fomDato }
+                infotrygdService.hentPerioderFraReplika(personIdent,
+                                                        setOf(StønadType.BARNETILSYN)).barnetilsyn.filter { it.stønadTom >= fomDato }
                         .map { periode ->
                             BarnetilsynBisysPeriode(Periode(periode.stønadFom, periode.stønadTom),
                                                     periode.barnIdenter,

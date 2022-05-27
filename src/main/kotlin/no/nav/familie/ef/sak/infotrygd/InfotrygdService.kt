@@ -54,6 +54,11 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
         return hentPerioderFraReplika(personIdenter)
     }
 
+    fun hentPerioderFraReplika(personIdent: String, stønadTyper: Set<StønadType>): InfotrygdPeriodeResponse {
+        val personIdenter = hentPersonIdenter(personIdent)
+        return hentPerioderFraReplika(personIdenter, stønadTyper)
+    }
+
     /**
      * Filtrerer og slår sammen perioder fra infotrygd for å få en bedre totalbilde om hva som er gjeldende
      */
