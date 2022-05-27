@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class HenleggService(private val behandlingService: BehandlingService,
-                     private val oppgaveService: OppgaveService) {
+class HenleggService(
+    private val behandlingService: BehandlingService,
+    private val oppgaveService: OppgaveService
+) {
 
     @Transactional
     fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
@@ -23,5 +25,4 @@ class HenleggService(private val behandlingService: BehandlingService,
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleSak)
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
     }
-
 }

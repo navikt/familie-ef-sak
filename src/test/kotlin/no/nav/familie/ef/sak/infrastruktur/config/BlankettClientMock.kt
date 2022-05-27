@@ -20,5 +20,4 @@ class BlankettClientMock {
         every { mock.genererBlankett(any()) } returns dummyPdf
         return mock
     }
-
 }

@@ -12,17 +12,22 @@ object BosituasjonMapper {
 
         val samboerDto = bosituasjon.samboer?.let { PersonMinimumDto(it.navn, it.fødselsdato, it.fødselsnummer) }
 
-        return BosituasjonDto(bosituasjon.delerDuBolig,
-                              samboerDto,
-                              bosituasjon.sammenflyttingsdato,
-                              bosituasjon.datoFlyttetFraHverandre,
-                              bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.let {
-                                  DokumentasjonDto(it.harSendtInnTidligere,
-                                                   it.dokumenter.map { dokument ->
-                                                       VedleggDto(dokument.id,
-                                                                  dokument.navn)
-                                                   })
-                              })
-
+        return BosituasjonDto(
+            bosituasjon.delerDuBolig,
+            samboerDto,
+            bosituasjon.sammenflyttingsdato,
+            bosituasjon.datoFlyttetFraHverandre,
+            bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.let {
+                DokumentasjonDto(
+                    it.harSendtInnTidligere,
+                    it.dokumenter.map { dokument ->
+                        VedleggDto(
+                            dokument.id,
+                            dokument.navn
+                        )
+                    }
+                )
+            }
+        )
     }
 }

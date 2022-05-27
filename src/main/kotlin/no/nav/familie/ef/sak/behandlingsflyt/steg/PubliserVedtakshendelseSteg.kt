@@ -14,5 +14,4 @@ class PubliserVedtakshendelseSteg(private val iverksettClient: IverksettClient) 
     override fun stegType(): StegType {
         return StegType.PUBLISER_VEDTAKSHENDELSE
     }
-
 }

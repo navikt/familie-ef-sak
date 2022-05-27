@@ -14,23 +14,22 @@ import org.springframework.stereotype.Service
  */
 @Service
 class PerioderForBarnetrygdService(
-        private val periodeService: PeriodeService
+    private val periodeService: PeriodeService
 ) {
 
     fun hentPerioderMedFullOvergangsstønad(request: PersonIdent): PerioderOvergangsstønadResponse {
         val perioder = periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(request.ident)
-                .filter(InternPeriode::erFullOvergangsstønad)
-                .map(InternPeriode::tilEksternPeriodeOvergangsstønad)
+            .filter(InternPeriode::erFullOvergangsstønad)
+            .map(InternPeriode::tilEksternPeriodeOvergangsstønad)
 
         return PerioderOvergangsstønadResponse(perioder)
     }
-
 }
 
 private fun InternPeriode.tilEksternPeriodeOvergangsstønad(): PeriodeOvergangsstønad =
-        PeriodeOvergangsstønad(
-                personIdent = this.personIdent,
-                fomDato = this.stønadFom,
-                tomDato = this.stønadTom,
-                datakilde = this.datakilde
-        )
+    PeriodeOvergangsstønad(
+        personIdent = this.personIdent,
+        fomDato = this.stønadFom,
+        tomDato = this.stønadTom,
+        datakilde = this.datakilde
+    )

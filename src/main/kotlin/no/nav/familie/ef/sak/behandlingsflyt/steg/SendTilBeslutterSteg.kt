@@ -34,16 +34,18 @@ import java.math.BigDecimal
 import java.util.UUID
 
 @Service
-class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
-                           private val oppgaveService: OppgaveService,
-                           private val fagsakService: FagsakService,
-                           private val behandlingService: BehandlingService,
-                           private val vedtaksbrevRepository: VedtaksbrevRepository,
-                           private val vedtakService: VedtakService,
-                           private val simuleringService: SimuleringService,
-                           private val tilbakekrevingService: TilbakekrevingService,
-                           private val vurderingService: VurderingService,
-                           private val validerOmregningService: ValiderOmregningService) : BehandlingSteg<Void?> {
+class SendTilBeslutterSteg(
+    private val taskRepository: TaskRepository,
+    private val oppgaveService: OppgaveService,
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val vedtaksbrevRepository: VedtaksbrevRepository,
+    private val vedtakService: VedtakService,
+    private val simuleringService: SimuleringService,
+    private val tilbakekrevingService: TilbakekrevingService,
+    private val vurderingService: VurderingService,
+    private val validerOmregningService: ValiderOmregningService
+) : BehandlingSteg<Void?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
         if (saksbehandling.steg != stegType()) {
@@ -53,7 +55,8 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         if (saksbehandling.type !== BehandlingType.BLANKETT &&
             saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
             saksbehandling.årsak !== BehandlingÅrsak.G_OMREGNING &&
-            !vedtaksbrevRepository.existsById(saksbehandling.id)) {
+            !vedtaksbrevRepository.existsById(saksbehandling.id)
+        ) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
         }
         brukerfeilHvis(saksbehandlerMåTaStilingTilTilbakekreving(saksbehandling)) {
@@ -78,7 +81,7 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
             return false
         }
         val feilutbetaling =
-                simuleringService.hentLagretSimuleringsoppsummering(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
+            simuleringService.hentLagretSimuleringsoppsummering(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
         val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
         if (feilutbetaling && harIkkeTattStillingTil) {
             return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(saksbehandling.id)
@@ -90,9 +93,9 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
         val resultatType = vedtakService.hentVedtaksresultat(saksbehandling.id)
         return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING ||
-               saksbehandling.type == BehandlingType.BLANKETT ||
-               resultatType == ResultatType.AVSLÅ ||
-               resultatType == ResultatType.HENLEGGE
+            saksbehandling.type == BehandlingType.BLANKETT ||
+            resultatType == ResultatType.AVSLÅ ||
+            resultatType == ResultatType.HENLEGGE
     }
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
@@ -104,26 +107,33 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
     }
 
-
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
-            taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
+        taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
 
     private fun ferdigstillOppgave(saksbehandling: Saksbehandling, oppgavetype: Oppgavetype) {
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
         oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = saksbehandling.id,
-                                                                   oppgavetype,
-                                                                   it.gsakOppgaveId,
-                                                                   aktivIdent))
+            taskRepository.save(
+                FerdigstillOppgaveTask.opprettTask(
+                    behandlingId = saksbehandling.id,
+                    oppgavetype,
+                    it.gsakOppgaveId,
+                    aktivIdent
+                )
+            )
         }
     }
 
-
     private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {
-        taskRepository.save(OpprettOppgaveTask.opprettTask(
-                OpprettOppgaveTaskData(behandlingId = saksbehandling.id,
-                                       oppgavetype = Oppgavetype.GodkjenneVedtak,
-                                       beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.")))
+        taskRepository.save(
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTaskData(
+                    behandlingId = saksbehandling.id,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}."
+                )
+            )
+        )
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
@@ -139,5 +149,4 @@ class SendTilBeslutterSteg(private val taskRepository: TaskRepository,
     override fun stegType(): StegType {
         return StegType.SEND_TIL_BESLUTTER
     }
-
 }

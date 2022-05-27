@@ -8,11 +8,12 @@ object SivilstandsplanerMapper {
 
     fun tilDto(sivilstandsplaner: Sivilstandsplaner?): SivilstandsplanerDto {
         val samboerDto =
-                sivilstandsplaner?.vordendeSamboerEktefelle?.let { PersonMinimumDto(it.navn, it.fødselsdato, it.fødselsnummer) }
+            sivilstandsplaner?.vordendeSamboerEktefelle?.let { PersonMinimumDto(it.navn, it.fødselsdato, it.fødselsnummer) }
 
-        return SivilstandsplanerDto(sivilstandsplaner?.harPlaner,
-                                    sivilstandsplaner?.fraDato,
-                                    samboerDto)
+        return SivilstandsplanerDto(
+            sivilstandsplaner?.harPlaner,
+            sivilstandsplaner?.fraDato,
+            samboerDto
+        )
     }
 }
-

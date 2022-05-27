@@ -15,13 +15,17 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = StartBehandlingTask.TYPE,
-                     beskrivelse = "Sender start behandling til Infotrygd")
+@TaskStepBeskrivelse(
+    taskStepType = StartBehandlingTask.TYPE,
+    beskrivelse = "Sender start behandling til Infotrygd"
+)
 
-class StartBehandlingTask(private val iverksettClient: IverksettClient,
-                          private val pdlClient: PdlClient,
-                          private val fagsakService: FagsakService,
-                          private val behandlingRepository: BehandlingRepository) : AsyncTaskStep {
+class StartBehandlingTask(
+    private val iverksettClient: IverksettClient,
+    private val pdlClient: PdlClient,
+    private val fagsakService: FagsakService,
+    private val behandlingRepository: BehandlingRepository
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
@@ -35,23 +39,22 @@ class StartBehandlingTask(private val iverksettClient: IverksettClient,
     }
 
     private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
-            behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
+        behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
 
     companion object {
 
         fun opprettTask(behandlingId: UUID, fagsakId: UUID, personIdent: String): Task =
-                Task(type = TYPE,
-                     payload = behandlingId.toString(),
-                     properties = Properties().apply {
-                         this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
-                         this["behandlingId"] = behandlingId.toString()
-                         this["fagsakId"] = fagsakId.toString()
-                         this["personIdent"] = personIdent
-                     })
-
+            Task(
+                type = TYPE,
+                payload = behandlingId.toString(),
+                properties = Properties().apply {
+                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                    this["behandlingId"] = behandlingId.toString()
+                    this["fagsakId"] = fagsakId.toString()
+                    this["personIdent"] = personIdent
+                }
+            )
 
         const val TYPE = "startBehandlingTask"
     }
-
-
 }

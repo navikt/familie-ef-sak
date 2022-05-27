@@ -69,5 +69,4 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
 
         assertThat(opprettStartBehandlingHendelseDtoSlot.isCaptured).isEqualTo(false)
     }
-
 }

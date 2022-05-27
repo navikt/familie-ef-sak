@@ -3,11 +3,13 @@ package no.nav.familie.ef.sak.behandlingshistorikk.dto
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class HendelseshistorikkDto(val behandlingId: UUID,
-                                      var hendelse: Hendelse,
-                                      val endretAvNavn: String,
-                                      val endretTid: LocalDateTime,
-                                      val metadata: Map<String, Any>? = null)
+data class HendelseshistorikkDto(
+    val behandlingId: UUID,
+    var hendelse: Hendelse,
+    val endretAvNavn: String,
+    val endretTid: LocalDateTime,
+    val metadata: Map<String, Any>? = null
+)
 
 enum class Hendelse {
     OPPRETTET,

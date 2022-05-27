@@ -26,28 +26,35 @@ class EregClientMock {
     private fun lagResponse() = listOf(lagOrganisasjonDto(lagNavn(), lagOrganisasjonDetaljer()))
 
     private fun lagOrganisasjonDetaljer(): OrganisasjonDetaljer =
-            OrganisasjonDetaljer(registreringsdato = null,
-                                 enhetstyper = null,
-                                 navn = null,
-                                 forretningsAdresser = null,
-                                 postAdresser = null,
-                                 sistEndret = null)
+        OrganisasjonDetaljer(
+            registreringsdato = null,
+            enhetstyper = null,
+            navn = null,
+            forretningsAdresser = null,
+            postAdresser = null,
+            sistEndret = null
+        )
 
     private fun lagNavn() =
-            Navn(bruksperiode = null,
-                 gyldighetsperiode = null,
-                 navnelinje1 = "Julenissens Gavefabrikk AS",
-                 navnelinje2 = null,
-                 navnelinje3 = null,
-                 navnelinje4 = null,
-                 navnelinje5 = null,
-                 redigertnavn = null)
+        Navn(
+            bruksperiode = null,
+            gyldighetsperiode = null,
+            navnelinje1 = "Julenissens Gavefabrikk AS",
+            navnelinje2 = null,
+            navnelinje3 = null,
+            navnelinje4 = null,
+            navnelinje5 = null,
+            redigertnavn = null
+        )
 
-    private fun lagOrganisasjonDto(navn: Navn,
-                                   organisasjonDetaljer: OrganisasjonDetaljer) =
-            OrganisasjonDto(organisasjonsnummer = "123456789",
-                            type = "type",
-                            navn = navn,
-                            organisasjonDetaljer = organisasjonDetaljer)
-
+    private fun lagOrganisasjonDto(
+        navn: Navn,
+        organisasjonDetaljer: OrganisasjonDetaljer
+    ) =
+        OrganisasjonDto(
+            organisasjonsnummer = "123456789",
+            type = "type",
+            navn = navn,
+            organisasjonDetaljer = organisasjonDetaljer
+        )
 }

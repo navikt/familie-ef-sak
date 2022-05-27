@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(path = ["/api/frittstaende-brev"])
 @ProtectedWithClaims(issuer = "azuread")
-class FrittståendeBrevController(private val frittståendeBrevService: FrittståendeBrevService,
-                                 private val tilgangService: TilgangService) {
+class FrittståendeBrevController(
+    private val frittståendeBrevService: FrittståendeBrevService,
+    private val tilgangService: TilgangService
+) {
 
     @PostMapping("")
     fun forhåndsvisFrittståendeBrev(@RequestBody brevInnhold: FrittståendeBrevDto): Ressurs<ByteArray> {
@@ -28,5 +30,4 @@ class FrittståendeBrevController(private val frittståendeBrevService: Frittst�
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(frittståendeBrevService.sendFrittståendeBrev(brevInnhold))
     }
-
 }

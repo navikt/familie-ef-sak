@@ -21,14 +21,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/vurdering"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VurderingController(private val vurderingService: VurderingService,
-                          private val vurderingStegService: VurderingStegService,
-                          private val tilgangService: TilgangService) {
+class VurderingController(
+    private val vurderingService: VurderingService,
+    private val vurderingStegService: VurderingStegService,
+    private val tilgangService: TilgangService
+) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -38,17 +39,18 @@ class VurderingController(private val vurderingService: VurderingService,
     }
 
     @PostMapping("vilkar")
-    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: SvarPåVurderingerDto)
-            : Ressurs<VilkårsvurderingDto> {
+    fun oppdaterVurderingVilkår(@RequestBody vilkårsvurdering: SvarPåVurderingerDto): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         try {
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
             val delvilkårJson = objectMapper.writeValueAsString(vilkårsvurdering.delvilkårsvurderinger)
-            secureLogger.warn("id=${vilkårsvurdering.id}" +
-                              " behandlingId=${vilkårsvurdering.behandlingId}" +
-                              " svar=$delvilkårJson")
+            secureLogger.warn(
+                "id=${vilkårsvurdering.id}" +
+                    " behandlingId=${vilkårsvurdering.behandlingId}" +
+                    " svar=$delvilkårJson"
+            )
             throw e
         }
     }

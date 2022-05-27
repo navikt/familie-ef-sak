@@ -21,7 +21,6 @@ import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import org.assertj.core.api.Assertions.assertThat
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -38,10 +37,14 @@ internal class BisysBarnetilsynServiceTest {
 
     val fagsak: Fagsak = fagsak()
     val personident = "12345678910"
-    val behandlingBarn = listOf(BehandlingBarn(id = UUID.randomUUID(),
-                                               behandlingId = UUID.randomUUID(),
-                                               søknadBarnId = null,
-                                               personIdent = "123"))
+    val behandlingBarn = listOf(
+        BehandlingBarn(
+            id = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
+            søknadBarnId = null,
+            personIdent = "123"
+        )
+    )
 
     @BeforeEach
     fun setup() {
@@ -50,55 +53,68 @@ internal class BisysBarnetilsynServiceTest {
         every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarn
     }
 
-
     @Test
     fun `personident med ingen historikk, forvent tom liste med barntilsynBisysPerioder`() {
 
         every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns emptyList()
-        assertThat(barnetilsynBisysService.hentPerioderBarnetilsyn(personident,
-                                                                   LocalDate.now()).barnetilsynBisysPerioder).isEmpty()
-
+        assertThat(
+            barnetilsynBisysService.hentPerioderBarnetilsyn(
+                personident,
+                LocalDate.now()
+            ).barnetilsynBisysPerioder
+        ).isEmpty()
     }
 
     @Test
     fun `personident med andelhistorikk som har type ulik splittet, forvent tom liste med barntilsynBisysPerioder`() {
         val andelhistorikkDto =
-                lagAndelHistorikkDto(tilOgMed = LocalDate.now(),
-                                     behandlingBarn = behandlingBarn,
-                                     endring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now()))
+            lagAndelHistorikkDto(
+                tilOgMed = LocalDate.now(),
+                behandlingBarn = behandlingBarn,
+                endring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
+            )
         every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
-        assertThat(barnetilsynBisysService.hentPerioderBarnetilsyn(personident,
-                                                                   LocalDate.now()).barnetilsynBisysPerioder).isEmpty()
-
+        assertThat(
+            barnetilsynBisysService.hentPerioderBarnetilsyn(
+                personident,
+                LocalDate.now()
+            ).barnetilsynBisysPerioder
+        ).isEmpty()
     }
 
     @Test
     fun `personident med andelhistorikk som har beløp lik null, forvent tom liste med barntilsynBisysPerioder`() {
 
         val andelhistorikkDto =
-                lagAndelHistorikkDto(tilOgMed = LocalDate.now().plusDays(1), behandlingBarn = behandlingBarn, beløp = 0)
+            lagAndelHistorikkDto(tilOgMed = LocalDate.now().plusDays(1), behandlingBarn = behandlingBarn, beløp = 0)
         every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
-        assertThat(barnetilsynBisysService.hentPerioderBarnetilsyn(personident,
-                                                                   LocalDate.now()).barnetilsynBisysPerioder).isEmpty()
-
+        assertThat(
+            barnetilsynBisysService.hentPerioderBarnetilsyn(
+                personident,
+                LocalDate.now()
+            ).barnetilsynBisysPerioder
+        ).isEmpty()
     }
 
     @Test
     fun `personident med andelhistorikk som har tilOgMedDato før fomDato, forvent tom liste med barntilsynBisysPerioder`() {
 
         val andelhistorikkDto =
-                lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
+            lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
         every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
-        assertThat(barnetilsynBisysService.hentPerioderBarnetilsyn(personident,
-                                                                   LocalDate.now()).barnetilsynBisysPerioder).isEmpty()
-
+        assertThat(
+            barnetilsynBisysService.hentPerioderBarnetilsyn(
+                personident,
+                LocalDate.now()
+            ).barnetilsynBisysPerioder
+        ).isEmpty()
     }
 
     @Test
     fun `personident med gyldig andelhistorikk, forvent barnetilsynBisysResponse`() {
 
         val andelhistorikkDto =
-                lagAndelHistorikkDto(tilOgMed = LocalDate.now(), behandlingBarn = behandlingBarn)
+            lagAndelHistorikkDto(tilOgMed = LocalDate.now(), behandlingBarn = behandlingBarn)
 
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
@@ -117,45 +133,47 @@ internal class BisysBarnetilsynServiceTest {
     fun `personident med to andelshistorikker der den ene er før fomDato, forvent en andelshistorikk`() {
 
         val andelhistorikkDto =
-                lagAndelHistorikkDto(tilOgMed = LocalDate.now(), behandlingBarn = behandlingBarn)
+            lagAndelHistorikkDto(tilOgMed = LocalDate.now(), behandlingBarn = behandlingBarn)
         val gammelAndelhistorikkDto =
-                lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
+            lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
 
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto, gammelAndelhistorikkDto)
         val fomDato = LocalDate.now()
         assertThat(barnetilsynBisysService.hentPerioderBarnetilsyn(personident, fomDato).barnetilsynBisysPerioder).hasSize(1)
-
     }
-
 }
 
 fun lagAndelHistorikkDto(
-        fraOgMed: LocalDate = LocalDate.MIN,
-        tilOgMed: LocalDate,
-        behandlingBarn: List<BehandlingBarn> = emptyList(),
-        beløp: Int = 1,
-        endring: HistorikkEndring? = null,
-        aktivitet: AktivitetType? = null,
-        periodeType: VedtaksperiodeType? = null
+    fraOgMed: LocalDate = LocalDate.MIN,
+    tilOgMed: LocalDate,
+    behandlingBarn: List<BehandlingBarn> = emptyList(),
+    beløp: Int = 1,
+    endring: HistorikkEndring? = null,
+    aktivitet: AktivitetType? = null,
+    periodeType: VedtaksperiodeType? = null
 ): AndelHistorikkDto {
     return AndelHistorikkDto(
-            behandlingId = UUID.randomUUID(),
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            vedtakstidspunkt = LocalDateTime.now(),
-            saksbehandler = "",
-            andel = AndelMedGrunnlagDto(lagAndelTilkjentYtelse(beløp = beløp,
-                                                               fraOgMed = fraOgMed!!,
-                                                               tilOgMed = tilOgMed),
-                                        null).copy(barn = behandlingBarn.map { it.id }),
+        behandlingId = UUID.randomUUID(),
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        vedtakstidspunkt = LocalDateTime.now(),
+        saksbehandler = "",
+        andel = AndelMedGrunnlagDto(
+            lagAndelTilkjentYtelse(
+                beløp = beløp,
+                fraOgMed = fraOgMed!!,
+                tilOgMed = tilOgMed
+            ),
+            null
+        ).copy(barn = behandlingBarn.map { it.id }),
 
-            aktivitet = aktivitet,
-            aktivitetArbeid = null,
-            periodeType = periodeType,
-            erSanksjon = false,
-            sanksjonsårsak = null,
-            endring = endring
+        aktivitet = aktivitet,
+        aktivitetArbeid = null,
+        periodeType = periodeType,
+        erSanksjon = false,
+        sanksjonsårsak = null,
+        endring = endring
 
     )
 }

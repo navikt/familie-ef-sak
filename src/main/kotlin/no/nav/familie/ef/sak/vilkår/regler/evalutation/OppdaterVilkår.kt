@@ -28,10 +28,11 @@ object OppdaterVilkår {
      * Oppdaterer [Vilkårsvurdering] med nye svar og resultat
      * Validerer att svaren er gyldige
      */
-    fun lagNyOppdatertVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering,
-                                       oppdatering: List<DelvilkårsvurderingDto>,
-                                       vilkårsregler: Map<VilkårType, Vilkårsregel> = ALLE_VILKÅRSREGLER.vilkårsregler) // TODO: Ikke default input her, kanskje?
-            : Vilkårsvurdering {
+    fun lagNyOppdatertVilkårsvurdering(
+        vilkårsvurdering: Vilkårsvurdering,
+        oppdatering: List<DelvilkårsvurderingDto>,
+        vilkårsregler: Map<VilkårType, Vilkårsregel> = ALLE_VILKÅRSREGLER.vilkårsregler
+    ): Vilkårsvurdering { // TODO: Ikke default input her, kanskje?
         val vilkårsregel = vilkårsregler[vilkårsvurdering.type] ?: error("Finner ikke vilkårsregler for ${vilkårsvurdering.type}")
 
         validerVurdering(vilkårsregel, oppdatering, vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger)
@@ -39,8 +40,10 @@ object OppdaterVilkår {
         val vilkårsresultat = utledResultat(vilkårsregel, oppdatering)
         validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat)
         val oppdaterteDelvilkår = oppdaterDelvilkår(vilkårsvurdering, vilkårsresultat, oppdatering)
-        return vilkårsvurdering.copy(resultat = vilkårsresultat.vilkår,
-                                     delvilkårsvurdering = oppdaterteDelvilkår)
+        return vilkårsvurdering.copy(
+            resultat = vilkårsresultat.vilkår,
+            delvilkårsvurdering = oppdaterteDelvilkår
+        )
     }
 
     /**
@@ -51,7 +54,7 @@ object OppdaterVilkår {
     private fun validerAttResultatErOppfyltEllerIkkeOppfylt(vilkårsresultat: RegelResultat) {
         if (!vilkårsresultat.vilkår.oppfyltEllerIkkeOppfylt()) {
             val message = "Støtter ikke mellomlagring ennå, må håndtere ${vilkårsresultat.vilkår}. " +
-                          "Ett resultat på vurderingen må bli oppfylt eller ikke oppfylt"
+                "Ett resultat på vurderingen må bli oppfylt eller ikke oppfylt"
             throw Feil(message = message, frontendFeilmelding = message)
         }
     }
@@ -63,9 +66,11 @@ object OppdaterVilkår {
      *
      * @param vilkårsvurdering Vilkårsoppdatering fra databasen som skal oppdateres
      */
-    private fun oppdaterDelvilkår(vilkårsvurdering: Vilkårsvurdering,
-                                  vilkårsresultat: RegelResultat,
-                                  oppdatering: List<DelvilkårsvurderingDto>): DelvilkårsvurderingWrapper {
+    private fun oppdaterDelvilkår(
+        vilkårsvurdering: Vilkårsvurdering,
+        vilkårsresultat: RegelResultat,
+        oppdatering: List<DelvilkårsvurderingDto>
+    ): DelvilkårsvurderingWrapper {
         val vurderingerPåType = oppdatering.associateBy { it.vurderinger.first().regelId }
         val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger.map {
             if (it.resultat == Vilkårsresultat.IKKE_AKTUELL) {
@@ -76,8 +81,10 @@ object OppdaterVilkår {
                 val svar = vurderingerPåType[hovedregel] ?: throw Feil("Savner svar for hovedregel=$hovedregel")
 
                 if (resultat.oppfyltEllerIkkeOppfylt()) {
-                    it.copy(resultat = resultat,
-                            vurderinger = svar.svarTilDomene())
+                    it.copy(
+                        resultat = resultat,
+                        vurderinger = svar.svarTilDomene()
+                    )
                 } else {
                     // TODO håndtering for [Vilkårsresultat.SKAL_IKKE_VURDERES] som burde beholde første svaret i det delvilkåret
                     throw Feil("Håndterer ikke oppdatering av resultat=$resultat ennå")
@@ -107,17 +114,21 @@ object OppdaterVilkår {
             value.any { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL } -> Vilkårsresultat.IKKE_TATT_STILLING_TIL
             value.all { it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } -> Vilkårsresultat.SKAL_IKKE_VURDERES
             value.any { it.resultat == Vilkårsresultat.IKKE_OPPFYLT } &&
-            value.all { it.resultat == Vilkårsresultat.IKKE_OPPFYLT || it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } ->
+                value.all { it.resultat == Vilkårsresultat.IKKE_OPPFYLT || it.resultat == Vilkårsresultat.SKAL_IKKE_VURDERES } ->
                 Vilkårsresultat.IKKE_OPPFYLT
-            else -> throw Feil("Utled resultat for aleneomsorg - kombinasjon av resultat er ikke behandlet: " +
-                               "${value.map { it.resultat }}")
+            else -> throw Feil(
+                "Utled resultat for aleneomsorg - kombinasjon av resultat er ikke behandlet: " +
+                    "${value.map { it.resultat }}"
+            )
         }
     }
 
-    fun erAlleVilkårsvurderingerOppfylt(vilkårsvurderinger: List<Vilkårsvurdering>,
-                                        stønadstype: StønadType): Boolean {
+    fun erAlleVilkårsvurderingerOppfylt(
+        vilkårsvurderinger: List<Vilkårsvurdering>,
+        stønadstype: StønadType
+    ): Boolean {
         val inneholderAlleTyperVilkår =
-                vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkårForStønad(stønadstype))
+            vilkårsvurderinger.map { it.type }.containsAll(VilkårType.hentVilkårForStønad(stønadstype))
         val vilkårsresultat = utledVilkårsresultat(vilkårsvurderinger)
         return inneholderAlleTyperVilkår && vilkårsresultat.all { it == Vilkårsresultat.OPPFYLT }
     }
@@ -138,51 +149,56 @@ object OppdaterVilkår {
      * [Vilkårsresultat.IKKE_OPPFYLT], [Vilkårsresultat.OPPFYLT] og [Vilkårsresultat.SKAL_IKKE_VURDERES]
      */
     private fun harNoenIkkeOppfyltOgRestenIkkeOppfyltEllerOppfyltEllerSkalIkkevurderes(vilkårsresultat: List<Vilkårsresultat>) =
-            vilkårsresultat.any { it == Vilkårsresultat.IKKE_OPPFYLT } &&
+        vilkårsresultat.any { it == Vilkårsresultat.IKKE_OPPFYLT } &&
             vilkårsresultat.all {
                 it == Vilkårsresultat.OPPFYLT ||
-                it == Vilkårsresultat.IKKE_OPPFYLT ||
-                it == Vilkårsresultat.SKAL_IKKE_VURDERES
+                    it == Vilkårsresultat.IKKE_OPPFYLT ||
+                    it == Vilkårsresultat.SKAL_IKKE_VURDERES
             }
 
-    fun opprettNyeVilkårsvurderinger(behandlingId: UUID,
-                                     metadata: HovedregelMetadata,
-                                     stønadstype: StønadType): List<Vilkårsvurdering> {
+    fun opprettNyeVilkårsvurderinger(
+        behandlingId: UUID,
+        metadata: HovedregelMetadata,
+        stønadstype: StønadType
+    ): List<Vilkårsvurdering> {
         return vilkårsreglerForStønad(stønadstype)
-                .flatMap { vilkårsregel ->
-                    if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
-                        metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
-                    } else {
-                        listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
-                    }
+            .flatMap { vilkårsregel ->
+                if (vilkårsregel.vilkårType.gjelderFlereBarn() && metadata.barn.isNotEmpty()) {
+                    metadata.barn.map { lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId, it.id) }
+                } else {
+                    listOf(lagNyVilkårsvurdering(vilkårsregel, metadata, behandlingId))
                 }
+            }
     }
 
-
-    fun lagVilkårsvurderingForNyttBarn(metadata: HovedregelMetadata,
-                                       behandlingId: UUID,
-                                       barnId: UUID,
-                                       stønadstype: StønadType): List<Vilkårsvurdering> {
+    fun lagVilkårsvurderingForNyttBarn(
+        metadata: HovedregelMetadata,
+        behandlingId: UUID,
+        barnId: UUID,
+        stønadstype: StønadType
+    ): List<Vilkårsvurdering> {
         return when (stønadstype) {
             OVERGANGSSTØNAD -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId))
-            BARNETILSYN -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
-                                  lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId))
+            BARNETILSYN -> listOf(
+                lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
+                lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId)
+            )
             SKOLEPENGER -> throw NotImplementedError("Ikke implementert for skolepenger")
         }
-
     }
 
-
-    private fun lagNyVilkårsvurdering(vilkårsregel: Vilkårsregel,
-                                      metadata: HovedregelMetadata,
-                                      behandlingId: UUID,
-                                      barnId: UUID? = null): Vilkårsvurdering {
+    private fun lagNyVilkårsvurdering(
+        vilkårsregel: Vilkårsregel,
+        metadata: HovedregelMetadata,
+        behandlingId: UUID,
+        barnId: UUID? = null
+    ): Vilkårsvurdering {
         val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(metadata)
-        return Vilkårsvurdering(behandlingId = behandlingId,
-                                type = vilkårsregel.vilkårType,
-                                barnId = barnId,
-                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering))
+        return Vilkårsvurdering(
+            behandlingId = behandlingId,
+            type = vilkårsregel.vilkårType,
+            barnId = barnId,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)
+        )
     }
-
-
 }

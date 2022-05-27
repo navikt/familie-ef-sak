@@ -21,8 +21,8 @@ internal class RepositoryUtilTest {
         val testRepository = mockk<TestRepository>()
         every { testRepository.findByIdOrNull(any()) } returns null
         assertThat(catchThrowable { testRepository.findByIdOrThrow("123") })
-                .hasMessage("Finner ikke TestDomene med id=123")
-                .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("Finner ikke TestDomene med id=123")
+            .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test

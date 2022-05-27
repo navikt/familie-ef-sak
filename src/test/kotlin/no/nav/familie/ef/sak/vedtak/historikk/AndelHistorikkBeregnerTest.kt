@@ -70,7 +70,6 @@ class AndelHistorikkBeregnerTest {
         run("/økonomi/revurder_på_nytt_uten_endringer.csv")
     }
 
-
     @Nested
     inner class Sanksjon {
 
@@ -108,7 +107,6 @@ class AndelHistorikkBeregnerTest {
         internal fun `revurderer med sanksjon 2 ganger`() {
             run("/økonomi/sanksjon_flere.csv")
         }
-
     }
 
     private fun run(filnavn: String, tilOgMedBehandlingId: Int? = null) {
@@ -141,7 +139,7 @@ object AndelHistorikkRunner {
 
     private fun validerHarMaks1SanksjonPerVedtak(grupper: ParsetAndelHistorikkData) {
         grupper.vedtaksliste.mapNotNull { it.perioder?.perioder }
-                .forEach { perioder -> perioder.count { it.periodeType == VedtaksperiodeType.SANKSJON } < 2 }
+            .forEach { perioder -> perioder.count { it.periodeType == VedtaksperiodeType.SANKSJON } < 2 }
     }
 
     private fun validerVedtaksperioderIkkeOverlapper(grupper: ParsetAndelHistorikkData) {
@@ -166,9 +164,9 @@ object AndelHistorikkRunner {
 
     private fun toString(andeler: List<AndelHistorikkDto>): String {
         return "\n$headerString\n" +
-               andeler.joinToString("\n") { andel ->
-                   values().joinToString(", ") { mapValue(it, it.value.invoke(andel)) }
-               } + "\n"
+            andeler.joinToString("\n") { andel ->
+                values().joinToString(", ") { mapValue(it, it.value.invoke(andel)) }
+            } + "\n"
     }
 }
 
@@ -178,22 +176,26 @@ enum class TestType {
     OUTPUT
 }
 
-private data class AndelHistorikkData(val testType: TestType,
-                                      val behandlingId: UUID,
-                                      val beløp: Int?,
-                                      val stønadFom: LocalDate?,
-                                      val stønadTom: LocalDate?,
-                                      val inntekt: Int?,
-                                      val inntektsreduksjon: Int?,
-                                      val samordningsfradrag: Int?,
-                                      val type: EndringType?,
-                                      val aktivitet: AktivitetType?,
-                                      val periodeType: VedtaksperiodeType?,
-                                      val endretI: UUID?)
+private data class AndelHistorikkData(
+    val testType: TestType,
+    val behandlingId: UUID,
+    val beløp: Int?,
+    val stønadFom: LocalDate?,
+    val stønadTom: LocalDate?,
+    val inntekt: Int?,
+    val inntektsreduksjon: Int?,
+    val samordningsfradrag: Int?,
+    val type: EndringType?,
+    val aktivitet: AktivitetType?,
+    val periodeType: VedtaksperiodeType?,
+    val endretI: UUID?
+)
 
-data class ParsetAndelHistorikkData(val vedtaksliste: List<Vedtak>,
-                                    val input: List<TilkjentYtelse>,
-                                    val expectedOutput: List<AndelHistorikkDto>)
+data class ParsetAndelHistorikkData(
+    val vedtaksliste: List<Vedtak>,
+    val input: List<TilkjentYtelse>,
+    val expectedOutput: List<AndelHistorikkDto>
+)
 
 private val oppdragIdn = mutableMapOf<Int, UUID>()
 private fun generateBehandlingId(behandlingId: Int): UUID = oppdragIdn.getOrPut(behandlingId) { UUID.randomUUID() }
@@ -202,9 +204,11 @@ private fun hentBehandlingId(behandlingId: UUID) = oppdragIdn.entries.first { it
 /**
  * [ENDRET_I] kan brukes for å overstyre kildeBehandlingId
  */
-private enum class AndelHistorikkHeader(val key: String,
-                                        val value: (AndelHistorikkDto) -> Any?,
-                                        val minHeaderValue: Int = key.length) {
+private enum class AndelHistorikkHeader(
+    val key: String,
+    val value: (AndelHistorikkDto) -> Any?,
+    val minHeaderValue: Int = key.length
+) {
 
     TEST_TYPE("type", { "" }),
     BEHANDLING("behandling_id", { hentBehandlingId(it.behandlingId) }),
@@ -227,63 +231,71 @@ object AndelHistorikkParser {
     private fun parse(url: URL): List<AndelHistorikkData> {
         val fileContent = url.openStream()!!
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
-                .map { it.entries.associate { entry -> entry.key.trim() to entry.value.trim() } }
-                .filterNot { it.getValue(TEST_TYPE.key).startsWith("!") }
+            .map { it.entries.associate { entry -> entry.key.trim() to entry.value.trim() } }
+            .filterNot { it.getValue(TEST_TYPE.key).startsWith("!") }
 
         return rows
-                .map { row -> row.entries.associate { it.key.trim() to it.value.trim() } }
-                .mapIndexed { index, row ->
-                    try {
-                        val behandlingIdInt = row.getValue(BEHANDLING.key).toInt()
-                        val type = TestType.valueOf(row.getValue(TEST_TYPE.key))
+            .map { row -> row.entries.associate { it.key.trim() to it.value.trim() } }
+            .mapIndexed { index, row ->
+                try {
+                    val behandlingIdInt = row.getValue(BEHANDLING.key).toInt()
+                    val type = TestType.valueOf(row.getValue(TEST_TYPE.key))
 
-                        val behandlingId = generateBehandlingId(behandlingIdInt)
-                        mapRow(type, behandlingId, row)
-                    } catch (e: Exception) {
-                        throw RuntimeException("Feilet håndtering av rowIndex=$index - $row", e)
-                    }
+                    val behandlingId = generateBehandlingId(behandlingIdInt)
+                    mapRow(type, behandlingId, row)
+                } catch (e: Exception) {
+                    throw RuntimeException("Feilet håndtering av rowIndex=$index - $row", e)
                 }
+            }
     }
 
-    private fun mapRow(type: TestType,
-                       behandlingId: UUID,
-                       row: Map<String, String>) =
-            AndelHistorikkData(testType = type,
-                               behandlingId = behandlingId,
-                               beløp = row.getOptionalInt(BELØP),
-                               stønadFom = row.getOptionalValue(FOM)?.let { YearMonth.parse(it).atDay(1) },
-                               stønadTom = row.getOptionalValue(TOM)?.let { YearMonth.parse(it).atEndOfMonth() },
-                               inntekt = row.getOptionalInt(INNTEKT),
-                               inntektsreduksjon = row.getOptionalInt(INNTEKTSREDUKSJON),
-                               samordningsfradrag = row.getOptionalInt(SAMORDNINGSFRADRAG),
-                               aktivitet = row.getOptionalValue(AKTIVITET)?.let { AktivitetType.valueOf(it) },
-                               periodeType = row.getOptionalValue(PERIODE_TYPE)?.let { VedtaksperiodeType.valueOf(it) },
-                               type = row.getOptionalValue(TYPE_ENDRING)?.let { EndringType.valueOf(it) },
-                               endretI = row.getOptionalInt(ENDRET_I)?.let { generateBehandlingId(it) })
+    private fun mapRow(
+        type: TestType,
+        behandlingId: UUID,
+        row: Map<String, String>
+    ) =
+        AndelHistorikkData(
+            testType = type,
+            behandlingId = behandlingId,
+            beløp = row.getOptionalInt(BELØP),
+            stønadFom = row.getOptionalValue(FOM)?.let { YearMonth.parse(it).atDay(1) },
+            stønadTom = row.getOptionalValue(TOM)?.let { YearMonth.parse(it).atEndOfMonth() },
+            inntekt = row.getOptionalInt(INNTEKT),
+            inntektsreduksjon = row.getOptionalInt(INNTEKTSREDUKSJON),
+            samordningsfradrag = row.getOptionalInt(SAMORDNINGSFRADRAG),
+            aktivitet = row.getOptionalValue(AKTIVITET)?.let { AktivitetType.valueOf(it) },
+            periodeType = row.getOptionalValue(PERIODE_TYPE)?.let { VedtaksperiodeType.valueOf(it) },
+            type = row.getOptionalValue(TYPE_ENDRING)?.let { EndringType.valueOf(it) },
+            endretI = row.getOptionalInt(ENDRET_I)?.let { generateBehandlingId(it) }
+        )
 
     private fun mapAndel(andel: AndelHistorikkData): AndelTilkjentYtelse =
-            AndelTilkjentYtelse(beløp = andel.beløp!!,
-                                stønadFom = andel.stønadFom!!,
-                                stønadTom = andel.stønadTom!!,
-                                personIdent = PERSON_IDENT,
-                                inntekt = andel.inntekt!!,
-                                inntektsreduksjon = andel.inntektsreduksjon!!,
-                                samordningsfradrag = andel.samordningsfradrag!!,
-                                kildeBehandlingId = andel.endretI ?: andel.behandlingId)
+        AndelTilkjentYtelse(
+            beløp = andel.beløp!!,
+            stønadFom = andel.stønadFom!!,
+            stønadTom = andel.stønadTom!!,
+            personIdent = PERSON_IDENT,
+            inntekt = andel.inntekt!!,
+            inntektsreduksjon = andel.inntektsreduksjon!!,
+            samordningsfradrag = andel.samordningsfradrag!!,
+            kildeBehandlingId = andel.endretI ?: andel.behandlingId
+        )
 
     private fun Map<String, String>.getValue(header: AndelHistorikkHeader) = getValue(header.key)
     private fun Map<String, String>.getOptionalValue(header: AndelHistorikkHeader) = get(header.key)?.let { emptyAsNull(it) }
     private fun Map<String, String>.getOptionalInt(header: AndelHistorikkHeader) = getOptionalValue(header)?.toInt()
 
     private fun emptyAsNull(s: String?): String? =
-            if (s == null || s.isEmpty()) null else s
+        if (s == null || s.isEmpty()) null else s
 
     fun parseGroup(url: URL): ParsetAndelHistorikkData {
         val parse = parse(url)
         val groupBy = parse.groupBy { it.testType }
-        return ParsetAndelHistorikkData(vedtaksliste = mapVedtaksPerioder(groupBy[TestType.VEDTAK]!!),
-                                        input = mapInput(groupBy[TestType.ANDEL]!!),
-                                        expectedOutput = groupBy[TestType.OUTPUT]?.map { lagAndel(it) } ?: emptyList())
+        return ParsetAndelHistorikkData(
+            vedtaksliste = mapVedtaksPerioder(groupBy[TestType.VEDTAK]!!),
+            input = mapInput(groupBy[TestType.ANDEL]!!),
+            expectedOutput = groupBy[TestType.OUTPUT]?.map { lagAndel(it) } ?: emptyList()
+        )
     }
 
     /**
@@ -291,74 +303,87 @@ object AndelHistorikkParser {
      */
     private fun mapVedtaksPerioder(list: List<AndelHistorikkData>): List<Vedtak> {
         return list.map { it.behandlingId to it }
-                .groupBy({ it.first }, { it.second })
-                .map { (behandlingId, vedtaksperioder) ->
-                    val resultat: ResultatType
-                    var periodeWrapper: PeriodeWrapper? = null
-                    var opphørFom: LocalDate? = null
-                    var sanksjonsårsak: Sanksjonsårsak? = null
-                    if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
-                        resultat = ResultatType.SANKSJONERE
-                        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
-                        periodeWrapper = mapVedtaksperioder(vedtaksperioder)
-                    } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
-                        resultat = ResultatType.INNVILGE
-                        periodeWrapper = mapVedtaksperioder(vedtaksperioder)
-                    } else {
-                        feilHvis(vedtaksperioder.size > 1) {
-                            "Kan kun være en vedtaksperiode som er av typen opphør"
-                        }
-                        resultat = ResultatType.OPPHØRT
-                        opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
+            .groupBy({ it.first }, { it.second })
+            .map { (behandlingId, vedtaksperioder) ->
+                val resultat: ResultatType
+                var periodeWrapper: PeriodeWrapper? = null
+                var opphørFom: LocalDate? = null
+                var sanksjonsårsak: Sanksjonsårsak? = null
+                if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
+                    resultat = ResultatType.SANKSJONERE
+                    sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
+                    periodeWrapper = mapVedtaksperioder(vedtaksperioder)
+                } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
+                    resultat = ResultatType.INNVILGE
+                    periodeWrapper = mapVedtaksperioder(vedtaksperioder)
+                } else {
+                    feilHvis(vedtaksperioder.size > 1) {
+                        "Kan kun være en vedtaksperiode som er av typen opphør"
                     }
-                    val inntekter = periodeWrapper?.perioder?.firstOrNull()
-                                            ?.let {
-                                                listOf(Inntektsperiode(it.datoFra,
-                                                                       it.datoTil,
-                                                                       BigDecimal.ZERO,
-                                                                       BigDecimal.ZERO))
-                                            } ?: emptyList()
-                    Vedtak(behandlingId = behandlingId,
-                           resultatType = resultat,
-                           periodeBegrunnelse = null,
-                           inntektBegrunnelse = null,
-                           avslåBegrunnelse = null,
-                           perioder = periodeWrapper,
-                           inntekter = InntektWrapper(inntekter),
-                           saksbehandlerIdent = null,
-                           opphørFom = opphørFom,
-                           beslutterIdent = null,
-                           sanksjonsårsak = sanksjonsårsak,
-                           internBegrunnelse = "")
-
+                    resultat = ResultatType.OPPHØRT
+                    opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
                 }
+                val inntekter = periodeWrapper?.perioder?.firstOrNull()
+                    ?.let {
+                        listOf(
+                            Inntektsperiode(
+                                it.datoFra,
+                                it.datoTil,
+                                BigDecimal.ZERO,
+                                BigDecimal.ZERO
+                            )
+                        )
+                    } ?: emptyList()
+                Vedtak(
+                    behandlingId = behandlingId,
+                    resultatType = resultat,
+                    periodeBegrunnelse = null,
+                    inntektBegrunnelse = null,
+                    avslåBegrunnelse = null,
+                    perioder = periodeWrapper,
+                    inntekter = InntektWrapper(inntekter),
+                    saksbehandlerIdent = null,
+                    opphørFom = opphørFom,
+                    beslutterIdent = null,
+                    sanksjonsårsak = sanksjonsårsak,
+                    internBegrunnelse = ""
+                )
+            }
     }
 
     private fun mapVedtaksperioder(vedtaksperioder: List<AndelHistorikkData>) =
-            PeriodeWrapper(vedtaksperioder.map {
-                Vedtaksperiode(datoFra = it.stønadFom!!,
-                               datoTil = it.stønadTom!!,
-                               aktivitet = it.aktivitet!!,
-                               periodeType = it.periodeType!!)
-            })
+        PeriodeWrapper(
+            vedtaksperioder.map {
+                Vedtaksperiode(
+                    datoFra = it.stønadFom!!,
+                    datoTil = it.stønadTom!!,
+                    aktivitet = it.aktivitet!!,
+                    periodeType = it.periodeType!!
+                )
+            }
+        )
 
     private fun lagAndel(it: AndelHistorikkData) =
-            AndelHistorikkDto(behandlingId = it.behandlingId,
-                              behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                              vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
-                              saksbehandler = "",
-                              andel = AndelMedGrunnlagDto(mapAndel(it), null),
-                              aktivitet = it.aktivitet!!,
-                              periodeType = it.periodeType!!,
-                              endring = it.type?.let { type ->
-                                  HistorikkEndring(type,
-                                                   it.endretI
-                                                   ?: error("Trenger id til behandling hvis det finnes en endring"),
-                                                   LocalDateTime.now())
-                              },
-                              aktivitetArbeid = null,
-                              erSanksjon = false,
-                              sanksjonsårsak = null)
+        AndelHistorikkDto(
+            behandlingId = it.behandlingId,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
+            saksbehandler = "",
+            andel = AndelMedGrunnlagDto(mapAndel(it), null),
+            aktivitet = it.aktivitet!!,
+            periodeType = it.periodeType!!,
+            endring = it.type?.let { type ->
+                HistorikkEndring(
+                    type,
+                    it.endretI
+                        ?: error("Trenger id til behandling hvis det finnes en endring"),
+                    LocalDateTime.now()
+                )
+            },
+            aktivitetArbeid = null,
+            erSanksjon = false,
+            sanksjonsårsak = null
+        )
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
 
@@ -367,30 +392,32 @@ object AndelHistorikkParser {
      */
     private fun mapInput(input: List<AndelHistorikkData>): List<TilkjentYtelse> {
         return input
-                .fold(mutableListOf<AndelTilkjentHolder>()) { acc, pair ->
-                    val last = acc.lastOrNull()
-                    val andel = if (pair.stønadFom == null || pair.stønadTom == null) null else mapAndel(pair)
-                    if (last?.behandlingId != pair.behandlingId) {
-                        acc.add(AndelTilkjentHolder(pair.behandlingId, mutableListOf(andel)))
-                    } else {
-                        last.andeler.add(andel)
-                    }
-                    acc
+            .fold(mutableListOf<AndelTilkjentHolder>()) { acc, pair ->
+                val last = acc.lastOrNull()
+                val andel = if (pair.stønadFom == null || pair.stønadTom == null) null else mapAndel(pair)
+                if (last?.behandlingId != pair.behandlingId) {
+                    acc.add(AndelTilkjentHolder(pair.behandlingId, mutableListOf(andel)))
+                } else {
+                    last.andeler.add(andel)
                 }
-                .map { holder ->
-                    val andelerTilkjentYtelse =
-                            if (holder.andeler.contains(null)) {
-                                feilHvis(holder.andeler.size > 1) {
-                                    "Andeler kan kun inneholde ett element som mangler stønadFom/stønadTom savnes"
-                                }
-                                emptyList()
-                            } else holder.andeler as List<AndelTilkjentYtelse>
+                acc
+            }
+            .map { holder ->
+                val andelerTilkjentYtelse =
+                    if (holder.andeler.contains(null)) {
+                        feilHvis(holder.andeler.size > 1) {
+                            "Andeler kan kun inneholde ett element som mangler stønadFom/stønadTom savnes"
+                        }
+                        emptyList()
+                    } else holder.andeler as List<AndelTilkjentYtelse>
 
-                    TilkjentYtelse(behandlingId = holder.behandlingId,
-                                   vedtakstidspunkt = LocalDateTime.now(),
-                                   andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                   personident = PERSON_IDENT,
-                                   startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now())
-                }
+                TilkjentYtelse(
+                    behandlingId = holder.behandlingId,
+                    vedtakstidspunkt = LocalDateTime.now(),
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    personident = PERSON_IDENT,
+                    startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now()
+                )
+            }
     }
 }

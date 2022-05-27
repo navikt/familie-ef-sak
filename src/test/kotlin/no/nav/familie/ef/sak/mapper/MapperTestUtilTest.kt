@@ -17,23 +17,25 @@ class MapperTestUtilTest {
     @Test
     internal fun `sjekker at felter ikke er satt`() {
         assertThat(Assertions.catchThrowable { sjekkAtAlleVerdierErSatt(Foo(navn = null)) })
-                .hasMessage(forventetFeilmelding("Foo", "navn"))
+            .hasMessage(forventetFeilmelding("Foo", "navn"))
 
         assertThat(Assertions.catchThrowable { sjekkAtAlleVerdierErSatt(Foo(dato = null)) })
-                .hasMessage(forventetFeilmelding("Foo", "dato"))
+            .hasMessage(forventetFeilmelding("Foo", "dato"))
 
         assertThat(Assertions.catchThrowable { sjekkAtAlleVerdierErSatt(Foo(list = null)) })
-                .hasMessage(forventetFeilmelding("Foo", "list"))
+            .hasMessage(forventetFeilmelding("Foo", "list"))
 
         assertThat(Assertions.catchThrowable { sjekkAtAlleVerdierErSatt(Foo(list = listOf())) })
-                .hasMessage(forventetFeilmeldingTomListe("Foo", "list"))
+            .hasMessage(forventetFeilmeldingTomListe("Foo", "list"))
 
         assertThat(Assertions.catchThrowable { sjekkAtAlleVerdierErSatt(Foo(list = listOf(Bar(navn = null)))) })
-                .hasMessage(forventetFeilmelding("Bar", "navn"))
+            .hasMessage(forventetFeilmelding("Bar", "navn"))
     }
 
-    private fun forventetFeilmeldingTomListe(klassenavn: String,
-                                             feltnavn: String) = "$klassenavn har en tom liste i felt $feltnavn"
+    private fun forventetFeilmeldingTomListe(
+        klassenavn: String,
+        feltnavn: String
+    ) = "$klassenavn har en tom liste i felt $feltnavn"
 
     private fun forventetFeilmelding(klassenavn: String, feltnavn: String) = "$klassenavn har ingen verdi i felt $feltnavn"
 }

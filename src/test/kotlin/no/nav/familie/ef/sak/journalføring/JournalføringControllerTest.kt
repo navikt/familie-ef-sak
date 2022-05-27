@@ -33,13 +33,12 @@ import kotlin.test.assertFailsWith
 
 internal class JournalføringControllerTest {
 
-
     private val journalføringService = mockk<JournalføringService>()
     private val pdlClient = mockk<PdlClient>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val journalføringController =
-            JournalføringController(journalføringService, pdlClient, tilgangService, featureToggleService)
+        JournalføringController(journalføringService, pdlClient, tilgangService, featureToggleService)
 
     @BeforeEach
     internal fun setUp() {
@@ -50,7 +49,6 @@ internal class JournalføringControllerTest {
 
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {
-
 
         every {
             pdlClient.hentPersonidenter(aktørId)
@@ -102,7 +100,6 @@ internal class JournalføringControllerTest {
         assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
     }
 
-
     @Test
     internal fun `skal feile hvis journalpost har orgnr`() {
         every {
@@ -123,12 +120,16 @@ internal class JournalføringControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang til bruker")
 
         assertThrows<ManglerTilgang> {
-            journalføringController.fullførJournalpost(journalpostMedFødselsnummer.journalpostId,
-                                                       JournalføringRequest(null,
-                                                                            UUID.randomUUID(),
-                                                                            "dummy-oppgave",
-                                                                            JournalføringBehandling(UUID.randomUUID()),
-                                                                            "9991"))
+            journalføringController.fullførJournalpost(
+                journalpostMedFødselsnummer.journalpostId,
+                JournalføringRequest(
+                    null,
+                    UUID.randomUUID(),
+                    "dummy-oppgave",
+                    JournalføringBehandling(UUID.randomUUID()),
+                    "9991"
+                )
+            )
         }
     }
 
@@ -139,9 +140,11 @@ internal class JournalføringControllerTest {
         internal fun `skal kaste ApiFeil hvis vedlegget ikke inneholder dokumentvariant ARKIV`() {
             every {
                 journalføringService.hentJournalpost(any())
-            } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-                it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
-            })
+            } returns journalpostMedFødselsnummer.copy(
+                dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
+                    it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
+                }
+            )
 
             assertThrows<ApiFeil> { journalføringController.hentDokument(journalpostId, dokumentInfoId) }
         }
@@ -150,10 +153,16 @@ internal class JournalføringControllerTest {
         internal fun `skal kunne hente dokument med dokumentvariant ARKIV`() {
             every {
                 journalføringService.hentJournalpost(any())
-            } returns journalpostMedFødselsnummer.copy(dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
-                it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
-                                                   Dokumentvariant(Dokumentvariantformat.ARKIV)))
-            })
+            } returns journalpostMedFødselsnummer.copy(
+                dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
+                    it.copy(
+                        dokumentvarianter = listOf(
+                            Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF),
+                            Dokumentvariant(Dokumentvariantformat.ARKIV)
+                        )
+                    )
+                }
+            )
 
             every { journalføringService.hentDokument(any(), any()) } returns byteArrayOf()
 
@@ -161,7 +170,6 @@ internal class JournalføringControllerTest {
 
             verify(exactly = 1) { journalføringService.hentDokument(journalpostId, dokumentInfoId) }
         }
-
     }
 
     private val aktørId = "11111111111"
@@ -170,25 +178,29 @@ internal class JournalføringControllerTest {
     private val dokumentInfoId = "12345"
 
     private val journalpostMedAktørId =
-            Journalpost(journalpostId = journalpostId,
-                        journalposttype = Journalposttype.I,
-                        journalstatus = Journalstatus.MOTTATT,
-                        tema = "ENF",
-                        behandlingstema = "ab0071",
-                        tittel = "abrakadabra",
-                        bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
-                        journalforendeEnhet = "4817",
-                        kanal = "SKAN_IM",
-                        dokumenter =
-                        listOf(DokumentInfo(dokumentInfoId = dokumentInfoId,
-                                            tittel = "Tittel",
-                                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                            dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))))
+        Journalpost(
+            journalpostId = journalpostId,
+            journalposttype = Journalposttype.I,
+            journalstatus = Journalstatus.MOTTATT,
+            tema = "ENF",
+            behandlingstema = "ab0071",
+            tittel = "abrakadabra",
+            bruker = Bruker(type = BrukerIdType.AKTOERID, id = aktørId),
+            journalforendeEnhet = "4817",
+            kanal = "SKAN_IM",
+            dokumenter =
+            listOf(
+                DokumentInfo(
+                    dokumentInfoId = dokumentInfoId,
+                    tittel = "Tittel",
+                    brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))
+                )
             )
+        )
 
     private val journalpostMedFødselsnummer =
-            journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
+        journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
     private val journalpostUtenBruker = journalpostMedAktørId.copy(bruker = null)
     private val journalpostMedOrgnr = journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345"))
-
 }

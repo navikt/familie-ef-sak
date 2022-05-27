@@ -10,19 +10,19 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 data class Fagsaker(
-        val overgangsstønad: Fagsak?,
-        val barnetilsyn: Fagsak?,
-        val skolepenger: Fagsak?,
+    val overgangsstønad: Fagsak?,
+    val barnetilsyn: Fagsak?,
+    val skolepenger: Fagsak?,
 )
 
 data class Fagsak(
-        val id: UUID,
-        val fagsakPersonId: UUID,
-        val personIdenter: Set<PersonIdent>,
-        val eksternId: EksternFagsakId,
-        val stønadstype: StønadType,
-        val migrert: Boolean,
-        val sporbar: Sporbar
+    val id: UUID,
+    val fagsakPersonId: UUID,
+    val personIdenter: Set<PersonIdent>,
+    val eksternId: EksternFagsakId,
+    val stønadstype: StønadType,
+    val migrert: Boolean,
+    val sporbar: Sporbar
 ) {
 
     fun erAktivIdent(personIdent: String): Boolean = hentAktivIdent() == personIdent
@@ -30,30 +30,29 @@ data class Fagsak(
     fun hentAktivIdent(): String {
         return personIdenter.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på fagsak $id")
     }
-
 }
 
 @Table("fagsak")
-data class FagsakDomain(@Id
-                        val id: UUID = UUID.randomUUID(),
-                        val fagsakPersonId: UUID,
-                        @MappedCollection(idColumn = "fagsak_id")
-                        val eksternId: EksternFagsakId = EksternFagsakId(),
-                        @Column("stonadstype")
-                        val stønadstype: StønadType,
-                        val migrert: Boolean = false,
-                        @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                        val sporbar: Sporbar = Sporbar()) {
-
-}
+data class FagsakDomain(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val fagsakPersonId: UUID,
+    @MappedCollection(idColumn = "fagsak_id")
+    val eksternId: EksternFagsakId = EksternFagsakId(),
+    @Column("stonadstype")
+    val stønadstype: StønadType,
+    val migrert: Boolean = false,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 fun FagsakDomain.tilFagsakMedPerson(personIdenter: Set<PersonIdent>): Fagsak =
-        Fagsak(
-                id = id,
-                fagsakPersonId = fagsakPersonId,
-                personIdenter = personIdenter,
-                eksternId = eksternId,
-                stønadstype = stønadstype,
-                migrert = migrert,
-                sporbar = sporbar
-        )
+    Fagsak(
+        id = id,
+        fagsakPersonId = fagsakPersonId,
+        personIdenter = personIdenter,
+        eksternId = eksternId,
+        stønadstype = stønadstype,
+        migrert = migrert,
+        sporbar = sporbar
+    )

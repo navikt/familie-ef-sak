@@ -17,7 +17,7 @@ internal class VilkårsregelTest {
         Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {
             val json = objectWriter.writeValueAsString(it.value)
             // kommentere ut hvis regler har endret seg for å lagre de nye reglene
-            //skrivTilFil(it, json)
+            // skrivTilFil(it, json)
             val fileJson = readFile(it.value)
             assertThat(json).isEqualTo(fileJson)
         }
@@ -39,5 +39,5 @@ internal class VilkårsregelTest {
     }
 
     private fun readFile(it: Vilkårsregel) =
-            this::class.java.classLoader.getResource("regler/${it.vilkårType}.json").readText()
+        this::class.java.classLoader.getResource("regler/${it.vilkårType}.json").readText()
 }

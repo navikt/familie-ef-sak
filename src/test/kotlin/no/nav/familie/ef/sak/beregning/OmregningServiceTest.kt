@@ -41,7 +41,6 @@ import java.util.UUID
 
 internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
-
     @Autowired lateinit var omregningService: OmregningService
     @Autowired lateinit var behandlingRepository: BehandlingRepository
     @Autowired lateinit var vedtakRepository: VedtakRepository
@@ -67,10 +66,14 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val fagsakId = UUID.fromString("3549f9e2-ddd1-467d-82be-bfdb6c7f07e1")
         val behandlingId = UUID.fromString("39c7dc82-adc1-43db-a6f9-64b8e4352ff6")
         val fagsak = testoppsettService.lagreFagsak(fagsak(id = fagsakId, identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(id = behandlingId,
-                                                                fagsak = fagsak,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                id = behandlingId,
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
 
@@ -81,18 +84,21 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
         val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling)
         assertThat(iverksettDtoSlot.captured).usingRecursiveComparison()
-                .ignoringFields("vedtak.vedtakstidspunkt")
-                .isEqualTo(expectedIverksettDto)
-
+            .ignoringFields("vedtak.vedtakstidspunkt")
+            .isEqualTo(expectedIverksettDto)
     }
 
     @Test
     fun `utførGOmregning kjørt med liveRun=false kaster exception og etterlater seg ingen spor i databasen`() {
 
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
 
@@ -104,13 +110,16 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
     }
 
-
     @Test
     fun `utførGOmregning med samordningsfradrag returner og etterlater seg ingen spor i databasen i dry run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
@@ -126,9 +135,13 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `utførGOmregning med samordningsfradrag returner og etterlater seg ingen spor i databasen i live run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
@@ -144,16 +157,24 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `utførGOmregning med sanksjon returner og etterlater seg ingen spor i databasen i dry run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
-        vedtakRepository.insert(vedtak(behandlingId = behandling.id,
-                                       år = år,
-                                       inntekter = InntektWrapper(listOf(inntektsperiode)),
-                                       perioder = PeriodeWrapper(listOf(vedtaksperiode))))
+        vedtakRepository.insert(
+            vedtak(
+                behandlingId = behandling.id,
+                år = år,
+                inntekter = InntektWrapper(listOf(inntektsperiode)),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode))
+            )
+        )
 
         omregningService.utførGOmregning(fagsak.id, false)
 
@@ -166,16 +187,24 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     @Test
     fun `utførGOmregning med sanksjon returner og etterlater seg ingen spor i databasen i live run`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                resultat = BehandlingResultat.INNVILGET,
-                                                                status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
-        vedtakRepository.insert(vedtak(behandlingId = behandling.id,
-                                       år = år,
-                                       inntekter = InntektWrapper(listOf(inntektsperiode)),
-                                       perioder = PeriodeWrapper(listOf(vedtaksperiode))))
+        vedtakRepository.insert(
+            vedtak(
+                behandlingId = behandling.id,
+                år = år,
+                inntekter = InntektWrapper(listOf(inntektsperiode)),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode))
+            )
+        )
 
         omregningService.utførGOmregning(fagsak.id, true)
 
@@ -188,13 +217,15 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     fun iverksettMedOppdaterteIder(fagsak: Fagsak, behandling: Behandling): IverksettOvergangsstønadDto {
 
         val nyBehandling =
-                behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD,
-                                                                          fagsak.personIdenter.map {
-                                                                              it.ident
-                                                                          }.toSet()) ?: error("Impossibru! :p")
+            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
+                StønadType.OVERGANGSSTØNAD,
+                fagsak.personIdenter.map {
+                    it.ident
+                }.toSet()
+            ) ?: error("Impossibru! :p")
 
         val expectedIverksettDto: IverksettOvergangsstønadDto =
-                ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
+            ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
 
         val andelerTilkjentYtelse = expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
             if (it.fraOgMed >= nyesteGrunnbeløpGyldigFraOgMed) {
@@ -204,14 +235,17 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             }
         } ?: emptyList()
         val tilkjentYtelseDto =
-                expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
+            expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
         val vedtak = expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto)
-        val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(behandlingId = nyBehandling.id,
-                                                                          eksternId = nyBehandling.eksternId.id)
-        return expectedIverksettDto.copy(vedtak = vedtak,
-                                         behandling = behandlingsdetaljerDto,
-                                         fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id))
-
+        val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
+            behandlingId = nyBehandling.id,
+            eksternId = nyBehandling.eksternId.id
+        )
+        return expectedIverksettDto.copy(
+            vedtak = vedtak,
+            behandling = behandlingsdetaljerDto,
+            fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id)
+        )
     }
 
     private fun readFile(filnavn: String): String {

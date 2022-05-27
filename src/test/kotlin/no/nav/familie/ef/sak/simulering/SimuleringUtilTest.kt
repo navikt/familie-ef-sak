@@ -19,25 +19,25 @@ class SimuleringUtilTest {
     private val oktoberSlutt = LocalDate.of(2021, 10, 31)
 
     val simuleringsoppsummering = Simuleringsoppsummering(
-            perioder = listOf(
-                    lagSimuleringsperiode(YearMonth.of(2021, 1), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 2), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 3), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 4), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 5), nyttBeløp = 5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 6), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 7), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 8), nyttBeløp = -5000, tidligereUtbetalt = 0),
-                    lagSimuleringsperiode(YearMonth.of(2021, 10), nyttBeløp = -5000, tidligereUtbetalt = 0)
-            ),
-            fomDatoNestePeriode = null,
-            etterbetaling = BigDecimal.valueOf(5000),
-            feilutbetaling = BigDecimal.valueOf(40_000),
-            fom = LocalDate.of(2021, 1, 1),
-            tomDatoNestePeriode = null,
-            forfallsdatoNestePeriode = null,
-            tidSimuleringHentet = LocalDate.of(2021, 11, 1),
-            tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
+        perioder = listOf(
+            lagSimuleringsperiode(YearMonth.of(2021, 1), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 2), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 3), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 4), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 5), nyttBeløp = 5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 6), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 7), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 8), nyttBeløp = -5000, tidligereUtbetalt = 0),
+            lagSimuleringsperiode(YearMonth.of(2021, 10), nyttBeløp = -5000, tidligereUtbetalt = 0)
+        ),
+        fomDatoNestePeriode = null,
+        etterbetaling = BigDecimal.valueOf(5000),
+        feilutbetaling = BigDecimal.valueOf(40_000),
+        fom = LocalDate.of(2021, 1, 1),
+        tomDatoNestePeriode = null,
+        forfallsdatoNestePeriode = null,
+        tidSimuleringHentet = LocalDate.of(2021, 11, 1),
+        tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
     )
 
     @Test
@@ -60,13 +60,13 @@ class SimuleringUtilTest {
         val resultat = nyttBeløp - tidligereUtbetalt
 
         return Simuleringsperiode(
-                fom = mnd.atDay(1),
-                tom = mnd.atEndOfMonth(),
-                forfallsdato = mnd.atEndOfMonth(),
-                nyttBeløp = nyttBeløp.toBigDecimal(),
-                tidligereUtbetalt = tidligereUtbetalt.toBigDecimal(),
-                resultat = resultat.toBigDecimal(),
-                feilutbetaling = Integer.max(0 - resultat, 0).toBigDecimal()
+            fom = mnd.atDay(1),
+            tom = mnd.atEndOfMonth(),
+            forfallsdato = mnd.atEndOfMonth(),
+            nyttBeløp = nyttBeløp.toBigDecimal(),
+            tidligereUtbetalt = tidligereUtbetalt.toBigDecimal(),
+            resultat = resultat.toBigDecimal(),
+            feilutbetaling = Integer.max(0 - resultat, 0).toBigDecimal()
         )
     }
 

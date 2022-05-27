@@ -31,14 +31,22 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `to av tre utgåtte terminbarn, forvent to treff`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling = lagreInnvilgetBehandling(fagsak)
-        barnRepository.insertAll(listOf(barn(behandlingId = behandling.id, termindato = LocalDate.now()),
-                                        barn(behandlingId = behandling.id,
-                                             termindato = LocalDate.now().minusWeeks(5)),
-                                        barn(behandlingId = behandling.id,
-                                             termindato = LocalDate.now().minusWeeks(10))))
+        barnRepository.insertAll(
+            listOf(
+                barn(behandlingId = behandling.id, termindato = LocalDate.now()),
+                barn(
+                    behandlingId = behandling.id,
+                    termindato = LocalDate.now().minusWeeks(5)
+                ),
+                barn(
+                    behandlingId = behandling.id,
+                    termindato = LocalDate.now().minusWeeks(10)
+                )
+            )
+        )
 
         val barnForUtplukk =
-                terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
+            terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
         assertThat(barnForUtplukk.size).isEqualTo(2)
     }
 
@@ -46,12 +54,18 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `ingen utgåtte terminbarn, forvent ingen treff`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling = lagreInnvilgetBehandling(fagsak)
-        barnRepository.insertAll(listOf(barn(behandlingId = behandling.id, termindato = LocalDate.now()),
-                                        barn(behandlingId = behandling.id,
-                                             termindato = LocalDate.now().minusWeeks(3))))
+        barnRepository.insertAll(
+            listOf(
+                barn(behandlingId = behandling.id, termindato = LocalDate.now()),
+                barn(
+                    behandlingId = behandling.id,
+                    termindato = LocalDate.now().minusWeeks(3)
+                )
+            )
+        )
 
         val barnForUtplukk =
-                terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
+            terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
         assertThat(barnForUtplukk.size).isEqualTo(0)
     }
 
@@ -60,39 +74,53 @@ class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val behandling = lagreInnvilgetBehandling(fagsak)
         val utgåttTermindato = LocalDate.now().minusWeeks(5)
-        barnRepository.insertAll(listOf(barn(behandlingId = behandling.id, termindato = LocalDate.now()),
-                                        barn(behandlingId = behandling.id, termindato = utgåttTermindato)))
+        barnRepository.insertAll(
+            listOf(
+                barn(behandlingId = behandling.id, termindato = LocalDate.now()),
+                barn(behandlingId = behandling.id, termindato = utgåttTermindato)
+            )
+        )
         terminbarnRepository.insert(opprettTerminbarnOppgave(fagsak = fagsak.id, termindato = utgåttTermindato))
 
         val barnForUtplukk =
-                terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
+            terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
         assertThat(barnForUtplukk.size).isEqualTo(0)
     }
 
-    private fun opprettTerminbarnOppgave(fagsak: UUID = UUID.randomUUID(),
-                                         termindato: LocalDate = LocalDate.now()): TerminbarnOppgave {
-        return TerminbarnOppgave(fagsakId = fagsak,
-                                 termindato = termindato,
-                                 opprettetTid = LocalDate.now())
+    private fun opprettTerminbarnOppgave(
+        fagsak: UUID = UUID.randomUUID(),
+        termindato: LocalDate = LocalDate.now()
+    ): TerminbarnOppgave {
+        return TerminbarnOppgave(
+            fagsakId = fagsak,
+            termindato = termindato,
+            opprettetTid = LocalDate.now()
+        )
     }
 
-    private fun lagreInnvilgetBehandling(fagsak: Fagsak,
-                                         tidligereBehandling: Behandling? = null,
-                                         opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
-                                                                       ?: LocalDateTime.now()) =
-            behandlingRepository.insert(behandling(fagsak,
-                                                   status = BehandlingStatus.FERDIGSTILT,
-                                                   resultat = BehandlingResultat.INNVILGET,
-                                                   forrigeBehandlingId = tidligereBehandling?.id,
-                                                   opprettetTid = opprettetTid))
+    private fun lagreInnvilgetBehandling(
+        fagsak: Fagsak,
+        tidligereBehandling: Behandling? = null,
+        opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
+            ?: LocalDateTime.now()
+    ) =
+        behandlingRepository.insert(
+            behandling(
+                fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET,
+                forrigeBehandlingId = tidligereBehandling?.id,
+                opprettetTid = opprettetTid
+            )
+        )
 
     private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = LocalDate.now()): BehandlingBarn {
-        return BehandlingBarn(behandlingId = behandlingId,
-                              personIdent = personIdent,
-                              fødselTermindato = termindato,
-                              navn = null,
-                              søknadBarnId = UUID.randomUUID())
-
+        return BehandlingBarn(
+            behandlingId = behandlingId,
+            personIdent = personIdent,
+            fødselTermindato = termindato,
+            navn = null,
+            søknadBarnId = UUID.randomUUID()
+        )
     }
-
 }

@@ -34,7 +34,6 @@ import kotlin.test.assertFailsWith
 
 internal class TilgangServiceTest {
 
-
     private val personopplysningerIntegrajsonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -44,13 +43,15 @@ internal class TilgangServiceTest {
     private val kode7Gruppe = "kode7"
     private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe)
     private val tilgangService =
-            TilgangService(personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
-                           behandlingService = behandlingService,
-                           fagsakService = fagsakService,
-                           fagsakPersonService = fagsakPersonService,
-                           rolleConfig = rolleConfig,
-                           cacheManager = cacheManager,
-                           auditLogger = mockk(relaxed = true))
+        TilgangService(
+            personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
+            behandlingService = behandlingService,
+            fagsakService = fagsakService,
+            fagsakPersonService = fagsakPersonService,
+            rolleConfig = rolleConfig,
+            cacheManager = cacheManager,
+            auditLogger = mockk(relaxed = true)
+        )
     private val mocketPersonIdent = "12345"
 
     private val fagsak = fagsak(fagsakpersoner(setOf(mocketPersonIdent)))
@@ -93,8 +94,10 @@ internal class TilgangServiceTest {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns tilgangsfeilNavAnsatt
 
         val feil = assertFailsWith<ManglerTilgang> {
-            tilgangService.validerTilgangTilBehandling(behandling.id,
-                                                       AuditLoggerEvent.ACCESS)
+            tilgangService.validerTilgangTilBehandling(
+                behandling.id,
+                AuditLoggerEvent.ACCESS
+            )
         }
 
         assertThat(feil.frontendFeilmelding).contains(tilgangsfeilNavAnsatt.begrunnelse)
@@ -190,7 +193,6 @@ internal class TilgangServiceTest {
         testWithBrukerContext(groups = listOf(rolleConfig.kode7)) {
             assertThat(filtrer(personer)).containsExactly(uten, ugradert, fortrolig)
         }
-
     }
 
     @Test
@@ -215,8 +217,8 @@ internal class TilgangServiceTest {
     }
 
     private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =
-            tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende() }
+        tilgangService.filtrerUtFortroligDataForRolle(personer) { it.adressebeskyttelse.gjeldende() }
 
     private fun adresseBeskyttelse(gradering: AdressebeskyttelseGradering) =
-            listOf(Adressebeskyttelse(gradering, Metadata(false)))
+        listOf(Adressebeskyttelse(gradering, Metadata(false)))
 }

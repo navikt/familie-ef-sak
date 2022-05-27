@@ -12,10 +12,14 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = JournalførBlankettTask.TYPE,
-                     beskrivelse = "Utfører journalføring av saksbehandlingsblankett")
-class JournalførBlankettTask(private val stegService: StegService,
-                             private val behandlingService: BehandlingService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = JournalførBlankettTask.TYPE,
+    beskrivelse = "Utfører journalføring av saksbehandlingsblankett"
+)
+class JournalførBlankettTask(
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
@@ -26,13 +30,15 @@ class JournalførBlankettTask(private val stegService: StegService,
     companion object {
 
         fun opprettTask(saksbehandling: Saksbehandling): Task {
-            return Task(type = TYPE,
-                        payload = saksbehandling.id.toString(),
-                        properties = Properties().apply {
-                            this["personIdent"] = saksbehandling.ident
-                            this["behandlingId"] = saksbehandling.id.toString()
-                            this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
-                        })
+            return Task(
+                type = TYPE,
+                payload = saksbehandling.id.toString(),
+                properties = Properties().apply {
+                    this["personIdent"] = saksbehandling.ident
+                    this["behandlingId"] = saksbehandling.id.toString()
+                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                }
+            )
         }
 
         const val TYPE = "utførJournalførBlankett"

@@ -51,24 +51,25 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @SpringBootTest(classes = [ApplicationLocal::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("integrasjonstest",
-                "mock-arbeidssøker",
-                "mock-oauth",
-                "mock-pdl",
-                "mock-integrasjoner",
-                "mock-infotrygd-replika",
-                "mock-iverksett",
-                "mock-brev",
-                "mock-blankett",
-                "mock-inntekt",
-                "mock-ereg",
-                "mock-aareg",
-                "mock-tilbakekreving",
-                "mock-dokument")
+@ActiveProfiles(
+    "integrasjonstest",
+    "mock-arbeidssøker",
+    "mock-oauth",
+    "mock-pdl",
+    "mock-integrasjoner",
+    "mock-infotrygd-replika",
+    "mock-iverksett",
+    "mock-brev",
+    "mock-blankett",
+    "mock-inntekt",
+    "mock-ereg",
+    "mock-aareg",
+    "mock-tilbakekreving",
+    "mock-dokument"
+)
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
 
@@ -104,41 +105,41 @@ abstract class OppslagSpringRunnerTest {
     private fun clearCaches() {
         listOf(cacheManagerKodeverk, cacheManager).forEach {
             it.cacheNames.mapNotNull { cacheName -> it.getCache(cacheName) }
-                    .forEach { cache -> cache.clear() }
+                .forEach { cache -> cache.clear() }
         }
     }
 
     private fun resetDatabase() {
         listOf(
-                UttrekkArbeidssøkere::class,
-                KonsistensavstemmingJobb::class,
-                Simuleringsresultat::class,
-                BehandlingBarn::class,
-                Søknad::class,
-                SøknadsskjemaOvergangsstønad::class,
-                TilkjentYtelse::class,
-                Oppgave::class,
-                Vilkårsvurdering::class,
-                Behandlingshistorikk::class,
-                Vedtaksbrev::class,
-                Brevmottakere::class,
-                Blankett::class,
-                Vedtak::class,
-                MellomlagretBrev::class,
-                MellomlagretFritekstbrev::class,
-                MellomlagretFrittståendeBrev::class,
-                Behandlingsjournalpost::class,
-                Grunnlagsdata::class,
-                Tilbakekreving::class,
-                Behandling::class,
-                TerminbarnOppgave::class,
-                FagsakDomain::class,
-                FagsakPerson::class,
-                TaskLogg::class,
-                Task::class,
-                Migreringsstatus::class,
+            UttrekkArbeidssøkere::class,
+            KonsistensavstemmingJobb::class,
+            Simuleringsresultat::class,
+            BehandlingBarn::class,
+            Søknad::class,
+            SøknadsskjemaOvergangsstønad::class,
+            TilkjentYtelse::class,
+            Oppgave::class,
+            Vilkårsvurdering::class,
+            Behandlingshistorikk::class,
+            Vedtaksbrev::class,
+            Brevmottakere::class,
+            Blankett::class,
+            Vedtak::class,
+            MellomlagretBrev::class,
+            MellomlagretFritekstbrev::class,
+            MellomlagretFrittståendeBrev::class,
+            Behandlingsjournalpost::class,
+            Grunnlagsdata::class,
+            Tilbakekreving::class,
+            Behandling::class,
+            TerminbarnOppgave::class,
+            FagsakDomain::class,
+            FagsakPerson::class,
+            TaskLogg::class,
+            Task::class,
+            Migreringsstatus::class,
 
-                ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
+        ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
     protected fun getPort(): String {

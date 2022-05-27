@@ -63,7 +63,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal opprette fagsakPerson når personen finne i infotrygd`() {
         val personIdent = "01010199999"
         every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } returns
-                InfotrygdFinnesResponse(emptyList(), listOf(Saktreff(personIdent, StønadType.OVERGANGSSTØNAD)))
+            InfotrygdFinnesResponse(emptyList(), listOf(Saktreff(personIdent, StønadType.OVERGANGSSTØNAD)))
         val response = søkPerson(personIdent)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         val data = response.body!!.data!!
@@ -88,8 +88,10 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
-        return restTemplate.exchange(localhost("/api/sok/"),
-                                     HttpMethod.POST,
-                                     HttpEntity(PersonIdentDto(personIdent = personIdent), headers))
+        return restTemplate.exchange(
+            localhost("/api/sok/"),
+            HttpMethod.POST,
+            HttpEntity(PersonIdentDto(personIdent = personIdent), headers)
+        )
     }
 }

@@ -28,24 +28,25 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/beregning"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BeregningController(private val stegService: StegService,
-                          private val behandlingService: BehandlingService,
-                          private val beregningService: BeregningService,
-                          private val tilkjentYtelseService: TilkjentYtelseService,
-                          private val tilgangService: TilgangService,
-                          private val vurderingService: VurderingService,
-                          private val vedtakService: VedtakService) {
+class BeregningController(
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val tilgangService: TilgangService,
+    private val vurderingService: VurderingService,
+    private val vedtakService: VedtakService
+) {
 
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
         val vedtaksperioder: List<Periode> = beregningRequest.vedtaksperioder
-                .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-                .tilPerioder()
+            .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .tilPerioder()
 
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
         return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
@@ -82,8 +83,7 @@ class BeregningController(private val stegService: StegService,
             throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
         }
         val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
-                                 ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
+            ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
     }
-
 }

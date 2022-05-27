@@ -24,8 +24,8 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
         fagsakPersonService.hentEllerOpprettPerson(setOf("1"), "1")
         fagsakPersonService.hentEllerOpprettPerson(setOf("2"), "2")
         assertThatThrownBy { fagsakPersonService.hentEllerOpprettPerson(setOf("1", "2"), "1") }
-                .isInstanceOf(IncorrectResultSizeDataAccessException::class.java)
-                .hasMessageContaining("Incorrect result size: expected 1, actual 2")
+            .isInstanceOf(IncorrectResultSizeDataAccessException::class.java)
+            .hasMessageContaining("Incorrect result size: expected 1, actual 2")
     }
 
     @Test
@@ -67,13 +67,13 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentPerson - skal kaste feil når person ikke finnes`() {
         assertThatThrownBy { fagsakPersonService.hentPerson(UUID.randomUUID()) }
-                .isInstanceOf(IllegalStateException::class.java)
+            .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
     internal fun `hentIdenter - skal kaste feil når person ikke finnes`() {
         assertThatThrownBy { fagsakPersonService.hentIdenter(UUID.randomUUID()) }
-                .isInstanceOf(Feil::class.java)
-                .hasMessageContaining("Finner ikke personidenter")
+            .isInstanceOf(Feil::class.java)
+            .hasMessageContaining("Finner ikke personidenter")
     }
 }

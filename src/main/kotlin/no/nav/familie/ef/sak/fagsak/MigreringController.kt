@@ -18,8 +18,10 @@ import java.util.UUID
 @RequestMapping(path = ["/api/migrering"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class MigreringController(private val migreringService: MigreringService,
-                          private val tilgangService: TilgangService) {
+class MigreringController(
+    private val migreringService: MigreringService,
+    private val tilgangService: TilgangService
+) {
 
     @GetMapping("{fagsakPersonId}")
     fun hentMigreringInfo(@PathVariable fagsakPersonId: UUID): Ressurs<MigreringInfo> {

@@ -10,8 +10,10 @@ import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.springframework.stereotype.Service
 
 @Service
-class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
-                                private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
+class VentePåStatusFraIverksett(
+    private val iverksettClient: IverksettClient,
+    private val taskRepository: TaskRepository
+) : BehandlingSteg<Void?> {
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         iverksettClient.hentStatus(saksbehandling.id).let {
@@ -23,11 +25,16 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
         }
     }
 
-    private fun erBrevløsIverksettingOk(saksbehandling: Saksbehandling,
-                                        status: IverksettStatus): Boolean {
-        if (saksbehandling.årsak !in setOf(BehandlingÅrsak.KORRIGERING_UTEN_BREV,
-                                           BehandlingÅrsak.G_OMREGNING,
-                                           BehandlingÅrsak.MIGRERING)) {
+    private fun erBrevløsIverksettingOk(
+        saksbehandling: Saksbehandling,
+        status: IverksettStatus
+    ): Boolean {
+        if (saksbehandling.årsak !in setOf(
+                BehandlingÅrsak.KORRIGERING_UTEN_BREV,
+                BehandlingÅrsak.G_OMREGNING,
+                BehandlingÅrsak.MIGRERING
+            )
+        ) {
             return false
         }
         return status == IverksettStatus.OK_MOT_OPPDRAG
@@ -40,5 +47,4 @@ class VentePåStatusFraIverksett(private val iverksettClient: IverksettClient,
     override fun stegType(): StegType {
         return StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
     }
-
 }

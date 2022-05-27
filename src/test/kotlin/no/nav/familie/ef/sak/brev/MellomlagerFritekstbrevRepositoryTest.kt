@@ -21,15 +21,23 @@ internal class MellomlagerFritekstbrevRepositoryTest : OppslagSpringRunnerTest()
     internal fun `skal lagre mellomlagret brev`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val mellomlagretBrev = MellomlagretFritekstbrev(behandlingId = behandling.id,
-                                                        brev = Fritekstbrev(overskrift = "Et testbrev", avsnitt = listOf(
-                                                                FrittståendeBrevAvsnitt(deloverskrift = "En deloverskift",
-                                                                                        innhold = "Noe innhold"))),
-                                                        brevType = FritekstBrevKategori.VEDTAK_AVSLAG)
+        val mellomlagretBrev = MellomlagretFritekstbrev(
+            behandlingId = behandling.id,
+            brev = Fritekstbrev(
+                overskrift = "Et testbrev",
+                avsnitt = listOf(
+                    FrittståendeBrevAvsnitt(
+                        deloverskrift = "En deloverskift",
+                        innhold = "Noe innhold"
+                    )
+                )
+            ),
+            brevType = FritekstBrevKategori.VEDTAK_AVSLAG
+        )
 
         mellomlagerFritekstbrevRepository.insert(mellomlagretBrev)
 
         Assertions.assertThat(mellomlagerFritekstbrevRepository.findById(behandling.id))
-                .get().usingRecursiveComparison().isEqualTo(mellomlagretBrev)
+            .get().usingRecursiveComparison().isEqualTo(mellomlagretBrev)
     }
 }

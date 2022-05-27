@@ -14,12 +14,14 @@ import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
 @Service
-class FrittståendeBrevService(private val brevClient: BrevClient,
-                              private val fagsakService: FagsakService,
-                              private val personopplysningerService: PersonopplysningerService,
-                              private val arbeidsfordelingService: ArbeidsfordelingService,
-                              private val iverksettClient: IverksettClient,
-                              private val brevsignaturService: BrevsignaturService) {
+class FrittståendeBrevService(
+    private val brevClient: BrevClient,
+    private val fagsakService: FagsakService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val iverksettClient: IverksettClient,
+    private val brevsignaturService: BrevsignaturService
+) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
         return lagFrittståendeBrevMedSignatur(frittståendeBrevDto)
@@ -32,21 +34,27 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         val brevType = utledFrittståendeBrevtype(frittståendeBrevDto.brevType)
-        iverksettClient.sendFrittståendeBrev(FrittståendeBrevDtoIverksetting(personIdent = ident,
-                                                                             eksternFagsakId = fagsak.eksternId.id,
-                                                                             stønadType = fagsak.stønadstype,
-                                                                             brevtype = brevType,
-                                                                             fil = brev,
-                                                                             journalførendeEnhet = journalførendeEnhet,
-                                                                             saksbehandlerIdent = saksbehandlerIdent))
+        iverksettClient.sendFrittståendeBrev(
+            FrittståendeBrevDtoIverksetting(
+                personIdent = ident,
+                eksternFagsakId = fagsak.eksternId.id,
+                stønadType = fagsak.stønadstype,
+                brevtype = brevType,
+                fil = brev,
+                journalførendeEnhet = journalførendeEnhet,
+                saksbehandlerIdent = saksbehandlerIdent
+            )
+        )
     }
 
     private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto, ident: String): FrittståendeBrevRequestDto {
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
-        return FrittståendeBrevRequestDto(overskrift = frittståendeBrevDto.overskrift,
-                                          avsnitt = frittståendeBrevDto.avsnitt,
-                                          personIdent = ident,
-                                          navn = navn.getValue(ident))
+        return FrittståendeBrevRequestDto(
+            overskrift = frittståendeBrevDto.overskrift,
+            avsnitt = frittståendeBrevDto.avsnitt,
+            personIdent = ident,
+            navn = navn.getValue(ident)
+        )
     }
 
     private fun lagFrittståendeBrevMedSignatur(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
@@ -60,15 +68,11 @@ class FrittståendeBrevService(private val brevClient: BrevClient,
         return brevClient.genererBrev(request, signatur.navn, signatur.enhet)
     }
 
-
     private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori): FrittståendeBrevType =
-            when (brevKategori) {
-                FrittståendeBrevKategori.INFORMASJONSBREV -> FrittståendeBrevType.INFORMASJONSBREV
-                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
-                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
-                FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> FrittståendeBrevType.VARSEL_OM_SANKSJON
-            }
+        when (brevKategori) {
+            FrittståendeBrevKategori.INFORMASJONSBREV -> FrittståendeBrevType.INFORMASJONSBREV
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
+            FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> FrittståendeBrevType.VARSEL_OM_SANKSJON
+        }
 }
-
-
-

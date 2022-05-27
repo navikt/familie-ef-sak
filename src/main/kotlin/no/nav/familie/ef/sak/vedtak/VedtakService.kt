@@ -23,7 +23,7 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
 
     fun slettVedtakHvisFinnes(behandlingId: UUID) {
         vedtakRepository.findByIdOrNull(behandlingId)
-                ?.let { vedtakRepository.deleteById(behandlingId) }
+            ?.let { vedtakRepository.deleteById(behandlingId) }
     }
 
     fun hentVedtak(behandlingId: UUID): Vedtak {
@@ -71,9 +71,12 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         val map = mutableMapOf<UUID, Int?>()
         for (vedtak in vedtakList) {
             if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
-                map.put(vedtak.behandlingId, vedtak.inntekter?.inntekter?.firstOrNull {
-                    dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato)
-                }?.inntekt?.toInt())
+                map.put(
+                    vedtak.behandlingId,
+                    vedtak.inntekter?.inntekter?.firstOrNull {
+                        dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato)
+                    }?.inntekt?.toInt()
+                )
             } else {
                 map.put(vedtak.behandlingId, null)
             }

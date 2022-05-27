@@ -4,13 +4,10 @@ import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenenøkkel
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBehandlingstype
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -26,16 +23,15 @@ object SaksbehandlingDomeneParser {
             val rad = rader.first()
             val forrigeBehandlingId = behandlingIdTilUUID[parseValgfriInt(SaksbehandlingDomeneBegrep.FORRIGE_BEHANDLING, rad)]
             val behandling = behandling(
-                    fagsak = fagsak,
-                    id = behandlingId,
-                    forrigeBehandlingId = forrigeBehandlingId,
-                    type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsak = fagsak,
+                id = behandlingId,
+                forrigeBehandlingId = forrigeBehandlingId,
+                type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
             )
             behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))
         }.toMap()
     }
 }
-
 
 enum class SaksbehandlingDomeneBegrep(val nøkkel: String) : Domenenøkkel {
     BEHANDLINGSTYPE("Behandlingstype"),

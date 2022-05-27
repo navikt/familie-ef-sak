@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class PersonService(
-        private val pdlClient: PdlClient,
-        @Qualifier("shortCache")
-        private val cacheManager: CacheManager
+    private val pdlClient: PdlClient,
+    @Qualifier("shortCache")
+    private val cacheManager: CacheManager
 ) {
 
     fun hentSøker(ident: String): PdlSøker {
@@ -24,7 +24,7 @@ class PersonService(
     fun hentPersonMedBarn(ident: String): SøkerMedBarn {
         val søker = hentSøker(ident)
         val barnIdentifikatorer = søker.forelderBarnRelasjon.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .mapNotNull { it.relatertPersonsIdent }
+            .mapNotNull { it.relatertPersonsIdent }
         return SøkerMedBarn(ident, søker, pdlClient.hentBarn(barnIdentifikatorer))
     }
 

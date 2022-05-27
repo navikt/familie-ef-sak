@@ -15,9 +15,11 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/behandlingshistorikk"])
 @ProtectedWithClaims(issuer = "azuread")
-class BehandlingshistorikkController(private val behandlingshistorikkService: BehandlingshistorikkService,
-                                     private val tilgangService: TilgangService,
-                                     private val behandlingService: BehandlingService) {
+class BehandlingshistorikkController(
+    private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val tilgangService: TilgangService,
+    private val behandlingService: BehandlingService
+) {
 
     @GetMapping("{behandlingId}")
     fun hentBehandlingshistorikk(@PathVariable behandlingId: UUID): Ressurs<List<HendelseshistorikkDto>> {

@@ -27,18 +27,32 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val vedtak = Vedtak(behandlingId = behandling.id,
-                            resultatType = ResultatType.INNVILGE,
-                            periodeBegrunnelse = "begrunnelse for periode",
-                            inntektBegrunnelse = "begrunnelse for inntekt",
-                            perioder = PeriodeWrapper(listOf(Vedtaksperiode(LocalDate.now(),
-                                                                            LocalDate.now(),
-                                                                            AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
-                                                                            VedtaksperiodeType.HOVEDPERIODE))),
-                            inntekter = InntektWrapper(listOf(Inntektsperiode(LocalDate.now(),
-                                                                              LocalDate.now(),
-                                                                              inntekt = BigDecimal(100),
-                                                                              samordningsfradrag = BigDecimal(0)))))
+        val vedtak = Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.INNVILGE,
+            periodeBegrunnelse = "begrunnelse for periode",
+            inntektBegrunnelse = "begrunnelse for inntekt",
+            perioder = PeriodeWrapper(
+                listOf(
+                    Vedtaksperiode(
+                        LocalDate.now(),
+                        LocalDate.now(),
+                        AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
+                        VedtaksperiodeType.HOVEDPERIODE
+                    )
+                )
+            ),
+            inntekter = InntektWrapper(
+                listOf(
+                    Inntektsperiode(
+                        LocalDate.now(),
+                        LocalDate.now(),
+                        inntekt = BigDecimal(100),
+                        samordningsfradrag = BigDecimal(0)
+                    )
+                )
+            )
+        )
 
         vedtakRepository.insert(vedtak)
 

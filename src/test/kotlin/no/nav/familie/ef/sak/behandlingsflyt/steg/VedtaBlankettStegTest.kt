@@ -26,15 +26,17 @@ internal class VedtaBlankettStegTest {
     @Test
     internal fun `skal opprette nytt vedtak - innvilget`() {
         val fagsak = fagsak()
-        val behandling = behandling(fagsak,
-                                    steg = StegType.VILKÅR,
-                                    status = BehandlingStatus.UTREDES,
-                                    type = BehandlingType.BLANKETT)
+        val behandling = behandling(
+            fagsak,
+            steg = StegType.VILKÅR,
+            status = BehandlingStatus.UTREDES,
+            type = BehandlingType.BLANKETT
+        )
         val request = InnvilgelseOvergangsstønad(
-                "En periodebegrunnelse",
-                "En inntektBegrunnelse",
-                emptyList(),
-                emptyList()
+            "En periodebegrunnelse",
+            "En inntektBegrunnelse",
+            emptyList(),
+            emptyList()
 
         )
 
@@ -51,22 +53,22 @@ internal class VedtaBlankettStegTest {
         } just Runs
 
         vedtaBlankettSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak, behandling), request)
-
     }
-
 
     @Test
     internal fun `skal feile hvis nytt vedtak er førstegangsbehandling`() {
         val fagsak = fagsak()
-        val behandling = behandling(fagsak,
-                                    steg = StegType.VILKÅR,
-                                    status = BehandlingStatus.UTREDES,
-                                    type = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = behandling(
+            fagsak,
+            steg = StegType.VILKÅR,
+            status = BehandlingStatus.UTREDES,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING
+        )
         val request = InnvilgelseOvergangsstønad(
-                "En periodebegrunnelse",
-                "En inntektBegrunnelse",
-                emptyList(),
-                emptyList()
+            "En periodebegrunnelse",
+            "En inntektBegrunnelse",
+            emptyList(),
+            emptyList()
 
         )
 
@@ -83,24 +85,27 @@ internal class VedtaBlankettStegTest {
         } just Runs
 
         assertThrows<IllegalStateException> {
-            vedtaBlankettSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak, behandling),
-                                                       request)
+            vedtaBlankettSteg.utførOgReturnerNesteSteg(
+                saksbehandling(fagsak, behandling),
+                request
+            )
         }
-
     }
 
     @Test
     internal fun `skal forsøke å slette blankett ved lagring av vedtak`() {
         val fagsak = fagsak()
-        val behandling = behandling(fagsak,
-                                    steg = StegType.VILKÅR,
-                                    status = BehandlingStatus.UTREDES,
-                                    type = BehandlingType.BLANKETT)
+        val behandling = behandling(
+            fagsak,
+            steg = StegType.VILKÅR,
+            status = BehandlingStatus.UTREDES,
+            type = BehandlingType.BLANKETT
+        )
         val request = InnvilgelseOvergangsstønad(
-                "En periodebegrunnelse",
-                "En inntektBegrunnelse",
-                emptyList(),
-                emptyList()
+            "En periodebegrunnelse",
+            "En inntektBegrunnelse",
+            emptyList(),
+            emptyList()
 
         )
 
@@ -119,7 +124,5 @@ internal class VedtaBlankettStegTest {
         vedtaBlankettSteg.utførOgReturnerNesteSteg(saksbehandling(fagsak, behandling), request)
 
         verify { blankettRepository.deleteById(behandling.id) }
-
-
     }
 }

@@ -15,8 +15,10 @@ import java.util.UUID
 @RequestMapping("/api/vedlegg")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VedleggController(private val vedleggService: VedleggService,
-                        private val tilgangService: TilgangService) {
+class VedleggController(
+    private val vedleggService: VedleggService,
+    private val tilgangService: TilgangService
+) {
 
     @GetMapping("/{behandlingId}")
     fun finnVedleggForBehandling(@PathVariable behandlingId: UUID): Ressurs<JournalposterDto> {

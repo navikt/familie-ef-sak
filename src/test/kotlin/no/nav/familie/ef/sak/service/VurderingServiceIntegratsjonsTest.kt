@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
-
 internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
@@ -52,11 +51,13 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val barnPåRevurdering = barnRepository.insertAll(søknadsBarnTilBehandlingBarn(søknadskjema.barn, revurdering.id))
 
         val vilkårForBehandling = opprettVilkårsvurderinger(søknadskjema, behandling, barnPåFørsteSøknad).first()
-        val metadata = HovedregelMetadata(søknadskjema.sivilstand,
-                                          Sivilstandstype.SKILT,
-                                          false,
-                                          barnPåRevurdering,
-                                          emptyList())
+        val metadata = HovedregelMetadata(
+            søknadskjema.sivilstand,
+            Sivilstandstype.SKILT,
+            false,
+            barnPåRevurdering,
+            emptyList()
+        )
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id).first()
@@ -70,7 +71,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForRevurdering.barnId).isEqualTo(barnPåRevurdering.first().id)
 
         assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
-                .isEqualTo(vilkårForRevurdering)
+            .isEqualTo(vilkårForRevurdering)
     }
 
     @Test
@@ -78,7 +79,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         assertThat(catchThrowable { vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandling.id) })
-                .hasMessage("Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}")
+            .hasMessage("Kan ikke laste inn nye grunnlagsdata for behandling med status ${behandling.status}")
     }
 
     @Test
@@ -86,17 +87,23 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val tidligereBehandlingId = UUID.randomUUID()
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val revurdering = behandlingRepository.insert(behandling(fagsak))
-        val metadata = HovedregelMetadata(null,
-                                          Sivilstandstype.SKILT,
-                                          false,
-                                          emptyList(),
-                                          emptyList())
-        assertThat(catchThrowable {
-            vurderingService.kopierVurderingerTilNyBehandling(tidligereBehandlingId,
-                                                              revurdering.id,
-                                                              metadata, StønadType.OVERGANGSSTØNAD)
-        })
-                .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
+        val metadata = HovedregelMetadata(
+            null,
+            Sivilstandstype.SKILT,
+            false,
+            emptyList(),
+            emptyList()
+        )
+        assertThat(
+            catchThrowable {
+                vurderingService.kopierVurderingerTilNyBehandling(
+                    tidligereBehandlingId,
+                    revurdering.id,
+                    metadata, StønadType.OVERGANGSSTØNAD
+                )
+            }
+        )
+            .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
     }
 
     @Test
@@ -105,35 +112,46 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN))
         val behandling = behandling(fagsak)
         val førstegangsbehandling = behandlingRepository.insert(behandling)
-        val vilkårsvurdering = vilkårsvurdering(behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
-        listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)))))
+        val vilkårsvurdering = vilkårsvurdering(
+            behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
+            listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))))
+        )
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
         val behandlingIdToSvarId = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandling.id))
         assertThat(behandlingIdToSvarId[behandling.id]).isEqualTo(SvarId.ER_I_ARBEID)
     }
 
-    private fun opprettVilkårsvurderinger(søknadskjema: SøknadsskjemaOvergangsstønad,
-                                          behandling: Behandling,
-                                          barn: List<BehandlingBarn>): List<Vilkårsvurdering> {
+    private fun opprettVilkårsvurderinger(
+        søknadskjema: SøknadsskjemaOvergangsstønad,
+        behandling: Behandling,
+        barn: List<BehandlingBarn>
+    ): List<Vilkårsvurdering> {
         val hovedregelMetadata =
-                HovedregelMetadata(søknadskjema.sivilstand,
-                                   Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                                   barn = barn,
-                                   søktOmBarnetilsyn = emptyList())
+            HovedregelMetadata(
+                søknadskjema.sivilstand,
+                Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                barn = barn,
+                søktOmBarnetilsyn = emptyList()
+            )
         val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(hovedregelMetadata)
-        val vilkårsvurderinger = listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                         type = VilkårType.SIVILSTAND,
-                                                         behandlingId = behandling.id,
-                                                         barnId = barn.first().id,
-                                                         delvilkårsvurdering = delvilkårsvurdering))
+        val vilkårsvurderinger = listOf(
+            vilkårsvurdering(
+                resultat = Vilkårsresultat.OPPFYLT,
+                type = VilkårType.SIVILSTAND,
+                behandlingId = behandling.id,
+                barnId = barn.first().id,
+                delvilkårsvurdering = delvilkårsvurdering
+            )
+        )
         return vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 
-    private fun lagreSøknad(behandling: Behandling,
-                            fagsak: Fagsak): SøknadsskjemaOvergangsstønad {
+    private fun lagreSøknad(
+        behandling: Behandling,
+        fagsak: Fagsak
+    ): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)!!
     }
-
 }

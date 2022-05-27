@@ -17,7 +17,7 @@ object InfotrygdPeriodeParser {
     private const val KEY_STØNAD_ID = "stonad_id"
     private const val KEY_VEDTAK_ID = "vedtak_id"
 
-    //private const val KEY_STØNAD_BELØP = "stonad_belop"
+    // private const val KEY_STØNAD_BELØP = "stonad_belop"
     private const val KEY_INNT_FRADRAG = "innt_fradrag"
     private const val KEY_SUM_FRADRAG = "sam_fradrag"
     private const val KEY_NETTO_BELØP = "netto_belop"
@@ -32,46 +32,52 @@ object InfotrygdPeriodeParser {
         val rows: List<Map<String, String>> = csvReader().readAllWithHeader(fileContent)
 
         val inputOutput = rows
-                .map { row -> row.entries.associate { it.key.trim() to it.value } }
-                .map { row ->
-                    getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
-                }.groupBy({ it.first }, { it.second })
-        return InfotrygdTestData(inputOutput["INPUT"]!!,
-                                 inputOutput["OUTPUT"]!!
-                                         .map(InfotrygdPeriode::tilInternPeriode)
-                                         .sortedBy(InternPeriode::stønadFom))
+            .map { row -> row.entries.associate { it.key.trim() to it.value } }
+            .map { row ->
+                getValue(row, KEY_TYPE)!! to parseInfotrygdPeriode(row)
+            }.groupBy({ it.first }, { it.second })
+        return InfotrygdTestData(
+            inputOutput["INPUT"]!!,
+            inputOutput["OUTPUT"]!!
+                .map(InfotrygdPeriode::tilInternPeriode)
+                .sortedBy(InternPeriode::stønadFom)
+        )
     }
 
     private fun parseInfotrygdPeriode(row: Map<String, String>) =
-            InfotrygdPeriode(stønadId = getValue(row, KEY_STØNAD_ID)!!.toLong(),
-                             vedtakId = getValue(row, KEY_VEDTAK_ID)!!.toLong(),
-                             inntektsgrunnlag = 0,
-                             inntektsreduksjon = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
-                             samordningsfradrag = getValue(row, KEY_SUM_FRADRAG)!!.toInt(),
-                             utgifterBarnetilsyn = 0,
-                             beløp = 0,
-                             månedsbeløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
-                             engangsbeløp = 0,
-                             stønadFom = LocalDate.parse(getValue(row, KEY_STØNAD_FOM)!!,
-                                                         DATO_FORMATTERER),
-                             stønadTom = LocalDate.parse(getValue(row, KEY_STØNAD_TOM)!!,
-                                                         DATO_FORMATTERER),
-                             opphørsdato = getValue(row, KEY_DATO_OPPHØR)
-                                     ?.let { emptyAsNull(it) }
-                                     ?.let { LocalDate.parse(it, DATO_FORMATTERER) },
-                             personIdent = "",
-                             brukerId = "",
-                             kode = InfotrygdEndringKode.ENDRING_BEREGNINGSGRUNNLAG,
-                             sakstype = InfotrygdSakstype.SØKNAD,
-                             kodeOvergangsstønad = null,
-                             aktivitetstype = null,
-                             startDato = LocalDate.now(),
-                             vedtakstidspunkt = LocalDateTime.now(),
-                             stønadBeløp = 0 // kanskje fjerne ?
-            )
+        InfotrygdPeriode(
+            stønadId = getValue(row, KEY_STØNAD_ID)!!.toLong(),
+            vedtakId = getValue(row, KEY_VEDTAK_ID)!!.toLong(),
+            inntektsgrunnlag = 0,
+            inntektsreduksjon = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
+            samordningsfradrag = getValue(row, KEY_SUM_FRADRAG)!!.toInt(),
+            utgifterBarnetilsyn = 0,
+            beløp = 0,
+            månedsbeløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
+            engangsbeløp = 0,
+            stønadFom = LocalDate.parse(
+                getValue(row, KEY_STØNAD_FOM)!!,
+                DATO_FORMATTERER
+            ),
+            stønadTom = LocalDate.parse(
+                getValue(row, KEY_STØNAD_TOM)!!,
+                DATO_FORMATTERER
+            ),
+            opphørsdato = getValue(row, KEY_DATO_OPPHØR)
+                ?.let { emptyAsNull(it) }
+                ?.let { LocalDate.parse(it, DATO_FORMATTERER) },
+            personIdent = "",
+            brukerId = "",
+            kode = InfotrygdEndringKode.ENDRING_BEREGNINGSGRUNNLAG,
+            sakstype = InfotrygdSakstype.SØKNAD,
+            kodeOvergangsstønad = null,
+            aktivitetstype = null,
+            startDato = LocalDate.now(),
+            vedtakstidspunkt = LocalDateTime.now(),
+            stønadBeløp = 0 // kanskje fjerne ?
+        )
 
     private fun getValue(row: Map<String, String>, key: String) = row[key]?.trim()
 
     private fun emptyAsNull(s: String): String? = s.ifEmpty { null }
-
 }
