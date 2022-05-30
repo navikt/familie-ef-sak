@@ -19,8 +19,8 @@ class InntektRegel : Vilkårsregel(vilkårType = VilkårType.INNTEKT,
                                                            SvarId.NOEN_MÅNEDER_OVERSTIGER_6G to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                                                            SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
 
-        private val samsvarerInntektMedOsMapping = mapOf(SvarId.JA to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                                         SvarId.BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+        private val samsvarerInntektMedOsMapping = mapOf(SvarId.JA to SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+                                                         SvarId.BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD to SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
                                                          SvarId.NEI to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
 
         private val LAVERE_INNTEKT_ENN_GRENSEN =
