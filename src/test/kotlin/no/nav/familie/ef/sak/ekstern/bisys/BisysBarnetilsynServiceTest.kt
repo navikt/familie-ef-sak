@@ -12,12 +12,15 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 
 import org.junit.jupiter.api.BeforeEach
@@ -132,13 +135,16 @@ internal class BisysBarnetilsynServiceTest {
 fun lagAndelHistorikkDto(
         fraOgMed: LocalDate = LocalDate.MIN,
         tilOgMed: LocalDate,
-        behandlingBarn: List<BehandlingBarn>,
+        behandlingBarn: List<BehandlingBarn> = emptyList(),
         beløp: Int = 1,
         endring: HistorikkEndring? = null,
+        aktivitet: AktivitetType? = null,
+        periodeType: VedtaksperiodeType? = null
 ): AndelHistorikkDto {
     return AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
             andel = AndelMedGrunnlagDto(lagAndelTilkjentYtelse(beløp = beløp,
@@ -146,9 +152,9 @@ fun lagAndelHistorikkDto(
                                                                tilOgMed = tilOgMed),
                                         null).copy(barn = behandlingBarn.map { it.id }),
 
-            aktivitet = null,
+            aktivitet = aktivitet,
             aktivitetArbeid = null,
-            periodeType = null,
+            periodeType = periodeType,
             erSanksjon = false,
             sanksjonsårsak = null,
             endring = endring

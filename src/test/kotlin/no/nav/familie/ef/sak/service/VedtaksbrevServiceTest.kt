@@ -216,8 +216,18 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Test
-    fun `Skal erstatte placeholder med besluttersignatur`() {
+    internal fun `skal kunne signere brev som kode 6 uten at det inneholder BESLUTTER_SIGNATUR_PLACEHOLDER`() {
+        val signaturDto = SignaturDto(beslutterNavn, "enhet", true)
+        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
+        every { brevsignaturService.lagSignaturMedEnhet(any<Saksbehandling>()) } returns signaturDto
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns
+                vedtaksbrev.copy(saksbehandlerHtml = "html uten placeholder")
 
+        vedtaksbrevService.forhåndsvisBeslutterBrev(saksbehandling(fagsak, behandlingForBeslutter))
+    }
+
+    @Test
+    fun `Skal erstatte placeholder med besluttersignatur`() {
         val htmlSlot = slot<String>()
 
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(saksbehandlerHtml = "html med placeholder $BESLUTTER_SIGNATUR_PLACEHOLDER og en liten avslutning")

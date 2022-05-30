@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
@@ -47,8 +48,8 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
                        private val vedtakService: VedtakService,
                        private val tilbakekrevingService: TilbakekrevingService,
                        private val barnService: BarnService,
-                       private val fagsakService: FagsakService) : BehandlingSteg<VedtakDto> {
-
+                       private val fagsakService: FagsakService,
+                       private val validerOmregningService: ValiderOmregningService) : BehandlingSteg<VedtakDto> {
 
     override fun stegType(): StegType {
         return StegType.BEREGNE_YTELSE
@@ -67,6 +68,7 @@ class BeregnYtelseSteg(private val tilkjentYtelseService: TilkjentYtelseService,
 
         when (data) {
             is InnvilgelseOvergangsstønad -> {
+                validerOmregningService.validerHarSammePerioderSomTidligereVedtak(data, saksbehandlingMedOppdatertIdent)
                 validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
