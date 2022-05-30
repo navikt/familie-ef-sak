@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -19,6 +20,7 @@ enum class EndringType {
 
 data class AndelHistorikkDto(val behandlingId: UUID,
                              val behandlingType: BehandlingType,
+                             val behandlingÅrsak: BehandlingÅrsak,
                              val vedtakstidspunkt: LocalDateTime,
                              val saksbehandler: String,
                              val andel: AndelMedGrunnlagDto,

@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 
 import org.junit.jupiter.api.BeforeEach
@@ -143,6 +144,7 @@ fun lagAndelHistorikkDto(
     return AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
             andel = AndelMedGrunnlagDto(lagAndelTilkjentYtelse(beløp = beløp,
