@@ -5,7 +5,7 @@
       "regelId" : "LEVER_IKKE_MED_ANNEN_FORELDER",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "VALGFRI",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
