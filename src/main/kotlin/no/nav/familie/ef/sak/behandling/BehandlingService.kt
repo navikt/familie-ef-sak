@@ -39,50 +39,56 @@ import java.util.UUID
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOvergangsstønadKontrakt
 
 @Service
-class BehandlingService(private val behandlingsjournalpostRepository: BehandlingsjournalpostRepository,
-                        private val behandlingRepository: BehandlingRepository,
-                        private val behandlingshistorikkService: BehandlingshistorikkService,
-                        private val taskService: TaskService,
-                        private val søknadService: SøknadService,
-                        private val featureToggleService: FeatureToggleService) {
+class BehandlingService(
+    private val behandlingsjournalpostRepository: BehandlingsjournalpostRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val taskService: TaskService,
+    private val søknadService: SøknadService,
+    private val featureToggleService: FeatureToggleService
+) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
 
     fun hentAktiveIdenter(behandlingIds: Collection<UUID>): Map<UUID, String> =
-            behandlingRepository.finnAktiveIdenter(behandlingIds).toMap()
+        behandlingRepository.finnAktiveIdenter(behandlingIds).toMap()
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
-                                                              ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
+        ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
-            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     fun finnesÅpenBehandling(fagsakId: UUID) =
-            behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
+        behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
 
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
-            behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
             ?: hentBehandlinger(fagsakId).lastOrNull {
                 it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT
             }
 
-
     fun finnGjeldendeIverksatteBehandlinger(stonadstype: StønadType) =
-            behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
+        behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
 
     @Transactional
-    fun opprettBehandlingForBlankett(behandlingType: BehandlingType,
-                                     fagsakId: UUID,
-                                     søknad: SøknadOvergangsstønadKontrakt,
-                                     journalpost: Journalpost): Behandling {
+    fun opprettBehandlingForBlankett(
+        behandlingType: BehandlingType,
+        fagsakId: UUID,
+        søknad: SøknadOvergangsstønadKontrakt,
+        journalpost: Journalpost
+    ): Behandling {
         val behandling =
-                opprettBehandling(behandlingType = behandlingType, fagsakId = fagsakId, behandlingsårsak = BehandlingÅrsak.SØKNAD)
-        behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling.id,
-                                                                       journalpost.journalpostId,
-                                                                       journalpost.journalposttype))
+            opprettBehandling(behandlingType = behandlingType, fagsakId = fagsakId, behandlingsårsak = BehandlingÅrsak.SØKNAD)
+        behandlingsjournalpostRepository.insert(
+            Behandlingsjournalpost(
+                behandling.id,
+                journalpost.journalpostId,
+                journalpost.journalposttype
+            )
+        )
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
         return behandling
     }
@@ -93,46 +99,59 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
 
     @Transactional
     fun opprettMigrering(fagsakId: UUID): Behandling {
-        return opprettBehandling(behandlingType = BehandlingType.REVURDERING,
-                                 fagsakId = fagsakId,
-                                 behandlingsårsak = BehandlingÅrsak.MIGRERING,
-                                 erMigrering = true)
+        return opprettBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            fagsakId = fagsakId,
+            behandlingsårsak = BehandlingÅrsak.MIGRERING,
+            erMigrering = true
+        )
     }
 
     @Transactional
-    fun opprettBehandling(behandlingType: BehandlingType,
-                          fagsakId: UUID,
-                          status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-                          stegType: StegType = VILKÅR,
-                          behandlingsårsak: BehandlingÅrsak,
-                          kravMottatt: LocalDate? = null,
-                          erMigrering: Boolean = false): Behandling {
+    fun opprettBehandling(
+        behandlingType: BehandlingType,
+        fagsakId: UUID,
+        status: BehandlingStatus = BehandlingStatus.OPPRETTET,
+        stegType: StegType = VILKÅR,
+        behandlingsårsak: BehandlingÅrsak,
+        kravMottatt: LocalDate? = null,
+        erMigrering: Boolean = false
+    ): Behandling {
         feilHvis(erMigrering && !featureToggleService.isEnabled("familie.ef.sak.migrering")) {
             "Feature toggle for migrering er disabled"
         }
         feilHvis(behandlingsårsak == BehandlingÅrsak.G_OMREGNING && !featureToggleService.isEnabled("familie.ef.sak.g-beregning")) {
             "Feature toggle for g-omregning er disabled"
         }
-        feilHvis(behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-                 !featureToggleService.isEnabled("familie.ef.sak.behandling-korrigering")) {
+        feilHvis(
+            behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
+                !featureToggleService.isEnabled("familie.ef.sak.behandling-korrigering")
+        ) {
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling, erMigrering)
 
-        val behandling = behandlingRepository.insert(Behandling(fagsakId = fagsakId,
-                                                                forrigeBehandlingId = forrigeBehandling?.id,
-                                                                type = behandlingType,
-                                                                steg = stegType,
-                                                                status = status,
-                                                                resultat = BehandlingResultat.IKKE_SATT,
-                                                                årsak = behandlingsårsak,
-                                                                kravMottatt = kravMottatt))
+        val behandling = behandlingRepository.insert(
+            Behandling(
+                fagsakId = fagsakId,
+                forrigeBehandlingId = forrigeBehandling?.id,
+                type = behandlingType,
+                steg = stegType,
+                status = status,
+                resultat = BehandlingResultat.IKKE_SATT,
+                årsak = behandlingsårsak,
+                kravMottatt = kravMottatt
+            )
+        )
 
         behandlingshistorikkService.opprettHistorikkInnslag(
-                behandlingshistorikk = Behandlingshistorikk(behandlingId = behandling.id,
-                                                            steg = VILKÅR))
+            behandlingshistorikk = Behandlingshistorikk(
+                behandlingId = behandling.id,
+                steg = VILKÅR
+            )
+        )
 
         return behandling
     }
@@ -142,62 +161,82 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
     fun hentSaksbehandling(behandlingId: UUID): Saksbehandling = behandlingRepository.finnSaksbehandling(behandlingId)
 
     fun hentSaksbehandling(eksternBehandlingId: Long): Saksbehandling =
-            behandlingRepository.finnSaksbehandling(eksternBehandlingId)
+        behandlingRepository.finnSaksbehandling(eksternBehandlingId)
 
     fun hentBehandlingPåEksternId(eksternBehandlingId: Long): Behandling = behandlingRepository.finnMedEksternId(
-            eksternBehandlingId) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
+        eksternBehandlingId
+    ) ?: error("Kan ikke finne behandling med eksternId=$eksternBehandlingId")
 
     fun hentBehandlinger(behandlingIder: Set<UUID>): List<Behandling> =
-            behandlingRepository.findAllByIdOrThrow(behandlingIder) { it.id }
+        behandlingRepository.findAllByIdOrThrow(behandlingIder) { it.id }
 
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
-        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
-                          "fra ${behandling.status} til $status")
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
+                "fra ${behandling.status} til $status"
+        )
         return behandlingRepository.update(behandling.copy(status = status))
     }
 
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
-        secureLogger.info("${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
-                          "fra ${behandling.steg} til $steg")
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
+                "fra ${behandling.steg} til $steg"
+        )
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
     fun harFørstegangsbehandlingEllerRevurderingFraFør(fagsakId: UUID) =
-            behandlingRepository.existsByFagsakIdAndTypeIn(fagsakId, setOf(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                           BehandlingType.REVURDERING))
+        behandlingRepository.existsByFagsakIdAndTypeIn(
+            fagsakId,
+            setOf(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                BehandlingType.REVURDERING
+            )
+        )
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
         return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }
     }
 
     fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
-        behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandlingId = behandlingId,
-                                                                       journalpostId = journalpostId,
-                                                                       sporbar = Sporbar(),
-                                                                       journalpostType = journalposttype))
+        behandlingsjournalpostRepository.insert(
+            Behandlingsjournalpost(
+                behandlingId = behandlingId,
+                journalpostId = journalpostId,
+                sporbar = Sporbar(),
+                journalpostType = journalposttype
+            )
+        )
     }
 
     @Transactional
     fun henleggBehandling(behandlingId: UUID, henlagt: HenlagtDto): Behandling {
         val behandling = hentBehandling(behandlingId)
         validerAtBehandlingenKanHenlegges(behandling)
-        val henlagtBehandling = behandling.copy(henlagtÅrsak = henlagt.årsak,
-                                                resultat = HENLAGT,
-                                                steg = BEHANDLING_FERDIGSTILT,
-                                                status = FERDIGSTILT)
-        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = henlagtBehandling.id,
-                                                            stegtype = henlagtBehandling.steg,
-                                                            utfall = StegUtfall.HENLAGT,
-                                                            metadata = henlagt)
+        val henlagtBehandling = behandling.copy(
+            henlagtÅrsak = henlagt.årsak,
+            resultat = HENLAGT,
+            steg = BEHANDLING_FERDIGSTILT,
+            status = FERDIGSTILT
+        )
+        behandlingshistorikkService.opprettHistorikkInnslag(
+            behandlingId = henlagtBehandling.id,
+            stegtype = henlagtBehandling.steg,
+            utfall = StegUtfall.HENLAGT,
+            metadata = henlagt
+        )
         return behandlingRepository.update(henlagtBehandling)
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
         if (!behandling.kanHenlegges()) {
-            throw ApiFeil("Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
-                          HttpStatus.BAD_REQUEST)
+            throw ApiFeil(
+                "Kan ikke henlegge en behandling med status ${behandling.status} for ${behandling.type}",
+                HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -226,5 +265,4 @@ class BehandlingService(private val behandlingsjournalpostRepository: Behandling
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
-
 }

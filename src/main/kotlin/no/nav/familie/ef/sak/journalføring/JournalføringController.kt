@@ -24,15 +24,16 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-
 @RestController
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringController(private val journalføringService: JournalføringService,
-                              private val pdlClient: PdlClient,
-                              private val tilgangService: TilgangService,
-                              private val featureToggleService: FeatureToggleService) {
+class JournalføringController(
+    private val journalføringService: JournalføringService,
+    private val pdlClient: PdlClient,
+    private val tilgangService: TilgangService,
+    private val featureToggleService: FeatureToggleService
+) {
 
     @GetMapping("/{journalpostId}")
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
@@ -58,8 +59,9 @@ class JournalføringController(private val journalføringService: Journalføring
     }
 
     @PostMapping("/{journalpostId}/fullfor")
-    fun fullførJournalpost(@PathVariable journalpostId: String,
-                           @RequestBody journalføringRequest: JournalføringRequest
+    fun fullførJournalpost(
+        @PathVariable journalpostId: String,
+        @RequestBody journalføringRequest: JournalføringRequest
     ): Ressurs<Long> {
         val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
@@ -69,8 +71,9 @@ class JournalføringController(private val journalføringService: Journalføring
 
     @PostMapping("/{journalpostId}/opprett-behandling-med-soknadsdata-fra-en-ferdigstilt-journalpost")
     fun opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
-            @PathVariable journalpostId: String,
-            @RequestBody request: JournalføringTilNyBehandlingRequest): Ressurs<Long> {
+        @PathVariable journalpostId: String,
+        @RequestBody request: JournalføringTilNyBehandlingRequest
+    ): Ressurs<Long> {
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost")) {
             "Funksjonen opprettBehandlingPåFerdigstiltJournalføring er skrudd av for denne brukeren"
         }
@@ -78,13 +81,19 @@ class JournalføringController(private val journalføringService: Journalføring
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
-        return Ressurs.success(journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(request,
-                                                                                                               journalpostId))
+        return Ressurs.success(
+            journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
+                request,
+                journalpostId
+            )
+        )
     }
 
-    private fun validerDokumentKanHentes(journalpost: Journalpost,
-                                         dokumentInfoId: String,
-                                         journalpostId: String) {
+    private fun validerDokumentKanHentes(
+        journalpost: Journalpost,
+        dokumentInfoId: String,
+        journalpostId: String
+    ) {
         val dokument = journalpost.dokumenter?.find { it.dokumentInfoId == dokumentInfoId }
         feilHvis(dokument == null) {
             "Finner ikke dokument med $dokumentInfoId for journalpost=$journalpostId"

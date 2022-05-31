@@ -16,8 +16,12 @@ class InitForberedOppgaverForTerminBarnTaskController(private val taskService: T
 
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
-        taskService.save(Task(ForberedOppgaverTerminbarnTask.TYPE,
-                              LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE)))
+        taskService.save(
+            Task(
+                ForberedOppgaverTerminbarnTask.TYPE,
+                LocalDate.now().minusWeeks(1).format(DateTimeFormatter.ISO_DATE)
+            )
+        )
         return ResponseEntity(HttpStatus.OK)
     }
 }

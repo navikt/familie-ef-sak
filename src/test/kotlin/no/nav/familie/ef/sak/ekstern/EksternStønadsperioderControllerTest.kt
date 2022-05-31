@@ -20,9 +20,11 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ef-proxy", true))
 
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
-                restTemplate.exchange(localhost("/api/ekstern/perioder"),
-                                      HttpMethod.POST,
-                                      HttpEntity(PerioderOvergangsstønadRequest("1"), headers))
+            restTemplate.exchange(
+                localhost("/api/ekstern/perioder"),
+                HttpMethod.POST,
+                HttpEntity(PerioderOvergangsstønadRequest("1"), headers)
+            )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -33,9 +35,11 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
-                restTemplate.exchange(localhost("/api/ekstern/perioder"),
-                                      HttpMethod.POST,
-                                      HttpEntity(PerioderOvergangsstønadRequest("1"), headers))
+            restTemplate.exchange(
+                localhost("/api/ekstern/perioder"),
+                HttpMethod.POST,
+                HttpEntity(PerioderOvergangsstønadRequest("1"), headers)
+            )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.FEILET)
@@ -46,9 +50,11 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ba-sak", true))
 
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
-                restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),
-                                      HttpMethod.POST,
-                                      HttpEntity(PersonIdent("1"), headers))
+            restTemplate.exchange(
+                localhost("/api/ekstern/perioder/full-overgangsstonad"),
+                HttpMethod.POST,
+                HttpEntity(PersonIdent("1"), headers)
+            )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -57,9 +63,11 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
     @Test
     internal fun `full overgangsstønad - skal ikke kunne kalle endepunkt uten token`() {
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
-                restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),
-                                      HttpMethod.POST,
-                                      HttpEntity(PersonIdent("1"), headers))
+            restTemplate.exchange(
+                localhost("/api/ekstern/perioder/full-overgangsstonad"),
+                HttpMethod.POST,
+                HttpEntity(PersonIdent("1"), headers)
+            )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.FEILET)
@@ -70,9 +78,11 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(onBehalfOfToken("familie-ba-sak"))
 
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
-                restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),
-                                      HttpMethod.POST,
-                                      HttpEntity(PersonIdent("1"), headers))
+            restTemplate.exchange(
+                localhost("/api/ekstern/perioder/full-overgangsstonad"),
+                HttpMethod.POST,
+                HttpEntity(PersonIdent("1"), headers)
+            )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -83,9 +93,11 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(onBehalfOfToken("d21e00a4-969d-4b28-8782-dc818abfae65"))
 
         val response: ResponseEntity<Ressurs<PerioderOvergangsstønadResponse>> =
-                restTemplate.exchange(localhost("/api/ekstern/perioder/full-overgangsstonad"),
-                                      HttpMethod.POST,
-                                      HttpEntity(PersonIdent("ikkeTilgang"), headers))
+            restTemplate.exchange(
+                localhost("/api/ekstern/perioder/full-overgangsstonad"),
+                HttpMethod.POST,
+                HttpEntity(PersonIdent("ikkeTilgang"), headers)
+            )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)

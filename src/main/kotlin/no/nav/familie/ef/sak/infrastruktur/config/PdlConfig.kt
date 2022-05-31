@@ -30,8 +30,8 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
         val søkPersonQuery = graphqlQuery("/pdl/søk_person.graphql")
 
         private fun graphqlQuery(path: String) = PdlConfig::class.java.getResource(path)
-                .readText()
-                .graphqlCompatible()
+            .readText()
+            .graphqlCompatible()
 
         private fun String.graphqlCompatible(): String {
             return StringUtils.normalizeSpace(this.replace("\n", ""))

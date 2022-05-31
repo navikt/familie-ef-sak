@@ -6,11 +6,12 @@ import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import java.time.LocalDate
 import kotlin.math.abs
 
-
 object BarnMatcher {
 
-    fun kobleBehandlingBarnOgRegisterBarn(behandlingBarn: List<BehandlingBarn>,
-                                          barn: List<BarnMedIdent>): List<MatchetBehandlingBarn> {
+    fun kobleBehandlingBarnOgRegisterBarn(
+        behandlingBarn: List<BehandlingBarn>,
+        barn: List<BarnMedIdent>
+    ): List<MatchetBehandlingBarn> {
         val barnMap = barn.associateBy { it.personIdent }
         val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
             val firstOrNull = barnMap.entries.firstOrNull { entry -> it.personIdent == entry.key }
@@ -18,7 +19,7 @@ object BarnMatcher {
         }
 
         val pdlBarnIkkeIBehandlingBarn =
-                barnMap.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
+            barnMap.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
 
         return behandlingBarnFnrMatchetTilPdlBarn.map {
             if (it.barn != null) {
@@ -31,21 +32,23 @@ object BarnMatcher {
                 barnForsøktMatchetPåFødselsdato
             }
         }
-
     }
 
-    private fun forsøkMatchPåFødselsdato(barn: MatchetBehandlingBarn,
-                                         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>): MatchetBehandlingBarn {
+    private fun forsøkMatchPåFødselsdato(
+        barn: MatchetBehandlingBarn,
+        pdlBarnIkkeISøknad: Map<String, BarnMedIdent>
+    ): MatchetBehandlingBarn {
 
         val fødselTermindato = barn.behandlingBarn.fødselTermindato ?: return barn
         val nærmesteMatch = nærmesteMatch(pdlBarnIkkeISøknad, fødselTermindato) ?: return barn
 
         return barn.copy(fødselsnummer = nærmesteMatch.key, barn = nærmesteMatch.value)
-
     }
 
-    private fun nærmesteMatch(pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
-                              fødselTermindato: LocalDate): Map.Entry<String, BarnMedIdent>? {
+    private fun nærmesteMatch(
+        pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
+        fødselTermindato: LocalDate
+    ): Map.Entry<String, BarnMedIdent>? {
         val uke20 = fødselTermindato.minusWeeks(20)
         val uke44 = fødselTermindato.plusWeeks(4)
 
@@ -59,9 +62,10 @@ object BarnMatcher {
             abs(epochDayForFødsel - epochDayTermindato)
         }
     }
-
 }
 
-data class MatchetBehandlingBarn(val fødselsnummer: String?,
-                                 val barn: BarnMedIdent?,
-                                 val behandlingBarn: BehandlingBarn)
+data class MatchetBehandlingBarn(
+    val fødselsnummer: String?,
+    val barn: BarnMedIdent?,
+    val behandlingBarn: BehandlingBarn
+)

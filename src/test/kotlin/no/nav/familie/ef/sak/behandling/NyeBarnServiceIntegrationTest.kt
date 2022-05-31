@@ -24,9 +24,13 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal kunne kalle på finnNyeBarnSidenGjeldendeBehandlingForPersonIdent flere ganger og kun opprette en task for OpprettOppgaveForMigrertFødtBarnTask`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident)), migrert = true))
-        behandlingRepository.insert(behandling(fagsak,
-                                               status = BehandlingStatus.FERDIGSTILT,
-                                               resultat = BehandlingResultat.INNVILGET))
+        behandlingRepository.insert(
+            behandling(
+                fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
@@ -36,9 +40,13 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal ikke opprette oppgaver for fagsaker som ikke er migrert`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident))))
-        behandlingRepository.insert(behandling(fagsak,
-                                               status = BehandlingStatus.FERDIGSTILT,
-                                               resultat = BehandlingResultat.INNVILGET))
+        behandlingRepository.insert(
+            behandling(
+                fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(taskRepository.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).isEmpty()

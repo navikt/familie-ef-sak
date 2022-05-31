@@ -16,32 +16,35 @@ class BeregningBarnetilsynService {
 
     fun beregnYtelseBarnetilsyn(innvilgelseBarnetilsyn: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
         return beregnYtelseBarnetilsyn(
-                innvilgelseBarnetilsyn.perioder,
-                innvilgelseBarnetilsyn.perioderKontantstøtte,
-                innvilgelseBarnetilsyn.tilleggsstønad.perioder
+            innvilgelseBarnetilsyn.perioder,
+            innvilgelseBarnetilsyn.perioderKontantstøtte,
+            innvilgelseBarnetilsyn.tilleggsstønad.perioder
         )
     }
 
-    fun beregnYtelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-                                tilleggsstønadsperioder: List<PeriodeMedBeløpDto>): List<BeløpsperiodeBarnetilsynDto> {
+    fun beregnYtelseBarnetilsyn(
+        utgiftsperioder: List<UtgiftsperiodeDto>,
+        kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    ): List<BeløpsperiodeBarnetilsynDto> {
 
         validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
         return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(kontantstøttePerioder, tilleggsstønadsperioder)
-                .values.toList()
-                .mergeSammenhengendePerioder()
+            .values.toList()
+            .mergeSammenhengendePerioder()
     }
 
     /**
      * Hva som er "fornuftige" beløp kan sikkert endre seg. Mulig vi kan justere beløp for å treffe bedre etterhvert.
      * Denne valideringen vil bare fange opp relativt store overskidelser av hva vi anser som fornuftig.
      */
-    private fun validerFornuftigeBeløp(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                       kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-                                       tilleggsstønadsperioder: List<PeriodeMedBeløpDto>) {
-
+    private fun validerFornuftigeBeløp(
+        utgiftsperioder: List<UtgiftsperiodeDto>,
+        kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    ) {
 
         brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
         brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000 }) { "Utgifter på mer enn 40000 støttes ikke" }
@@ -51,17 +54,18 @@ class BeregningBarnetilsynService {
 
         brukerfeilHvis(tilleggsstønadsperioder.any { it.beløp < 0 }) { "Beløp tilleggsstønad kan ikke være mindre enn 0" }
         brukerfeilHvis(tilleggsstønadsperioder.any { it.beløp > 20000 }) { "Tilleggsstønad større enn 20000 støttes ikke" }
-
     }
 
     fun List<PeriodeMedBeløpDto>.tilPerioder(): List<Periode> =
-            this.map {
-                it.tilPeriode()
-            }
+        this.map {
+            it.tilPeriode()
+        }
 
-    private fun validerGyldigePerioder(utgiftsperioderDto: List<UtgiftsperiodeDto>,
-                                       kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
-                                       tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>) {
+    private fun validerGyldigePerioder(
+        utgiftsperioderDto: List<UtgiftsperiodeDto>,
+        kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
+        tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>
+    ) {
 
         val utgiftsperioder = utgiftsperioderDto.tilPerioder()
         val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
@@ -95,7 +99,6 @@ class BeregningBarnetilsynService {
         brukerfeilHvis((kontantstøttePerioder.harPeriodeFør(innføringsMndKontantstøttefradrag))) {
             "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
         }
-
     }
 
     private fun harUrelevantReduksjonsPeriode(utgiftsperioder: List<Periode>, reduksjonsperioder: List<Periode>): Boolean {
@@ -108,7 +111,7 @@ class BeregningBarnetilsynService {
 }
 
 private fun List<Periode>.harPeriodeFør(årMåned: YearMonth): Boolean {
-    return this.any {  it.fradato.yearMonth() < årMåned}
+    return this.any { it.fradato.yearMonth() < årMåned }
 }
 
 private fun List<Periode>.harOverlappende(): Boolean {
@@ -119,17 +122,21 @@ private fun List<Periode>.harOverlappende(): Boolean {
 }
 
 fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =
-        this.perioder.tilBeløpsperioderPerUtgiftsmåned(this.perioderKontantstøtte,
-                                                       this.tilleggsstønad.perioder)
+    this.perioder.tilBeløpsperioderPerUtgiftsmåned(
+        this.perioderKontantstøtte,
+        this.tilleggsstønad.perioder
+    )
 
 fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
-        kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    kontantstøttePerioder: List<PeriodeMedBeløpDto>,
+    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
 ) = this.map { it.split() }
-        .flatten().associate { utgiftsMåned ->
-            utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(kontantstøttePerioder,
-                                                                                tilleggsstønadsperioder)
-        }
+    .flatten().associate { utgiftsMåned ->
+        utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
+            kontantstøttePerioder,
+            tilleggsstønadsperioder
+        )
+    }
 
 /**
  * Del opp utgiftsperioder i atomiske deler (mnd).
@@ -169,13 +176,9 @@ fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsy
 }
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
-        this.beløp == other.beløp &&
+    this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
-
 
 fun YearMonth.omsluttesAv(fraOgMed: YearMonth, tilOgMed: YearMonth): Boolean = fraOgMed <= this && this <= tilOgMed
 
 private fun LocalDate.yearMonth(): YearMonth = YearMonth.from(this)
-
-
-

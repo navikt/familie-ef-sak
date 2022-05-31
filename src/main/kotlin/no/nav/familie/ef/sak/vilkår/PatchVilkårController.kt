@@ -17,29 +17,30 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/patch-vilkar"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Unprotected
 @Validated
-class PatchVilkårController(private val patchVilkårRepository: PatchVilkårRepository,
-                            private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                            private val fagsakService: FagsakService,
-                            private val behandlingRepository: BehandlingRepository,
-                            private val tilkjentYtelseService: TilkjentYtelseService) {
+class PatchVilkårController(
+    private val patchVilkårRepository: PatchVilkårRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val fagsakService: FagsakService,
+    private val behandlingRepository: BehandlingRepository,
+    private val tilkjentYtelseService: TilkjentYtelseService
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("inntekt")
-    fun patchInntekt(@RequestBody liveRun: LiveRun)
-            : Ressurs<String> {
+    fun patchInntekt(@RequestBody liveRun: LiveRun): Ressurs<String> {
 
         val behandlinger = patchVilkårRepository.finnBehandlingerSomHarBarnetilsyn()
         behandlinger.forEach {
             val eksisterendeVilkår = vilkårsvurderingRepository.findByBehandlingId(it.id)
 
             if (eksisterendeVilkår.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.flatMap { it.vurderinger.map { it.regelId } } }
-                            .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)) {
+                .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)
+            ) {
                 logger.info("det finnes allerede et delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
             } else {
                 logger.info("bygger opp nytt delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
@@ -51,8 +52,13 @@ class PatchVilkårController(private val patchVilkårRepository: PatchVilkårRep
                     val nyDelvilkårsvurdering = lagNyDelvilkårsvurdering(it.id)
                     if (liveRun.skalPersistere) {
                         logger.info("persistererer delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
-                        vilkårsvurderingRepository.update(gammelVilkårsvurderingEllerNull.copy(delvilkårsvurdering = DelvilkårsvurderingWrapper(
-                                delvilkårsvurderinger = gammelVilkårsvurderingEllerNull.delvilkårsvurdering.delvilkårsvurderinger + nyDelvilkårsvurdering)))
+                        vilkårsvurderingRepository.update(
+                            gammelVilkårsvurderingEllerNull.copy(
+                                delvilkårsvurdering = DelvilkårsvurderingWrapper(
+                                    delvilkårsvurderinger = gammelVilkårsvurderingEllerNull.delvilkårsvurdering.delvilkårsvurderinger + nyDelvilkårsvurdering
+                                )
+                            )
+                        )
                     }
                 }
             }
@@ -66,11 +72,16 @@ class PatchVilkårController(private val patchVilkårRepository: PatchVilkårRep
         val sisteIverksatteBehandling = fagsaker.overgangsstønad?.let { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
         val svar = utledSvar(sisteIverksatteBehandling)
 
-        return Delvilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                   vurderinger = listOf(
-                                           Vurdering(regelId = RegelId.INNTEKT_SAMSVARER_MED_OS,
-                                                     svar = svar,
-                                                     begrunnelse = "Nytt delvilkår - automatisk lagt inn i ettertid")))
+        return Delvilkårsvurdering(
+            resultat = Vilkårsresultat.OPPFYLT,
+            vurderinger = listOf(
+                Vurdering(
+                    regelId = RegelId.INNTEKT_SAMSVARER_MED_OS,
+                    svar = svar,
+                    begrunnelse = "Nytt delvilkår - automatisk lagt inn i ettertid"
+                )
+            )
+        )
     }
 
     private fun utledSvar(behandling: Behandling?): SvarId {
@@ -81,7 +92,6 @@ class PatchVilkårController(private val patchVilkårRepository: PatchVilkårRep
         }
         return SvarId.BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD
     }
-
 }
 
 data class LiveRun(val skalPersistere: Boolean)

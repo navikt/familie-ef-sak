@@ -62,30 +62,35 @@ internal class BeslutteVedtakStegTest {
     private val behandlingService = mockk<BehandlingService>()
     private val featureToggleService = mockk<FeatureToggleService>()
 
-    private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository = taskRepository,
-                                                        fagsakService = fagsakService,
-                                                        oppgaveService = oppgaveService,
-                                                        iverksettClient = iverksett,
-                                                        iverksettingDtoMapper = iverksettingDtoMapper,
-                                                        totrinnskontrollService = totrinnskontrollService,
-                                                        behandlingService = behandlingService,
-                                                        vedtakService = vedtakService,
-                                                        vedtaksbrevService = vedtaksbrevService,
-                                                        featureToggleService = featureToggleService)
+    private val beslutteVedtakSteg = BeslutteVedtakSteg(
+        taskRepository = taskRepository,
+        fagsakService = fagsakService,
+        oppgaveService = oppgaveService,
+        iverksettClient = iverksett,
+        iverksettingDtoMapper = iverksettingDtoMapper,
+        totrinnskontrollService = totrinnskontrollService,
+        behandlingService = behandlingService,
+        vedtakService = vedtakService,
+        vedtaksbrevService = vedtaksbrevService,
+        featureToggleService = featureToggleService
+    )
 
     private val innloggetBeslutter = "sign2"
 
-    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
-                                identer = setOf(PersonIdent(ident = "12345678901")))
+    private val fagsak = fagsak(
+        stønadstype = StønadType.OVERGANGSSTØNAD,
+        identer = setOf(PersonIdent(ident = "12345678901"))
+    )
     private val behandlingId = UUID.randomUUID()
 
-    private val oppgave = Oppgave(id = UUID.randomUUID(),
-                                  behandlingId = behandlingId,
-                                  gsakOppgaveId = 123L,
-                                  type = Oppgavetype.BehandleSak,
-                                  erFerdigstilt = false)
+    private val oppgave = Oppgave(
+        id = UUID.randomUUID(),
+        behandlingId = behandlingId,
+        gsakOppgaveId = 123L,
+        type = Oppgavetype.BehandleSak,
+        erFerdigstilt = false
+    )
     private lateinit var taskSlot: MutableList<Task>
-
 
     @BeforeEach
     internal fun setUp() {
@@ -129,7 +134,7 @@ internal class BeslutteVedtakStegTest {
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
-                .isEqualTo(Hendelse.BESLUTTET)
+            .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }
         verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
@@ -166,17 +171,23 @@ internal class BeslutteVedtakStegTest {
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {
-        return beslutteVedtakSteg.utførOgReturnerNesteSteg(saksbehandling,
-                                                           BeslutteVedtakDto(godkjent = godkjent))
+        return beslutteVedtakSteg.utførOgReturnerNesteSteg(
+            saksbehandling,
+            BeslutteVedtakDto(godkjent = godkjent)
+        )
     }
 
     private fun opprettSaksbehandling(årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD) =
-            saksbehandling(fagsak,
-                           Behandling(id = behandlingId,
-                                      fagsakId = fagsak.id,
-                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                      status = BehandlingStatus.FATTER_VEDTAK,
-                                      steg = beslutteVedtakSteg.stegType(),
-                                      resultat = BehandlingResultat.IKKE_SATT,
-                                      årsak = årsak))
+        saksbehandling(
+            fagsak,
+            Behandling(
+                id = behandlingId,
+                fagsakId = fagsak.id,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.FATTER_VEDTAK,
+                steg = beslutteVedtakSteg.stegType(),
+                resultat = BehandlingResultat.IKKE_SATT,
+                årsak = årsak
+            )
+        )
 }

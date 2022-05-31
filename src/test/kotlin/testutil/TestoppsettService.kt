@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service
 @Profile("integrasjonstest")
 @Service
 class TestoppsettService(
-        private val fagsakPersonRepository: FagsakPersonRepository,
-        private val fagsakRepository: FagsakRepository,
+    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val fagsakRepository: FagsakRepository,
 ) {
 
     fun opprettPerson(ident: String) = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(ident))))
@@ -24,18 +24,25 @@ class TestoppsettService(
 
     fun lagreFagsak(fagsak: Fagsak): Fagsak {
         val person = hentEllerOpprettPerson(fagsak)
-        return fagsakRepository.insert(FagsakDomain(id = fagsak.id,
-                                                    fagsakPersonId = person.id,
-                                                    stønadstype = fagsak.stønadstype,
-                                                    eksternId = fagsak.eksternId,
-                                                    migrert = fagsak.migrert,
-                                                    sporbar = fagsak.sporbar)).tilFagsakMedPerson(person.identer)
+        return fagsakRepository.insert(
+            FagsakDomain(
+                id = fagsak.id,
+                fagsakPersonId = person.id,
+                stønadstype = fagsak.stønadstype,
+                eksternId = fagsak.eksternId,
+                migrert = fagsak.migrert,
+                sporbar = fagsak.sporbar
+            )
+        ).tilFagsakMedPerson(person.identer)
     }
 
     private fun hentEllerOpprettPerson(fagsak: Fagsak): FagsakPerson {
         val person = fagsakPersonRepository.findByIdOrNull(fagsak.fagsakPersonId)
-        return person ?: fagsakPersonRepository.insert(FagsakPerson(fagsak.fagsakPersonId,
-                                                                    identer = fagsak.personIdenter))
+        return person ?: fagsakPersonRepository.insert(
+            FagsakPerson(
+                fagsak.fagsakPersonId,
+                identer = fagsak.personIdenter
+            )
+        )
     }
-
 }

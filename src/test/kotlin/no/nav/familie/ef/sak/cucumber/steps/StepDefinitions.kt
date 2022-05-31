@@ -75,16 +75,18 @@ class StepDefinitions {
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockFagsakService()
 
-    private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
-                                                    beregningService,
-                                                    beregningBarnetilsynService,
-                                                    beregningSkolepengerService,
-                                                    simuleringService,
-                                                    vedtakService,
-                                                    tilbakekrevingService,
-                                                    barnService,
-                                                    fagsakService,
-                                                    mockk())
+    private val beregnYtelseSteg = BeregnYtelseSteg(
+        tilkjentYtelseService,
+        beregningService,
+        beregningBarnetilsynService,
+        beregningSkolepengerService,
+        simuleringService,
+        vedtakService,
+        tilbakekrevingService,
+        barnService,
+        fagsakService,
+        mockk()
+    )
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
 
@@ -153,7 +155,7 @@ class StepDefinitions {
         val behandlinger = mapBehandlinger()
 
         if (stønadstype == StønadType.OVERGANGSSTØNAD) {
-            //Skriver over inntekt hvis inntekter er definiert
+            // Skriver over inntekt hvis inntekter er definiert
             gittVedtak = gittVedtak.map {
                 it.copy(inntekter = inntekter[it.behandlingId] ?: it.inntekter)
             }
@@ -163,12 +165,14 @@ class StepDefinitions {
             beregnYtelseSteg.utførSteg(behandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
         }
         // kan ikke beregne historikk ennå
-        if(stønadstype == StønadType.SKOLEPENGER) return
-        beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(tilkjentYtelser.values.toList(),
-                                                                         lagredeVedtak,
-                                                                         behandlinger.values.map { it.first }.toList(),
-                                                                         null,
-                                                                         behandlingIdsToAktivitetArbeid)
+        if (stønadstype == StønadType.SKOLEPENGER) return
+        beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
+            tilkjentYtelser.values.toList(),
+            lagredeVedtak,
+            behandlinger.values.map { it.first }.toList(),
+            null,
+            behandlingIdsToAktivitetArbeid
+        )
     }
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
@@ -207,13 +211,13 @@ class StepDefinitions {
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")
     fun `forvent følgende andeler lagret`(behandling: Int, dataTable: DataTable) {
-        if(stønadstype == StønadType.SKOLEPENGER) return // TODO denne må slettes når vi fikset beregning av periodene
+        if (stønadstype == StønadType.SKOLEPENGER) return // TODO denne må slettes når vi fikset beregning av periodene
         dataTable.asMaps().mapIndexed { index, rad ->
             val behandlingId = behandlingIdTilUUID[behandling]
             val kildeBehandlingId =
-                    behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, rad)]
+                behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, rad)]
             val gjeldendeTilkjentYtelse: TilkjentYtelse =
-                    tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
+                tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
 
             val fraOgMed = parseFraOgMed(rad)
             val tilOgMed = parseTilOgMed(rad)
@@ -221,7 +225,7 @@ class StepDefinitions {
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 
             val gjelendeAndel = gjeldendeTilkjentYtelse.andelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
-                                ?: error("Fant ingen andel med startdato $fraOgMed")
+                ?: error("Fant ingen andel med startdato $fraOgMed")
 
             try {
 
@@ -229,8 +233,8 @@ class StepDefinitions {
                 assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
                 beløpMellom?.let {
                     assertThat(gjelendeAndel.beløp)
-                            .isGreaterThanOrEqualTo(it.first)
-                            .isLessThanOrEqualTo(it.second)
+                        .isGreaterThanOrEqualTo(it.first)
+                        .isLessThanOrEqualTo(it.second)
                 }
                 beløp?.let { assertThat(gjelendeAndel.beløp).isEqualTo(it) }
                 assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
@@ -254,16 +258,18 @@ class StepDefinitions {
         val fagsak = fagsak(stønadstype = stønadstype)
 
         return gittVedtak
-                .map { it.behandlingId }
-                .distinct()
-                .foldIndexed<UUID, List<Behandling>>(listOf()) { index, acc, id ->
-                    acc + behandling(id = id,
-                                     opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                                     type = BehandlingType.REVURDERING,
-                                     forrigeBehandlingId = acc.lastOrNull()?.id)
-                }
-                .map { it to saksbehandling(fagsak, it) }
-                .associateBy { it.first.id }
+            .map { it.behandlingId }
+            .distinct()
+            .foldIndexed<UUID, List<Behandling>>(listOf()) { index, acc, id ->
+                acc + behandling(
+                    id = id,
+                    opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
+                    type = BehandlingType.REVURDERING,
+                    forrigeBehandlingId = acc.lastOrNull()?.id
+                )
+            }
+            .map { it to saksbehandling(fagsak, it) }
+            .associateBy { it.first.id }
     }
 
     private fun initialiserTilkjentYtelseOgVedtakMock() {
@@ -324,14 +330,15 @@ class StepDefinitions {
         }
     }
 
-    private fun assertBeregnetAndel(it: MutableMap<String, String>,
-                                    index: Int,
-                                    forventetHistorikkEndringer: List<VedtakDomeneParser.ForventetHistorikk>,
-                                    andelHistorikkDto: AndelHistorikkDto
+    private fun assertBeregnetAndel(
+        it: MutableMap<String, String>,
+        index: Int,
+        forventetHistorikkEndringer: List<VedtakDomeneParser.ForventetHistorikk>,
+        andelHistorikkDto: AndelHistorikkDto
     ) {
         val endringType = parseEndringType(it)
         val endretIBehandlingId =
-                behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
+            behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
         val beregnetAndelHistorikk = andelHistorikkDto
         val forventetHistorikkEndring = forventetHistorikkEndringer[index]
 
@@ -378,8 +385,7 @@ class StepDefinitions {
         if (beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
             assertThat(beregnetAndelHistorikk.endring?.type).isEqualTo(forventetHistorikkEndring.historikkEndring?.type)
             assertThat(beregnetAndelHistorikk.endring?.behandlingId)
-                    .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)
+                .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)
         }
     }
-
 }

@@ -18,5 +18,3 @@ enum class BeregningBarnetilsynDomenebegrep(val nøkkel: String) : Domenenøkkel
         return nøkkel
     }
 }
-
-

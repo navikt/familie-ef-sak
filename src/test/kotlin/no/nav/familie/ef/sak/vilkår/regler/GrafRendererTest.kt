@@ -20,19 +20,31 @@ internal class GrafRendererTest {
     internal fun `print alle vilkår`() {
         val vilkårsregler = Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.filter { it.key != VilkårType.SIVILSTAND }.map {
             val regler = it.value.regler
-            mapOf("name" to it.key,
-                  "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) })
+            mapOf(
+                "name" to it.key,
+                "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) }
+            )
         }
-        println(objectMapper.writeValueAsString(mapOf("name" to "vilkår",
-                                                      "children" to vilkårsregler.toList())))
+        println(
+            objectMapper.writeValueAsString(
+                mapOf(
+                    "name" to "vilkår",
+                    "children" to vilkårsregler.toList()
+                )
+            )
+        )
     }
 
     enum class SivilstandData(val sivilstandstype: Sivilstandstype, val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder()) {
-        UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(Sivilstandstype.UGIFT,
-                                                    søknadBuilder { it.copy(erUformeltGift = true) }),
+        UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(
+            Sivilstandstype.UGIFT,
+            søknadBuilder { it.copy(erUformeltGift = true) }
+        ),
         UGIFT(Sivilstandstype.UGIFT),
-        GIFT__SØKT_OM_SKILSMISSE(Sivilstandstype.GIFT,
-                                 søknadBuilder { it.copy(søktOmSkilsmisseSeparasjon = true) }),
+        GIFT__SØKT_OM_SKILSMISSE(
+            Sivilstandstype.GIFT,
+            søknadBuilder { it.copy(søktOmSkilsmisseSeparasjon = true) }
+        ),
         GIFT(Sivilstandstype.GIFT),
         SEPARERT(Sivilstandstype.SEPARERT),
         SKILT(Sivilstandstype.SKILT),
@@ -43,34 +55,50 @@ internal class GrafRendererTest {
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
-            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(HovedregelMetadata(it.søknad.sivilstand,
-                                                                                                 it.sivilstandstype,
-                                                                                                 barn = emptyList(),
-                                                                                                 søktOmBarnetilsyn = emptyList()))
+            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(
+                HovedregelMetadata(
+                    it.søknad.sivilstand,
+                    it.sivilstandstype,
+                    barn = emptyList(),
+                    søktOmBarnetilsyn = emptyList()
+                )
+            )
             val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
                 delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
             }.map { delvilkår -> mapSpørsmål(regel.regler, delvilkår.hovedregel) }
 
-            mapOf("name" to it.name,
-                  "children" to hovedregler)
+            mapOf(
+                "name" to it.name,
+                "children" to hovedregler
+            )
         }
-        println(objectMapper.writeValueAsString(mapOf("name" to "vilkår",
-                                                      "children" to sivilstandregler.toList())))
+        println(
+            objectMapper.writeValueAsString(
+                mapOf(
+                    "name" to "vilkår",
+                    "children" to sivilstandregler.toList()
+                )
+            )
+        )
     }
 
     /**
      * Brukes kun til å rendere grafdata for d3
      */
-    data class Spørsmål(val name: RegelId,
-                        val children: List<Svar>) {
+    data class Spørsmål(
+        val name: RegelId,
+        val children: List<Svar>
+    ) {
 
         val type = "spørsmål"
     }
 
-    data class Svar(val name: SvarId,
-                    val begrunnelseType: BegrunnelseType,
-                    val children: List<Spørsmål>,
-                    val resultat: Vilkårsresultat? = null) {
+    data class Svar(
+        val name: SvarId,
+        val begrunnelseType: BegrunnelseType,
+        val children: List<Spørsmål>,
+        val resultat: Vilkårsresultat? = null
+    ) {
 
         val type = "svar"
     }
@@ -99,12 +127,13 @@ internal class GrafRendererTest {
 
         fun søknadBuilder(changeSivilstand: (Sivilstand) -> Sivilstand = { it }): SøknadsskjemaOvergangsstønad {
             val builder = TestsøknadBuilder.Builder()
-            builder.setSivilstandsdetaljer(erUformeltGift = false,
-                                           erUformeltSeparertEllerSkilt = false,
-                                           søktOmSkilsmisseSeparasjon = false)
+            builder.setSivilstandsdetaljer(
+                erUformeltGift = false,
+                erUformeltSeparertEllerSkilt = false,
+                søktOmSkilsmisseSeparasjon = false
+            )
             val søknad = SøknadsskjemaMapper.tilDomene(builder.build().søknadOvergangsstønad)
             return søknad.copy(sivilstand = changeSivilstand.invoke(søknad.sivilstand))
         }
     }
-
 }

@@ -6,7 +6,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
@@ -29,9 +28,7 @@ internal class OppgaveControllerTest {
     private val oppgaveService: OppgaveService = mockk()
     private val pdlClient: PdlClient = mockk()
 
-
     private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, pdlClient)
-
 
     @Test
     internal fun `skal kaste feil hvis ident ikke er på gyldig format`() {
@@ -96,7 +93,6 @@ internal class OppgaveControllerTest {
     internal fun `skal hente oppgave`() {
         tilgangOgRolleJustRuns()
 
-
         val oppgave = Oppgave(UUID.randomUUID(), UUID.randomUUID(), 123, Oppgavetype.BehandleSak)
 
         every {
@@ -113,7 +109,6 @@ internal class OppgaveControllerTest {
     @Test
     internal fun `skal returnere funksjonell feil når oppgave ikke finnes hos oss`() {
         tilgangOgRolleJustRuns()
-
 
         every {
             oppgaveService.hentEfOppgave(any())

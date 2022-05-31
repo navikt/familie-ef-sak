@@ -2,11 +2,6 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.behandling.migrering.AutomatiskMigreringService
-import no.nav.familie.ef.sak.behandling.migrering.MigreringExceptionType
-import no.nav.familie.ef.sak.behandling.migrering.MigreringResultat
-import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
-import no.nav.familie.ef.sak.behandling.migrering.MigreringsstatusRepository
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
@@ -41,10 +36,11 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
         val personIdent = "1"
         migreringsstatusRepository.insert(Migreringsstatus(personIdent, MigreringResultat.IKKE_KONTROLLERT))
         val perioderOvergangsstønad = listOf(
-                lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
-                lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1)))
+            lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
+            lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1))
+        )
         every { infotrygdReplikaClient.hentPerioder(any()) } returns
-                InfotrygdPeriodeResponse(perioderOvergangsstønad, emptyList(), emptyList())
+            InfotrygdPeriodeResponse(perioderOvergangsstønad, emptyList(), emptyList())
 
         automatiskMigreringService.migrerPersonAutomatisk(personIdent)
 
@@ -53,5 +49,4 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
         assertThat(oppdatertMigreringsstatus.status).isEqualTo(MigreringResultat.FEILET)
         assertThat(oppdatertMigreringsstatus.årsak).isEqualTo(MigreringExceptionType.FLERE_AKTIVE_PERIODER)
     }
-
 }

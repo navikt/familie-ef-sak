@@ -7,7 +7,6 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseBigDecimal
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
@@ -31,7 +30,6 @@ class BeregningBarnetilsynStepDefinitions {
     val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()
     val utgiftsperioder: MutableList<UtgiftsperiodeDto> = mutableListOf()
-
 
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {
@@ -66,9 +64,13 @@ class BeregningBarnetilsynStepDefinitions {
 
     @Når("vi beregner perioder med barnetilsyn")
     fun `vi beregner perioder med barnetilsyn`() {
-        beregnYtelseBarnetilsynResultat.addAll(beregningBarnetilsynService.beregnYtelseBarnetilsyn(utgiftsperioder = utgiftsperioder,
-                                                                                                   kontantstøttePerioder = kontantStøtteperioder,
-                                                                                                   tilleggsstønadsperioder = tilleggsstønadPerioder))
+        beregnYtelseBarnetilsynResultat.addAll(
+            beregningBarnetilsynService.beregnYtelseBarnetilsyn(
+                utgiftsperioder = utgiftsperioder,
+                kontantstøttePerioder = kontantStøtteperioder,
+                tilleggsstønadsperioder = tilleggsstønadPerioder
+            )
+        )
     }
 
     @Så("forventer vi følgende perioder")
@@ -90,7 +92,6 @@ class BeregningBarnetilsynStepDefinitions {
             assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
             assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
         }
-
     }
 
     @Så("forventer vi følgende perioder med riktig grunnlagsdata")
@@ -119,9 +120,11 @@ class BeregningBarnetilsynStepDefinitions {
         ForventetPeriodeMedGrunnlag(beløp, fraÅrMåned, tilÅrMåned, harKontantstøtte, harTilleggsstønad, antallBarn)
     }
 
-    private fun assertAllefelterErSomForventet(it: BeløpsperiodeBarnetilsynDto,
-                                               sortetForventet: List<ForventetPeriodeMedGrunnlag>,
-                                               idx: Int) {
+    private fun assertAllefelterErSomForventet(
+        it: BeløpsperiodeBarnetilsynDto,
+        sortetForventet: List<ForventetPeriodeMedGrunnlag>,
+        idx: Int
+    ) {
         assertThat(it.periode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
         assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
         assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
@@ -138,11 +141,12 @@ class BeregningBarnetilsynStepDefinitions {
     }
 
     data class ForventetPeriode(val beløp: Int, val fraÅrMåned: YearMonth, val tilÅrMåned: YearMonth)
-    data class ForventetPeriodeMedGrunnlag(val beløp: Int,
-                                           val fraÅrMåned: YearMonth,
-                                           val tilÅrMåned: YearMonth,
-                                           val harKontantstøtte: Boolean,
-                                           val harTilleggsstønad: Boolean,
-                                           val antallBarn: Int)
+    data class ForventetPeriodeMedGrunnlag(
+        val beløp: Int,
+        val fraÅrMåned: YearMonth,
+        val tilÅrMåned: YearMonth,
+        val harKontantstøtte: Boolean,
+        val harTilleggsstønad: Boolean,
+        val antallBarn: Int
+    )
 }
-

@@ -26,5 +26,4 @@ internal class BeregningBarnetilsynUtilKtTest {
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 1, årMåned = år2020)).isEqualTo(4053)
         assertThat(satserForBarnetilsyn.hentSatsFor(antallBarn = 0, årMåned = år2020)).isEqualTo(0)
     }
-
 }

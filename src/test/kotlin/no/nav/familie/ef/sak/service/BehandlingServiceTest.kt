@@ -47,12 +47,14 @@ internal class BehandlingServiceTest {
     private val behandlingshistorikkService: BehandlingshistorikkService = mockk(relaxed = true)
     private val taskService: TaskService = mockk(relaxed = true)
     private val behandlingService =
-            BehandlingService(mockk(),
-                              behandlingRepository,
-                              behandlingshistorikkService,
-                              taskService,
-                              mockk(),
-                              mockFeatureToggleService())
+        BehandlingService(
+            mockk(),
+            behandlingRepository,
+            behandlingshistorikkService,
+            taskService,
+            mockk(),
+            mockFeatureToggleService()
+        )
     private val behandlingSlot = slot<Behandling>()
 
     @BeforeAll
@@ -117,22 +119,24 @@ internal class BehandlingServiceTest {
         @Test
         internal fun `skal ikke kunne henlegge behandling hvor vedtak fattes`() {
             val behandling =
-                    behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
             henleggOgForventApiFeilmelding(behandling, FEILREGISTRERT)
         }
 
         @Test
         internal fun `skal ikke kunne henlegge behandling som er iverksatt`() {
-            val behandling = behandling(fagsak(),
-                                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                        status = BehandlingStatus.IVERKSETTER_VEDTAK)
+            val behandling = behandling(
+                fagsak(),
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.IVERKSETTER_VEDTAK
+            )
             henleggOgForventApiFeilmelding(behandling, TRUKKET_TILBAKE)
         }
 
         @Test
         internal fun `skal ikke kunne henlegge behandling som er ferdigstilt`() {
             val behandling =
-                    behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT)
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT)
             henleggOgForventApiFeilmelding(behandling, TRUKKET_TILBAKE)
         }
 
@@ -164,10 +168,12 @@ internal class BehandlingServiceTest {
 
             assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
             verify {
-                taskService.save(coWithArg {
-                    assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-                    assertThat(it.payload).contains(Hendelse.VENTER.name)
-                })
+                taskService.save(
+                    coWithArg {
+                        assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+                        assertThat(it.payload).contains(Hendelse.VENTER.name)
+                    }
+                )
             }
         }
 
@@ -198,10 +204,12 @@ internal class BehandlingServiceTest {
 
             assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.UTREDES)
             verify {
-                taskService.save(coWithArg {
-                    assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-                    assertThat(it.payload).contains(Hendelse.PÅBEGYNT.name)
-                })
+                taskService.save(
+                    coWithArg {
+                        assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
+                        assertThat(it.payload).contains(Hendelse.PÅBEGYNT.name)
+                    }
+                )
             }
         }
 

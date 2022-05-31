@@ -28,18 +28,20 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Service
-class NyeBarnService(private val behandlingService: BehandlingService,
-                     private val fagsakService: FagsakService,
-                     private val personService: PersonService,
-                     private val barnService: BarnService,
-                     private val taskRepository: TaskRepository) {
+class NyeBarnService(
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
+    private val personService: PersonService,
+    private val barnService: BarnService,
+    private val taskRepository: TaskRepository
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
-                     ?: error("Kunne ikke finne fagsak for personident")
+            ?: error("Kunne ikke finne fagsak for personident")
         val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
 
         val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
@@ -73,7 +75,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
     private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData {
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
-                         ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
+            ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return finnKobledeBarn(behandling.id, aktivIdent)
     }
@@ -81,7 +83,7 @@ class NyeBarnService(private val behandlingService: BehandlingService,
     private fun finnKobledeBarn(forrigeBehandlingId: UUID, personIdent: String): NyeBarnData {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
         val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
-                .filter { it.fødsel.gjeldende().erUnder18År() }
+            .filter { it.fødsel.gjeldende().erUnder18År() }
         val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarnUnder18år)
 
         return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
@@ -89,12 +91,12 @@ class NyeBarnService(private val behandlingService: BehandlingService,
 
     private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData): List<NyttBarn> {
         return kobledeBarn.kobledeBarn
-                .filter { it.behandlingBarn.personIdent == null }
-                .filter { barnFødtFørTermin(it) }
-                .map {
-                    val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
-                    NyttBarn(barn.personIdent, NyttBarnÅrsak.FØDT_FØR_TERMIN)
-                }
+            .filter { it.behandlingBarn.personIdent == null }
+            .filter { barnFødtFørTermin(it) }
+            .map {
+                val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
+                NyttBarn(barn.personIdent, NyttBarnÅrsak.FØDT_FØR_TERMIN)
+            }
     }
 
     private fun barnFødtFørTermin(barn: MatchetBehandlingBarn): Boolean {
@@ -107,18 +109,20 @@ class NyeBarnService(private val behandlingService: BehandlingService,
         return YearMonth.from(fødselsdato) < YearMonth.from(behandlingBarn.fødselTermindato)
     }
 
-    private data class NyeBarnData(val pdlBarnUnder18år: List<BarnMedIdent>,
-                                   val kobledeBarn: List<MatchetBehandlingBarn>)
+    private data class NyeBarnData(
+        val pdlBarnUnder18år: List<BarnMedIdent>,
+        val kobledeBarn: List<MatchetBehandlingBarn>
+    )
 
     private fun filtrerNyeBarn(data: NyeBarnData) =
-            data.pdlBarnUnder18år
-                    .filter { pdlBarn -> data.kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
-                    .map { barnMinimumDto(it) }
+        data.pdlBarnUnder18år
+            .filter { pdlBarn -> data.kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
+            .map { barnMinimumDto(it) }
 
     private fun barnMinimumDto(it: BarnMedIdent) =
-            BarnMinimumDto(personIdent = it.personIdent,
-                           navn = it.navn.visningsnavn(),
-                           fødselsdato = it.fødsel.gjeldende().fødselsdato)
-
-
+        BarnMinimumDto(
+            personIdent = it.personIdent,
+            navn = it.navn.visningsnavn(),
+            fødselsdato = it.fødsel.gjeldende().fødselsdato
+        )
 }

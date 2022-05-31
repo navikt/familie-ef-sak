@@ -79,7 +79,7 @@ class OpprettOppgaverForBarnSomIkkeBlittOpprettetTidligereController(
     fun opprettOppgaver(@RequestParam dryRun: Boolean) {
         val beskrivelse = OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr()
         val oppgaver = barn1År.mapNotNull { (behandlingId, fødselsdato) ->
-            if(behandlingRepository.findByIdOrNull(behandlingId) == null) {
+            if (behandlingRepository.findByIdOrNull(behandlingId) == null) {
                 logger.info("Finner ikke behandling for $behandlingId")
                 return@mapNotNull null
             }
@@ -87,18 +87,19 @@ class OpprettOppgaverForBarnSomIkkeBlittOpprettetTidligereController(
             val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
             val barnFraGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
             val barn = barnFraGrunnlagsdata.find { it.fødsel.gjeldende().fødselsdato == fødselsdato }
-            if(barn == null) {
+            if (barn == null) {
                 logger.info("Finner ikke barn med fødselsdato $fødselsdato for behandling=$behandlingId")
                 return@mapNotNull null
             }
-            OppgaveForBarn(behandlingId,
+            OppgaveForBarn(
+                behandlingId,
                 saksbehandling.eksternFagsakId,
                 saksbehandling.ident,
                 StønadType.OVERGANGSSTØNAD,
                 beskrivelse
             )
         }
-        if(dryRun) {
+        if (dryRun) {
             logger.info("Oppretter ikke oppgaver")
         } else {
             iverksettClient.sendOppgaverForBarn(OppgaverForBarnDto(oppgaver))

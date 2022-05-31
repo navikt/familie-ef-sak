@@ -7,9 +7,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Table("mellomlagret_frittstaende_brev")
-data class MellomlagretFrittståendeBrev(@Id val id: UUID = UUID.randomUUID(),
-                                        val fagsakId: UUID,
-                                        val brev: Fritekstbrev,
-                                        val brevType: FrittståendeBrevKategori,
-                                        val saksbehandlerIdent: String,
-                                        val tidspunktOpprettet: LocalDateTime = LocalDateTime.now())
+data class MellomlagretFrittståendeBrev(
+    @Id val id: UUID = UUID.randomUUID(),
+    val fagsakId: UUID,
+    val brev: Fritekstbrev,
+    val brevType: FrittståendeBrevKategori,
+    val saksbehandlerIdent: String,
+    val tidspunktOpprettet: LocalDateTime = LocalDateTime.now()
+)

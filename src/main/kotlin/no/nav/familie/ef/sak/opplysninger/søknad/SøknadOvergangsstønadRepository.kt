@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface SøknadOvergangsstønadRepository : RepositoryInterface<SøknadsskjemaOvergangsstønad, UUID>,
-                                            InsertUpdateRepository<SøknadsskjemaOvergangsstønad>
+interface SøknadOvergangsstønadRepository :
+    RepositoryInterface<SøknadsskjemaOvergangsstønad, UUID>,
+    InsertUpdateRepository<SøknadsskjemaOvergangsstønad>

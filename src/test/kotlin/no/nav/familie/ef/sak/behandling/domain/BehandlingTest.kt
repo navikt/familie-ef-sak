@@ -55,9 +55,11 @@ internal class BehandlingTest {
         assertThat(feil.feil).isEqualTo("Kan ikke henlegge behandling uten en årsak")
     }
 
-    private fun lagBehandlingMed(behandlingResultat: BehandlingResultat,
-                                 henlagtÅrsak: HenlagtÅrsak?,
-                                 type: BehandlingType): Behandling {
+    private fun lagBehandlingMed(
+        behandlingResultat: BehandlingResultat,
+        henlagtÅrsak: HenlagtÅrsak?,
+        type: BehandlingType
+    ): Behandling {
         return behandling.copy(resultat = behandlingResultat, henlagtÅrsak = henlagtÅrsak, type = type)
     }
 }

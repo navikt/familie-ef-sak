@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface SimuleringsresultatRepository : RepositoryInterface<Simuleringsresultat, UUID>,
-                                          InsertUpdateRepository<Simuleringsresultat>
+interface SimuleringsresultatRepository :
+    RepositoryInterface<Simuleringsresultat, UUID>,
+    InsertUpdateRepository<Simuleringsresultat>

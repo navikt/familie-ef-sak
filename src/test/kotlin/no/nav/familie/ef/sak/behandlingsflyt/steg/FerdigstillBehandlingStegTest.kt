@@ -70,21 +70,38 @@ internal class FerdigstillBehandlingStegTest {
 
     @Test
     internal fun `skal kaste feil hvis behandlingen er av andre typer`() {
-        assertThat(catchThrowable {
-            task.utførSteg(saksbehandling(fagsak,
-                                          behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR)), null)
-        })
-        assertThat(catchThrowable {
-            task.utførSteg(saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.REVURDERING)),
-                           null)
-        })
+        assertThat(
+            catchThrowable {
+                task.utførSteg(
+                    saksbehandling(
+                        fagsak,
+                        behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR)
+                    ),
+                    null
+                )
+            }
+        )
+        assertThat(
+            catchThrowable {
+                task.utførSteg(
+                    saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.REVURDERING)),
+                    null
+                )
+            }
+        )
     }
 
     private fun utførStegGOmregning(opprettetAv: String) {
-        task.utførSteg(saksbehandling(fagsak,
-                                      behandling(fagsak,
-                                                 type = BehandlingType.REVURDERING,
-                                                 årsak = BehandlingÅrsak.G_OMREGNING)).copy(opprettetAv = opprettetAv),
-                       null)
+        task.utførSteg(
+            saksbehandling(
+                fagsak,
+                behandling(
+                    fagsak,
+                    type = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.G_OMREGNING
+                )
+            ).copy(opprettetAv = opprettetAv),
+            null
+        )
     }
 }

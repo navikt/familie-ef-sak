@@ -23,8 +23,12 @@ class FagsakController(private val fagsakService: FagsakService, private val til
     @PostMapping
     fun hentEllerOpprettFagsakForPerson(@RequestBody fagsakRequest: FagsakRequest): Ressurs<FagsakDto> {
         tilgangService.validerTilgangTilPersonMedBarn(fagsakRequest.personIdent, AuditLoggerEvent.CREATE) // TODO dele opp denne?
-        return Ressurs.success(fagsakService.hentEllerOpprettFagsakMedBehandlinger(fagsakRequest.personIdent,
-                                                                                   fagsakRequest.stønadstype))
+        return Ressurs.success(
+            fagsakService.hentEllerOpprettFagsakMedBehandlinger(
+                fagsakRequest.personIdent,
+                fagsakRequest.stønadstype
+            )
+        )
     }
 
     @GetMapping("{fagsakId}")

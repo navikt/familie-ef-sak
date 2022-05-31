@@ -68,26 +68,38 @@ sealed class VedtakDto(open val resultatType: ResultatType, open val _type: Stri
     }
 }
 
-//Rename til dto? InnvilgelseOvergangsstønadDto, AvslagDto, OpphørDto, SanksjoneringDto
-data class InnvilgelseOvergangsstønad(val periodeBegrunnelse: String?,
-                                      val inntektBegrunnelse: String?,
-                                      val perioder: List<VedtaksperiodeDto> = emptyList(),
-                                      val inntekter: List<Inntekt> = emptyList(),
-                                      val samordningsfradragType: SamordningsfradragType? = null) : VedtakDto(ResultatType.INNVILGE,
-                                                                                                              "InnvilgelseOvergangsstønad")
+// Rename til dto? InnvilgelseOvergangsstønadDto, AvslagDto, OpphørDto, SanksjoneringDto
+data class InnvilgelseOvergangsstønad(
+    val periodeBegrunnelse: String?,
+    val inntektBegrunnelse: String?,
+    val perioder: List<VedtaksperiodeDto> = emptyList(),
+    val inntekter: List<Inntekt> = emptyList(),
+    val samordningsfradragType: SamordningsfradragType? = null
+) : VedtakDto(
+    ResultatType.INNVILGE,
+    "InnvilgelseOvergangsstønad"
+)
 
-data class Avslå(val avslåÅrsak: AvslagÅrsak?,
-                 val avslåBegrunnelse: String?) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
+data class Avslå(
+    val avslåÅrsak: AvslagÅrsak?,
+    val avslåBegrunnelse: String?
+) : VedtakDto(ResultatType.AVSLÅ, "Avslag")
 
-data class Opphør(val opphørFom: YearMonth,
-                  val begrunnelse: String?) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
+data class Opphør(
+    val opphørFom: YearMonth,
+    val begrunnelse: String?
+) : VedtakDto(ResultatType.OPPHØRT, "Opphør")
 
-data class Sanksjonert(val sanksjonsårsak: Sanksjonsårsak,
-                       val periode: SanksjonertPeriodeDto,
-                       val internBegrunnelse: String) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
+data class Sanksjonert(
+    val sanksjonsårsak: Sanksjonsårsak,
+    val periode: SanksjonertPeriodeDto,
+    val internBegrunnelse: String
+) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
-data class SanksjonertPeriodeDto(val årMånedFra: YearMonth,
-                                 val årMånedTil: YearMonth) {
+data class SanksjonertPeriodeDto(
+    val årMånedFra: YearMonth,
+    val årMånedTil: YearMonth
+) {
 
     fun datoFra() = årMånedFra.atDay(1)
     fun datoTil() = årMånedTil.atEndOfMonth()
@@ -96,111 +108,134 @@ data class SanksjonertPeriodeDto(val årMånedFra: YearMonth,
 }
 
 fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak = when (this) {
-    is Avslå -> Vedtak(behandlingId = behandlingId,
-                       avslåÅrsak = this.avslåÅrsak,
-                       avslåBegrunnelse = this.avslåBegrunnelse,
-                       resultatType = this.resultatType)
+    is Avslå -> Vedtak(
+        behandlingId = behandlingId,
+        avslåÅrsak = this.avslåÅrsak,
+        avslåBegrunnelse = this.avslåBegrunnelse,
+        resultatType = this.resultatType
+    )
     is InnvilgelseOvergangsstønad ->
-        Vedtak(behandlingId = behandlingId,
-               periodeBegrunnelse = this.periodeBegrunnelse,
-               inntektBegrunnelse = this.inntektBegrunnelse,
-               resultatType = this.resultatType,
-               perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
-               inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
-               samordningsfradragType = this.samordningsfradragType)
+        Vedtak(
+            behandlingId = behandlingId,
+            periodeBegrunnelse = this.periodeBegrunnelse,
+            inntektBegrunnelse = this.inntektBegrunnelse,
+            resultatType = this.resultatType,
+            perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
+            inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
+            samordningsfradragType = this.samordningsfradragType
+        )
     is InnvilgelseBarnetilsyn ->
         Vedtak(
-                resultatType = this.resultatType,
-                behandlingId = behandlingId,
-                barnetilsyn = BarnetilsynWrapper(perioder = this.perioder.map { it.tilDomene() },
-                                                 begrunnelse = this.begrunnelse),
-                kontantstøtte = KontantstøtteWrapper(perioder = this.perioderKontantstøtte.map { it.tilDomene() }),
-                tilleggsstønad = TilleggsstønadWrapper(harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
-                                                       perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
-                                                       begrunnelse = this.tilleggsstønad.begrunnelse))
+            resultatType = this.resultatType,
+            behandlingId = behandlingId,
+            barnetilsyn = BarnetilsynWrapper(
+                perioder = this.perioder.map { it.tilDomene() },
+                begrunnelse = this.begrunnelse
+            ),
+            kontantstøtte = KontantstøtteWrapper(perioder = this.perioderKontantstøtte.map { it.tilDomene() }),
+            tilleggsstønad = TilleggsstønadWrapper(
+                harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
+                perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
+                begrunnelse = this.tilleggsstønad.begrunnelse
+            )
+        )
     is InnvilgelseSkolepenger ->
         Vedtak(
-                resultatType = this.resultatType,
-                behandlingId = behandlingId,
-                skolepenger = SkolepengerWrapper(perioder = this.perioder.map { it.tilDomene() },
-                                                 begrunnelse = this.begrunnelse)
+            resultatType = this.resultatType,
+            behandlingId = behandlingId,
+            skolepenger = SkolepengerWrapper(
+                perioder = this.perioder.map { it.tilDomene() },
+                begrunnelse = this.begrunnelse
+            )
         )
     is Opphør ->
-        Vedtak(behandlingId = behandlingId,
-               avslåBegrunnelse = begrunnelse,
-               resultatType = ResultatType.OPPHØRT,
-               opphørFom = opphørFom.atDay(1))
+        Vedtak(
+            behandlingId = behandlingId,
+            avslåBegrunnelse = begrunnelse,
+            resultatType = ResultatType.OPPHØRT,
+            opphørFom = opphørFom.atDay(1)
+        )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
 
-private fun Sanksjonert.sanksjonertTilVedtak(behandlingId: UUID,
-                                             stønadstype: StønadType) =
-        when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> {
-                val vedtaksperiode = Vedtaksperiode(periode.datoFra(),
-                                                    periode.datoTil(),
-                                                    AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                    VedtaksperiodeType.SANKSJON)
-                Vedtak(behandlingId = behandlingId,
-                       sanksjonsårsak = this.sanksjonsårsak,
-                       perioder = PeriodeWrapper(listOf(vedtaksperiode)),
-                       internBegrunnelse = this.internBegrunnelse,
-                       resultatType = ResultatType.SANKSJONERE)
-            }
-            StønadType.BARNETILSYN -> {
-                val vedtaksperiode = Barnetilsynperiode(periode.datoFra(),
-                                                        periode.datoTil(),
-                                                        utgifter = 0,
-                                                        emptyList())
-                Vedtak(behandlingId = behandlingId,
-                       sanksjonsårsak = this.sanksjonsårsak,
-                       barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
-                       internBegrunnelse = this.internBegrunnelse,
-                       resultatType = ResultatType.SANKSJONERE)
-            }
-            StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+private fun Sanksjonert.sanksjonertTilVedtak(
+    behandlingId: UUID,
+    stønadstype: StønadType
+) =
+    when (stønadstype) {
+        StønadType.OVERGANGSSTØNAD -> {
+            val vedtaksperiode = Vedtaksperiode(
+                periode.datoFra(),
+                periode.datoTil(),
+                AktivitetType.IKKE_AKTIVITETSPLIKT,
+                VedtaksperiodeType.SANKSJON
+            )
+            Vedtak(
+                behandlingId = behandlingId,
+                sanksjonsårsak = this.sanksjonsårsak,
+                perioder = PeriodeWrapper(listOf(vedtaksperiode)),
+                internBegrunnelse = this.internBegrunnelse,
+                resultatType = ResultatType.SANKSJONERE
+            )
         }
+        StønadType.BARNETILSYN -> {
+            val vedtaksperiode = Barnetilsynperiode(
+                periode.datoFra(),
+                periode.datoTil(),
+                utgifter = 0,
+                emptyList()
+            )
+            Vedtak(
+                behandlingId = behandlingId,
+                sanksjonsårsak = this.sanksjonsårsak,
+                barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
+                internBegrunnelse = this.internBegrunnelse,
+                resultatType = ResultatType.SANKSJONERE
+            )
+        }
+        StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+    }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
-        when (this.resultatType) {
-            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
-                when {
-                    this.skolepenger != null -> mapInnvilgelseSkolepenger()
-                    this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn(this.resultatType)
-                    this.perioder != null -> mapInnvilgelseOvergangsstønad()
-                    else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
-                }
+    when (this.resultatType) {
+        ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> {
+            when {
+                this.skolepenger != null -> mapInnvilgelseSkolepenger()
+                this.barnetilsyn != null -> mapInnvilgelseBarnetilsyn(this.resultatType)
+                this.perioder != null -> mapInnvilgelseOvergangsstønad()
+                else -> error("Kan ikke mappe innvilget vedtak for vedtak=${this.behandlingId}")
             }
-            ResultatType.AVSLÅ -> Avslå(
-                    avslåBegrunnelse = this.avslåBegrunnelse,
-                    avslåÅrsak = this.avslåÅrsak,
-            )
-            ResultatType.OPPHØRT -> Opphør(
-                    begrunnelse = this.avslåBegrunnelse,
-                    opphørFom = YearMonth.from(this.opphørFom)
-            )
-            ResultatType.SANKSJONERE -> Sanksjonert(
-                    sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
-                    periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
-                              ?: this.barnetilsyn?.perioder?.single()?.fraDomeneForSanksjon()
-                              ?: error("Mangler perioder for sanksjon"),
-                    internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
-            )
-            else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
         }
+        ResultatType.AVSLÅ -> Avslå(
+            avslåBegrunnelse = this.avslåBegrunnelse,
+            avslåÅrsak = this.avslåÅrsak,
+        )
+        ResultatType.OPPHØRT -> Opphør(
+            begrunnelse = this.avslåBegrunnelse,
+            opphørFom = YearMonth.from(this.opphørFom)
+        )
+        ResultatType.SANKSJONERE -> Sanksjonert(
+            sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
+            periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
+                ?: this.barnetilsyn?.perioder?.single()?.fraDomeneForSanksjon()
+                ?: error("Mangler perioder for sanksjon"),
+            internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
+        )
+        else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
+    }
 
 fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
     feilHvis(this.perioder == null || this.inntekter == null) {
         "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
     }
     return InnvilgelseOvergangsstønad(
-            periodeBegrunnelse = this.periodeBegrunnelse,
-            inntektBegrunnelse = this.inntektBegrunnelse,
-            perioder = this.perioder.perioder.fraDomene(),
-            inntekter = this.inntekter.inntekter.tilInntekt(),
-            samordningsfradragType = this.samordningsfradragType)
+        periodeBegrunnelse = this.periodeBegrunnelse,
+        inntektBegrunnelse = this.inntektBegrunnelse,
+        perioder = this.perioder.perioder.fraDomene(),
+        inntekter = this.inntekter.inntekter.tilInntekt(),
+        samordningsfradragType = this.samordningsfradragType
+    )
 }
-
 
 private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::class.java) {
 
@@ -219,7 +254,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
             return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
-                    .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
+                .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
@@ -238,4 +273,3 @@ class VedtakDtoModule : com.fasterxml.jackson.databind.module.SimpleModule() {
         addDeserializer(VedtakDto::class.java, VedtakDtoDeserializer())
     }
 }
-

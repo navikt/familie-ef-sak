@@ -19,34 +19,40 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
 
     // language=PostgreSQL
-    @Query("""SELECT b.*, be.id AS eksternid_id         
+    @Query(
+        """SELECT b.*, be.id AS eksternid_id         
                      FROM behandling b         
                      JOIN behandling_ekstern be 
                      ON be.behandling_id = b.id         
-                     WHERE be.id = :eksternId""")
+                     WHERE be.id = :eksternId"""
+    )
     fun finnMedEksternId(eksternId: Long): Behandling?
 
     // language=PostgreSQL
-    @Query("""SELECT pi.ident FROM fagsak f
+    @Query(
+        """SELECT pi.ident FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id = :behandlingId
                     ORDER BY pi.endret_tid DESC 
                     LIMIT 1
-                    """)
+                    """
+    )
     fun finnAktivIdent(behandlingId: UUID): String
 
     // language=PostgreSQL
-    @Query("""SELECT b.id AS first, pi.ident AS second FROM fagsak f
+    @Query(
+        """SELECT b.id AS first, pi.ident AS second FROM fagsak f
                     JOIN behandling b ON f.id = b.fagsak_id
                     JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
                     WHERE b.id in (:behandlingIds)
-            """)
+            """
+    )
     fun finnAktiveIdenter(behandlingIds: Collection<UUID>): List<Pair<UUID, String>>
 
-
     // language=PostgreSQL
-    @Query("""SELECT
+    @Query(
+        """SELECT
               b.id,
               b.forrige_behandling_id,
               be.id AS ekstern_id,
@@ -73,11 +79,13 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
              WHERE b.id = :behandlingId
              ORDER BY pi.endret_tid DESC
              LIMIT 1
-             """)
+             """
+    )
     fun finnSaksbehandling(behandlingId: UUID): Saksbehandling
 
     // language=PostgreSQL
-    @Query("""SELECT
+    @Query(
+        """SELECT
               b.id,
               b.forrige_behandling_id,
               be.id AS ekstern_id,
@@ -104,11 +112,13 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
              WHERE be.id = :eksternBehandlingId
              ORDER BY pi.endret_tid DESC
              LIMIT 1
-             """)
+             """
+    )
     fun finnSaksbehandling(eksternBehandlingId: Long): Saksbehandling
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT b.*, be.id AS eksternid_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
@@ -117,12 +127,16 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE pi.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
-    """)
-    fun finnSisteBehandlingSomIkkeErBlankett(stønadstype: StønadType,
-                                             personidenter: Set<String>): Behandling?
+    """
+    )
+    fun finnSisteBehandlingSomIkkeErBlankett(
+        stønadstype: StønadType,
+        personidenter: Set<String>
+    ): Behandling?
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT b.*, be.id AS eksternid_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
@@ -132,19 +146,22 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
-    """)
+    """
+    )
     fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
 
     fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT b.id behandling_id, be.id ekstern_behandling_id, fe.id ekstern_fagsak_id
         FROM behandling b
             JOIN behandling_ekstern be ON b.id = be.behandling_id
             JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id 
         WHERE behandling_id IN (:behandlingId)
-        """)
+        """
+    )
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
 
     // language=PostgreSQL
@@ -152,18 +169,21 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnSisteIverksatteBehandlinger(stønadstype: StønadType): Set<UUID>
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT DISTINCT pi.ident 
         FROM gjeldende_iverksatte_behandlinger gib 
             JOIN behandling b ON b.id = gib.id
             JOIN fagsak f ON f.id = b.fagsak_id
             JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
         WHERE gib.stonadstype=:stønadstype
-    """)
+    """
+    )
     fun finnPersonerMedAktivStonad(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD): List<String>
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT pi.ident AS first, gib.id AS second 
         FROM gjeldende_iverksatte_behandlinger gib 
             JOIN behandling b ON b.id = gib.id
@@ -171,11 +191,12 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
         WHERE pi.ident IN (:personidenter)
             AND gib.stonadstype=:stønadstype
-    """)
-    fun finnSisteIverksatteBehandlingerForPersonIdenter(personidenter: Collection<String>,
-                                                        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD)
-            : List<Pair<String, UUID>>
+    """
+    )
+    fun finnSisteIverksatteBehandlingerForPersonIdenter(
+        personidenter: Collection<String>,
+        stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
+    ): List<Pair<String, UUID>>
 
     fun existsByFagsakIdAndTypeIn(fagsakId: UUID, typer: Set<BehandlingType>): Boolean
-
 }

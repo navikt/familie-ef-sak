@@ -25,11 +25,13 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     @Gitt("følgende data")
     fun data(dataTable: DataTable) {
         inputData = dataTable.asMaps().map {
-            PeriodeDataDto(periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
-                           kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
-                           tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
-                           antallBarn = parseInt(ANTALL_BARN, it),
-                           årMåned = parseÅrMåned(PERIODEDATO, it))
+            PeriodeDataDto(
+                periodeutgift = parseBigDecimal(PERIODEUTGIFT, it),
+                kontantstøtteBeløp = parseBigDecimal(KONTANTSTØTTEBELØP, it),
+                tillegstønadbeløp = parseBigDecimal(TILLEGSSTØNADBELØP, it),
+                antallBarn = parseInt(ANTALL_BARN, it),
+                årMåned = parseÅrMåned(PERIODEDATO, it)
+            )
         }.first()
     }
 
@@ -39,11 +41,13 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     }
 
     private fun beregnPeriodebeløp(periodeDataDto: PeriodeDataDto) =
-            BeregningBarnetilsynUtil.beregnPeriodeBeløp(periodeutgift = periodeDataDto.periodeutgift,
-                                                        kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp,
-                                                        tilleggsstønadBeløp = periodeDataDto.tillegstønadbeløp,
-                                                        antallBarn = periodeDataDto.antallBarn,
-                                                        årMåned = periodeDataDto.årMåned)
+        BeregningBarnetilsynUtil.beregnPeriodeBeløp(
+            periodeutgift = periodeDataDto.periodeutgift,
+            kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp,
+            tilleggsstønadBeløp = periodeDataDto.tillegstønadbeløp,
+            antallBarn = periodeDataDto.antallBarn,
+            årMåned = periodeDataDto.årMåned
+        )
 
     @Så("forventer vi barnetilsyn periodebeløp")
     fun `forventer vi barnetilsyn periodebeløp`(dataTable: DataTable) {
@@ -52,8 +56,10 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
     }
 }
 
-data class PeriodeDataDto(val periodeutgift: BigDecimal,
-                          val kontantstøtteBeløp: BigDecimal,
-                          val tillegstønadbeløp: BigDecimal,
-                          val antallBarn: Int,
-                          val årMåned: YearMonth)
+data class PeriodeDataDto(
+    val periodeutgift: BigDecimal,
+    val kontantstøtteBeløp: BigDecimal,
+    val tillegstønadbeløp: BigDecimal,
+    val antallBarn: Int,
+    val årMåned: YearMonth
+)

@@ -53,7 +53,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private val kravMottatt = LocalDate.of(2021, 9, 9)
     private lateinit var revurderingDto: RevurderingDto
 
-
     @BeforeEach
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
@@ -69,9 +68,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette revurdering`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                status = BehandlingStatus.FERDIGSTILT,
-                                                                resultat = BehandlingResultat.INNVILGET))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
 
@@ -87,9 +90,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal opprette revurdering med en avslått førstegangsbehandling`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                status = BehandlingStatus.FERDIGSTILT,
-                                                                resultat = BehandlingResultat.AVSLÅTT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.AVSLÅTT
+            )
+        )
         opprettVilkår(behandling, lagreSøknad(behandling))
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -104,15 +111,23 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal peke til forrige iverksatte behandling hvis den finnes`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                status = BehandlingStatus.FERDIGSTILT,
-                                                                resultat = BehandlingResultat.INNVILGET))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
         opprettVilkår(behandling, lagreSøknad(behandling))
 
-        val revurdering1 = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                  type = BehandlingType.REVURDERING,
-                                                                  status = BehandlingStatus.FERDIGSTILT,
-                                                                  resultat = BehandlingResultat.AVSLÅTT))
+        val revurdering1 = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.AVSLÅTT
+            )
+        )
         opprettVilkår(behandling, lagreSøknad(revurdering1))
 
         val revurdering2 = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -124,9 +139,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                status = BehandlingStatus.FERDIGSTILT,
-                                                                resultat = BehandlingResultat.INNVILGET))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
 
@@ -152,18 +171,21 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(aleneomsorgVilkårForBehandling.barnId).isNotNull
         assertThat(aleneomsorgVilkårForRevurdering.barnId).isEqualTo(barnPåBehandling.id)
 
-
         assertThat(sivilstandVilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
-                .isEqualTo(sivilstandVilkårForRevurdering)
+            .isEqualTo(sivilstandVilkårForRevurdering)
         assertThat(aleneomsorgVilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
-                .isEqualTo(aleneomsorgVilkårForRevurdering)
+            .isEqualTo(aleneomsorgVilkårForRevurdering)
     }
 
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(behandling(fagsak = fagsak,
-                                                                status = BehandlingStatus.FERDIGSTILT,
-                                                                resultat = BehandlingResultat.INNVILGET))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
         val nyttBarn = RevurderingBarnDto(personIdent = "44445555666")
@@ -183,8 +205,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
         assertThat(vilkårForBehandling.first { it.type == VilkårType.SIVILSTAND }).usingRecursiveComparison()
-                .ignoringFields("id", "sporbar", "behandlingId", "barnId")
-                .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId")
+            .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
     }
 
     @Test
@@ -192,50 +214,70 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak = fagsak, status = BehandlingStatus.UTREDES))
 
         assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
-                .hasMessageContaining("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
+            .hasMessageContaining("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
     @Test
     internal fun `skal ikke være mulig å opprette fagsak hvis det ikke finnes en behandling fra før`() {
         assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
-                .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
+            .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
     private fun getSøknadsskjemaId(revurdering1: Behandling) =
-            søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
+        søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
 
     private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
-        val søknad = TestsøknadBuilder.Builder().setBarn(listOf(
+        val søknad = TestsøknadBuilder.Builder().setBarn(
+            listOf(
                 TestsøknadBuilder.Builder()
-                        .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
-        )).build().søknadOvergangsstønad
+                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
+            )
+        ).build().søknadOvergangsstønad
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
         val overgangsstønad = søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
         barnRepository.insertAll(søknadsBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
         return overgangsstønad
     }
 
-    private fun opprettVilkår(behandling: Behandling,
-                              søknad: SøknadsskjemaOvergangsstønad) {
+    private fun opprettVilkår(
+        behandling: Behandling,
+        søknad: SøknadsskjemaOvergangsstønad
+    ) {
         val barn = barnRepository.findByBehandlingId(behandling.id)
         val delvilkårsvurdering =
-                SivilstandRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
-                                                                                Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                                                                                barn = emptyList(),
-                                                                                søktOmBarnetilsyn = emptyList()))
+            SivilstandRegel().initereDelvilkårsvurdering(
+                HovedregelMetadata(
+                    søknad.sivilstand,
+                    Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                    barn = emptyList(),
+                    søktOmBarnetilsyn = emptyList()
+                )
+            )
 
         val delvilkårsvurderingAleneomsorg =
-                AleneomsorgRegel().initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
-                                                                                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                                                                                 barn = barn, søktOmBarnetilsyn = emptyList()))
-        vilkårsvurderingRepository.insertAll(listOf(vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                                     type = VilkårType.SIVILSTAND,
-                                                                     behandlingId = behandling.id,
-                                                                     delvilkårsvurdering = delvilkårsvurdering),
-                                                    vilkårsvurdering(resultat = Vilkårsresultat.OPPFYLT,
-                                                                     type = VilkårType.ALENEOMSORG,
-                                                                     behandlingId = behandling.id,
-                                                                     barnId = barn.first().id,
-                                                                     delvilkårsvurdering = delvilkårsvurderingAleneomsorg)))
+            AleneomsorgRegel().initereDelvilkårsvurdering(
+                HovedregelMetadata(
+                    søknad.sivilstand,
+                    Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                    barn = barn, søktOmBarnetilsyn = emptyList()
+                )
+            )
+        vilkårsvurderingRepository.insertAll(
+            listOf(
+                vilkårsvurdering(
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = VilkårType.SIVILSTAND,
+                    behandlingId = behandling.id,
+                    delvilkårsvurdering = delvilkårsvurdering
+                ),
+                vilkårsvurdering(
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = VilkårType.ALENEOMSORG,
+                    behandlingId = behandling.id,
+                    barnId = barn.first().id,
+                    delvilkårsvurdering = delvilkårsvurderingAleneomsorg
+                )
+            )
+        )
     }
 }

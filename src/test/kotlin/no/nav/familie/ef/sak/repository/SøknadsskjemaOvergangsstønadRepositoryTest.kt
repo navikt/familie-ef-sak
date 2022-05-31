@@ -33,7 +33,6 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         assertThat(søknadFraDatabase.sivilstandsplaner).isEqualTo(Sivilstandsplaner(null, null, null))
     }
 
-
     @Test
     internal fun `søknad om overgangsstønad lagres korrekt`() {
 
@@ -52,9 +51,12 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         val barn = Testsøknad.søknadOvergangsstønad.barn
         val barnUtenBarnepass = barn.verdi.map { it.copy(barnepass = null) }
         val aktivitetUtenUtdanning = aktivitet.verdi.copy(underUtdanning = null)
-        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad.copy(
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(
+            Testsøknad.søknadOvergangsstønad.copy(
                 aktivitet = aktivitet.copy(verdi = aktivitetUtenUtdanning),
-                barn = Søknadsfelt("", barnUtenBarnepass)))
+                barn = Søknadsfelt("", barnUtenBarnepass)
+            )
+        )
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
@@ -63,7 +65,6 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         assertThat(søknadFraDatabase.aktivitet.tidligereUtdanninger).isEmpty()
         assertThat(søknadFraDatabase.barn.first().årsakBarnepass).isNull()
         assertThat(søknadFraDatabase.barn.first().barnepassordninger).isEmpty()
-
     }
 
     @Test
@@ -89,8 +90,14 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
     @Test
     internal fun `søknad uten barnepass blir hentet korrekt`() {
         val builder = TestsøknadBuilder.Builder()
-        builder.setBarn(listOf(builder.defaultBarn(barnepass = Barnepass(barnepassordninger = Søknadsfelt("", emptyList())),
-                                                   skalHaBarnepass = false)))
+        builder.setBarn(
+            listOf(
+                builder.defaultBarn(
+                    barnepass = Barnepass(barnepassordninger = Søknadsfelt("", emptyList())),
+                    skalHaBarnepass = false
+                )
+            )
+        )
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(builder.build().søknadBarnetilsyn)
 
         søknadBarnetilsynRepository.insert(søknadTilLagring)
@@ -113,5 +120,4 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         assertThat(søknadFraDatabase.barn).isEqualTo(søknadTilLagring.barn)
         assertThat(søknadFraDatabase.barn.single().barnepassordninger).hasSize(1)
     }
-
 }

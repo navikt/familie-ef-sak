@@ -13,7 +13,6 @@ import java.time.LocalDate
 
 internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
 
-
     @Autowired
     private lateinit var repository: KonsistensavstemmingJobbRepository
 
@@ -33,7 +32,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
         val jobb = repository.insert(KonsistensavstemmingJobb(triggerdato = LocalDate.now()))
         repository.update(jobb)
         assertThat(catchThrowable { repository.update(jobb) })
-                .hasRootCauseInstanceOf(OptimisticLockingFailureException::class.java)
+            .hasRootCauseInstanceOf(OptimisticLockingFailureException::class.java)
     }
 
     @Test

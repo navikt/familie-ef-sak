@@ -11,8 +11,10 @@ import java.util.UUID
 @Repository
 interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, InsertUpdateRepository<FagsakPerson> {
 
-    @Query("""SELECT p.* FROM fagsak_person p WHERE 
-                EXISTS(SELECT 1 FROM person_ident WHERE fagsak_person_id = p.id AND ident IN (:identer))""")
+    @Query(
+        """SELECT p.* FROM fagsak_person p WHERE 
+                EXISTS(SELECT 1 FROM person_ident WHERE fagsak_person_id = p.id AND ident IN (:identer))"""
+    )
     fun findByIdent(identer: Collection<String>): FagsakPerson?
 
     @Query("SELECT * FROM person_ident WHERE fagsak_person_id = :personId")
@@ -20,5 +22,4 @@ interface FagsakPersonRepository : RepositoryInterface<FagsakPerson, UUID>, Inse
 
     @Query("SELECT ident FROM person_ident WHERE fagsak_person_id = :personId ORDER BY endret_tid DESC LIMIT 1")
     fun hentAktivIdent(personId: UUID): String
-
 }

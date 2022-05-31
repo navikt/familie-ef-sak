@@ -13,11 +13,10 @@ internal class BehandlingStegSpringTest : OppslagSpringRunnerTest() {
     internal fun `skal ikke finnes fler enn ett BehandlingSteg per StegType`() {
         assertThat(behandlingSteg).isNotEmpty
         behandlingSteg.groupBy { it.stegType() }.entries
-                .forEach {
-                    assertThat(it.value)
-                            .withFailMessage("${it.key} har flere BehandlingSteg: ${it.value}")
-                            .hasSize(1)
-                }
-
+            .forEach {
+                assertThat(it.value)
+                    .withFailMessage("${it.key} har flere BehandlingSteg: ${it.value}")
+                    .hasSize(1)
+            }
     }
 }

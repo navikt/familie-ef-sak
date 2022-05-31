@@ -20,8 +20,10 @@ import java.util.UUID
 @RequestMapping("/api/perioder")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PeriodeController(private val tilgangService: TilgangService,
-                        private val tilkjentYtelseService: TilkjentYtelseService) {
+class PeriodeController(
+    private val tilgangService: TilgangService,
+    private val tilkjentYtelseService: TilkjentYtelseService
+) {
 
     @GetMapping("/{behandlingId}")
     fun hentPerioder(@PathVariable behandlingId: UUID): Ressurs<TilkjentYtelseDto> {
@@ -30,8 +32,10 @@ class PeriodeController(private val tilgangService: TilgangService,
     }
 
     @GetMapping("/fagsak/{fagsakId}/historikk")
-    fun hentHistorikk(@PathVariable fagsakId: UUID,
-                      @RequestParam tilOgMedBehandlingId: UUID? = null): Ressurs<List<AndelHistorikkDto>> {
+    fun hentHistorikk(
+        @PathVariable fagsakId: UUID,
+        @RequestParam tilOgMedBehandlingId: UUID? = null
+    ): Ressurs<List<AndelHistorikkDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(tilkjentYtelseService.hentHistorikk(fagsakId, tilOgMedBehandlingId).reversed())
     }

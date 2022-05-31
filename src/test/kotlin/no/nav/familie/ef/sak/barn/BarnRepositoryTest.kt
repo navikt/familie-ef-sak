@@ -107,14 +107,17 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(barnForBehandling.first()).usingRecursiveComparison().ignoringFields("sporbar").isEqualTo(nyttBarn)
     }
 
-    private fun lagBarn(behandling: Behandling,
-                        personIdent: String? = null,
-                        navn: String? = null,
-                        fødselTermindato: LocalDate? = null) =
-            BehandlingBarn(behandlingId = behandling.id,
-                           søknadBarnId = UUID.randomUUID(),
-                           personIdent = personIdent,
-                           navn = navn,
-                           fødselTermindato = fødselTermindato)
-
+    private fun lagBarn(
+        behandling: Behandling,
+        personIdent: String? = null,
+        navn: String? = null,
+        fødselTermindato: LocalDate? = null
+    ) =
+        BehandlingBarn(
+            behandlingId = behandling.id,
+            søknadBarnId = UUID.randomUUID(),
+            personIdent = personIdent,
+            navn = navn,
+            fødselTermindato = fødselTermindato
+        )
 }

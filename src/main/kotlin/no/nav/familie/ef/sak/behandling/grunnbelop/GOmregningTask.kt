@@ -20,23 +20,28 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = GOmregningTask.TYPE,
-                     maxAntallFeil = 3,
-                     settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "G-omregning")
-class GOmregningTask(private val omregningService: OmregningService,
-                     private val taskService: TaskService,
-                     private val featureToggleService: FeatureToggleService) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+    taskStepType = GOmregningTask.TYPE,
+    maxAntallFeil = 3,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 15 * 60L,
+    beskrivelse = "G-omregning"
+)
+class GOmregningTask(
+    private val omregningService: OmregningService,
+    private val taskService: TaskService,
+    private val featureToggleService: FeatureToggleService
+) : AsyncTaskStep {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
 
     override fun doTask(task: Task) {
         val fagsakId = UUID.fromString(task.payload)
         try {
-            omregningService.utførGOmregning(fagsakId,
-                                             featureToggleService.isEnabled("familie.ef.sak.omberegning.live.run"))
+            omregningService.utførGOmregning(
+                fagsakId,
+                featureToggleService.isEnabled("familie.ef.sak.omberegning.live.run")
+            )
         } catch (e: DryRunException) {
             logger.info("G-OmberegningTask for fagsakId $fagsakId ruller tilbake fordi den er kjørt i dry run-modus.")
         }

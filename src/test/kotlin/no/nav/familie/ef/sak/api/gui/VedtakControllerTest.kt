@@ -57,7 +57,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
     @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
-
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
     private val saksbehandling = saksbehandling(fagsak, behandling)
@@ -93,7 +92,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderinger(behandlingId, ikkeLag = 1)
         sendTilBeslutter(SAKSBEHANDLER) { response ->
             assertThat(response.body.frontendFeilmelding)
-                    .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
+                .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
         }
     }
 
@@ -103,7 +102,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.IKKE_OPPFYLT)
         sendTilBeslutter(SAKSBEHANDLER) { response ->
             assertThat(response.body.frontendFeilmelding)
-                    .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
+                .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
         }
     }
 
@@ -163,7 +162,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerTotrinnskontrollUaktuelt(BESLUTTER_2)
     }
 
-
     @Test
     internal fun `hvis man underkjenner behandlingen må man sende den til beslutter på nytt og sen godkjenne den`() {
         opprettBehandling()
@@ -208,12 +206,17 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         }
     }
 
-    private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES,
-                                  steg: StegType = StegType.SEND_TIL_BESLUTTER,
-                                  vedtakResultatType: ResultatType = ResultatType.AVSLÅ): UUID {
-        val lagretBehandling = behandlingRepository.insert(behandling.copy(status = status,
-                                                                           steg = steg))
-
+    private fun opprettBehandling(
+        status: BehandlingStatus = BehandlingStatus.UTREDES,
+        steg: StegType = StegType.SEND_TIL_BESLUTTER,
+        vedtakResultatType: ResultatType = ResultatType.AVSLÅ
+    ): UUID {
+        val lagretBehandling = behandlingRepository.insert(
+            behandling.copy(
+                status = status,
+                steg = steg
+            )
+        )
 
         vedtakRepository.insert(vedtak(lagretBehandling.id, vedtakResultatType))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
@@ -235,41 +238,56 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
     }
 
-    private fun sendTilBeslutter(saksbehandler: Saksbehandler,
-                                 validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
+    private fun sendTilBeslutter(
+        saksbehandler: Saksbehandler,
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+    ) {
         headers.setBearerAuth(token(saksbehandler))
         lagSaksbehandlerBrev(saksbehandler.name)
-        val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
-                                                            HttpMethod.POST,
-                                                            HttpEntity<Any>(headers))
+        val response = restTemplate.exchange<Ressurs<UUID>>(
+            localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
+            HttpMethod.POST,
+            HttpEntity<Any>(headers)
+        )
         validator.invoke(response)
     }
 
-    private fun godkjennTotrinnskontroll(saksbehandler: Saksbehandler,
-                                         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
+    private fun godkjennTotrinnskontroll(
+        saksbehandler: Saksbehandler,
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+    ) {
         beslutteVedtak(saksbehandler, BeslutteVedtakDto(true), validator)
     }
 
-    private fun underkjennTotrinnskontroll(saksbehandler: Saksbehandler,
-                                           validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()) {
+    private fun underkjennTotrinnskontroll(
+        saksbehandler: Saksbehandler,
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+    ) {
         beslutteVedtak(saksbehandler, BeslutteVedtakDto(false, "begrunnelse"), validator)
     }
 
-    private fun beslutteVedtak(saksbehandler: Saksbehandler, beslutteVedtak: BeslutteVedtakDto,
-                               validator: (ResponseEntity<Ressurs<UUID>>) -> Unit) {
+    private fun beslutteVedtak(
+        saksbehandler: Saksbehandler,
+        beslutteVedtak: BeslutteVedtakDto,
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit
+    ) {
         headers.setBearerAuth(token(saksbehandler))
-        val response = restTemplate.exchange<Ressurs<UUID>>(localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
-                                                            HttpMethod.POST,
-                                                            HttpEntity(beslutteVedtak, headers))
+        val response = restTemplate.exchange<Ressurs<UUID>>(
+            localhost("/api/vedtak/${behandling.id}/beslutte-vedtak"),
+            HttpMethod.POST,
+            HttpEntity(beslutteVedtak, headers)
+        )
         validator.invoke(response)
     }
 
     private fun hentTotrinnskontrollStatus(saksbehandler: Saksbehandler): TotrinnskontrollStatusDto {
         headers.setBearerAuth(token(saksbehandler))
         val response = restTemplate
-                .exchange<Ressurs<TotrinnskontrollStatusDto>>(localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
-                                                              HttpMethod.GET,
-                                                              HttpEntity<Any>(headers))
+            .exchange<Ressurs<TotrinnskontrollStatusDto>>(
+                localhost("/api/vedtak/${behandling.id}/totrinnskontroll"),
+                HttpMethod.GET,
+                HttpEntity<Any>(headers)
+            )
         responseOK<TotrinnskontrollStatusDto>().invoke(response)
         return response.body.data!!
     }
@@ -277,7 +295,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     private fun validerBehandlingUtredes() = validerBehandling(BehandlingStatus.UTREDES, StegType.SEND_TIL_BESLUTTER)
 
     private fun validerBehandlingIverksetter() =
-            validerBehandling(BehandlingStatus.IVERKSETTER_VEDTAK, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        validerBehandling(BehandlingStatus.IVERKSETTER_VEDTAK, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
 
     private fun validerBehandlingFatterVedtak() = validerBehandling(BehandlingStatus.FATTER_VEDTAK, StegType.BESLUTTE_VEDTAK)
 
@@ -324,16 +342,19 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         clearBrukerContext()
     }
 
-    private fun lagVilkårsvurderinger(behandlingId: UUID,
-                                      resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
-                                      ikkeLag: Int = 0) {
+    private fun lagVilkårsvurderinger(
+        behandlingId: UUID,
+        resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+        ikkeLag: Int = 0
+    ) {
         val vilkårsvurderinger = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
-            vilkårsvurdering(behandlingId = behandlingId,
-                             resultat = resultat,
-                             type = it,
-                             delvilkårsvurdering = listOf())
+            vilkårsvurdering(
+                behandlingId = behandlingId,
+                resultat = resultat,
+                type = it,
+                delvilkårsvurdering = listOf()
+            )
         }.dropLast(ikkeLag)
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
-
 }

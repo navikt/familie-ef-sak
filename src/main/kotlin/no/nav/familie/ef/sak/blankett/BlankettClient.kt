@@ -10,11 +10,15 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class BlankettClient(@Value("\${FAMILIE_BLANKETT_API_URL}")
-                     private val familieBlankettUri: String,
-                     @Qualifier("utenAuth")
-                     private val restOperations: RestOperations) : AbstractPingableRestClient(restOperations,
-                                                                                              "familie.blankett") {
+class BlankettClient(
+    @Value("\${FAMILIE_BLANKETT_API_URL}")
+    private val familieBlankettUri: String,
+    @Qualifier("utenAuth")
+    private val restOperations: RestOperations
+) : AbstractPingableRestClient(
+    restOperations,
+    "familie.blankett"
+) {
 
     private val pdfUrl = URI.create("$familieBlankettUri/api/pdf")
 

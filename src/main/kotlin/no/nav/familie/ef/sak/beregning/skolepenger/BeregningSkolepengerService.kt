@@ -17,14 +17,15 @@ class BeregningSkolepengerService {
         validerFornuftigeBeløp(utgiftsperioder)
 
         return utgiftsperioder.map {
-            BeløpsperiodeSkolepengerDto(it.tilPeriode(),
-                                        beløp =  100, // TODO håndtere senere
-                                        BeregningsgrunnlagSkolepengerDto(it.studietype, it.utgifter, it.studiebelastning))
+            BeløpsperiodeSkolepengerDto(
+                it.tilPeriode(),
+                beløp = 100, // TODO håndtere senere
+                BeregningsgrunnlagSkolepengerDto(it.studietype, it.utgifter, it.studiebelastning)
+            )
         }
     }
 
     private fun validerFornuftigeBeløp(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>) {
-
 
         brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
 
@@ -38,6 +39,3 @@ class BeregningSkolepengerService {
         }
     }
 }
-
-
-

@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
 
 internal class SaksbehandlingsblankettStegTest {
 
-
     private val blankettServiceMock = mockk<BlankettService>()
     private val taskRepositoryMock = mockk<TaskRepository>()
     private val arbeidsfordelingServiceMock = mockk<ArbeidsfordelingService>()
@@ -36,13 +35,14 @@ internal class SaksbehandlingsblankettStegTest {
     private val behandlingServiceMock = mockk<BehandlingService>()
     private val fagsakServiceMock = mockk<FagsakService>()
 
-    private val saksbehandlingsblankettSteg = SaksbehandlingsblankettSteg(blankettService = blankettServiceMock,
-                                                                          taskRepository = taskRepositoryMock,
-                                                                          arbeidsfordelingService = arbeidsfordelingServiceMock,
-                                                                          totrinnskontrollService = totrinnskontrollServiceMock,
-                                                                          journalpostClient = journalpostClientMock,
-                                                                          behandlingService = behandlingServiceMock,
-                                                                          fagsakService = fagsakServiceMock
+    private val saksbehandlingsblankettSteg = SaksbehandlingsblankettSteg(
+        blankettService = blankettServiceMock,
+        taskRepository = taskRepositoryMock,
+        arbeidsfordelingService = arbeidsfordelingServiceMock,
+        totrinnskontrollService = totrinnskontrollServiceMock,
+        journalpostClient = journalpostClientMock,
+        behandlingService = behandlingServiceMock,
+        fagsakService = fagsakServiceMock
     )
 
     val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
@@ -51,15 +51,13 @@ internal class SaksbehandlingsblankettStegTest {
     internal fun setUp() {
         every { blankettServiceMock.lagBlankett(any()) } returns "123".toByteArray()
         val arkiverDokumentResponse =
-                ArkiverDokumentResponse(journalpostId = "12341234", ferdigstilt = true, dokumenter = listOf())
+            ArkiverDokumentResponse(journalpostId = "12341234", ferdigstilt = true, dokumenter = listOf())
         every { journalpostClientMock.arkiverDokument(capture(arkiverDokumentRequestSlot), any()) } returns arkiverDokumentResponse
         every { arbeidsfordelingServiceMock.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
         every { totrinnskontrollServiceMock.hentBeslutter(any()) } returns "BeslutterPerson"
         every { behandlingServiceMock.leggTilBehandlingsjournalpost(any(), any(), any()) } just Runs
         every { taskRepositoryMock.save(any()) } answers { firstArg() }
-
     }
-
 
     @Test
     internal fun `skal opprette, lagre og arkivere blankett for førstegangsbehandling`() {
@@ -93,5 +91,4 @@ internal class SaksbehandlingsblankettStegTest {
             Assertions.assertThat(it.dokumenttype).isEqualTo(Dokumenttype.BARNETILSYN_BLANKETT_SAKSBEHANDLING)
         }
     }
-
 }

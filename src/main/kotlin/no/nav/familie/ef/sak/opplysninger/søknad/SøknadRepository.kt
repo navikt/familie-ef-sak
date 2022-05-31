@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.søknad
 
-
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknad
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -15,9 +14,11 @@ interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRe
     fun findByBehandlingId(behandlingId: UUID): Søknad?
 
     // language=PostgreSQL
-    @Query("""SELECT ss.dato_mottatt
+    @Query(
+        """SELECT ss.dato_mottatt
                     FROM soknad_grunnlag soknad
                     JOIN soknadsskjema ss ON soknad.soknadsskjema_id = ss.id
-                    WHERE soknad.behandling_id = :behandlingId""")
+                    WHERE soknad.behandling_id = :behandlingId"""
+    )
     fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime
 }

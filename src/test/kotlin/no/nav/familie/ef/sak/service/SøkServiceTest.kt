@@ -20,7 +20,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.ukjentBostedsadresse
@@ -31,7 +30,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-
 internal class SøkServiceTest {
 
     private val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
@@ -40,12 +38,14 @@ internal class SøkServiceTest {
     private val adresseMapper: AdresseMapper = AdresseMapper(KodeverkServiceMock().kodeverkService())
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
-    private val søkService = SøkService(fagsakPersonService,
-                                        behandlingService,
-                                        personService,
-                                        pdlSaksbehandlerClient,
-                                        adresseMapper,
-                                        fagsakService)
+    private val søkService = SøkService(
+        fagsakPersonService,
+        behandlingService,
+        personService,
+        pdlSaksbehandlerClient,
+        adresseMapper,
+        fagsakService
+    )
 
     @BeforeEach
     internal fun setUp() {
@@ -57,35 +57,48 @@ internal class SøkServiceTest {
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {
 
-        val vegadresse = Vegadresse("23",
-                                    "A",
-                                    "",
-                                    "Adressenavn",
-                                    "",
-                                    "",
-                                    "0000",
-                                    null,
-                                    1L)
+        val vegadresse = Vegadresse(
+            "23",
+            "A",
+            "",
+            "Adressenavn",
+            "",
+            "",
+            "0000",
+            null,
+            1L
+        )
 
-        val bostedsadresseFraPdl = listOf(Bostedsadresse(null,
-                                                         LocalDate.now(),
-                                                         LocalDate.now(),
-                                                         null,
-                                                         null,
-                                                         vegadresse,
-                                                         null,
-                                                         null,
-                                                         Metadata(historisk = false)))
+        val bostedsadresseFraPdl = listOf(
+            Bostedsadresse(
+                null,
+                LocalDate.now(),
+                LocalDate.now(),
+                null,
+                null,
+                vegadresse,
+                null,
+                null,
+                Metadata(historisk = false)
+            )
+        )
 
         val navnFraPdl = listOf(Navn("Fornavn", "Mellomnavn", "Etternavn", Metadata(false)))
 
-        val personFraPdl = PersonSøkResultat(hits = listOf(PersonSøkTreff(
-                person = PdlPersonFraSøk(listOf(Folkeregisteridentifikator("123456789")),
-                                         bostedsadresseFraPdl,
-                                         navnFraPdl))),
-                                             totalHits = 1,
-                                             pageNumber = 1,
-                                             totalPages = 1)
+        val personFraPdl = PersonSøkResultat(
+            hits = listOf(
+                PersonSøkTreff(
+                    person = PdlPersonFraSøk(
+                        listOf(Folkeregisteridentifikator("123456789")),
+                        bostedsadresseFraPdl,
+                        navnFraPdl
+                    )
+                )
+            ),
+            totalHits = 1,
+            pageNumber = 1,
+            totalPages = 1
+        )
 
         every {
             pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(any())
@@ -94,9 +107,11 @@ internal class SøkServiceTest {
             personService.hentSøker(any())
         } returns pdlSøker(bostedsadresse = bostedsadresseFraPdl)
 
-        val forventetResultat = PersonFraSøk(personIdent = "123456789",
-                                             visningsadresse = "Adressenavn 23 A, 0000 Oslo",
-                                             "Fornavn Mellomnavn Etternavn")
+        val forventetResultat = PersonFraSøk(
+            personIdent = "123456789",
+            visningsadresse = "Adressenavn 23 A, 0000 Oslo",
+            "Fornavn Mellomnavn Etternavn"
+        )
 
         val person = SøkeresultatPerson(listOf(forventetResultat), 1, 1, 1)
         assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
@@ -109,7 +124,7 @@ internal class SøkServiceTest {
         } returns pdlSøker(bostedsadresse = listOf(ukjentBostedsadresse()))
 
         assertThatThrownBy { søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID()) }
-                .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("ukjent bostedsadresse")
+            .isInstanceOf(ApiFeil::class.java)
+            .hasMessageContaining("ukjent bostedsadresse")
     }
 }

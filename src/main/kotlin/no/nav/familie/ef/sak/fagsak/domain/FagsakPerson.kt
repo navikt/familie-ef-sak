@@ -10,12 +10,14 @@ import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class FagsakPerson(@Id
-                        val id: UUID = UUID.randomUUID(),
-                        @MappedCollection(idColumn = "fagsak_person_id")
-                        val identer: Set<PersonIdent>,
-                        val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
-                        val opprettetTid: LocalDateTime = SporbarUtils.now()) {
+data class FagsakPerson(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    @MappedCollection(idColumn = "fagsak_person_id")
+    val identer: Set<PersonIdent>,
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+    val opprettetTid: LocalDateTime = SporbarUtils.now()
+) {
 
     fun hentAktivIdent(): String {
         return identer.maxByOrNull { it.sporbar.endret.endretTid }?.ident ?: error("Fant ingen ident på person $id")
@@ -32,10 +34,11 @@ data class FagsakPerson(@Id
 
         return this.copy(identer = søkerIdenterUtenGjeldende.toSet() + personIdentForGjeldendeIdent)
     }
-
 }
 
-data class PersonIdent(@Id
-                       val ident: String,
-                       @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                       val sporbar: Sporbar = Sporbar())
+data class PersonIdent(
+    @Id
+    val ident: String,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)

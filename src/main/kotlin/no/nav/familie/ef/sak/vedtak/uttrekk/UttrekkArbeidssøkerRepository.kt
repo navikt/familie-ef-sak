@@ -9,15 +9,17 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Repository
-interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssøkere, UUID>,
-                                          InsertUpdateRepository<UttrekkArbeidssøkere> {
+interface UttrekkArbeidssøkerRepository :
+    RepositoryInterface<UttrekkArbeidssøkere, UUID>,
+    InsertUpdateRepository<UttrekkArbeidssøkere> {
 
     fun findAllByÅrMånedAndRegistrertArbeidssøkerIsFalse(årMåned: YearMonth): List<UttrekkArbeidssøkere>
 
     fun existsByÅrMånedAndFagsakId(årMåned: YearMonth, fagsakId: UUID): Boolean
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT DISTINCT ON (v.behandling_id) -- Trenger ikke å hente samme vedtak flere ganger 
                gib.id behandling_id, gib.fagsak_id, v.behandling_id behandling_id_for_vedtak, v.perioder 
           FROM gjeldende_iverksatte_behandlinger gib
@@ -26,7 +28,10 @@ interface UttrekkArbeidssøkerRepository : RepositoryInterface<UttrekkArbeidssø
           JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
         WHERE aty.stonad_tom >= :startdato AND aty.stonad_fom <= :sluttdato
           AND gib.stonadstype = 'OVERGANGSSTØNAD'
-    """)
-    fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato: LocalDate,
-                                                            sluttdato: LocalDate): List<VedtaksperioderForUttrekk>
+    """
+    )
+    fun hentVedtaksperioderForSisteFerdigstilteBehandlinger(
+        startdato: LocalDate,
+        sluttdato: LocalDate
+    ): List<VedtaksperioderForUttrekk>
 }

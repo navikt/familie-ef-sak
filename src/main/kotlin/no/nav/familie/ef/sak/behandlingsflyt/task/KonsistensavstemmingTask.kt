@@ -14,13 +14,15 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class KonsistensavstemmingPayload(val stønadstype: StønadType,
-                                       val datoForAvstemming: LocalDate)
+data class KonsistensavstemmingPayload(
+    val stønadstype: StønadType,
+    val datoForAvstemming: LocalDate
+)
 
 @Service
 @TaskStepBeskrivelse(taskStepType = KonsistensavstemmingTask.TYPE, beskrivelse = "Utfører konsistensavstemming mot økonomi.")
 class KonsistensavstemmingTask(
-        private val avstemmingService: AvstemmingService
+    private val avstemmingService: AvstemmingService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -33,16 +35,18 @@ class KonsistensavstemmingTask(
         const val TYPE = "utførKonsistensavstemming"
 
         fun opprettTask(payload: KonsistensavstemmingPayload, triggerTid: LocalDateTime): Task {
-            val task = Task(type = TYPE,
-                            payload = objectMapper.writeValueAsString(payload),
-                            triggerTid = triggerTid)
-            val properties = PropertiesWrapper(task.metadata.apply {
-                this["stønadstype"] = payload.stønadstype.name
-                this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-            })
+            val task = Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(payload),
+                triggerTid = triggerTid
+            )
+            val properties = PropertiesWrapper(
+                task.metadata.apply {
+                    this["stønadstype"] = payload.stønadstype.name
+                    this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+                }
+            )
             return task.copy(metadataWrapper = properties)
         }
     }
-
-
 }

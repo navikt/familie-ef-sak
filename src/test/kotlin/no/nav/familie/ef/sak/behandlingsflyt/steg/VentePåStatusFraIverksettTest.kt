@@ -57,7 +57,7 @@ internal class VentePåStatusFraIverksettTest {
         mockIverksettStatus(IverksettStatus.IKKE_PÅBEGYNT)
 
         assertThatThrownBy { steg.utførSteg(saksbehandling(årsak = BehandlingÅrsak.MIGRERING), null) }
-                .isInstanceOf(TaskExceptionUtenStackTrace::class.java)
+            .isInstanceOf(TaskExceptionUtenStackTrace::class.java)
 
         verifyHarIkkeOpprettetTask()
     }

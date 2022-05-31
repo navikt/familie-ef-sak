@@ -21,10 +21,14 @@ internal class AvstemmingServiceTest {
     @Test
     internal fun `skal sende start og slutt melding før og etter avstemminger`() {
         every { tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(any(), any()) } returns
-                listOf(KonsistensavstemmingTilkjentYtelseDto(UUID.randomUUID(),
-                                                             1,
-                                                             1L,
-                                                             "1", listOf()))
+            listOf(
+                KonsistensavstemmingTilkjentYtelseDto(
+                    UUID.randomUUID(),
+                    1,
+                    1L,
+                    "1", listOf()
+                )
+            )
         service.konsistensavstemOppdrag(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
         verifyOrder {

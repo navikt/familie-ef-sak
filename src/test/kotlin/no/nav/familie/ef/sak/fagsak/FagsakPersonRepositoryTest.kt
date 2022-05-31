@@ -23,9 +23,9 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
         fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
         assertThatThrownBy { fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2")))) }
-                .hasRootCauseInstanceOf(PSQLException::class.java)
-                .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"person_ident_pkey\"\n"))
-                .has(hasCauseMessageContaining("Detail: Key (ident)=(2) already exists."))
+            .hasRootCauseInstanceOf(PSQLException::class.java)
+            .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"person_ident_pkey\"\n"))
+            .has(hasCauseMessageContaining("Detail: Key (ident)=(2) already exists."))
     }
 
     @Test
@@ -33,9 +33,9 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
         val person = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
         assertThatThrownBy { fagsakPersonRepository.update(person.medOppdatertGjeldendeIdent("2")) }
-                .hasRootCauseInstanceOf(PSQLException::class.java)
-                .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"person_ident_pkey\"\n"))
-                .has(hasCauseMessageContaining("Detail: Key (ident)=(2) already exists."))
+            .hasRootCauseInstanceOf(PSQLException::class.java)
+            .has(hasCauseMessageContaining("ERROR: duplicate key value violates unique constraint \"person_ident_pkey\"\n"))
+            .has(hasCauseMessageContaining("Detail: Key (ident)=(2) already exists."))
     }
 
     @Test
@@ -51,8 +51,8 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
         fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("2"))))
         assertThatThrownBy { fagsakPersonRepository.findByIdent(setOf("1", "2")) }
-                .isInstanceOf(IncorrectResultSizeDataAccessException::class.java)
-                .hasMessageContaining("Incorrect result size: expected 1, actual 2")
+            .isInstanceOf(IncorrectResultSizeDataAccessException::class.java)
+            .hasMessageContaining("Incorrect result size: expected 1, actual 2")
     }
 
     @Test
@@ -66,9 +66,15 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentAktivIdent - skal returnere identen som har siste endretTid`() {
         val sporbarEnDagSiden = Sporbar(endret = Endret(endretTid = LocalDateTime.now().minusDays(1)))
-        val person = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1", sporbarEnDagSiden),
-                                                                                PersonIdent("2"),
-                                                                                PersonIdent("3", sporbarEnDagSiden))))
+        val person = fagsakPersonRepository.insert(
+            FagsakPerson(
+                identer = setOf(
+                    PersonIdent("1", sporbarEnDagSiden),
+                    PersonIdent("2"),
+                    PersonIdent("3", sporbarEnDagSiden)
+                )
+            )
+        )
         assertThat(fagsakPersonRepository.hentAktivIdent(person.id)).isEqualTo("2")
     }
 }

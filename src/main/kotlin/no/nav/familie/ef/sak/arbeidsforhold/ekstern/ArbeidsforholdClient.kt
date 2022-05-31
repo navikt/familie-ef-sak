@@ -25,7 +25,6 @@ class ArbeidsforholdClient(
     }
 }
 
-
 class ArbeidsforholdRequest(
     val personIdent: String,
     val ansettelsesperiodeFom: LocalDate

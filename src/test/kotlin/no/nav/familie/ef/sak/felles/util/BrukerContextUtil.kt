@@ -18,22 +18,28 @@ object BrukerContextUtil {
         RequestContextHolder.resetRequestAttributes()
     }
 
-    fun mockBrukerContext(preferredUsername: String = "A",
-                          groups: List<String> = emptyList(),
-                          servletRequest: HttpServletRequest = MockHttpServletRequest()) {
+    fun mockBrukerContext(
+        preferredUsername: String = "A",
+        groups: List<String> = emptyList(),
+        servletRequest: HttpServletRequest = MockHttpServletRequest()
+    ) {
         val tokenValidationContext = mockk<TokenValidationContext>()
-        val jwtTokenClaims = JwtTokenClaims(JWTClaimsSet.Builder()
-                                                    .claim("preferred_username", preferredUsername)
-                                                    .claim("NAVident", preferredUsername)
-                                                    .claim("name", preferredUsername)
-                                                    .claim("groups", groups)
-                                                    .build())
+        val jwtTokenClaims = JwtTokenClaims(
+            JWTClaimsSet.Builder()
+                .claim("preferred_username", preferredUsername)
+                .claim("NAVident", preferredUsername)
+                .claim("name", preferredUsername)
+                .claim("groups", groups)
+                .build()
+        )
         val requestAttributes = ServletRequestAttributes(servletRequest)
 
         RequestContextHolder.setRequestAttributes(requestAttributes)
-        requestAttributes.setAttribute(SpringTokenValidationContextHolder::class.java.name,
-                                       tokenValidationContext,
-                                       RequestAttributes.SCOPE_REQUEST)
+        requestAttributes.setAttribute(
+            SpringTokenValidationContextHolder::class.java.name,
+            tokenValidationContext,
+            RequestAttributes.SCOPE_REQUEST
+        )
         every { tokenValidationContext.getClaims("azuread") } returns jwtTokenClaims
     }
 

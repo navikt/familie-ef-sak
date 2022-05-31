@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.arbeidsforhold
 
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
 
-
 fun List<Arbeidsforhold>.tilDto() = this.map {
     ArbeidsforholdDto(
         navArbeidsforholdId = it.navArbeidsforholdId,

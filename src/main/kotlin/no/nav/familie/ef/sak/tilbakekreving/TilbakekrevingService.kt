@@ -20,7 +20,6 @@ import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.tilDomene
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -32,13 +31,14 @@ import java.util.UUID
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as TilbakekrevingBehandling
 
 @Service
-class TilbakekrevingService(private val tilbakekrevingRepository: TilbakekrevingRepository,
-                            private val behandlingService: BehandlingService,
-                            private val fagsakService: FagsakService,
-                            private val tilbakekrevingClient: TilbakekrevingClient,
-                            private val simuleringService: SimuleringService,
-                            private val arbeidsfordelingService: ArbeidsfordelingService) {
-
+class TilbakekrevingService(
+    private val tilbakekrevingRepository: TilbakekrevingRepository,
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
+    private val tilbakekrevingClient: TilbakekrevingClient,
+    private val simuleringService: SimuleringService,
+    private val arbeidsfordelingService: ArbeidsfordelingService
+) {
 
     fun lagreTilbakekreving(tilbakekrevingDto: TilbakekrevingDto, behandlingId: UUID) {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -56,8 +56,10 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
     }
 
     private fun validerTilbakekreving(behandling: Behandling, tilbakekrevingDto: TilbakekrevingDto) {
-        brukerfeilHvis(tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL
-                       && tilbakekrevingDto.varseltekst.isNullOrBlank()) {
+        brukerfeilHvis(
+            tilbakekrevingDto.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL &&
+                tilbakekrevingDto.varseltekst.isNullOrBlank()
+        ) {
             "Må fylle ut varseltekst for å lage tilbakekreving med varsel"
         }
         brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
@@ -84,26 +86,26 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
         validerIkkeFerdigstiltBehandling(saksbehandling.id)
         val feilutbetaltePerioderDto = lagFeilutbetaltePerioderDto(saksbehandling)
         val navEnhet = arbeidsfordelingService.hentNavEnhet(saksbehandling.ident)
-        val request = ForhåndsvisVarselbrevRequest(varseltekst = varseltekst,
-                                                   ytelsestype = Ytelsestype.valueOf(saksbehandling.stønadstype.name),
-                                                   behandlendeEnhetId = navEnhet?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                                                   behandlendeEnhetsNavn = navEnhet?.enhetNavn ?: "Ukjent",
-                                                   saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(strict = true),
-                                                   språkkode = Språkkode.NB,
-                                                   vedtaksdato = LocalDate.now(),
-                                                   feilutbetaltePerioderDto = feilutbetaltePerioderDto,
-                                                   fagsystem = Fagsystem.EF,
-                                                   eksternFagsakId = saksbehandling.eksternFagsakId.toString(),
-                                                   fagsystemsbehandlingId = saksbehandling.eksternId.toString(),
-                                                   ident = saksbehandling.ident,
-                                                   verge = null)
+        val request = ForhåndsvisVarselbrevRequest(
+            varseltekst = varseltekst,
+            ytelsestype = Ytelsestype.valueOf(saksbehandling.stønadstype.name),
+            behandlendeEnhetId = navEnhet?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET,
+            behandlendeEnhetsNavn = navEnhet?.enhetNavn ?: "Ukjent",
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(strict = true),
+            språkkode = Språkkode.NB,
+            vedtaksdato = LocalDate.now(),
+            feilutbetaltePerioderDto = feilutbetaltePerioderDto,
+            fagsystem = Fagsystem.EF,
+            eksternFagsakId = saksbehandling.eksternFagsakId.toString(),
+            fagsystemsbehandlingId = saksbehandling.eksternId.toString(),
+            ident = saksbehandling.ident,
+            verge = null
+        )
         return tilbakekrevingClient.hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest = request)
-
     }
 
     private fun validerIkkeFerdigstiltBehandling(behandlingId: UUID) {
-        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status == BehandlingStatus.FERDIGSTILT)
-        { "Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling." }
+        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status == BehandlingStatus.FERDIGSTILT) { "Kan ikke generere forhåndsvisning av varselbrev på en ferdigstilt behandling." }
     }
 
     private fun lagFeilutbetaltePerioderDto(saksbehandling: Saksbehandling): FeilutbetaltePerioderDto {
@@ -111,30 +113,35 @@ class TilbakekrevingService(private val tilbakekrevingRepository: Tilbakekreving
 
         val perioderMedFeilutbetaling = simulering.hentSammenhengendePerioderMedFeilutbetaling()
 
-        return FeilutbetaltePerioderDto(sumFeilutbetaling = simulering.feilutbetaling.toLong(),
-                                        perioder = perioderMedFeilutbetaling)
+        return FeilutbetaltePerioderDto(
+            sumFeilutbetaling = simulering.feilutbetaling.toLong(),
+            perioder = perioderMedFeilutbetaling
+        )
     }
 
     fun genererBrevMedVarseltekstFraEksisterendeTilbakekreving(saksbehandling: Saksbehandling): ByteArray {
         val varseltekst = tilbakekrevingRepository.findByIdOrThrow(saksbehandling.id).varseltekst
-                          ?: throw Feil("Kan ikke finne varseltekst for behandlingId=$saksbehandling",
-                                        frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg")
+            ?: throw Feil(
+                "Kan ikke finne varseltekst for behandlingId=$saksbehandling",
+                frontendFeilmelding = "Kan ikke finne varseltekst på tilbakekrevingsvalg"
+            )
         return genererBrev(saksbehandling, varseltekst)
     }
 
     fun opprettManuellTilbakekreving(fagsakId: UUID) {
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         val kanBehandlingOpprettesManuelt =
-                tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id)
+            tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id)
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
             throw ApiFeil(kanBehandlingOpprettesManuelt.melding, HttpStatus.BAD_REQUEST)
         }
 
         val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-                         ?: throw Feil("Kan ikke opprette manuell tilbakekreving for fagsak uten iverksatt behandling. " +
-                                       "fagsakId=$fagsakId")
+            ?: throw Feil(
+                "Kan ikke opprette manuell tilbakekreving for fagsak uten iverksatt behandling. " +
+                    "fagsakId=$fagsakId"
+            )
 
         tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id, behandling.eksternId.id, fagsak.stønadstype)
     }
-
 }
