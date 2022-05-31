@@ -10,22 +10,33 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
 class InntektRegel : Vilkårsregel(
     vilkårType = VilkårType.INNTEKT,
-    regler = setOf(LAVERE_INNTEKT_ENN_GRENSEN),
-    hovedregler = regelIder(LAVERE_INNTEKT_ENN_GRENSEN)
+    regler = setOf(LAVERE_INNTEKT_ENN_GRENSEN, SAMSVARER_INNTEKT_MED_OS),
+    hovedregler = regelIder(LAVERE_INNTEKT_ENN_GRENSEN, SAMSVARER_INNTEKT_MED_OS)
 ) {
 
     companion object {
 
-        private val inntektRegelMapping = mapOf(
+        private val lavereInntektEnnGrensenMapping = mapOf(
             SvarId.JA to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
             SvarId.NOEN_MÅNEDER_OVERSTIGER_6G to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
             SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
         )
 
+        private val samsvarerInntektMedOsMapping = mapOf(
+            SvarId.JA to SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+            SvarId.BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD to SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+            SvarId.NEI to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+        )
+
         private val LAVERE_INNTEKT_ENN_GRENSEN =
             RegelSteg(
                 regelId = RegelId.INNTEKT_LAVERE_ENN_INNTEKTSGRENSE,
-                svarMapping = inntektRegelMapping
+                svarMapping = lavereInntektEnnGrensenMapping
             )
+
+        private val SAMSVARER_INNTEKT_MED_OS = RegelSteg(
+            regelId = RegelId.INNTEKT_SAMSVARER_MED_OS,
+            svarMapping = samsvarerInntektMedOsMapping
+        )
     }
 }

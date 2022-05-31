@@ -51,6 +51,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -1609,6 +1610,7 @@ internal class BeregnYtelseStegTest {
         AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
             andel = andelDto(1, fom, tom),
@@ -1624,6 +1626,7 @@ internal class BeregnYtelseStegTest {
         AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.SANKSJON_1_MND,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
             andel = andelDto(0, sanksjonMåned, sanksjonMåned),

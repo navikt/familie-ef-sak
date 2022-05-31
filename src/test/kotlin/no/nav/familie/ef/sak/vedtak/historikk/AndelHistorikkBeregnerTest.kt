@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TEST_TYPE
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TOM
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.values
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -367,6 +368,7 @@ object AndelHistorikkParser {
         AndelHistorikkDto(
             behandlingId = it.behandlingId,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(), // burde denne testes? EKs att man oppretter vedtaksdato per behandlingId
             saksbehandler = "",
             andel = AndelMedGrunnlagDto(mapAndel(it), null),

@@ -75,17 +75,19 @@ object AndelHistorikkBeregner {
         behandlinger: List<Behandling>
     ): List<AndelHistorikkDto> {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData)
-        val behandlingerPåId = behandlinger.associate { it.id to it.type }
+        val behandlingerPåId = behandlinger.associate { it.id to it }
 
         return historikk.map {
             val vedtaksperiode = it.vedtaksperiode
             val aktivitet = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
             val periodeType = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
             val barnetilsyn = if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) vedtaksperiode else null
+            val behandling = behandlingerPåId.getValue(it.behandlingId)
 
             AndelHistorikkDto(
                 behandlingId = it.behandlingId,
-                behandlingType = behandlingerPåId.getValue(it.behandlingId),
+                behandlingType = behandling.type,
+                behandlingÅrsak = behandling.årsak,
                 vedtakstidspunkt = it.vedtakstidspunkt,
                 saksbehandler = it.saksbehandler,
                 andel = AndelMedGrunnlagDto(andel = it.andel, barnetilsyn),
