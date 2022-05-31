@@ -17,6 +17,9 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
 
     fun findByFagsakIdAndÅrsak(fagsakId: UUID, årsak: BehandlingÅrsak): Behandling
 
+    @Query("SELECT id from behandling where arsak = 'G_OMREGNING'")
+    fun finnGOmregninger(): Set<UUID>
+
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
