@@ -315,7 +315,6 @@ fun vedtaksperiodeDto(
         periodeType = periodeType
     )
 
-
 fun behandlingBarn(
     id: UUID = UUID.randomUUID(),
     behandlingId: UUID,

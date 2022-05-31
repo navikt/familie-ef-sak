@@ -94,9 +94,13 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
-        val barn = barnRepository.insert(behandlingBarn(behandlingId = behandling.id,
-                                                        personIdent = "01012067050",
-                                                        navn = "Kid Kiddesen"))
+        val barn = barnRepository.insert(
+            behandlingBarn(
+                behandlingId = behandling.id,
+                personIdent = "01012067050",
+                navn = "Kid Kiddesen"
+            )
+        )
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
 
         val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandlingId)
@@ -113,9 +117,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(iverksettDtoSlot.captured).isEqualTo(expectedIverksettDto)
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
-        assertThat(vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
-                           .single { it.type == VilkårType.ALENEOMSORG }.barnId).isNotNull
-
+        assertThat(
+            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
+                .single { it.type == VilkårType.ALENEOMSORG }.barnId
+        ).isNotNull
     }
 
     @Test
@@ -132,9 +137,13 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
         vedtakRepository.insert(vedtak(behandling.id, år = år))
 
-        val barn = barnRepository.insert(behandlingBarn(behandlingId = behandling.id,
-                                                        personIdent = "01012067050",
-                                                        navn = "Kid Kiddesen"))
+        val barn = barnRepository.insert(
+            behandlingBarn(
+                behandlingId = behandling.id,
+                personIdent = "01012067050",
+                navn = "Kid Kiddesen"
+            )
+        )
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
 
         val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandling.id)
@@ -252,24 +261,36 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
     }
 
-    private fun lagVilkårsvurderinger(barn: BehandlingBarn,
-                                      behandlingId: UUID): List<Vilkårsvurdering> {
+    private fun lagVilkårsvurderinger(
+        barn: BehandlingBarn,
+        behandlingId: UUID
+    ): List<Vilkårsvurdering> {
         val vilkårsvurderinger = vilkårsreglerForStønad(StønadType.OVERGANGSSTØNAD).map { vilkårsregel ->
-            val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(HovedregelMetadata(sivilstandSøknad = null,
-                                                                                                 sivilstandstype = Sivilstandstype.UGIFT,
-                                                                                                 erMigrering = false,
-                                                                                                 barn = listOf(barn),
-                                                                                                 søktOmBarnetilsyn = emptyList()))
-            Vilkårsvurdering(behandlingId = behandlingId,
-                             resultat = Vilkårsresultat.OPPFYLT,
-                             type = vilkårsregel.vilkårType,
-                             barnId = if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) barn.id else null,
-                             delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering.map {
-                                 it.copy(resultat = Vilkårsresultat.OPPFYLT,
-                                         vurderinger = it.vurderinger.map { vurdering ->
-                                             vurdering.copy(begrunnelse = "Godkjent")
-                                         })
-                             }))
+            val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(
+                HovedregelMetadata(
+                    sivilstandSøknad = null,
+                    sivilstandstype = Sivilstandstype.UGIFT,
+                    erMigrering = false,
+                    barn = listOf(barn),
+                    søktOmBarnetilsyn = emptyList()
+                )
+            )
+            Vilkårsvurdering(
+                behandlingId = behandlingId,
+                resultat = Vilkårsresultat.OPPFYLT,
+                type = vilkårsregel.vilkårType,
+                barnId = if (vilkårsregel.vilkårType == VilkårType.ALENEOMSORG) barn.id else null,
+                delvilkårsvurdering = DelvilkårsvurderingWrapper(
+                    delvilkårsvurdering.map {
+                        it.copy(
+                            resultat = Vilkårsresultat.OPPFYLT,
+                            vurderinger = it.vurderinger.map { vurdering ->
+                                vurdering.copy(begrunnelse = "Godkjent")
+                            }
+                        )
+                    }
+                )
+            )
         }
         return vilkårsvurderinger
     }
@@ -296,13 +317,15 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         } ?: emptyList()
         val tilkjentYtelseDto = expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
         val vedtak = expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
-        val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(behandlingId = nyBehandling.id,
-                                                                          eksternId = nyBehandling.eksternId.id)
-        return expectedIverksettDto.copy(vedtak = vedtak,
-                                         behandling = behandlingsdetaljerDto,
-                                         fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id))
-
-
+        val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
+            behandlingId = nyBehandling.id,
+            eksternId = nyBehandling.eksternId.id
+        )
+        return expectedIverksettDto.copy(
+            vedtak = vedtak,
+            behandling = behandlingsdetaljerDto,
+            fagsak = expectedIverksettDto.fagsak.copy(eksternId = fagsak.eksternId.id)
+        )
     }
 
     private fun readFile(filnavn: String): String {

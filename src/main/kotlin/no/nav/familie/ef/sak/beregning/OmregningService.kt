@@ -189,15 +189,15 @@ class OmregningService(
 
     private fun kopierDataFraForrigeBehandling(behandling: Behandling) {
         val forrigeBehandlingId = behandling.forrigeBehandlingId
-                                  ?: error("Finner ikke forrigeBehandlingId til ${behandling.id}")
+            ?: error("Finner ikke forrigeBehandlingId til ${behandling.id}")
         søknadService.kopierSøknad(forrigeBehandlingId, behandling.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         barnService.opprettBarnForRevurdering(
-                behandlingId = behandling.id,
-                forrigeBehandlingId = forrigeBehandlingId,
-                nyeBarnPåRevurdering = emptyList(),
-                grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-                stønadstype = StønadType.OVERGANGSSTØNAD
+            behandlingId = behandling.id,
+            forrigeBehandlingId = forrigeBehandlingId,
+            nyeBarnPåRevurdering = emptyList(),
+            grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
+            stønadstype = StønadType.OVERGANGSSTØNAD
         )
 
         vurderingService.opprettVilkårForOmregning(behandling)
