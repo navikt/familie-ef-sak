@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
@@ -13,6 +14,11 @@ import java.util.UUID
 
 @Repository
 interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUpdateRepository<Behandling> {
+
+    fun findByFagsakIdAndÅrsak(fagsakId: UUID, årsak: BehandlingÅrsak): Behandling
+
+    @Query("SELECT id from behandling where arsak = 'G_OMREGNING'")
+    fun finnGOmregninger(): Set<UUID>
 
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
