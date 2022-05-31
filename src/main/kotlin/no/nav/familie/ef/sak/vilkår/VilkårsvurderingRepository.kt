@@ -9,7 +9,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
-interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>, InsertUpdateRepository<Vilkårsvurdering> {
+interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, UUID>,
+    InsertUpdateRepository<Vilkårsvurdering> {
 
     fun findByBehandlingId(behandlingId: UUID): List<Vilkårsvurdering>
 
@@ -23,5 +24,7 @@ interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, U
 
     fun findByTypeAndBehandlingIdIn(vilkårtype: VilkårType, behandlingIds: Collection<UUID>): List<Vilkårsvurdering>
 
-    fun deleteAllByBehandlingId(behandlingId: UUID)
+    @Modifying
+    @Query("delete from vilkarsvurdering where behandling_id = :behandlingId")
+    fun deleteAllByBehandlingId(behandlingId: UUID): Long
 }

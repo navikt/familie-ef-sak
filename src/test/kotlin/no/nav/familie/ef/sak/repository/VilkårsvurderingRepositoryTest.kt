@@ -21,6 +21,30 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
+    internal fun deleteAllByBehandlingId() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("11")))
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val behandling2 = behandlingRepository.insert(behandling(fagsak2))
+
+        vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            VilkårType.FORUTGÅENDE_MEDLEMSKAP))
+        vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            VilkårType.AKTIVITET))
+
+        vilkårsvurderingRepository.insert(vilkårsvurdering(behandling2.id,
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            VilkårType.FORUTGÅENDE_MEDLEMSKAP))
+
+        vilkårsvurderingRepository.deleteAllByBehandlingId(behandlingId = behandling.id)
+        val findAll = vilkårsvurderingRepository.findAll()
+        assertThat(findAll).hasSize(1)
+        assertThat(findAll.map { it.behandlingId }).containsExactlyInAnyOrder(behandling2.id)
+    }
+
+    @Test
     internal fun findByBehandlingId() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))

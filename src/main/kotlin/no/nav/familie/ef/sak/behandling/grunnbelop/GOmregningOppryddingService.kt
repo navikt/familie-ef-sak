@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -51,6 +53,12 @@ class GOmregningOppryddingService(
 
     @Transactional
     fun ryddOppGOmregninger(saksbehandling: Saksbehandling) {
+        feilHvis(saksbehandling.årsak != BehandlingÅrsak.G_OMREGNING) {
+            "Behandling er ikke g-omregning"
+        }
+        feilHvis(saksbehandling.opprettetAv != SYSTEM_FORKORTELSE) {
+            "Behandling er ikke maskinellt opprettet"
+        }
         val behandlingId = saksbehandling.id
         val forrigeBehandlingId = saksbehandling.forrigeBehandlingId
             ?: error("Finner ikke forrigeBehandlingId til $behandlingId")
