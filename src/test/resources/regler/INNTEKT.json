@@ -22,11 +22,11 @@
       "regelId" : "INNTEKT_SAMSVARER_MED_OS",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "PÅKREVD",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         },
         "BRUKER_MOTTAR_IKKE_OVERGANGSSTØNAD" : {
-          "begrunnelseType" : "PÅKREVD",
+          "begrunnelseType" : "VALGFRI",
           "regelId" : "SLUTT_NODE"
         },
         "NEI" : {
