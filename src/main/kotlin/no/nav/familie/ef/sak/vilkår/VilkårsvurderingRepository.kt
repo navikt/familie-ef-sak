@@ -22,4 +22,6 @@ interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, U
     fun settMaskinelltOpprettet(id: UUID)
 
     fun findByTypeAndBehandlingIdIn(vilkårtype: VilkårType, behandlingIds: Collection<UUID>): List<Vilkårsvurdering>
+
+    fun deleteAllByBehandlingId(behandlingId: UUID)
 }
