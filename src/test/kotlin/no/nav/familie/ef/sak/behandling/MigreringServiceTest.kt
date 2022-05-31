@@ -196,8 +196,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `migrering med 0-beløp skal håndteres`() {
-        every { iverksettClient.hentStatus(any()) } returns IverksettStatus.SENDT_TIL_OPPDRAG
-
         val migrering = opprettOgIverksettMigrering(inntektsgrunnlag = BigDecimal(1_000_000))
 
         verifiserBehandlingErFerdigstilt(migrering)

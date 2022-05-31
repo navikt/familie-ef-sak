@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.beregning.BeregningService
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenebegrep
@@ -74,6 +75,7 @@ class StepDefinitions {
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockFagsakService()
+    private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
     private val beregnYtelseSteg = BeregnYtelseSteg(
         tilkjentYtelseService,
@@ -85,7 +87,7 @@ class StepDefinitions {
         tilbakekrevingService,
         barnService,
         fagsakService,
-        mockk()
+        validerOmregningService
     )
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
