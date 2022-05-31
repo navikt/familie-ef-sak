@@ -10,10 +10,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 import org.springframework.stereotype.Service
 
-
 @Service
 class BrevsignaturService(val personopplysningerService: PersonopplysningerService, val fagsakService: FagsakService) {
-
 
     fun lagSignaturMedEnhet(saksbehandling: Saksbehandling): SignaturDto {
         return lagSignaturDto(saksbehandling.ident)
@@ -25,8 +23,8 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
 
     private fun lagSignaturDto(ident: String): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
-                personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
-                        .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
+            personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
+                .let { it == STRENGT_FORTROLIG || it == STRENGT_FORTROLIG_UTLAND }
 
         return if (harStrengtFortroligAdresse) {
             SignaturDto(NAV_ANONYM_NAVN, ENHET_VIKAFOSSEN, true)
@@ -41,5 +39,4 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
         val ENHET_VIKAFOSSEN = "NAV Vikafossen"
         val ENHET_NAY = "NAV Arbeid og ytelser"
     }
-
 }

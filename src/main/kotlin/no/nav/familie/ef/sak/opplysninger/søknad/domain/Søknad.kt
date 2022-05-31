@@ -8,18 +8,19 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 @Table("soknad_grunnlag")
-data class Søknad(@Id
-                  val id: UUID = UUID.randomUUID(),
-                  val behandlingId: UUID,
-                  val type: SøknadType,
-                  val soknadsskjemaId: UUID,
-                  val journalpostId: String,
-                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                  val sporbar: Sporbar = Sporbar(),
-                  @MappedCollection(idColumn = "grunnlag_soknad_id")
-                  val søker: Søker,
-                  val relaterteFnr: Set<String>)
-
+data class Søknad(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val behandlingId: UUID,
+    val type: SøknadType,
+    val soknadsskjemaId: UUID,
+    val journalpostId: String,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar(),
+    @MappedCollection(idColumn = "grunnlag_soknad_id")
+    val søker: Søker,
+    val relaterteFnr: Set<String>
+)
 
 enum class SøknadType {
     OVERGANGSSTØNAD,
@@ -29,19 +30,21 @@ enum class SøknadType {
 
 object SøknadMapper {
 
-    fun toDomain(journalpostId: String,
-                 søknad: ISøknadsskjema,
-                 behandlingId: UUID): Søknad {
-        return Søknad(soknadsskjemaId = søknad.id,
-                      behandlingId = behandlingId,
-                      journalpostId = journalpostId,
-                      søker = Søker(søknad.fødselsnummer, søknad.navn),
-                      type = søknad.type,
-                      relaterteFnr = søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
-                              .flatten()
-                              .filterNotNull()
-                              .toSet())
+    fun toDomain(
+        journalpostId: String,
+        søknad: ISøknadsskjema,
+        behandlingId: UUID
+    ): Søknad {
+        return Søknad(
+            soknadsskjemaId = søknad.id,
+            behandlingId = behandlingId,
+            journalpostId = journalpostId,
+            søker = Søker(søknad.fødselsnummer, søknad.navn),
+            type = søknad.type,
+            relaterteFnr = søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
+                .flatten()
+                .filterNotNull()
+                .toSet()
+        )
     }
-
-
 }

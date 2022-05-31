@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
-
 @Suppress("unused")
 @ControllerAdvice
 class ApiExceptionHandler {
@@ -28,16 +27,20 @@ class ApiExceptionHandler {
         logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
     }
 
     @ExceptionHandler(JwtTokenMissingException::class)
     fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Ressurs.failure(errorMessage = "401 Unauthorized JwtTokenMissingException",
-                                      frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert"))
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(
+                Ressurs.failure(
+                    errorMessage = "401 Unauthorized JwtTokenMissingException",
+                    frontendFeilmelding = "En uventet feil oppstod: Kall ikke autorisert"
+                )
+            )
     }
 
     @ExceptionHandler(ApiFeil::class)
@@ -45,8 +48,12 @@ class ApiExceptionHandler {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
         secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
         logger.info("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.funksjonellFeil(frontendFeilmelding = feil.feil,
-                                                                                   melding = feil.feil))
+        return ResponseEntity.status(feil.httpStatus).body(
+            Ressurs.funksjonellFeil(
+                frontendFeilmelding = feil.feil,
+                melding = feil.feil
+            )
+        )
     }
 
     @ExceptionHandler(Feil::class)
@@ -68,12 +75,15 @@ class ApiExceptionHandler {
         secureLogger.warn("En håndtert tilgangsfeil har oppstått - ${manglerTilgang.melding}", manglerTilgang)
         logger.warn("En håndtert tilgangsfeil har oppstått")
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Ressurs(data = null,
-                              status = Ressurs.Status.IKKE_TILGANG,
-                              frontendFeilmelding = manglerTilgang.frontendFeilmelding,
-                              melding = manglerTilgang.melding,
-                              stacktrace = null
-                ))
+            .body(
+                Ressurs(
+                    data = null,
+                    status = Ressurs.Status.IKKE_TILGANG,
+                    frontendFeilmelding = manglerTilgang.frontendFeilmelding,
+                    melding = manglerTilgang.melding,
+                    stacktrace = null
+                )
+            )
     }
 
     @ExceptionHandler(IntegrasjonException::class)
@@ -81,14 +91,14 @@ class ApiExceptionHandler {
         secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Ressurs.failure(frontendFeilmelding = feil.message))
+            .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
     fun finnMetodeSomFeiler(e: Throwable): String {
         val firstElement = e.stackTrace.firstOrNull {
             it.className.startsWith("no.nav.familie.ef.sak") &&
-            !it.className.contains("$") &&
-            !it.className.contains("InsertUpdateRepositoryImpl")
+                !it.className.contains("$") &&
+                !it.className.contains("InsertUpdateRepositoryImpl")
         }
         if (firstElement != null) {
             val className = firstElement.className.split(".").lastOrNull()
@@ -96,5 +106,4 @@ class ApiExceptionHandler {
         }
         return e.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
     }
-
 }

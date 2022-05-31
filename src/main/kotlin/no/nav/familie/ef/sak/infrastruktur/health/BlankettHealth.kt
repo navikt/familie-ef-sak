@@ -7,5 +7,5 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("!local")
-class BlankettHealth(client: BlankettClient)
-    : AbstractHealthIndicator(client, "familie.blankett")
+class BlankettHealth(client: BlankettClient) :
+    AbstractHealthIndicator(client, "familie.blankett")

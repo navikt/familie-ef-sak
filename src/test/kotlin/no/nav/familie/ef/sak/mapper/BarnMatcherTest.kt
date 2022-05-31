@@ -19,14 +19,18 @@ internal class BarnMatcherTest {
         val fnrBarn2 = FnrGenerator.generer()
         val fnrBarn3 = FnrGenerator.generer()
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 4)
-        val behandlingBarn = listOf(behandlingBarn(fnr = fnrBarn1),
-                                    behandlingBarn(fnr = fnrBarn2),
-                                    behandlingBarn(fnr = fnrBarn3),
-                                    behandlingBarn(LocalDate.of(2018, 5, 4)))
-        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
-                                  pdlBarn(fnrBarn2),
-                                  pdlBarn(fnrBarn3),
-                                  pdlBarn(fnrBarn4))
+        val behandlingBarn = listOf(
+            behandlingBarn(fnr = fnrBarn1),
+            behandlingBarn(fnr = fnrBarn2),
+            behandlingBarn(fnr = fnrBarn3),
+            behandlingBarn(LocalDate.of(2018, 5, 4))
+        )
+        val barnGrunnlag = listOf(
+            pdlBarn(fnrBarn1),
+            pdlBarn(fnrBarn2),
+            pdlBarn(fnrBarn3),
+            pdlBarn(fnrBarn4)
+        )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
 
@@ -35,7 +39,7 @@ internal class BarnMatcherTest {
         assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.behandlingBarn.personIdent).isEqualTo(fnrBarn2)
         assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.behandlingBarn.personIdent).isEqualTo(fnrBarn3)
         assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.behandlingBarn.fødselTermindato)
-                .isEqualTo(LocalDate.of(2018, 5, 4))
+            .isEqualTo(LocalDate.of(2018, 5, 4))
     }
 
     @Test
@@ -44,14 +48,18 @@ internal class BarnMatcherTest {
         val fnrBarn2 = FnrGenerator.generer()
         val fnrBarn3 = FnrGenerator.generer()
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 4)
-        val behandlingBarn = listOf(behandlingBarn(fnr = fnrBarn1),
-                                    behandlingBarn(fnr = fnrBarn2),
-                                    behandlingBarn(fnr = fnrBarn3),
-                                    behandlingBarn(LocalDate.of(2018, 9, 4)))
-        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
-                                  pdlBarn(fnrBarn2),
-                                  pdlBarn(fnrBarn3),
-                                  pdlBarn(fnrBarn4))
+        val behandlingBarn = listOf(
+            behandlingBarn(fnr = fnrBarn1),
+            behandlingBarn(fnr = fnrBarn2),
+            behandlingBarn(fnr = fnrBarn3),
+            behandlingBarn(LocalDate.of(2018, 9, 4))
+        )
+        val barnGrunnlag = listOf(
+            pdlBarn(fnrBarn1),
+            pdlBarn(fnrBarn2),
+            pdlBarn(fnrBarn3),
+            pdlBarn(fnrBarn4)
+        )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
 
@@ -60,7 +68,7 @@ internal class BarnMatcherTest {
         assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.behandlingBarn.personIdent).isEqualTo(fnrBarn2)
         assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.behandlingBarn.personIdent).isEqualTo(fnrBarn3)
         assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.behandlingBarn.fødselTermindato)
-                .isEqualTo(LocalDate.of(2018, 9, 4))
+            .isEqualTo(LocalDate.of(2018, 9, 4))
     }
 
     @Test
@@ -69,14 +77,18 @@ internal class BarnMatcherTest {
         val fnrBarn2 = FnrGenerator.generer()
         val fnrBarn3 = FnrGenerator.generer()
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 31)
-        val behandlingBarn = listOf(behandlingBarn(fnr = fnrBarn1),
-                                    behandlingBarn(fnr = fnrBarn2),
-                                    behandlingBarn(fnr = fnrBarn3),
-                                    behandlingBarn(LocalDate.of(2018, 5, 4)))
-        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
-                                  pdlBarn(fnrBarn2),
-                                  pdlBarn(fnrBarn3),
-                                  pdlBarn(fnrBarn4))
+        val behandlingBarn = listOf(
+            behandlingBarn(fnr = fnrBarn1),
+            behandlingBarn(fnr = fnrBarn2),
+            behandlingBarn(fnr = fnrBarn3),
+            behandlingBarn(LocalDate.of(2018, 5, 4))
+        )
+        val barnGrunnlag = listOf(
+            pdlBarn(fnrBarn1),
+            pdlBarn(fnrBarn2),
+            pdlBarn(fnrBarn3),
+            pdlBarn(fnrBarn4)
+        )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
 
@@ -85,7 +97,7 @@ internal class BarnMatcherTest {
         assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.behandlingBarn.personIdent).isEqualTo(fnrBarn2)
         assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.behandlingBarn.personIdent).isEqualTo(fnrBarn3)
         assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.behandlingBarn.fødselTermindato)
-                .isEqualTo(LocalDate.of(2018, 5, 4))
+            .isEqualTo(LocalDate.of(2018, 5, 4))
     }
 
     @Test
@@ -94,14 +106,18 @@ internal class BarnMatcherTest {
         val fnrBarn2 = FnrGenerator.generer()
         val fnrBarn3 = FnrGenerator.generer(2018, 5, 31)
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 31)
-        val behandlingBarn = listOf(behandlingBarn(fnr = fnrBarn1),
-                                    behandlingBarn(fnr = fnrBarn2),
-                                    behandlingBarn(LocalDate.of(2018, 5, 4)),
-                                    behandlingBarn(LocalDate.of(2018, 5, 4)))
-        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
-                                  pdlBarn(fnrBarn2),
-                                  pdlBarn(fnrBarn3),
-                                  pdlBarn(fnrBarn4))
+        val behandlingBarn = listOf(
+            behandlingBarn(fnr = fnrBarn1),
+            behandlingBarn(fnr = fnrBarn2),
+            behandlingBarn(LocalDate.of(2018, 5, 4)),
+            behandlingBarn(LocalDate.of(2018, 5, 4))
+        )
+        val barnGrunnlag = listOf(
+            pdlBarn(fnrBarn1),
+            pdlBarn(fnrBarn2),
+            pdlBarn(fnrBarn3),
+            pdlBarn(fnrBarn4)
+        )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
 
@@ -109,9 +125,9 @@ internal class BarnMatcherTest {
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.behandlingBarn.personIdent).isEqualTo(fnrBarn1)
         assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.behandlingBarn.personIdent).isEqualTo(fnrBarn2)
         assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.behandlingBarn.fødselTermindato)
-                .isEqualTo(LocalDate.of(2018, 5, 4))
+            .isEqualTo(LocalDate.of(2018, 5, 4))
         assertThat(barn.first { it.fødselsnummer == fnrBarn4 }.behandlingBarn.fødselTermindato)
-                .isEqualTo(LocalDate.of(2018, 5, 4))
+            .isEqualTo(LocalDate.of(2018, 5, 4))
     }
 
     @Test
@@ -120,13 +136,17 @@ internal class BarnMatcherTest {
         val fnrBarn2 = FnrGenerator.generer()
         val fnrBarn3 = FnrGenerator.generer(2018, 5, 15)
         val fnrBarn4 = FnrGenerator.generer(2018, 5, 31)
-        val behandlingBarn = listOf(behandlingBarn(fnr = fnrBarn1),
-                                    behandlingBarn(fnr = fnrBarn2),
-                                    behandlingBarn(LocalDate.of(2018, 5, 4)))
-        val barnGrunnlag = listOf(pdlBarn(fnrBarn1),
-                                  pdlBarn(fnrBarn2),
-                                  pdlBarn(fnrBarn3),
-                                  pdlBarn(fnrBarn4))
+        val behandlingBarn = listOf(
+            behandlingBarn(fnr = fnrBarn1),
+            behandlingBarn(fnr = fnrBarn2),
+            behandlingBarn(LocalDate.of(2018, 5, 4))
+        )
+        val barnGrunnlag = listOf(
+            pdlBarn(fnrBarn1),
+            pdlBarn(fnrBarn2),
+            pdlBarn(fnrBarn3),
+            pdlBarn(fnrBarn4)
+        )
 
         val barn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnGrunnlag)
 
@@ -134,26 +154,28 @@ internal class BarnMatcherTest {
         assertThat(barn.first { it.fødselsnummer == fnrBarn1 }.behandlingBarn.personIdent).isEqualTo(fnrBarn1)
         assertThat(barn.first { it.fødselsnummer == fnrBarn2 }.behandlingBarn.personIdent).isEqualTo(fnrBarn2)
         assertThat(barn.first { it.fødselsnummer == fnrBarn3 }.behandlingBarn.fødselTermindato)
-                .isEqualTo(LocalDate.of(2018, 5, 4))
+            .isEqualTo(LocalDate.of(2018, 5, 4))
         assertThat(barn.firstOrNull { it.fødselsnummer == fnrBarn4 }).isNull()
     }
 
-
     private fun behandlingBarn(terminDato: LocalDate? = null, fnr: String? = null) =
-            BehandlingBarn(personIdent = fnr,
-                           fødselTermindato = terminDato,
-                           behandlingId = UUID.randomUUID(),
-                           navn = "navn",
-                           søknadBarnId = null)
+        BehandlingBarn(
+            personIdent = fnr,
+            fødselTermindato = terminDato,
+            behandlingId = UUID.randomUUID(),
+            navn = "navn",
+            søknadBarnId = null
+        )
 
     private fun pdlBarn(fnr: String) =
-            BarnMedIdent(emptyList(),
-                         emptyList(),
-                         emptyList(),
-                         emptyList(),
-                         emptyList(),
-                         emptyList(),
-                         Navn("", "", "", Metadata(false)),
-                         fnr)
-
+        BarnMedIdent(
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            Navn("", "", "", Metadata(false)),
+            fnr
+        )
 }

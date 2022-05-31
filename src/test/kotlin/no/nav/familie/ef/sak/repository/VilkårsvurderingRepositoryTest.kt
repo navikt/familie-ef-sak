@@ -25,9 +25,13 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
-                                                                                  Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                                                  VilkårType.FORUTGÅENDE_MEDLEMSKAP))
+        val vilkårsvurdering = vilkårsvurderingRepository.insert(
+            vilkårsvurdering(
+                behandling.id,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                VilkårType.FORUTGÅENDE_MEDLEMSKAP
+            )
+        )
 
         assertThat(vilkårsvurderingRepository.findByBehandlingId(UUID.randomUUID())).isEmpty()
         assertThat(vilkårsvurderingRepository.findByBehandlingId(behandling.id)).containsOnly(vilkårsvurdering)
@@ -38,15 +42,20 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(behandling.id,
-                                                                                  Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                                                  VilkårType.FORUTGÅENDE_MEDLEMSKAP))
+        val vilkårsvurdering = vilkårsvurderingRepository.insert(
+            vilkårsvurdering(
+                behandling.id,
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                VilkårType.FORUTGÅENDE_MEDLEMSKAP
+            )
+        )
         val nyttTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.MILLIS)
 
         vilkårsvurderingRepository.oppdaterEndretTid(vilkårsvurdering.id, nyttTidspunkt)
 
         assertThat(vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurdering.id).sporbar.endret.endretTid).isEqualTo(
-                nyttTidspunkt)
+            nyttTidspunkt
+        )
     }
 
     @Test
@@ -57,7 +66,8 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         val vilkårsvurdering: Vilkårsvurdering = testWithBrukerContext(preferredUsername = saksbehandler) {
             vilkårsvurderingRepository.insert(
-                    vilkårsvurdering(behandling.id, Vilkårsresultat.IKKE_TATT_STILLING_TIL, VilkårType.FORUTGÅENDE_MEDLEMSKAP))
+                vilkårsvurdering(behandling.id, Vilkårsresultat.IKKE_TATT_STILLING_TIL, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+            )
         }
         assertThat(vilkårsvurdering.sporbar.opprettetAv).isEqualTo(saksbehandler)
         assertThat(vilkårsvurdering.sporbar.endret.endretAv).isEqualTo(saksbehandler)

@@ -18,11 +18,13 @@ import java.util.UUID
  * Kjører i 16 min før den settes til feilet
  */
 @Service
-@TaskStepBeskrivelse(taskStepType = SjekkMigrertStatusIInfotrygdTask.TYPE,
-                     maxAntallFeil = 7,
-                     settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 120L,
-                     beskrivelse = "Sjekker status for migrert sak")
+@TaskStepBeskrivelse(
+    taskStepType = SjekkMigrertStatusIInfotrygdTask.TYPE,
+    maxAntallFeil = 7,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 120L,
+    beskrivelse = "Sjekker status for migrert sak"
+)
 
 class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringService) : AsyncTaskStep {
 
@@ -37,17 +39,17 @@ class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringSe
     companion object {
 
         fun opprettTask(behandlingId: UUID, opphørsmåned: YearMonth, personIdent: String): Task =
-                Task(type = TYPE,
-                     payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
-                     properties = Properties().apply {
-                         this["behandlingId"] = behandlingId.toString()
-                         this["personIdent"] = personIdent
-                     }).copy(triggerTid = LocalDateTime.now().plusMinutes(16))
-
+            Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(SjekkMigrertStatusIInfotrygdData(behandlingId, opphørsmåned)),
+                properties = Properties().apply {
+                    this["behandlingId"] = behandlingId.toString()
+                    this["personIdent"] = personIdent
+                }
+            ).copy(triggerTid = LocalDateTime.now().plusMinutes(16))
 
         const val TYPE = "sjekkMigrertStatus"
     }
 
     data class SjekkMigrertStatusIInfotrygdData(val behandlingId: UUID, val opphørsmåned: YearMonth)
-
 }

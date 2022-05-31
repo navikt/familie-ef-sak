@@ -31,19 +31,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VedtakController(private val stegService: StegService,
-                       private val behandlingService: BehandlingService,
-                       private val totrinnskontrollService: TotrinnskontrollService,
-                       private val tilgangService: TilgangService,
-                       private val vedtakService: VedtakService,
-                       private val vurderingService: VurderingService,
-                       private val vedtakHistorikkService: VedtakHistorikkService,
-                       private val behandlingRepository: BehandlingRepository) {
+class VedtakController(
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val tilgangService: TilgangService,
+    private val vedtakService: VedtakService,
+    private val vurderingService: VurderingService,
+    private val vedtakHistorikkService: VedtakHistorikkService,
+    private val behandlingRepository: BehandlingRepository
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -55,8 +56,10 @@ class VedtakController(private val stegService: StegService,
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
-    fun beslutteVedtak(@PathVariable behandlingId: UUID,
-                       @RequestBody request: BeslutteVedtakDto): Ressurs<UUID> {
+    fun beslutteVedtak(
+        @PathVariable behandlingId: UUID,
+        @RequestBody request: BeslutteVedtakDto
+    ): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
         if (!request.godkjent && request.begrunnelse.isNullOrBlank()) {
@@ -79,8 +82,10 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("fagsak/{fagsakId}/historikk/{fra}")
-    fun hentVedtak(@PathVariable fagsakId: UUID,
-                   @PathVariable fra: YearMonth): Ressurs<VedtakDto> {
+    fun hentVedtak(
+        @PathVariable fagsakId: UUID,
+        @PathVariable fra: YearMonth
+    ): Ressurs<VedtakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
     }
@@ -100,7 +105,7 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/eksternid/{eksternId}/inntekt")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentForventetInntektForEksternId(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Int?> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
@@ -109,7 +114,7 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/eksternid/{eksternId}/harAktivtVedtak")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentHarAktivStonad(@PathVariable eksternId: Long, dato: LocalDate?): Ressurs<Boolean> {
         val behandlingId = behandlingService.hentBehandlingPåEksternId(eksternId).id
 
@@ -118,13 +123,13 @@ class VedtakController(private val stegService: StegService,
     }
 
     @GetMapping("/personerMedAktivStonad")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonad(): Ressurs<List<String>> {
         return Ressurs.success(behandlingRepository.finnPersonerMedAktivStonad())
     }
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) //Familie-ef-personhendelse bruker denne
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
     fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<Map<String, Int?>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
@@ -132,7 +137,7 @@ class VedtakController(private val stegService: StegService,
         val identToForventetInntektMap = mutableMapOf<String, Int?>()
 
         val behandlingIdToForventetInntektMap =
-                vedtakService.hentForventetInntektForBehandlingIds(personIdentToBehandlingIds.values)
+            vedtakService.hentForventetInntektForBehandlingIds(personIdentToBehandlingIds.values)
 
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]

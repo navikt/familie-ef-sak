@@ -21,8 +21,10 @@ import java.util.UUID
 @RequestMapping(path = ["/api/behandling/barn"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BarnController(private val nyeBarnService: NyeBarnService,
-                     private val tilgangService: TilgangService) {
+class BarnController(
+    private val nyeBarnService: NyeBarnService,
+    private val tilgangService: TilgangService
+) {
 
     @PostMapping("nye-eller-tidligere-fodte-barn")
     // denne skal kalles på fra ef-personhendelse(client_credential) for å opprette oppgaver for nye eller for tidligt fødte barn
@@ -34,8 +36,10 @@ class BarnController(private val nyeBarnService: NyeBarnService,
     }
 
     @GetMapping("fagsak/{fagsakId}/nye-barn")
-    fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(@PathVariable("fagsakId")
-                                                     fagsakId: UUID): Ressurs<List<BarnMinimumDto>> {
+    fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(
+        @PathVariable("fagsakId")
+        fagsakId: UUID
+    ): Ressurs<List<BarnMinimumDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId))
     }

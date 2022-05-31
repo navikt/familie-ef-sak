@@ -39,4 +39,3 @@ class ArbeidsavtaleDto(
     val bruksperiode: Periode? = null,
     val gyldighetsperiode: Periode? = null
 )
-

@@ -49,39 +49,49 @@ internal class PersonopplysningerServiceTest {
         val pdlClient = PdlClientConfig().pdlClient()
 
         val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
-        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
-                                                                        personopplysningerIntegrasjonerClient,
-                                                                        infotrygdService)
+        val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
+            pdlClient,
+            personopplysningerIntegrasjonerClient,
+            infotrygdService
+        )
 
-        grunnlagsdataService = GrunnlagsdataService(mockk(),
-                                                    søknadService,
-                                                    grunnlagsdataRegisterService,
-                                                    behandlingService, mockk())
+        grunnlagsdataService = GrunnlagsdataService(
+            mockk(),
+            søknadService,
+            grunnlagsdataRegisterService,
+            behandlingService, mockk()
+        )
         val personopplysningerMapper =
-                PersonopplysningerMapper(adresseMapper,
-                                         StatsborgerskapMapper(kodeverkService),
-                                         InnflyttingUtflyttingMapper(kodeverkService),
-                                         arbeidsfordelingService)
+            PersonopplysningerMapper(
+                adresseMapper,
+                StatsborgerskapMapper(kodeverkService),
+                InnflyttingUtflyttingMapper(kodeverkService),
+                arbeidsfordelingService
+            )
         val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
-        personopplysningerService = PersonopplysningerService(personService,
-                                                              behandlingService,
-                                                              personopplysningerIntegrasjonerClient,
-                                                              grunnlagsdataService,
-                                                              personopplysningerMapper,
-                                                              ConcurrentMapCacheManager())
+        personopplysningerService = PersonopplysningerService(
+            personService,
+            behandlingService,
+            personopplysningerIntegrasjonerClient,
+            grunnlagsdataService,
+            personopplysningerMapper,
+            ConcurrentMapCacheManager()
+        )
     }
 
     @Test
     internal fun `mapper grunnlagsdata til PersonopplysningerDto`() {
         every { personopplysningerIntegrasjonerClient.egenAnsatt(any()) } returns true
-        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo("01010172272",
-                                                                                                           emptyList(),
-                                                                                                           emptyList(),
-                                                                                                           emptyList())
+        every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) } returns Medlemskapsinfo(
+            "01010172272",
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
         val søker = personopplysningerService.hentPersonopplysninger("01010172272")
         assertThat(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(søker))
-                .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
+            .isEqualToIgnoringWhitespace(readFile("/json/personopplysningerDto.json"))
     }
 
     @Test

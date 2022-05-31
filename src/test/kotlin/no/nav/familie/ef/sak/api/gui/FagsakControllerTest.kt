@@ -43,9 +43,11 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     private fun hentFagsakForPerson(): ResponseEntity<Ressurs<FagsakDto>> {
         val fagsakRequest = FagsakRequest("ikkeTilgang", StønadType.OVERGANGSSTØNAD)
 
-        return restTemplate.exchange(localhost("/api/fagsak"),
-                                     HttpMethod.POST,
-                                     HttpEntity(fagsakRequest, headers))
+        return restTemplate.exchange(
+            localhost("/api/fagsak"),
+            HttpMethod.POST,
+            HttpEntity(fagsakRequest, headers)
+        )
     }
 
     @Test
@@ -61,9 +63,11 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentFagsakForId(fagsakId: UUID): Ressurs<FagsakDto> {
-        val response = restTemplate.exchange<Ressurs<FagsakDto>>(localhost("/api/fagsak/$fagsakId"),
-                                                                 HttpMethod.GET,
-                                                                 HttpEntity<Any>(headers))
+        val response = restTemplate.exchange<Ressurs<FagsakDto>>(
+            localhost("/api/fagsak/$fagsakId"),
+            HttpMethod.GET,
+            HttpEntity<Any>(headers)
+        )
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.SUKSESS)

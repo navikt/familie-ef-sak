@@ -38,8 +38,10 @@ class KonsistensavstemmingScheduler(private val konsistensavstemmingService: Kon
 }
 
 @Service
-class KonsistensavstemmingService(private val repository: KonsistensavstemmingJobbRepository,
-                                  private val taskRepository: TaskRepository) {
+class KonsistensavstemmingService(
+    private val repository: KonsistensavstemmingJobbRepository,
+    private val taskRepository: TaskRepository
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -49,27 +51,37 @@ class KonsistensavstemmingService(private val repository: KonsistensavstemmingJo
         val jobber = repository.findAllByOpprettetIsFalseAndTriggerdatoIsBefore(tidspunkt)
         jobber.forEach {
             val triggerdato = it.triggerdato
-            logger.info("Oppretter tasks for konsistensavstemming for dato=${triggerdato}")
-            taskRepository.saveAll(listOf(
-                    KonsistensavstemmingTask.opprettTask(KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerdato),
-                                                         triggerdato.atTime(8, 0)),
-                    KonsistensavstemmingTask.opprettTask(KonsistensavstemmingPayload(StønadType.BARNETILSYN, triggerdato),
-                                                         triggerdato.atTime(8, 20))))
+            logger.info("Oppretter tasks for konsistensavstemming for dato=$triggerdato")
+            taskRepository.saveAll(
+                listOf(
+                    KonsistensavstemmingTask.opprettTask(
+                        KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerdato),
+                        triggerdato.atTime(8, 0)
+                    ),
+                    KonsistensavstemmingTask.opprettTask(
+                        KonsistensavstemmingPayload(StønadType.BARNETILSYN, triggerdato),
+                        triggerdato.atTime(8, 20)
+                    )
+                )
+            )
         }
         repository.updateAll(jobber.map { it.copy(opprettet = true) })
     }
 }
 
 @Repository
-interface KonsistensavstemmingJobbRepository : RepositoryInterface<KonsistensavstemmingJobb, Int>,
-                                               InsertUpdateRepository<KonsistensavstemmingJobb> {
+interface KonsistensavstemmingJobbRepository :
+    RepositoryInterface<KonsistensavstemmingJobb, Int>,
+    InsertUpdateRepository<KonsistensavstemmingJobb> {
 
     fun findAllByOpprettetIsFalseAndTriggerdatoIsBefore(tidspunkt: LocalDate): List<KonsistensavstemmingJobb>
 }
 
-data class KonsistensavstemmingJobb(@Id
-                                    val id: Int = 0,
-                                    @Version
-                                    val versjon: Int = 0,
-                                    val triggerdato: LocalDate,
-                                    val opprettet: Boolean = false)
+data class KonsistensavstemmingJobb(
+    @Id
+    val id: Int = 0,
+    @Version
+    val versjon: Int = 0,
+    val triggerdato: LocalDate,
+    val opprettet: Boolean = false
+)

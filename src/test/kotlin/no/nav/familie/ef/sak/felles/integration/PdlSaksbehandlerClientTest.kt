@@ -48,25 +48,31 @@ internal class PdlSaksbehandlerClientTest {
 
     @Test
     fun `pdlClient håndterer response for person søk gitt bostedsadresse`() {
-        wiremockServerItem.stubFor(WireMock.post(WireMock.urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(WireMock.okJson(readFile("person_søk.json"))))
-        val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(husnummer = "1",
-                                                                    adressenavn = "KLINGAVEGEN",
-                                                                    postnummer = "0358",
-                                                                    bruksenhetsnummer = null,
-                                                                    matrikkelId = 1L,
-                                                                    husbokstav = null,
-                                                                    kommunenummer = null,
-                                                                    tilleggsnavn = null,
-                                                                    koordinater = null),
-                                            matrikkeladresse = null,
-                                            angittFlyttedato = null,
-                                            gyldigFraOgMed = null,
-                                            gyldigTilOgMed = null,
-                                            coAdressenavn = null,
-                                            utenlandskAdresse = null,
-                                            ukjentBosted = null,
-                                            metadata = Metadata(false))
+        wiremockServerItem.stubFor(
+            WireMock.post(WireMock.urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(WireMock.okJson(readFile("person_søk.json")))
+        )
+        val bostedsadresse = Bostedsadresse(
+            vegadresse = Vegadresse(
+                husnummer = "1",
+                adressenavn = "KLINGAVEGEN",
+                postnummer = "0358",
+                bruksenhetsnummer = null,
+                matrikkelId = 1L,
+                husbokstav = null,
+                kommunenummer = null,
+                tilleggsnavn = null,
+                koordinater = null
+            ),
+            matrikkeladresse = null,
+            angittFlyttedato = null,
+            gyldigFraOgMed = null,
+            gyldigTilOgMed = null,
+            coAdressenavn = null,
+            utenlandskAdresse = null,
+            ukjentBosted = null,
+            metadata = Metadata(false)
+        )
         val response = pdlClient.søkPersonerMedSammeAdresse(PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse))
         assertThat(response.totalHits).isEqualTo(1)
         assertThat(response.hits.first().person.navn.first().fornavn).isEqualTo("BRÅKETE")

@@ -36,9 +36,13 @@ internal class BehandlingsjournalpostRepositoryTest : OppslagSpringRunnerTest() 
         val behandling1 = behandlingRepository.insert(behandling(fagsak))
         behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling1.id, "1", Journalposttype.U))
         val throwable = catchThrowable {
-            behandlingsjournalpostRepository.insert(Behandlingsjournalpost(behandling1.id,
-                                                                           "1",
-                                                                           Journalposttype.U))
+            behandlingsjournalpostRepository.insert(
+                Behandlingsjournalpost(
+                    behandling1.id,
+                    "1",
+                    Journalposttype.U
+                )
+            )
         }
         assertThat(getRootCause(throwable)).hasMessageContaining("duplicate key value violates unique constraint")
     }

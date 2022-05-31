@@ -29,29 +29,35 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/oppgave")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OppgaveController(private val oppgaveService: OppgaveService,
-                        private val tilgangService: TilgangService,
-                        private val pdlClient: PdlClient) {
+class OppgaveController(
+    private val oppgaveService: OppgaveService,
+    private val tilgangService: TilgangService,
+    private val pdlClient: PdlClient
+) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    @PostMapping(path = ["/soek"],
-                 consumes = [MediaType.APPLICATION_JSON_VALUE],
-                 produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        path = ["/soek"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<OppgaveResponseDto> {
         validerOptionalIdent(finnOppgaveRequest.ident)
 
         val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
-                ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
+            ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
 
-        secureLogger.info("AktoerId: ${aktørId}, Ident: ${finnOppgaveRequest.ident}")
+        secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun fordelOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
-                      @RequestParam("saksbehandler") saksbehandler: String): Ressurs<Long> {
+    fun fordelOppgave(
+        @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
+        @RequestParam("saksbehandler") saksbehandler: String
+    ): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
             throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
@@ -70,8 +76,10 @@ class OppgaveController(private val oppgaveService: OppgaveService,
         tilgangService.validerHarSaksbehandlerrolle()
         val efOppgave = oppgaveService.hentEfOppgave(gsakOppgaveId)
         return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
-               ?: Ressurs.funksjonellFeil("Denne oppgaven må behandles i Gosys og Infotrygd",
-                                          "Denne oppgaven må behandles i Gosys og Infotrygd")
+            ?: Ressurs.funksjonellFeil(
+                "Denne oppgaven må behandles i Gosys og Infotrygd",
+                "Denne oppgaven må behandles i Gosys og Infotrygd"
+            )
     }
 
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -84,46 +92,42 @@ private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
     val oppgaver = oppgaver.map {
 
         it.tilDto()
-
-
     }
     return OppgaveResponseDto(antallTreffTotalt, oppgaver)
 }
 
 private fun Oppgave.tilDto(): OppgaveEfDto {
-    return OppgaveEfDto(id = id,
-                        identer = identer,
-                        tildeltEnhetsnr = tildeltEnhetsnr,
-                        endretAvEnhetsnr = endretAvEnhetsnr,
-                        opprettetAvEnhetsnr = opprettetAvEnhetsnr,
-                        journalpostId = journalpostId,
-                        journalpostkilde = journalpostkilde,
-                        behandlesAvApplikasjon = behandlesAvApplikasjon ?: "",
-                        saksreferanse = saksreferanse,
-                        bnr = bnr,
-                        samhandlernr = samhandlernr,
-                        aktoerId = aktoerId,
-                        orgnr = orgnr,
-                        tilordnetRessurs = tilordnetRessurs,
-                        beskrivelse = beskrivelse,
-                        temagruppe = temagruppe,
-                        tema = tema,
-                        behandlingstema = behandlingstema,
-                        oppgavetype = oppgavetype,
-                        behandlingstype = behandlingstype,
-                        versjon = versjon,
-                        mappeId = mappeId,
-                        fristFerdigstillelse = fristFerdigstillelse,
-                        aktivDato = aktivDato,
-                        opprettetTidspunkt = opprettetTidspunkt,
-                        opprettetAv = opprettetAv,
-                        endretAv = endretAv,
-                        ferdigstiltTidspunkt = ferdigstiltTidspunkt,
-                        endretTidspunkt = endretTidspunkt,
-                        prioritet = prioritet,
-                        status = status)
-
+    return OppgaveEfDto(
+        id = id,
+        identer = identer,
+        tildeltEnhetsnr = tildeltEnhetsnr,
+        endretAvEnhetsnr = endretAvEnhetsnr,
+        opprettetAvEnhetsnr = opprettetAvEnhetsnr,
+        journalpostId = journalpostId,
+        journalpostkilde = journalpostkilde,
+        behandlesAvApplikasjon = behandlesAvApplikasjon ?: "",
+        saksreferanse = saksreferanse,
+        bnr = bnr,
+        samhandlernr = samhandlernr,
+        aktoerId = aktoerId,
+        orgnr = orgnr,
+        tilordnetRessurs = tilordnetRessurs,
+        beskrivelse = beskrivelse,
+        temagruppe = temagruppe,
+        tema = tema,
+        behandlingstema = behandlingstema,
+        oppgavetype = oppgavetype,
+        behandlingstype = behandlingstype,
+        versjon = versjon,
+        mappeId = mappeId,
+        fristFerdigstillelse = fristFerdigstillelse,
+        aktivDato = aktivDato,
+        opprettetTidspunkt = opprettetTidspunkt,
+        opprettetAv = opprettetAv,
+        endretAv = endretAv,
+        ferdigstiltTidspunkt = ferdigstiltTidspunkt,
+        endretTidspunkt = endretTidspunkt,
+        prioritet = prioritet,
+        status = status
+    )
 }
-
-
-

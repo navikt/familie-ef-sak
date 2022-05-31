@@ -28,100 +28,129 @@ internal class AktivitetMapperTest {
     }
 
     private fun situasjon(): Situasjon =
-            Situasjon(arbeidskontrakt = dokumentliste(),
-                      barnMedSærligeBehov = dokumentliste(),
-                      barnsSykdom = dokumentliste(),
-                      gjelderDetteDeg = GjelderDeg(listOf(" Jeg har søkt om barnepass, men ikke fått plass enda; " +
-                                                          "Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, " +
-                                                          "psykiske eller store sosiale problemer")),
-                      manglendeBarnepass = dokumentliste(),
-                      oppsigelseDokumentasjon = dokumentliste(),
-                      oppsigelseReduksjonTidspunkt = LocalDate.now(),
-                      oppsigelseReduksjonÅrsak = "Årsak",
-                      oppstartNyJobb = LocalDate.now(),
-                      oppstartUtdanning = null,
-                      sagtOppEllerRedusertStilling = "Ja",
-                      sykdom = dokumentliste(),
-                      utdanningstilbud = dokumentliste())
+        Situasjon(
+            arbeidskontrakt = dokumentliste(),
+            barnMedSærligeBehov = dokumentliste(),
+            barnsSykdom = dokumentliste(),
+            gjelderDetteDeg = GjelderDeg(
+                listOf(
+                    " Jeg har søkt om barnepass, men ikke fått plass enda; " +
+                        "Jeg har barn som har behov for særlig tilsyn på grunn av fysiske, " +
+                        "psykiske eller store sosiale problemer"
+                )
+            ),
+            manglendeBarnepass = dokumentliste(),
+            oppsigelseDokumentasjon = dokumentliste(),
+            oppsigelseReduksjonTidspunkt = LocalDate.now(),
+            oppsigelseReduksjonÅrsak = "Årsak",
+            oppstartNyJobb = LocalDate.now(),
+            oppstartUtdanning = null,
+            sagtOppEllerRedusertStilling = "Ja",
+            sykdom = dokumentliste(),
+            utdanningstilbud = dokumentliste()
+        )
 
     private fun dokumentliste() =
-            Dokumentasjon(harSendtInnTidligere = false, dokumenter = emptyList())
+        Dokumentasjon(harSendtInnTidligere = false, dokumenter = emptyList())
 
     private fun aktivitet(): Aktivitet =
-            Aktivitet(arbeidsforhold = arbeidsforhold(),
-                      arbeidssøker = arbeidssøker(),
-                      hvordanErArbeidssituasjonen = Arbeidssituasjon(listOf("Jeg er ansatt i eget aksjeselskap (AS)")),
-                      firmaer = selvstendig(),
-                      underUtdanning = underUtdanning(),
-                      aksjeselskap = aksjeselskap(),
-                      virksomhet = virksomhet(),
-                      tidligereUtdanninger = tidligereUtdanning(),
-                      erIArbeid = "JA")
+        Aktivitet(
+            arbeidsforhold = arbeidsforhold(),
+            arbeidssøker = arbeidssøker(),
+            hvordanErArbeidssituasjonen = Arbeidssituasjon(listOf("Jeg er ansatt i eget aksjeselskap (AS)")),
+            firmaer = selvstendig(),
+            underUtdanning = underUtdanning(),
+            aksjeselskap = aksjeselskap(),
+            virksomhet = virksomhet(),
+            tidligereUtdanninger = tidligereUtdanning(),
+            erIArbeid = "JA"
+        )
 
     private fun aksjeselskap(): Set<Aksjeselskap> =
-            setOf(Aksjeselskap(navn = "navn", arbeidsmengde = 30))
+        setOf(Aksjeselskap(navn = "navn", arbeidsmengde = 30))
 
     private fun virksomhet() =
-            Virksomhet(virksomhetsbeskrivelse = "virksomhet",
-                       dokumentasjon = dokumentliste())
+        Virksomhet(
+            virksomhetsbeskrivelse = "virksomhet",
+            dokumentasjon = dokumentliste()
+        )
 
     private fun underUtdanning(): UnderUtdanning =
-            UnderUtdanning(
-                    heltidEllerDeltid = "Heltid",
-                    hvaErMåletMedUtdanningen = "Kose seg",
-                    hvorMyeSkalDuStudere = 50,
-                    offentligEllerPrivat = "privat",
-                    skoleUtdanningssted = "Oslo",
-                    utdanningEtterGrunnskolen = true,
-                    fra = LocalDate.now(),
-                    til = LocalDate.now().plusYears(1),
-                    linjeKursGrad = "Kurs"
-            )
+        UnderUtdanning(
+            heltidEllerDeltid = "Heltid",
+            hvaErMåletMedUtdanningen = "Kose seg",
+            hvorMyeSkalDuStudere = 50,
+            offentligEllerPrivat = "privat",
+            skoleUtdanningssted = "Oslo",
+            utdanningEtterGrunnskolen = true,
+            fra = LocalDate.now(),
+            til = LocalDate.now().plusYears(1),
+            linjeKursGrad = "Kurs"
+        )
 
     private fun tidligereUtdanning(): Set<TidligereUtdanning> =
-            setOf(TidligereUtdanning(linjeKursGrad = "linje",
-                                     fra = YearMonth.now().minusYears(5),
-                                     til = YearMonth.now().minusYears(1)))
+        setOf(
+            TidligereUtdanning(
+                linjeKursGrad = "linje",
+                fra = YearMonth.now().minusYears(5),
+                til = YearMonth.now().minusYears(1)
+            )
+        )
 
     private fun selvstendig(): Set<Selvstendig> =
-            setOf(Selvstendig(arbeidsmengde = 50,
-                              etableringsdato = LocalDate.now(),
-                              firmanavn = "SelvstendigFirmanavn",
-                              hvordanSerArbeidsukenUt = "fin",
-                              organisasjonsnummer = "987654321"))
+        setOf(
+            Selvstendig(
+                arbeidsmengde = 50,
+                etableringsdato = LocalDate.now(),
+                firmanavn = "SelvstendigFirmanavn",
+                hvordanSerArbeidsukenUt = "fin",
+                organisasjonsnummer = "987654321"
+            )
+        )
 
     private fun arbeidsforhold(): Set<Arbeidsgiver> =
-            (setOf(Arbeidsgiver(arbeidsgivernavn = "Arbeidsgivernavn",
-                                fastEllerMidlertidig = "Fast",
-                                harSluttdato = true,
-                                sluttdato = LocalDate.now(),
-                                arbeidsmengde = 50)))
+        (
+            setOf(
+                Arbeidsgiver(
+                    arbeidsgivernavn = "Arbeidsgivernavn",
+                    fastEllerMidlertidig = "Fast",
+                    harSluttdato = true,
+                    sluttdato = LocalDate.now(),
+                    arbeidsmengde = 50
+                )
+            )
+            )
 
     private fun arbeidssøker(): Arbeidssøker =
-            Arbeidssøker(hvorØnskerDuArbeid = "På dagen",
-                         kanDuBegynneInnenEnUke = true,
-                         kanDuSkaffeBarnepassInnenEnUke = true,
-                         registrertSomArbeidssøkerNav = true,
-                         villigTilÅTaImotTilbudOmArbeid = true,
-                         ønskerDuMinst50ProsentStilling = true,
-                         ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentliste())
+        Arbeidssøker(
+            hvorØnskerDuArbeid = "På dagen",
+            kanDuBegynneInnenEnUke = true,
+            kanDuSkaffeBarnepassInnenEnUke = true,
+            registrertSomArbeidssøkerNav = true,
+            villigTilÅTaImotTilbudOmArbeid = true,
+            ønskerDuMinst50ProsentStilling = true,
+            ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentliste()
+        )
 
     private fun barn(): Set<SøknadBarn> =
-            setOf(SøknadBarn(id = UUID.randomUUID(),
-                             navn = "navn",
-                             fødselsnummer = null,
-                             harSkalHaSammeAdresse = false,
-                             skalBoHosSøker = null,
-                             ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-                             erBarnetFødt = false,
-                             fødselTermindato = LocalDate.now().plusMonths(1),
-                             terminbekreftelse = dokumentliste(),
-                             annenForelder = null,
-                             samvær = null,
-                             skalHaBarnepass = false,
-                             særligeTilsynsbehov = "Ja",
-                             årsakBarnepass = null,
-                             barnepassordninger = emptySet(),
-                             lagtTilManuelt = true
-            ))
+        setOf(
+            SøknadBarn(
+                id = UUID.randomUUID(),
+                navn = "navn",
+                fødselsnummer = null,
+                harSkalHaSammeAdresse = false,
+                skalBoHosSøker = null,
+                ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+                erBarnetFødt = false,
+                fødselTermindato = LocalDate.now().plusMonths(1),
+                terminbekreftelse = dokumentliste(),
+                annenForelder = null,
+                samvær = null,
+                skalHaBarnepass = false,
+                særligeTilsynsbehov = "Ja",
+                årsakBarnepass = null,
+                barnepassordninger = emptySet(),
+                lagtTilManuelt = true
+            )
+        )
 }

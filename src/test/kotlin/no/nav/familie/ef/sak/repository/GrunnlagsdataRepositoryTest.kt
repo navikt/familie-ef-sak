@@ -35,5 +35,4 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(grunnlagsdataRepository.findByIdOrThrow(behandling.id).data).isEqualTo(grunnlagsdata)
     }
-
 }

@@ -9,11 +9,13 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Repository
-interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave, UUID>,
-                                    InsertUpdateRepository<BarnTilUtplukkForOppgave> {
+interface GjeldendeBarnRepository :
+    RepositoryInterface<BarnTilUtplukkForOppgave, UUID>,
+    InsertUpdateRepository<BarnTilUtplukkForOppgave> {
 
     // language=PostgreSQL
-    @Query("""
+    @Query(
+        """
         SELECT b.id behandling_id, pi.ident fodselsnummer_soker, bb.person_ident fodselsnummer_barn, 
           bb.fodsel_termindato termindato_barn, FALSE AS fra_migrering
         FROM gjeldende_iverksatte_behandlinger b
@@ -26,10 +28,12 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
             AND ty.behandling_id = b.id
           AND aty.stonad_tom >= :dato
           AND aty.belop > 0)
-        """)
+        """
+    )
     fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
 
-    @Query("""
+    @Query(
+        """
         SELECT b.id behandling_id, pi.ident fodselsnummer_soker, 
          JSON_ARRAY_ELEMENTS(data -> 'barn') ->> 'personIdent' fodselsnummer_barn, NULL AS termindato_barn, TRUE AS fra_migrering
         FROM gjeldende_iverksatte_behandlinger b
@@ -45,7 +49,7 @@ interface GjeldendeBarnRepository : RepositoryInterface<BarnTilUtplukkForOppgave
                      AND aty.stonad_tom >= :dato
                      AND aty.belop > 0)
          AND f.migrert = TRUE
-    """)
+    """
+    )
     fun finnBarnTilMigrerteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
-
 }

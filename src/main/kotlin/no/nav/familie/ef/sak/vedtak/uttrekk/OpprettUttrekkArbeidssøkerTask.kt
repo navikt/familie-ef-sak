@@ -18,13 +18,13 @@ import java.time.YearMonth
  */
 @Service
 @TaskStepBeskrivelse(
-        taskStepType = OpprettUttrekkArbeidssøkerTask.TYPE,
-        beskrivelse = "Oppretter uttrekk av arbeidssøkere"
+    taskStepType = OpprettUttrekkArbeidssøkerTask.TYPE,
+    beskrivelse = "Oppretter uttrekk av arbeidssøkere"
 )
 class OpprettUttrekkArbeidssøkerTask(
-        private val uttrekkArbeidssøkerService: UttrekkArbeidssøkerService,
-        private val fagsakService: FagsakService,
-        private val taskRepository: TaskRepository
+    private val uttrekkArbeidssøkerService: UttrekkArbeidssøkerService,
+    private val fagsakService: FagsakService,
+    private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -41,11 +41,13 @@ class OpprettUttrekkArbeidssøkerTask(
                 return@forEach
             }
             try {
-                uttrekkArbeidssøkerService.opprettUttrekkArbeidssøkere(årMåned = årMåned,
-                                                                       fagsakId = it.fagsakId,
-                                                                       behandlingIdForVedtak = it.behandlingIdForVedtak,
-                                                                       personIdent = aktiveIdenter[it.fagsakId]
-                                                                                     ?: error("Kunne ikke finne fagsakID"))
+                uttrekkArbeidssøkerService.opprettUttrekkArbeidssøkere(
+                    årMåned = årMåned,
+                    fagsakId = it.fagsakId,
+                    behandlingIdForVedtak = it.behandlingIdForVedtak,
+                    personIdent = aktiveIdenter[it.fagsakId]
+                        ?: error("Kunne ikke finne fagsakID")
+                )
             } catch (ex: Exception) {
                 val errorMelding = "Sjekk av utrekkArbeidssøker feiler fagsak=${it.fagsakId} behandling=${it.behandlingId}"
                 logger.error(errorMelding)

@@ -46,7 +46,6 @@ import java.util.UUID
 
 internal class OppgaveServiceTest {
 
-
     private val oppgaveClient = mockk<OppgaveClient>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -55,20 +54,28 @@ internal class OppgaveServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
 
     private val oppgaveService =
-            OppgaveService(oppgaveClient,
-                           fagsakService,
-                           oppgaveRepository,
-                           arbeidsfordelingService,
-                           pdlClient,
-                           cacheManager,
-                           URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk"))
+        OppgaveService(
+            oppgaveClient,
+            fagsakService,
+            oppgaveRepository,
+            arbeidsfordelingService,
+            pdlClient,
+            cacheManager,
+            URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+        )
 
     @BeforeEach
     internal fun setUp() {
-        val finnMappeResponseDto = FinnMappeResponseDto(antallTreffTotalt = 1,
-                                                        mapper = listOf(MappeDto(123,
-                                                                                 "EF Sak - 70 Godkjenne vedtak",
-                                                                                 enhetsnr = "4489")))
+        val finnMappeResponseDto = FinnMappeResponseDto(
+            antallTreffTotalt = 1,
+            mapper = listOf(
+                MappeDto(
+                    123,
+                    "EF Sak - 70 Godkjenne vedtak",
+                    enhetsnr = "4489"
+                )
+            )
+        )
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
     }
 
@@ -112,7 +119,6 @@ internal class OppgaveServiceTest {
         }
     }
 
-
     @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
         val aktørIdentFraPdl = "AKTØERIDENT"
@@ -140,8 +146,10 @@ internal class OppgaveServiceTest {
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = "1234",
-                                                                                             enhetNavn = ENHETSNAVN)
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(
+            enhetId = "1234",
+            enhetNavn = ENHETSNAVN
+        )
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
@@ -189,7 +197,6 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
 
-
     @Test
     fun `Ferdigstill oppgave feiler fordi den ikke finner oppgave på behandlingen`() {
         every {
@@ -198,10 +205,9 @@ internal class OppgaveServiceTest {
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
 
         Assertions.assertThatThrownBy { oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
-                .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
-                .isInstanceOf(java.lang.IllegalStateException::class.java)
+            .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
+            .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
-
 
     @Test
     fun `Ferdigstill oppgave hvis oppgave ikke finnes - kaster ikke feil`() {
@@ -223,7 +229,6 @@ internal class OppgaveServiceTest {
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(GSAK_OPPGAVE_ID)
     }
-
 
     @Test
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
@@ -251,22 +256,21 @@ internal class OppgaveServiceTest {
     @Test
     fun `Skal sette frist for oppgave`() {
         val frister = listOf<Pair<LocalDateTime, LocalDate>>(
-                Pair(torsdag.morgen(), fredagFrist),
-                Pair(torsdag.kveld(), mandagFrist),
-                Pair(fredag.morgen(), mandagFrist),
-                Pair(fredag.kveld(), tirsdagFrist),
-                Pair(lørdag.morgen(), tirsdagFrist),
-                Pair(lørdag.kveld(), tirsdagFrist),
-                Pair(søndag.morgen(), tirsdagFrist),
-                Pair(søndag.kveld(), tirsdagFrist),
-                Pair(mandag.morgen(), tirsdagFrist),
-                Pair(mandag.kveld(), onsdagFrist),
+            Pair(torsdag.morgen(), fredagFrist),
+            Pair(torsdag.kveld(), mandagFrist),
+            Pair(fredag.morgen(), mandagFrist),
+            Pair(fredag.kveld(), tirsdagFrist),
+            Pair(lørdag.morgen(), tirsdagFrist),
+            Pair(lørdag.kveld(), tirsdagFrist),
+            Pair(søndag.morgen(), tirsdagFrist),
+            Pair(søndag.kveld(), tirsdagFrist),
+            Pair(mandag.morgen(), tirsdagFrist),
+            Pair(mandag.kveld(), onsdagFrist),
         )
 
         frister.forEach {
             assertThat(oppgaveService.lagFristForOppgave(it.first)).isEqualTo(it.second)
         }
-
     }
 
     @Test
@@ -291,15 +295,19 @@ internal class OppgaveServiceTest {
         verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
     }
 
-    private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>,
-                                   aktørIdentFraPdl: String) {
+    private fun mockOpprettOppgave(
+        slot: CapturingSlot<OpprettOppgaveRequest>,
+        aktørIdentFraPdl: String
+    ) {
         every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
-        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(enhetId = ENHETSNUMMER,
-                                                                                             enhetNavn = ENHETSNAVN)
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(
+            enhetId = ENHETSNUMMER,
+            enhetNavn = ENHETSNAVN
+        )
         every { oppgaveClient.opprettOppgave(capture(slot)) } answers {
             val oppgaveRequest: OpprettOppgaveRequest = firstArg()
             if (oppgaveRequest.enhetsnummer == null) {
@@ -312,10 +320,12 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagTestFagsak(): Fagsak {
-        return fagsak(id = FAGSAK_ID,
-                      stønadstype = StønadType.OVERGANGSSTØNAD,
-                      eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
-                      identer = setOf(PersonIdent(ident = FNR)))
+        return fagsak(
+            id = FAGSAK_ID,
+            stønadstype = StønadType.OVERGANGSSTØNAD,
+            eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
+            identer = setOf(PersonIdent(ident = FNR))
+        )
     }
 
     private fun lagTestOppgave(): Oppgave {
@@ -327,8 +337,9 @@ internal class OppgaveServiceTest {
     }
 
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
-        return FinnOppgaveResponseDto(antallTreffTotalt = 1,
-                                      oppgaver = listOf(lagEksternTestOppgave())
+        return FinnOppgaveResponseDto(
+            antallTreffTotalt = 1,
+            oppgaver = listOf(lagEksternTestOppgave())
         )
     }
 
@@ -363,4 +374,3 @@ private val fredagFrist = LocalDate.of(2021, 4, 2)
 private val mandagFrist = LocalDate.of(2021, 4, 5)
 private val tirsdagFrist = LocalDate.of(2021, 4, 6)
 private val onsdagFrist = LocalDate.of(2021, 4, 7)
-

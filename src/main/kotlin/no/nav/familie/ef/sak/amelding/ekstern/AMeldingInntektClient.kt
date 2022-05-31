@@ -14,15 +14,15 @@ import java.time.YearMonth
 
 @Component
 class AMeldingInntektClient(
-        @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
-        @Qualifier("azure") restOperations: RestOperations
+    @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
+    @Qualifier("azure") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "inntekt") {
 
     private fun lagInntektUri(fom: YearMonth, tom: YearMonth) =
-            UriComponentsBuilder.fromUri(uri).pathSegment("api/inntekt")
-                    .queryParam("fom", fom)
-                    .queryParam("tom", tom)
-                    .build().toUri()
+        UriComponentsBuilder.fromUri(uri).pathSegment("api/inntekt")
+            .queryParam("fom", fom)
+            .queryParam("tom", tom)
+            .build().toUri()
 
     private val genererUrlUri = UriComponentsBuilder.fromUri(uri).pathSegment("api/ainntekt/generer-url").build().toUri()
 
@@ -31,8 +31,11 @@ class AMeldingInntektClient(
     }
 
     fun genererAInntektUrl(personIdent: String): String {
-        return postForEntity(genererUrlUri, PersonIdent(personIdent), HttpHeaders().apply {
-            accept = listOf(MediaType.TEXT_PLAIN)
-        })
+        return postForEntity(
+            genererUrlUri, PersonIdent(personIdent),
+            HttpHeaders().apply {
+                accept = listOf(MediaType.TEXT_PLAIN)
+            }
+        )
     }
 }

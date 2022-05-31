@@ -11,14 +11,18 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FerdigstillBehandlingTask.TYPE,
-                     maxAntallFeil = 50,
-                     settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "Ferdigstill behandling.")
+@TaskStepBeskrivelse(
+    taskStepType = FerdigstillBehandlingTask.TYPE,
+    maxAntallFeil = 50,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 15 * 60L,
+    beskrivelse = "Ferdigstill behandling."
+)
 
-class FerdigstillBehandlingTask(private val stegService: StegService,
-                                private val behandlingService: BehandlingService) : AsyncTaskStep {
+class FerdigstillBehandlingTask(
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val behandlingId = UUID.fromString(task.payload)
@@ -29,14 +33,14 @@ class FerdigstillBehandlingTask(private val stegService: StegService,
     companion object {
 
         fun opprettTask(saksbehandling: Saksbehandling): Task =
-                Task(type = TYPE,
-                     payload = saksbehandling.id.toString(),
-                     properties = Properties().apply {
-                         this["behandlingId"] = saksbehandling.id.toString()
-                     })
+            Task(
+                type = TYPE,
+                payload = saksbehandling.id.toString(),
+                properties = Properties().apply {
+                    this["behandlingId"] = saksbehandling.id.toString()
+                }
+            )
 
         const val TYPE = "ferdigstillBehandling"
     }
-
-
 }

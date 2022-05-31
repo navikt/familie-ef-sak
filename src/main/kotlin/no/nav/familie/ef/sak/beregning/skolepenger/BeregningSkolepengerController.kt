@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/beregning/skolepenger"])
 @ProtectedWithClaims(issuer = "azuread")
-class BeregningSkolepengerController(private val beregningSkolepengerService: BeregningSkolepengerService,
-                                     private val tilgangService: TilgangService,
-                                     private val vedtakService: VedtakService) {
-
+class BeregningSkolepengerController(
+    private val beregningSkolepengerService: BeregningSkolepengerService,
+    private val tilgangService: TilgangService,
+    private val vedtakService: VedtakService
+) {
 
     @PostMapping
     fun beregnYtelse(@RequestBody request: BeregningSkolepengerRequest): Ressurs<List<BeløpsperiodeSkolepengerDto>> {
@@ -40,6 +40,4 @@ class BeregningSkolepengerController(private val beregningSkolepengerService: Be
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }
-
-
 }

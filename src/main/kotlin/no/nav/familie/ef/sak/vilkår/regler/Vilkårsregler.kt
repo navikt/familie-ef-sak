@@ -31,59 +31,57 @@ class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vi
 }
 
 private val alleVilkårsregler = listOf(
-        ForutgåendeMedlemskapRegel(),
-        OppholdINorgeRegel(),
-        MorEllerFarRegel(),
-        SivilstandRegel(),
-        SamlivRegel(),
-        AleneomsorgRegel(),
-        NyttBarnSammePartnerRegel(),
-        AktivitetRegel(),
-        SagtOppEllerRedusertRegel(),
-        TidligareVedtaksperioderRegel(),
-        AktivitetArbeidRegel(),
-        InntektRegel(),
-        AlderPåBarnRegel(),
-        DokumentasjonTilsynsutgifterRegel()
+    ForutgåendeMedlemskapRegel(),
+    OppholdINorgeRegel(),
+    MorEllerFarRegel(),
+    SivilstandRegel(),
+    SamlivRegel(),
+    AleneomsorgRegel(),
+    NyttBarnSammePartnerRegel(),
+    AktivitetRegel(),
+    SagtOppEllerRedusertRegel(),
+    TidligareVedtaksperioderRegel(),
+    AktivitetArbeidRegel(),
+    InntektRegel(),
+    AlderPåBarnRegel(),
+    DokumentasjonTilsynsutgifterRegel()
 )
 
-fun  vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
-        when (stønadstype) {
-            OVERGANGSSTØNAD -> listOf(
-                    ForutgåendeMedlemskapRegel(),
-                    OppholdINorgeRegel(),
-                    MorEllerFarRegel(),
-                    SivilstandRegel(),
-                    SamlivRegel(),
-                    AleneomsorgRegel(),
-                    NyttBarnSammePartnerRegel(),
-                    AktivitetRegel(),
-                    SagtOppEllerRedusertRegel(),
-                    TidligareVedtaksperioderRegel()
-            )
-            BARNETILSYN -> listOf(
-                    ForutgåendeMedlemskapRegel(),
-                    OppholdINorgeRegel(),
-                    MorEllerFarRegel(),
-                    SivilstandRegel(),
-                    SamlivRegel(),
-                    AleneomsorgRegel(),
-                    NyttBarnSammePartnerRegel(),
-                    AktivitetArbeidRegel(),
-                    InntektRegel(),
-                    AlderPåBarnRegel(),
-                    DokumentasjonTilsynsutgifterRegel(),
-            )
+fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
+    when (stønadstype) {
+        OVERGANGSSTØNAD -> listOf(
+            ForutgåendeMedlemskapRegel(),
+            OppholdINorgeRegel(),
+            MorEllerFarRegel(),
+            SivilstandRegel(),
+            SamlivRegel(),
+            AleneomsorgRegel(),
+            NyttBarnSammePartnerRegel(),
+            AktivitetRegel(),
+            SagtOppEllerRedusertRegel(),
+            TidligareVedtaksperioderRegel()
+        )
+        BARNETILSYN -> listOf(
+            ForutgåendeMedlemskapRegel(),
+            OppholdINorgeRegel(),
+            MorEllerFarRegel(),
+            SivilstandRegel(),
+            SamlivRegel(),
+            AleneomsorgRegel(),
+            NyttBarnSammePartnerRegel(),
+            AktivitetArbeidRegel(),
+            InntektRegel(),
+            AlderPåBarnRegel(),
+            DokumentasjonTilsynsutgifterRegel(),
+        )
 
-            //TODO fiks denne
-            else -> listOf(
-                    ForutgåendeMedlemskapRegel()
-            )
-        }
-
+        // TODO fiks denne
+        else -> listOf(
+            ForutgåendeMedlemskapRegel()
+        )
+    }
 
 fun hentVilkårsregel(vilkårType: VilkårType): Vilkårsregel {
     return Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler[vilkårType]
-           ?: error("Finner ikke vilkårsregler for vilkårType=$vilkårType")
+        ?: error("Finner ikke vilkårsregler for vilkårType=$vilkårType")
 }
-

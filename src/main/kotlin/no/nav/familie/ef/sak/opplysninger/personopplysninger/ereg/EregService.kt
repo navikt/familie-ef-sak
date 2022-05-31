@@ -8,15 +8,17 @@ import org.springframework.stereotype.Service
 @Service
 class EregService(private val eregClient: EregClient) {
 
-    fun hentOrganisasjoner(organisasjonsnumre: List<String>) : List<Organisasjon> {
+    fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<Organisasjon> {
         val organisasjoner = eregClient.hentOrganisasjoner(organisasjonsnumre)
         return mapEregResultat(organisasjoner)
     }
 
-    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon{
+    fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
         val organisasjon = eregClient.hentOrganisasjoner(listOf(organisasjonsnummer)).firstOrNull()
 
-        return organisasjon?.let { mapOrganisasjonDto(it) } ?: throw ApiFeil("Finner ingen organisasjon for søket",
-                                                                             HttpStatus.BAD_REQUEST)
+        return organisasjon?.let { mapOrganisasjonDto(it) } ?: throw ApiFeil(
+            "Finner ingen organisasjon for søket",
+            HttpStatus.BAD_REQUEST
+        )
     }
 }

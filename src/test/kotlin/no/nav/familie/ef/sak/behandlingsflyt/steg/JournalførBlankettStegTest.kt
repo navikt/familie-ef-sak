@@ -55,47 +55,61 @@ class JournalførBlankettStegTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
 
-    private val blankettSteg = BlankettSteg(behandlingService = behandlingService,
-                                            behandlingRepository = behandlingRepository,
-                                            journalpostClient = journalpostClient,
-                                            arbeidsfordelingService = arbeidsfordelingService,
-                                            blankettRepository = blankettRepository,
-                                            totrinnskontrollService = totrinnskontrollService,
-                                            taskRepository = taskRepository)
+    private val blankettSteg = BlankettSteg(
+        behandlingService = behandlingService,
+        behandlingRepository = behandlingRepository,
+        journalpostClient = journalpostClient,
+        arbeidsfordelingService = arbeidsfordelingService,
+        blankettRepository = blankettRepository,
+        totrinnskontrollService = totrinnskontrollService,
+        taskRepository = taskRepository
+    )
 
     private lateinit var taskSlot: MutableList<Task>
 
     private val fnr = "12345678901"
-    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
-                                identer = setOf(PersonIdent(ident = fnr)))
+    private val fagsak = fagsak(
+        stønadstype = StønadType.OVERGANGSSTØNAD,
+        identer = setOf(PersonIdent(ident = fnr))
+    )
 
     private val journalpost =
-            Journalpost(journalpostId = "1234",
-                        journalposttype = Journalposttype.I,
-                        journalstatus = Journalstatus.MOTTATT,
-                        tema = "ENF",
-                        behandlingstema = "ab0071",
-                        tittel = "abrakadabra",
-                        bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
-                        journalforendeEnhet = "4817",
-                        kanal = "SKAN_IM",
-                        sak = Sak("1234", "arkivsaksystem", fagsak.id.toString()),
-                        dokumenter =
-                        listOf(DokumentInfo(dokumentInfoId = "12345",
-                                            tittel = "Tittel",
-                                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                                            dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))))
+        Journalpost(
+            journalpostId = "1234",
+            journalposttype = Journalposttype.I,
+            journalstatus = Journalstatus.MOTTATT,
+            tema = "ENF",
+            behandlingstema = "ab0071",
+            tittel = "abrakadabra",
+            bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+            journalforendeEnhet = "4817",
+            kanal = "SKAN_IM",
+            sak = Sak("1234", "arkivsaksystem", fagsak.id.toString()),
+            dokumenter =
+            listOf(
+                DokumentInfo(
+                    dokumentInfoId = "12345",
+                    tittel = "Tittel",
+                    brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                    dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))
+                )
             )
+        )
 
-    private val saksbehandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
-                                                                   type = BehandlingType.BLANKETT,
-                                                                   status = BehandlingStatus.IVERKSETTER_VEDTAK,
-                                                                   steg = blankettSteg.stegType(),
-                                                                   resultat = BehandlingResultat.IKKE_SATT,
-                                                                   årsak = BehandlingÅrsak.SØKNAD))
+    private val saksbehandling = saksbehandling(
+        fagsak,
+        Behandling(
+            fagsakId = fagsak.id,
+            type = BehandlingType.BLANKETT,
+            status = BehandlingStatus.IVERKSETTER_VEDTAK,
+            steg = blankettSteg.stegType(),
+            resultat = BehandlingResultat.IKKE_SATT,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
+    )
 
     private val behandlingJournalpost =
-            Behandlingsjournalpost(saksbehandling.id, journalpost.journalpostId, journalpost.journalposttype)
+        Behandlingsjournalpost(saksbehandling.id, journalpost.journalpostId, journalpost.journalposttype)
 
     private val pdf = "enPdF".toByteArray()
 
@@ -152,5 +166,4 @@ class JournalførBlankettStegTest {
         assertThat(arkiverDokumentRequestSlot.captured.hoveddokumentvarianter.first().filtype).isEqualTo(Filtype.PDFA)
         assertThat(journalpostIdSlot.captured).isEqualTo(journalpostId)
     }
-
 }

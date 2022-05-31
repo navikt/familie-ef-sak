@@ -14,42 +14,48 @@ import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import org.springframework.stereotype.Service
 
-
 @Service
 class BlankettSimuleringsService(val beregningService: BeregningService) {
 
-    fun genererTilkjentYtelseForBlankett(vedtak: VedtakDto?,
-                                         saksbehandling: Saksbehandling): TilkjentYtelseMedMetadata {
+    fun genererTilkjentYtelseForBlankett(
+        vedtak: VedtakDto?,
+        saksbehandling: Saksbehandling
+    ): TilkjentYtelseMedMetadata {
         val andeler = when (vedtak) {
             is InnvilgelseOvergangsstønad -> {
-                beregningService.beregnYtelse(vedtak.perioder.tilPerioder(),
-                                              vedtak.inntekter.tilInntektsperioder())
-                        .map {
-                            AndelTilkjentYtelse(beløp = it.beløp.toInt(),
-                                                stønadFom = it.periode.fradato,
-                                                stønadTom = it.periode.tildato,
-                                                kildeBehandlingId = saksbehandling.id,
-                                                inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
-                                                inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
-                                                samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
-                                                personIdent = saksbehandling.ident)
-                        }
+                beregningService.beregnYtelse(
+                    vedtak.perioder.tilPerioder(),
+                    vedtak.inntekter.tilInntektsperioder()
+                )
+                    .map {
+                        AndelTilkjentYtelse(
+                            beløp = it.beløp.toInt(),
+                            stønadFom = it.periode.fradato,
+                            stønadTom = it.periode.tildato,
+                            kildeBehandlingId = saksbehandling.id,
+                            inntektsreduksjon = it.beregningsgrunnlag?.avkortningPerMåned?.toInt() ?: 0,
+                            inntekt = it.beregningsgrunnlag?.inntekt?.toInt() ?: 0,
+                            samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
+                            personIdent = saksbehandling.ident
+                        )
+                    }
             }
             else -> emptyList()
         }
 
-
-        val tilkjentYtelseForBlankett = TilkjentYtelse(personident = saksbehandling.ident,
-                                                       behandlingId = saksbehandling.id,
-                                                       andelerTilkjentYtelse = andeler,
-                                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                                                       startdato = andeler.minOf { it.stønadFom })
+        val tilkjentYtelseForBlankett = TilkjentYtelse(
+            personident = saksbehandling.ident,
+            behandlingId = saksbehandling.id,
+            andelerTilkjentYtelse = andeler,
+            type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+            startdato = andeler.minOf { it.stønadFom }
+        )
 
         return tilkjentYtelseForBlankett.tilTilkjentYtelseMedMetaData(
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                stønadstype = saksbehandling.stønadstype,
-                eksternBehandlingId = saksbehandling.eksternId,
-                eksternFagsakId = saksbehandling.eksternFagsakId
+            saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+            stønadstype = saksbehandling.stønadstype,
+            eksternBehandlingId = saksbehandling.eksternId,
+            eksternFagsakId = saksbehandling.eksternFagsakId
         )
     }
 }

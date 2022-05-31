@@ -14,7 +14,7 @@ internal class PdlPersonSøkHjelperTest {
     internal fun `søker har matrikkeladresse uten bruksenhetsnummer`() {
         val matrikkelId = 123L
         val resultat =
-                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, null, null, null)))
+            PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null, Matrikkeladresse(matrikkelId, null, null, null)))
         assertThat(resultat.size).isEqualTo(1)
         assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
         assertThat(resultat[0].searchRule.equals).isEqualTo(matrikkelId.toString())
@@ -25,11 +25,17 @@ internal class PdlPersonSøkHjelperTest {
         val matrikkelId = 123L
         val bruksenhetsnummer = "2"
         val resultat =
-                PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(null,
-                                                                        Matrikkeladresse(matrikkelId,
-                                                                                         bruksenhetsnummer,
-                                                                                         null,
-                                                                                         null)))
+            PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(
+                lagAdresse(
+                    null,
+                    Matrikkeladresse(
+                        matrikkelId,
+                        bruksenhetsnummer,
+                        null,
+                        null
+                    )
+                )
+            )
         assertThat(resultat.size).isEqualTo(2)
         assertThat(resultat[0].fieldName).isEqualTo("person.bostedsadresse.matrikkeladresse.matrikkelId")
         assertThat(resultat[0].searchRule.equals).isEqualTo(matrikkelId.toString())
@@ -39,15 +45,17 @@ internal class PdlPersonSøkHjelperTest {
 
     @Test
     internal fun `søker har bare vegadresse`() {
-        val vegadresse = Vegadresse("1",
-                                    "ABC",
-                                    "123",
-                                    "Oslogata",
-                                    "01",
-                                    null,
-                                    "0101",
-                                    null,
-                                    null)
+        val vegadresse = Vegadresse(
+            "1",
+            "ABC",
+            "123",
+            "Oslogata",
+            "01",
+            null,
+            "0101",
+            null,
+            null
+        )
 
         val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
         assertThat(resultat.size).isEqualTo(5)
@@ -65,15 +73,17 @@ internal class PdlPersonSøkHjelperTest {
 
     @Test
     internal fun `søker har bare vegadresse uten husbokstav og bruksenhet`() {
-        val vegadresse = Vegadresse("1",
-                                    null,
-                                    null,
-                                    "Oslogata",
-                                    "01",
-                                    null,
-                                    "0101",
-                                    null,
-                                    null)
+        val vegadresse = Vegadresse(
+            "1",
+            null,
+            null,
+            "Oslogata",
+            "01",
+            null,
+            "0101",
+            null,
+            null
+        )
 
         val resultat = PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(lagAdresse(vegadresse, null))
         assertThat(resultat.size).isEqualTo(3)
@@ -87,15 +97,15 @@ internal class PdlPersonSøkHjelperTest {
 
     private fun lagAdresse(vegadresse: Vegadresse?, matrikkeladresse: Matrikkeladresse?): Bostedsadresse {
         return Bostedsadresse(
-                angittFlyttedato = null,
-                gyldigFraOgMed = null,
-                gyldigTilOgMed = null,
-                vegadresse = vegadresse,
-                matrikkeladresse = matrikkeladresse,
-                coAdressenavn = null,
-                utenlandskAdresse = null,
-                ukjentBosted = null,
-                metadata = Metadata(false)
+            angittFlyttedato = null,
+            gyldigFraOgMed = null,
+            gyldigTilOgMed = null,
+            vegadresse = vegadresse,
+            matrikkeladresse = matrikkeladresse,
+            coAdressenavn = null,
+            utenlandskAdresse = null,
+            ukjentBosted = null,
+            metadata = Metadata(false)
         )
     }
 }

@@ -18,7 +18,7 @@ internal class StatsborgerskapMapperTest {
     internal fun `skal mappe NOR ISO3 landkode til Norge`() {
         every { kodeverkService.hentLand("NOR", any()) } returns "Norge"
         val mappedStatsborgerskap =
-                statsborgerskapMapper.map(listOf(Statsborgerskap("NOR", LocalDate.MIN, LocalDate.MAX))).first()
+            statsborgerskapMapper.map(listOf(Statsborgerskap("NOR", LocalDate.MIN, LocalDate.MAX))).first()
         assertThat(mappedStatsborgerskap.land).isEqualTo("Norge")
         assertThat(mappedStatsborgerskap.gyldigFraOgMedDato).isEqualTo(LocalDate.MIN)
         assertThat(mappedStatsborgerskap.gyldigTilOgMedDato).isEqualTo(LocalDate.MAX)
@@ -30,6 +30,4 @@ internal class StatsborgerskapMapperTest {
         val mappedStatsborgerskap = statsborgerskapMapper.map(listOf(Statsborgerskap("NOR", null, null))).first()
         assertThat(mappedStatsborgerskap.land).isEqualTo("NOR")
     }
-
-
 }

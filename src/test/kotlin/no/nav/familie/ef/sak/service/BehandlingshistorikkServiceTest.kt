@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 
-
 internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var behandlingshistorikkService: BehandlingshistorikkService
@@ -35,16 +34,19 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val behandlingHistorikk =
-                behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                           steg = behandling.steg,
-                                                                           opprettetAvNavn = "Saksbehandlernavn",
-                                                                           opprettetAv = SikkerhetContext.hentSaksbehandler()))
+            behandlingshistorikkRepository.insert(
+                Behandlingshistorikk(
+                    behandlingId = behandling.id,
+                    steg = behandling.steg,
+                    opprettetAvNavn = "Saksbehandlernavn",
+                    opprettetAv = SikkerhetContext.hentSaksbehandler()
+                )
+            )
         val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto(saksbehandling(fagsak, behandling))
-
 
         /** Hent */
         val innslag: HendelseshistorikkDto =
-                behandlingshistorikkService.finnHendelseshistorikk(saksbehandling(fagsak, behandling))[0]
+            behandlingshistorikkService.finnHendelseshistorikk(saksbehandling(fagsak, behandling))[0]
 
         assertThat(innslag).isEqualTo(hendelseshistorikkDto)
     }
@@ -61,7 +63,6 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(list.isEmpty()).isTrue
     }
-
 
     @Test
     internal fun `finn seneste behandlinghistorikk`() {
@@ -86,7 +87,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         insert(behandling, "C", LocalDateTime.now())
 
         var siste =
-                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, StegType.BESLUTTE_VEDTAK)
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, StegType.BESLUTTE_VEDTAK)
         assertThat(siste).isNull()
 
         siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, behandling.steg)
@@ -113,8 +114,8 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         insert(behandling2, "A", tidspunkt)
 
         val sistEndret = behandlingshistorikkRepository
-                .finnSisteEndringstidspunktForBehandlinger(fagsak1.id, stegType)
-                .sortedBy { it.second }
+            .finnSisteEndringstidspunktForBehandlinger(fagsak1.id, stegType)
+            .sortedBy { it.second }
         assertThat(sistEndret.size).isEqualTo(2)
         assertThat(sistEndret[0].second.toLocalDateTime()).isEqualTo(tidspunkt.plusDays(1))
         assertThat(sistEndret[1].second.toLocalDateTime()).isEqualTo(tidspunkt.plusDays(1))
@@ -134,21 +135,23 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         insert(behandling2, "A", tidspunkt.plusDays(1))
 
         val sistEndret = behandlingshistorikkRepository
-                .finnSisteEndringstidspunktForBehandlinger(fagsak1.id, stegType)
+            .finnSisteEndringstidspunktForBehandlinger(fagsak1.id, stegType)
 
         assertThat(sistEndret.map { it.first }).containsExactlyInAnyOrder(behandling1.id)
     }
 
-    private fun insert(behandling: Behandling,
-                       opprettetAv: String,
-                       endretTid: LocalDateTime) {
-        behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                   steg = behandling.steg,
-                                                                   opprettetAvNavn = opprettetAv,
-                                                                   endretTid = endretTid))
+    private fun insert(
+        behandling: Behandling,
+        opprettetAv: String,
+        endretTid: LocalDateTime
+    ) {
+        behandlingshistorikkRepository.insert(
+            Behandlingshistorikk(
+                behandlingId = behandling.id,
+                steg = behandling.steg,
+                opprettetAvNavn = opprettetAv,
+                endretTid = endretTid
+            )
+        )
     }
-
 }
-
-
-

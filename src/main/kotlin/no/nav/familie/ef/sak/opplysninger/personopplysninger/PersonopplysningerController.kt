@@ -20,16 +20,17 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/personopplysninger"], produces = [APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PersonopplysningerController(private val personopplysningerService: PersonopplysningerService,
-                                   private val tilgangService: TilgangService,
-                                   private val behandlingService: BehandlingService,
-                                   private val fagsakService: FagsakService,
-                                   private val fagsakPersonService: FagsakPersonService) {
+class PersonopplysningerController(
+    private val personopplysningerService: PersonopplysningerService,
+    private val tilgangService: TilgangService,
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
+    private val fagsakPersonService: FagsakPersonService
+) {
 
     @PostMapping
     fun personopplysninger(@RequestBody personIdent: PersonIdentDto): Ressurs<PersonopplysningerDto> {
@@ -42,7 +43,6 @@ class PersonopplysningerController(private val personopplysningerService: Person
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(behandlingId))
     }
-
 
     @GetMapping("/fagsak/{fagsakId}")
     fun personopplysningerFraFagsakId(@PathVariable fagsakId: UUID): Ressurs<PersonopplysningerDto> {
@@ -70,5 +70,4 @@ class PersonopplysningerController(private val personopplysningerService: Person
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentNavKontor(personIdent.personIdent))
     }
-
 }

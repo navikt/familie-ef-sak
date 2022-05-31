@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
@@ -36,11 +35,11 @@ internal class PeriodeServiceTest {
     private val replikaClient = mockk<InfotrygdReplikaClient>()
 
     private val service = PeriodeService(
-            pdlClient = pdlClient,
-            fagsakService = fagsakService,
-            behandlingService = behandlingService,
-            tilkjentYtelseService = tilkjentYtelseService,
-            infotrygdService = InfotrygdService(replikaClient, pdlClient)
+        pdlClient = pdlClient,
+        fagsakService = fagsakService,
+        behandlingService = behandlingService,
+        tilkjentYtelseService = tilkjentYtelseService,
+        infotrygdService = InfotrygdService(replikaClient, pdlClient)
     )
 
     private val personIdent = "123"
@@ -146,17 +145,27 @@ internal class PeriodeServiceTest {
     internal fun `skal filtrere vekk perioder som er annulert eller uaktuelle`() {
         mockBehandling()
         mockTilkjentYtelse(LocalDate.MAX)
-        mockReplika(listOf(lagInfotrygdPeriode(stønadFom = LocalDate.parse("2021-01-01"),
-                                               stønadTom = LocalDate.parse("2021-01-02"),
-                                               beløp = 1,
-                                               kode = InfotrygdEndringKode.ANNULERT),
-                           lagInfotrygdPeriode(stønadFom = LocalDate.parse("2021-02-01"),
-                                               stønadTom = LocalDate.parse("2021-02-02"),
-                                               beløp = 2),
-                           lagInfotrygdPeriode(stønadFom = LocalDate.parse("2021-03-01"),
-                                               stønadTom = LocalDate.parse("2021-03-02"),
-                                               beløp = 3,
-                                               kode = InfotrygdEndringKode.UAKTUELL)))
+        mockReplika(
+            listOf(
+                lagInfotrygdPeriode(
+                    stønadFom = LocalDate.parse("2021-01-01"),
+                    stønadTom = LocalDate.parse("2021-01-02"),
+                    beløp = 1,
+                    kode = InfotrygdEndringKode.ANNULERT
+                ),
+                lagInfotrygdPeriode(
+                    stønadFom = LocalDate.parse("2021-02-01"),
+                    stønadTom = LocalDate.parse("2021-02-02"),
+                    beløp = 2
+                ),
+                lagInfotrygdPeriode(
+                    stønadFom = LocalDate.parse("2021-03-01"),
+                    stønadTom = LocalDate.parse("2021-03-02"),
+                    beløp = 3,
+                    kode = InfotrygdEndringKode.UAKTUELL
+                )
+            )
+        )
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
@@ -174,8 +183,12 @@ internal class PeriodeServiceTest {
 
         mockBehandling()
         mockTilkjentYtelse(lagAndelTilkjentYtelse(100, fraOgMed = efFra, tilOgMed = efTil))
-        mockReplika(listOf(lagInfotrygdPeriode(stønadFom = periode1fom, stønadTom = periode1tom, beløp = 1),
-                           lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2)))
+        mockReplika(
+            listOf(
+                lagInfotrygdPeriode(stønadFom = periode1fom, stønadTom = periode1tom, beløp = 1),
+                lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2)
+            )
+        )
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(3)
@@ -205,11 +218,11 @@ internal class PeriodeServiceTest {
     private fun mockTilkjentYtelse(vararg andelTilkjentYtelse: AndelTilkjentYtelse) {
         if (andelTilkjentYtelse.isEmpty()) error("Må sette startdato hvis man har en tom liste med andeler")
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
-                lagTilkjentYtelse(andelTilkjentYtelse.toList(), behandlingId = behandling.id)
+            lagTilkjentYtelse(andelTilkjentYtelse.toList(), behandlingId = behandling.id)
     }
 
     private fun mockTilkjentYtelse(startdato: LocalDate) {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
-                lagTilkjentYtelse(andelerTilkjentYtelse = emptyList(), behandlingId = behandling.id, startdato = startdato)
+            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList(), behandlingId = behandling.id, startdato = startdato)
     }
 }

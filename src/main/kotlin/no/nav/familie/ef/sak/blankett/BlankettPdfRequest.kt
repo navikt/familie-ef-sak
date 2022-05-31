@@ -7,19 +7,19 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 
 data class BlankettPdfRequest(
-        val behandling: BlankettPdfBehandling,
-        val personopplysninger: PersonopplysningerDto,
-        val vilkår: VilkårDto,
-        val vedtak: VedtakDto,
-        val søknadsdatoer: SøknadDatoerDto?
+    val behandling: BlankettPdfBehandling,
+    val personopplysninger: PersonopplysningerDto,
+    val vilkår: VilkårDto,
+    val vedtak: VedtakDto,
+    val søknadsdatoer: SøknadDatoerDto?
 )
 
 data class BlankettPdfBehandling(
-        val årsak: BehandlingÅrsak,
-        val stønadstype: StønadType
+    val årsak: BehandlingÅrsak,
+    val stønadstype: StønadType
 )
 
 data class PersonopplysningerDto(
-        val navn: String,
-        val personIdent: String
+    val navn: String,
+    val personIdent: String
 )

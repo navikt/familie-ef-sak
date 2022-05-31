@@ -13,12 +13,14 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
  * @param vilkår [Vilkårsresultat] for vilkåret
  * @param delvilkår [Vilkårsresultat] for hver hovedregel
  */
-data class RegelResultat(val vilkårType: VilkårType,
-                         val vilkår: Vilkårsresultat,
-                         val delvilkår: Map<RegelId, Vilkårsresultat>) {
+data class RegelResultat(
+    val vilkårType: VilkårType,
+    val vilkår: Vilkårsresultat,
+    val delvilkår: Map<RegelId, Vilkårsresultat>
+) {
 
     fun resultatHovedregel(hovedregel: RegelId) =
-            delvilkår[hovedregel] ?: throw Feil("Savner resultat for regelId=$hovedregel vilkårType=$vilkårType")
+        delvilkår[hovedregel] ?: throw Feil("Savner resultat for regelId=$hovedregel vilkårType=$vilkårType")
 }
 
 object RegelEvaluering {
@@ -30,9 +32,11 @@ object RegelEvaluering {
         val delvilkårResultat = delvilkår.associate { vurdering ->
             vurdering.hovedregel() to utledResultatForDelvilkår(vilkårsregel, vurdering)
         }
-        return RegelResultat(vilkårType = vilkårsregel.vilkårType,
-                             vilkår = utledVilkårResultat(delvilkårResultat),
-                             delvilkår = delvilkårResultat)
+        return RegelResultat(
+            vilkårType = vilkårsregel.vilkårType,
+            vilkår = utledVilkårResultat(delvilkårResultat),
+            delvilkår = delvilkårResultat
+        )
     }
 
     fun utledVilkårResultat(delvilkårResultat: Map<RegelId, Vilkårsresultat>): Vilkårsresultat {
@@ -50,8 +54,10 @@ object RegelEvaluering {
     /**
      * Dette setter foreløpig resultat, men fortsetter å validere resterende svar slik att man fortsatt har ett gyldig svar
      */
-    private fun utledResultatForDelvilkår(vilkårsregel: Vilkårsregel,
-                                          vurdering: DelvilkårsvurderingDto): Vilkårsresultat {
+    private fun utledResultatForDelvilkår(
+        vilkårsregel: Vilkårsregel,
+        vurdering: DelvilkårsvurderingDto
+    ): Vilkårsresultat {
 
         vurdering.vurderinger.forEach { svar ->
             val regel = vilkårsregel.regel(svar.regelId)
@@ -68,5 +74,4 @@ object RegelEvaluering {
         }
         error("Noe gikk galt, skal ikke komme til sluttet her")
     }
-
 }

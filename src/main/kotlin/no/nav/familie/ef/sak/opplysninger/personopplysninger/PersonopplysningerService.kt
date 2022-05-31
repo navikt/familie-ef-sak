@@ -18,13 +18,15 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class PersonopplysningerService(private val personService: PersonService,
-                                private val behandlingService: BehandlingService,
-                                private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
-                                private val grunnlagsdataService: GrunnlagsdataService,
-                                private val personopplysningerMapper: PersonopplysningerMapper,
-                                @Qualifier("shortCache")
-                                private val cacheManager: CacheManager) {
+class PersonopplysningerService(
+    private val personService: PersonService,
+    private val behandlingService: BehandlingService,
+    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val personopplysningerMapper: PersonopplysningerMapper,
+    @Qualifier("shortCache")
+    private val cacheManager: CacheManager
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -35,9 +37,9 @@ class PersonopplysningerService(private val personService: PersonService,
         val egenAnsatt = egenAnsatt(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-                grunnlagsdata,
-                egenAnsatt,
-                søkerIdenter
+            grunnlagsdata,
+            egenAnsatt,
+            søkerIdenter
         )
     }
 
@@ -48,11 +50,13 @@ class PersonopplysningerService(private val personService: PersonService,
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
         return personopplysningerMapper.tilPersonopplysninger(
-                GrunnlagsdataMedMetadata(grunnlagsdata,
-                                         lagtTilEtterFerdigstilling = false,
-                                         opprettetTidspunkt = LocalDateTime.now()),
-                egenAnsatt,
-                identerFraPdl
+            GrunnlagsdataMedMetadata(
+                grunnlagsdata,
+                lagtTilEtterFerdigstilling = false,
+                opprettetTidspunkt = LocalDateTime.now()
+            ),
+            egenAnsatt,
+            identerFraPdl
         )
     }
 
@@ -75,4 +79,3 @@ class PersonopplysningerService(private val personService: PersonService,
         return personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
     }
 }
-

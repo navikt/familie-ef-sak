@@ -30,8 +30,12 @@ fun sjekkAtAlleVerdierErSatt(obj: Any) {
     }
 }
 
-private fun lagFeilmeldingTomListe(it: KProperty1<out Any, *>,
-                                   kClass: KClass<out Any>) = "${kClass.simpleName} har en tom liste i felt ${it.name}"
+private fun lagFeilmeldingTomListe(
+    it: KProperty1<out Any, *>,
+    kClass: KClass<out Any>
+) = "${kClass.simpleName} har en tom liste i felt ${it.name}"
 
-private fun lagFeilmelding(it: KProperty1<out Any, *>,
-                           kClass: KClass<out Any>) = "${kClass.simpleName} har ingen verdi i felt ${it.name}"
+private fun lagFeilmelding(
+    it: KProperty1<out Any, *>,
+    kClass: KClass<out Any>
+) = "${kClass.simpleName} har ingen verdi i felt ${it.name}"

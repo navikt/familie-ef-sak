@@ -19,26 +19,28 @@ import java.util.UUID
 /**
  * @param forrigeBehandlingId forrige iverksatte behandling
  */
-data class Behandling(@Id
-                      val id: UUID = UUID.randomUUID(),
-                      val fagsakId: UUID,
-                      val forrigeBehandlingId: UUID? = null,
-                      @MappedCollection(idColumn = "behandling_id")
-                      val eksternId: EksternBehandlingId = EksternBehandlingId(),
-                      val versjon: Int = 0,
+data class Behandling(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val fagsakId: UUID,
+    val forrigeBehandlingId: UUID? = null,
+    @MappedCollection(idColumn = "behandling_id")
+    val eksternId: EksternBehandlingId = EksternBehandlingId(),
+    val versjon: Int = 0,
 
-                      val type: BehandlingType,
-                      val status: BehandlingStatus,
-                      val steg: StegType,
-                      @Column("arsak")
-                      val årsak: BehandlingÅrsak,
-                      val kravMottatt: LocalDate? = null,
+    val type: BehandlingType,
+    val status: BehandlingStatus,
+    val steg: StegType,
+    @Column("arsak")
+    val årsak: BehandlingÅrsak,
+    val kravMottatt: LocalDate? = null,
 
-                      @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                      val sporbar: Sporbar = Sporbar(),
-                      val resultat: BehandlingResultat,
-                      @Column("henlagt_arsak")
-                      val henlagtÅrsak: HenlagtÅrsak? = null) {
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar(),
+    val resultat: BehandlingResultat,
+    @Column("henlagt_arsak")
+    val henlagtÅrsak: HenlagtÅrsak? = null
+) {
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
 
@@ -89,6 +91,5 @@ enum class BehandlingStatus {
     ;
 
     fun behandlingErLåstForVidereRedigering(): Boolean =
-            setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
+        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
 }
-

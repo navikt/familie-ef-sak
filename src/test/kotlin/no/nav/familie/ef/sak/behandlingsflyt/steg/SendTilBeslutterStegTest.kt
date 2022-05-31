@@ -66,44 +66,57 @@ internal class SendTilBeslutterStegTest {
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val vurderingService = mockk<VurderingService>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
-    private val simuleringsoppsummering = Simuleringsoppsummering(perioder = listOf(),
-                                                                  fomDatoNestePeriode = null,
-                                                                  etterbetaling = BigDecimal.ZERO,
-                                                                  feilutbetaling = BigDecimal.ZERO,
-                                                                  fom = null,
-                                                                  tomDatoNestePeriode = null,
-                                                                  forfallsdatoNestePeriode = null,
-                                                                  tidSimuleringHentet = null,
-                                                                  tomSisteUtbetaling = null)
+    private val simuleringsoppsummering = Simuleringsoppsummering(
+        perioder = listOf(),
+        fomDatoNestePeriode = null,
+        etterbetaling = BigDecimal.ZERO,
+        feilutbetaling = BigDecimal.ZERO,
+        fom = null,
+        tomDatoNestePeriode = null,
+        forfallsdatoNestePeriode = null,
+        tidSimuleringHentet = null,
+        tomSisteUtbetaling = null
+    )
 
     private val beslutteVedtakSteg =
-            SendTilBeslutterSteg(taskRepository,
-                                 oppgaveService,
-                                 fagsakService,
-                                 behandlingService,
-                                 vedtaksbrevRepository,
-                                 vedtakService,
-                                 simuleringService,
-                                 tilbakekrevingService,
-                                 vurderingService,
-                                 validerOmregningService)
-    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
-                                identer = setOf(PersonIdent(ident = "12345678901")))
+        SendTilBeslutterSteg(
+            taskRepository,
+            oppgaveService,
+            fagsakService,
+            behandlingService,
+            vedtaksbrevRepository,
+            vedtakService,
+            simuleringService,
+            tilbakekrevingService,
+            vurderingService,
+            validerOmregningService
+        )
+    private val fagsak = fagsak(
+        stønadstype = StønadType.OVERGANGSSTØNAD,
+        identer = setOf(PersonIdent(ident = "12345678901"))
+    )
     private val saksbehandlerNavn = "saksbehandlernavn"
-    private val vedtaksbrev = Vedtaksbrev(behandlingId = UUID.randomUUID(),
-                                          brevmal = "",
-                                          saksbehandlersignatur = saksbehandlerNavn,
-                                          beslutterPdf = null,
-                                          enhet = "enhet",
-                                          saksbehandlerident = saksbehandlerNavn,
-                                          saksbehandlerHtml = "")
+    private val vedtaksbrev = Vedtaksbrev(
+        behandlingId = UUID.randomUUID(),
+        brevmal = "",
+        saksbehandlersignatur = saksbehandlerNavn,
+        beslutterPdf = null,
+        enhet = "enhet",
+        saksbehandlerident = saksbehandlerNavn,
+        saksbehandlerHtml = ""
+    )
 
-    private val behandling = saksbehandling(fagsak, Behandling(fagsakId = fagsak.id,
-                                                               type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                               status = BehandlingStatus.UTREDES,
-                                                               steg = beslutteVedtakSteg.stegType(),
-                                                               resultat = BehandlingResultat.IKKE_SATT,
-                                                               årsak = BehandlingÅrsak.SØKNAD))
+    private val behandling = saksbehandling(
+        fagsak,
+        Behandling(
+            fagsakId = fagsak.id,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            status = BehandlingStatus.UTREDES,
+            steg = beslutteVedtakSteg.stegType(),
+            resultat = BehandlingResultat.IKKE_SATT,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
+    )
 
     private val revurdering = behandling.copy(type = BehandlingType.REVURDERING, resultat = INNVILGET)
 
@@ -154,7 +167,7 @@ internal class SendTilBeslutterStegTest {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val frontendFeilmelding =
-                assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
+            assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
         val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
         assertThat(frontendFeilmelding).isEqualTo(forvetetFeilmelding)
     }
@@ -228,17 +241,20 @@ internal class SendTilBeslutterStegTest {
     private fun verifiserVedtattBehandlingsstatistikkTask() {
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
-                .isEqualTo(Hendelse.VEDTATT)
+            .isEqualTo(Hendelse.VEDTATT)
     }
-
 
     private fun utførOgVerifiserKall(oppgavetype: Oppgavetype) {
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, any()) }
-                .returns(Oppgave(id = UUID.randomUUID(),
-                                 behandlingId = behandling.id,
-                                 gsakOppgaveId = 123L,
-                                 type = Oppgavetype.BehandleSak,
-                                 erFerdigstilt = false))
+            .returns(
+                Oppgave(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandling.id,
+                    gsakOppgaveId = 123L,
+                    type = Oppgavetype.BehandleSak,
+                    erFerdigstilt = false
+                )
+            )
 
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         mockBrukerContext("saksbehandlernavn")
@@ -250,11 +266,11 @@ internal class SendTilBeslutterStegTest {
 
         assertThat(taskSlot[0].type).isEqualTo(OpprettOppgaveTask.TYPE)
         assertThat(objectMapper.readValue<OpprettOppgaveTaskData>(taskSlot[0].payload).oppgavetype)
-                .isEqualTo(Oppgavetype.GodkjenneVedtak)
+            .isEqualTo(Oppgavetype.GodkjenneVedtak)
 
         assertThat(taskSlot[1].type).isEqualTo(FerdigstillOppgaveTask.TYPE)
         assertThat(objectMapper.readValue<FerdigstillOppgaveTaskData>(taskSlot[1].payload).oppgavetype)
-                .isEqualTo(oppgavetype)
+            .isEqualTo(oppgavetype)
     }
 
     private fun utførSteg() {
@@ -268,11 +284,13 @@ internal class SendTilBeslutterStegTest {
     private fun mockTilbakekrevingValideringsfeil() {
         // tilbakekrevingService.
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal(
-                1000))
+        every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns simuleringsoppsummering.copy(
+            feilutbetaling = BigDecimal(
+                1000
+            )
+        )
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns false
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns false
     }
-
 }

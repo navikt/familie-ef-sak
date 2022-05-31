@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
@@ -92,16 +91,18 @@ internal class IverksettingDtoMapperTest {
     private val barnMatcher = mockk<BarnMatcher>()
 
     private val iverksettingDtoMapper =
-            IverksettingDtoMapper(arbeidsfordelingService = arbeidsfordelingService,
-                                  behandlingshistorikkService = behandlingshistorikkService,
-                                  grunnlagsdataService = grunnlagsdataService,
-                                  simuleringService = simuleringService,
-                                  barnService = barnService,
-                                  tilbakekrevingService = tilbakekrevingService,
-                                  tilkjentYtelseService = tilkjentYtelseService,
-                                  vedtakService = vedtakService,
-                                  vilkårsvurderingRepository = vilkårsvurderingRepository,
-                                  brevmottakereRepository = brevmottakereRepository)
+        IverksettingDtoMapper(
+            arbeidsfordelingService = arbeidsfordelingService,
+            behandlingshistorikkService = behandlingshistorikkService,
+            grunnlagsdataService = grunnlagsdataService,
+            simuleringService = simuleringService,
+            barnService = barnService,
+            tilbakekrevingService = tilbakekrevingService,
+            tilkjentYtelseService = tilkjentYtelseService,
+            vedtakService = vedtakService,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            brevmottakereRepository = brevmottakereRepository
+        )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
@@ -111,9 +112,11 @@ internal class IverksettingDtoMapperTest {
     internal fun setUp() {
         every { vedtakService.hentVedtak(behandling.id) } returns Vedtak(behandling.id, ResultatType.INNVILGE)
         val behandlingshistorikk =
-                Behandlingshistorikk(behandlingId = behandling.id,
-                                     opprettetAv = "opprettetAv",
-                                     steg = StegType.SEND_TIL_BESLUTTER)
+            Behandlingshistorikk(
+                behandlingId = behandling.id,
+                opprettetAv = "opprettetAv",
+                steg = StegType.SEND_TIL_BESLUTTER
+            )
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
     }
@@ -122,23 +125,25 @@ internal class IverksettingDtoMapperTest {
     internal fun `Skal mappe tilbakekreving med varseltekst og feilutbetaling`() {
         val forventetVarseltekst = "forventetVarseltekst"
         val simuleringsoppsummering = Simuleringsoppsummering(
-                perioder = emptyList(),
-                fomDatoNestePeriode = null,
-                etterbetaling = BigDecimal.ZERO,
-                feilutbetaling = BigDecimal.TEN,
-                fom = null,
-                tomDatoNestePeriode = null,
-                forfallsdatoNestePeriode = null,
-                tidSimuleringHentet = null,
-                tomSisteUtbetaling = null
+            perioder = emptyList(),
+            fomDatoNestePeriode = null,
+            etterbetaling = BigDecimal.ZERO,
+            feilutbetaling = BigDecimal.TEN,
+            fom = null,
+            tomDatoNestePeriode = null,
+            forfallsdatoNestePeriode = null,
+            tidSimuleringHentet = null,
+            tomSisteUtbetaling = null
         )
 
         every {
             tilbakekrevingService.hentTilbakekreving(behandlingId = behandling.id)
-        } returns Tilbakekreving(behandlingId = behandling.id,
-                                 valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
-                                 varseltekst = forventetVarseltekst,
-                                 begrunnelse = "ingen")
+        } returns Tilbakekreving(
+            behandlingId = behandling.id,
+            valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
+            varseltekst = forventetVarseltekst,
+            begrunnelse = "ingen"
+        )
         every {
             simuleringService.hentLagretSimuleringsoppsummering(behandlingId = behandling.id)
         } returns simuleringsoppsummering.copy(feilutbetaling = BigDecimal.TEN)
@@ -151,9 +156,11 @@ internal class IverksettingDtoMapperTest {
     @Test
     internal fun `tilDto - skal kunne mappe person uten barn`() {
         every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(opprettGrunnlagsdata(),
-                                                                                                 false,
-                                                                                                 LocalDateTime.now())
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
+            opprettGrunnlagsdata(),
+            false,
+            LocalDateTime.now()
+        )
         every { tilkjentYtelseService.hentForBehandling(any()) } returns mockk(relaxed = true)
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
@@ -193,8 +200,8 @@ internal class IverksettingDtoMapperTest {
 
         AktivitetType.values().forEach { AktivitetTypeIverksett.valueOf(it.name) }
         VedtaksperiodeType.values()
-                .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-                .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
+            .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
     }
 
     private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
@@ -222,8 +229,10 @@ internal class IverksettingDtoMapperTest {
         assertThat(fagsak.stønadstype).isEqualTo(stønadType)
     }
 
-    private fun assertBehandling(behandling: BehandlingsdetaljerDto,
-                                 behandlingId: UUID?) {
+    private fun assertBehandling(
+        behandling: BehandlingsdetaljerDto,
+        behandlingId: UUID?
+    ) {
         assertThat(behandling.behandlingId).isEqualTo(behandlingId)
         assertThat(behandling.behandlingType.name).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING.name)
         assertThat(behandling.behandlingÅrsak).isEqualTo(BehandlingÅrsak.SØKNAD)
@@ -270,14 +279,13 @@ internal class IverksettingDtoMapperTest {
         assertThat(tilbakekrevingMedVarsel?.varseltekst).isEqualTo("varseltekst")
         assertThat(tilbakekrevingMedVarsel?.sumFeilutbetaling).isEqualTo(BigDecimal("1000.0"))
         assertThat(vedtak.tilbakekreving?.tilbakekrevingsvalg)
-                .isEqualTo(no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
-
+            .isEqualTo(no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
         assertThat(vedtak.tilkjentYtelse?.startdato).isEqualTo(LocalDate.of(2022, 4, 7))
-        //opphørsdato ikke i bruk?
+        // opphørsdato ikke i bruk?
 
         assertThat(vedtak.tilkjentYtelse?.andelerTilkjentYtelse).hasSize(1)
-        //assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
+        // assertThat(iverksettDto.vedtak.vedtakstidspunkt) - sjekker ikke denne da det er LocalDate.now()
     }
 
     private fun assertVilkårsvurdering(vilkårsvurderinger: List<VilkårsvurderingDto>) {
@@ -334,52 +342,54 @@ internal class IverksettingDtoMapperTest {
 
     private fun mockReturnerObjekterMedAlleFelterFylt(): UUID? {
         val grunnlagsdata =
-                opprettGrunnlagsdata().copy(søker = søker(), barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")))
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(grunnlagsdata,
-                                                                                                 false,
-                                                                                                 LocalDateTime.parse("2022-03-25T05:51:31.439"))
+            opprettGrunnlagsdata().copy(søker = søker(), barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")))
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
+            grunnlagsdata,
+            false,
+            LocalDateTime.parse("2022-03-25T05:51:31.439")
+        )
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
         val behandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb")
 
         val behandlingBarn = objectMapper.readValue<BehandlingBarn>(behandlingBarnJson)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn)
         every { barnMatcher.kobleBehandlingBarnOgRegisterBarn(any(), any()) } returns listOf(
-                MatchetBehandlingBarn(
-                        fødselsnummer = "1234",
-                        barn = barnMedIdent(fnr = "1234", "fornavn etternavn"),
-                        behandlingBarn = behandlingBarn
-                )
+            MatchetBehandlingBarn(
+                fødselsnummer = "1234",
+                barn = barnMedIdent(fnr = "1234", "fornavn etternavn"),
+                behandlingBarn = behandlingBarn
+            )
         )
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns listOf(objectMapper.readValue(vilkårsvurderingJson))
         every { vedtakService.hentVedtak(any()) } returns objectMapper.readValue(vedtakJson)
         every { brevmottakereRepository.findByIdOrNull(any()) } returns objectMapper.readValue(brevmottakereJson)
         every { tilbakekrevingService.hentTilbakekreving(any()) } returns objectMapper.readValue(tilbakekrevingJson)
         every { simuleringService.hentLagretSimuleringsoppsummering(any()) } returns objectMapper.readValue(
-                simuleringsoppsummeringJson)
+            simuleringsoppsummeringJson
+        )
         every { tilkjentYtelseService.hentForBehandling(any()) } returns objectMapper.readValue(tilkjentYtelseJson)
         return behandlingId
     }
 
-
     private fun saksbehandling(stønadType: StønadType = StønadType.OVERGANGSSTØNAD) = Saksbehandling(
-            id = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb"),
-            eksternId = 1,
-            forrigeBehandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc"),
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            status = BehandlingStatus.OPPRETTET,
-            steg = StegType.VILKÅR,
-            årsak = BehandlingÅrsak.SØKNAD,
-            kravMottatt = LocalDate.of(2022, 3, 1),
-            resultat = BehandlingResultat.IKKE_SATT,
-            henlagtÅrsak = HenlagtÅrsak.FEILREGISTRERT,
-            ident = "3",
-            fagsakId = UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"),
-            eksternFagsakId = 4,
-            stønadstype = stønadType,
-            migrert = false,
-            opprettetAv = "z094239",
-            opprettetTid = LocalDateTime.parse("2022-03-02T05:36:39.553"),
-            endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556")
+        id = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb"),
+        eksternId = 1,
+        forrigeBehandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cc"),
+        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+        status = BehandlingStatus.OPPRETTET,
+        steg = StegType.VILKÅR,
+        årsak = BehandlingÅrsak.SØKNAD,
+        kravMottatt = LocalDate.of(2022, 3, 1),
+        resultat = BehandlingResultat.IKKE_SATT,
+        henlagtÅrsak = HenlagtÅrsak.FEILREGISTRERT,
+        ident = "3",
+        fagsakId = UUID.fromString("65811679-17ed-4c3c-b1ab-c1678acdfa7b"),
+        eksternFagsakId = 4,
+        stønadstype = stønadType,
+        migrert = false,
+        opprettetAv = "z094239",
+        opprettetTid = LocalDateTime.parse("2022-03-02T05:36:39.553"),
+        endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556")
     )
 
     private val behandlingBarnJson = """
@@ -525,4 +535,3 @@ internal class IverksettingDtoMapperTest {
         }
     """.trimIndent()
 }
-

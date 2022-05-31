@@ -5,30 +5,31 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 data class HentInntektListeResponse(
-        @JsonProperty("arbeidsInntektMaaned")
-        val arbeidsinntektMåned: List<ArbeidsinntektMåned>?,
-        val ident: Aktør
+    @JsonProperty("arbeidsInntektMaaned")
+    val arbeidsinntektMåned: List<ArbeidsinntektMåned>?,
+    val ident: Aktør
 )
 
 data class ArbeidsinntektMåned(
-        @JsonProperty("aarMaaned")
-        val årMåned: YearMonth,// rapportert for den måneden
-        val avvikListe: List<Avvik>?,
-        val arbeidsInntektInformasjon: ArbeidsInntektInformasjon?
+    @JsonProperty("aarMaaned")
+    val årMåned: YearMonth,
+    // rapportert for den måneden
+    val avvikListe: List<Avvik>?,
+    val arbeidsInntektInformasjon: ArbeidsInntektInformasjon?
 )
 
 data class Aktør(
-        val identifikator: String,
-        @JsonProperty("aktoerType")
-        val aktørType: AktørType
+    val identifikator: String,
+    @JsonProperty("aktoerType")
+    val aktørType: AktørType
 )
 
 data class Avvik(
-        val ident: Aktør? = null,
-        val opplysningspliktig: Aktør? = null,
-        val virksomhet: Aktør,
-        val avvikPeriode: YearMonth? = null,
-        val tekst: String? = null
+    val ident: Aktør? = null,
+    val opplysningspliktig: Aktør? = null,
+    val virksomhet: Aktør,
+    val avvikPeriode: YearMonth? = null,
+    val tekst: String? = null
 )
 
 data class ArbeidsInntektInformasjon(
@@ -36,21 +37,21 @@ data class ArbeidsInntektInformasjon(
 )
 
 data class AMeldingInntekt(
-        val inntektType: InntektType,
-        @JsonProperty("beloep")
-        val beløp: Int,
-        val fordel: String, //kontantytese / etc
-        val opptjeningsland: String? = null,
-        val opptjeningsperiodeFom: LocalDate? = null,
-        val opptjeningsperiodeTom: LocalDate? = null,
-        val skattemessigBosattLand: String? = null,
-        val virksomhet: Aktør,//? = null,
-        val tilleggsinformasjon: Tilleggsinformasjon? = null,
-        val beskrivelse: String? = null, // hentes fra kodeverk
+    val inntektType: InntektType,
+    @JsonProperty("beloep")
+    val beløp: Int,
+    val fordel: String, // kontantytese / etc
+    val opptjeningsland: String? = null,
+    val opptjeningsperiodeFom: LocalDate? = null,
+    val opptjeningsperiodeTom: LocalDate? = null,
+    val skattemessigBosattLand: String? = null,
+    val virksomhet: Aktør, // ? = null,
+    val tilleggsinformasjon: Tilleggsinformasjon? = null,
+    val beskrivelse: String? = null, // hentes fra kodeverk
 )
 
 data class Tilleggsinformasjon(
-        val kategori: String? = null, // Kodeverk -> EDAGTilleggsinfoKategorier
+    val kategori: String? = null, // Kodeverk -> EDAGTilleggsinfoKategorier
 )
 
 enum class AktørType {

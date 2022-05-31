@@ -13,13 +13,14 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class KodeverkClient(@Qualifier("azure") restOperations: RestOperations,
-                     private val integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "kodeverk") {
+class KodeverkClient(
+    @Qualifier("azure") restOperations: RestOperations,
+    private val integrasjonerConfig: IntegrasjonerConfig
+) :
+    AbstractPingableRestClient(restOperations, "kodeverk") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-
 
     fun hentKodeverkLandkoder(): KodeverkDto {
         return getForEntity<Ressurs<KodeverkDto>>(integrasjonerConfig.kodeverkLandkoderUri).data!!

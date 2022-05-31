@@ -33,14 +33,15 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
-                  private val behandlingService: BehandlingService,
-                  private val rolleConfig: RolleConfig,
-                  private val behandlingshistorikkService: BehandlingshistorikkService) {
+class StegService(
+    private val behandlingSteg: List<BehandlingSteg<*>>,
+    private val behandlingService: BehandlingService,
+    private val rolleConfig: RolleConfig,
+    private val behandlingshistorikkService: BehandlingshistorikkService
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -92,7 +93,6 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
-
     @Transactional
     fun håndterPollStatusFraIverksett(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: VentePåStatusFraIverksett = hentBehandlingSteg(VENTE_PÅ_STATUS_FRA_IVERKSETT)
@@ -122,7 +122,6 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
-
     @Transactional
     fun resetSteg(behandlingId: UUID, steg: StegType) {
         val behandling = behandlingService.hentBehandling(behandlingId)
@@ -130,30 +129,38 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
             error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
         }
         if (!behandling.steg.kommerEtter(steg)) {
-            error("Kan ikke sette behandling til steg=$steg når behandling allerede " +
-                  "er på ${behandling.steg} behandling=$behandlingId")
+            error(
+                "Kan ikke sette behandling til steg=$steg når behandling allerede " +
+                    "er på ${behandling.steg} behandling=$behandlingId"
+            )
         }
 
         validerAtStegKanResettes(behandling, steg)
         behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
     }
 
-    private fun validerAtStegKanResettes(behandling: Behandling,
-                                         steg: StegType) {
+    private fun validerAtStegKanResettes(
+        behandling: Behandling,
+        steg: StegType
+    ) {
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
         val harTilgangTilNesteSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, steg.tillattFor)
         if (!harTilgangTilSteg || !harTilgangTilNesteSteg) {
             val saksbehandler = SikkerhetContext.hentSaksbehandler()
-            error("$saksbehandler kan ikke endre" +
-                  " fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()}" +
-                  " pga manglende rolle på behandling=$behandling.id")
+            error(
+                "$saksbehandler kan ikke endre" +
+                    " fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()}" +
+                    " pga manglende rolle på behandling=$behandling.id"
+            )
         }
     }
 
     // Generelle stegmetoder
-    private fun <T> håndterSteg(saksbehandling: Saksbehandling,
-                                behandlingSteg: BehandlingSteg<T>,
-                                data: T): Behandling {
+    private fun <T> håndterSteg(
+        saksbehandling: Saksbehandling,
+        behandlingSteg: BehandlingSteg<T>,
+        data: T
+    ): Behandling {
         val stegType = behandlingSteg.stegType()
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         try {
@@ -173,15 +180,19 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
     private fun validerNesteSteg(nesteSteg: StegType, saksbehandling: Saksbehandling) {
         if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingService.hentBehandling(saksbehandling.id).status)) {
-            error("Steg '${nesteSteg.displayName()}' kan ikke settes " +
-                  "på behandling i kombinasjon med status ${saksbehandling.status}")
+            error(
+                "Steg '${nesteSteg.displayName()}' kan ikke settes " +
+                    "på behandling i kombinasjon med status ${saksbehandling.status}"
+            )
         }
     }
 
-    private fun <T> valider(saksbehandling: Saksbehandling,
-                            stegType: StegType,
-                            saksbehandlerIdent: String,
-                            behandlingSteg: BehandlingSteg<T>) {
+    private fun <T> valider(
+        saksbehandling: Saksbehandling,
+        stegType: StegType,
+        saksbehandlerIdent: String,
+        behandlingSteg: BehandlingSteg<T>
+    ) {
         validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
 
         validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
@@ -193,36 +204,47 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         metrikk[stegType]?.increment()
     }
 
-    private fun <T> oppdaterHistorikk(behandlingSteg: BehandlingSteg<T>,
-                                      behandlingId: UUID,
-                                      saksbehandlerIdent: String) {
+    private fun <T> oppdaterHistorikk(
+        behandlingSteg: BehandlingSteg<T>,
+        behandlingId: UUID,
+        saksbehandlerIdent: String
+    ) {
         if (behandlingSteg.settInnHistorikk()) {
             behandlingshistorikkService.opprettHistorikkInnslag(
-                    Behandlingshistorikk(behandlingId = behandlingId,
-                                         steg = behandlingSteg.stegType(),
-                                         opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
-                                         opprettetAv = saksbehandlerIdent))
+                Behandlingshistorikk(
+                    behandlingId = behandlingId,
+                    steg = behandlingSteg.stegType(),
+                    opprettetAvNavn = SikkerhetContext.hentSaksbehandlerNavn(),
+                    opprettetAv = saksbehandlerIdent
+                )
+            )
         }
     }
 
-    private fun <T> utførBehandlingsvalidering(behandlingSteg: BehandlingSteg<T>,
-                                               saksbehandling: Saksbehandling) {
+    private fun <T> utførBehandlingsvalidering(
+        behandlingSteg: BehandlingSteg<T>,
+        saksbehandling: Saksbehandling
+    ) {
         if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
             error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${saksbehandling.status}")
         }
         behandlingSteg.validerSteg(saksbehandling)
     }
 
-    private fun validerGyldigTilstand(saksbehandling: Saksbehandling,
-                                      stegType: StegType,
-                                      saksbehandlerIdent: String) {
+    private fun validerGyldigTilstand(
+        saksbehandling: Saksbehandling,
+        stegType: StegType,
+        saksbehandlerIdent: String
+    ) {
         if (saksbehandling.steg == BEHANDLING_FERDIGSTILT) {
             error("Behandlingen er avsluttet og stegprosessen kan ikke gjenåpnes")
         }
 
         if (stegType.kommerEtter(saksbehandling.steg)) {
-            error("$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
-                  "men behandlingen er på steg '${saksbehandling.steg.displayName()}'")
+            error(
+                "$saksbehandlerIdent prøver å utføre steg '${stegType.displayName()}', " +
+                    "men behandlingen er på steg '${saksbehandling.steg.displayName()}'"
+            )
         }
 
         if (saksbehandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
@@ -230,14 +252,18 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
         }
     }
 
-    private fun validerHarTilgang(saksbehandling: Saksbehandling,
-                                  stegType: StegType,
-                                  saksbehandlerIdent: String) {
+    private fun validerHarTilgang(
+        saksbehandling: Saksbehandling,
+        stegType: StegType,
+        saksbehandlerIdent: String
+    ) {
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, saksbehandling.steg.tillattFor)
 
         logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
-        secureLogger.info("Starter håndtering av $stegType på behandling " +
-                          "${saksbehandling.id} med saksbehandler=[$saksbehandlerIdent]")
+        secureLogger.info(
+            "Starter håndtering av $stegType på behandling " +
+                "${saksbehandling.id} med saksbehandler=[$saksbehandlerIdent]"
+        )
 
         feilHvis(!harTilgangTilSteg) {
             "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."
@@ -246,19 +272,20 @@ class StegService(private val behandlingSteg: List<BehandlingSteg<*>>,
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
         val firstOrNull = behandlingSteg.singleOrNull { it.stegType() == stegType }
-                          ?: error("Finner ikke behandling steg for type $stegType")
+            ?: error("Finner ikke behandling steg for type $stegType")
         @Suppress("UNCHECKED_CAST")
         return firstOrNull as T
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
         return behandlingSteg.associate {
-            it.stegType() to Metrics.counter("behandling.steg.$type",
-                                             "steg",
-                                             it.stegType().name,
-                                             "beskrivelse",
-                                             "${it.stegType().rekkefølge} ${it.stegType().displayName()}")
+            it.stegType() to Metrics.counter(
+                "behandling.steg.$type",
+                "steg",
+                it.stegType().name,
+                "beskrivelse",
+                "${it.stegType().rekkefølge} ${it.stegType().displayName()}"
+            )
         }
     }
-
 }
