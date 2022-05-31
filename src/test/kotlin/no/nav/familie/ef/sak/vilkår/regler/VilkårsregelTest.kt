@@ -17,7 +17,7 @@ internal class VilkårsregelTest {
         Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {
             val json = objectWriter.writeValueAsString(it.value)
             // kommentere ut hvis regler har endret seg for å lagre de nye reglene
-            //skrivTilFil(it.value, json)
+            // skrivTilFil(it.value, json)
             val fileJson = readFile(it.value)
             assertThat(json).isEqualTo(fileJson)
         }
