@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsårsakstype
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -73,15 +72,12 @@ class VurderingService(private val behandlingService: BehandlingService,
         feilHvisIkke(behandling.årsak == BehandlingÅrsak.G_OMREGNING) { "Maskinelle vurderinger kun for G-omregning." }
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
         val stønadstype = fagsakService.hentFagsakForBehandling(behandling.id).stønadstype
+        kopierVurderingerTilNyBehandling(eksisterendeBehandlingId = behandling.forrigeBehandlingId ?: error("Finner ikke forrige behandlingId"),
+                                         nyBehandlingsId = behandling.id,
+                                         metadata = metadata,
+                                         stønadType = stønadstype
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId = behandling.id,
-                                                                 metadata = metadata,
-                                                                 stønadstype = stønadstype)
-                .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
-        vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
-        nyeVilkårsvurderinger.forEach {
-            vilkårsvurderingRepository.settMaskinelltOpprettet(it.id)
-        }
+        )
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {

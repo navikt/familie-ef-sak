@@ -255,12 +255,12 @@ fun vedtaksperiodeDto(årMånedFra: YearMonth = YearMonth.of(2021, 1),
                           aktivitet = aktivitet,
                           periodeType = periodeType)
 
-fun behandlingBarn(id: UUID,
+fun behandlingBarn(id: UUID = UUID.randomUUID(),
                    behandlingId: UUID,
-                   søknadBarnId: UUID,
-                   personIdent: String,
-                   navn: String,
-                   fødselTermindato: LocalDate): BehandlingBarn {
+                   søknadBarnId: UUID? = null,
+                   personIdent: String? = null,
+                   navn: String? = null,
+                   fødselTermindato: LocalDate? = null): BehandlingBarn {
     return BehandlingBarn(
             id = id,
             behandlingId = behandlingId,
