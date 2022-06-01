@@ -24,90 +24,98 @@ object GrunnlagsdataMapper {
     }
 
     fun mapBarn(pdlBarn: PdlBarn, personIdent: String) =
-            BarnMedIdent(fødsel = pdlBarn.fødsel,
-                         adressebeskyttelse = pdlBarn.adressebeskyttelse,
-                         navn = pdlBarn.navn.gjeldende(),
-                         bostedsadresse = pdlBarn.bostedsadresse,
-                         dødsfall = pdlBarn.dødsfall,
-                         deltBosted = pdlBarn.deltBosted,
-                         forelderBarnRelasjon = pdlBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
-                         personIdent = personIdent)
+        BarnMedIdent(
+            fødsel = pdlBarn.fødsel,
+            adressebeskyttelse = pdlBarn.adressebeskyttelse,
+            navn = pdlBarn.navn.gjeldende(),
+            bostedsadresse = pdlBarn.bostedsadresse,
+            dødsfall = pdlBarn.dødsfall,
+            deltBosted = pdlBarn.deltBosted,
+            forelderBarnRelasjon = pdlBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
+            personIdent = personIdent
+        )
 
     fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
-            barneForeldre.map {
-                AnnenForelderMedIdent(
-                        adressebeskyttelse = it.value.adressebeskyttelse,
-                        personIdent = it.key,
-                        fødsel = it.value.fødsel,
-                        bostedsadresse = it.value.bostedsadresse,
-                        dødsfall = it.value.dødsfall,
-                        navn = it.value.navn.gjeldende()
-                )
-            }
+        barneForeldre.map {
+            AnnenForelderMedIdent(
+                adressebeskyttelse = it.value.adressebeskyttelse,
+                personIdent = it.key,
+                fødsel = it.value.fødsel,
+                bostedsadresse = it.value.bostedsadresse,
+                dødsfall = it.value.dødsfall,
+                navn = it.value.navn.gjeldende()
+            )
+        }
 
     fun mapSøker(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>) = Søker(
-            sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
-            adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
-            bostedsadresse = pdlSøker.bostedsadresse,
-            dødsfall = pdlSøker.dødsfall.gjeldende(),
-            forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
-            fullmakt = mapFullmakt(pdlSøker, andrePersoner),
-            fødsel = pdlSøker.fødsel,
-            folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
-            innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
-            kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
-            kontaktadresse = pdlSøker.kontaktadresse,
-            navn = pdlSøker.navn.gjeldende(),
-            opphold = pdlSøker.opphold,
-            oppholdsadresse = pdlSøker.oppholdsadresse,
-            statsborgerskap = pdlSøker.statsborgerskap,
-            telefonnummer = pdlSøker.telefonnummer,
-            tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
-            utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-            vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner)
+        sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
+        adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
+        bostedsadresse = pdlSøker.bostedsadresse,
+        dødsfall = pdlSøker.dødsfall.gjeldende(),
+        forelderBarnRelasjon = pdlSøker.forelderBarnRelasjon.mapForelderBarnRelasjon(),
+        fullmakt = mapFullmakt(pdlSøker, andrePersoner),
+        fødsel = pdlSøker.fødsel,
+        folkeregisterpersonstatus = pdlSøker.folkeregisterpersonstatus,
+        innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
+        kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
+        kontaktadresse = pdlSøker.kontaktadresse,
+        navn = pdlSøker.navn.gjeldende(),
+        opphold = pdlSøker.opphold,
+        oppholdsadresse = pdlSøker.oppholdsadresse,
+        statsborgerskap = pdlSøker.statsborgerskap,
+        telefonnummer = pdlSøker.telefonnummer,
+        tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
+        utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
+        vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner)
     )
 
     private fun List<ForelderBarnRelasjonPdl>.mapForelderBarnRelasjon() =
-            this.mapNotNull {
-                it.relatertPersonsIdent?.let { relatertPersonsIdent ->
-                    ForelderBarnRelasjon(relatertPersonsIdent,
-                                         it.relatertPersonsRolle,
-                                         it.minRolleForPerson)
-                }
+        this.mapNotNull {
+            it.relatertPersonsIdent?.let { relatertPersonsIdent ->
+                ForelderBarnRelasjon(
+                    relatertPersonsIdent,
+                    it.relatertPersonsRolle,
+                    it.minRolleForPerson
+                )
             }
+        }
 
     /**
      * Legger inn navn fra [andrePersoner] hvis personIdent finnes
      */
     private fun mapVergemålEllerFremtidsfullmakt(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>) =
-            pdlSøker.vergemaalEllerFremtidsfullmakt.map { vergemaal ->
-                val personIdent = vergemaal.vergeEllerFullmektig.motpartsPersonident
-                personIdent?.let { andrePersoner[it] }?.navn?.gjeldende()
-                        ?.let { Personnavn(etternavn = it.etternavn, fornavn = it.fornavn, mellomnavn = it.mellomnavn) }
-                        ?.let { vergemaal.copy(vergeEllerFullmektig = vergemaal.vergeEllerFullmektig.copy(navn = it)) }
+        pdlSøker.vergemaalEllerFremtidsfullmakt.map { vergemaal ->
+            val personIdent = vergemaal.vergeEllerFullmektig.motpartsPersonident
+            personIdent?.let { andrePersoner[it] }?.navn?.gjeldende()
+                ?.let { Personnavn(etternavn = it.etternavn, fornavn = it.fornavn, mellomnavn = it.mellomnavn) }
+                ?.let { vergemaal.copy(vergeEllerFullmektig = vergemaal.vergeEllerFullmektig.copy(navn = it)) }
                 ?: vergemaal
-            }
+        }
 
     private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {
 
         return pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]
-            SivilstandMedNavn(type = Sivilstandstype.valueOf(it.type.name),
-                              gyldigFraOgMed = it.gyldigFraOgMed,
-                              relatertVedSivilstand = it.relatertVedSivilstand,
-                              bekreftelsesdato = it.bekreftelsesdato,
-                              dødsfall = person?.dødsfall?.gjeldende(),
-                              metadata = it.metadata,
-                              navn = person?.navn?.gjeldende()?.visningsnavn())
+            SivilstandMedNavn(
+                type = Sivilstandstype.valueOf(it.type.name),
+                gyldigFraOgMed = it.gyldigFraOgMed,
+                relatertVedSivilstand = it.relatertVedSivilstand,
+                bekreftelsesdato = it.bekreftelsesdato,
+                dødsfall = person?.dødsfall?.gjeldende(),
+                metadata = it.metadata,
+                navn = person?.navn?.gjeldende()?.visningsnavn()
+            )
         }
     }
 
     private fun mapFullmakt(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<FullmaktMedNavn> {
         return pdlSøker.fullmakt.map {
-            FullmaktMedNavn(gyldigFraOgMed = it.gyldigFraOgMed,
-                            gyldigTilOgMed = it.gyldigTilOgMed,
-                            motpartsPersonident = it.motpartsPersonident,
-                            navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn())
+            FullmaktMedNavn(
+                gyldigFraOgMed = it.gyldigFraOgMed,
+                gyldigTilOgMed = it.gyldigTilOgMed,
+                motpartsPersonident = it.motpartsPersonident,
+                navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn()
+            )
         }
     }
 }

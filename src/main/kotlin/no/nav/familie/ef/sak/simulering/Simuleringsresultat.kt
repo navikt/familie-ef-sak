@@ -9,11 +9,11 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 @Table
-data class Simuleringsresultat(@Id
-                               val behandlingId: UUID,
-                               val data: DetaljertSimuleringResultat,
-                               @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                               val sporbar: Sporbar = Sporbar(),
-                               val beriketData: BeriketSimuleringsresultat)
-
-
+data class Simuleringsresultat(
+    @Id
+    val behandlingId: UUID,
+    val data: DetaljertSimuleringResultat,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar(),
+    val beriketData: BeriketSimuleringsresultat
+)

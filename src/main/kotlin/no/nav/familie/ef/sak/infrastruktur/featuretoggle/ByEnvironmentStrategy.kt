@@ -21,8 +21,7 @@ class ByEnvironmentStrategy : Strategy {
     override fun isEnabled(map: Map<String, String>?, unleashContext: UnleashContext): Boolean {
 
         return unleashContext.environment
-                .map { env -> map?.get(miljøKey)?.split(',')?.contains(env) ?: false }
-                .orElse(false)
+            .map { env -> map?.get(miljøKey)?.split(',')?.contains(env) ?: false }
+            .orElse(false)
     }
-
 }

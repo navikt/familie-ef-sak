@@ -53,7 +53,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
-
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
@@ -62,17 +61,22 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet avslå`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VEDTA_BLANKETT,
-                                                                type = BehandlingType.BLANKETT,
-                                                                status = BehandlingStatus.UTREDES))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.VEDTA_BLANKETT,
+                type = BehandlingType.BLANKETT,
+                status = BehandlingStatus.UTREDES
+            )
+        )
         val vedtakDto = Avslå(avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT)
-        val vedtak = Vedtak(behandlingId = behandling.id,
-                            avslåBegrunnelse = "avslår vedtaket",
-                            avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
-                            resultatType = ResultatType.AVSLÅ)
+        val vedtak = Vedtak(
+            behandlingId = behandling.id,
+            avslåBegrunnelse = "avslår vedtaket",
+            avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
+            resultatType = ResultatType.AVSLÅ
+        )
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
-
 
         assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
     }
@@ -80,21 +84,29 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal klare å inserte ett vedtak med resultatet innvilge`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VEDTA_BLANKETT,
-                                                                type = BehandlingType.BLANKETT,
-                                                                status = BehandlingStatus.UTREDES))
-        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
-                                                   inntektBegrunnelse = "inntekt begrunnelse")
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.VEDTA_BLANKETT,
+                type = BehandlingType.BLANKETT,
+                status = BehandlingStatus.UTREDES
+            )
+        )
+        val vedtakDto = InnvilgelseOvergangsstønad(
+            periodeBegrunnelse = "periode begrunnelse",
+            inntektBegrunnelse = "inntekt begrunnelse"
+        )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
-        val vedtak = Vedtak(behandlingId = behandling.id,
-                            periodeBegrunnelse = "periode begrunnelse",
-                            inntektBegrunnelse = "inntekt begrunnelse",
-                            resultatType = ResultatType.INNVILGE,
-                            inntekter = InntektWrapper(emptyList()),
-                            avslåBegrunnelse = null,
-                            perioder = PeriodeWrapper(emptyList()))
+        val vedtak = Vedtak(
+            behandlingId = behandling.id,
+            periodeBegrunnelse = "periode begrunnelse",
+            inntektBegrunnelse = "inntekt begrunnelse",
+            resultatType = ResultatType.INNVILGE,
+            inntekter = InntektWrapper(emptyList()),
+            avslåBegrunnelse = null,
+            perioder = PeriodeWrapper(emptyList())
+        )
 
         assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
     }
@@ -103,15 +115,16 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     internal fun `Skal returnere riktig feilmelding i response når fullfør ikke er mulig pga valideringsfeil`() {
         val (_, behandling) = lagFagsakOgBehandling()
 
-        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
-                                                   inntektBegrunnelse = "inntekt begrunnelse")
+        val vedtakDto = InnvilgelseOvergangsstønad(
+            periodeBegrunnelse = "periode begrunnelse",
+            inntektBegrunnelse = "inntekt begrunnelse"
+        )
 
         vilkårsvurderingService.hentEllerOpprettVurderinger(behandlingId = behandling.id) // ingen ok.
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
         assertThat(respons.body.frontendFeilmelding).isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
-
     }
 
     @Test
@@ -120,7 +133,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val revurdering = lagRevurdering(stegType = StegType.BESLUTTE_VEDTAK, fagsak)
 
         val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
-                hentBeløpsperioderForBehandling(behandling.id)
+            hentBeløpsperioderForBehandling(behandling.id)
         val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
         assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
@@ -137,28 +150,40 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
-        val førstegangsbehandling = behandlingRepository.insert(behandling(fagsak,
-                                                                           steg = stegType,
-                                                                           type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                                           status = BehandlingStatus.FERDIGSTILT))
+        val førstegangsbehandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = stegType,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
 
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val tilkjentYtelse = lagTilkjentYtelse(behandlingId = førstegangsbehandling.id,
-                                               andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
-                                                       fraOgMed = LocalDate.of(2022, 1, 1),
-                                                       kildeBehandlingId = førstegangsbehandling.id,
-                                                       beløp = 10_000,
-                                                       tilOgMed = LocalDate.of(2022, 4, 30),
-                                               )))
-        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
-                                                   inntektBegrunnelse = "inntekt begrunnelse",
-                                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 1),
-                                                                      årMånedTil = YearMonth.of(2022, 4),
-                                                                      aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                                      periodeType = VedtaksperiodeType.HOVEDPERIODE)),
-                                                   inntekter = emptyList())
-
-
+        val tilkjentYtelse = lagTilkjentYtelse(
+            behandlingId = førstegangsbehandling.id,
+            andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse(
+                    fraOgMed = LocalDate.of(2022, 1, 1),
+                    kildeBehandlingId = førstegangsbehandling.id,
+                    beløp = 10_000,
+                    tilOgMed = LocalDate.of(2022, 4, 30),
+                )
+            )
+        )
+        val vedtakDto = InnvilgelseOvergangsstønad(
+            periodeBegrunnelse = "periode begrunnelse",
+            inntektBegrunnelse = "inntekt begrunnelse",
+            perioder = listOf(
+                VedtaksperiodeDto(
+                    årMånedFra = YearMonth.of(2022, 1),
+                    årMånedTil = YearMonth.of(2022, 4),
+                    aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                    periodeType = VedtaksperiodeType.HOVEDPERIODE
+                )
+            ),
+            inntekter = emptyList()
+        )
 
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
@@ -169,52 +194,73 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagRevurdering(stegType: StegType = StegType.BESLUTTE_VEDTAK, fagsak: Fagsak): Behandling {
-        val revurdering = behandlingRepository.insert(behandling(fagsak,
-                                                                 steg = stegType,
-                                                                 type = BehandlingType.REVURDERING,
-                                                                 status = BehandlingStatus.UTREDES))
+        val revurdering = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = stegType,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.UTREDES
+            )
+        )
         val tilkjentYtelse =
-                lagTilkjentYtelse(behandlingId = revurdering.id,
-                                  andelerTilkjentYtelse =
-                                  listOf(lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 1, 1),
-                                                                beløp = 10_000,
-                                                                kildeBehandlingId = revurdering.id,
-                                                                tilOgMed = LocalDate.of(2022, 2, 28)),
-                                         lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 3, 1),
-                                                                beløp = 12_000,
-                                                                kildeBehandlingId = revurdering.id,
-                                                                tilOgMed = LocalDate.of(2022, 6, 30))))
+            lagTilkjentYtelse(
+                behandlingId = revurdering.id,
+                andelerTilkjentYtelse =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.of(2022, 1, 1),
+                        beløp = 10_000,
+                        kildeBehandlingId = revurdering.id,
+                        tilOgMed = LocalDate.of(2022, 2, 28)
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.of(2022, 3, 1),
+                        beløp = 12_000,
+                        kildeBehandlingId = revurdering.id,
+                        tilOgMed = LocalDate.of(2022, 6, 30)
+                    )
+                )
+            )
 
-        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "periode begrunnelse",
-                                                   inntektBegrunnelse = "inntekt begrunnelse",
-                                                   perioder = listOf(VedtaksperiodeDto(årMånedFra = YearMonth.of(2022, 3),
-                                                                      årMånedTil = YearMonth.of(2022, 6),
-                                                                      aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                                                      periodeType = VedtaksperiodeType.HOVEDPERIODE)),
-                                                   inntekter = emptyList())
+        val vedtakDto = InnvilgelseOvergangsstønad(
+            periodeBegrunnelse = "periode begrunnelse",
+            inntektBegrunnelse = "inntekt begrunnelse",
+            perioder = listOf(
+                VedtaksperiodeDto(
+                    årMånedFra = YearMonth.of(2022, 3),
+                    årMånedTil = YearMonth.of(2022, 6),
+                    aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+                    periodeType = VedtaksperiodeType.HOVEDPERIODE
+                )
+            ),
+            inntekter = emptyList()
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
     }
 
     private fun fatteVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(localhost("/api/beregning/$id/lagre-blankettvedtak"),
-                                     HttpMethod.POST,
-                                     HttpEntity(vedtakDto, headers))
+        return restTemplate.exchange(
+            localhost("/api/beregning/$id/lagre-blankettvedtak"),
+            HttpMethod.POST,
+            HttpEntity(vedtakDto, headers)
+        )
     }
 
-
     private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(localhost("/api/vedtak/$id/lagre-vedtak"),
-                                     HttpMethod.POST,
-                                     HttpEntity(vedtakDto, headers))
+        return restTemplate.exchange(
+            localhost("/api/vedtak/$id/lagre-vedtak"),
+            HttpMethod.POST,
+            HttpEntity(vedtakDto, headers)
+        )
     }
 
     private fun hentBeløpsperioderForBehandling(id: UUID): ResponseEntity<Ressurs<List<Beløpsperiode>>> {
-        return restTemplate.exchange(localhost("/api/beregning/$id"),
-                                     HttpMethod.GET,
-                                     HttpEntity<Ressurs<List<Beløpsperiode>>>(headers))
+        return restTemplate.exchange(
+            localhost("/api/beregning/$id"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<List<Beløpsperiode>>>(headers)
+        )
     }
-
-
 }

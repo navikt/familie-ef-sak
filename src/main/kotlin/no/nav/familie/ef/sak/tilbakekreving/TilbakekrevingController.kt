@@ -21,9 +21,11 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as Tilbakekrev
 @RestController
 @RequestMapping(path = ["/api/tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
-class TilbakekrevingController(private val tilgangService: TilgangService,
-                               private val behandlingService: BehandlingService,
-                               private val tilbakekrevingService: TilbakekrevingService) {
+class TilbakekrevingController(
+    private val tilgangService: TilgangService,
+    private val behandlingService: BehandlingService,
+    private val tilbakekrevingService: TilbakekrevingService
+) {
 
     @PostMapping("/{behandlingId}")
     fun lagreTilbakekreving(@PathVariable behandlingId: UUID, @RequestBody tilbakekrevingDto: TilbakekrevingDto): Ressurs<UUID> {
@@ -66,11 +68,12 @@ class TilbakekrevingController(private val tilgangService: TilgangService,
     }
 
     @PostMapping("/{behandlingId}/brev/generer")
-    fun genererTilbakekekrevingBrevMedVarseltekst(@PathVariable behandlingId: UUID,
-                                                  @RequestBody varseltekstDto: VarseltekstDto): Ressurs<ByteArray> {
+    fun genererTilbakekekrevingBrevMedVarseltekst(
+        @PathVariable behandlingId: UUID,
+        @RequestBody varseltekstDto: VarseltekstDto
+    ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         return Ressurs.success(tilbakekrevingService.genererBrev(saksbehandling, varseltekstDto.varseltekst))
     }
-
 }

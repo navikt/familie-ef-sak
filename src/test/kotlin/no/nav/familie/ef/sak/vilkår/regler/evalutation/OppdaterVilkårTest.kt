@@ -31,29 +31,32 @@ import java.util.UUID
 
 internal class OppdaterVilkårTest {
 
-
     @Test
     fun `Skal lage ALDER_PÅ_BARN-vurderinger for barn det er søkt om OG de andre barna som finnes - barnetilsyn`() {
 
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
-                id = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = null,
-                navn = null,
-                fødselTermindato = null,
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = null,
+            navn = null,
+            fødselTermindato = null,
         )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
-        val metadata = HovedregelMetadata(sivilstandSøknad = null,
-                                          sivilstandstype = GIFT,
-                                          erMigrering = false,
-                                          barn = listOf(barn, barnUtenSøknad),
-                                          søktOmBarnetilsyn = listOf(barn.id))
+        val metadata = HovedregelMetadata(
+            sivilstandSøknad = null,
+            sivilstandstype = GIFT,
+            erMigrering = false,
+            barn = listOf(barn, barnUtenSøknad),
+            søktOmBarnetilsyn = listOf(barn.id)
+        )
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
-                                                                 metadata,
-                                                                 StønadType.BARNETILSYN)
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
+            behandlingId,
+            metadata,
+            StønadType.BARNETILSYN
+        )
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(2)
         val barnIdMedAlderPåBarnVilkår = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }.map { it.barnId }
@@ -65,23 +68,27 @@ internal class OppdaterVilkårTest {
 
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
-                id = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = null,
-                navn = null,
-                fødselTermindato = null,
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = null,
+            navn = null,
+            fødselTermindato = null,
         )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
-        val metadata = HovedregelMetadata(sivilstandSøknad = null,
-                                          sivilstandstype = GIFT,
-                                          erMigrering = false,
-                                          barn = listOf(barn, barnUtenSøknad),
-                                          søktOmBarnetilsyn = listOf(barn.id))
+        val metadata = HovedregelMetadata(
+            sivilstandSøknad = null,
+            sivilstandstype = GIFT,
+            erMigrering = false,
+            barn = listOf(barn, barnUtenSøknad),
+            søktOmBarnetilsyn = listOf(barn.id)
+        )
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
-                                                                 metadata,
-                                                                 StønadType.BARNETILSYN)
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
+            behandlingId,
+            metadata,
+            StønadType.BARNETILSYN
+        )
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(2)
         val barnIdMedVilkårAleneomsorg = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }.map { it.barnId }
@@ -93,22 +100,26 @@ internal class OppdaterVilkårTest {
 
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
-                id = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = null,
-                navn = null,
-                fødselTermindato = null,
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = null,
+            navn = null,
+            fødselTermindato = null,
         )
-        val metadata = HovedregelMetadata(sivilstandSøknad = null,
-                                          sivilstandstype = GIFT,
-                                          erMigrering = false,
-                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
-                                          søktOmBarnetilsyn = emptyList())
+        val metadata = HovedregelMetadata(
+            sivilstandSøknad = null,
+            sivilstandstype = GIFT,
+            erMigrering = false,
+            barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+            søktOmBarnetilsyn = emptyList()
+        )
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
-                                                                 metadata,
-                                                                 StønadType.OVERGANGSSTØNAD)
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
+            behandlingId,
+            metadata,
+            StønadType.OVERGANGSSTØNAD
+        )
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(0)
     }
@@ -118,33 +129,38 @@ internal class OppdaterVilkårTest {
 
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
-                id = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = null,
-                navn = null,
-                fødselTermindato = null,
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = null,
+            navn = null,
+            fødselTermindato = null,
         )
-        val metadata = HovedregelMetadata(sivilstandSøknad = null,
-                                          sivilstandstype = GIFT,
-                                          erMigrering = false,
-                                          barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
-                                          søktOmBarnetilsyn = emptyList())
+        val metadata = HovedregelMetadata(
+            sivilstandSøknad = null,
+            sivilstandstype = GIFT,
+            erMigrering = false,
+            barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
+            søktOmBarnetilsyn = emptyList()
+        )
 
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(behandlingId,
-                                                                 metadata,
-                                                                 StønadType.OVERGANGSSTØNAD)
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
+            behandlingId,
+            metadata,
+            StønadType.OVERGANGSSTØNAD
+        )
 
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALENEOMSORG }).hasSize(2)
     }
-
 
     @Test
     fun `har kun svart på første spørsmål som er en sluttnode - allt ok`() {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
-        val resultat = validerOgOppdater(vilkårsvurdering, regel,
-                                         VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering, regel,
+            VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)
+        )
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -154,9 +170,11 @@ internal class OppdaterVilkårTest {
     fun `har svart på två spørsmål hvor det siste er en sluttnode - allt ok`() {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
-        val resultat = validerOgOppdater(vilkårsvurdering, regel,
-                                         VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
-                                         VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering, regel,
+            VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
+            VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA)
+        )
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -170,9 +188,11 @@ internal class OppdaterVilkårTest {
     fun `har svart på två spørsmål hvor det siste er en sluttnode men mangler begrunnelse på første`() {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
-        val resultat = validerOgOppdater(vilkårsvurdering, regel,
-                                         VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
-                                         VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering, regel,
+            VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
+            VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA)
+        )
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
@@ -182,9 +202,11 @@ internal class OppdaterVilkårTest {
     fun `har svart på två spørsmål hvor det som gir IKKE_OPPFYLT`() {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
-        val resultat = validerOgOppdater(vilkårsvurdering, regel,
-                                         VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
-                                         VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering, regel,
+            VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
+            VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI)
+        )
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
         assertThat(resultat.førsteDelvilkår().resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
@@ -194,15 +216,21 @@ internal class OppdaterVilkårTest {
     fun `två rotRegler - en IKKE_OPPFYLT og en OPPFYLT`() {
         val regel = VilkårsregelToHovedregler()
         val vilkårsvurdering = opprettVurdering(regel)
-        val resultat = validerOgOppdater(vilkårsvurdering, regel,
-                                         delvilkårsvurderingDto(VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)),
-                                         delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                                                                             SvarId.NEI)))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering, regel,
+            delvilkårsvurderingDto(VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)),
+            delvilkårsvurderingDto(
+                VurderingDto(
+                    RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+                    SvarId.NEI
+                )
+            )
+        )
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
         assertThat(resultat.delvilkår(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE).resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(resultat.delvilkår(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE).resultat)
-                .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+            .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
     }
 
     /**
@@ -213,40 +241,56 @@ internal class OppdaterVilkårTest {
     fun `två rotRegler - en IKKE_TATT_STILLING_TIL og en OPPFYLT`() {
         val regel = VilkårsregelToHovedregler()
         val vilkårsvurdering = opprettVurdering(regel)
-        val resultat = validerOgOppdater(vilkårsvurdering, regel,
-                                         delvilkårsvurderingDto(
-                                                 VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "")),
-                                         delvilkårsvurderingDto(VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                                                                             SvarId.JA)))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering, regel,
+            delvilkårsvurderingDto(
+                VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "")
+            ),
+            delvilkårsvurderingDto(
+                VurderingDto(
+                    RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+                    SvarId.JA
+                )
+            )
+        )
 
         assertThat(resultat.resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(resultat.delvilkår(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE).resultat)
-                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(resultat.delvilkår(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE).resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
     }
-
 
     @Test
     fun `sivilstand - trenger ikke å svare på hovedvilkår som ikke er aktuelle`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
         val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
-                                                                                Sivilstandstype.SKILT,
-                                                                                barn = barn,
-                                                                                søktOmBarnetilsyn = emptyList()))
+        val initDelvilkår = regel.initereDelvilkårsvurdering(
+            HovedregelMetadata(
+                søknad.sivilstand,
+                Sivilstandstype.SKILT,
+                barn = barn,
+                søktOmBarnetilsyn = emptyList()
+            )
+        )
         val aktuelleDelvilkår = initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }
         assertThat(initDelvilkår).hasSize(5)
         assertThat(initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_AKTUELL }).hasSize(4)
         assertThat(aktuelleDelvilkår).hasSize(1)
 
-        val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
-                                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                type = VilkårType.SIVILSTAND,
-                                                delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår))
+        val vilkårsvurdering = Vilkårsvurdering(
+            behandlingId = UUID.randomUUID(),
+            resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            type = VilkårType.SIVILSTAND,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår)
+        )
 
-        val oppdatering = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                        listOf(VurderingDto(aktuelleDelvilkår.first().hovedregel, SvarId.JA))))
+        val oppdatering = listOf(
+            DelvilkårsvurderingDto(
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                listOf(VurderingDto(aktuelleDelvilkår.first().hovedregel, SvarId.JA))
+            )
+        )
         val lagNyOppdatertVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering)
         assertThat(lagNyOppdatertVilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger).hasSize(regel.hovedregler.size)
     }
@@ -256,164 +300,281 @@ internal class OppdaterVilkårTest {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
         val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
-        val initDelvilkår = regel.initereDelvilkårsvurdering(HovedregelMetadata(søknad.sivilstand,
-                                                                                Sivilstandstype.SKILT,
-                                                                                barn = barn,
-                                                                                søktOmBarnetilsyn = emptyList()))
+        val initDelvilkår = regel.initereDelvilkårsvurdering(
+            HovedregelMetadata(
+                søknad.sivilstand,
+                Sivilstandstype.SKILT,
+                barn = barn,
+                søktOmBarnetilsyn = emptyList()
+            )
+        )
 
-        val vilkårsvurdering = Vilkårsvurdering(behandlingId = UUID.randomUUID(),
-                                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                type = VilkårType.SIVILSTAND,
-                                                delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår))
+        val vilkårsvurdering = Vilkårsvurdering(
+            behandlingId = UUID.randomUUID(),
+            resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            type = VilkårType.SIVILSTAND,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår)
+        )
 
-        val oppdatering = listOf(DelvilkårsvurderingDto(Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                        listOf(VurderingDto(RegelId.SIVILSTAND_UNNTAK, SvarId.JA))))
+        val oppdatering = listOf(
+            DelvilkårsvurderingDto(
+                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                listOf(VurderingDto(RegelId.SIVILSTAND_UNNTAK, SvarId.JA))
+            )
+        )
         assertThat(catchThrowable { OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering, oppdatering) })
-                .hasMessage("Delvilkårsvurderinger savner svar på hovedregler - " +
-                            "hovedregler=[KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE] delvilkår=[SIVILSTAND_UNNTAK]")
+            .hasMessage(
+                "Delvilkårsvurderinger savner svar på hovedregler - " +
+                    "hovedregler=[KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE] delvilkår=[SIVILSTAND_UNNTAK]"
+            )
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir OPPFYLT hvis en er OPPFYLT`() {
         assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT))))
-                .isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
-                                                                    aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT))))
-                .isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
-                                                                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
-                .isEqualTo(Vilkårsresultat.OPPFYLT)
-        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.OPPFYLT),
-                                                                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
-                .isEqualTo(Vilkårsresultat.OPPFYLT)
+            .isEqualTo(Vilkårsresultat.OPPFYLT)
+        assertThat(
+            utledResultatForVilkårSomGjelderFlereBarn(
+                listOf(
+                    aleneomsorg(Vilkårsresultat.OPPFYLT),
+                    aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT)
+                )
+            )
+        )
+            .isEqualTo(Vilkårsresultat.OPPFYLT)
+        assertThat(
+            utledResultatForVilkårSomGjelderFlereBarn(
+                listOf(
+                    aleneomsorg(Vilkårsresultat.OPPFYLT),
+                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+                )
+            )
+        )
+            .isEqualTo(Vilkårsresultat.OPPFYLT)
+        assertThat(
+            utledResultatForVilkårSomGjelderFlereBarn(
+                listOf(
+                    aleneomsorg(Vilkårsresultat.OPPFYLT),
+                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES)
+                )
+            )
+        )
+            .isEqualTo(Vilkårsresultat.OPPFYLT)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir IKKE_OPPFYLT hvis en er oppfylt og resten er IKKE_OPPFYLT eller SKAL_IKKE_VURDERES`() {
         assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT))))
-                .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
-        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
-                                                                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
-                .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
-        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
-                                                                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
-                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+            .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+        assertThat(
+            utledResultatForVilkårSomGjelderFlereBarn(
+                listOf(
+                    aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
+                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES)
+                )
+            )
+        )
+            .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
+        assertThat(
+            utledResultatForVilkårSomGjelderFlereBarn(
+                listOf(
+                    aleneomsorg(Vilkårsresultat.IKKE_OPPFYLT),
+                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+                )
+            )
+        )
+            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir SKAL_IKKE_VURDERES hvis kun SKAL_IKKE_VURDERES`() {
         assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
-                .isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
+            .isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - gir IKKE_TATT_STILLING_TIL om det finnes IKKE_TATT_STILLING_TIL og SKAL_IKKE_VURDERES`() {
         assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL))))
-                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-        assertThat(utledResultatForVilkårSomGjelderFlereBarn(listOf(aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL),
-                                                                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES))))
-                .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(
+            utledResultatForVilkårSomGjelderFlereBarn(
+                listOf(
+                    aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL),
+                    aleneomsorg(Vilkårsresultat.SKAL_IKKE_VURDERES)
+                )
+            )
+        )
+            .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }
 
     @Test
     fun `utledResultatForAleneomsorg - skal kaste feil hvis vilkåren inneholder noe annet enn aleneomsorg`() {
         val vilkårForSivilstand = aleneomsorg(Vilkårsresultat.IKKE_TATT_STILLING_TIL).copy(type = VilkårType.SIVILSTAND)
         assertThat(catchThrowable { utledResultatForVilkårSomGjelderFlereBarn(listOf(vilkårForSivilstand)) })
-                .hasMessage("Denne metoden kan kun kalles med vilkår som kan ha flere barn")
+            .hasMessage("Denne metoden kan kun kalles med vilkår som kan ha flere barn")
     }
 
     @Test
     fun `erAlleVilkårVurdert - alle vilkåren er OPPFYLT`() {
         assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT)))
-                .isTrue
+            .isTrue
     }
 
     @Test
     fun `erAlleVilkårVurdert - skal kunne ha en kombinasjon av OPPFYLT og SKAL_IKKE_VURDERES`() {
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT,
-                                                      Vilkårsresultat.SKAL_IKKE_VURDERES)))
-                .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.OPPFYLT,
+                    Vilkårsresultat.SKAL_IKKE_VURDERES
+                )
+            )
+        )
+            .isTrue
     }
 
     @Test
     fun `erAlleVilkårVurdert - ett vilkår er IKKE_OPPFYLT og resten er gyldig`() {
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                                      Vilkårsresultat.OPPFYLT)))
-                .isTrue
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                                      Vilkårsresultat.SKAL_IKKE_VURDERES)))
-                .isTrue
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                                      Vilkårsresultat.IKKE_OPPFYLT)))
-                .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.IKKE_OPPFYLT,
+                    Vilkårsresultat.OPPFYLT
+                )
+            )
+        )
+            .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.IKKE_OPPFYLT,
+                    Vilkårsresultat.SKAL_IKKE_VURDERES
+                )
+            )
+        )
+            .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.IKKE_OPPFYLT,
+                    Vilkårsresultat.IKKE_OPPFYLT
+                )
+            )
+        )
+            .isTrue
     }
 
     @Test
     fun `erAlleVilkårVurdert - IKKE_TATT_STILLING_TIL skal gi false`() {
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.IKKE_OPPFYLT,
-                                                      Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
-                .isFalse
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.OPPFYLT,
-                                                      Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
-                .isFalse
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                                      Vilkårsresultat.IKKE_TATT_STILLING_TIL)))
-                .isFalse
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.IKKE_OPPFYLT,
+                    Vilkårsresultat.IKKE_TATT_STILLING_TIL
+                )
+            )
+        )
+            .isFalse
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.OPPFYLT,
+                    Vilkårsresultat.IKKE_TATT_STILLING_TIL
+                )
+            )
+        )
+            .isFalse
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.SKAL_IKKE_VURDERES,
+                    Vilkårsresultat.IKKE_TATT_STILLING_TIL
+                )
+            )
+        )
+            .isFalse
     }
 
     @Test
     fun `erAlleVilkårVurdert - SKAL_IKKE_VURDERES må være i en kombinasjon med IKKE_OPPFYLT`() {
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                                      Vilkårsresultat.IKKE_OPPFYLT)))
-                .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.SKAL_IKKE_VURDERES,
+                    Vilkårsresultat.IKKE_OPPFYLT
+                )
+            )
+        )
+            .isTrue
 
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                                      Vilkårsresultat.SKAL_IKKE_VURDERES)))
-                .withFailMessage("Alle vilkår skal kunne være satt til SKAL_IKKE_VURDERES")
-                .isTrue
-        assertThat(erAlleVilkårTattStillingTil(listOf(Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                                      Vilkårsresultat.OPPFYLT)))
-                .withFailMessage("Alle vilkår skal kunne være satt til enten SKAL_IKKE_VURDERES eller OPPFYLT")
-                .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.SKAL_IKKE_VURDERES,
+                    Vilkårsresultat.SKAL_IKKE_VURDERES
+                )
+            )
+        )
+            .withFailMessage("Alle vilkår skal kunne være satt til SKAL_IKKE_VURDERES")
+            .isTrue
+        assertThat(
+            erAlleVilkårTattStillingTil(
+                listOf(
+                    Vilkårsresultat.SKAL_IKKE_VURDERES,
+                    Vilkårsresultat.OPPFYLT
+                )
+            )
+        )
+            .withFailMessage("Alle vilkår skal kunne være satt til enten SKAL_IKKE_VURDERES eller OPPFYLT")
+            .isTrue
     }
 
     private fun aleneomsorg(vilkårsresultat: Vilkårsresultat) =
-            Vilkårsvurdering(behandlingId = UUID.randomUUID(),
-                             resultat = vilkårsresultat,
-                             type = VilkårType.ALENEOMSORG,
-                             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()))
+        Vilkårsvurdering(
+            behandlingId = UUID.randomUUID(),
+            resultat = vilkårsresultat,
+            type = VilkårType.ALENEOMSORG,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList())
+        )
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
-            this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.hovedregel == regelId }
+        this.delvilkårsvurdering.delvilkårsvurderinger.singleOrNull { it.hovedregel == regelId }
             ?: error("Finner ikke regelId=$regelId blant ${this.delvilkårsvurdering.delvilkårsvurderinger.map { it.hovedregel }}")
 
     private fun Vilkårsvurdering.førsteDelvilkår() = this.delvilkårsvurdering.delvilkårsvurderinger.first()
 
     private fun delvilkårsvurderingDto(vararg vurderinger: VurderingDto) =
-            DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
+        DelvilkårsvurderingDto(resultat = Vilkårsresultat.IKKE_AKTUELL, vurderinger = vurderinger.toList())
 
-    private fun validerOgOppdater(vilkårsvurdering: Vilkårsvurdering,
-                                  regel: Vilkårsregel,
-                                  vararg vurderinger: VurderingDto): Vilkårsvurdering {
+    private fun validerOgOppdater(
+        vilkårsvurdering: Vilkårsvurdering,
+        regel: Vilkårsregel,
+        vararg vurderinger: VurderingDto
+    ): Vilkårsvurdering {
         return validerOgOppdater(vilkårsvurdering, regel, delvilkårsvurderingDto(*vurderinger))
     }
 
-    private fun validerOgOppdater(vilkårsvurdering: Vilkårsvurdering,
-                                  regel: Vilkårsregel,
-                                  vararg delvilkårsvurderingDto: DelvilkårsvurderingDto): Vilkårsvurdering {
-        return OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering = vilkårsvurdering,
-                                                             vilkårsregler = mapOf(regel.vilkårType to regel),
-                                                             oppdatering = delvilkårsvurderingDto.toList())
+    private fun validerOgOppdater(
+        vilkårsvurdering: Vilkårsvurdering,
+        regel: Vilkårsregel,
+        vararg delvilkårsvurderingDto: DelvilkårsvurderingDto
+    ): Vilkårsvurdering {
+        return OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
+            vilkårsvurdering = vilkårsvurdering,
+            vilkårsregler = mapOf(regel.vilkårType to regel),
+            oppdatering = delvilkårsvurderingDto.toList()
+        )
     }
 
     private fun opprettVurdering(regel: Vilkårsregel): Vilkårsvurdering {
         val delvilkårsvurderinger = regel.hovedregler.map {
             Delvilkårsvurdering(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL, vurderinger = listOf(Vurdering(it)))
         }
-        return Vilkårsvurdering(behandlingId = UUID.randomUUID(),
-                                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                type = VilkårType.ALENEOMSORG,
-                                delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger))
+        return Vilkårsvurdering(
+            behandlingId = UUID.randomUUID(),
+            resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+            type = VilkårType.ALENEOMSORG,
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger)
+        )
     }
-
 }

@@ -24,10 +24,12 @@ import java.util.UUID
 @RequestMapping(path = ["/api/blankett"])
 @ProtectedWithClaims(issuer = "azuread")
 @Unprotected
-class BlankettController(private val tilgangService: TilgangService,
-                         private val blankettService: BlankettService,
-                         private val behandlingService: BehandlingService,
-                         private val oppgaveService: OppgaveService) {
+class BlankettController(
+    private val tilgangService: TilgangService,
+    private val blankettService: BlankettService,
+    private val behandlingService: BehandlingService,
+    private val oppgaveService: OppgaveService
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 

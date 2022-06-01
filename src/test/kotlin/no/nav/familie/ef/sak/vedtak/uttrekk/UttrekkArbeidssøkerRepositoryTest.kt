@@ -22,24 +22,36 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         for (i in 1..10) {
-            repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,
-                                                   vedtakId = behandling.id,
-                                                   årMåned = årMåned,
-                                                   registrertArbeidssøker = false))
+            repository.insert(
+                UttrekkArbeidssøkere(
+                    fagsakId = fagsak.id,
+                    vedtakId = behandling.id,
+                    årMåned = årMåned,
+                    registrertArbeidssøker = false
+                )
+            )
         }
 
         for (i in 1..5) {
-            repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,
-                                                   vedtakId = behandling.id,
-                                                   årMåned = årMåned.plusMonths(1),
-                                                   kontrollert = true,
-                                                   registrertArbeidssøker = false))
+            repository.insert(
+                UttrekkArbeidssøkere(
+                    fagsakId = fagsak.id,
+                    vedtakId = behandling.id,
+                    årMåned = årMåned.plusMonths(1),
+                    kontrollert = true,
+                    registrertArbeidssøker = false
+                )
+            )
         }
         for (i in 1..2) {
-            repository.insert(UttrekkArbeidssøkere(fagsakId = fagsak.id,
-                                                   vedtakId = behandling.id,
-                                                   årMåned = årMåned.plusMonths(1),
-                                                   registrertArbeidssøker = true))
+            repository.insert(
+                UttrekkArbeidssøkere(
+                    fagsakId = fagsak.id,
+                    vedtakId = behandling.id,
+                    årMåned = årMåned.plusMonths(1),
+                    registrertArbeidssøker = true
+                )
+            )
         }
     }
 

@@ -33,8 +33,10 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
     val behandlingService = mockk<BehandlingService>()
     val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
-    val service = OpprettOppgaveForMigrertFødtBarnTask(iverksettClient, behandlingService, tilkjentYtelseService,
-                                                       grunnlagsdataService)
+    val service = OpprettOppgaveForMigrertFødtBarnTask(
+        iverksettClient, behandlingService, tilkjentYtelseService,
+        grunnlagsdataService
+    )
 
     val oppgaverSlot = slot<OppgaverForBarnDto>()
 
@@ -88,22 +90,29 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         assertThat(oppgaver.single { it.aktivFra in etÅr.minusWeeks(1)..etÅr.plusWeeks(2) })
     }
 
-    private fun tilkjentYtelse(tilOgMed: LocalDate) = lagTilkjentYtelse(listOf(
-            lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed)))
+    private fun tilkjentYtelse(tilOgMed: LocalDate) = lagTilkjentYtelse(
+        listOf(
+            lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed)
+        )
+    )
 
     private fun opprettGrunnlagsdata(barnFødelsdato: LocalDate?): GrunnlagsdataMedMetadata {
         val grunnlagsdata = opprettGrunnlagsdata()
-        val fødsel = Fødsel(fødselsdato = barnFødelsdato,
-                            fødekommune = null,
-                            fødeland = null,
-                            fødested = null,
-                            fødselsår = null,
-                            metadata = Metadata(false))
+        val fødsel = Fødsel(
+            fødselsdato = barnFødelsdato,
+            fødekommune = null,
+            fødeland = null,
+            fødested = null,
+            fødselsår = null,
+            metadata = Metadata(false)
+        )
         val barn = opprettBarnMedIdent("1", fødsel = fødsel)
         return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), false, LocalDateTime.now())
     }
 
     private fun opprettOppgave(fødelsdato: LocalDate?) =
-            OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak(fagsakpersoner(setOf("1"))),
-                                                                listOf(BarnMinimumDto("1", "", fødelsdato)))
+        OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(
+            fagsak(fagsakpersoner(setOf("1"))),
+            listOf(BarnMinimumDto("1", "", fødelsdato))
+        )
 }

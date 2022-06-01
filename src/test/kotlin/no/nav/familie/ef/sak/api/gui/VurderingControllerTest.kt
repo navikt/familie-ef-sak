@@ -110,7 +110,6 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
-
     @Test
     internal fun `skal nullstille vurderingen for TIDLIGERE VEDTAKSPERIODER og initiere delvilkårsvurderingene med riktig resultattype`() {
         val opprettetVurdering = opprettInngangsvilkår().body.data!!
@@ -143,20 +142,23 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagOppdaterVilkårsvurderingMedSvarJa(it: VilkårsvurderingDto) =
-        SvarPåVurderingerDto(id = it.id,
-                             behandlingId = it.behandlingId,
-                             delvilkårsvurderinger = it.delvilkårsvurderinger.map {
-                                 it.copy(vurderinger = it.vurderinger.map { vurderingDto ->
-                                     vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
-                                 })
-                             })
-
+        SvarPåVurderingerDto(
+            id = it.id,
+            behandlingId = it.behandlingId,
+            delvilkårsvurderinger = it.delvilkårsvurderinger.map {
+                it.copy(
+                    vurderinger = it.vurderinger.map { vurderingDto ->
+                        vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
+                    }
+                )
+            }
+        )
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
-                søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-                StønadType.OVERGANGSSTØNAD
+            søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+            StønadType.OVERGANGSSTØNAD
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(

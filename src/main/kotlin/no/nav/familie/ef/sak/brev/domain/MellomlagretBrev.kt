@@ -4,9 +4,11 @@ import org.springframework.data.annotation.Id
 import java.time.LocalDate
 import java.util.UUID
 
-data class MellomlagretBrev(@Id
-                            val behandlingId: UUID,
-                            val brevverdier: String,
-                            val brevmal: String,
-                            val sanityVersjon: String,
-                            val opprettetTid: LocalDate)
+data class MellomlagretBrev(
+    @Id
+    val behandlingId: UUID,
+    val brevverdier: String,
+    val brevmal: String,
+    val sanityVersjon: String,
+    val opprettetTid: LocalDate
+)

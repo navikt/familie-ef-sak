@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected // kommer kunne brukes uten token
 @RestController
 @RequestMapping("api/automatisk-migrering")
-class AutomatiskMigreringController(private val automatiskMigreringService: AutomatiskMigreringService,
-                                    private val featureToggleService: FeatureToggleService) {
+class AutomatiskMigreringController(
+    private val automatiskMigreringService: AutomatiskMigreringService,
+    private val featureToggleService: FeatureToggleService
+) {
 
     @GetMapping
     fun migrerAutomatiskt(@RequestParam antall: Int) {

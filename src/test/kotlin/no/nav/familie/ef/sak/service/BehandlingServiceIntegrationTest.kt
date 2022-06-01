@@ -25,12 +25,18 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `opprettBehandling skal ikke være mulig å opprette en revurdering om forrige behandling ikke er ferdigstilt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsak = fagsak,
-                                               status = BehandlingStatus.UTREDES))
+        behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.UTREDES
+            )
+        )
         assertThatThrownBy {
-            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
-                                                fagsak.id,
-                                                behandlingsårsak = behandlingÅrsak)
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsak.id,
+                behandlingsårsak = behandlingÅrsak
+            )
         }.hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
     }
 
@@ -38,44 +44,60 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering om det ikke finnes en behandling fra før`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         assertThatThrownBy {
-            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
-                                                fagsak.id,
-                                                behandlingsårsak = behandlingÅrsak)
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsak.id,
+                behandlingsårsak = behandlingÅrsak
+            )
         }.hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
     }
 
     @Test
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering hvis forrige behandling er blankett`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsak = fagsak,
-                                               status = BehandlingStatus.FERDIGSTILT,
-                                               type = BehandlingType.BLANKETT))
+        behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                type = BehandlingType.BLANKETT
+            )
+        )
         assertThatThrownBy {
-            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
-                                                fagsak.id,
-                                                behandlingsårsak = behandlingÅrsak)
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsak.id,
+                behandlingsårsak = behandlingÅrsak
+            )
         }.hasMessage("Siste behandling ble behandlet i infotrygd, denne må migreres")
     }
 
     @Test
     internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering om forrige behandling er teknisk opphør`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(behandling(fagsak = fagsak,
-                                               status = BehandlingStatus.FERDIGSTILT,
-                                               type = BehandlingType.TEKNISK_OPPHØR))
-        assertThat(catchThrowable {
-            behandlingService.opprettBehandling(BehandlingType.REVURDERING,
-                                                fagsak.id,
-                                                behandlingsårsak = behandlingÅrsak)
-        })
-                .hasMessage("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør")
+        behandlingRepository.insert(
+            behandling(
+                fagsak = fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                type = BehandlingType.TEKNISK_OPPHØR
+            )
+        )
+        assertThat(
+            catchThrowable {
+                behandlingService.opprettBehandling(
+                    BehandlingType.REVURDERING,
+                    fagsak.id,
+                    behandlingsårsak = behandlingÅrsak
+                )
+            }
+        )
+            .hasMessage("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør")
     }
 
     @Test
     internal fun `hentBehandlinger - skal kaste feil hvis behandling ikke finnes`() {
         assertThatThrownBy { behandlingService.hentBehandlinger(setOf(UUID.randomUUID())) }
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessageContaining("Finner ikke Behandling for")
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("Finner ikke Behandling for")
     }
 
     @Test

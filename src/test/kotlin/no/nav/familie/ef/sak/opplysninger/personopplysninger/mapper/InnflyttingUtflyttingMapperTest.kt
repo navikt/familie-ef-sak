@@ -61,16 +61,23 @@ internal class InnflyttingUtflyttingMapperTest {
     }
 
     private fun lagInnflytting(gyldighetstidspunkt: LocalDate? = null) =
-            InnflyttingTilNorge(fraflyttingsland = "SWE",
-                                fraflyttingsstedIUtlandet = "Sted",
-                                folkeregistermetadata = Folkeregistermetadata(
-                                        gyldighetstidspunkt = gyldighetstidspunkt?.atStartOfDay(),
-                                        opphørstidspunkt = LocalDateTime.now()))
+        InnflyttingTilNorge(
+            fraflyttingsland = "SWE",
+            fraflyttingsstedIUtlandet = "Sted",
+            folkeregistermetadata = Folkeregistermetadata(
+                gyldighetstidspunkt = gyldighetstidspunkt?.atStartOfDay(),
+                opphørstidspunkt = LocalDateTime.now()
+            )
+        )
 
     private fun lagUtflytting(utflyttingsdato: LocalDate? = null) =
-            UtflyttingFraNorge(tilflyttingsland = "SWE",
-                               tilflyttingsstedIUtlandet = "Sted",
-                               utflyttingsdato = utflyttingsdato,
-                               folkeregistermetadata = Folkeregistermetadata(gyldighetstidspunkt = null,
-                                                                             opphørstidspunkt = null))
+        UtflyttingFraNorge(
+            tilflyttingsland = "SWE",
+            tilflyttingsstedIUtlandet = "Sted",
+            utflyttingsdato = utflyttingsdato,
+            folkeregistermetadata = Folkeregistermetadata(
+                gyldighetstidspunkt = null,
+                opphørstidspunkt = null
+            )
+        )
 }

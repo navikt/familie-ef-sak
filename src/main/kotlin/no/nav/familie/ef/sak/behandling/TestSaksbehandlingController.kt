@@ -56,18 +56,20 @@ import java.util.UUID
 @RequestMapping("/api/test")
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("!prod")
-class TestSaksbehandlingController(private val fagsakService: FagsakService,
-                                   private val behandlingshistorikkService: BehandlingshistorikkService,
-                                   private val iverksettService: IverksettService,
-                                   private val behandlingService: BehandlingService,
-                                   private val søknadService: SøknadService,
-                                   private val personService: PersonService,
-                                   private val grunnlagsdataService: GrunnlagsdataService,
-                                   private val barnService: BarnService,
-                                   private val taskRepository: TaskRepository,
-                                   private val oppgaveService: OppgaveService,
-                                   private val journalpostClient: JournalpostClient,
-                                   private val migreringService: MigreringService) {
+class TestSaksbehandlingController(
+    private val fagsakService: FagsakService,
+    private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val iverksettService: IverksettService,
+    private val behandlingService: BehandlingService,
+    private val søknadService: SøknadService,
+    private val personService: PersonService,
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val barnService: BarnService,
+    private val taskRepository: TaskRepository,
+    private val oppgaveService: OppgaveService,
+    private val journalpostClient: JournalpostClient,
+    private val migreringService: MigreringService
+) {
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
@@ -84,23 +86,36 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
             SKOLEPENGER -> lagSkolepengerBehandling(søknadBuilder.søknadSkolepenger, fagsak)
         }
 
-
         if (!behandling.erMigrering()) {
             iverksettService.startBehandling(behandling, fagsak)
             val grunnlagsdata =
-                    grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
-            barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id,
-                                                              fagsak.id,
-                                                              grunnlagsdata.grunnlagsdata.barn,
-                                                              fagsak.stønadstype)
-            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                                     steg = StegType.VILKÅR))
-            val oppgaveId = oppgaveService.opprettOppgave(behandling.id,
-                                                          Oppgavetype.BehandleSak,
-                                                          SikkerhetContext.hentSaksbehandler(true),
-                                                          "Dummy-oppgave opprettet i ny løsning")
-            taskRepository.save(taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id,
-                                                                                                 oppgaveId = oppgaveId)))
+                grunnlagsdataService.opprettGrunnlagsdata(behandling.id) // opprettGrunnlagsdata håndteres i migreringservice
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandling.id,
+                fagsak.id,
+                grunnlagsdata.grunnlagsdata.barn,
+                fagsak.stønadstype
+            )
+            behandlingshistorikkService.opprettHistorikkInnslag(
+                Behandlingshistorikk(
+                    behandlingId = behandling.id,
+                    steg = StegType.VILKÅR
+                )
+            )
+            val oppgaveId = oppgaveService.opprettOppgave(
+                behandling.id,
+                Oppgavetype.BehandleSak,
+                SikkerhetContext.hentSaksbehandler(true),
+                "Dummy-oppgave opprettet i ny løsning"
+            )
+            taskRepository.save(
+                taskRepository.save(
+                    BehandlingsstatistikkTask.opprettMottattTask(
+                        behandlingId = behandling.id,
+                        oppgaveId = oppgaveId
+                    )
+                )
+            )
         }
 
         return Ressurs.success(behandling.id)
@@ -108,95 +123,110 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 
     private fun lagBarnetilsynBehandling(søknadBarnetilsyn: SøknadBarnetilsyn, fagsak: Fagsak): Behandling {
 
-
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
-                                                             behandlingsårsak = BehandlingÅrsak.SØKNAD)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = BehandlingÅrsak.SØKNAD
+        )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
-        søknadService.lagreSøknadForBarnetilsyn(søknadBarnetilsyn,
-                                                behandling.id,
-                                                fagsak.id,
-                                                journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
+        søknadService.lagreSøknadForBarnetilsyn(
+            søknadBarnetilsyn,
+            behandling.id,
+            fagsak.id,
+            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID"
+        )
         return behandling
     }
 
     private fun lagSkolepengerBehandling(søknadSkolepenger: SøknadSkolepenger, fagsak: Fagsak): Behandling {
 
-
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
-                                                             behandlingsårsak = BehandlingÅrsak.SØKNAD)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = BehandlingÅrsak.SØKNAD
+        )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
-        søknadService.lagreSøknadForSkolepenger(søknadSkolepenger,
-                                                behandling.id,
-                                                fagsak.id,
-                                                journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
+        søknadService.lagreSøknadForSkolepenger(
+            søknadSkolepenger,
+            behandling.id,
+            fagsak.id,
+            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID"
+        )
         return behandling
     }
-
 
     private fun lagSøknad(personIdent: String): TestsøknadBuilder {
         val søkerMedBarn = personService.hentPersonMedBarn(personIdent)
         val barneListe: List<Barn> = mapSøkersBarn(søkerMedBarn)
         return TestsøknadBuilder.Builder()
-                .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
-                .setBarn(barneListe)
-                .setBosituasjon(delerDuBolig =
-                                EnumTekstverdiMedSvarId(verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
-                                                        svarId = "borAleneMedBarnEllerGravid"))
-                .setSivilstandsplaner(
-                        harPlaner = true,
-                        fraDato = LocalDate.of(2019, 9, 17),
-                        vordendeSamboerEktefelle = TestsøknadBuilder.Builder()
-                                .defaultPersonMinimum(navn = "Fyren som skal bli min samboer",
-                                                      fødselsdato = LocalDate.of(1979, 9, 17)),
+            .setPersonalia(søkerMedBarn.søker.navn.gjeldende().visningsnavn(), søkerMedBarn.søkerIdent)
+            .setBarn(barneListe)
+            .setBosituasjon(
+                delerDuBolig =
+                EnumTekstverdiMedSvarId(
+                    verdi = "Nei, jeg bor alene med barn eller jeg er gravid og bor alene",
+                    svarId = "borAleneMedBarnEllerGravid"
                 )
-                .build()
+            )
+            .setSivilstandsplaner(
+                harPlaner = true,
+                fraDato = LocalDate.of(2019, 9, 17),
+                vordendeSamboerEktefelle = TestsøknadBuilder.Builder()
+                    .defaultPersonMinimum(
+                        navn = "Fyren som skal bli min samboer",
+                        fødselsdato = LocalDate.of(1979, 9, 17)
+                    ),
+            )
+            .build()
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
         val barneListe: List<Barn> = søkerMedBarn.barn.map {
             TestsøknadBuilder.Builder().defaultBarn(
-                    navn = it.value.navn.gjeldende().visningsnavn(),
-                    fødselsnummer = it.key,
-                    harSkalHaSammeAdresse = true,
-                    ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
-                    erBarnetFødt = true,
-                    fødselTermindato = Fødselsnummer(it.key).fødselsdato,
-                    annenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(
-                            ikkeOppgittAnnenForelderBegrunnelse = null,
-                            bosattINorge = false,
-                            land = "Sverige",
-                            personMinimum = TestsøknadBuilder.Builder()
-                                    .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
-                    ),
-                    samvær = TestsøknadBuilder.Builder().defaultSamvær(
-                            beskrivSamværUtenBarn = "Har sjelden sett noe til han",
-                            borAnnenForelderISammeHus = "ja",
-                            borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
-                            harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
-                            harDereTidligereBoddSammen = true,
-                            hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
-                            hvordanPraktiseresSamværet = "Bytter litt på innimellom",
-                            nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
-                            skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
-                            spørsmålAvtaleOmDeltBosted = true
-                    ),
-                    skalBoHosSøker = "jaMenSamarbeiderIkke"
+                navn = it.value.navn.gjeldende().visningsnavn(),
+                fødselsnummer = it.key,
+                harSkalHaSammeAdresse = true,
+                ikkeRegistrertPåSøkersAdresseBeskrivelse = "Fordi",
+                erBarnetFødt = true,
+                fødselTermindato = Fødselsnummer(it.key).fødselsdato,
+                annenForelder = TestsøknadBuilder.Builder().defaultAnnenForelder(
+                    ikkeOppgittAnnenForelderBegrunnelse = null,
+                    bosattINorge = false,
+                    land = "Sverige",
+                    personMinimum = TestsøknadBuilder.Builder()
+                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                ),
+                samvær = TestsøknadBuilder.Builder().defaultSamvær(
+                    beskrivSamværUtenBarn = "Har sjelden sett noe til han",
+                    borAnnenForelderISammeHus = "ja",
+                    borAnnenForelderISammeHusBeskrivelse = "Samme blokk",
+                    harDereSkriftligAvtaleOmSamvær = "jaIkkeKonkreteTidspunkter",
+                    harDereTidligereBoddSammen = true,
+                    hvorMyeErDuSammenMedAnnenForelder = "møtesUtenom",
+                    hvordanPraktiseresSamværet = "Bytter litt på innimellom",
+                    nårFlyttetDereFraHverandre = LocalDate.of(2020, 12, 31),
+                    skalAnnenForelderHaSamvær = "jaMerEnnVanlig",
+                    spørsmålAvtaleOmDeltBosted = true
+                ),
+                skalBoHosSøker = "jaMenSamarbeiderIkke"
             )
         }
         return barneListe
     }
 
     private fun lagFørstegangsbehandling(søknad: SøknadOvergangsstønad, fagsak: Fagsak): Behandling {
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
-                                                             behandlingsårsak = BehandlingÅrsak.SØKNAD)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = BehandlingÅrsak.SØKNAD
+        )
         val journalposter = behandlingService.hentBehandlingsjournalposter(behandling.id)
-        søknadService.lagreSøknadForOvergangsstønad(søknad,
-                                                    behandling.id,
-                                                    fagsak.id,
-                                                    journalposter.firstOrNull()?.journalpostId ?: "TESTJPID")
+        søknadService.lagreSøknadForOvergangsstønad(
+            søknad,
+            behandling.id,
+            fagsak.id,
+            journalposter.firstOrNull()?.journalpostId ?: "TESTJPID"
+        )
         return behandling
     }
 
@@ -206,22 +236,29 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
         return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
     }
 
-
     private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
-        return migreringService.opprettMigrering(fagsak = fagsak,
-                                                 fra = YearMonth.now(),
-                                                 til = YearMonth.now().plusMonths(1),
-                                                 inntektsgrunnlag = 0,
-                                                 samordningsfradrag = 0)
+        return migreringService.opprettMigrering(
+            fagsak = fagsak,
+            fra = YearMonth.now(),
+            til = YearMonth.now().plusMonths(1),
+            inntektsgrunnlag = 0,
+            samordningsfradrag = 0
+        )
     }
 
     private fun arkiver(fnr: String): String {
-        val arkiverDokumentRequest = ArkiverDokumentRequest(fnr,
-                                                            false,
-                                                            listOf(Dokument("TEST".toByteArray(),
-                                                                            Filtype.PDFA, null, null,
-                                                                            Dokumenttype.OVERGANGSSTØNAD_SØKNAD)),
-                                                            emptyList())
+        val arkiverDokumentRequest = ArkiverDokumentRequest(
+            fnr,
+            false,
+            listOf(
+                Dokument(
+                    "TEST".toByteArray(),
+                    Filtype.PDFA, null, null,
+                    Dokumenttype.OVERGANGSSTØNAD_SØKNAD
+                )
+            ),
+            emptyList()
+        )
 
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest, saksbehandler)
@@ -230,14 +267,16 @@ class TestSaksbehandlingController(private val fagsakService: FagsakService,
 }
 
 private fun TestBehandlingsType.tilStønadstype(): StønadType =
-        when (this) {
-            FØRSTEGANGSBEHANDLING, BLANKETT, MIGRERING -> StønadType.OVERGANGSSTØNAD
-            BARNETILSYN -> StønadType.BARNETILSYN
-            SKOLEPENGER -> StønadType.SKOLEPENGER
-        }
+    when (this) {
+        FØRSTEGANGSBEHANDLING, BLANKETT, MIGRERING -> StønadType.OVERGANGSSTØNAD
+        BARNETILSYN -> StønadType.BARNETILSYN
+        SKOLEPENGER -> StønadType.SKOLEPENGER
+    }
 
-data class TestFagsakRequest(val personIdent: String,
-                             val behandlingsType: TestBehandlingsType = FØRSTEGANGSBEHANDLING)
+data class TestFagsakRequest(
+    val personIdent: String,
+    val behandlingsType: TestBehandlingsType = FØRSTEGANGSBEHANDLING
+)
 
 enum class TestBehandlingsType {
     FØRSTEGANGSBEHANDLING,

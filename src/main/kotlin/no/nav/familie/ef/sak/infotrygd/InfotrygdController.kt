@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/infotrygd")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class InfotrygdController(private val tilgangService: TilgangService,
-                          private val infotrygdService: InfotrygdService) {
+class InfotrygdController(
+    private val tilgangService: TilgangService,
+    private val infotrygdService: InfotrygdService
+) {
 
     @PostMapping("perioder")
     fun hentPerioder(@RequestBody personIdent: PersonIdentDto): Ressurs<InfotrygdPerioderDto> {
@@ -30,5 +32,4 @@ class InfotrygdController(private val tilgangService: TilgangService,
         tilgangService.validerTilgangTilPersonMedBarn(personIdent.personIdent, AuditLoggerEvent.ACCESS)
         return Ressurs.success(infotrygdService.hentSaker(personIdent.personIdent))
     }
-
 }

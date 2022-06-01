@@ -49,35 +49,49 @@ internal class InfotrygdPeriodeValideringServiceTest {
         internal fun `skal kunne journalføre når det ikke trengs migrering - når personen har perioder langt bak i tiden`() {
             val dato = YearMonth.now().minusYears(4)
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
-                    infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1",
-                                                                    stønadFom = dato.atDay(1),
-                                                                    stønadTom = dato.atEndOfMonth())))
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth()
+                        )
+                    )
+                )
             service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
 
         @Test
         internal fun `kan ikke journalføre når personen har periode`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
-                    infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))
+                infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))
 
             assertThatThrownBy {
-                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent,
-                                                                         StønadType.OVERGANGSSTØNAD)
+                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD
+                )
             }
-                    .isInstanceOf(ApiFeil::class.java)
+                .isInstanceOf(ApiFeil::class.java)
         }
 
         @Test
         internal fun `kan ikke journalføre når det finnes flere identer på perioder i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
-                    infotrygdPerioderDto(listOf(lagInfotrygdPeriode(personIdent = "1", vedtakId = 1),
-                                                lagInfotrygdPeriode(personIdent = "2", vedtakId = 2)))
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(personIdent = "1", vedtakId = 1),
+                        lagInfotrygdPeriode(personIdent = "2", vedtakId = 2)
+                    )
+                )
 
             assertThatThrownBy {
-                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent,
-                                                                         StønadType.OVERGANGSSTØNAD)
+                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                    personIdent,
+                    StønadType.OVERGANGSSTØNAD
+                )
             }
-                    .isInstanceOf(ApiFeil::class.java)
+                .isInstanceOf(ApiFeil::class.java)
         }
     }
 
@@ -87,24 +101,36 @@ internal class InfotrygdPeriodeValideringServiceTest {
         @Test
         fun `skal ikke kunne journalføre barnetilsyn når åpen sak i innfotrygd`() {
             val fagsak = fagsak(stønadstype = BARNETILSYN)
-            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(saker = listOf(InfotrygdSak(personIdent = fagsak.hentAktivIdent(),
-                                                                                                                 stønadType = fagsak.stønadstype,
-                                                                                                                 resultat = InfotrygdSakResultat.ÅPEN_SAK)))
+            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
+                saker = listOf(
+                    InfotrygdSak(
+                        personIdent = fagsak.hentAktivIdent(),
+                        stønadType = fagsak.stønadstype,
+                        resultat = InfotrygdSakResultat.ÅPEN_SAK
+                    )
+                )
+            )
 
             assertThatThrownBy { service.validerHarIkkeÅpenSakIInfotrygd(fagsak) }
-                    .isInstanceOf(MigreringException::class.java)
-                    .extracting("type")
-                    .isInstanceOf(MigreringExceptionType.ÅPEN_SAK::class.java)
+                .isInstanceOf(MigreringException::class.java)
+                .extracting("type")
+                .isInstanceOf(MigreringExceptionType.ÅPEN_SAK::class.java)
         }
 
         @Test
         fun `skal kunne journalføre barnetilsyn med ferdigstilt sak i innfotrygd`() {
             val fagsak = fagsak(stønadstype = BARNETILSYN)
-            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(saker = listOf(InfotrygdSak(personIdent = fagsak.hentAktivIdent(),
-                                                                                                                 stønadType = fagsak.stønadstype,
-                                                                                                                 resultat = InfotrygdSakResultat.INNVILGET)))
+            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
+                saker = listOf(
+                    InfotrygdSak(
+                        personIdent = fagsak.hentAktivIdent(),
+                        stønadType = fagsak.stønadstype,
+                        resultat = InfotrygdSakResultat.INNVILGET
+                    )
+                )
+            )
 
-           service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
+            service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
         }
     }
 

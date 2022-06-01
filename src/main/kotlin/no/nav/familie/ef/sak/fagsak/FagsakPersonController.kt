@@ -18,9 +18,9 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakPersonController(
-        private val tilgangService: TilgangService,
-        private val fagsakPersonService: FagsakPersonService,
-        private val fagsakService: FagsakService
+    private val tilgangService: TilgangService,
+    private val fagsakPersonService: FagsakPersonService,
+    private val fagsakService: FagsakService
 ) {
 
     @GetMapping("{fagsakPersonId}")
@@ -28,12 +28,14 @@ class FagsakPersonController(
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val person = fagsakPersonService.hentPerson(fagsakPersonId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
-        return Ressurs.success(FagsakPersonDto(
+        return Ressurs.success(
+            FagsakPersonDto(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.id,
                 barnetilsyn = fagsaker.barnetilsyn?.id,
                 skolepenger = fagsaker.skolepenger?.id
-        ))
+            )
+        )
     }
 
     @GetMapping("{fagsakPersonId}/utvidet")
@@ -41,13 +43,13 @@ class FagsakPersonController(
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val person = fagsakPersonService.hentPerson(fagsakPersonId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(person.id)
-        return Ressurs.success(FagsakPersonUtvidetDto(
+        return Ressurs.success(
+            FagsakPersonUtvidetDto(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
                 barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
                 skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) }
-        ))
+            )
+        )
     }
-
-
 }

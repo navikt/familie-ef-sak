@@ -24,13 +24,14 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.UUID
 
-
 @Component
-class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
-                      private val familieEfIverksettUri: String,
-                      @Qualifier("azure")
-                      private val restOperations: RestOperations)
-    : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
+class IverksettClient(
+    @Value("\${FAMILIE_EF_IVERKSETT_URL}")
+    private val familieEfIverksettUri: String,
+    @Qualifier("azure")
+    private val restOperations: RestOperations
+) :
+    AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
     override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
 
@@ -41,9 +42,11 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     fun simuler(simuleringRequest: SimuleringDto): BeriketSimuleringsresultat {
         val url = URI.create("$familieEfIverksettUri/api/simulering/v2")
 
-        return postForEntity<Ressurs<BeriketSimuleringsresultat>>(url,
-                                                                  simuleringRequest,
-                                                                  HttpHeaders().medContentTypeJsonUTF8()).data!!
+        return postForEntity<Ressurs<BeriketSimuleringsresultat>>(
+            url,
+            simuleringRequest,
+            HttpHeaders().medContentTypeJsonUTF8()
+        ).data!!
     }
 
     fun startBehandling(request: OpprettStartBehandlingHendelseDto) {
@@ -63,15 +66,15 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun publiserVedtakshendelse(behandlingId: UUID) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/${behandlingId}"), "")
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/$behandlingId"), "")
     }
 
     fun iverksett(iverksettDto: IverksettDto, fil: Fil) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
         val request = MultipartBuilder()
-                .withJson("data", iverksettDto)
-                .withByteArray("fil", "vedtak", fil.bytes)
-                .build()
+            .withJson("data", iverksettDto)
+            .withByteArray("fil", "vedtak", fil.bytes)
+            .build()
         val headers = HttpHeaders().apply { this.add("Content-Type", "multipart/form-data") }
         postForEntity<Any>(url, request, headers)
     }
@@ -92,23 +95,25 @@ class IverksettClient(@Value("\${FAMILIE_EF_IVERKSETT_URL}")
     }
 
     fun sendStartmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
-            konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
+        konsistensavstemming(request, sendStartmelding = true, sendAvsluttmelding = false, transaksjonId)
 
     fun sendSluttmeldingKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
-            konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
+        konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = true, transaksjonId)
 
     fun sendKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
-            konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
+        konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
 
-    private fun konsistensavstemming(request: KonsistensavstemmingDto,
-                                     sendStartmelding: Boolean = true,
-                                     sendAvsluttmelding: Boolean = true,
-                                     transaksjonId: UUID = UUID.randomUUID()) {
+    private fun konsistensavstemming(
+        request: KonsistensavstemmingDto,
+        sendStartmelding: Boolean = true,
+        sendAvsluttmelding: Boolean = true,
+        transaksjonId: UUID = UUID.randomUUID()
+    ) {
         val url = UriComponentsBuilder.fromUriString("$familieEfIverksettUri/api/konsistensavstemming")
-                .queryParam("sendStartmelding", sendStartmelding)
-                .queryParam("sendAvsluttmelding", sendAvsluttmelding)
-                .queryParam("transaksjonId", transaksjonId.toString())
-                .build().toUri()
+            .queryParam("sendStartmelding", sendStartmelding)
+            .queryParam("sendAvsluttmelding", sendAvsluttmelding)
+            .queryParam("transaksjonId", transaksjonId.toString())
+            .build().toUri()
         postForEntity<Any>(url, request)
     }
 

@@ -7,26 +7,30 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import java.time.LocalDate
 import java.util.UUID
 
-data class JournalføringRequest(val dokumentTitler: Map<String, String>? = null,
-                                val fagsakId: UUID,
-                                val oppgaveId: String,
-                                val behandling: JournalføringBehandling,
-                                val journalførendeEnhet: String,
-                                val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList())
+data class JournalføringRequest(
+    val dokumentTitler: Map<String, String>? = null,
+    val fagsakId: UUID,
+    val oppgaveId: String,
+    val behandling: JournalføringBehandling,
+    val journalførendeEnhet: String,
+    val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
+)
 
 data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 
     fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn = BehandlingBarn(
-            behandlingId = behandlingId,
-            søknadBarnId = null,
-            personIdent = null,
-            navn = null,
-            fødselTermindato = this.fødselTerminDato)
+        behandlingId = behandlingId,
+        søknadBarnId = null,
+        personIdent = null,
+        navn = null,
+        fødselTermindato = this.fødselTerminDato
+    )
 }
 
-
-data class JournalføringTilNyBehandlingRequest(val fagsakId: UUID,
-                                               val behandlingstype: BehandlingType)
+data class JournalføringTilNyBehandlingRequest(
+    val fagsakId: UUID,
+    val behandlingstype: BehandlingType
+)
 
 fun JournalføringRequest.valider() {
     feilHvis(this.behandling.behandlingsId != null && barnSomSkalFødes.isNotEmpty()) {
@@ -45,6 +49,8 @@ fun JournalføringRequest.valider() {
 
 fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean = this.behandling.behandlingsId != null
 
-data class JournalføringBehandling(val behandlingsId: UUID? = null,
-                                   val behandlingstype: BehandlingType? = null,
-                                   val årsak: BehandlingÅrsak? = null)
+data class JournalføringBehandling(
+    val behandlingsId: UUID? = null,
+    val behandlingstype: BehandlingType? = null,
+    val årsak: BehandlingÅrsak? = null
+)

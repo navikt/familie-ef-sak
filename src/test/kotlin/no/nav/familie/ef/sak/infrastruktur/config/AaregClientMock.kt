@@ -37,5 +37,4 @@ class AaregClientMock {
         every { mockk.hentArbeidsforhold(any(), any()) } returns Ressurs.success(mockResponse)
         return mockk
     }
-
 }

@@ -19,13 +19,17 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kaste exception hvis man bruker save eller saveAll`() {
-        assertThat(catchThrowable {
-            fagsakRepository.save(fagsakDomain())
-        }).isInstanceOf(DbActionExecutionException::class.java)
+        assertThat(
+            catchThrowable {
+                fagsakRepository.save(fagsakDomain())
+            }
+        ).isInstanceOf(DbActionExecutionException::class.java)
 
-        assertThat(catchThrowable {
-            fagsakRepository.saveAll(listOf(fagsakDomain(), fagsakDomain()))
-        }).isInstanceOf(DbActionExecutionException::class.java)
+        assertThat(
+            catchThrowable {
+                fagsakRepository.saveAll(listOf(fagsakDomain(), fagsakDomain()))
+            }
+        ).isInstanceOf(DbActionExecutionException::class.java)
     }
 
     @Test
@@ -60,8 +64,12 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         val person1 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val person2 = testoppsettService.opprettPerson(FagsakPerson(identer = emptySet()))
         val fagsaker =
-                fagsakRepository.insertAll(listOf(fagsakDomain(stønadstype = StønadType.BARNETILSYN, personId = person1.id),
-                                                  fagsakDomain(stønadstype = StønadType.SKOLEPENGER, personId = person2.id)))
+            fagsakRepository.insertAll(
+                listOf(
+                    fagsakDomain(stønadstype = StønadType.BARNETILSYN, personId = person1.id),
+                    fagsakDomain(stønadstype = StønadType.SKOLEPENGER, personId = person2.id)
+                )
+            )
         fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = StønadType.OVERGANGSSTØNAD) })
 
         assertThat(fagsakRepository.count()).isEqualTo(2)
@@ -69,7 +77,6 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
             assertThat(it.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
         }
     }
-
 
     /**
      * Dersom denne testen slutter å fungere og endretTid oppdateres for alle søkerIdenter ved endring av fagsak/søkerIdenter
@@ -84,8 +91,12 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         val person = testoppsettService.opprettPerson(FagsakPerson(identer = setOf(PersonIdent(personIdent))))
         Thread.sleep(200)
         val oppdatertPerson =
-                fagsakPersonRepository.update(person.copy(identer = person.identer.map { it.copy(ident = nyPersonIdent) }
-                                                                            .toSet() + PersonIdent(annenIdent)))
+            fagsakPersonRepository.update(
+                person.copy(
+                    identer = person.identer.map { it.copy(ident = nyPersonIdent) }
+                        .toSet() + PersonIdent(annenIdent)
+                )
+            )
         val oppdatertSøkerIdent = oppdatertPerson.identer.first { it.ident == nyPersonIdent }
         val originalSøkerIdent = person.identer.first { it.ident == personIdent }
 
@@ -95,13 +106,17 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal kaste exception hvis man oppdaterer entiteter som ikke finnes`() {
-        assertThat(catchThrowable {
-            fagsakRepository.update(fagsakDomain())
-        }).isInstanceOf(DbActionExecutionException::class.java)
+        assertThat(
+            catchThrowable {
+                fagsakRepository.update(fagsakDomain())
+            }
+        ).isInstanceOf(DbActionExecutionException::class.java)
 
-        assertThat(catchThrowable {
-            fagsakRepository.updateAll(listOf(fagsakDomain(), fagsakDomain()))
-        }).isInstanceOf(DbActionExecutionException::class.java)
+        assertThat(
+            catchThrowable {
+                fagsakRepository.updateAll(listOf(fagsakDomain(), fagsakDomain()))
+            }
+        ).isInstanceOf(DbActionExecutionException::class.java)
     }
 
     @Test
@@ -110,7 +125,6 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         try {
             fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent("1"))))
         } catch (e: Exception) {
-
         }
         assertThat(fagsakPersonRepository.findAll()).hasSize(1)
     }

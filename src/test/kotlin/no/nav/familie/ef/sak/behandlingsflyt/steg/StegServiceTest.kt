@@ -40,27 +40,38 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal legge inn historikkinnslag for beregn ytelse selv om behandlingen står på send til beslutter`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("0101017227"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                status = BehandlingStatus.UTREDES,
-                                                                steg = StegType.SEND_TIL_BESLUTTER))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                status = BehandlingStatus.UTREDES,
+                steg = StegType.SEND_TIL_BESLUTTER
+            )
+        )
 
-        val vedtaksperiode = VedtaksperiodeDto(årMånedFra = YearMonth.of(2021, 1),
-                                               årMånedTil = YearMonth.of(2021, 6),
-                                               aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                                               periodeType = VedtaksperiodeType.HOVEDPERIODE)
-        val inntek = Inntekt(årMånedFra = YearMonth.of(2021, 1),
-                             forventetInntekt = BigDecimal(12345),
-                             samordningsfradrag = BigDecimal(2))
-        stegService.håndterBeregnYtelseForStønad(saksbehandling(fagsak, behandling),
-                                                 vedtak = InnvilgelseOvergangsstønad(periodeBegrunnelse = "ok",
-                                                                                     inntektBegrunnelse = "okok",
-                                                                                     perioder = listOf(vedtaksperiode),
-                                                                                     inntekter = listOf(inntek),
-                                                                                     samordningsfradragType = SamordningsfradragType.UFØRETRYGD))
+        val vedtaksperiode = VedtaksperiodeDto(
+            årMånedFra = YearMonth.of(2021, 1),
+            årMånedTil = YearMonth.of(2021, 6),
+            aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+            periodeType = VedtaksperiodeType.HOVEDPERIODE
+        )
+        val inntek = Inntekt(
+            årMånedFra = YearMonth.of(2021, 1),
+            forventetInntekt = BigDecimal(12345),
+            samordningsfradrag = BigDecimal(2)
+        )
+        stegService.håndterBeregnYtelseForStønad(
+            saksbehandling(fagsak, behandling),
+            vedtak = InnvilgelseOvergangsstønad(
+                periodeBegrunnelse = "ok",
+                inntektBegrunnelse = "okok",
+                perioder = listOf(vedtaksperiode),
+                inntekter = listOf(inntek),
+                samordningsfradragType = SamordningsfradragType.UFØRETRYGD
+            )
+        )
 
         assertThat(behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(behandling.id).first().steg)
-                .isEqualTo(StegType.BEREGNE_YTELSE)
-
+            .isEqualTo(StegType.BEREGNE_YTELSE)
     }
 
     @Test

@@ -12,9 +12,11 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
-class GOmregningTaskService(val fagsakRepository: FagsakRepository,
-                            val featureToggleService: FeatureToggleService,
-                            val gOmregningTask: GOmregningTask) {
+class GOmregningTaskService(
+    val fagsakRepository: FagsakRepository,
+    val featureToggleService: FeatureToggleService,
+    val gOmregningTask: GOmregningTask
+) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -41,5 +43,4 @@ class GOmregningTaskService(val fagsakRepository: FagsakRepository,
         }
         return fagsakIder.size
     }
-
 }

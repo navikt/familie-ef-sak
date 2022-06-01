@@ -50,15 +50,25 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         every { iverksettClient.hentStatus(any()) } returns IverksettStatus.OK_MOT_OPPDRAG
 
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident = ident))))
-        behandling = behandlingRepository.insert(behandling(fagsak,
-                                                            status = BehandlingStatus.FERDIGSTILT,
-                                                            resultat = BehandlingResultat.INNVILGET))
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(beløp = 0,
-                                                         fraOgMed = LocalDate.now(),
-                                                         tilOgMed = LocalDate.now(),
-                                                         kildeBehandlingId = behandling.id)
-        tilkjentYtelseService.opprettTilkjentYtelse(lagTilkjentYtelse(behandlingId = behandling.id,
-                                                                      andelerTilkjentYtelse = listOf(andelTilkjentYtelse)))
+        behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
+            beløp = 0,
+            fraOgMed = LocalDate.now(),
+            tilOgMed = LocalDate.now(),
+            kildeBehandlingId = behandling.id
+        )
+        tilkjentYtelseService.opprettTilkjentYtelse(
+            lagTilkjentYtelse(
+                behandlingId = behandling.id,
+                andelerTilkjentYtelse = listOf(andelTilkjentYtelse)
+            )
+        )
     }
 
     @AfterEach
@@ -86,7 +96,7 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         val sistIverksattBehandlingId = finnSistIverksatteBehandling()!!.id
 
         assertThat(tilkjentYtelseService.hentForBehandling(sistIverksattBehandlingId).andelerTilkjentYtelse)
-                .isEmpty()
+            .isEmpty()
     }
 
     private fun finnSistIverksatteBehandling() = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
@@ -110,5 +120,4 @@ internal class TekniskOpphørTest : OppslagSpringRunnerTest() {
         assertThat(task.type).isEqualTo(FerdigstillBehandlingTask.TYPE)
         ferdigstillBehandlingTask.doTask(task)
     }
-
 }

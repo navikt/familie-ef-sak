@@ -24,12 +24,14 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class SimuleringService(private val iverksettClient: IverksettClient,
-                        private val vedtakService: VedtakService,
-                        private val blankettSimuleringsService: BlankettSimuleringsService,
-                        private val simuleringsresultatRepository: SimuleringsresultatRepository,
-                        private val tilkjentYtelseService: TilkjentYtelseService,
-                        private val tilgangService: TilgangService) {
+class SimuleringService(
+    private val iverksettClient: IverksettClient,
+    private val vedtakService: VedtakService,
+    private val blankettSimuleringsService: BlankettSimuleringsService,
+    private val simuleringsresultatRepository: SimuleringsresultatRepository,
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val tilgangService: TilgangService
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -68,17 +70,20 @@ class SimuleringService(private val iverksettClient: IverksettClient,
 
         val beriketSimuleringsresultat = simulerMedTilkjentYtelse(saksbehandling)
         simuleringsresultatRepository.deleteById(saksbehandling.id)
-        return simuleringsresultatRepository.insert(Simuleringsresultat(
+        return simuleringsresultatRepository.insert(
+            Simuleringsresultat(
                 behandlingId = saksbehandling.id,
                 data = beriketSimuleringsresultat.detaljer,
                 beriketData = beriketSimuleringsresultat
-        ))
+            )
+        )
     }
 
     private fun simulerForBehandling(saksbehandling: Saksbehandling): Simuleringsoppsummering {
 
-        if (saksbehandling.status.behandlingErLåstForVidereRedigering()
-            || !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)) {
+        if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
+            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        ) {
             return hentLagretSimuleringsoppsummering(saksbehandling.id)
         }
         val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
@@ -89,25 +94,31 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
 
         val tilkjentYtelseMedMedtadata =
-                tilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
-                                                            eksternBehandlingId = saksbehandling.eksternId,
-                                                            stønadstype = saksbehandling.stønadstype,
-                                                            eksternFagsakId = saksbehandling.eksternFagsakId)
+            tilkjentYtelse.tilTilkjentYtelseMedMetaData(
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                eksternBehandlingId = saksbehandling.eksternId,
+                stønadstype = saksbehandling.stønadstype,
+                eksternFagsakId = saksbehandling.eksternFagsakId
+            )
 
         try {
-            return iverksettClient.simuler(SimuleringDto(
+            return iverksettClient.simuler(
+                SimuleringDto(
                     nyTilkjentYtelseMedMetaData = tilkjentYtelseMedMedtadata,
                     forrigeBehandlingId = saksbehandling.forrigeBehandlingId
-            ))
+                )
+            )
         } catch (e: Exception) {
             val personFinnesIkkeITps = "Personen finnes ikke i TPS"
             brukerfeilHvis(e is RessursException && e.ressurs.melding == personFinnesIkkeITps) {
                 personFinnesIkkeITps
             }
-            throw Feil(message = "Kunne ikke utføre simulering",
-                       frontendFeilmelding = "Kunne ikke utføre simulering. Vennligst prøv på nytt",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+            throw Feil(
+                message = "Kunne ikke utføre simulering",
+                frontendFeilmelding = "Kunne ikke utføre simulering. Vennligst prøv på nytt",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
     }
 
@@ -115,8 +126,8 @@ class SimuleringService(private val iverksettClient: IverksettClient,
         val vedtak = vedtakService.hentVedtakHvisEksisterer(saksbehandling.id)
         val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, saksbehandling)
         val simuleringDto = SimuleringDto(
-                nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
-                forrigeBehandlingId = null
+            nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
+            forrigeBehandlingId = null
 
         )
         return iverksettClient.simuler(simuleringDto).oppsummering

@@ -12,41 +12,50 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 
 fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
-        Søker(adressebeskyttelse = null,
-              bostedsadresse = emptyList(),
-              dødsfall = null,
-              forelderBarnRelasjon = emptyList(),
-              fødsel = emptyList(),
-              folkeregisterpersonstatus = emptyList(),
-              fullmakt = emptyList(),
-              kjønn = KjønnType.UKJENT,
-              kontaktadresse = emptyList(),
-              navn = Navn("", "", "", Metadata(false)),
-              opphold = emptyList(),
-              oppholdsadresse = emptyList(),
-              sivilstand = emptyList(),
-              statsborgerskap = emptyList(),
-              telefonnummer = emptyList(),
-              tilrettelagtKommunikasjon = emptyList(),
-              innflyttingTilNorge = emptyList(),
-              utflyttingFraNorge = emptyList(),
-              vergemaalEllerFremtidsfullmakt = emptyList()
-        ),
-        emptyList(),
-        Medlemskapsinfo("", emptyList(), emptyList(), emptyList()),
-        emptyList(),
-        TidligereVedtaksperioder(TidligereInnvilgetVedtak(harTidligereOvergangsstønad = false,
-                                                          harTidligereBarnetilsyn = true,
-                                                          harTidligereSkolepenger = false))
+    Søker(
+        adressebeskyttelse = null,
+        bostedsadresse = emptyList(),
+        dødsfall = null,
+        forelderBarnRelasjon = emptyList(),
+        fødsel = emptyList(),
+        folkeregisterpersonstatus = emptyList(),
+        fullmakt = emptyList(),
+        kjønn = KjønnType.UKJENT,
+        kontaktadresse = emptyList(),
+        navn = Navn("", "", "", Metadata(false)),
+        opphold = emptyList(),
+        oppholdsadresse = emptyList(),
+        sivilstand = emptyList(),
+        statsborgerskap = emptyList(),
+        telefonnummer = emptyList(),
+        tilrettelagtKommunikasjon = emptyList(),
+        innflyttingTilNorge = emptyList(),
+        utflyttingFraNorge = emptyList(),
+        vergemaalEllerFremtidsfullmakt = emptyList()
+    ),
+    emptyList(),
+    Medlemskapsinfo("", emptyList(), emptyList(), emptyList()),
+    emptyList(),
+    TidligereVedtaksperioder(
+        TidligereInnvilgetVedtak(
+            harTidligereOvergangsstønad = false,
+            harTidligereBarnetilsyn = true,
+            harTidligereSkolepenger = false
+        )
+    )
 )
 
-fun opprettBarnMedIdent(personIdent: String,
-                        fødsel: Fødsel? = null) =
-        BarnMedIdent(adressebeskyttelse = emptyList(),
-                     bostedsadresse = emptyList(),
-                     deltBosted = emptyList(),
-                     dødsfall = emptyList(),
-                     forelderBarnRelasjon = emptyList(),
-                     fødsel = listOfNotNull(fødsel),
-                     navn = Navn("", "", "", Metadata(false)),
-                     personIdent = personIdent)
+fun opprettBarnMedIdent(
+    personIdent: String,
+    fødsel: Fødsel? = null
+) =
+    BarnMedIdent(
+        adressebeskyttelse = emptyList(),
+        bostedsadresse = emptyList(),
+        deltBosted = emptyList(),
+        dødsfall = emptyList(),
+        forelderBarnRelasjon = emptyList(),
+        fødsel = listOfNotNull(fødsel),
+        navn = Navn("", "", "", Metadata(false)),
+        personIdent = personIdent
+    )

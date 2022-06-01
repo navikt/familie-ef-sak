@@ -31,16 +31,24 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
     private fun opprettSøknad(saksnummer: String, fødselsnummer: String, behandlingId: UUID) {
         søknadRepository
-                .insert(Søknad(soknadsskjemaId = UUID.randomUUID(),
-                               behandlingId = behandlingId,
-                               type = SøknadType.OVERGANGSSTØNAD,
-                               søker = Søker(fødselsnummer, "Navn"),
-                               journalpostId = "journalId$saksnummer",
-                               sporbar = Sporbar(opprettetTid = LocalDateTime.of(nextInt(0, 2020),
-                                                                                 nextInt(11) + 1,
-                                                                                 nextInt(27) + 1,
-                                                                                 nextInt(23),
-                                                                                 nextInt(59))),
-                               relaterteFnr = setOf("654654654")))
+            .insert(
+                Søknad(
+                    soknadsskjemaId = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    type = SøknadType.OVERGANGSSTØNAD,
+                    søker = Søker(fødselsnummer, "Navn"),
+                    journalpostId = "journalId$saksnummer",
+                    sporbar = Sporbar(
+                        opprettetTid = LocalDateTime.of(
+                            nextInt(0, 2020),
+                            nextInt(11) + 1,
+                            nextInt(27) + 1,
+                            nextInt(23),
+                            nextInt(59)
+                        )
+                    ),
+                    relaterteFnr = setOf("654654654")
+                )
+            )
     }
 }

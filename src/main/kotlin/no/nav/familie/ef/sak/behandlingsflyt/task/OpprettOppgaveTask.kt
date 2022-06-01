@@ -14,44 +14,49 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OpprettOppgaveTask.TYPE,
-                     beskrivelse = "Opprett oppgave i GOSYS for behandling",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+    taskStepType = OpprettOppgaveTask.TYPE,
+    beskrivelse = "Opprett oppgave i GOSYS for behandling",
+    maxAntallFeil = 3
+)
 class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
     /**
      * Då payload er unik per task type, så settes unik inn
      */
-    data class OpprettOppgaveTaskData(val behandlingId: UUID,
-                                      val oppgavetype: Oppgavetype,
-                                      val tilordnetNavIdent: String? = null,
-                                      val beskrivelse: String? = null,
-                                      val unik: LocalDateTime? = LocalDateTime.now())
+    data class OpprettOppgaveTaskData(
+        val behandlingId: UUID,
+        val oppgavetype: Oppgavetype,
+        val tilordnetNavIdent: String? = null,
+        val beskrivelse: String? = null,
+        val unik: LocalDateTime? = LocalDateTime.now()
+    )
 
     override fun doTask(task: Task) {
         val data = objectMapper.readValue<OpprettOppgaveTaskData>(task.payload)
-        val oppgaveId = oppgaveService.opprettOppgave(behandlingId = data.behandlingId,
-                                                      oppgavetype = data.oppgavetype,
-                                                      tilordnetNavIdent = data.tilordnetNavIdent,
-                                                      beskrivelse = data.beskrivelse)
+        val oppgaveId = oppgaveService.opprettOppgave(
+            behandlingId = data.behandlingId,
+            oppgavetype = data.oppgavetype,
+            tilordnetNavIdent = data.tilordnetNavIdent,
+            beskrivelse = data.beskrivelse
+        )
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())
     }
 
     companion object {
 
         fun opprettTask(data: OpprettOppgaveTaskData): Task {
-            return Task(type = TYPE,
-                        payload = objectMapper.writeValueAsString(data),
-                        properties = Properties().apply {
-                            this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
-                            this["behandlingId"] = data.behandlingId.toString()
-                            this["oppgavetype"] = data.oppgavetype.name
-                        })
-
+            return Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(data),
+                properties = Properties().apply {
+                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                    this["behandlingId"] = data.behandlingId.toString()
+                    this["oppgavetype"] = data.oppgavetype.name
+                }
+            )
         }
 
         const val TYPE = "opprettOppgave"
     }
-
-
 }

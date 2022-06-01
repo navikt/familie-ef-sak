@@ -24,16 +24,18 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = OpprettOppgaveForMigrertFødtBarnTask.TYPE,
-                     maxAntallFeil = 3,
-                     settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "Oppretter oppgave for fødte barn")
+@TaskStepBeskrivelse(
+    taskStepType = OpprettOppgaveForMigrertFødtBarnTask.TYPE,
+    maxAntallFeil = 3,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 15 * 60L,
+    beskrivelse = "Oppretter oppgave for fødte barn"
+)
 class OpprettOppgaveForMigrertFødtBarnTask(
-        private val iverksettClient: IverksettClient,
-        private val behandlingService: BehandlingService,
-        private val tilkjentYtelseService: TilkjentYtelseService,
-        private val grunnlagsdataService: GrunnlagsdataService
+    private val iverksettClient: IverksettClient,
+    private val behandlingService: BehandlingService,
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val grunnlagsdataService: GrunnlagsdataService
 ) : AsyncTaskStep {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -50,10 +52,12 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         lagOgSendOppgaver(fagsakId, behandlingId, sisteUtbetalingsdato, data)
     }
 
-    private fun lagOgSendOppgaver(fagsakId: UUID,
-                                  behandlingId: UUID,
-                                  sisteUtbetalingsdato: LocalDate,
-                                  data: OpprettOppgaveForMigrertFødtBarnTaskData) {
+    private fun lagOgSendOppgaver(
+        fagsakId: UUID,
+        behandlingId: UUID,
+        sisteUtbetalingsdato: LocalDate,
+        data: OpprettOppgaveForMigrertFødtBarnTaskData
+    ) {
         val oppgaver = lagOppgaver(behandlingId, data, sisteUtbetalingsdato)
         if (oppgaver.isNotEmpty()) {
             logger.info("Sender ${oppgaver.size} for fagsakId=$fagsakId")
@@ -63,7 +67,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
 
     private fun sisteIverksatteBehandling(fagsakId: UUID): UUID {
         val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-                         ?: error("Finner ikke iverksatt behandling for fagsak=$fagsakId")
+            ?: error("Finner ikke iverksatt behandling for fagsak=$fagsakId")
         return behandling.id
     }
 
@@ -71,11 +75,13 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         return tilkjentYtelseService.hentForBehandling(behandlingId).andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
     }
 
-    private fun lagOppgaver(behandlingId: UUID,
-                            data: OpprettOppgaveForMigrertFødtBarnTaskData,
-                            sisteUtbetalingsdato: LocalDate): List<OppgaveForBarn> {
+    private fun lagOppgaver(
+        behandlingId: UUID,
+        data: OpprettOppgaveForMigrertFødtBarnTaskData,
+        sisteUtbetalingsdato: LocalDate
+    ): List<OppgaveForBarn> {
         val kjenteFødselsdatoer = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.barn
-                .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
+            .flatMap { it.fødsel.mapNotNull(Fødsel::fødselsdato) }
         return data.barn.mapNotNull {
             val fødselsdato = it.fødselsdato
             if (fødselsdato == null) {
@@ -87,16 +93,16 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                 return@mapNotNull null
             }
             datoOgBeskrivelse(fødselsdato, sisteUtbetalingsdato)
-                    .map { datoOgBeskrivelse ->
-                        OppgaveForBarn(
-                                behandlingId = behandlingId,
-                                eksternFagsakId = data.eksternFagsakId,
-                                personIdent = data.personIdent,
-                                stønadType = data.stønadType,
-                                beskrivelse = datoOgBeskrivelse.second,
-                                aktivFra = datoOgBeskrivelse.first
-                        )
-                    }
+                .map { datoOgBeskrivelse ->
+                    OppgaveForBarn(
+                        behandlingId = behandlingId,
+                        eksternFagsakId = data.eksternFagsakId,
+                        personIdent = data.personIdent,
+                        stønadType = data.stønadType,
+                        beskrivelse = datoOgBeskrivelse.second,
+                        aktivFra = datoOgBeskrivelse.first
+                    )
+                }
         }.flatten()
     }
 
@@ -112,9 +118,11 @@ class OpprettOppgaveForMigrertFødtBarnTask(
             logger.info("Dato for sisteUtbetalingsdato=$sisteUtbetalingsdato er før barnet fyller 1 år = $datoOm1År")
             return emptyList()
         }
-        return listOf(nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to beskrivelseBarnBlirSeksMnd,
-                      datoOm1År to beskrivelseBarnFyllerEttÅr)
-                .filter { it.first > LocalDate.now() }
+        return listOf(
+            nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to beskrivelseBarnBlirSeksMnd,
+            datoOm1År to beskrivelseBarnFyllerEttÅr
+        )
+            .filter { it.first > LocalDate.now() }
     }
 
     /**
@@ -130,18 +138,26 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         const val TYPE = "opprettOppgaveForMigrertFødtBarn"
 
         fun opprettOppgave(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(
-                    OpprettOppgaveForMigrertFødtBarnTaskData(fagsakId = fagsak.id,
-                                                             eksternFagsakId = fagsak.eksternId.id,
-                                                             stønadType = fagsak.stønadstype,
-                                                             personIdent = fagsak.hentAktivIdent(),
-                                                             nyeBarn)))
+            return Task(
+                TYPE,
+                objectMapper.writeValueAsString(
+                    OpprettOppgaveForMigrertFødtBarnTaskData(
+                        fagsakId = fagsak.id,
+                        eksternFagsakId = fagsak.eksternId.id,
+                        stønadType = fagsak.stønadstype,
+                        personIdent = fagsak.hentAktivIdent(),
+                        nyeBarn
+                    )
+                )
+            )
         }
     }
 }
 
-data class OpprettOppgaveForMigrertFødtBarnTaskData(val fagsakId: UUID,
-                                                    val eksternFagsakId: Long,
-                                                    val stønadType: StønadType,
-                                                    val personIdent: String,
-                                                    val barn: List<BarnMinimumDto>)
+data class OpprettOppgaveForMigrertFødtBarnTaskData(
+    val fagsakId: UUID,
+    val eksternFagsakId: Long,
+    val stønadType: StønadType,
+    val personIdent: String,
+    val barn: List<BarnMinimumDto>
+)

@@ -50,16 +50,18 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
         assertThat(søknad.soknadsskjemaId).isEqualTo(søknadForRevurdering.soknadsskjemaId)
     }
 
-
-
-    private fun kopierSøknadskjema(behandling: Behandling,
-                                   revurdering: Behandling): SøknadsskjemaOvergangsstønad {
+    private fun kopierSøknadskjema(
+        behandling: Behandling,
+        revurdering: Behandling
+    ): SøknadsskjemaOvergangsstønad {
         søknadService.kopierSøknad(behandling.id, revurdering.id)
         return søknadService.hentOvergangsstønad(revurdering.id)!!
     }
 
-    private fun lagreSøknad(behandling: Behandling,
-                            fagsak: Fagsak): SøknadsskjemaOvergangsstønad {
+    private fun lagreSøknad(
+        behandling: Behandling,
+        fagsak: Fagsak
+    ): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)!!
     }

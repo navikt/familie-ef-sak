@@ -26,7 +26,6 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as KontrakterFrittståendeBrevDto
 
-
 internal class FrittståendeBrevServiceTest {
 
     private val brevClient = mockk<BrevClient>()
@@ -37,61 +36,83 @@ internal class FrittståendeBrevServiceTest {
     private val brevsignaturService = mockk<BrevsignaturService>()
 
     private val frittståendeBrevService =
-            FrittståendeBrevService(brevClient,
-                                    fagsakService,
-                                    personopplysningerService,
-                                    arbeidsfordelingService,
-                                    iverksettClient,
-                                    brevsignaturService
+        FrittståendeBrevService(
+            brevClient,
+            fagsakService,
+            personopplysningerService,
+            arbeidsfordelingService,
+            iverksettClient,
+            brevsignaturService
 
-            )
+        )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(
-            "overskrift",
-            listOf(
-                    FrittståendeBrevAvsnitt(
-                            "deloverskrift",
-                            "innhold"
-                    )
-            ),
-            fagsak.id, FrittståendeBrevKategori.INFORMASJONSBREV
+        "overskrift",
+        listOf(
+            FrittståendeBrevAvsnitt(
+                "deloverskrift",
+                "innhold"
+            )
+        ),
+        fagsak.id, FrittståendeBrevKategori.INFORMASJONSBREV
     )
 
-
-    private val brevtyperTestData = listOf(Pair(StønadType.OVERGANGSSTØNAD,
-                                                FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
-                                           Pair(StønadType.OVERGANGSSTØNAD,
-                                                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
-                                           Pair(StønadType.OVERGANGSSTØNAD,
-                                                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
-                                           Pair(StønadType.SKOLEPENGER,
-                                                FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
-                                           Pair(StønadType.SKOLEPENGER,
-                                                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
-                                           Pair(StønadType.SKOLEPENGER,
-                                                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
-                                           Pair(StønadType.BARNETILSYN,
-                                                FrittståendeBrevKategori.INFORMASJONSBREV) to FrittståendeBrevType.INFORMASJONSBREV,
-                                           Pair(StønadType.BARNETILSYN,
-                                                FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
-                                           Pair(StønadType.BARNETILSYN,
-                                                FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT)
+    private val brevtyperTestData = listOf(
+        Pair(
+            StønadType.OVERGANGSSTØNAD,
+            FrittståendeBrevKategori.INFORMASJONSBREV
+        ) to FrittståendeBrevType.INFORMASJONSBREV,
+        Pair(
+            StønadType.OVERGANGSSTØNAD,
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER
+        ) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
+        Pair(
+            StønadType.OVERGANGSSTØNAD,
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT
+        ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
+        Pair(
+            StønadType.SKOLEPENGER,
+            FrittståendeBrevKategori.INFORMASJONSBREV
+        ) to FrittståendeBrevType.INFORMASJONSBREV,
+        Pair(
+            StønadType.SKOLEPENGER,
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER
+        ) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
+        Pair(
+            StønadType.SKOLEPENGER,
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT
+        ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT,
+        Pair(
+            StønadType.BARNETILSYN,
+            FrittståendeBrevKategori.INFORMASJONSBREV
+        ) to FrittståendeBrevType.INFORMASJONSBREV,
+        Pair(
+            StønadType.BARNETILSYN,
+            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER
+        ) to FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER,
+        Pair(
+            StønadType.BARNETILSYN,
+            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT
+        ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
+    )
 
     @TestFactory
     fun `skal sende frittstående brev med riktig brevtype`() =
-            brevtyperTestData.map { (input, forventetBrevtype) ->
-                DynamicTest.dynamicTest("Skal sende brev for stønadtype ${input.first} og brevkategori " +
-                                        "${input.second} til iverksett for journalføring med brevtype $forventetBrevtype") {
-                    mockAvhengigheter()
+        brevtyperTestData.map { (input, forventetBrevtype) ->
+            DynamicTest.dynamicTest(
+                "Skal sende brev for stønadtype ${input.first} og brevkategori " +
+                    "${input.second} til iverksett for journalføring med brevtype $forventetBrevtype"
+            ) {
+                mockAvhengigheter()
 
-                    val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
-                    every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak.copy(stønadstype = input.first)
-                    every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
+                val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
+                every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak.copy(stønadstype = input.first)
+                every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
 
-                    frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
+                frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
 
-                    assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
-                }
+                assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
+            }
         }
 
     private fun mockAvhengigheter() {
@@ -116,6 +137,4 @@ internal class FrittståendeBrevServiceTest {
             BrukerContextUtil.clearBrukerContext()
         }
     }
-
-
 }

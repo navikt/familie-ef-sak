@@ -30,14 +30,18 @@ class TilbakekrevingClientTestConfig {
 
         every { tilbakekrevingClient.finnesÅpenBehandling(any()) } returns false
 
-        every { tilbakekrevingClient.finnBehandlinger(any()) } returns listOf(Behandling(behandlingId = UUID.randomUUID(),
-                                                                                         opprettetTidspunkt = LocalDateTime.now(),
-                                                                                         aktiv = true,
-                                                                                         årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
-                                                                                         type = Behandlingstype.TILBAKEKREVING,
-                                                                                         status = Behandlingsstatus.OPPRETTET,
-                                                                                         vedtaksdato = null,
-                                                                                         resultat = null))
+        every { tilbakekrevingClient.finnBehandlinger(any()) } returns listOf(
+            Behandling(
+                behandlingId = UUID.randomUUID(),
+                opprettetTidspunkt = LocalDateTime.now(),
+                aktiv = true,
+                årsak = Behandlingsårsakstype.REVURDERING_OPPLYSNINGER_OM_VILKÅR,
+                type = Behandlingstype.TILBAKEKREVING,
+                status = Behandlingsstatus.OPPRETTET,
+                vedtaksdato = null,
+                resultat = null
+            )
+        )
 
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()
         every { tilbakekrevingClient.hentForhåndsvisningVarselbrev(any()) } returns dummyPdf

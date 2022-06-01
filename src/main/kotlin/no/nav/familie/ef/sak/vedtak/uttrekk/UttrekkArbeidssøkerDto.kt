@@ -12,34 +12,36 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
  * @param antallManglerKontrollUtenTilgang antall av de som man ikke har tilgang til som ikke er kontrollerte
  */
 data class UttrekkArbeidssøkereDto(
-        val årMåned: YearMonth,
-        val antallTotalt: Int,
-        val antallKontrollert: Int,
-        val antallManglerKontrollUtenTilgang: Int,
-        val arbeidssøkere: List<UttrekkArbeidssøkerDto>
+    val årMåned: YearMonth,
+    val antallTotalt: Int,
+    val antallKontrollert: Int,
+    val antallManglerKontrollUtenTilgang: Int,
+    val arbeidssøkere: List<UttrekkArbeidssøkerDto>
 )
 
 data class UttrekkArbeidssøkerDto(
-        val id: UUID,
-        val fagsakId: UUID,
-        val behandlingIdForVedtak: UUID,
-        val personIdent: String,
-        val navn: String,
-        val registrertArbeidssøker: Boolean?,
-        val adressebeskyttelse: Adressebeskyttelse?,
-        val kontrollert: Boolean,
-        val kontrollertTid: LocalDateTime?,
-        val kontrollertAv: String?
+    val id: UUID,
+    val fagsakId: UUID,
+    val behandlingIdForVedtak: UUID,
+    val personIdent: String,
+    val navn: String,
+    val registrertArbeidssøker: Boolean?,
+    val adressebeskyttelse: Adressebeskyttelse?,
+    val kontrollert: Boolean,
+    val kontrollertTid: LocalDateTime?,
+    val kontrollertAv: String?
 )
 
 fun UttrekkArbeidssøkere.tilDto(personIdent: String, navn: String, adressebeskyttelse: PdlAdressebeskyttelse?) =
-        UttrekkArbeidssøkerDto(id = this.id,
-                               fagsakId = this.fagsakId,
-                               behandlingIdForVedtak = this.vedtakId,
-                               personIdent = personIdent,
-                               navn = navn,
-                               registrertArbeidssøker = this.registrertArbeidssøker,
-                               adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
-                               kontrollert = this.kontrollert,
-                               kontrollertTid = this.kontrollertTid,
-                               kontrollertAv = this.kontrollertAv)
+    UttrekkArbeidssøkerDto(
+        id = this.id,
+        fagsakId = this.fagsakId,
+        behandlingIdForVedtak = this.vedtakId,
+        personIdent = personIdent,
+        navn = navn,
+        registrertArbeidssøker = this.registrertArbeidssøker,
+        adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
+        kontrollert = this.kontrollert,
+        kontrollertTid = this.kontrollertTid,
+        kontrollertAv = this.kontrollertAv
+    )

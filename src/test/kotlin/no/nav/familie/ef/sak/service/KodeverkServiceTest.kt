@@ -27,5 +27,4 @@ internal class KodeverkServiceTest : OppslagSpringRunnerTest() {
         wireMockServer.verify(1, getRequestedFor(urlEqualTo(familieIntegrasjonerConfig.kodeverkPoststedUri.path)))
         wireMockServer.verify(1, getRequestedFor(urlEqualTo(familieIntegrasjonerConfig.kodeverkLandkoderUri.path)))
     }
-
 }

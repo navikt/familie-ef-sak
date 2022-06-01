@@ -14,8 +14,8 @@ object SikkerhetContext {
     fun erMaskinTilMaskinToken(): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         return claims.get("oid") != null &&
-               claims.get("oid") == claims.get("sub") &&
-               claims.getAsList("roles").contains("access_as_application")
+            claims.get("oid") == claims.get("sub") &&
+            claims.getAsList("roles").contains("access_as_application")
     }
 
     /**
@@ -23,10 +23,12 @@ object SikkerhetContext {
      */
     fun hentSaksbehandler(strict: Boolean = false): String {
         val result = Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(onSuccess = {
+            .fold(
+                onSuccess = {
                     it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
                 },
-                      onFailure = { SYSTEM_FORKORTELSE })
+                onFailure = { SYSTEM_FORKORTELSE }
+            )
         if (strict && result == SYSTEM_FORKORTELSE) {
             error("Finner ikke NAVident i token")
         }
@@ -35,34 +37,44 @@ object SikkerhetContext {
 
     fun hentSaksbehandlerNavn(strict: Boolean = false): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(onSuccess = {
+            .fold(
+                onSuccess = {
                     it.getClaims("azuread")?.get("name")?.toString()
-                    ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
+                        ?: if (strict) error("Finner ikke navn i azuread token") else SYSTEM_NAVN
                 },
-                      onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN })
+                onFailure = { if (strict) error("Finner ikke navn på innlogget bruker") else SYSTEM_NAVN }
+            )
     }
 
     fun hentGrupperFraToken(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-                .fold(onSuccess = {
+            .fold(
+                onSuccess = {
                     @Suppress("UNCHECKED_CAST")
                     it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
                 },
-                      onFailure = { emptyList() })
+                onFailure = { emptyList() }
+            )
     }
 
     fun harTilgangTilGittRolle(rolleConfig: RolleConfig, minimumsrolle: BehandlerRolle): Boolean {
         val rollerFraToken = hentGrupperFraToken()
         val rollerForBruker = when {
-            hentSaksbehandler() == SYSTEM_FORKORTELSE -> listOf(BehandlerRolle.SYSTEM,
-                                                                BehandlerRolle.BESLUTTER,
-                                                                BehandlerRolle.SAKSBEHANDLER,
-                                                                BehandlerRolle.VEILEDER)
-            rollerFraToken.contains(rolleConfig.beslutterRolle) -> listOf(BehandlerRolle.BESLUTTER,
-                                                                          BehandlerRolle.SAKSBEHANDLER,
-                                                                          BehandlerRolle.VEILEDER)
-            rollerFraToken.contains(rolleConfig.saksbehandlerRolle) -> listOf(BehandlerRolle.SAKSBEHANDLER,
-                                                                              BehandlerRolle.VEILEDER)
+            hentSaksbehandler() == SYSTEM_FORKORTELSE -> listOf(
+                BehandlerRolle.SYSTEM,
+                BehandlerRolle.BESLUTTER,
+                BehandlerRolle.SAKSBEHANDLER,
+                BehandlerRolle.VEILEDER
+            )
+            rollerFraToken.contains(rolleConfig.beslutterRolle) -> listOf(
+                BehandlerRolle.BESLUTTER,
+                BehandlerRolle.SAKSBEHANDLER,
+                BehandlerRolle.VEILEDER
+            )
+            rollerFraToken.contains(rolleConfig.saksbehandlerRolle) -> listOf(
+                BehandlerRolle.SAKSBEHANDLER,
+                BehandlerRolle.VEILEDER
+            )
             rollerFraToken.contains(rolleConfig.veilederRolle) -> listOf(BehandlerRolle.VEILEDER)
             else -> listOf(BehandlerRolle.UKJENT)
         }

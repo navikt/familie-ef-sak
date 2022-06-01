@@ -29,77 +29,89 @@ import java.time.LocalDateTime
  * kritiske
  */
 
-data class GrunnlagsdataMedMetadata(val grunnlagsdata: GrunnlagsdataDomene,
-                                    val lagtTilEtterFerdigstilling: Boolean,
-                                    val opprettetTidspunkt: LocalDateTime)
+data class GrunnlagsdataMedMetadata(
+    val grunnlagsdata: GrunnlagsdataDomene,
+    val lagtTilEtterFerdigstilling: Boolean,
+    val opprettetTidspunkt: LocalDateTime
+)
 
-data class GrunnlagsdataDomene(val søker: Søker,
-                               val annenForelder: List<AnnenForelderMedIdent>,
-                               val medlUnntak: Medlemskapsinfo,
-                               val barn: List<BarnMedIdent>,
-                               val tidligereVedtaksperioder: TidligereVedtaksperioder?)
+data class GrunnlagsdataDomene(
+    val søker: Søker,
+    val annenForelder: List<AnnenForelderMedIdent>,
+    val medlUnntak: Medlemskapsinfo,
+    val barn: List<BarnMedIdent>,
+    val tidligereVedtaksperioder: TidligereVedtaksperioder?
+)
 
-
-data class Søker(val adressebeskyttelse: Adressebeskyttelse?, //Er en liste i PDLSøker
-                 val bostedsadresse: List<Bostedsadresse>,
-                 val dødsfall: Dødsfall?, //Er en liste i PDLSøker
-                 val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-                 val fødsel: List<Fødsel>, //Er en liste i PDLSøker
-                 val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-                 val fullmakt: List<FullmaktMedNavn>,
-                 val kjønn: KjønnType,
-                 val kontaktadresse: List<Kontaktadresse>,
-                 val navn: Navn,
-                 val opphold: List<Opphold>,
-                 val oppholdsadresse: List<Oppholdsadresse>,
-                 val sivilstand: List<SivilstandMedNavn>,
-                 val statsborgerskap: List<Statsborgerskap>,
-                 val telefonnummer: List<Telefonnummer>,
-                 val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
-                 val innflyttingTilNorge: List<InnflyttingTilNorge>,
-                 val utflyttingFraNorge: List<UtflyttingFraNorge>,
-                 val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>
+data class Søker(
+    val adressebeskyttelse: Adressebeskyttelse?, // Er en liste i PDLSøker
+    val bostedsadresse: List<Bostedsadresse>,
+    val dødsfall: Dødsfall?, // Er en liste i PDLSøker
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
+    val fødsel: List<Fødsel>, // Er en liste i PDLSøker
+    val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
+    val fullmakt: List<FullmaktMedNavn>,
+    val kjønn: KjønnType,
+    val kontaktadresse: List<Kontaktadresse>,
+    val navn: Navn,
+    val opphold: List<Opphold>,
+    val oppholdsadresse: List<Oppholdsadresse>,
+    val sivilstand: List<SivilstandMedNavn>,
+    val statsborgerskap: List<Statsborgerskap>,
+    val telefonnummer: List<Telefonnummer>,
+    val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
+    val innflyttingTilNorge: List<InnflyttingTilNorge>,
+    val utflyttingFraNorge: List<UtflyttingFraNorge>,
+    val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>
 )
 
 data class AnnenForelderMedIdent(
-        val adressebeskyttelse: List<Adressebeskyttelse>,
-        val bostedsadresse: List<Bostedsadresse>,
-        val dødsfall: List<Dødsfall>,
-        val fødsel: List<Fødsel>,
-        val navn: Navn,
-        val personIdent: String
+    val adressebeskyttelse: List<Adressebeskyttelse>,
+    val bostedsadresse: List<Bostedsadresse>,
+    val dødsfall: List<Dødsfall>,
+    val fødsel: List<Fødsel>,
+    val navn: Navn,
+    val personIdent: String
 )
 
 data class BarnMedIdent(
-        val adressebeskyttelse: List<Adressebeskyttelse>,
-        val bostedsadresse: List<Bostedsadresse>,
-        val deltBosted: List<DeltBosted>,
-        val dødsfall: List<Dødsfall>,
-        val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-        val fødsel: List<Fødsel>,
-        val navn: Navn,
-        val personIdent: String,
+    val adressebeskyttelse: List<Adressebeskyttelse>,
+    val bostedsadresse: List<Bostedsadresse>,
+    val deltBosted: List<DeltBosted>,
+    val dødsfall: List<Dødsfall>,
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
+    val fødsel: List<Fødsel>,
+    val navn: Navn,
+    val personIdent: String,
 )
 
-data class ForelderBarnRelasjon(val relatertPersonsIdent: String,
-                                val relatertPersonsRolle: Familierelasjonsrolle,
-                                val minRolleForPerson: Familierelasjonsrolle?)
+data class ForelderBarnRelasjon(
+    val relatertPersonsIdent: String,
+    val relatertPersonsRolle: Familierelasjonsrolle,
+    val minRolleForPerson: Familierelasjonsrolle?
+)
 
-data class SivilstandMedNavn(val type: Sivilstandstype,
-                             val gyldigFraOgMed: LocalDate?,
-                             val relatertVedSivilstand: String?,
-                             val bekreftelsesdato: LocalDate?,
-                             val dødsfall: Dødsfall?, //Er en liste i PDLSøker
-                             val navn: String?,
-                             val metadata: Metadata)
+data class SivilstandMedNavn(
+    val type: Sivilstandstype,
+    val gyldigFraOgMed: LocalDate?,
+    val relatertVedSivilstand: String?,
+    val bekreftelsesdato: LocalDate?,
+    val dødsfall: Dødsfall?, // Er en liste i PDLSøker
+    val navn: String?,
+    val metadata: Metadata
+)
 
-data class FullmaktMedNavn(val gyldigFraOgMed: LocalDate,
-                           val gyldigTilOgMed: LocalDate,
-                           val motpartsPersonident: String,
-                           val navn: String?)
+data class FullmaktMedNavn(
+    val gyldigFraOgMed: LocalDate,
+    val gyldigTilOgMed: LocalDate,
+    val motpartsPersonident: String,
+    val navn: String?
+)
 
 data class TidligereVedtaksperioder(val infotrygd: TidligereInnvilgetVedtak)
 
-data class TidligereInnvilgetVedtak(val harTidligereOvergangsstønad: Boolean,
-                                    val harTidligereBarnetilsyn: Boolean,
-                                    val harTidligereSkolepenger: Boolean)
+data class TidligereInnvilgetVedtak(
+    val harTidligereOvergangsstønad: Boolean,
+    val harTidligereBarnetilsyn: Boolean,
+    val harTidligereSkolepenger: Boolean
+)

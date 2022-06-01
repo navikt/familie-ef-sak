@@ -8,8 +8,10 @@ interface IPersonMinimum {
     val fødselsnummer: String?
 }
 
-data class PersonMinimum(val navn: String,
-                         @Column("fodselsnummer")
-                         override val fødselsnummer: String? = null,
-                         @Column("fodselsdato")
-                         val fødselsdato: LocalDate? = null) : IPersonMinimum
+data class PersonMinimum(
+    val navn: String,
+    @Column("fodselsnummer")
+    override val fødselsnummer: String? = null,
+    @Column("fodselsdato")
+    val fødselsdato: LocalDate? = null
+) : IPersonMinimum

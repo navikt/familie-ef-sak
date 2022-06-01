@@ -8,7 +8,15 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.oppgave.*
+import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
@@ -21,23 +29,26 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.familie.ef.sak.oppgave.Oppgave as EfOppgave
 
-
 @Service
-class OppgaveService(private val oppgaveClient: OppgaveClient,
-                     private val fagsakService: FagsakService,
-                     private val oppgaveRepository: OppgaveRepository,
-                     private val arbeidsfordelingService: ArbeidsfordelingService,
-                     private val pdlClient: PdlClient,
-                     private val cacheManager: CacheManager,
-                     @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI) {
+class OppgaveService(
+    private val oppgaveClient: OppgaveClient,
+    private val fagsakService: FagsakService,
+    private val oppgaveRepository: OppgaveRepository,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val pdlClient: PdlClient,
+    private val cacheManager: CacheManager,
+    @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     val ENHET_NAY = "4489"
 
-    fun opprettOppgave(behandlingId: UUID,
-                       oppgavetype: Oppgavetype,
-                       tilordnetNavIdent: String? = null,
-                       beskrivelse: String? = null): Long {
+    fun opprettOppgave(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        tilordnetNavIdent: String? = null,
+        beskrivelse: String? = null
+    ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
         val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
@@ -49,18 +60,19 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
             val opprettOppgave =
-                    OpprettOppgaveRequest(ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
-                                          saksId = fagsak.eksternId.id.toString(),
-                                          tema = Tema.ENF,
-                                          oppgavetype = oppgavetype,
-                                          fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
-                                          beskrivelse = lagOppgaveTekst(beskrivelse),
-                                          enhetsnummer = enhetsnummer,
-                                          behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-                                          tilordnetRessurs = tilordnetNavIdent,
-                                          behandlesAvApplikasjon = "familie-ef-sak",
-                                          mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
-                    )
+                OpprettOppgaveRequest(
+                    ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
+                    saksId = fagsak.eksternId.id.toString(),
+                    tema = Tema.ENF,
+                    oppgavetype = oppgavetype,
+                    fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
+                    beskrivelse = lagOppgaveTekst(beskrivelse),
+                    enhetsnummer = enhetsnummer,
+                    behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
+                    tilordnetRessurs = tilordnetNavIdent,
+                    behandlesAvApplikasjon = "familie-ef-sak",
+                    mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
+                )
 
             val opprettetOppgaveId = try {
                 oppgaveClient.opprettOppgave(opprettOppgave)
@@ -72,16 +84,18 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
                 }
             }
 
-            val oppgave = EfOppgave(gsakOppgaveId = opprettetOppgaveId,
-                                    behandlingId = behandlingId,
-                                    type = oppgavetype)
+            val oppgave = EfOppgave(
+                gsakOppgaveId = opprettetOppgaveId,
+                behandlingId = behandlingId,
+                type = oppgavetype
+            )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
         }
     }
 
     private fun finnerIkkeGyldigArbeidsfordeling(e: Exception): Boolean =
-            e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
+        e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
         if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
@@ -119,7 +133,7 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
 
     fun ferdigstillBehandleOppgave(behandlingId: UUID, oppgavetype: Oppgavetype) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
-                      ?: error("Finner ikke oppgave for behandling $behandlingId")
+            ?: error("Finner ikke oppgave for behandling $behandlingId")
         ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
     }
 
@@ -150,8 +164,8 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
         } else {
             ""
         } +
-               "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
+            "----- Opprettet av familie-ef-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+            "$frontendOppgaveUrl" + "\n----- Oppgave må behandles i ny løsning"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
@@ -195,13 +209,19 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
     fun finnMapper(enhet: String): List<MappeDto> {
         return cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
-            val mappeRespons = oppgaveClient.finnMapper(FinnMappeRequest(tema = listOf(),
-                                                                         enhetsnr = enhet,
-                                                                         opprettetFom = null,
-                                                                         limit = 1000))
+            val mappeRespons = oppgaveClient.finnMapper(
+                FinnMappeRequest(
+                    tema = listOf(),
+                    enhetsnr = enhet,
+                    opprettetFom = null,
+                    limit = 1000
+                )
+            )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
-                logger.error("Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
-                             "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. ")
+                logger.error(
+                    "Det finnes flere mapper (${mappeRespons.antallTreffTotalt}) " +
+                        "enn vi har hentet ut (${mappeRespons.mapper.size}). Sjekk limit. "
+                )
             }
             mappeRespons.mapper
         }
@@ -214,5 +234,4 @@ class OppgaveService(private val oppgaveClient: OppgaveClient,
             gjeldendeTid.plusDays(1).toLocalDate()
         }
     }
-
 }

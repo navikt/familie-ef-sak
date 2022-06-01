@@ -14,28 +14,29 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Service
-class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
-                             private val infotrygdReplikaUri: URI,
-                             @Qualifier("azure")
-                             restOperations: RestOperations)
-    : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
+class InfotrygdReplikaClient(
+    @Value("\${INFOTRYGD_REPLIKA_API_URL}")
+    private val infotrygdReplikaUri: URI,
+    @Qualifier("azure")
+    restOperations: RestOperations
+) :
+    AbstractPingableRestClient(restOperations, "infotrygd.replika") {
 
     private val perioderUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
-
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
     private val finnSakerUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
 
     private val eksistererUri: URI =
-            UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/stonad/eksisterer").build().toUri()
 
     private fun migreringspersonerUri(antall: Int): URI =
-            UriComponentsBuilder.fromUri(infotrygdReplikaUri)
-                    .pathSegment("api/perioder/migreringspersoner")
-                    .queryParam("antall", antall)
-                    .build()
-                    .toUri()
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri)
+            .pathSegment("api/perioder/migreringspersoner")
+            .queryParam("antall", antall)
+            .build()
+            .toUri()
 
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
         return postForEntity(perioderUri, request)
@@ -61,5 +62,4 @@ class InfotrygdReplikaClient(@Value("\${INFOTRYGD_REPLIKA_API_URL}")
 
     override val pingUri: URI
         get() = UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/ping").build().toUri()
-
 }

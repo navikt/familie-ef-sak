@@ -16,9 +16,11 @@ class BrevmottakereService(val brevmottakereRepository: BrevmottakereRepository)
         validerAntallBrevmottakere(brevmottakereDto)
         validerUnikeBrevmottakere(brevmottakereDto)
 
-        val brevmottakere = Brevmottakere(behandlingId,
-                                          PersonerWrapper(brevmottakereDto.personer),
-                                          OrganisasjonerWrapper(brevmottakereDto.organisasjoner))
+        val brevmottakere = Brevmottakere(
+            behandlingId,
+            PersonerWrapper(brevmottakereDto.personer),
+            OrganisasjonerWrapper(brevmottakereDto.organisasjoner)
+        )
 
         return when (brevmottakereRepository.existsById(behandlingId)) {
             true ->
@@ -26,10 +28,7 @@ class BrevmottakereService(val brevmottakereRepository: BrevmottakereRepository)
             false ->
                 brevmottakereRepository.insert(brevmottakere)
         }.behandlingId
-
-
     }
-
 
     fun hentBrevmottakere(behandlingId: UUID): BrevmottakereDto? {
         return brevmottakereRepository.findByIdOrNull(behandlingId)?.let {

@@ -17,8 +17,9 @@ object AndelHistorikkUtil {
         }
     }
 
-    fun sammenhengende(first: AndelHistorikkDto,
-                       second: AndelHistorikkDto) =
-            first.andel.stønadTil.harPåfølgendeMåned(second.andel.stønadFra)
-
+    fun sammenhengende(
+        first: AndelHistorikkDto,
+        second: AndelHistorikkDto
+    ) =
+        first.andel.stønadTil.harPåfølgendeMåned(second.andel.stønadFra)
 }

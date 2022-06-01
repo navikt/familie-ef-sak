@@ -18,9 +18,11 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/brevmottakere/"])
 @ProtectedWithClaims(issuer = "azuread")
-class BrevmottakereController(private val tilgangService: TilgangService,
-                              private val brevmottakereService: BrevmottakereService,
-                              private val featureToggleService: FeatureToggleService) {
+class BrevmottakereController(
+    private val tilgangService: TilgangService,
+    private val brevmottakereService: BrevmottakereService,
+    private val featureToggleService: FeatureToggleService
+) {
 
     @GetMapping("/{behandlingId}")
     fun hentBrevmottakere(@PathVariable behandlingId: UUID): Ressurs<BrevmottakereDto?> {
@@ -30,17 +32,19 @@ class BrevmottakereController(private val tilgangService: TilgangService,
     }
 
     @PostMapping("/{behandlingId}")
-    fun velgBrevmottakere(@PathVariable behandlingId: UUID,
-                          @RequestBody brevmottakere: BrevmottakereDto): Ressurs<UUID> {
+    fun velgBrevmottakere(
+        @PathVariable behandlingId: UUID,
+        @RequestBody brevmottakere: BrevmottakereDto
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         if (!featureToggleService.isEnabled("familie.ef.sak.brevmottakere-verge-og-fullmakt")) {
-            throw Feil("Brevmottaker-funksjonaliteten er ikke tilgjengelig",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "Brevmottaker-funksjonaliteten er ikke tilgjengelig",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
 
         return Ressurs.success(brevmottakereService.lagreBrevmottakere(behandlingId, brevmottakere))
     }
-
 }
-
