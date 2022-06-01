@@ -1602,22 +1602,6 @@ internal class BeregnYtelseStegTest {
     }
 
     @Test
-    internal fun `skal ikke kunne lagre andel som er midlertidig opphør og strekker seg over mer enn en måned`() {
-        val andelFom = LocalDate.of(2022, 1, 1)
-        val andelTom = LocalDate.of(2022, 3, 31)
-
-        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
-
-        val feil: ApiFeil = assertThrows {
-            utførSteg(saksbehandling(fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
-                                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                     forrigeBehandlingId = null),
-                      innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, erMidlertidigOpphør = true))
-        }
-        assertThat(feil.feil).contains("En periode som er midlertidig opphør må være av lengde èn måned, på behandling=")
-    }
-
-    @Test
     internal fun `skal ikke kunne lagre andel som er midlertidig opphør som første andel i en førstegangsbehandling`() {
         val andelFom = LocalDate.of(2022, 1, 1)
         val andelTom = LocalDate.of(2022, 1, 31)
