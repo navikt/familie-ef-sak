@@ -22,10 +22,12 @@ internal class AutomatiskMigreringServiceTest {
     private val migreringService = mockk<MigreringService>()
     private val taskRepository = mockk<TaskRepository>()
 
-    private val service = AutomatiskMigreringService(migreringsstatusRepository,
-                                                     migreringService,
-                                                     infotrygdReplikaClient,
-                                                     taskRepository)
+    private val service = AutomatiskMigreringService(
+        migreringsstatusRepository,
+        migreringService,
+        infotrygdReplikaClient,
+        taskRepository
+    )
 
     private val updateSlots = mutableListOf<Migreringsstatus>()
     private val insertAllSlot = slot<List<Migreringsstatus>>()
@@ -46,7 +48,7 @@ internal class AutomatiskMigreringServiceTest {
     internal fun `har allerede migrert en av identene, hopper over den`() {
         every { infotrygdReplikaClient.hentPersonerForMigrering(any()) } returns setOf("1", "2", "3", "4", "5")
         every { migreringsstatusRepository.findAllByIdentIn(any()) } returns
-                setOf(Migreringsstatus("2", MigreringResultat.FEILET))
+            setOf(Migreringsstatus("2", MigreringResultat.FEILET))
 
         service.migrerAutomatisk(3)
         assertThat(insertAllSlot.captured).hasSize(3)

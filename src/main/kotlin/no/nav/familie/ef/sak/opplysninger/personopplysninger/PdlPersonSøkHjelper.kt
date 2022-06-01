@@ -10,46 +10,61 @@ object PdlPersonSøkHjelper {
         if (bostedsadresse.matrikkeladresse != null) {
             val matrikkeladresse = bostedsadresse.matrikkeladresse
             return listOfNotNull(
-                    matrikkeladresse.matrikkelId?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.matrikkeladresse.matrikkelId",
-                                         søkeord = bostedsadresse.matrikkeladresse.matrikkelId.toString())
-                    },
-                    matrikkeladresse.bruksenhetsnummer?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.matrikkeladresse.bruksenhetsnummer",
-                                         søkeord = bostedsadresse.matrikkeladresse.bruksenhetsnummer.toString())
-                    }
+                matrikkeladresse.matrikkelId?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.matrikkeladresse.matrikkelId",
+                        søkeord = bostedsadresse.matrikkeladresse.matrikkelId.toString()
+                    )
+                },
+                matrikkeladresse.bruksenhetsnummer?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.matrikkeladresse.bruksenhetsnummer",
+                        søkeord = bostedsadresse.matrikkeladresse.bruksenhetsnummer.toString()
+                    )
+                }
             )
-
         } else if (bostedsadresse.vegadresse != null) {
             val vegadresse = bostedsadresse.vegadresse
             return listOfNotNull(
-                    vegadresse.adressenavn?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.vegadresse.adressenavn",
-                                         søkeord = it)
-                    },
-                    vegadresse.bruksenhetsnummer?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.vegadresse.bruksenhetsnummer",
-                                         søkeord = it)
-                    },
-                    vegadresse.husbokstav?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.vegadresse.husbokstav",
-                                         søkeord = it)
-                    },
-                    vegadresse.husnummer?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.vegadresse.husnummer",
-                                         søkeord = it)
-                    },
-                    vegadresse.postnummer?.let {
-                        lagSøkeKriterier(søkefelt = "person.bostedsadresse.vegadresse.postnummer",
-                                         søkeord = it)
-                    }
+                vegadresse.adressenavn?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.vegadresse.adressenavn",
+                        søkeord = it
+                    )
+                },
+                vegadresse.bruksenhetsnummer?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.vegadresse.bruksenhetsnummer",
+                        søkeord = it
+                    )
+                },
+                vegadresse.husbokstav?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.vegadresse.husbokstav",
+                        søkeord = it
+                    )
+                },
+                vegadresse.husnummer?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.vegadresse.husnummer",
+                        søkeord = it
+                    )
+                },
+                vegadresse.postnummer?.let {
+                    lagSøkeKriterier(
+                        søkefelt = "person.bostedsadresse.vegadresse.postnummer",
+                        søkeord = it
+                    )
+                }
             )
         }
         return emptyList()
     }
 
     private fun lagSøkeKriterier(søkefelt: String, søkeord: String): SøkeKriterier {
-        return SøkeKriterier(fieldName = søkefelt,
-                             searchRule = SearchRule(equals = søkeord))
+        return SøkeKriterier(
+            fieldName = søkefelt,
+            searchRule = SearchRule(equals = søkeord)
+        )
     }
 }

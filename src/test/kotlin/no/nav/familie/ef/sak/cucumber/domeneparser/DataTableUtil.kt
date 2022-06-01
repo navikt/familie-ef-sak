@@ -9,7 +9,7 @@ import java.util.UUID
 object DataTableUtil {
 
     fun <T> DataTable.forHverBehandling(mapper: (behandlingId: UUID, rader: List<Map<String, String>>) -> T) =
-            this.asMaps().groupBy {
-                IdTIlUUIDHolder.behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, it)]!!
-            }.map { (behandlingId, rader) -> mapper(behandlingId, rader) }
+        this.asMaps().groupBy {
+            IdTIlUUIDHolder.behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, it)]!!
+        }.map { (behandlingId, rader) -> mapper(behandlingId, rader) }
 }

@@ -12,11 +12,14 @@ import java.time.format.DateTimeFormatter
 
 @Service
 @TaskStepBeskrivelse(
-        taskStepType = ForberedOppgaverTerminbarnTask.TYPE,
-        beskrivelse = "Oppretter oppgave for ufødte terminbarn")
-class ForberedOppgaverTerminbarnTask(val taskRepository: TaskRepository,
-                                     val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService,
-                                     val featureToggleService: FeatureToggleService) : AsyncTaskStep {
+    taskStepType = ForberedOppgaverTerminbarnTask.TYPE,
+    beskrivelse = "Oppretter oppgave for ufødte terminbarn"
+)
+class ForberedOppgaverTerminbarnTask(
+    val taskRepository: TaskRepository,
+    val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService,
+    val featureToggleService: FeatureToggleService
+) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

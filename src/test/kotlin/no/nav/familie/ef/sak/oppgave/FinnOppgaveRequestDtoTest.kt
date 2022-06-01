@@ -29,7 +29,7 @@ internal class FinnOppgaveRequestDtoTest {
         eksternInput["fristTom"] = LocalDate.of(2020, 1, 2).toString()
 
         val finnOppgaveRequestDto =
-                objectMapper.readValue(objectMapper.writeValueAsString(eksternInput), FinnOppgaveRequestDto::class.java)
+            objectMapper.readValue(objectMapper.writeValueAsString(eksternInput), FinnOppgaveRequestDto::class.java)
         val finnOppgaveRequest = finnOppgaveRequestDto.tilFinnOppgaveRequest()
 
         Assertions.assertThat(finnOppgaveRequest.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad)
@@ -46,7 +46,5 @@ internal class FinnOppgaveRequestDtoTest {
         Assertions.assertThat(finnOppgaveRequest.limit).isEqualTo(150)
         Assertions.assertThat(finnOppgaveRequest.offset).isEqualTo(0)
         Assertions.assertThat(finnOppgaveRequest.mappeId).isEqualTo(1234L)
-
-
     }
 }

@@ -23,18 +23,31 @@ internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal lagre brevmottaker`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val brevmottakere = Brevmottakere(behandlingId = behandling.id,
-                                          personer = PersonerWrapper(listOf(BrevmottakerPerson(personIdent = "12345678910",
-                                                                                               navn = "Verge",
-                                                                                               mottakerRolle = MottakerRolle.VERGE))),
-                                          organisasjoner = OrganisasjonerWrapper(listOf(BrevmottakerOrganisasjon(
-                                                  organisasjonsnummer = "12345678",
-                                                  navnHosOrganisasjon = "Advokat",
-                                                  MottakerRolle.FULLMAKT))))
+        val brevmottakere = Brevmottakere(
+            behandlingId = behandling.id,
+            personer = PersonerWrapper(
+                listOf(
+                    BrevmottakerPerson(
+                        personIdent = "12345678910",
+                        navn = "Verge",
+                        mottakerRolle = MottakerRolle.VERGE
+                    )
+                )
+            ),
+            organisasjoner = OrganisasjonerWrapper(
+                listOf(
+                    BrevmottakerOrganisasjon(
+                        organisasjonsnummer = "12345678",
+                        navnHosOrganisasjon = "Advokat",
+                        MottakerRolle.FULLMAKT
+                    )
+                )
+            )
+        )
 
         brevmottakereRepository.insert(brevmottakere)
 
         Assertions.assertThat(brevmottakereRepository.findById(behandling.id))
-                .get().usingRecursiveComparison().isEqualTo(brevmottakere)
+            .get().usingRecursiveComparison().isEqualTo(brevmottakere)
     }
 }

@@ -39,6 +39,6 @@ internal class CachedKodeverkServiceTest {
     }
 
     private fun sjekkAllePublicErCacheable(kClass: KClass<*>) = kClass.declaredMemberFunctions
-            .filter { Modifier.isPublic(it.javaMethod!!.modifiers) }
-            .none { it.annotations.none { innerIt -> innerIt.annotationClass == Cacheable::class } }
+        .filter { Modifier.isPublic(it.javaMethod!!.modifiers) }
+        .none { it.annotations.none { innerIt -> innerIt.annotationClass == Cacheable::class } }
 }

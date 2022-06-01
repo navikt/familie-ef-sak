@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface MellomlagerFrittståendeBrevRepository : RepositoryInterface<MellomlagretFrittståendeBrev, UUID>,
-                                                  InsertUpdateRepository<MellomlagretFrittståendeBrev> {
+interface MellomlagerFrittståendeBrevRepository :
+    RepositoryInterface<MellomlagretFrittståendeBrev, UUID>,
+    InsertUpdateRepository<MellomlagretFrittståendeBrev> {
 
     fun findByFagsakIdAndSaksbehandlerIdent(fagsakId: UUID, saksehandlerIdent: String): MellomlagretFrittståendeBrev?
-
 }

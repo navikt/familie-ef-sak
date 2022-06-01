@@ -10,10 +10,13 @@ import java.time.format.DateTimeFormatter
 
 @Service
 @TaskStepBeskrivelse(
-        taskStepType = ForberedOppgaverForBarnTask.TYPE,
-        beskrivelse = "Oppretter oppgave for barn som fyller 1/2 eller 1 år")
-class ForberedOppgaverForBarnTask(val taskRepository: TaskRepository,
-                                  val forberedOppgaverForBarnService: ForberedOppgaverForBarnService) : AsyncTaskStep {
+    taskStepType = ForberedOppgaverForBarnTask.TYPE,
+    beskrivelse = "Oppretter oppgave for barn som fyller 1/2 eller 1 år"
+)
+class ForberedOppgaverForBarnTask(
+    val taskRepository: TaskRepository,
+    val forberedOppgaverForBarnService: ForberedOppgaverForBarnService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val referansedato = LocalDate.parse(task.payload)

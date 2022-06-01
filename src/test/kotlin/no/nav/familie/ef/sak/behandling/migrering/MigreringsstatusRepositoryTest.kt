@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.behandling.migrering.MigreringResultat
-import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
-import no.nav.familie.ef.sak.behandling.migrering.MigreringsstatusRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

@@ -27,7 +27,6 @@ internal class GrunnbeløpstestTest {
         assertThat(perioder.last().periode.tildato).isEqualTo(LocalDate.of(2021, 5, 1))
     }
 
-
     @Test
     internal fun `skal sette riktig startdato og sluttdato når beløpsperioder starter på en g-endringsperiode`() {
         val perioder = finnGrunnbeløpsPerioder(LocalDate.of(2021, 5, 1), LocalDate.of(2021, 8, 1))

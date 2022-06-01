@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClient,
-                       private val pdlClient: PdlClient) {
+class InfotrygdService(
+    private val infotrygdReplikaClient: InfotrygdReplikaClient,
+    private val pdlClient: PdlClient
+) {
 
     /**
      * Forslag på sjekk om en person eksisterer i infotrygd
@@ -33,17 +35,21 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
     fun hentDtoPerioder(personIdent: String): InfotrygdPerioderDto {
         val perioder = hentPerioderFraReplika(personIdent)
         return InfotrygdPerioderDto(
-                overgangsstønad = mapPerioder(perioder.overgangsstønad),
-                barnetilsyn = mapPerioder(perioder.barnetilsyn),
-                skolepenger = mapPerioder(perioder.skolepenger)
+            overgangsstønad = mapPerioder(perioder.overgangsstønad),
+            barnetilsyn = mapPerioder(perioder.barnetilsyn),
+            skolepenger = mapPerioder(perioder.skolepenger)
         )
     }
 
     fun hentSaker(personIdent: String): InfotrygdSakResponse {
         val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
-        return response.copy(saker = response.saker
-                .sortedWith(compareByDescending<InfotrygdSak, LocalDate?>(nullsLast()) { it.vedtaksdato }
-                                    .thenByDescending(nullsLast()) { it.mottattDato }))
+        return response.copy(
+            saker = response.saker
+                .sortedWith(
+                    compareByDescending<InfotrygdSak, LocalDate?>(nullsLast()) { it.vedtaksdato }
+                        .thenByDescending(nullsLast()) { it.mottattDato }
+                )
+        )
     }
 
     /**
@@ -59,17 +65,23 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
      */
     fun hentSammenslåttePerioderSomInternPerioder(personIdenter: Set<String>): InternePerioder {
         val perioder = hentPerioderFraReplika(personIdenter)
-        return InternePerioder(overgangsstønad = slåSammenPerioder(perioder.overgangsstønad).map { it.tilInternPeriode() },
-                               barnetilsyn = slåSammenPerioder(perioder.barnetilsyn).map { it.tilInternPeriode() },
-                               skolepenger = slåSammenPerioder(perioder.skolepenger).map { it.tilInternPeriode() })
+        return InternePerioder(
+            overgangsstønad = slåSammenPerioder(perioder.overgangsstønad).map { it.tilInternPeriode() },
+            barnetilsyn = slåSammenPerioder(perioder.barnetilsyn).map { it.tilInternPeriode() },
+            skolepenger = slåSammenPerioder(perioder.skolepenger).map { it.tilInternPeriode() }
+        )
     }
 
     private fun mapPerioder(perioder: List<InfotrygdPeriode>) =
-            InfotrygdStønadPerioderDto(perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
-                                       slåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() })
+        InfotrygdStønadPerioderDto(
+            perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
+            slåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() }
+        )
 
-    private fun hentPerioderFraReplika(identer: Set<String>,
-                                       stønadstyper: Set<StønadType> = StønadType.values().toSet()): InfotrygdPeriodeResponse {
+    private fun hentPerioderFraReplika(
+        identer: Set<String>,
+        stønadstyper: Set<StønadType> = StønadType.values().toSet()
+    ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentPerioder(request)
@@ -82,5 +94,4 @@ class InfotrygdService(private val infotrygdReplikaClient: InfotrygdReplikaClien
     private fun hentPersonIdenter(personIdent: String): Set<String> {
         return pdlClient.hentPersonidenter(personIdent, true).identer()
     }
-
 }

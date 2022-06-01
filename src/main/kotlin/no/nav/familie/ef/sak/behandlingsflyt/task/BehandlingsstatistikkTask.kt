@@ -36,23 +36,24 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
-        taskStepType = BehandlingsstatistikkTask.TYPE,
-        beskrivelse = "Sender behandlingsstatistikk til iverksett"
+    taskStepType = BehandlingsstatistikkTask.TYPE,
+    beskrivelse = "Sender behandlingsstatistikk til iverksett"
 )
 
-class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
-                                private val behandlingService: BehandlingService,
-                                private val søknadService: SøknadService,
-                                private val vedtakRepository: VedtakRepository,
-                                private val oppgaveService: OppgaveService,
-                                private val grunnlagsdataService: GrunnlagsdataService
+class BehandlingsstatistikkTask(
+    private val iverksettClient: IverksettClient,
+    private val behandlingService: BehandlingService,
+    private val søknadService: SøknadService,
+    private val vedtakRepository: VedtakRepository,
+    private val oppgaveService: OppgaveService,
+    private val grunnlagsdataService: GrunnlagsdataService
 ) : AsyncTaskStep {
 
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
         val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) =
-                objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
+            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
@@ -63,29 +64,29 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
-                saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
+            saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
-                behandlingId = behandlingId,
-                eksternBehandlingId = saksbehandling.eksternId,
-                personIdent = saksbehandling.ident,
-                gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
-                beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
-                              else null,
-                eksternFagsakId = saksbehandling.eksternFagsakId,
-                hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
-                behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
-                hendelse = hendelse,
-                behandlingResultat = saksbehandling.resultat.name,
-                resultatBegrunnelse = resultatBegrunnelse,
-                opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
-                strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
-                stønadstype = saksbehandling.stønadstype,
-                behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
-                henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
-                relatertEksternBehandlingId = relatertEksternBehandlingId,
-                relatertBehandlingId = null
+            behandlingId = behandlingId,
+            eksternBehandlingId = saksbehandling.eksternId,
+            personIdent = saksbehandling.ident,
+            gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
+            beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
+            else null,
+            eksternFagsakId = saksbehandling.eksternFagsakId,
+            hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
+            behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),
+            hendelse = hendelse,
+            behandlingResultat = saksbehandling.resultat.name,
+            resultatBegrunnelse = resultatBegrunnelse,
+            opprettetEnhet = sisteOppgaveForBehandling?.opprettetAvEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+            ansvarligEnhet = sisteOppgaveForBehandling?.tildeltEnhetsnr ?: MASKINELL_JOURNALFOERENDE_ENHET,
+            strengtFortroligAdresse = søker.adressebeskyttelse?.erStrengtFortrolig() ?: false,
+            stønadstype = saksbehandling.stønadstype,
+            behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
+            henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
+            relatertEksternBehandlingId = relatertEksternBehandlingId,
+            relatertBehandlingId = null
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
@@ -98,7 +99,6 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
     }
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
-
 
     private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, stønadType: StønadType): String? {
         return when (hendelse) {
@@ -116,16 +116,17 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
     }
 
     private fun utledBegrunnelseForInnvilgetVedtak(stønadType: StønadType, vedtak: Vedtak) =
-            when (stønadType) {
-                OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
-                BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
-                SKOLEPENGER -> throw NotImplementedError("Skolepenger er ikke implementert")
-            }
+        when (stønadType) {
+            OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
+            BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
+            SKOLEPENGER -> throw NotImplementedError("Skolepenger er ikke implementert")
+        }
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER -> gjeldendeSaksbehandler
-                                                                    ?: error("Mangler saksbehandler for hendelse")
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER ->
+                gjeldendeSaksbehandler
+                    ?: error("Mangler saksbehandler for hendelse")
             Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
         }
     }
@@ -138,79 +139,93 @@ class BehandlingsstatistikkTask(private val iverksettClient: IverksettClient,
         }
     }
 
-
     companion object {
 
         fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long?): Task =
-                opprettTask(behandlingId = behandlingId,
-                            hendelse = Hendelse.MOTTATT,
-                            hendelseTidspunkt = LocalDateTime.now(),
-                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true),
-                            oppgaveId = oppgaveId)
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.MOTTATT,
+                hendelseTidspunkt = LocalDateTime.now(),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true),
+                oppgaveId = oppgaveId
+            )
 
         fun opprettPåbegyntTask(behandlingId: UUID): Task =
-                opprettTask(behandlingId = behandlingId,
-                            hendelse = Hendelse.PÅBEGYNT,
-                            hendelseTidspunkt = LocalDateTime.now(),
-                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.PÅBEGYNT,
+                hendelseTidspunkt = LocalDateTime.now(),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+            )
 
         fun opprettVenterTask(behandlingId: UUID): Task =
-                opprettTask(behandlingId = behandlingId,
-                            hendelse = Hendelse.VENTER,
-                            hendelseTidspunkt = LocalDateTime.now(),
-                            gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true))
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.VENTER,
+                hendelseTidspunkt = LocalDateTime.now(),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+            )
 
         fun opprettVedtattTask(behandlingId: UUID): Task =
-                opprettTask(behandlingId = behandlingId,
-                            hendelse = Hendelse.VEDTATT,
-                            hendelseTidspunkt = LocalDateTime.now())
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.VEDTATT,
+                hendelseTidspunkt = LocalDateTime.now()
+            )
 
-        fun opprettBesluttetTask(behandlingId: UUID,
-                                 oppgaveId: Long?): Task =
-                opprettTask(behandlingId = behandlingId,
-                            hendelse = Hendelse.BESLUTTET,
-                            hendelseTidspunkt = LocalDateTime.now(),
-                            oppgaveId = oppgaveId)
+        fun opprettBesluttetTask(
+            behandlingId: UUID,
+            oppgaveId: Long?
+        ): Task =
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.BESLUTTET,
+                hendelseTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId
+            )
 
         fun opprettFerdigTask(behandlingId: UUID): Task =
-                opprettTask(behandlingId = behandlingId,
-                            hendelse = Hendelse.FERDIG,
-                            hendelseTidspunkt = LocalDateTime.now())
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.FERDIG,
+                hendelseTidspunkt = LocalDateTime.now()
+            )
 
         private fun opprettTask(
-                behandlingId: UUID,
-                hendelse: Hendelse,
-                hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
-                gjeldendeSaksbehandler: String? = null,
-                oppgaveId: Long? = null
+            behandlingId: UUID,
+            hendelse: Hendelse,
+            hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
+            gjeldendeSaksbehandler: String? = null,
+            oppgaveId: Long? = null
         ): Task =
-                Task(type = TYPE,
-                     payload = objectMapper.writeValueAsString(
-                             BehandlingsstatistikkTaskPayload(
-                                     behandlingId,
-                                     hendelse,
-                                     hendelseTidspunkt,
-                                     gjeldendeSaksbehandler,
-                                     oppgaveId
-                             )),
-                     properties = Properties().apply {
-                         this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
-                         this["behandlingId"] = behandlingId.toString()
-                         this["hendelse"] = hendelse.name
-                         this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
-                         this["oppgaveId"] = oppgaveId?.toString() ?: ""
-                     })
-
+            Task(
+                type = TYPE,
+                payload = objectMapper.writeValueAsString(
+                    BehandlingsstatistikkTaskPayload(
+                        behandlingId,
+                        hendelse,
+                        hendelseTidspunkt,
+                        gjeldendeSaksbehandler,
+                        oppgaveId
+                    )
+                ),
+                properties = Properties().apply {
+                    this["saksbehandler"] = gjeldendeSaksbehandler ?: ""
+                    this["behandlingId"] = behandlingId.toString()
+                    this["hendelse"] = hendelse.name
+                    this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
+                    this["oppgaveId"] = oppgaveId?.toString() ?: ""
+                }
+            )
 
         const val TYPE = "behandlingsstatistikkTask"
     }
-
 }
 
 data class BehandlingsstatistikkTaskPayload(
-        val behandlingId: UUID,
-        val hendelse: Hendelse,
-        val hendelseTidspunkt: LocalDateTime,
-        val gjeldendeSaksbehandler: String?,
-        val oppgaveId: Long?
+    val behandlingId: UUID,
+    val hendelse: Hendelse,
+    val hendelseTidspunkt: LocalDateTime,
+    val gjeldendeSaksbehandler: String?,
+    val oppgaveId: Long?
 )

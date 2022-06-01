@@ -73,21 +73,26 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange(localhost("/api/behandling/$id"),
-                                     HttpMethod.GET,
-                                     HttpEntity<Ressurs<BehandlingDto>>(headers))
+        return restTemplate.exchange(
+            localhost("/api/behandling/$id"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<BehandlingDto>>(headers)
+        )
     }
 
     private fun henleggBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange(localhost("/api/behandling/$id/henlegg"),
-                                     HttpMethod.POST,
-                                     HttpEntity<Ressurs<BehandlingDto>>(headers))
+        return restTemplate.exchange(
+            localhost("/api/behandling/$id/henlegg"),
+            HttpMethod.POST,
+            HttpEntity<Ressurs<BehandlingDto>>(headers)
+        )
     }
 
-
     private fun henlegg(id: UUID, henlagt: HenlagtDto): ResponseEntity<Ressurs<BehandlingDto>> {
-        return restTemplate.exchange<Ressurs<BehandlingDto>>(localhost("/api/behandling/$id/henlegg"),
-                                                             HttpMethod.POST,
-                                                             HttpEntity(henlagt, headers))
+        return restTemplate.exchange<Ressurs<BehandlingDto>>(
+            localhost("/api/behandling/$id/henlegg"),
+            HttpMethod.POST,
+            HttpEntity(henlagt, headers)
+        )
     }
 }

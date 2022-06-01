@@ -5,17 +5,17 @@ import java.math.BigDecimal
 import java.util.UUID
 
 data class BeløpsperiodeBarnetilsynDto(
-        val periode: Periode,
-        val beløp: Int,
-        val beløpFørFratrekkOgSatsjustering: Int,
-        val sats: Int,
-        val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
+    val periode: Periode,
+    val beløp: Int,
+    val beløpFørFratrekkOgSatsjustering: Int,
+    val sats: Int,
+    val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
 )
 
 data class BeregningsgrunnlagBarnetilsynDto(
-        val utgifter: BigDecimal,
-        val kontantstøttebeløp: BigDecimal,
-        val tilleggsstønadsbeløp: BigDecimal,
-        val antallBarn: Int,
-        val barn: List<UUID>
+    val utgifter: BigDecimal,
+    val kontantstøttebeløp: BigDecimal,
+    val tilleggsstønadsbeløp: BigDecimal,
+    val antallBarn: Int,
+    val barn: List<UUID>
 )

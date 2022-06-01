@@ -37,7 +37,6 @@ class PdlClientTest {
             wiremockServerItem = WireMockServer(wireMockConfig().dynamicPort())
             wiremockServerItem.start()
             pdlClient = PdlClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
-
         }
 
         @AfterAll
@@ -54,8 +53,10 @@ class PdlClientTest {
 
     @Test
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten riktig`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("søker.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("søker.json")))
+        )
 
         val response = pdlClient.hentSøker("")
 
@@ -64,8 +65,10 @@ class PdlClientTest {
 
     @Test
     fun `pdlClient håndterer response for andreForeldre-query mot pdl-tjenesten riktig`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("andreForeldre.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("andreForeldre.json")))
+        )
 
         val response = pdlClient.hentAndreForeldre(listOf("11111122222"))
 
@@ -74,8 +77,10 @@ class PdlClientTest {
 
     @Test
     fun `pdlClient håndterer response for barn-query mot pdl-tjenesten riktig`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("barn.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("barn.json")))
+        )
 
         val response = pdlClient.hentBarn(listOf("11111122222"))
 
@@ -84,8 +89,10 @@ class PdlClientTest {
 
     @Test
     fun `pdlClient håndterer response for personKortBolk-query mot pdl-tjenesten riktig`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("person_kort_bolk.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("person_kort_bolk.json")))
+        )
 
         val response = pdlClient.hentPersonKortBolk(listOf("11111122222"))
 
@@ -94,46 +101,56 @@ class PdlClientTest {
 
     @Test
     fun `pdlClient håndterer response for uthenting av identer`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("hent_identer.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("hent_identer.json")))
+        )
         val response = pdlClient.hentAktørIder("12345")
         assertThat(response.identer.first().ident).isEqualTo("12345678901")
     }
 
     @Test
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der person i data er null`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson("{\"data\": {}}")))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson("{\"data\": {}}"))
+        )
         assertThat(Assertions.catchThrowable { pdlClient.hentSøker("") })
-                .hasMessageStartingWith("Manglende ")
-                .isInstanceOf(PdlRequestException::class.java)
+            .hasMessageStartingWith("Manglende ")
+            .isInstanceOf(PdlRequestException::class.java)
     }
 
     @Test
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der data er null og har errors`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlErrorResponse.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("pdlErrorResponse.json")))
+        )
         assertThat(Assertions.catchThrowable { pdlClient.hentSøker("") })
-                .hasMessageStartingWith("Feil ved henting av")
-                .isInstanceOf(PdlRequestException::class.java)
+            .hasMessageStartingWith("Feil ved henting av")
+            .isInstanceOf(PdlRequestException::class.java)
     }
 
     @Test
     fun `pdlClient håndterer response for bolk-query mot pdl-tjenesten der person er null og har errors`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlBolkErrorResponse.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("pdlBolkErrorResponse.json")))
+        )
         assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
-                .hasMessageStartingWith("Feil ved henting av")
-                .isInstanceOf(PdlRequestException::class.java)
+            .hasMessageStartingWith("Feil ved henting av")
+            .isInstanceOf(PdlRequestException::class.java)
     }
 
     @Test
     fun `pdlClient håndterer response for bolk-query mot pdl-tjenesten der data er null og har errors`() {
-        wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                           .willReturn(okJson(readFile("pdlBolkErrorResponse_nullData.json"))))
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("pdlBolkErrorResponse_nullData.json")))
+        )
         assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
-                .hasMessageStartingWith("Data er null fra PDL")
-                .isInstanceOf(PdlRequestException::class.java)
+            .hasMessageStartingWith("Data er null fra PDL")
+            .isInstanceOf(PdlRequestException::class.java)
     }
 
     @Nested
@@ -141,8 +158,10 @@ class PdlClientTest {
 
         @Test
         fun `håndterer response for uthenting av identer i bolk`() {
-            wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                               .willReturn(okJson(readFile("hent_identer_bolk.json"))))
+            wiremockServerItem.stubFor(
+                post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                    .willReturn(okJson(readFile("hent_identer_bolk.json")))
+            )
             val response = pdlClient.hentIdenterBolk(listOf("12345"))
             assertThat(response["12345678910"]?.ident).isEqualTo("11223344556677")
             assertThat(response["12345678911"]?.ident).isEqualTo("12345678911")
@@ -156,11 +175,12 @@ class PdlClientTest {
 
         @Test
         fun `kjører feilfritt hvis antall identer er lik MAKS_ANTALL_IDENTER`() {
-            wiremockServerItem.stubFor(post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                                               .willReturn(okJson(readFile("hent_identer_bolk.json"))))
+            wiremockServerItem.stubFor(
+                post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                    .willReturn(okJson(readFile("hent_identer_bolk.json")))
+            )
             assertDoesNotThrow { pdlClient.hentIdenterBolk((1..PdlClient.MAKS_ANTALL_IDENTER).map { "$it" }) }
         }
-
     }
 
     private fun readFile(filnavn: String): String {

@@ -34,7 +34,7 @@ internal class ForberedOppgaverForBarnServiceTest {
     private val iverksettClient = mockk<IverksettClient>()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val opprettOppgaveForBarnService =
-            ForberedOppgaverForBarnService(gjeldendeBarnRepository, behandlingRepository, iverksettClient)
+        ForberedOppgaverForBarnService(gjeldendeBarnRepository, behandlingRepository, iverksettClient)
 
     private val REFERANSEDATO = LocalDate.now()
 
@@ -50,7 +50,7 @@ internal class ForberedOppgaverForBarnServiceTest {
         every { gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(any(), any()) } returns emptyList()
         every { behandlingRepository.finnEksterneIder(capture(eksterneIderSlot)) } answers {
             firstArg<Set<UUID>>()
-                    .mapIndexed { index, behandlingId -> EksternId(behandlingId, index.toLong(), index.toLong()) }.toSet()
+                .mapIndexed { index, behandlingId -> EksternId(behandlingId, index.toLong(), index.toLong()) }.toSet()
         }
     }
 
@@ -233,8 +233,10 @@ internal class ForberedOppgaverForBarnServiceTest {
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato),
-                         opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato))
+        } returns listOf(
+            opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato),
+            opprettBarn(behandlingId = behandlingId, fødselsnummer = null, termindato = termindato)
+        )
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(REFERANSEDATO)
         assertThat(eksterneIderSlot.captured.size).isEqualTo(1)
     }
@@ -245,8 +247,10 @@ internal class ForberedOppgaverForBarnServiceTest {
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato),
-                         opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato))
+        } returns listOf(
+            opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato),
+            opprettBarn(behandlingId = UUID.randomUUID(), fødselsnummer = null, termindato = termindato)
+        )
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(REFERANSEDATO)
         assertThat(eksterneIderSlot.captured.size).isEqualTo(2)
     }
@@ -264,9 +268,13 @@ internal class ForberedOppgaverForBarnServiceTest {
         } returns listOf(opprettBarn(behandlingId = behandlingId, termindato = termindato))
         every {
             gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(behandlingId = migrertBehandlingId,
-                                     fødselsnummer = FnrGenerator.generer(fødselsdato),
-                                     fraMigrering = true))
+        } returns listOf(
+            opprettBarn(
+                behandlingId = migrertBehandlingId,
+                fødselsnummer = FnrGenerator.generer(fødselsdato),
+                fraMigrering = true
+            )
+        )
 
         opprettOppgaveForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(REFERANSEDATO)
 
@@ -275,12 +283,12 @@ internal class ForberedOppgaverForBarnServiceTest {
         assertThat(oppgaverForBarn.map { it.behandlingId }).containsExactlyInAnyOrder(behandlingId, migrertBehandlingId)
     }
 
-    private fun opprettBarn(behandlingId: UUID = UUID.randomUUID(),
-                            fødselsnummer: String? = null,
-                            termindato: LocalDate? = null,
-                            fraMigrering: Boolean = false): BarnTilUtplukkForOppgave {
+    private fun opprettBarn(
+        behandlingId: UUID = UUID.randomUUID(),
+        fødselsnummer: String? = null,
+        termindato: LocalDate? = null,
+        fraMigrering: Boolean = false
+    ): BarnTilUtplukkForOppgave {
         return BarnTilUtplukkForOppgave(behandlingId, "12345678910", fødselsnummer, termindato, fraMigrering)
     }
-
-
 }

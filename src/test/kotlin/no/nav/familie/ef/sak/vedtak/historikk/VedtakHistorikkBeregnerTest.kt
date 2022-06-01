@@ -32,9 +32,11 @@ internal class VedtakHistorikkBeregnerTest {
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
-        validerPeriode(vedtaksperioderPerBehandling,
-                       andreVedtak.behandlingId,
-                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk()))
+        validerPeriode(
+            vedtaksperioderPerBehandling,
+            andreVedtak.behandlingId,
+            listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk())
+        )
     }
 
     @Test
@@ -66,7 +68,7 @@ internal class VedtakHistorikkBeregnerTest {
     @Test
     internal fun `revurdering fra samme startdato overskreve alle tidligere perioder`() {
         val andreVedtak =
-                lagVedtak(perioder = listOf(førstePeriode.copy(aktivitet = AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE)))
+            lagVedtak(perioder = listOf(førstePeriode.copy(aktivitet = AktivitetType.BARNET_SÆRLIG_TILSYNSKREVENDE)))
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -92,18 +94,24 @@ internal class VedtakHistorikkBeregnerTest {
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
-        validerPeriode(vedtaksperioderPerBehandling, andreVedtak.behandlingId,
-                       listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
-                                      .tilHistorikk()) + andreVedtak.vedtaksperioder())
+        validerPeriode(
+            vedtaksperioderPerBehandling, andreVedtak.behandlingId,
+            listOf(
+                førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
+                    .tilHistorikk()
+            ) + andreVedtak.vedtaksperioder()
+        )
     }
 
     private fun validerFørsteVedtakErUendret(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>) {
         validerPeriode(vedtaksperioderPerBehandling, førsteVedtak.behandlingId, førsteVedtak.vedtaksperioder())
     }
 
-    private fun validerPeriode(vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>,
-                               behandlingId: UUID,
-                               vedtaksperioder: List<Vedtakshistorikkperiode>) {
+    private fun validerPeriode(
+        vedtaksperioderPerBehandling: Map<UUID, List<Vedtakshistorikkperiode>>,
+        behandlingId: UUID,
+        vedtaksperioder: List<Vedtakshistorikkperiode>
+    ) {
         assertThat(vedtaksperioderPerBehandling.getValue(behandlingId)).isEqualTo(vedtaksperioder)
     }
 
@@ -117,50 +125,63 @@ internal class VedtakHistorikkBeregnerTest {
             it.behandlingId to tilkjentYtelse.copy(sporbar = Sporbar(opprettetTid = opprettetTid))
         }
         val behandlingHistorikkData = vedtak.map {
-            BehandlingHistorikkData(it.behandlingId,
-                                    it.tilVedtakDto(),
-                                    null,
-                                    tilkjenteytelser.getValue(it.behandlingId))
+            BehandlingHistorikkData(
+                it.behandlingId,
+                it.tilVedtakDto(),
+                null,
+                tilkjenteytelser.getValue(it.behandlingId)
+            )
         }
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData)
     }
 
     private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
-            Vedtaksperiode(datoFra = fra,
-                           datoTil = til,
-                           aktivitet = AktivitetType.BARNET_ER_SYKT,
-                           periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+        Vedtaksperiode(
+            datoFra = fra,
+            datoTil = til,
+            aktivitet = AktivitetType.BARNET_ER_SYKT,
+            periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
+        )
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
-            this.datoFra,
-            this.datoTil,
-            sanksjonsårsak = null,
-            this.aktivitet,
-            this.periodeType,
+        this.datoFra,
+        this.datoTil,
+        sanksjonsårsak = null,
+        this.aktivitet,
+        this.periodeType,
     )
 
-    private fun lagVedtak(behandlingId: UUID = UUID.randomUUID(),
-                          perioder: List<Vedtaksperiode>?,
-                          opphørFom: LocalDate? = null): Vedtak {
+    private fun lagVedtak(
+        behandlingId: UUID = UUID.randomUUID(),
+        perioder: List<Vedtaksperiode>?,
+        opphørFom: LocalDate? = null
+    ): Vedtak {
         require((perioder == null) xor (opphørFom == null)) { "Må definiere perioder eller opphørFom" }
-        return Vedtak(behandlingId = behandlingId,
-                      resultatType = if (opphørFom == null) ResultatType.INNVILGE else ResultatType.OPPHØRT,
-                      periodeBegrunnelse = null,
-                      inntektBegrunnelse = null,
-                      avslåBegrunnelse = null,
-                      perioder = perioder?.let { PeriodeWrapper(it.toList()) },
-                      inntekter = perioder?.let {
-                          InntektWrapper(listOfNotNull(it.firstOrNull()
-                                                               ?.let {
-                                                                   Inntektsperiode(it.datoFra,
-                                                                                   it.datoTil,
-                                                                                   BigDecimal.ZERO,
-                                                                                   BigDecimal.ZERO)
-                                                               }))
-                      },
-                      saksbehandlerIdent = null,
-                      opphørFom = opphørFom,
-                      beslutterIdent = null)
+        return Vedtak(
+            behandlingId = behandlingId,
+            resultatType = if (opphørFom == null) ResultatType.INNVILGE else ResultatType.OPPHØRT,
+            periodeBegrunnelse = null,
+            inntektBegrunnelse = null,
+            avslåBegrunnelse = null,
+            perioder = perioder?.let { PeriodeWrapper(it.toList()) },
+            inntekter = perioder?.let {
+                InntektWrapper(
+                    listOfNotNull(
+                        it.firstOrNull()
+                            ?.let {
+                                Inntektsperiode(
+                                    it.datoFra,
+                                    it.datoTil,
+                                    BigDecimal.ZERO,
+                                    BigDecimal.ZERO
+                                )
+                            }
+                    )
+                )
+            },
+            saksbehandlerIdent = null,
+            opphørFom = opphørFom,
+            beslutterIdent = null
+        )
     }
 }
-

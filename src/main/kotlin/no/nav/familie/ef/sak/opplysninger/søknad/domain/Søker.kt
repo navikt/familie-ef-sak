@@ -6,16 +6,18 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("soknad_soker")
-data class Søker(@Column("fodselsnummer")
-                 val fødselsnummer: String,
-                 val navn: String)
+data class Søker(
+    @Column("fodselsnummer")
+    val fødselsnummer: String,
+    val navn: String
+)
 
 object SøkerMapper {
 
     fun toDomain(personalia: Søknadsfelt<Personalia>): Søker {
-        return Søker(personalia.verdi.fødselsnummer.verdi.verdi,
-                     personalia.verdi.navn.verdi)
+        return Søker(
+            personalia.verdi.fødselsnummer.verdi.verdi,
+            personalia.verdi.navn.verdi
+        )
     }
-
-
 }

@@ -5,17 +5,17 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
 
 data class BeregningSkolepengerRequest(
-        val utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>,
+    val utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>,
 )
 
 data class BeløpsperiodeSkolepengerDto(
-        val periode: Periode,
-        val beløp: Int,
-        val beregningsgrunnlag: BeregningsgrunnlagSkolepengerDto,
+    val periode: Periode,
+    val beløp: Int,
+    val beregningsgrunnlag: BeregningsgrunnlagSkolepengerDto,
 )
 
 data class BeregningsgrunnlagSkolepengerDto(
-        val studietype: SkolepengerStudietype,
-        val utgifter: Int,
-        val studiebelastning: Int,
+    val studietype: SkolepengerStudietype,
+    val utgifter: Int,
+    val studiebelastning: Int,
 )

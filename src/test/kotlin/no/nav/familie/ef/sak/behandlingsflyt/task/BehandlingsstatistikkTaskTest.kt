@@ -59,11 +59,11 @@ internal class BehandlingsstatistikkTaskTest {
     val inntektBegrunnelse = "Inntektus loremus ipsums"
 
     val payload = BehandlingsstatistikkTaskPayload(
-            behandling.id,
-            hendelse,
-            hendelseTidspunkt.toLocalDateTime(),
-            saksbehandlerId,
-            oppgaveId
+        behandling.id,
+        hendelse,
+        hendelseTidspunkt.toLocalDateTime(),
+        saksbehandlerId,
+        oppgaveId
     )
 
     val oppgaveMock = mockk<Oppgave>()
@@ -76,12 +76,14 @@ internal class BehandlingsstatistikkTaskTest {
     val vedtakRepository = mockk<VedtakRepository>()
     val oppgaveService = mockk<OppgaveService>()
 
-    val behandlingsstatistikkTask = BehandlingsstatistikkTask(iverksettClient = iverksettClient,
-                                                              behandlingService = behandlingService,
-                                                              søknadService = søknadService,
-                                                              vedtakRepository = vedtakRepository,
-                                                              oppgaveService = oppgaveService,
-                                                              grunnlagsdataService = grunnlagsdataService)
+    val behandlingsstatistikkTask = BehandlingsstatistikkTask(
+        iverksettClient = iverksettClient,
+        behandlingService = behandlingService,
+        søknadService = søknadService,
+        vedtakRepository = vedtakRepository,
+        oppgaveService = oppgaveService,
+        grunnlagsdataService = grunnlagsdataService
+    )
 
     @BeforeEach
     internal fun setUp() {
@@ -91,16 +93,17 @@ internal class BehandlingsstatistikkTaskTest {
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
         every { søknadService.finnDatoMottattForSøknad(any()) } returns søknadstidspunkt.toLocalDateTime()
         every { grunnlagsdataService.hentGrunnlagsdata(behandling.id) } returns grunnlagsdataMock
-        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(behandlingId = behandling.id,
-                                                                                resultatType = ResultatType.INNVILGE,
-                                                                                periodeBegrunnelse = periodeBegrunnelse,
-                                                                                inntektBegrunnelse = inntektBegrunnelse,
-                                                                                saksbehandlerIdent = saksbehandlerId,
-                                                                                beslutterIdent = beslutterId)
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.INNVILGE,
+            periodeBegrunnelse = periodeBegrunnelse,
+            inntektBegrunnelse = inntektBegrunnelse,
+            saksbehandlerIdent = saksbehandlerId,
+            beslutterIdent = beslutterId
+        )
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
         every { grunnlagsdataMock.grunnlagsdata.søker.adressebeskyttelse } returns null
-
     }
 
     @Test
@@ -110,8 +113,10 @@ internal class BehandlingsstatistikkTaskTest {
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
 
-        val task = Task(type = "behandlingsstatistikkTask",
-                        payload = objectMapper.writeValueAsString(payload))
+        val task = Task(
+            type = "behandlingsstatistikkTask",
+            payload = objectMapper.writeValueAsString(payload)
+        )
 
         behandlingsstatistikkTask.doTask(task)
 
@@ -136,18 +141,23 @@ internal class BehandlingsstatistikkTaskTest {
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
         every { behandlingService.hentSaksbehandling(behandling.id) } returns
-                saksbehandling.copy(stønadstype = StønadType.BARNETILSYN)
-        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(behandlingId = behandling.id,
-                                                                                resultatType = ResultatType.INNVILGE,
-                                                                                inntektBegrunnelse = inntektBegrunnelse,
-                                                                                barnetilsyn = BarnetilsynWrapper(emptyList(),
-                                                                                                                 begrunnelse),
-                                                                                saksbehandlerIdent = saksbehandlerId,
-                                                                                beslutterIdent = beslutterId)
+            saksbehandling.copy(stønadstype = StønadType.BARNETILSYN)
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.INNVILGE,
+            inntektBegrunnelse = inntektBegrunnelse,
+            barnetilsyn = BarnetilsynWrapper(
+                emptyList(),
+                begrunnelse
+            ),
+            saksbehandlerIdent = saksbehandlerId,
+            beslutterIdent = beslutterId
+        )
 
-
-        val task = Task(type = "behandlingsstatistikkTask",
-                        payload = objectMapper.writeValueAsString(payload))
+        val task = Task(
+            type = "behandlingsstatistikkTask",
+            payload = objectMapper.writeValueAsString(payload)
+        )
 
         behandlingsstatistikkTask.doTask(task)
 
@@ -164,5 +174,4 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(begrunnelse)
     }
-
 }

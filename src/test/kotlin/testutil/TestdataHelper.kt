@@ -17,32 +17,37 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import java.util.UUID
 
-fun søknad(personalia: Søknadsfelt<Personalia> = mockk(),
-           innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer> = mockk(),
-           sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer> = mockk(),
-           medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer> = mockk(),
-           bosituasjon: Søknadsfelt<Bosituasjon> = mockk(),
-           sivilstandsplaner: Søknadsfelt<Sivilstandsplaner>? = mockk(),
-           barn: Søknadsfelt<List<Barn>> = mockk(),
-           aktivitet: Søknadsfelt<Aktivitet> = mockk(),
-           situasjon: Søknadsfelt<Situasjon> = mockk(),
-           stønadsstart: Søknadsfelt<Stønadsstart> = mockk()) =
-        SøknadOvergangsstønad(personalia,
-                              innsendingsdetaljer,
-                              sivilstandsdetaljer,
-                              medlemskapsdetaljer,
-                              bosituasjon,
-                              sivilstandsplaner,
-                              barn,
-                              aktivitet,
-                              situasjon,
-                              stønadsstart)
-
+fun søknad(
+    personalia: Søknadsfelt<Personalia> = mockk(),
+    innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer> = mockk(),
+    sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer> = mockk(),
+    medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer> = mockk(),
+    bosituasjon: Søknadsfelt<Bosituasjon> = mockk(),
+    sivilstandsplaner: Søknadsfelt<Sivilstandsplaner>? = mockk(),
+    barn: Søknadsfelt<List<Barn>> = mockk(),
+    aktivitet: Søknadsfelt<Aktivitet> = mockk(),
+    situasjon: Søknadsfelt<Situasjon> = mockk(),
+    stønadsstart: Søknadsfelt<Stønadsstart> = mockk()
+) =
+    SøknadOvergangsstønad(
+        personalia,
+        innsendingsdetaljer,
+        sivilstandsdetaljer,
+        medlemskapsdetaljer,
+        bosituasjon,
+        sivilstandsplaner,
+        barn,
+        aktivitet,
+        situasjon,
+        stønadsstart
+    )
 
 fun søknadsBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
-    BehandlingBarn(behandlingId = behandlingId,
-                   søknadBarnId = it.id,
-                   personIdent = it.fødselsnummer,
-                   navn = it.navn,
-                   fødselTermindato = it.fødselTermindato)
+    BehandlingBarn(
+        behandlingId = behandlingId,
+        søknadBarnId = it.id,
+        personIdent = it.fødselsnummer,
+        navn = it.navn,
+        fødselTermindato = it.fødselTermindato
+    )
 }

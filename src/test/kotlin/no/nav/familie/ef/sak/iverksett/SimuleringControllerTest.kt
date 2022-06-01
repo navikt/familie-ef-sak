@@ -43,20 +43,27 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(personIdent))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         tilkjentYtelseRepository
-                .insert(TilkjentYtelse(behandlingId = behandling.id,
-                                       personident = personIdent,
-                                       vedtakstidspunkt = LocalDate.of(2020, 5, 5).atStartOfDay(),
-                                       type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                                       startdato = LocalDate.of(2021, 1, 1),
-                                       andelerTilkjentYtelse = listOf(AndelTilkjentYtelse(15000,
-                                                                                          LocalDate.of(2021, 1, 1),
-                                                                                          LocalDate.of(2021, 12, 31),
-                                                                                          personIdent,
-                                                                                          inntekt = 0,
-                                                                                          inntektsreduksjon = 0,
-                                                                                          samordningsfradrag = 0,
-                                                                                          kildeBehandlingId = behandling.id))
-                ))
+            .insert(
+                TilkjentYtelse(
+                    behandlingId = behandling.id,
+                    personident = personIdent,
+                    vedtakstidspunkt = LocalDate.of(2020, 5, 5).atStartOfDay(),
+                    type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
+                    startdato = LocalDate.of(2021, 1, 1),
+                    andelerTilkjentYtelse = listOf(
+                        AndelTilkjentYtelse(
+                            15000,
+                            LocalDate.of(2021, 1, 1),
+                            LocalDate.of(2021, 12, 31),
+                            personIdent,
+                            inntekt = 0,
+                            inntektsreduksjon = 0,
+                            samordningsfradrag = 0,
+                            kildeBehandlingId = behandling.id
+                        )
+                    )
+                )
+            )
 
         val respons: ResponseEntity<Ressurs<Simuleringsoppsummering>> = simulerForBehandling(behandling.id)
 
@@ -72,9 +79,10 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun simulerForBehandling(behandlingId: UUID): ResponseEntity<Ressurs<Simuleringsoppsummering>> {
-        return restTemplate.exchange(localhost("/api/simulering/$behandlingId"),
-                                     HttpMethod.GET,
-                                     HttpEntity<Ressurs<BehandlingDto>>(headers))
+        return restTemplate.exchange(
+            localhost("/api/simulering/$behandlingId"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<BehandlingDto>>(headers)
+        )
     }
-
 }

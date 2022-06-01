@@ -23,12 +23,14 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class VedtaksbrevService(private val brevClient: BrevClient,
-                         private val brevRepository: VedtaksbrevRepository,
-                         private val personopplysningerService: PersonopplysningerService,
-                         private val brevsignaturService: BrevsignaturService,
-                         private val familieDokumentClient: FamilieDokumentClient,
-                         private val featureToggleService: FeatureToggleService) {
+class VedtaksbrevService(
+    private val brevClient: BrevClient,
+    private val brevRepository: VedtaksbrevRepository,
+    private val personopplysningerService: PersonopplysningerService,
+    private val brevsignaturService: BrevsignaturService,
+    private val familieDokumentClient: FamilieDokumentClient,
+    private val featureToggleService: FeatureToggleService
+) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
         val vedtaksbrev = brevRepository.findByIdOrThrow(behandlingId)
@@ -48,33 +50,40 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
         val saksbehandlersignatur = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
 
-        val html = brevClient.genererHtml(brevmal = brevmal,
-                                          saksbehandlerBrevrequest = brevrequest,
-                                          saksbehandlersignatur = saksbehandlersignatur.navn,
-                                          enhet = saksbehandlersignatur.enhet,
-                                          skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter)
+        val html = brevClient.genererHtml(
+            brevmal = brevmal,
+            saksbehandlerBrevrequest = brevrequest,
+            saksbehandlersignatur = saksbehandlersignatur.navn,
+            enhet = saksbehandlersignatur.enhet,
+            skjulBeslutterSignatur = saksbehandlersignatur.skjulBeslutter
+        )
 
-
-        lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = saksbehandling.id,
-                                                   brevmal = brevmal,
-                                                   saksbehandlersignatur = saksbehandlersignatur.navn,
-                                                   enhet = saksbehandlersignatur.enhet,
-                                                   saksbehandlerHtml = html)
+        lagreEllerOppdaterSaksbehandlerVedtaksbrev(
+            behandlingId = saksbehandling.id,
+            brevmal = brevmal,
+            saksbehandlersignatur = saksbehandlersignatur.navn,
+            enhet = saksbehandlersignatur.enhet,
+            saksbehandlerHtml = html
+        )
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
 
-    private fun lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId: UUID,
-                                                           brevmal: String,
-                                                           saksbehandlersignatur: String,
-                                                           enhet: String,
-                                                           saksbehandlerHtml: String): Vedtaksbrev {
-        val vedtaksbrev = Vedtaksbrev(behandlingId = behandlingId,
-                                      saksbehandlerHtml = saksbehandlerHtml,
-                                      brevmal = brevmal,
-                                      saksbehandlersignatur = saksbehandlersignatur,
-                                      enhet = enhet,
-                                      saksbehandlerident = SikkerhetContext.hentSaksbehandler(true))
+    private fun lagreEllerOppdaterSaksbehandlerVedtaksbrev(
+        behandlingId: UUID,
+        brevmal: String,
+        saksbehandlersignatur: String,
+        enhet: String,
+        saksbehandlerHtml: String
+    ): Vedtaksbrev {
+        val vedtaksbrev = Vedtaksbrev(
+            behandlingId = behandlingId,
+            saksbehandlerHtml = saksbehandlerHtml,
+            brevmal = brevmal,
+            saksbehandlersignatur = saksbehandlersignatur,
+            enhet = enhet,
+            saksbehandlerident = SikkerhetContext.hentSaksbehandler(true)
+        )
 
         return when (brevRepository.existsById(behandlingId)) {
             true -> brevRepository.update(vedtaksbrev)
@@ -90,10 +99,11 @@ class VedtaksbrevService(private val brevClient: BrevClient,
             "Mangler saksbehandlerbrev"
         }
 
-        return lagBeslutterPdfMedSignatur(vedtaksbrev.saksbehandlerHtml,
-                                          signaturMedEnhet).bytes
+        return lagBeslutterPdfMedSignatur(
+            vedtaksbrev.saksbehandlerHtml,
+            signaturMedEnhet
+        ).bytes
     }
-
 
     fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling): Fil {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
@@ -102,16 +112,20 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent)
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
         val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
-        val besluttervedtaksbrev = vedtaksbrev.copy(besluttersignatur = signaturMedEnhet.navn,
-                                                    enhet = signaturMedEnhet.enhet,
-                                                    beslutterident = beslutterIdent,
-                                                    beslutterPdf = beslutterPdf)
+        val besluttervedtaksbrev = vedtaksbrev.copy(
+            besluttersignatur = signaturMedEnhet.navn,
+            enhet = signaturMedEnhet.enhet,
+            beslutterident = beslutterIdent,
+            beslutterPdf = beslutterPdf
+        )
         brevRepository.update(besluttervedtaksbrev)
         return Fil(bytes = beslutterPdf.bytes)
     }
 
-    private fun hentSaksbehandlerHtml(vedtaksbrev: Vedtaksbrev,
-                                      saksbehandling: Saksbehandling): String {
+    private fun hentSaksbehandlerHtml(
+        vedtaksbrev: Vedtaksbrev,
+        saksbehandling: Saksbehandling
+    ): String {
         feilHvis(vedtaksbrev.saksbehandlerHtml == null) {
             "Mangler saksbehandlerbrev for behandling: ${saksbehandling.id}"
         }
@@ -123,8 +137,10 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
     private fun validerKanLageBeslutterbrev(behandling: Saksbehandling, vedtaksbrev: Vedtaksbrev, beslutterIdent: String) {
         if (behandling.steg != StegType.BESLUTTE_VEDTAK || behandling.status != BehandlingStatus.FATTER_VEDTAK) {
-            throw Feil("Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
 
         if (featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")) {
@@ -135,10 +151,14 @@ class VedtaksbrevService(private val brevClient: BrevClient,
         validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
     }
 
-    private fun lagBeslutterPdfMedSignatur(saksbehandlerHtml: String,
-                                           signaturMedEnhet: SignaturDto): Fil {
-        val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(html = saksbehandlerHtml,
-                                                                     signaturMedEnhet = signaturMedEnhet)
+    private fun lagBeslutterPdfMedSignatur(
+        saksbehandlerHtml: String,
+        signaturMedEnhet: SignaturDto
+    ): Fil {
+        val htmlMedBeslutterSignatur = settInnBeslutterSignaturIHtml(
+            html = saksbehandlerHtml,
+            signaturMedEnhet = signaturMedEnhet
+        )
         return Fil(familieDokumentClient.genererPdfFraHtml(htmlMedBeslutterSignatur))
     }
 
@@ -154,37 +174,47 @@ class VedtaksbrevService(private val brevClient: BrevClient,
     fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
         validerRedigerbarBehandling(saksbehandling)
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(saksbehandling.ident)).getValue(saksbehandling.ident)
-        val request = FrittståendeBrevRequestDto(overskrift = fritekstbrevDto.overskrift,
-                                                 avsnitt = fritekstbrevDto.avsnitt,
-                                                 personIdent = saksbehandling.ident,
-                                                 navn = navn)
+        val request = FrittståendeBrevRequestDto(
+            overskrift = fritekstbrevDto.overskrift,
+            avsnitt = fritekstbrevDto.avsnitt,
+            personIdent = saksbehandling.ident,
+            navn = navn
+        )
 
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
 
-        val html = brevClient.genererHtmlFritekstbrev(fritekstBrev = request,
-                                                      saksbehandlerNavn = signaturMedEnhet.navn,
-                                                      enhet = signaturMedEnhet.enhet)
+        val html = brevClient.genererHtmlFritekstbrev(
+            fritekstBrev = request,
+            saksbehandlerNavn = signaturMedEnhet.navn,
+            enhet = signaturMedEnhet.enhet
+        )
 
-        lagreEllerOppdaterSaksbehandlerVedtaksbrev(behandlingId = fritekstbrevDto.behandlingId,
-                                                   brevmal = FRITEKST,
-                                                   saksbehandlersignatur = signaturMedEnhet.navn,
-                                                   enhet = signaturMedEnhet.enhet,
-                                                   saksbehandlerHtml = html)
+        lagreEllerOppdaterSaksbehandlerVedtaksbrev(
+            behandlingId = fritekstbrevDto.behandlingId,
+            brevmal = FRITEKST,
+            saksbehandlersignatur = signaturMedEnhet.navn,
+            enhet = signaturMedEnhet.enhet,
+            saksbehandlerHtml = html
+        )
 
         return familieDokumentClient.genererPdfFraHtml(html)
     }
 
     private fun validerRedigerbarBehandling(saksbehandling: Saksbehandling) {
         if (saksbehandling.status.behandlingErLåstForVidereRedigering()) {
-            throw Feil("Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "Behandling er i feil steg=${saksbehandling.steg} status=${saksbehandling.status}",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
     private fun validerUlikeIdenter(saksbehandlerIdent: String, beslutterIdent: String) {
         if (saksbehandlerIdent == beslutterIdent) {
-            throw ApiFeil("Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
-                          HttpStatus.BAD_REQUEST)
+            throw ApiFeil(
+                "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
+                HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -196,5 +226,4 @@ class VedtaksbrevService(private val brevClient: BrevClient,
 
         const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
     }
-
 }

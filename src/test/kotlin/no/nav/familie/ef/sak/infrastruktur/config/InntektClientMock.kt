@@ -25,5 +25,4 @@ class InntektClientMock {
         every { mockk.genererAInntektUrl(any()) } returns "https://ainntekt"
         return mockk
     }
-
 }

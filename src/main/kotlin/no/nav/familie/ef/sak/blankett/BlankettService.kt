@@ -28,19 +28,21 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class BlankettService(private val tilgangService: TilgangService,
-                      private val vurderingService: VurderingService,
-                      private val blankettClient: BlankettClient,
-                      private val blankettRepository: BlankettRepository,
-                      private val journalføringService: JournalføringService,
-                      private val behandlingService: BehandlingService,
-                      private val søknadService: SøknadService,
-                      private val fagsakService: FagsakService,
-                      private val personopplysningerService: PersonopplysningerService,
-                      private val oppgaveRepository: OppgaveRepository,
-                      private val barnService: BarnService,
-                      private val grunnlagsdataService: GrunnlagsdataService,
-                      private val vedtakService: VedtakService) {
+class BlankettService(
+    private val tilgangService: TilgangService,
+    private val vurderingService: VurderingService,
+    private val blankettClient: BlankettClient,
+    private val blankettRepository: BlankettRepository,
+    private val journalføringService: JournalføringService,
+    private val behandlingService: BehandlingService,
+    private val søknadService: SøknadService,
+    private val fagsakService: FagsakService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val oppgaveRepository: OppgaveRepository,
+    private val barnService: BarnService,
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val vedtakService: VedtakService
+) {
 
     @Transactional
     fun opprettBlankettBehandling(journalpostId: String, oppgaveId: Long): Behandling {
@@ -53,28 +55,32 @@ class BlankettService(private val tilgangService: TilgangService,
         opprettEfOppgave(behandling.id, oppgaveId)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(behandling.id,
-                                                          fagsak.id,
-                                                          grunnlagsdata.grunnlagsdata.barn,
-                                                          fagsak.stønadstype)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(
+            behandling.id,
+            fagsak.id,
+            grunnlagsdata.grunnlagsdata.barn,
+            fagsak.stønadstype
+        )
         return behandling
     }
 
     private fun opprettEfOppgave(behandlingId: UUID, oppgaveId: Long) {
-        val oppgave = Oppgave(gsakOppgaveId = oppgaveId,
-                              behandlingId = behandlingId,
-                              type = Oppgavetype.BehandleSak)
+        val oppgave = Oppgave(
+            gsakOppgaveId = oppgaveId,
+            behandlingId = behandlingId,
+            type = Oppgavetype.BehandleSak
+        )
         oppgaveRepository.insert(oppgave)
     }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(
-                BlankettPdfBehandling(årsak = behandling.årsak, stønadstype = behandling.stønadstype),
-                lagPersonopplysningerDto(behandling),
-                hentVilkårDto(behandlingId),
-                hentVedtak(behandlingId),
-                lagSøknadsdatoer(behandlingId)
+            BlankettPdfBehandling(årsak = behandling.årsak, stønadstype = behandling.stønadstype),
+            lagPersonopplysningerDto(behandling),
+            hentVilkårDto(behandlingId),
+            hentVedtak(behandlingId),
+            lagSøknadsdatoer(behandlingId)
         )
         val blankettPdfAsByteArray = blankettClient.genererBlankett(blankettPdfRequest)
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
@@ -94,10 +100,9 @@ class BlankettService(private val tilgangService: TilgangService,
     private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto? {
         val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId) ?: return null
         return SøknadDatoerDto(
-                søknadsdato = søknadsgrunnlag.datoMottatt,
-                søkerStønadFra = søknadsgrunnlag.søkerFra
+            søknadsdato = søknadsgrunnlag.datoMottatt,
+            søkerStønadFra = søknadsgrunnlag.søkerFra
         )
-
     }
 
     private fun lagPersonopplysningerDto(saksbehandling: Saksbehandling): PersonopplysningerDto {
@@ -116,5 +121,4 @@ class BlankettService(private val tilgangService: TilgangService,
     fun hentBlankettPdf(behandlingId: UUID): Blankett? {
         return blankettRepository.findByIdOrNull(behandlingId)
     }
-
 }

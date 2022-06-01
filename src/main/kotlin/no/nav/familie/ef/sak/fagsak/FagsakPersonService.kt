@@ -31,8 +31,10 @@ class FagsakPersonService(private val fagsakPersonRepository: FagsakPersonReposi
         feilHvisIkke(personIdenter.contains(gjeldendePersonIdent)) {
             "Liste med personidenter inneholder ikke gjeldende personident"
         }
-        return (fagsakPersonRepository.findByIdent(personIdenter)
-                ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent)))))
+        return (
+            fagsakPersonRepository.findByIdent(personIdenter)
+                ?: fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(gjeldendePersonIdent))))
+            )
     }
 
     @Transactional

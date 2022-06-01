@@ -28,12 +28,14 @@ class TilkjentYtelseServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val vurderingService = mockk<VurderingService>()
     private val barnService = mockk<BarnService>()
-    private val tilkjentYtelseService = TilkjentYtelseService(behandlingService,
-                                                              mockk(),
-                                                              tilkjentYtelseRepository,
-                                                              fagsakService,
-                                                              vurderingService,
-                                                              barnService)
+    private val tilkjentYtelseService = TilkjentYtelseService(
+        behandlingService,
+        mockk(),
+        tilkjentYtelseRepository,
+        fagsakService,
+        vurderingService,
+        barnService
+    )
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))
     private val behandling = behandling(fagsak = fagsak)
@@ -53,7 +55,7 @@ class TilkjentYtelseServiceTest {
         internal fun `deler opp kall mot service i bolker`() {
 
             val fagsaker = (1..PdlClient.MAKS_ANTALL_IDENTER + 10)
-                    .map { fagsak(setOf(PersonIdent("$it"))) }
+                .map { fagsak(setOf(PersonIdent("$it"))) }
             val behandlinger = fagsaker.map { behandling(fagsak = it) }
             val ytelser = behandlinger.map { DataGenerator.tilfeldigTilkjentYtelse(it) }
             every { behandlingService.hentBehandlinger(any<Set<UUID>>()) } returns behandlinger
@@ -66,24 +68,26 @@ class TilkjentYtelseServiceTest {
 
             assertThat(tilkjentYtelser.size).isEqualTo(PdlClient.MAKS_ANTALL_IDENTER + 10)
             verify {
-                behandlingService.hentBehandlinger(ytelser.subList(0, PdlClient.MAKS_ANTALL_IDENTER)
-                                                           .map { it.behandlingId }
-                                                           .toSet())
+                behandlingService.hentBehandlinger(
+                    ytelser.subList(0, PdlClient.MAKS_ANTALL_IDENTER)
+                        .map { it.behandlingId }
+                        .toSet()
+                )
             }
             verify {
-                behandlingService.hentBehandlinger(ytelser.subList(PdlClient.MAKS_ANTALL_IDENTER, 110)
-                                                           .map { it.behandlingId }
-                                                           .toSet())
+                behandlingService.hentBehandlinger(
+                    ytelser.subList(PdlClient.MAKS_ANTALL_IDENTER, 110)
+                        .map { it.behandlingId }
+                        .toSet()
+                )
             }
-
         }
-
 
         @Test
         internal fun `filtrer bort andeler som har 0-beløp`() {
             val andelerTilkjentYtelse = listOf(andel2.copy(beløp = 0), andel3)
             val tilkjentYtelse =
-                    DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
+                DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
 
             every { behandlingService.hentBehandlinger(setOf(behandling.id)) } returns listOf(behandling)
             every {
@@ -101,7 +105,7 @@ class TilkjentYtelseServiceTest {
         internal fun `filtrer andeler har tom dato som er lik eller etter dato for konsistensavstemming`() {
             val andelerTilkjentYtelse = listOf(andel1, andel2, andel3, andel4)
             val tilkjentYtelse =
-                    DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
+                DataGenerator.tilfeldigTilkjentYtelse(behandling).copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
 
             every { behandlingService.hentBehandlinger(setOf(behandling.id)) } returns listOf(behandling)
             every {
@@ -119,17 +123,21 @@ class TilkjentYtelseServiceTest {
         internal fun `skal kaste feil hvis den ikke finner eksterneIder til behandling`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-                    .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
 
             every { behandlingService.hentEksterneIder(any()) } returns emptySet()
             every {
                 tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, any())
             } returns listOf(tilkjentYtelse)
 
-            assertThat(catchThrowable {
-                tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(StønadType.OVERGANGSSTØNAD,
-                                                                                 datoForAvstemming)
-            }).hasMessageContaining(behandling.id.toString())
+            assertThat(
+                catchThrowable {
+                    tilkjentYtelseService.finnTilkjentYtelserTilKonsistensavstemming(
+                        StønadType.OVERGANGSSTØNAD,
+                        datoForAvstemming
+                    )
+                }
+            ).hasMessageContaining(behandling.id.toString())
         }
     }
 
@@ -140,7 +148,7 @@ class TilkjentYtelseServiceTest {
         internal fun `skal returnere true hvis det finnes andel med sluttdato etter idag`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().plusDays(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-                    .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
             assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isTrue
         }
@@ -149,7 +157,7 @@ class TilkjentYtelseServiceTest {
         internal fun `skal returnere false hvis det finnes andel mer sluttdato før idag`() {
             val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusDays(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-                    .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
+                .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
             assertThat(tilkjentYtelseService.harLøpendeUtbetaling(behandling.id)).isFalse
         }

@@ -13,10 +13,17 @@ internal class SøknadsskjemaMapperTest {
 
     @Test
     internal fun `skal mappe søknad som mangler datoer for stønadsstart`() {
-        val stønadsstart = Søknadsfelt("Stønadsstart", Stønadsstart(null,
-                                                                    null,
-                                                                    Søknadsfelt("Søker du stønad fra et bestemt tidspunkt",
-                                                                                false)))
+        val stønadsstart = Søknadsfelt(
+            "Stønadsstart",
+            Stønadsstart(
+                null,
+                null,
+                Søknadsfelt(
+                    "Søker du stønad fra et bestemt tidspunkt",
+                    false
+                )
+            )
+        )
         val kontraktsøknad = Testsøknad.søknadOvergangsstønad.copy(stønadsstart = stønadsstart)
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(kontraktsøknad)
         Assertions.assertThat(søknadTilLagring.søkerFraBestemtMåned).isEqualTo(false)
@@ -31,23 +38,20 @@ internal class SøknadsskjemaMapperTest {
 
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
         Assertions.assertThat(søknadTilLagring.bosituasjon.samboer!!.fødselsdato!!).isEqualTo(LocalDate.now())
-
     }
 
     @Test
     internal fun `skal mappe feltet skalBoHosSøker`() {
         val svarSkalBarnetBoHosSøker = "jaMenSamarbeiderIkke"
         val barn = TestsøknadBuilder.Builder()
-                .defaultBarn()
-                .copy(
-                        skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
-                )
+            .defaultBarn()
+            .copy(
+                skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
+            )
         val søknad = TestsøknadBuilder.Builder()
-                .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))
+            .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))
 
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(søknad)
         Assertions.assertThat(søknadTilLagring.barn.first().skalBoHosSøker).isEqualTo(svarSkalBarnetBoHosSøker)
-
     }
-
 }

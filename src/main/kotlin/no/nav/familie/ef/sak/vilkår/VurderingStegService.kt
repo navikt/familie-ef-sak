@@ -25,12 +25,14 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class VurderingStegService(private val behandlingService: BehandlingService,
-                           private val vurderingService: VurderingService,
-                           private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-                           private val stegService: StegService,
-                           private val taskRepository: TaskRepository,
-                           private val blankettRepository: BlankettRepository) {
+class VurderingStegService(
+    private val behandlingService: BehandlingService,
+    private val vurderingService: VurderingService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val stegService: StegService,
+    private val taskRepository: TaskRepository,
+    private val blankettRepository: BlankettRepository
+) {
 
     @Transactional
     fun oppdaterVilkår(vilkårsvurderingDto: SvarPåVurderingerDto): VilkårsvurderingDto {
@@ -40,8 +42,10 @@ class VurderingStegService(private val behandlingService: BehandlingService,
         validerLåstForVidereRedigering(behandlingId)
         validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId, vilkårsvurderingDto.behandlingId)
 
-        val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(vilkårsvurdering,
-                                                                               vilkårsvurderingDto.delvilkårsvurderinger)
+        val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
+            vilkårsvurdering,
+            vilkårsvurderingDto.delvilkårsvurderinger
+        )
         blankettRepository.deleteById(behandlingId)
         val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
         oppdaterStegPåBehandling(vilkårsvurdering.behandlingId)
@@ -62,7 +66,6 @@ class VurderingStegService(private val behandlingService: BehandlingService,
         oppdaterStegPåBehandling(behandlingId)
         return nullstillVilkårMedNyeHovedregler
     }
-
 
     @Transactional
     fun settVilkårTilSkalIkkeVurderes(vilkårsvurderingDto: OppdaterVilkårsvurderingDto): VilkårsvurderingDto {
@@ -104,30 +107,43 @@ class VurderingStegService(private val behandlingService: BehandlingService,
         if (saksbehandling.type != BehandlingType.BLANKETT) {
             taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
         }
-
     }
 
     private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {
         return saksbehandling.status == BehandlingStatus.OPPRETTET
     }
 
-    private fun nullstillVilkårMedNyeHovedregler(behandlingId: UUID,
-                                                 vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
+    private fun nullstillVilkårMedNyeHovedregler(
+        behandlingId: UUID,
+        vilkårsvurdering: Vilkårsvurdering
+    ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
-        return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                                                                       delvilkårsvurdering = delvilkårsvurdering)).tilDto()
+        return vilkårsvurderingRepository.update(
+            vilkårsvurdering.copy(
+                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                delvilkårsvurdering = delvilkårsvurdering
+            )
+        ).tilDto()
     }
 
-    private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(behandlingId: UUID,
-                                                            vilkårsvurdering: Vilkårsvurdering): VilkårsvurderingDto {
+    private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(
+        behandlingId: UUID,
+        vilkårsvurdering: Vilkårsvurdering
+    ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(metadata,
-                                                                                              Vilkårsresultat.SKAL_IKKE_VURDERES)
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(
+            metadata,
+            Vilkårsresultat.SKAL_IKKE_VURDERES
+        )
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
-        return vilkårsvurderingRepository.update(vilkårsvurdering.copy(resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
-                                                                       delvilkårsvurdering = delvilkårsvurdering)).tilDto()
+        return vilkårsvurderingRepository.update(
+            vilkårsvurdering.copy(
+                resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
+                delvilkårsvurdering = delvilkårsvurdering
+            )
+        ).tilDto()
     }
 
     private fun hentHovedregelMetadata(behandlingId: UUID) = vurderingService.hentGrunnlagOgMetadata(behandlingId).second
@@ -144,14 +160,14 @@ class VurderingStegService(private val behandlingService: BehandlingService,
      */
     private fun validerBehandlingIdErLikIRequestOgIVilkåret(behandlingId: UUID, requestBehandlingId: UUID) {
         if (behandlingId != requestBehandlingId) {
-            throw Feil("BehandlingId=$requestBehandlingId er ikke lik vilkårets sin behandlingId=${behandlingId}",
-                       "BehandlingId er feil, her har noe gått galt",
-                       httpStatus = HttpStatus.BAD_REQUEST)
+            throw Feil(
+                "BehandlingId=$requestBehandlingId er ikke lik vilkårets sin behandlingId=$behandlingId",
+                "BehandlingId er feil, her har noe gått galt",
+                httpStatus = HttpStatus.BAD_REQUEST
+            )
         }
     }
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
-            behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
-
-
+        behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
 }

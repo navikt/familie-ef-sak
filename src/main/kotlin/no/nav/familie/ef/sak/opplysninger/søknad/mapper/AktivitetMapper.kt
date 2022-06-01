@@ -23,20 +23,20 @@ object AktivitetMapper {
 
     fun tilDto(aktivitet: Aktivitet?, situasjon: Situasjon?, søknadBarn: Set<SøknadBarn>): AktivitetDto {
         return AktivitetDto(
-                arbeidssituasjon = aktivitet?.hvordanErArbeidssituasjonen?.verdier ?: emptyList(),
-                arbeidsforhold = tilArbeidforholdDto(aktivitet?.arbeidsforhold),
-                selvstendig = tilSelvstendigDto(aktivitet?.firmaer),
-                aksjeselskap = tilAksjeselskapDto(aktivitet?.aksjeselskap),
-                arbeidssøker = tilArbeidssøkerDto(aktivitet?.arbeidssøker),
-                underUtdanning = tilUnderUtdanningDto(aktivitet?.underUtdanning),
-                virksomhet = aktivitet?.virksomhet?.let {
-                    VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse)
-                },
-                tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet?.tidligereUtdanninger),
-                gjelderDeg = situasjon?.gjelderDetteDeg?.verdier ?: emptyList(),
-                særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),
-                datoOppstartJobb = situasjon?.oppstartNyJobb,
-                erIArbeid = aktivitet?.erIArbeid
+            arbeidssituasjon = aktivitet?.hvordanErArbeidssituasjonen?.verdier ?: emptyList(),
+            arbeidsforhold = tilArbeidforholdDto(aktivitet?.arbeidsforhold),
+            selvstendig = tilSelvstendigDto(aktivitet?.firmaer),
+            aksjeselskap = tilAksjeselskapDto(aktivitet?.aksjeselskap),
+            arbeidssøker = tilArbeidssøkerDto(aktivitet?.arbeidssøker),
+            underUtdanning = tilUnderUtdanningDto(aktivitet?.underUtdanning),
+            virksomhet = aktivitet?.virksomhet?.let {
+                VirksomhetDto(virksomhetsbeskrivelse = it.virksomhetsbeskrivelse)
+            },
+            tidligereUtdanninger = tilTidligereUtdanningDto(aktivitet?.tidligereUtdanninger),
+            gjelderDeg = situasjon?.gjelderDetteDeg?.verdier ?: emptyList(),
+            særligeTilsynsbehov = tilSærligeTilsynsbehovDto(søknadBarn),
+            datoOppstartJobb = situasjon?.oppstartNyJobb,
+            erIArbeid = aktivitet?.erIArbeid
         )
     }
 
@@ -50,7 +50,6 @@ object AktivitetMapper {
                 harSluttdato = it.harSluttdato
             )
         } ?: emptyList()
-
     }
 
     private fun tilSelvstendigDto(firmaer: Set<Selvstendig>?): List<SelvstendigDto> {

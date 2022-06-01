@@ -30,9 +30,11 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Service
-class PdlClient(val pdlConfig: PdlConfig,
-                @Qualifier("azureClientCredential") restTemplate: RestOperations)
-    : AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
+class PdlClient(
+    val pdlConfig: PdlConfig,
+    @Qualifier("azureClientCredential") restTemplate: RestOperations
+) :
+    AbstractPingableRestClient(restTemplate, "pdl.personinfo") {
 
     override val pingUri: URI
         get() = pdlConfig.pdlUri
@@ -42,41 +44,57 @@ class PdlClient(val pdlConfig: PdlConfig,
     }
 
     fun hentSøker(personIdent: String): PdlSøker {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = PdlConfig.søkerQuery)
-        val pdlResponse: PdlResponse<PdlSøkerData> = postForEntity(pdlConfig.pdlUri,
-                                                                   pdlPersonRequest,
-                                                                   httpHeaders())
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = PdlConfig.søkerQuery
+        )
+        val pdlResponse: PdlResponse<PdlSøkerData> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders()
+        )
         return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }
     }
 
     fun hentBarn(personIdenter: List<String>): Map<String, PdlBarn> {
         if (personIdenter.isEmpty()) return emptyMap()
-        val pdlPersonRequest = PdlPersonBolkRequest(variables = PdlPersonBolkRequestVariables(personIdenter),
-                                                    query = PdlConfig.barnQuery)
-        val pdlResponse: PdlBolkResponse<PdlBarn> = postForEntity(pdlConfig.pdlUri,
-                                                                  pdlPersonRequest,
-                                                                  httpHeaders())
+        val pdlPersonRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdenter),
+            query = PdlConfig.barnQuery
+        )
+        val pdlResponse: PdlBolkResponse<PdlBarn> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders()
+        )
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
     fun hentAndreForeldre(personIdenter: List<String>): Map<String, PdlAnnenForelder> {
         if (personIdenter.isEmpty()) return emptyMap()
-        val pdlPersonRequest = PdlPersonBolkRequest(variables = PdlPersonBolkRequestVariables(personIdenter),
-                                                    query = PdlConfig.annenForelderQuery)
-        val pdlResponse: PdlBolkResponse<PdlAnnenForelder> = postForEntity(pdlConfig.pdlUri,
-                                                                           pdlPersonRequest,
-                                                                           httpHeaders())
+        val pdlPersonRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdenter),
+            query = PdlConfig.annenForelderQuery
+        )
+        val pdlResponse: PdlBolkResponse<PdlAnnenForelder> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders()
+        )
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
     fun hentPersonKortBolk(personIdenter: List<String>): Map<String, PdlPersonKort> {
         require(personIdenter.size <= 100) { "Liste med personidenter må være færre enn 100 st" }
-        val pdlPersonRequest = PdlPersonBolkRequest(variables = PdlPersonBolkRequestVariables(personIdenter),
-                                                    query = PdlConfig.personBolkKortQuery)
-        val pdlResponse: PdlBolkResponse<PdlPersonKort> = postForEntity(pdlConfig.pdlUri,
-                                                                        pdlPersonRequest,
-                                                                        httpHeaders())
+        val pdlPersonRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdenter),
+            query = PdlConfig.personBolkKortQuery
+        )
+        val pdlResponse: PdlBolkResponse<PdlPersonKort> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders()
+        )
         return feilsjekkOgReturnerData(pdlResponse)
     }
 
@@ -85,11 +103,15 @@ class PdlClient(val pdlConfig: PdlConfig,
      * @return liste med aktørider
      */
     fun hentAktørIder(ident: String): PdlIdenter {
-        val pdlPersonRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "AKTORID"),
-                                               query = PdlConfig.hentIdentQuery)
-        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
-                                                                     pdlPersonRequest,
-                                                                     httpHeaders())
+        val pdlPersonRequest = PdlIdentRequest(
+            variables = PdlIdentRequestVariables(ident, "AKTORID"),
+            query = PdlConfig.hentIdentQuery
+        )
+        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlPersonRequest,
+            httpHeaders()
+        )
         return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
     }
 
@@ -100,11 +122,15 @@ class PdlClient(val pdlConfig: PdlConfig,
      */
     @Cacheable("personidenter", cacheManager = "shortCache")
     fun hentPersonidenter(ident: String, historikk: Boolean = false): PdlIdenter {
-        val pdlIdentRequest = PdlIdentRequest(variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
-                                              query = PdlConfig.hentIdentQuery)
-        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(pdlConfig.pdlUri,
-                                                                     pdlIdentRequest,
-                                                                     httpHeaders())
+        val pdlIdentRequest = PdlIdentRequest(
+            variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
+            query = PdlConfig.hentIdentQuery
+        )
+        val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(
+            pdlConfig.pdlUri,
+            pdlIdentRequest,
+            httpHeaders()
+        )
         return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
     }
 
@@ -117,11 +143,15 @@ class PdlClient(val pdlConfig: PdlConfig,
         feilHvis(identer.size > MAKS_ANTALL_IDENTER) {
             "Feil i spørring mot PDL. Antall identer i spørring overstiger $MAKS_ANTALL_IDENTER"
         }
-        val pdlIdentBolkRequest = PdlIdentBolkRequest(variables = PdlIdentBolkRequestVariables(identer, "FOLKEREGISTERIDENT"),
-                                                      query = PdlConfig.hentIdenterBolkQuery)
-        val pdlResponse: PdlIdentBolkResponse = postForEntity(pdlConfig.pdlUri,
-                                                              pdlIdentBolkRequest,
-                                                              httpHeaders())
+        val pdlIdentBolkRequest = PdlIdentBolkRequest(
+            variables = PdlIdentBolkRequestVariables(identer, "FOLKEREGISTERIDENT"),
+            query = PdlConfig.hentIdenterBolkQuery
+        )
+        val pdlResponse: PdlIdentBolkResponse = postForEntity(
+            pdlConfig.pdlUri,
+            pdlIdentBolkRequest,
+            httpHeaders()
+        )
 
         return feilmeldOgReturnerData(pdlResponse)
     }

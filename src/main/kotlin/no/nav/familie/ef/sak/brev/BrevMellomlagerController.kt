@@ -20,19 +20,27 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/brev/mellomlager/"])
 @ProtectedWithClaims(issuer = "azuread")
-class BrevMellomlagerController(private val tilgangService: TilgangService,
-                                private val mellomlagringBrevService: MellomlagringBrevService) {
+class BrevMellomlagerController(
+    private val tilgangService: TilgangService,
+    private val mellomlagringBrevService: MellomlagringBrevService
+) {
 
     @PostMapping("/{behandlingId}")
-    fun mellomlagreBrevverdier(@PathVariable behandlingId: UUID,
-                               @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto): Ressurs<UUID> {
+    fun mellomlagreBrevverdier(
+        @PathVariable behandlingId: UUID,
+        @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
-        return Ressurs.success(mellomlagringBrevService.mellomLagreBrev(behandlingId,
-                                                                        mellomlagretBrev.brevverdier,
-                                                                        mellomlagretBrev.brevmal,
-                                                                        mellomlagretBrev.versjon))
+        return Ressurs.success(
+            mellomlagringBrevService.mellomLagreBrev(
+                behandlingId,
+                mellomlagretBrev.brevverdier,
+                mellomlagretBrev.brevmal,
+                mellomlagretBrev.versjon
+            )
+        )
     }
 
     @PostMapping("/fritekst")
@@ -59,12 +67,17 @@ class BrevMellomlagerController(private val tilgangService: TilgangService,
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentMellomlagretBrevverdier(@PathVariable behandlingId: UUID,
-                                    @RequestParam sanityVersjon: String): Ressurs<MellomlagretBrevResponse?> {
+    fun hentMellomlagretBrevverdier(
+        @PathVariable behandlingId: UUID,
+        @RequestParam sanityVersjon: String
+    ): Ressurs<MellomlagretBrevResponse?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
 
-        return Ressurs.success(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId,
-                                                                                      sanityVersjon))
+        return Ressurs.success(
+            mellomlagringBrevService.hentOgValiderMellomlagretBrev(
+                behandlingId,
+                sanityVersjon
+            )
+        )
     }
-
 }

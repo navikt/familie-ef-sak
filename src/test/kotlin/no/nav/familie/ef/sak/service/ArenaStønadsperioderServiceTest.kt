@@ -37,11 +37,13 @@ internal class ArenaStønadsperioderServiceTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val fagsakService = mockk<FagsakService>()
-    private val periodeService = PeriodeService(pdlClient,
-                                                fagsakService,
-                                                behandlingService,
-                                                tilkjentYtelseService,
-                                                InfotrygdService(infotrygdReplikaClient, pdlClient))
+    private val periodeService = PeriodeService(
+        pdlClient,
+        fagsakService,
+        behandlingService,
+        tilkjentYtelseService,
+        InfotrygdService(infotrygdReplikaClient, pdlClient)
+    )
 
     private val service = ArenaStønadsperioderService(periodeService = periodeService)
 
@@ -52,9 +54,11 @@ internal class ArenaStønadsperioderServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(),
-                                                                                              emptyList(),
-                                                                                              emptyList())
+        every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns null
         every { fagsakService.finnFagsak(any(), any()) } returns null
         every { fagsakService.finnFagsak(any(), StønadType.OVERGANGSSTØNAD) } returns fagsakOvergangsstønad
@@ -122,7 +126,7 @@ internal class ArenaStønadsperioderServiceTest {
     private fun mockNyLøsning(stønadFom: LocalDate, stønadTom: LocalDate) {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
-                lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, stønadFom, stønadTom, ident)))
+            lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, stønadFom, stønadTom, ident)))
     }
 
     private fun mockPdl() {
@@ -130,11 +134,10 @@ internal class ArenaStønadsperioderServiceTest {
     }
 
     private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
-            PeriodeOvergangsstønad(
-                    personIdent = ident,
-                    fomDato = fom.atDay(1),
-                    tomDato = tom.atEndOfMonth(),
-                    datakilde = Datakilde.EF
-            )
-
+        PeriodeOvergangsstønad(
+            personIdent = ident,
+            fomDato = fom.atDay(1),
+            tomDato = tom.atEndOfMonth(),
+            datakilde = Datakilde.EF
+        )
 }

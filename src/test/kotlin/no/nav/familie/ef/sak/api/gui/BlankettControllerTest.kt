@@ -59,11 +59,12 @@ class BlankettControllerTest : OppslagSpringRunnerTest() {
         assertThat(respons.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-
     private fun opprettBlankettBehandling(oppgaveId: Long): ResponseEntity<Ressurs<UUID>> {
 
-        return restTemplate.exchange(localhost("/api/blankett/oppgave/$oppgaveId"),
-                                     HttpMethod.POST,
-                                     HttpEntity<Any>(headers))
+        return restTemplate.exchange(
+            localhost("/api/blankett/oppgave/$oppgaveId"),
+            HttpMethod.POST,
+            HttpEntity<Any>(headers)
+        )
     }
 }

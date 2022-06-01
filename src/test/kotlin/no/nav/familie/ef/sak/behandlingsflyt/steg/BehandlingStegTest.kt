@@ -12,15 +12,17 @@ internal class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg`() {
         val riktigRekkefølge =
-                listOf(StegType.VILKÅR,
-                       StegType.BEREGNE_YTELSE,
-                       StegType.SEND_TIL_BESLUTTER,
-                       StegType.BESLUTTE_VEDTAK,
-                       StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT,
-                       StegType.LAG_SAKSBEHANDLINGSBLANKETT,
-                       StegType.FERDIGSTILLE_BEHANDLING,
-                       StegType.PUBLISER_VEDTAKSHENDELSE,
-                       StegType.BEHANDLING_FERDIGSTILT)
+            listOf(
+                StegType.VILKÅR,
+                StegType.BEREGNE_YTELSE,
+                StegType.SEND_TIL_BESLUTTER,
+                StegType.BESLUTTE_VEDTAK,
+                StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT,
+                StegType.LAG_SAKSBEHANDLINGSBLANKETT,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                StegType.PUBLISER_VEDTAKSHENDELSE,
+                StegType.BEHANDLING_FERDIGSTILT
+            )
 
         validerSteg(riktigRekkefølge, BehandlingType.FØRSTEGANGSBEHANDLING)
     }
@@ -28,9 +30,10 @@ internal class BehandlingStegTest {
     @Test
     fun `Tester rekkefølgen på steg - TEKNISK_OPPHØR`() {
         val riktigRekkefølge = listOf(
-                StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_FERDIGSTILT)
+            StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_FERDIGSTILT
+        )
 
         validerSteg(riktigRekkefølge, BehandlingType.TEKNISK_OPPHØR)
     }
@@ -58,5 +61,4 @@ internal class BehandlingStegTest {
         assertFalse(StegType.VILKÅR.erGyldigIKombinasjonMedStatus(BehandlingStatus.IVERKSETTER_VEDTAK))
         assertFalse(StegType.BEHANDLING_FERDIGSTILT.erGyldigIKombinasjonMedStatus(BehandlingStatus.OPPRETTET))
     }
-
 }

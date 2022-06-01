@@ -19,9 +19,9 @@ import java.util.UUID
 @RequestMapping(path = ["/api/revurdering"])
 @ProtectedWithClaims(issuer = "azuread")
 class RevurderingsController(
-        private val revurderingService: RevurderingService,
-        private val tilgangService: TilgangService,
-        private val featureToggleService: FeatureToggleService,
+    private val revurderingService: RevurderingService,
+    private val tilgangService: TilgangService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @PostMapping("{fagsakId}")
@@ -33,12 +33,11 @@ class RevurderingsController(
         }
         brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
             "Systemet har ikke støtte for å revurdere med årsak “Søknad” for øyeblikket. " +
-            "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +
-            "eller med revurderingsårsak \"Nye opplysninger\". " +
-            "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
+                "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +
+                "eller med revurderingsårsak \"Nye opplysninger\". " +
+                "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
         }
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
     }
-
 }

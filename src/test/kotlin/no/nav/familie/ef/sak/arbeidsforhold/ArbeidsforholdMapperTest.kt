@@ -38,7 +38,6 @@ internal class ArbeidsforholdMapperTest {
         assertThat(arbeidsforholdDto.arbeidsavtaler?.first()?.beregnetAntallTimerPrUke).isEqualTo(7.5)
         assertThat(arbeidsforholdDto.arbeidsavtaler?.first()?.bruksperiode).isEqualTo(bruksperiode)
         assertThat(arbeidsforholdDto.arbeidsavtaler?.first()?.gyldighetsperiode).isEqualTo(gyldighetsperiode)
-
     }
 
     private val gyldighetsperiode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 11, 18))

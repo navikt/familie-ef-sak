@@ -6,7 +6,6 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.stereotype.Repository
-import java.util.UUID
 
 @Repository
 interface MigreringsstatusRepository : RepositoryInterface<Migreringsstatus, String>, InsertUpdateRepository<Migreringsstatus> {
@@ -23,8 +22,10 @@ enum class MigreringResultat {
 }
 
 @Table("migrering")
-data class Migreringsstatus(@Id
-                            val ident: String,
-                            val status: MigreringResultat,
-                            @Column("arsak")
-                            val årsak: MigreringExceptionType? = null)
+data class Migreringsstatus(
+    @Id
+    val ident: String,
+    val status: MigreringResultat,
+    @Column("arsak")
+    val årsak: MigreringExceptionType? = null
+)
