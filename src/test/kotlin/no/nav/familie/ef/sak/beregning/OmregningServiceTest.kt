@@ -113,8 +113,19 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
 
-        val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling, iverksettDtoSlot.captured.vedtak.vedtakstidspunkt)
-        assertThat(iverksettDtoSlot.captured).isEqualTo(expectedIverksettDto)
+        val iverksettDto = iverksettDtoSlot.captured
+        val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling, iverksettDto.vedtak.vedtakstidspunkt)
+        assertThat(iverksettDto.vedtak).isEqualTo(expectedIverksettDto.vedtak)
+        assertThat(iverksettDto.fagsak).isEqualTo(expectedIverksettDto.fagsak)
+        assertThat(iverksettDto.søker).isEqualTo(expectedIverksettDto.søker)
+        assertThat(iverksettDto.behandling.aktivitetspliktInntrefferDato).isEqualTo(expectedIverksettDto.behandling.aktivitetspliktInntrefferDato)
+        assertThat(iverksettDto.behandling.behandlingId).isEqualTo(expectedIverksettDto.behandling.behandlingId)
+        assertThat(iverksettDto.behandling.behandlingType).isEqualTo(expectedIverksettDto.behandling.behandlingType)
+        assertThat(iverksettDto.behandling.behandlingÅrsak).isEqualTo(expectedIverksettDto.behandling.behandlingÅrsak)
+        assertThat(iverksettDto.behandling.eksternId).isEqualTo(expectedIverksettDto.behandling.eksternId)
+        assertThat(iverksettDto.behandling.forrigeBehandlingId).isEqualTo(expectedIverksettDto.behandling.forrigeBehandlingId)
+        assertThat(iverksettDto.behandling.kravMottatt).isEqualTo(expectedIverksettDto.behandling.kravMottatt)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger).hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(
