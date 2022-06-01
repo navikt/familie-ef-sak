@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -15,7 +16,10 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class VedtakService(private val vedtakRepository: VedtakRepository) {
+class VedtakService(
+    private val vedtakRepository: VedtakRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
         return vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId, stønadstype)).behandlingId
@@ -84,12 +88,13 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         )
     }
 
-    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: LocalDate) =
-        vedtak.inntekter?.inntekter?.firstOrNull {
-            forventetInntektForDato.isEqualOrAfter(it.startDato) && forventetInntektForDato.isEqualOrBefore(
-                it.sluttDato
-            )
-        }?.inntekt?.toInt()
+    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: LocalDate): Int? {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
+        return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
+            forventetInntektForDato.isEqualOrAfter(it.stønadFom) &&
+                forventetInntektForDato.isEqualOrBefore(it.stønadTom)
+        }?.inntekt
+    }
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
         return hentVedtak(behandlingId).perioder?.perioder?.any {

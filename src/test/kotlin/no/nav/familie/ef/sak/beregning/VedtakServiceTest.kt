@@ -6,11 +6,12 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.avslagDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
@@ -29,6 +30,8 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vedtak.erVedtakAktivtForDato
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -45,8 +48,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
     @Autowired private lateinit var vedtakService: VedtakService
     @Autowired private lateinit var vedtakRepository: VedtakRepository
-
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Test
     fun `lagre og hent vedtak, lagre igjen - da skal første slettes`() {
@@ -194,20 +196,20 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentForventetInntektForVedtakOgDato - finn riktig forventet inntekt`() {
         val forrigeMåned = YearMonth.now().minusMonths(1)
         val behandlingIdInnenforPeriode = insertVedtakMedPeriode(forrigeMåned.atDay(1), YearMonth.now().atEndOfMonth())
-        val behandlingIdMedInntektForrigeMåned = insertVedtakMedPeriode(forrigeMåned.atDay(1), forrigeMåned.atEndOfMonth())
+        val behandlingIdMedVedtakForrigeMåned = insertVedtakMedPeriode(forrigeMåned.atDay(1), forrigeMåned.atEndOfMonth())
 
         val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForBehandlingIds(
             listOf(
                 behandlingIdInnenforPeriode,
-                behandlingIdMedInntektForrigeMåned
+                behandlingIdMedVedtakForrigeMåned
             )
         )
 
         assertThat(behandlingIdToForventetInntektMap[behandlingIdInnenforPeriode]?.forventetInntektForrigeMåned).isEqualTo(
             500_000
         )
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedInntektForrigeMåned]?.forventetInntektForrigeMåned).isNull()
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedInntektForrigeMåned]?.forventetInntektToMånederTilbake).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedVedtakForrigeMåned]?.forventetInntektForrigeMåned).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedVedtakForrigeMåned]?.forventetInntektToMånederTilbake).isNull()
     }
 
     @Test
@@ -238,8 +240,12 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandlingIdToForventetInntektMap =
             vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdMedForskjelligInntektsperioder))
 
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektToMånederTilbake).isEqualTo(500_000)
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektForrigeMåned).isEqualTo(400_000)
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektToMånederTilbake).isEqualTo(
+            500_000
+        )
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektForrigeMåned).isEqualTo(
+            400_000
+        )
     }
 
     @Test
@@ -253,7 +259,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     private fun insertVedtakMedPeriode(
         fraOgMedDato: LocalDate,
         tilOgMedDato: LocalDate,
-        inntektsperiode: List<Inntektsperiode> = listOf(
+        inntektsperioder: List<Inntektsperiode> = listOf(
             Inntektsperiode(
                 fraOgMedDato,
                 tilOgMedDato,
@@ -274,11 +280,29 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         vedtakRepository.insert(
             vedtak(
                 behandlingId,
-                inntekter = InntektWrapper(inntektsperiode),
+                inntekter = InntektWrapper(inntektsperioder),
                 perioder = PeriodeWrapper(listOf(vedtaksperiode))
             )
         )
+
+        tilkjentYtelseRepository.insert(
+            lagTilkjentYtelse(
+                andelerTilkjentYtelse = andelerForInntektsperioder(inntektsperioder, behandlingId),
+                behandlingId = behandlingId
+            )
+        )
+
         return behandlingId
+    }
+
+    private fun andelerForInntektsperioder(
+        inntektsperioder: List<Inntektsperiode>,
+        behandlingId: UUID
+    ): List<AndelTilkjentYtelse> = inntektsperioder.map {
+        lagAndelTilkjentYtelse(
+            5000, it.startDato, it.sluttDato, inntekt = it.inntekt.toInt(),
+            kildeBehandlingId = behandlingId
+        )
     }
 
     @Nested

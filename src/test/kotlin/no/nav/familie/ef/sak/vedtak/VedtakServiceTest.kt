@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import org.assertj.core.api.Assertions
@@ -17,7 +18,8 @@ import java.util.UUID
 class VedtakServiceTest {
 
     private val vedtakRepository = mockk<VedtakRepository>()
-    private val vedtakService = VedtakService(vedtakRepository)
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val vedtakService = VedtakService(vedtakRepository, tilkjentYtelseRepository)
     private val behandlingId = UUID.randomUUID()
     private val inntektsperiodeUtenInntekt = inntektsperiode(
         startDato = LocalDate.of(2021, 1, 1),
