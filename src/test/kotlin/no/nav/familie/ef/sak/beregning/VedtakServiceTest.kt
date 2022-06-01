@@ -53,14 +53,20 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         /** Pre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VILKÅR,
-                                                                status = BehandlingStatus.UTREDES,
-                                                                type = BehandlingType.BLANKETT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.VILKÅR,
+                status = BehandlingStatus.UTREDES,
+                type = BehandlingType.BLANKETT
+            )
+        )
 
         val tomBegrunnelse = ""
-        val vedtakRequest = InnvilgelseOvergangsstønad(tomBegrunnelse,
-                                                       tomBegrunnelse, emptyList(), emptyList())
+        val vedtakRequest = InnvilgelseOvergangsstønad(
+            tomBegrunnelse,
+            tomBegrunnelse, emptyList(), emptyList()
+        )
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
         vedtakService.slettVedtakHvisFinnes(behandling.id)
@@ -75,7 +81,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         /** Slett og opprett ny **/
         val vedtakRequestMedPeriodeBegrunnelse =
-                InnvilgelseOvergangsstønad("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
+            InnvilgelseOvergangsstønad("Begrunnelse", tomBegrunnelse, emptyList(), emptyList())
         vedtakService.slettVedtakHvisFinnes(behandling.id)
         assertThat(vedtakRepository.findAll()).isEmpty()
         vedtakService.lagreVedtak(vedtakRequestMedPeriodeBegrunnelse, behandling.id, fagsak.stønadstype)
@@ -84,16 +90,19 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val nyttVedtakLagret = vedtakRepository.findByIdOrNull(behandling.id)
         assertThat(nyttVedtakLagret?.resultatType).isEqualTo(ResultatType.INNVILGE)
         assertThat(nyttVedtakLagret?.periodeBegrunnelse).isEqualTo(vedtakRequestMedPeriodeBegrunnelse.periodeBegrunnelse)
-
     }
 
     @Test
     fun `skal hente lagret vedtak hvis finnes`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VILKÅR,
-                                                                status = BehandlingStatus.UTREDES,
-                                                                type = BehandlingType.BLANKETT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.VILKÅR,
+                status = BehandlingStatus.UTREDES,
+                type = BehandlingType.BLANKETT
+            )
+        )
 
         val tomBegrunnelse = ""
         val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
@@ -106,10 +115,14 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal oppdatere saksbehandler på vedtaket`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VILKÅR,
-                                                                status = BehandlingStatus.UTREDES,
-                                                                type = BehandlingType.BLANKETT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.VILKÅR,
+                status = BehandlingStatus.UTREDES,
+                type = BehandlingType.BLANKETT
+            )
+        )
 
         val tomBegrunnelse = ""
         val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
@@ -123,10 +136,14 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal oppdatere beslutter på vedtaket`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak,
-                                                                steg = StegType.VILKÅR,
-                                                                status = BehandlingStatus.UTREDES,
-                                                                type = BehandlingType.BLANKETT))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.VILKÅR,
+                status = BehandlingStatus.UTREDES,
+                type = BehandlingType.BLANKETT
+            )
+        )
 
         val tomBegrunnelse = ""
         val vedtakDto = InnvilgelseOvergangsstønad(tomBegrunnelse, tomBegrunnelse, emptyList(), emptyList())
@@ -140,8 +157,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `hentVedtakForBehandlinger - skal kaste feil hvis vedtak ikke finnes`() {
         assertThatThrownBy { vedtakService.hentVedtakForBehandlinger(setOf(UUID.randomUUID())) }
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessageContaining("Finner ikke Vedtak for")
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("Finner ikke Vedtak for")
     }
 
     @Test
@@ -149,10 +166,12 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)).id
         val behandling2 = behandlingRepository.insert(behandling(fagsak)).id
-        val vedtakDto = InnvilgelseOvergangsstønad(periodeBegrunnelse = "",
-                                                   inntektBegrunnelse = "tomBegrunnelse",
-                                                   perioder = emptyList(),
-                                                   inntekter = emptyList())
+        val vedtakDto = InnvilgelseOvergangsstønad(
+            periodeBegrunnelse = "",
+            inntektBegrunnelse = "tomBegrunnelse",
+            perioder = emptyList(),
+            inntekter = emptyList()
+        )
         vedtakService.lagreVedtak(vedtakDto, behandling, fagsak.stønadstype)
         vedtakService.lagreVedtak(vedtakDto, behandling2, fagsak.stønadstype)
 
@@ -165,10 +184,10 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val vedtak = vedtakRepository.insert(vedtak(behandling.id))
         val behandlingIds = listOf(behandling.id)
-        val forventetInntektForBehandling = vedtakService.hentForventetInntektForBehandlingIds(behandlingIds)
+        val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForBehandlingIds(behandlingIds)
 
-        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandling.id }.forventetInntektForrigeMåned).isNull()
-        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandling.id }.forventetInntektToMånederTilbake).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandling.id]?.forventetInntektForrigeMåned).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandling.id]?.forventetInntektToMånederTilbake).isNull()
     }
 
     @Test
@@ -177,13 +196,18 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandlingIdInnenforPeriode = insertVedtakMedPeriode(forrigeMåned.atDay(1), YearMonth.now().atEndOfMonth())
         val behandlingIdMedInntektForrigeMåned = insertVedtakMedPeriode(forrigeMåned.atDay(1), forrigeMåned.atEndOfMonth())
 
-        val forventetInntektForBehandling = vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdInnenforPeriode,
-                                                                                                      behandlingIdMedInntektForrigeMåned))
+        val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForBehandlingIds(
+            listOf(
+                behandlingIdInnenforPeriode,
+                behandlingIdMedInntektForrigeMåned
+            )
+        )
 
-        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandlingIdInnenforPeriode }.forventetInntektForrigeMåned).isEqualTo(
-                500_000)
-        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandlingIdMedInntektForrigeMåned }.forventetInntektForrigeMåned).isNull()
-        assertThat(forventetInntektForBehandling.first { it.behandlingId == behandlingIdMedInntektForrigeMåned }.forventetInntektToMånederTilbake).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdInnenforPeriode]?.forventetInntektForrigeMåned).isEqualTo(
+            500_000
+        )
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedInntektForrigeMåned]?.forventetInntektForrigeMåned).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedInntektForrigeMåned]?.forventetInntektToMånederTilbake).isNull()
     }
 
     @Test
@@ -192,53 +216,68 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val vedtakTilOgMedDato = LocalDate.of(2023, 12, 31)
 
         val inntektsperiodeToMånederTilbake =
-                Inntektsperiode(vedtakFraOgMedDato,
-                                YearMonth.now().minusMonths(2).atEndOfMonth(),
-                                BigDecimal(500_000),
-                                BigDecimal.ZERO)
+            Inntektsperiode(
+                vedtakFraOgMedDato,
+                YearMonth.now().minusMonths(2).atEndOfMonth(),
+                BigDecimal(500_000),
+                BigDecimal.ZERO
+            )
         val inntektsperiodeForrigeMåned = Inntektsperiode(
-                YearMonth.now().minusMonths(1).atDay(1),
-                vedtakTilOgMedDato,
-                BigDecimal(400_000),
-                BigDecimal.ZERO)
+            YearMonth.now().minusMonths(1).atDay(1),
+            vedtakTilOgMedDato,
+            BigDecimal(400_000),
+            BigDecimal.ZERO
+        )
         val behandlingIdMedForskjelligInntektsperioder =
-                insertVedtakMedPeriode(vedtakFraOgMedDato,
-                                       vedtakTilOgMedDato,
-                                       listOf(inntektsperiodeToMånederTilbake, inntektsperiodeForrigeMåned))
+            insertVedtakMedPeriode(
+                vedtakFraOgMedDato,
+                vedtakTilOgMedDato,
+                listOf(inntektsperiodeToMånederTilbake, inntektsperiodeForrigeMåned)
+            )
 
+        val behandlingIdToForventetInntektMap =
+            vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdMedForskjelligInntektsperioder))
 
-        val forventetInntektForBehandling =
-                vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdMedForskjelligInntektsperioder))
-
-        assertThat(forventetInntektForBehandling.first().forventetInntektToMånederTilbake).isEqualTo(500_000)
-        assertThat(forventetInntektForBehandling.first().forventetInntektForrigeMåned).isEqualTo(400_000)
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektToMånederTilbake).isEqualTo(500_000)
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektForrigeMåned).isEqualTo(400_000)
     }
-
 
     @Test
     internal fun `er vedtak aktivt`() {
-        //Vedtak som varer fra 1.1.2021 - 31.12-2021
+        // Vedtak som varer fra 1.1.2021 - 31.12-2021
         assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2021, 6, 1))).isTrue
         assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2020, 12, 31))).isFalse
         assertThat(vedtak(UUID.randomUUID()).erVedtakAktivtForDato(LocalDate.of(2022, 1, 1))).isFalse
     }
 
-    private fun insertVedtakMedPeriode(fraOgMedDato: LocalDate,
-                                       tilOgMedDato: LocalDate,
-                                       inntektsperiode: List<Inntektsperiode> = listOf(Inntektsperiode(fraOgMedDato,
-                                                                                                       tilOgMedDato,
-                                                                                                       BigDecimal(500_000),
-                                                                                                       BigDecimal.ZERO))): UUID {
+    private fun insertVedtakMedPeriode(
+        fraOgMedDato: LocalDate,
+        tilOgMedDato: LocalDate,
+        inntektsperiode: List<Inntektsperiode> = listOf(
+            Inntektsperiode(
+                fraOgMedDato,
+                tilOgMedDato,
+                BigDecimal(500_000),
+                BigDecimal.ZERO
+            )
+        )
+    ): UUID {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(UUID.randomUUID().toString()))))
         val behandlingId = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)).id
 
-        val vedtaksperiode = Vedtaksperiode(fraOgMedDato,
-                                            tilOgMedDato,
-                                            AktivitetType.BARN_UNDER_ETT_ÅR,
-                                            VedtaksperiodeType.HOVEDPERIODE)
-        vedtakRepository.insert(vedtak(behandlingId,
-                                       inntekter = InntektWrapper(inntektsperiode),
-                                       perioder = PeriodeWrapper(listOf(vedtaksperiode))))
+        val vedtaksperiode = Vedtaksperiode(
+            fraOgMedDato,
+            tilOgMedDato,
+            AktivitetType.BARN_UNDER_ETT_ÅR,
+            VedtaksperiodeType.HOVEDPERIODE
+        )
+        vedtakRepository.insert(
+            vedtak(
+                behandlingId,
+                inntekter = InntektWrapper(inntektsperiode),
+                perioder = PeriodeWrapper(listOf(vedtaksperiode))
+            )
+        )
         return behandlingId
     }
 
@@ -296,7 +335,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `innvilgelse barnetilsyn og innvilgelse overgangsstønad er ikke lik`() {
             assertThat(innvilgelseBarnetilsynDto())
-                    .isNotEqualTo(innvilgelseOvergangsstønadDto())
+                .isNotEqualTo(innvilgelseOvergangsstønadDto())
         }
 
         private fun opprettBehandling(): Saksbehandling {
@@ -305,12 +344,13 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
             return behandlingRepository.finnSaksbehandling(behandlingId)
         }
 
-        private fun assertInnsendtVedtakErLikHentetVedtak(vedtak: VedtakDto,
-                                                          behandling: Saksbehandling) {
+        private fun assertInnsendtVedtakErLikHentetVedtak(
+            vedtak: VedtakDto,
+            behandling: Saksbehandling
+        ) {
             vedtakService.lagreVedtak(vedtak, behandling.id, behandling.stønadstype)
             val hentetVedtak = vedtakService.hentVedtak(behandling.id).tilVedtakDto()
             assertThat(vedtak).isEqualTo(hentetVedtak)
         }
     }
-
 }
