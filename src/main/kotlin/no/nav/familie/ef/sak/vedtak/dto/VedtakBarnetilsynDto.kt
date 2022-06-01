@@ -50,17 +50,15 @@ fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> =
         it.tilPeriode()
     }
 
-fun List<UtgiftsperiodeDto>.midlertidigOpphørErSammenhengende(): Boolean = this.foldIndexed(true) { index, acc, periode ->
+fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = this.foldIndexed(true) { index, acc, periode ->
     if (index == 0) {
         acc
     } else {
-        if (periode.erMidlertidigOpphør) {
             val forrigePeriode = this[index - 1]
             when {
                 forrigePeriode.årMånedTil.erPåfølgende(periode.årMånedFra) -> acc
                 else -> false
             }
-        } else acc
     }
 }
 

@@ -12,8 +12,6 @@ import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.felles.util.erPåfølgende
-import no.nav.familie.ef.sak.felles.util.erSammeMåned
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -35,7 +33,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
-import no.nav.familie.ef.sak.vedtak.dto.midlertidigOpphørErSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -171,7 +168,6 @@ class BeregnYtelseSteg(
 
     private fun validerMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>, saksbehandling: Saksbehandling) {
         validerAntallBarnOgUtgifterVedMidlertidigOpphør(utgiftsperioder, saksbehandling.id)
-        validerPeriodelengdeVedMidlertidigOpphør(utgiftsperioder, saksbehandling.id)
         validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
         validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
     }
@@ -191,12 +187,6 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerPeriodelengdeVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>, behandlingId: UUID) {
-        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphør && !it.årMånedFra.erSammeMåned(it.årMånedTil) }) {
-            "En periode som er midlertidig opphør må være av lengde èn måned, på behandling=$behandlingId"
-        }
-    }
-
     private fun validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
                                                            saksbehandling: Saksbehandling) {
         val førstePeriodeErMidlertidigOpphør = utgiftsperioder.first().erMidlertidigOpphør
@@ -212,7 +202,7 @@ class BeregnYtelseSteg(
 
     private fun validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
                                                                   saksbehandling: Saksbehandling) {
-        brukerfeilHvis(!utgiftsperioder.midlertidigOpphørErSammenhengende()) {
+        brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
             "Perioder som er midlertidig opphør må være sammenhengende, på behandling=${saksbehandling.id}"
         }
     }
