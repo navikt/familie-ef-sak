@@ -16,11 +16,13 @@ import java.util.UUID
 data class AutomatiskMigreringTaskData(val personIdent: String, val uniktId: UUID = UUID.randomUUID())
 
 @Service
-@TaskStepBeskrivelse(taskStepType = AutomatiskMigreringTask.TYPE,
-                     maxAntallFeil = 3,
-                     settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "Automatisk migrering")
+@TaskStepBeskrivelse(
+    taskStepType = AutomatiskMigreringTask.TYPE,
+    maxAntallFeil = 3,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 15 * 60L,
+    beskrivelse = "Automatisk migrering"
+)
 class AutomatiskMigreringTask(private val automatiskMigreringService: AutomatiskMigreringService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -33,9 +35,12 @@ class AutomatiskMigreringTask(private val automatiskMigreringService: Automatisk
         const val TYPE = "automatiskMigrering"
 
         fun opprettTask(ident: String): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)), Properties().apply {
-                this["personIdent"] = ident
-            })
+            return Task(
+                TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
+                Properties().apply {
+                    this["personIdent"] = ident
+                }
+            )
         }
     }
 }

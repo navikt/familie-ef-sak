@@ -20,9 +20,11 @@ import java.util.UUID
 @RequestMapping(path = ["/api/brev"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VedtaksbrevController(private val brevService: VedtaksbrevService,
-                            private val behandlingService: BehandlingService,
-                            private val tilgangService: TilgangService) {
+class VedtaksbrevController(
+    private val brevService: VedtaksbrevService,
+    private val behandlingService: BehandlingService,
+    private val tilgangService: TilgangService
+) {
 
     @GetMapping("/{behandlingId}")
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(@PathVariable behandlingId: UUID): Ressurs<ByteArray> {
@@ -31,9 +33,11 @@ class VedtaksbrevController(private val brevService: VedtaksbrevService,
     }
 
     @PostMapping("/{behandlingId}/{brevMal}")
-    fun lagSaksbehandlerbrev(@PathVariable behandlingId: UUID,
-                             @PathVariable brevMal: String,
-                             @RequestBody brevRequest: JsonNode): Ressurs<ByteArray> {
+    fun lagSaksbehandlerbrev(
+        @PathVariable behandlingId: UUID,
+        @PathVariable brevMal: String,
+        @RequestBody brevRequest: JsonNode
+    ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()

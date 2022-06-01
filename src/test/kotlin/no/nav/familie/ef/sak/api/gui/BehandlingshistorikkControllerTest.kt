@@ -70,11 +70,13 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
         leggInnHistorikk(behandling, "2", LocalDateTime.now().plusDays(1), StegType.BEREGNE_YTELSE)
         leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(2), StegType.SEND_TIL_BESLUTTER)
-        leggInnHistorikk(behandling,
-                         "4",
-                         LocalDateTime.now().plusDays(3),
-                         StegType.BESLUTTE_VEDTAK,
-                         stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT)
+        leggInnHistorikk(
+            behandling,
+            "4",
+            LocalDateTime.now().plusDays(3),
+            StegType.BESLUTTE_VEDTAK,
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT
+        )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(4), StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         leggInnHistorikk(behandling, "6", LocalDateTime.now().plusDays(5), StegType.LAG_SAKSBEHANDLINGSBLANKETT)
         leggInnHistorikk(behandling, "7", LocalDateTime.now().plusDays(6), StegType.FERDIGSTILLE_BEHANDLING)
@@ -93,11 +95,13 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
         leggInnHistorikk(behandling, "2", LocalDateTime.now().plusDays(1), StegType.BEREGNE_YTELSE)
         leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(2), StegType.SEND_TIL_BESLUTTER)
-        leggInnHistorikk(behandling,
-                         "4",
-                         LocalDateTime.now().plusDays(3),
-                         StegType.BESLUTTE_VEDTAK,
-                         stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT)
+        leggInnHistorikk(
+            behandling,
+            "4",
+            LocalDateTime.now().plusDays(3),
+            StegType.BESLUTTE_VEDTAK,
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+        )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(6), StegType.FERDIGSTILLE_BEHANDLING)
         leggInnHistorikk(behandling, "6", LocalDateTime.now().plusDays(8), StegType.BEHANDLING_FERDIGSTILT)
         behandlingRepository.update(behandling.copy(resultat = BehandlingResultat.HENLAGT))
@@ -113,17 +117,21 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "1", LocalDateTime.now(), StegType.VILKÅR)
         leggInnHistorikk(behandling, "2", LocalDateTime.now().plusDays(1), StegType.BEREGNE_YTELSE)
         leggInnHistorikk(behandling, "3", LocalDateTime.now().plusDays(2), StegType.SEND_TIL_BESLUTTER)
-        leggInnHistorikk(behandling,
-                         "4",
-                         LocalDateTime.now().plusDays(3),
-                         StegType.BESLUTTE_VEDTAK,
-                         stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT)
+        leggInnHistorikk(
+            behandling,
+            "4",
+            LocalDateTime.now().plusDays(3),
+            StegType.BESLUTTE_VEDTAK,
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+        )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(4), StegType.SEND_TIL_BESLUTTER)
-        leggInnHistorikk(behandling,
-                         "6",
-                         LocalDateTime.now().plusDays(5),
-                         StegType.BESLUTTE_VEDTAK,
-                         stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT)
+        leggInnHistorikk(
+            behandling,
+            "6",
+            LocalDateTime.now().plusDays(5),
+            StegType.BESLUTTE_VEDTAK,
+            stegUtfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT
+        )
 
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("6", "5", "4", "3", "1")
@@ -136,30 +144,42 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
         val jsonMap = mapOf("key" to "value")
         val metadata = JsonWrapper(objectMapper.writeValueAsString(jsonMap))
-        behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                   steg = behandling.steg,
-                                                                   metadata = metadata))
+        behandlingshistorikkRepository.insert(
+            Behandlingshistorikk(
+                behandlingId = behandling.id,
+                steg = behandling.steg,
+                metadata = metadata
+            )
+        )
 
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body.data!!.first().metadata).isEqualTo(jsonMap)
     }
 
-    private fun leggInnHistorikk(behandling: Behandling,
-                                 opprettetAv: String,
-                                 endretTid: LocalDateTime,
-                                 steg: StegType? = null,
-                                 stegUtfall: StegUtfall? = null) {
-        behandlingshistorikkRepository.insert(Behandlingshistorikk(behandlingId = behandling.id,
-                                                                   steg = steg ?: behandling.steg,
-                                                                   utfall = stegUtfall,
-                                                                   opprettetAv = opprettetAv,
-                                                                   opprettetAvNavn = opprettetAv,
-                                                                   endretTid = endretTid))
+    private fun leggInnHistorikk(
+        behandling: Behandling,
+        opprettetAv: String,
+        endretTid: LocalDateTime,
+        steg: StegType? = null,
+        stegUtfall: StegUtfall? = null
+    ) {
+        behandlingshistorikkRepository.insert(
+            Behandlingshistorikk(
+                behandlingId = behandling.id,
+                steg = steg ?: behandling.steg,
+                utfall = stegUtfall,
+                opprettetAv = opprettetAv,
+                opprettetAvNavn = opprettetAv,
+                endretTid = endretTid
+            )
+        )
     }
 
     private fun hentHistorikk(id: UUID): ResponseEntity<Ressurs<List<HendelseshistorikkDto>>> {
-        return restTemplate.exchange(localhost("/api/behandlingshistorikk/$id"),
-                                     HttpMethod.GET,
-                                     HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers))
+        return restTemplate.exchange(
+            localhost("/api/behandlingshistorikk/$id"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<List<BehandlingshistorikkDto>>>(headers)
+        )
     }
 }

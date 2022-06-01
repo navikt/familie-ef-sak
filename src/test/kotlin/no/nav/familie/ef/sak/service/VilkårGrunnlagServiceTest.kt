@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
-
 internal class VilkårGrunnlagServiceTest {
 
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
@@ -43,52 +42,59 @@ internal class VilkårGrunnlagServiceTest {
     private val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
     private val behandlingService = mockk<BehandlingService>()
 
-    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(pdlClient,
-                                                                            personopplysningerIntegrasjonerClient,
-                                                                            infotrygdService)
+    private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
+        pdlClient,
+        personopplysningerIntegrasjonerClient,
+        infotrygdService
+    )
 
     private val fagsakService = mockk<FagsakService>()
-    private val grunnlagsdataService = GrunnlagsdataService(grunnlagsdataRepository,
-                                                            søknadService,
-                                                            grunnlagsdataRegisterService,
-                                                            behandlingService, mockk())
+    private val grunnlagsdataService = GrunnlagsdataService(
+        grunnlagsdataRepository,
+        søknadService,
+        grunnlagsdataRegisterService,
+        behandlingService, mockk()
+    )
 
     private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService, fagsakService)
     private val behandling = behandling(fagsak())
     private val behandlingId = behandling.id
 
-
     private val søknadsBuilder = TestsøknadBuilder.Builder()
     val barnepassOrdning = søknadsBuilder.defaultBarnepassordning(
-            type = "barnehageOgLiknende",
-            navn = "Humpetitten barnehage",
-            fraDato = LocalDate.of(2021, 1, 1),
-            tilDato = LocalDate.of(2021, 6, 30),
-            beløp = 3000.0
+        type = "barnehageOgLiknende",
+        navn = "Humpetitten barnehage",
+        fraDato = LocalDate.of(2021, 1, 1),
+        tilDato = LocalDate.of(2021, 6, 30),
+        beløp = 3000.0
     )
     val søknadsbarn = listOf(
-            søknadsBuilder.defaultBarn(
-                    navn = "Navn1 navnesen",
-                    fødselTermindato = LocalDate.now().plusMonths(4),
-                    barnepass = søknadsBuilder.defaultBarnepass(årsakSvarId = "trengerMerPassEnnJevnaldrede",
-                                                                ordninger = listOf(barnepassOrdning)),
-                    skalHaBarnepass = true
+        søknadsBuilder.defaultBarn(
+            navn = "Navn1 navnesen",
+            fødselTermindato = LocalDate.now().plusMonths(4),
+            barnepass = søknadsBuilder.defaultBarnepass(
+                årsakSvarId = "trengerMerPassEnnJevnaldrede",
+                ordninger = listOf(barnepassOrdning)
             ),
-            søknadsBuilder.defaultBarn(
-                    navn = "Navn2 navnesen",
-                    fødselTermindato = LocalDate.now().plusMonths(6),
-                    barnepass = søknadsBuilder.defaultBarnepass(årsakSvarId = null,
-                                                                ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0))),
-                    skalHaBarnepass = true
-            )
+            skalHaBarnepass = true
+        ),
+        søknadsBuilder.defaultBarn(
+            navn = "Navn2 navnesen",
+            fødselTermindato = LocalDate.now().plusMonths(6),
+            barnepass = søknadsBuilder.defaultBarnepass(
+                årsakSvarId = null,
+                ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0))
+            ),
+            skalHaBarnepass = true
+        )
     )
     private val søknadOvergangsstønad =
-            SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
-                    .tilSøknadsverdier()
+        SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
+            .tilSøknadsverdier()
 
     private val søknadBarnetilsyn =
-            SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
-                    .tilSøknadsverdier()
+        SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
+            .tilSøknadsverdier()
     private val barn = søknadsBarnTilBehandlingBarn(søknadOvergangsstønad.barn)
     private val barnBarnetilsyn = søknadsBarnTilBehandlingBarn(søknadBarnetilsyn.barn)
     private val medlemskapsinfo = Medlemskapsinfo(søknadOvergangsstønad.fødselsnummer, emptyList(), emptyList(), emptyList())
@@ -156,6 +162,5 @@ internal class VilkårGrunnlagServiceTest {
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.fra).isEqualTo(LocalDate.of(2021, 1, 1))
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.til).isEqualTo(LocalDate.of(2021, 6, 30))
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.type).isEqualTo("barnehageOgLiknende")
-
     }
 }

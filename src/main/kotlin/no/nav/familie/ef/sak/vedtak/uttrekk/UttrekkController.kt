@@ -24,8 +24,10 @@ class UttrekkController(private val uttrekkVedtakService: UttrekkArbeidssøkerSe
     }
 
     @PostMapping("arbeidssoker/{id}/kontrollert")
-    fun settKontrollert(@PathVariable id: UUID,
-                        @RequestParam(defaultValue = "true") kontrollert: Boolean): Ressurs<UttrekkArbeidssøkerDto> {
+    fun settKontrollert(
+        @PathVariable id: UUID,
+        @RequestParam(defaultValue = "true") kontrollert: Boolean
+    ): Ressurs<UttrekkArbeidssøkerDto> {
         return success(uttrekkVedtakService.settKontrollert(id, kontrollert))
     }
 }

@@ -64,8 +64,7 @@ class EregClientTest {
         assertThat(response[1].navn.redigertnavn).isEqualTo("SJOKKERENDE ELEKTRIKER")
     }
 
-
-    private val orgnumre = listOf("972674818","947064649")
+    private val orgnumre = listOf("972674818", "947064649")
 
     private val queryMappingForHentOrganisasjon: MappingBuilder = WireMock.get(WireMock.urlPathEqualTo("/api/ereg"))
 

@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET
 import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET_ARBEID
 import no.nav.familie.ef.sak.vilkår.VilkårType.ALDER_PÅ_BARN
 import no.nav.familie.ef.sak.vilkår.VilkårType.ALENEOMSORG
+import no.nav.familie.ef.sak.vilkår.VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER
 import no.nav.familie.ef.sak.vilkår.VilkårType.FORUTGÅENDE_MEDLEMSKAP
 import no.nav.familie.ef.sak.vilkår.VilkårType.INNTEKT
 import no.nav.familie.ef.sak.vilkår.VilkårType.LOVLIG_OPPHOLD
@@ -22,29 +23,30 @@ import org.junit.jupiter.api.Test
 internal class VilkårTypeTest {
 
     private val vilkårForOvergangsstønad = listOf(
-            FORUTGÅENDE_MEDLEMSKAP,
-            LOVLIG_OPPHOLD,
-            MOR_ELLER_FAR,
-            SIVILSTAND,
-            SAMLIV,
-            ALENEOMSORG,
-            NYTT_BARN_SAMME_PARTNER,
-            SAGT_OPP_ELLER_REDUSERT,
-            AKTIVITET,
-            TIDLIGERE_VEDTAKSPERIODER
+        FORUTGÅENDE_MEDLEMSKAP,
+        LOVLIG_OPPHOLD,
+        MOR_ELLER_FAR,
+        SIVILSTAND,
+        SAMLIV,
+        ALENEOMSORG,
+        NYTT_BARN_SAMME_PARTNER,
+        SAGT_OPP_ELLER_REDUSERT,
+        AKTIVITET,
+        TIDLIGERE_VEDTAKSPERIODER
     )
 
     private val vilkårForBarnetilsyn = listOf(
-            FORUTGÅENDE_MEDLEMSKAP,
-            LOVLIG_OPPHOLD,
-            MOR_ELLER_FAR,
-            SIVILSTAND,
-            SAMLIV,
-            ALENEOMSORG,
-            NYTT_BARN_SAMME_PARTNER,
-            AKTIVITET_ARBEID,
-            INNTEKT,
-            ALDER_PÅ_BARN,
+        FORUTGÅENDE_MEDLEMSKAP,
+        LOVLIG_OPPHOLD,
+        MOR_ELLER_FAR,
+        SIVILSTAND,
+        SAMLIV,
+        ALENEOMSORG,
+        NYTT_BARN_SAMME_PARTNER,
+        AKTIVITET_ARBEID,
+        INNTEKT,
+        ALDER_PÅ_BARN,
+        DOKUMENTASJON_TILSYNSUTGIFTER,
     )
 
     @Test

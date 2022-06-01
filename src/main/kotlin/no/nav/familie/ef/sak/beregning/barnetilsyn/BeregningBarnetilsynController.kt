@@ -17,24 +17,30 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/beregning/barnetilsyn"])
 @ProtectedWithClaims(issuer = "azuread")
-class BeregningBarnetilsynController(private val beregningBarnetilsynService: BeregningBarnetilsynService,
-                                     private val tilgangService: TilgangService,
-                                     private val vedtakService: VedtakService,
-                                     private val tilkjentYtelseService: TilkjentYtelseService) {
-
+class BeregningBarnetilsynController(
+    private val beregningBarnetilsynService: BeregningBarnetilsynService,
+    private val tilgangService: TilgangService,
+    private val vedtakService: VedtakService,
+    private val tilkjentYtelseService: TilkjentYtelseService
+) {
 
     @PostMapping
-    fun beregnYtelserForBarnetilsyn(@RequestBody
-                                    barnetilsynBeregningRequest: BeregningBarnetilsynRequest): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
+    fun beregnYtelserForBarnetilsyn(
+        @RequestBody
+        barnetilsynBeregningRequest: BeregningBarnetilsynRequest
+    ): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
 
         // TODO valider
-        return Ressurs.success(beregningBarnetilsynService.beregnYtelseBarnetilsyn(barnetilsynBeregningRequest.utgiftsperioder,
-                                                                                   barnetilsynBeregningRequest.kontantstøtteperioder,
-                                                                                   barnetilsynBeregningRequest.tilleggsstønadsperioder))
+        return Ressurs.success(
+            beregningBarnetilsynService.beregnYtelseBarnetilsyn(
+                barnetilsynBeregningRequest.utgiftsperioder,
+                barnetilsynBeregningRequest.kontantstøtteperioder,
+                barnetilsynBeregningRequest.tilleggsstønadsperioder
+            )
+        )
     }
 
     @GetMapping("/{behandlingId}")
@@ -47,6 +53,4 @@ class BeregningBarnetilsynController(private val beregningBarnetilsynService: Be
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }
-
-
 }

@@ -17,31 +17,38 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
-    return TilkjentYtelseDto(behandlingId = this.behandlingId,
-                             vedtakstidspunkt = this.vedtakstidspunkt,
-                             andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
-                             samordningsfradragType = this.samordningsfradragType)
+    return TilkjentYtelseDto(
+        behandlingId = this.behandlingId,
+        vedtakstidspunkt = this.vedtakstidspunkt,
+        andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
+        samordningsfradragType = this.samordningsfradragType
+    )
 }
 
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
-    return AndelTilkjentYtelseDto(beløp = this.beløp,
-                                  stønadFra = this.stønadFom,
-                                  stønadTil = this.stønadTom,
-                                  inntekt = this.inntekt,
-                                  inntektsreduksjon = this.inntektsreduksjon,
-                                  samordningsfradrag = this.samordningsfradrag)
-
+    return AndelTilkjentYtelseDto(
+        beløp = this.beløp,
+        stønadFra = this.stønadFom,
+        stønadTil = this.stønadTom,
+        inntekt = this.inntekt,
+        inntektsreduksjon = this.inntektsreduksjon,
+        samordningsfradrag = this.samordningsfradrag
+    )
 }
 
 fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> {
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map { andel ->
-        Beløpsperiode(beløp = andel.beløp.toBigDecimal(),
-                      periode = Periode(fradato = andel.stønadFom, tildato = andel.stønadTom),
-                      beregningsgrunnlag = Beregningsgrunnlag(inntekt = andel.inntekt.toBigDecimal(),
-                                                              samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
-                                                              samordningsfradragType = this.samordningsfradragType,
-                                                              avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal()),
-                      beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal())
+        Beløpsperiode(
+            beløp = andel.beløp.toBigDecimal(),
+            periode = Periode(fradato = andel.stønadFom, tildato = andel.stønadTom),
+            beregningsgrunnlag = Beregningsgrunnlag(
+                inntekt = andel.inntekt.toBigDecimal(),
+                samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
+                samordningsfradragType = this.samordningsfradragType,
+                avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal()
+            ),
+            beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal()
+        )
     }
 }
 
@@ -51,29 +58,35 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
         val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
-        BeløpsperiodeBarnetilsynDto(periode = Periode(it.stønadFom, it.stønadTom),
-                                    beløp = it.beløp,
-                                    beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
-                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
-                                            beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp)
-                                            .roundUp()
-                                            .toInt(),
-                                    sats = beløpsperiodeBarnetilsynDto.sats,
-                                    beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag)
+        BeløpsperiodeBarnetilsynDto(
+            periode = Periode(it.stønadFom, it.stønadTom),
+            beløp = it.beløp,
+            beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
+                beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
+                beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp
+            )
+                .roundUp()
+                .toInt(),
+            sats = beløpsperiodeBarnetilsynDto.sats,
+            beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag
+        )
     }
 }
 
-fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(saksbehandlerId: String,
-                                                eksternBehandlingId: Long,
-                                                stønadstype: StønadType,
-                                                eksternFagsakId: Long): TilkjentYtelseMedMetadata {
-    return TilkjentYtelseMedMetadata(tilkjentYtelse = this.tilIverksettDto(),
-                                     saksbehandlerId = saksbehandlerId,
-                                     eksternBehandlingId = eksternBehandlingId,
-                                     stønadstype = stønadstype,
-                                     eksternFagsakId = eksternFagsakId,
-                                     personIdent = this.personident,
-                                     behandlingId = this.behandlingId,
-                                     vedtaksdato = this.vedtakstidspunkt.toLocalDate())
+fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
+    saksbehandlerId: String,
+    eksternBehandlingId: Long,
+    stønadstype: StønadType,
+    eksternFagsakId: Long
+): TilkjentYtelseMedMetadata {
+    return TilkjentYtelseMedMetadata(
+        tilkjentYtelse = this.tilIverksettDto(),
+        saksbehandlerId = saksbehandlerId,
+        eksternBehandlingId = eksternBehandlingId,
+        stønadstype = stønadstype,
+        eksternFagsakId = eksternFagsakId,
+        personIdent = this.personident,
+        behandlingId = this.behandlingId,
+        vedtaksdato = this.vedtakstidspunkt.toLocalDate()
+    )
 }
-

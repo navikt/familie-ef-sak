@@ -30,7 +30,7 @@ class PersonoppslysningerDtoTest {
     @Test
     internal fun `Test som feiler`() {
         assertThrows(IllegalStateException::class.java) { enumMappingValidator<Sivilstandstype, AdresseType>() }
-                .printStackTrace()
+            .printStackTrace()
     }
 
     private inline fun <reified A : Enum<A>, reified B : Enum<B>> enumMappingValidator() {
@@ -41,8 +41,10 @@ class PersonoppslysningerDtoTest {
         val bDelta = bValues.toMutableSet().let { it.removeAll(aValues); it }
 
         if (aDelta.isNotEmpty() || bDelta.isNotEmpty()) {
-            throw IllegalStateException("${A::class.java.name} inneholder feltene [${aDelta.joinToString(",")}]," +
-                                        " ${B::class.java.name} inneholder feltene [${bDelta.joinToString(",")}]")
+            throw IllegalStateException(
+                "${A::class.java.name} inneholder feltene [${aDelta.joinToString(",")}]," +
+                    " ${B::class.java.name} inneholder feltene [${bDelta.joinToString(",")}]"
+            )
         }
     }
 }

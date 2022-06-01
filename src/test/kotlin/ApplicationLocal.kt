@@ -12,20 +12,22 @@ class ApplicationLocal
 fun main(args: Array<String>) {
 
     SpringApplicationBuilder(ApplicationConfig::class.java)
-            .initializers(DbContainerInitializer())
-            .profiles("local",
-                      "mock-arbeidssøker",
-                      "mock-integrasjoner",
-                      "mock-pdl",
-                      "mock-infotrygd-replika",
-                      "mock-kodeverk",
-                      "mock-blankett",
-                      "mock-iverksett",
-                      "mock-inntekt",
-                      "mock-ereg",
-                      "mock-aareg",
-                      "mock-brev",
-                      "mock-dokument",
-                      "mock-tilbakekreving")
-            .run(*args)
+        .initializers(DbContainerInitializer())
+        .profiles(
+            "local",
+            "mock-arbeidssøker",
+            "mock-integrasjoner",
+            "mock-pdl",
+            "mock-infotrygd-replika",
+            "mock-kodeverk",
+            "mock-blankett",
+            "mock-iverksett",
+            "mock-inntekt",
+            "mock-ereg",
+            "mock-aareg",
+            "mock-brev",
+            "mock-dokument",
+            "mock-tilbakekreving"
+        )
+        .run(*args)
 }

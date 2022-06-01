@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.amelding
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.felles.kodeverk.CachedKodeverkService
 import no.nav.familie.ef.sak.amelding.ekstern.HentInntektListeResponse
+import no.nav.familie.ef.sak.felles.kodeverk.CachedKodeverkService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg.EregService
 import no.nav.familie.kontrakter.felles.kodeverk.InntektKodeverkType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,8 +25,10 @@ internal class AMeldingInntektMapperTest {
     internal fun setUp() {
         every { eregService.hentOrganisasjoner(any()) } returns listOf(Organisasjon("805824352", "orgnavn"))
         every { kodeverkService.hentInntekt() } returns
-                mapOf(InntektKodeverkType.LOENNSINNTEKT to mapOf("fastloenn" to "Fastlønn"),
-                InntektKodeverkType.TILLEGSINFORMASJON_KATEGORI to mapOf("NorskKontinentalsokkel" to "Norsk kontinentalsokkel"))
+            mapOf(
+                InntektKodeverkType.LOENNSINNTEKT to mapOf("fastloenn" to "Fastlønn"),
+                InntektKodeverkType.TILLEGSINFORMASJON_KATEGORI to mapOf("NorskKontinentalsokkel" to "Norsk kontinentalsokkel")
+            )
     }
 
     @Test
@@ -61,7 +63,6 @@ internal class AMeldingInntektMapperTest {
         assertThat(inntekt.opptjeningsperiodeFom).isEqualTo(LocalDate.of(2021, 9, 1))
         assertThat(inntekt.opptjeningsperiodeTom).isEqualTo(LocalDate.of(2021, 9, 30))
 
-
         assertThat(inntektForVirksomhet.navn).isEqualTo("orgnavn")
         assertThat(inntektForVirksomhet.identifikator).isEqualTo("805824352")
 
@@ -72,6 +73,4 @@ internal class AMeldingInntektMapperTest {
     private fun lagResponse(): HentInntektListeResponse {
         return objectMapper.readValue(this::class.java.classLoader.getResource("inntekt/inntektResponse.json")!!)
     }
-
-
 }

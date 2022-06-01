@@ -15,8 +15,8 @@ import kotlin.reflect.full.isSubclassOf
 internal class RegistergrunnlagTest {
 
     private val om = objectMapper.copy()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .writerWithDefaultPrettyPrinter()
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .writerWithDefaultPrettyPrinter()
 
     /**
      * For å få med seg breaking changes i Grunnlagsdata. Hvis noe faktiskt er breaking change får man vurdere om man skal
@@ -31,22 +31,25 @@ internal class RegistergrunnlagTest {
         assertThat(nyDefinisjon).isEqualTo(tidligereDefinisjon)
     }
 
-    private data class ObjectInfo(val name: String,
-                                  val type: String,
-                                  val fields: Map<String, ObjectInfo>? = null,
-                                  val values: List<String>? = null,
-                                  val nullable: Boolean)
+    private data class ObjectInfo(
+        val name: String,
+        val type: String,
+        val fields: Map<String, ObjectInfo>? = null,
+        val values: List<String>? = null,
+        val nullable: Boolean
+    )
 
-    private val endClasses = setOf(String::class,
-                                   UUID::class,
-                                   Int::class,
-                                   Long::class,
-                                   Float::class,
-                                   LocalDate::class,
-                                   LocalDateTime::class,
-                                   YearMonth::class,
-                                   Boolean::class)
-
+    private val endClasses = setOf(
+        String::class,
+        UUID::class,
+        Int::class,
+        Long::class,
+        Float::class,
+        LocalDate::class,
+        LocalDateTime::class,
+        YearMonth::class,
+        Boolean::class
+    )
 
     private fun getClassInfo(kClass: KClass<*>): Map<String, ObjectInfo> {
         val className = kClass.qualifiedName

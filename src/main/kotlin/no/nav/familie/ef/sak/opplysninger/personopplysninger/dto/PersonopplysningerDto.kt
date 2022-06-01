@@ -11,52 +11,64 @@ Målform Målform skal mastres videre i KRR. Konsumenter som vil ha målform, m�
  I en overgangsfase vil opplysningene fortsatt være tilgjengelig fra TPS.
 NAV-enhet
  */
-data class PersonopplysningerDto(val personIdent: String,
-                                 val navn: NavnDto,
-                                 val kjønn: Kjønn,
-                                 val adressebeskyttelse: Adressebeskyttelse?,
-                                 val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
-                                 val dødsdato: LocalDate?,
-                                 val telefonnummer: TelefonnummerDto?,
-                                 val statsborgerskap: List<StatsborgerskapDto>,
-                                 val sivilstand: List<SivilstandDto>,
-                                 val adresse: List<AdresseDto>,
-                                 val fullmakt: List<FullmaktDto>,
-                                 val egenAnsatt: Boolean,
-                                 val navEnhet: String,
-                                 val barn: List<BarnDto>,
-                                 val innflyttingTilNorge: List<InnflyttingDto>,
-                                 val utflyttingFraNorge: List<UtflyttingDto>,
-                                 val oppholdstillatelse: List<OppholdstillatelseDto>,
-                                 val vergemål: List<VergemålDto>,
-                                 val lagtTilEtterFerdigstilling: Boolean)
+data class PersonopplysningerDto(
+    val personIdent: String,
+    val navn: NavnDto,
+    val kjønn: Kjønn,
+    val adressebeskyttelse: Adressebeskyttelse?,
+    val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+    val dødsdato: LocalDate?,
+    val telefonnummer: TelefonnummerDto?,
+    val statsborgerskap: List<StatsborgerskapDto>,
+    val sivilstand: List<SivilstandDto>,
+    val adresse: List<AdresseDto>,
+    val fullmakt: List<FullmaktDto>,
+    val egenAnsatt: Boolean,
+    val navEnhet: String,
+    val barn: List<BarnDto>,
+    val innflyttingTilNorge: List<InnflyttingDto>,
+    val utflyttingFraNorge: List<UtflyttingDto>,
+    val oppholdstillatelse: List<OppholdstillatelseDto>,
+    val vergemål: List<VergemålDto>,
+    val lagtTilEtterFerdigstilling: Boolean
+)
 
-data class BarnDto(val personIdent: String,
-                   val navn: String,
-                   val annenForelder: AnnenForelderMinimumDto?,
-                   val adresse: List<AdresseDto>,
-                   val borHosSøker: Boolean,
-                   val fødselsdato: LocalDate?,
-                   val dødsdato: LocalDate?)
+data class BarnDto(
+    val personIdent: String,
+    val navn: String,
+    val annenForelder: AnnenForelderMinimumDto?,
+    val adresse: List<AdresseDto>,
+    val borHosSøker: Boolean,
+    val fødselsdato: LocalDate?,
+    val dødsdato: LocalDate?
+)
 
-data class BarnMinimumDto(val personIdent: String,
-                          val navn: String,
-                          val fødselsdato: LocalDate?)
+data class BarnMinimumDto(
+    val personIdent: String,
+    val navn: String,
+    val fødselsdato: LocalDate?
+)
 
-data class AnnenForelderMinimumDto(val personIdent: String,
-                                   val navn: String,
-                                   val dødsdato: LocalDate?)
+data class AnnenForelderMinimumDto(
+    val personIdent: String,
+    val navn: String,
+    val dødsdato: LocalDate?
+)
 
-data class TelefonnummerDto(val landskode: String,
-                            val nummer: String)
+data class TelefonnummerDto(
+    val landskode: String,
+    val nummer: String
+)
 
-data class SivilstandDto(val type: Sivilstandstype,
-                         val gyldigFraOgMed: LocalDate?,
-                         val relatertVedSivilstand: String?,
-                         val navn: String?,
-                         val dødsdato: LocalDate?)
+data class SivilstandDto(
+    val type: Sivilstandstype,
+    val gyldigFraOgMed: LocalDate?,
+    val relatertVedSivilstand: String?,
+    val navn: String?,
+    val dødsdato: LocalDate?
+)
 
-@Suppress("unused") //Kopi fra PDL
+@Suppress("unused") // Kopi fra PDL
 enum class Sivilstandstype {
 
     UOPPGITT,
@@ -75,14 +87,15 @@ enum class Sivilstandstype {
     fun erSeparert(): Boolean = this == SEPARERT_PARTNER || this == SEPARERT
     fun erEnkeEllerEnkemann(): Boolean = this == ENKE_ELLER_ENKEMANN || this == GJENLEVENDE_PARTNER
     fun erSkilt(): Boolean = this == SKILT || this == SKILT_PARTNER
-
 }
 
-data class AdresseDto(val visningsadresse: String?,
-                      val type: AdresseType,
-                      val gyldigFraOgMed: LocalDate?,
-                      val gyldigTilOgMed: LocalDate?,
-                      val angittFlyttedato: LocalDate? = null)
+data class AdresseDto(
+    val visningsadresse: String?,
+    val type: AdresseType,
+    val gyldigFraOgMed: LocalDate?,
+    val gyldigTilOgMed: LocalDate?,
+    val angittFlyttedato: LocalDate? = null
+)
 
 enum class AdresseType(val rekkefølge: Int) {
     BOSTEDADRESSE(1),
@@ -91,13 +104,14 @@ enum class AdresseType(val rekkefølge: Int) {
     KONTAKTADRESSE_UTLAND(4),
 }
 
-data class FullmaktDto(val gyldigFraOgMed: LocalDate,
-                       val gyldigTilOgMed: LocalDate,
-                       val motpartsPersonident: String,
-                       val navn: String?)
+data class FullmaktDto(
+    val gyldigFraOgMed: LocalDate,
+    val gyldigTilOgMed: LocalDate,
+    val motpartsPersonident: String,
+    val navn: String?
+)
 
-
-@Suppress("unused") //Kopi fra PDL
+@Suppress("unused") // Kopi fra PDL
 enum class Adressebeskyttelse {
 
     STRENGT_FORTROLIG,
@@ -126,7 +140,7 @@ enum class Folkeregisterpersonstatus(private val pdlStatus: String) {
     }
 }
 
-@Suppress("unused") //Kopi fra PDL
+@Suppress("unused") // Kopi fra PDL
 enum class Kjønn {
 
     KVINNE,
@@ -134,10 +148,12 @@ enum class Kjønn {
     UKJENT
 }
 
-data class NavnDto(val fornavn: String,
-                   val mellomnavn: String?,
-                   val etternavn: String,
-                   val visningsnavn: String) {
+data class NavnDto(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+    val visningsnavn: String
+) {
 
     companion object {
 
@@ -145,8 +161,10 @@ data class NavnDto(val fornavn: String,
     }
 }
 
-data class VergemålDto(val embete: String?,
-                       val type: String?,
-                       val motpartsPersonident: String?,
-                       val navn: String?,
-                       val omfang: String?)
+data class VergemålDto(
+    val embete: String?,
+    val type: String?,
+    val motpartsPersonident: String?,
+    val navn: String?,
+    val omfang: String?
+)

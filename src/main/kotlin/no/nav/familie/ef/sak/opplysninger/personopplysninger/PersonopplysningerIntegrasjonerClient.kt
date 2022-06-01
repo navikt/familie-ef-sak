@@ -21,22 +21,30 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Component
-class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: RestOperations,
-                                            private val integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+class PersonopplysningerIntegrasjonerClient(
+    @Qualifier("azure") restOperations: RestOperations,
+    private val integrasjonerConfig: IntegrasjonerConfig
+) :
+    AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
 
     fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
-        return postForEntity<List<Tilgang>>(integrasjonerConfig.tilgangPersonUri, listOf(personIdent), HttpHeaders().also {
-            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-        }).single()
+        return postForEntity<List<Tilgang>>(
+            integrasjonerConfig.tilgangPersonUri, listOf(personIdent),
+            HttpHeaders().also {
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+            }
+        ).single()
     }
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
-        return postForEntity(integrasjonerConfig.tilgangRelasjonerUri, PersonIdent(personIdent), HttpHeaders().also {
-            it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-        })
+        return postForEntity(
+            integrasjonerConfig.tilgangRelasjonerUri, PersonIdent(personIdent),
+            HttpHeaders().also {
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+            }
+        )
     }
 
     fun hentMedlemskapsinfo(ident: String): Medlemskapsinfo {
@@ -49,15 +57,19 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     }
 
     fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING {
-        return postForEntity<Ressurs<ADRESSEBESKYTTELSEGRADERING>>(integrasjonerConfig.adressebeskyttelse,
-                                                                   PersonIdent(personIdent),
-                                                                   HttpHeaders().also {
-                                                                       it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-                                                                   }).getDataOrThrow()
+        return postForEntity<Ressurs<ADRESSEBESKYTTELSEGRADERING>>(
+            integrasjonerConfig.adressebeskyttelse,
+            PersonIdent(personIdent),
+            HttpHeaders().also {
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+            }
+        ).getDataOrThrow()
     }
 
-    private fun hentArbeidsfordelingEnhet(uri: URI,
-                                          ident: String): List<Arbeidsfordelingsenhet> {
+    private fun hentArbeidsfordelingEnhet(
+        uri: URI,
+        ident: String
+    ): List<Arbeidsfordelingsenhet> {
         return try {
             val response = postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
             response.data ?: throw Feil("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt uri=$uri")
@@ -67,8 +79,10 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
     }
 
     fun egenAnsatt(ident: String): Boolean {
-        return postForEntity<Ressurs<EgenAnsattResponse>>(integrasjonerConfig.egenAnsattUri,
-                                                          EgenAnsattRequest(ident)).data!!.erEgenAnsatt
+        return postForEntity<Ressurs<EgenAnsattResponse>>(
+            integrasjonerConfig.egenAnsattUri,
+            EgenAnsattRequest(ident)
+        ).data!!.erEgenAnsatt
     }
 
     fun hentNavKontor(ident: String): NavKontorEnhet? {
@@ -84,5 +98,4 @@ class PersonopplysningerIntegrasjonerClient(@Qualifier("azure") restOperations: 
         const val HEADER_NAV_TEMA = "Nav-Tema"
         const val HEADER_NAV_TEMA_ENF = "ENF"
     }
-
 }

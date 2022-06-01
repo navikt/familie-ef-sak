@@ -20,7 +20,7 @@ Egenskap: Andelhistorikk: Revurdering av barnetilsyn
       | 1            | 15    |
       | 2            | 15    |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp |
@@ -45,7 +45,7 @@ Egenskap: Andelhistorikk: Revurdering av barnetilsyn
       | 1            | 15    |
       | 2            | 20    |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp |
@@ -70,7 +70,7 @@ Egenskap: Andelhistorikk: Revurdering av barnetilsyn
       | 1            | 01.2021         | 03.2021         | 15    |
       | 2            | 02.2021         | 03.2021         | 20    |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp |

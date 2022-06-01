@@ -29,22 +29,23 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
-                         private val fagsakService: FagsakService,
-                         private val oppgaveService: OppgaveService,
-                         private val iverksettClient: IverksettClient,
-                         private val iverksettingDtoMapper: IverksettingDtoMapper,
-                         private val totrinnskontrollService: TotrinnskontrollService,
-                         private val behandlingService: BehandlingService,
-                         private val vedtakService: VedtakService,
-                         private val vedtaksbrevService: VedtaksbrevService,
-                         private val featureToggleService: FeatureToggleService) : BehandlingSteg<BeslutteVedtakDto> {
+class BeslutteVedtakSteg(
+    private val taskRepository: TaskRepository,
+    private val fagsakService: FagsakService,
+    private val oppgaveService: OppgaveService,
+    private val iverksettClient: IverksettClient,
+    private val iverksettingDtoMapper: IverksettingDtoMapper,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
+    private val vedtaksbrevService: VedtaksbrevService,
+    private val featureToggleService: FeatureToggleService
+) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
         if (saksbehandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${saksbehandling.steg}")
         }
-
     }
 
     override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): StegType {
@@ -65,7 +66,7 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
                     oppdaterResultatPåBehandling(saksbehandling.id)
                     opprettPollForStatusOppgave(saksbehandling.id)
                     opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-                    if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV) {
+                    if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning) {
                         iverksettClient.iverksettUtenBrev(iverksettDto)
                     } else {
                         val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
@@ -84,8 +85,12 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
-            taskRepository.save(BehandlingsstatistikkTask.opprettBesluttetTask(behandlingId = behandlingId,
-                                                                               oppgaveId = oppgaveId))
+        taskRepository.save(
+            BehandlingsstatistikkTask.opprettBesluttetTask(
+                behandlingId = behandlingId,
+                oppgaveId = oppgaveId
+            )
+        )
 
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
@@ -102,19 +107,28 @@ class BeslutteVedtakSteg(private val taskRepository: TaskRepository,
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
         return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskRepository.save(FerdigstillOppgaveTask.opprettTask(behandlingId = saksbehandling.id,
-                                                                   oppgavetype = oppgavetype,
-                                                                   oppgaveId = it.gsakOppgaveId,
-                                                                   personIdent = aktivIdent))
+            taskRepository.save(
+                FerdigstillOppgaveTask.opprettTask(
+                    behandlingId = saksbehandling.id,
+                    oppgavetype = oppgavetype,
+                    oppgaveId = it.gsakOppgaveId,
+                    personIdent = aktivIdent
+                )
+            )
             it.gsakOppgaveId
         }
     }
 
     private fun opprettBehandleUnderkjentVedtakOppgave(saksbehandling: Saksbehandling, navIdent: String) {
-        taskRepository.save(OpprettOppgaveTask.opprettTask(
-                OpprettOppgaveTaskData(behandlingId = saksbehandling.id,
-                                       oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
-                                       tilordnetNavIdent = navIdent)))
+        taskRepository.save(
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTaskData(
+                    behandlingId = saksbehandling.id,
+                    oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
+                    tilordnetNavIdent = navIdent
+                )
+            )
+        )
     }
 
     private fun opprettTaskForJournalførBlankett(saksbehandling: Saksbehandling) {

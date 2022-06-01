@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.6</version>
+        <version>2.6.7</version>
     </parent>
     <repositories>
         <repository>
@@ -29,22 +29,25 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.6.20</kotlin.version>
+        <kotlin.version>1.6.21</kotlin.version>
         <kotlin-coroutines.version>1.6.1</kotlin-coroutines.version>
-        <springdoc.version>1.6.7</springdoc.version>
-        <mockk.version>1.12.3</mockk.version>
-        <felles.version>1.20220406150627_c699e0a</felles.version>
-        <prosessering.version>1.20220331123748_03bdb3b</prosessering.version>
+        <springdoc.version>1.6.8</springdoc.version>
+        <mockk.version>1.12.4</mockk.version>
+        <felles.version>1.20220503150007_21cbfef</felles.version>
+        <prosessering.version>1.20220518155102_343fcae</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20220505111225_1683031</kontrakter.version>
-        <cucumber.version>7.2.3</cucumber.version>
+        <kontrakter.version>2.0_20220524120504_33e74cf</kontrakter.version>
+        <eksterne.kontrakter.bisys.version>2.0_20220503154019_02ec0eb</eksterne.kontrakter.bisys.version>
+        <cucumber.version>7.3.4</cucumber.version>
+
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <nav.security.version>1.3.19</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
-        <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
+        <nav.security.version>2.0.20</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
+        <okhttp3.version>4.9.1
+        </okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <unleash.version>4.4.1</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -161,12 +164,17 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.familie.eksterne.kontrakter</groupId>
+            <artifactId>bisys</artifactId>
+            <version>${eksterne.kontrakter.bisys.version}</version>
+        </dependency>
 
         <!-- test -->
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.33.1</version>
+            <version>2.33.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -200,7 +208,7 @@
         <dependency>
             <groupId>dev.akkinoc.spring.boot</groupId>
             <artifactId>logback-access-spring-boot-starter</artifactId>
-            <version>3.2.5</version>
+            <version>3.2.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -212,7 +220,7 @@
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>1.2.0</version>
+            <version>1.3.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -326,6 +334,54 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M6</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>ktlint</id>
+                        <phase>verify</phase>
+                        <configuration>
+                            <target name="ktlint">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+                                      classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <arg value="src/**/*.kt"/>
+                                </java>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ktlint-format</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <target name="ktlint">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+                                      classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <jvmarg value="--add-opens"/>
+                                    <jvmarg value="java.base/java.lang=ALL-UNNAMED"/>
+                                    <arg value="-F"/>
+                                    <arg value="src/**/*.kt"/>
+                                </java>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.pinterest</groupId>
+                        <artifactId>ktlint</artifactId>
+                        <version>0.45.2</version>
+                    </dependency>
+                    <!-- additional 3rd party ruleset(s) can be specified here -->
+                </dependencies>
             </plugin>
         </plugins>
     </build>

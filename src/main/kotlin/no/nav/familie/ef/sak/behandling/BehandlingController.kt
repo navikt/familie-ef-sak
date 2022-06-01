@@ -24,11 +24,13 @@ import java.util.UUID
 @RequestMapping(path = ["/api/behandling"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class BehandlingController(private val behandlingService: BehandlingService,
-                           private val fagsakService: FagsakService,
-                           private val henleggService: HenleggService,
-                           private val stegService: StegService,
-                           private val tilgangService: TilgangService) {
+class BehandlingController(
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
+    private val henleggService: HenleggService,
+    private val stegService: StegService,
+    private val tilgangService: TilgangService
+) {
 
     @GetMapping("{behandlingId}")
     fun hentBehandling(@PathVariable behandlingId: UUID): Ressurs<BehandlingDto> {

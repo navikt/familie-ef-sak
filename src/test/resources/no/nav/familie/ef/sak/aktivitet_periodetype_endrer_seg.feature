@@ -14,7 +14,7 @@ Egenskap: Andelhistorikk: Endring i aktivitet
       | BehandlingId | Inntekt |
       | 2            | 1       |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet          |

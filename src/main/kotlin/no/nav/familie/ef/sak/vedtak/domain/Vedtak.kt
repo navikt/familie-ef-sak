@@ -11,64 +11,94 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-
-data class Vedtak(@Id
-                  val behandlingId: UUID,
-                  val resultatType: ResultatType,
-                  val periodeBegrunnelse: String? = null,
-                  val inntektBegrunnelse: String? = null,
-                  @Column("avsla_begrunnelse")
-                  val avslåBegrunnelse: String? = null,
-                  @Column("avsla_arsak")
-                  val avslåÅrsak: AvslagÅrsak? = null,
-                  val perioder: PeriodeWrapper? = null,
-                  val inntekter: InntektWrapper? = null,
-                  val samordningsfradragType: SamordningsfradragType? = null,
-                  val saksbehandlerIdent: String? = null,
-                  @Column("opphor_fom")
-                  val opphørFom: LocalDate? = null,
-                  val barnetilsyn: BarnetilsynWrapper? = null,
-                  @Column("kontantstotte")
-                  val kontantstøtte: KontantstøtteWrapper? = null,
-                  @Column("tilleggsstonad")
-                  val tilleggsstønad: TilleggsstønadWrapper? = null,
-                  val beslutterIdent: String? = null,
-                  @Column("sanksjon_arsak")
-                  val sanksjonsårsak: Sanksjonsårsak? = null,
-                  val internBegrunnelse: String? = null)
+data class Vedtak(
+    @Id
+    val behandlingId: UUID,
+    val resultatType: ResultatType,
+    val periodeBegrunnelse: String? = null,
+    val inntektBegrunnelse: String? = null,
+    @Column("avsla_begrunnelse")
+    val avslåBegrunnelse: String? = null,
+    @Column("avsla_arsak")
+    val avslåÅrsak: AvslagÅrsak? = null,
+    val perioder: PeriodeWrapper? = null,
+    val inntekter: InntektWrapper? = null,
+    val samordningsfradragType: SamordningsfradragType? = null,
+    val saksbehandlerIdent: String? = null,
+    @Column("opphor_fom")
+    val opphørFom: LocalDate? = null,
+    val barnetilsyn: BarnetilsynWrapper? = null,
+    @Column("kontantstotte")
+    val kontantstøtte: KontantstøtteWrapper? = null,
+    @Column("tilleggsstonad")
+    val tilleggsstønad: TilleggsstønadWrapper? = null,
+    val skolepenger: SkolepengerWrapper? = null,
+    val beslutterIdent: String? = null,
+    @Column("sanksjon_arsak")
+    val sanksjonsårsak: Sanksjonsårsak? = null,
+    val internBegrunnelse: String? = null
+)
 
 data class Vedtaksperiode(
-        val datoFra: LocalDate,
-        val datoTil: LocalDate,
-        val aktivitet: AktivitetType,
-        val periodeType: VedtaksperiodeType)
+    val datoFra: LocalDate,
+    val datoTil: LocalDate,
+    val aktivitet: AktivitetType,
+    val periodeType: VedtaksperiodeType
+)
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
-data class Barnetilsynperiode(val datoFra: LocalDate,
-                              val datoTil: LocalDate,
-                              val utgifter: Int,
-                              val barn: List<UUID>,
-                              val erMidlertidigOpphør: Boolean? = false)
+data class Barnetilsynperiode(
+    val datoFra: LocalDate,
+    val datoTil: LocalDate,
+    val utgifter: Int,
+    val barn: List<UUID>,
+    val erMidlertidigOpphør: Boolean? = false
+)
 
-data class PeriodeMedBeløp(val datoFra: LocalDate,
-                           val datoTil: LocalDate,
-                           val beløp: Int) {
+data class UtgiftsperiodeSkolepenger(
+    val studietype: SkolepengerStudietype,
+    val datoFra: LocalDate,
+    val datoTil: LocalDate,
+    val studiebelastning: Int,
+    val utgifter: Int
+)
 
-    fun tilDto() = PeriodeMedBeløpDto(årMånedFra = YearMonth.from(datoFra),
-                                      årMånedTil = YearMonth.from(datoTil),
-                                      beløp = beløp)
+enum class SkolepengerStudietype {
+    HØGSKOLE_UNIVERSITET
+}
+
+data class PeriodeMedBeløp(
+    val datoFra: LocalDate,
+    val datoTil: LocalDate,
+    val beløp: Int
+) {
+
+    fun tilDto() = PeriodeMedBeløpDto(
+        årMånedFra = YearMonth.from(datoFra),
+        årMånedTil = YearMonth.from(datoTil),
+        beløp = beløp
+    )
 }
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
 data class InntektWrapper(val inntekter: List<Inntektsperiode>)
-data class TilleggsstønadWrapper(val harTilleggsstønad: Boolean,
-                                 val perioder: List<PeriodeMedBeløp>,
-                                 val begrunnelse: String?)
+data class TilleggsstønadWrapper(
+    val harTilleggsstønad: Boolean,
+    val perioder: List<PeriodeMedBeløp>,
+    val begrunnelse: String?
+)
 
 data class KontantstøtteWrapper(val perioder: List<PeriodeMedBeløp>)
 
-data class BarnetilsynWrapper(val perioder: List<Barnetilsynperiode>,
-                              val begrunnelse: String?)
+data class BarnetilsynWrapper(
+    val perioder: List<Barnetilsynperiode>,
+    val begrunnelse: String?
+)
+
+data class SkolepengerWrapper(
+    val perioder: List<UtgiftsperiodeSkolepenger>,
+    val begrunnelse: String?
+)
 
 enum class VedtaksperiodeType {
     FORLENGELSE,

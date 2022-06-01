@@ -9,8 +9,10 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = PubliserVedtakshendelseTask.TYPE,
-                     beskrivelse = "Sender hendelse om vedtak")
+@TaskStepBeskrivelse(
+    taskStepType = PubliserVedtakshendelseTask.TYPE,
+    beskrivelse = "Sender hendelse om vedtak"
+)
 
 class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncTaskStep {
 
@@ -21,13 +23,14 @@ class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncT
     companion object {
 
         fun opprettTask(behandlingId: UUID): Task =
-                Task(type = TYPE,
-                     payload = behandlingId.toString(),
-                     properties = Properties().apply {
-                         this["behandlingId"] = behandlingId.toString()
-                     })
+            Task(
+                type = TYPE,
+                payload = behandlingId.toString(),
+                properties = Properties().apply {
+                    this["behandlingId"] = behandlingId.toString()
+                }
+            )
 
         const val TYPE = "publiserVedtakshendelse"
     }
-
 }

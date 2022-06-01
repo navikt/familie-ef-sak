@@ -13,13 +13,15 @@ object OpprettBehandlingUtil {
     /**
      * @param behandlingType for ny behandling
      */
-    fun validerKanOppretteNyBehandling(behandlingType: BehandlingType,
-                                       tidligereBehandlinger: List<Behandling>,
-                                       sistIverksatteBehandling: Behandling?,
-                                       erMigrering: Boolean = false) {
+    fun validerKanOppretteNyBehandling(
+        behandlingType: BehandlingType,
+        tidligereBehandlinger: List<Behandling>,
+        sistIverksatteBehandling: Behandling?,
+        erMigrering: Boolean = false
+    ) {
         val sisteBehandling = tidligereBehandlinger
-                .filter { it.resultat != BehandlingResultat.HENLAGT && it.status == BehandlingStatus.FERDIGSTILT }
-                .maxByOrNull { it.sporbar.opprettetTid }
+            .filter { it.resultat != BehandlingResultat.HENLAGT && it.status == BehandlingStatus.FERDIGSTILT }
+            .maxByOrNull { it.sporbar.opprettetTid }
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
         validerMigreringErRevurdering(behandlingType, erMigrering)
@@ -38,8 +40,10 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerTekniskOpphør(sisteBehandling: Behandling?,
-                                     sistIverksatteBehandling: Behandling?) {
+    private fun validerTekniskOpphør(
+        sisteBehandling: Behandling?,
+        sistIverksatteBehandling: Behandling?
+    ) {
         if (sisteBehandling == null) {
             throw ApiFeil("Det finnes ikke en tidligere behandling for fagsaken", HttpStatus.BAD_REQUEST)
         }
@@ -59,16 +63,21 @@ object OpprettBehandlingUtil {
 
     private fun validerKanOppretteBlankett(tidligereBehandlinger: List<Behandling>) {
         if (tidligereBehandlinger.any { it.type != BehandlingType.BLANKETT }) {
-            throw ApiFeil("Kan ikke å opprette blankettbehandling når fagsaken allerede har andre typer behandlinger",
-                          HttpStatus.BAD_REQUEST)
+            throw ApiFeil(
+                "Kan ikke å opprette blankettbehandling når fagsaken allerede har andre typer behandlinger",
+                HttpStatus.BAD_REQUEST
+            )
         }
     }
 
     private fun validerKanOppretteFørstegangsbehandling(sisteBehandling: Behandling?) {
         if (sisteBehandling != null &&
-            !(sisteBehandling.type == BehandlingType.BLANKETT || sisteBehandling.type == BehandlingType.TEKNISK_OPPHØR)) {
-            throw ApiFeil("Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør",
-                          HttpStatus.BAD_REQUEST)
+            !(sisteBehandling.type == BehandlingType.BLANKETT || sisteBehandling.type == BehandlingType.TEKNISK_OPPHØR)
+        ) {
+            throw ApiFeil(
+                "Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør",
+                HttpStatus.BAD_REQUEST
+            )
         }
     }
 
@@ -79,12 +88,14 @@ object OpprettBehandlingUtil {
         if (!erMigrering && sisteBehandling?.type == BehandlingType.BLANKETT) {
             throw ApiFeil("Siste behandling ble behandlet i infotrygd, denne må migreres", HttpStatus.BAD_REQUEST)
         }
-        if(erMigrering && sisteBehandling != null && sisteBehandling.type != BehandlingType.BLANKETT) {
+        if (erMigrering && sisteBehandling != null && sisteBehandling.type != BehandlingType.BLANKETT) {
             throw ApiFeil("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før", HttpStatus.BAD_REQUEST)
         }
         if (sisteBehandling?.type == BehandlingType.TEKNISK_OPPHØR) {
-            throw ApiFeil("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør",
-                          HttpStatus.BAD_REQUEST)
+            throw ApiFeil(
+                "Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør",
+                HttpStatus.BAD_REQUEST
+            )
         }
     }
 }

@@ -7,13 +7,14 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.UUID
 
-data class Oppgave(@Id
-                   val id: UUID = UUID.randomUUID(),
-                   val behandlingId: UUID,
-                   val gsakOppgaveId: Long,
-                   val type: Oppgavetype,
-                   @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                   val sporbar: Sporbar = Sporbar(),
-                   @Column("ferdigstilt")
-                   var erFerdigstilt: Boolean = false)
-
+data class Oppgave(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val behandlingId: UUID,
+    val gsakOppgaveId: Long,
+    val type: Oppgavetype,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar(),
+    @Column("ferdigstilt")
+    var erFerdigstilt: Boolean = false
+)

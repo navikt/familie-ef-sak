@@ -18,7 +18,7 @@ Egenskap: Andelhistorikk: Samme periode blir lagt til på nytt
       | 3            | 02.2021         |
       | 3            | 03.2021         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |

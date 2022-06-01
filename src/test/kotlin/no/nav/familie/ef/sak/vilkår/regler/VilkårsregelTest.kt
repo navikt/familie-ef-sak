@@ -17,12 +17,13 @@ internal class VilkårsregelTest {
         Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {
             val json = objectWriter.writeValueAsString(it.value)
             // kommentere ut hvis regler har endret seg for å lagre de nye reglene
-            //skrivTilFil(it, json)
+            // skrivTilFil(it.value, json)
             val fileJson = readFile(it.value)
             assertThat(json).isEqualTo(fileJson)
         }
     }
 
+    @Suppress("unused")
     private fun skrivTilFil(it: Vilkårsregel, json: String) {
         val file = File("src/test/resources/regler/${it.vilkårType}.json")
         if (!file.exists()) {
@@ -39,5 +40,5 @@ internal class VilkårsregelTest {
     }
 
     private fun readFile(it: Vilkårsregel) =
-            this::class.java.classLoader.getResource("regler/${it.vilkårType}.json").readText()
+        this::class.java.classLoader.getResource("regler/${it.vilkårType}.json").readText()
 }

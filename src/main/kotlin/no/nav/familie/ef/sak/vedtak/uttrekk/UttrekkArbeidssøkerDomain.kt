@@ -12,32 +12,36 @@ import java.util.UUID
 
 @Table("uttrekk_arbeidssoker")
 data class UttrekkArbeidssøkere(
-        @Id
-        val id: UUID = UUID.randomUUID(),
-        val fagsakId: UUID,
-        val vedtakId: UUID,
-        @Column("aar_maaned")
-        val årMåned: YearMonth,
-        @Column("registert_arbeidssoker")
-        val registrertArbeidssøker: Boolean? = null,
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val fagsakId: UUID,
+    val vedtakId: UUID,
+    @Column("aar_maaned")
+    val årMåned: YearMonth,
+    @Column("registert_arbeidssoker")
+    val registrertArbeidssøker: Boolean? = null,
 
-        val opprettetTid: LocalDateTime = SporbarUtils.now(),
-        val kontrollert: Boolean = false,
-        val kontrollertTid: LocalDateTime? = null,
-        val kontrollertAv: String? = null
+    val opprettetTid: LocalDateTime = SporbarUtils.now(),
+    val kontrollert: Boolean = false,
+    val kontrollertTid: LocalDateTime? = null,
+    val kontrollertAv: String? = null
 ) {
 
     fun medKontrollert(kontrollert: Boolean): UttrekkArbeidssøkere {
-        return this.copy(kontrollert = kontrollert,
-                         kontrollertTid = SporbarUtils.now(),
-                         kontrollertAv = SikkerhetContext.hentSaksbehandler())
+        return this.copy(
+            kontrollert = kontrollert,
+            kontrollertTid = SporbarUtils.now(),
+            kontrollertAv = SikkerhetContext.hentSaksbehandler()
+        )
     }
 }
 
 /**
  * Då vedtaket som er kilden til perioden som er aktuell, så trenger vi å joine [kilde_behandling_id] fra ATY med vedtak
  */
-data class VedtaksperioderForUttrekk(val fagsakId: UUID,
-                                     val behandlingId: UUID,
-                                     val behandlingIdForVedtak: UUID,
-                                     val perioder: PeriodeWrapper)
+data class VedtaksperioderForUttrekk(
+    val fagsakId: UUID,
+    val behandlingId: UUID,
+    val behandlingIdForVedtak: UUID,
+    val perioder: PeriodeWrapper
+)

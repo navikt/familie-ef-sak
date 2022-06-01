@@ -60,5 +60,4 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
     private fun validerPersonIdent(personIdentRequest: PersonIdentDto) {
         validerIdent(personIdentRequest.personIdent)
     }
-
 }

@@ -16,19 +16,24 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
-                                  private val taskRepository: TaskRepository,
-                                  private val arbeidsfordelingService: ArbeidsfordelingService,
-                                  private val totrinnskontrollService: TotrinnskontrollService,
-                                  private val journalpostClient: JournalpostClient,
-                                  private val behandlingService: BehandlingService,
-                                  private val fagsakService: FagsakService) : BehandlingSteg<Void?> {
+class SaksbehandlingsblankettSteg(
+    private val blankettService: BlankettService,
+    private val taskRepository: TaskRepository,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val journalpostClient: JournalpostClient,
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService
+) : BehandlingSteg<Void?> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
-        if (saksbehandling.erMigrering()) {
-            logger.info("Oppretter ikke saksbehandlingsblankett for behandling=${saksbehandling.id}, behandling er migrering")
+        if (saksbehandling.erMigrering || saksbehandling.erMaskinellOmregning) {
+            logger.info(
+                "Oppretter ikke saksbehandlingsblankett for behandling=${saksbehandling.id}, " +
+                    "behandling er migrering eller maskinell g-omregning"
+            )
         } else {
             val blankettPdf = blankettService.lagBlankett(saksbehandling.id)
             logger.info("Journalfører blankett for behandling=${saksbehandling.id}")
@@ -46,8 +51,10 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
         behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, saksbehandling.id)
     }
 
-    private fun opprettArkiverDokumentRequest(saksbehandling: Saksbehandling,
-                                              blankettPdf: ByteArray): ArkiverDokumentRequest {
+    private fun opprettArkiverDokumentRequest(
+        saksbehandling: Saksbehandling,
+        blankettPdf: ByteArray
+    ): ArkiverDokumentRequest {
         val fagsak = fagsakService.hentFagsak(saksbehandling.fagsakId)
         val personIdent = fagsak.hentAktivIdent()
         val enhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(personIdent)
@@ -61,5 +68,4 @@ class SaksbehandlingsblankettSteg(private val blankettService: BlankettService,
     private fun opprettFerdigstillBehandlingTask(saksbehandling: Saksbehandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))
     }
-
 }

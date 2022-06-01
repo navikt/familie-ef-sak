@@ -14,14 +14,17 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import org.springframework.stereotype.Service
 
-
 @Service
-class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
-                                   private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
-                                   private val infotrygdService: InfotrygdService) {
+class GrunnlagsdataRegisterService(
+    private val pdlClient: PdlClient,
+    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
+    private val infotrygdService: InfotrygdService
+) {
 
-    fun hentGrunnlagsdataFraRegister(personIdent: String,
-                                     barneforeldreFraSøknad: List<String>): GrunnlagsdataDomene {
+    fun hentGrunnlagsdataFraRegister(
+        personIdent: String,
+        barneforeldreFraSøknad: List<String>
+    ): GrunnlagsdataDomene {
         val pdlSøker = pdlClient.hentSøker(personIdent)
         val pdlBarn = hentPdlBarn(pdlSøker)
         val barneForeldre = hentPdlBarneForeldre(pdlBarn, personIdent, barneforeldreFraSøknad)
@@ -30,11 +33,11 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
         return GrunnlagsdataDomene(
-                søker = mapSøker(pdlSøker, dataTilAndreIdenter),
-                annenForelder = mapAnnenForelder(barneForeldre),
-                medlUnntak = medlUnntak,
-                barn = mapBarn(pdlBarn),
-                tidligereVedtaksperioder = hentTidligereVedtaksperioder(personIdent)
+            søker = mapSøker(pdlSøker, dataTilAndreIdenter),
+            annenForelder = mapAnnenForelder(barneForeldre),
+            medlUnntak = medlUnntak,
+            barn = mapBarn(pdlBarn),
+            tidligereVedtaksperioder = hentTidligereVedtaksperioder(personIdent)
         )
     }
 
@@ -42,9 +45,9 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
     private fun hentTidligereVedtaksperioder(personIdent: String): TidligereVedtaksperioder {
         return infotrygdService.hentPerioderFraReplika(personIdent).let {
             val infotrygd = TidligereInnvilgetVedtak(
-                    harTidligereOvergangsstønad = it.overgangsstønad.isNotEmpty(),
-                    harTidligereBarnetilsyn = it.barnetilsyn.isNotEmpty(),
-                    harTidligereSkolepenger = it.skolepenger.isNotEmpty(),
+                harTidligereOvergangsstønad = it.overgangsstønad.isNotEmpty(),
+                harTidligereBarnetilsyn = it.barnetilsyn.isNotEmpty(),
+                harTidligereSkolepenger = it.skolepenger.isNotEmpty(),
             )
             TidligereVedtaksperioder(infotrygd = infotrygd)
         }
@@ -52,28 +55,29 @@ class GrunnlagsdataRegisterService(private val pdlClient: PdlClient,
 
     private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
         return pdlSøker.forelderBarnRelasjon
-                .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
-                .mapNotNull { it.relatertPersonsIdent }
-                .let { pdlClient.hentBarn(it) }
+            .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
+            .mapNotNull { it.relatertPersonsIdent }
+            .let { pdlClient.hentBarn(it) }
     }
 
-    private fun hentPdlBarneForeldre(barn: Map<String, PdlBarn>,
-                                     personIdent: String,
-                                     barneforeldrePersonIdentFraSøknad: List<String>): Map<String, PdlAnnenForelder> {
+    private fun hentPdlBarneForeldre(
+        barn: Map<String, PdlBarn>,
+        personIdent: String,
+        barneforeldrePersonIdentFraSøknad: List<String>
+    ): Map<String, PdlAnnenForelder> {
         return barn.flatMap { it.value.forelderBarnRelasjon }
-                .filter { it.relatertPersonsIdent != personIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
-                .mapNotNull { it.relatertPersonsIdent }
-                .plus(barneforeldrePersonIdentFraSøknad)
-                .distinct()
-                .let { pdlClient.hentAndreForeldre(it) }
+            .filter { it.relatertPersonsIdent != personIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }
+            .mapNotNull { it.relatertPersonsIdent }
+            .plus(barneforeldrePersonIdentFraSøknad)
+            .distinct()
+            .let { pdlClient.hentAndreForeldre(it) }
     }
 
     private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
         val andreIdenter = pdlSøker.sivilstand.mapNotNull { it.relatertVedSivilstand } +
-                           pdlSøker.fullmakt.map { it.motpartsPersonident } +
-                           pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
+            pdlSøker.fullmakt.map { it.motpartsPersonident } +
+            pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
         if (andreIdenter.isEmpty()) return emptyMap()
         return pdlClient.hentPersonKortBolk(andreIdenter)
     }
-
 }

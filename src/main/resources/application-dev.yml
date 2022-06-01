@@ -17,6 +17,7 @@ no.nav.security.jwt:
         scope: api://dev-fss.teamfamilie.familie-integrasjoner-q1/.default
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
+G_OMREGNING_CRON_EXPRESSION: 0 0 * * * ?
 
 rolle:
   veileder: "19dcbfde-4cdb-4c64-a1ea-ac9802b03339"

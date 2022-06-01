@@ -9,5 +9,4 @@ object OppgaveBeskrivelse {
     fun beskrivelseBarnBlirSeksMnd(): String {
         return "Barn 1/2 år. Send varsel om aktivitetsplikt."
     }
-
 }

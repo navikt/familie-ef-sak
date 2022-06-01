@@ -20,31 +20,36 @@ import java.util.UUID
  *
  */
 @Table("vilkarsvurdering")
-data class Vilkårsvurdering(@Id
-                            val id: UUID = UUID.randomUUID(),
-                            val behandlingId: UUID,
-                            val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                            val type: VilkårType,
-                            val barnId: UUID? = null,
-                            @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                            val sporbar: Sporbar = Sporbar(),
-                            @Column("delvilkar")
-                            val delvilkårsvurdering: DelvilkårsvurderingWrapper)
+data class Vilkårsvurdering(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val behandlingId: UUID,
+    val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+    val type: VilkårType,
+    val barnId: UUID? = null,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar(),
+    @Column("delvilkar")
+    val delvilkårsvurdering: DelvilkårsvurderingWrapper
+)
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
 
-data class Delvilkårsvurdering(val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                               val vurderinger: List<Vurdering>) {
+data class Delvilkårsvurdering(
+    val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+    val vurderinger: List<Vurdering>
+) {
 
     // regelId for første svaret er det samme som hovedregel
     val hovedregel = vurderinger.first().regelId
-
 }
 
-data class Vurdering(val regelId: RegelId,
-                     val svar: SvarId? = null,
-                     val begrunnelse: String? = null)
+data class Vurdering(
+    val regelId: RegelId,
+    val svar: SvarId? = null,
+    val begrunnelse: String? = null
+)
 
 enum class Vilkårsresultat(val beskrivelse: String) {
     OPPFYLT("Vilkåret er oppfylt når alle delvilkår er oppfylte"),
@@ -73,17 +78,15 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     TIDLIGERE_VEDTAKSPERIODER("Tidligere vedtaksperioder", listOf(OVERGANGSSTØNAD)),
     INNTEKT("§15-10 Inntekt", listOf(BARNETILSYN)),
     ALDER_PÅ_BARN("Alder på barn", listOf(BARNETILSYN)),
+    DOKUMENTASJON_TILSYNSUTGIFTER("Dokumentasjon av tilsynsutgifter", listOf(BARNETILSYN))
     ;
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN
-
 
     companion object {
 
         fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> = values().filter {
             it.gjelderStønader.contains(stønadstype)
         }
-
-
     }
 }

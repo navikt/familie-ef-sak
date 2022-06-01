@@ -17,6 +17,5 @@ class ArbeidsforholdService(
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         val arbeidsforholdResponse = arbeidsforholdClient.hentArbeidsforhold(aktivIdent, ansettelsesperiodeFom)
         return arbeidsforholdResponse.data?.tilDto() ?: emptyList()
-
     }
 }

@@ -26,12 +26,12 @@ import java.util.UUID
 
 @Service
 class SøkService(
-        private val fagsakPersonService: FagsakPersonService,
-        private val behandlingService: BehandlingService,
-        private val personService: PersonService,
-        private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
-        private val adresseMapper: AdresseMapper,
-        private val fagsakService: FagsakService
+    private val fagsakPersonService: FagsakPersonService,
+    private val behandlingService: BehandlingService,
+    private val personService: PersonService,
+    private val pdlSaksbehandlerClient: PdlSaksbehandlerClient,
+    private val adresseMapper: AdresseMapper,
+    private val fagsakService: FagsakService
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -43,24 +43,26 @@ class SøkService(
             throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
         }
         val fagsaker =
-                fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
+            fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
         val fagsakPerson = fagsakPersonService.finnPerson(personIdenter.identer())
 
         val person = personService.hentSøker(gjeldendePersonIdent)
 
-        return Søkeresultat(personIdent = gjeldendePersonIdent,
-                            kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
-                            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
-                            fagsakPersonId = fagsakPerson?.id,
-                            fagsaker = fagsaker.map {
-                                FagsakForSøkeresultat(fagsakId = it.id,
-                                                      stønadstype = it.stønadstype,
-                                                      erLøpende = fagsakService.erLøpende(it),
-                                                      erMigrert = it.migrert)
-                            }
+        return Søkeresultat(
+            personIdent = gjeldendePersonIdent,
+            kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
+            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
+            fagsakPersonId = fagsakPerson?.id,
+            fagsaker = fagsaker.map {
+                FagsakForSøkeresultat(
+                    fagsakId = it.id,
+                    stønadstype = it.stønadstype,
+                    erLøpende = fagsakService.erLøpende(it),
+                    erMigrert = it.migrert
+                )
+            }
         )
     }
-
 
     // Denne trenger ikke en tilgangskontroll då den ikke returnerer noe fra behandlingen.
     // Pdl gjører tilgangskontroll for søkPersoner
@@ -85,7 +87,7 @@ class SøkService(
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
-                             ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
+            ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
 
         brukerfeilHvis(bostedsadresse.ukjentBosted != null) {
             "Personen har ukjent bostedsadresse, kan ikke finne personer på samme adresse"
@@ -95,38 +97,37 @@ class SøkService(
         if (søkeKriterier.isEmpty()) {
             secureLogger.error("Får ikke laget søkekriterer for $aktivIdent med bostedsadresse=$bostedsadresse")
             throw Feil(
-                    message = "Får ikke laget søkekriterer for bostedsadresse",
-                    frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
+                message = "Får ikke laget søkekriterer for bostedsadresse",
+                frontendFeilmelding = "Klarer ikke av å lage søkekriterer for bostedsadressen til person"
             )
         }
 
         val personSøkResultat = pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(søkeKriterier)
 
         return SøkeresultatPerson(
-                hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
-                totalHits = personSøkResultat.totalHits,
-                pageNumber = personSøkResultat.pageNumber,
-                totalPages = personSøkResultat.totalPages
+            hits = personSøkResultat.hits.map { tilPersonFraSøk(it.person) },
+            totalHits = personSøkResultat.totalHits,
+            pageNumber = personSøkResultat.pageNumber,
+            totalPages = personSøkResultat.totalPages
         )
     }
 
     fun søkPersonUtenFagsak(personIdent: String): SøkeresultatUtenFagsak {
         return personService.hentPdlPersonKort(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
-                    personIdent = personIdent,
-                    navn = it.navn.gjeldende().visningsnavn()
+                personIdent = personIdent,
+                navn = it.navn.gjeldende().visningsnavn()
             )
         }
-               ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
+            ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
     }
 
     private fun tilPersonFraSøk(person: PdlPersonFraSøk): PersonFraSøk {
         return PersonFraSøk(
-                personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
-                visningsadresse = person.bostedsadresse.gjeldende()
-                        ?.let { adresseMapper.tilAdresse(it).visningsadresse },
-                visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn
+            personIdent = person.folkeregisteridentifikator.gjeldende().identifikasjonsnummer,
+            visningsadresse = person.bostedsadresse.gjeldende()
+                ?.let { adresseMapper.tilAdresse(it).visningsadresse },
+            visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn
         )
     }
-
 }

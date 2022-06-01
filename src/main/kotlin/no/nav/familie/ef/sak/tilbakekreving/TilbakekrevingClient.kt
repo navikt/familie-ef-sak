@@ -20,48 +20,54 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
-
 @Component
-class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
-                           @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI)
-    : AbstractRestClient(restOperations, "familie.tilbakekreving") {
+class TilbakekrevingClient(
+    @Qualifier("azure") restOperations: RestOperations,
+    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI
+) :
+    AbstractRestClient(restOperations, "familie.tilbakekreving") {
 
     private val hentForhåndsvisningVarselbrevUri: URI = UriComponentsBuilder.fromUri(familieTilbakeUri)
-            .pathSegment("api/dokument/forhandsvis-varselbrev")
-            .build()
-            .toUri()
+        .pathSegment("api/dokument/forhandsvis-varselbrev")
+        .build()
+        .toUri()
 
     private val opprettManueltTilbakekrevingUri =
-            UriComponentsBuilder.fromUri(familieTilbakeUri).pathSegment("api/behandling/manuelt/task/v1").build().toUri()
+        UriComponentsBuilder.fromUri(familieTilbakeUri).pathSegment("api/behandling/manuelt/task/v1").build().toUri()
 
-    private fun kanBehandlingOpprettesManueltUri(stønadstype: StønadType,
-                                                 eksternFagsakId: Long) =
-            UriComponentsBuilder.fromUri(familieTilbakeUri)
-                    .pathSegment("api",
-                                 "ytelsestype",
-                                 stønadstype.name,
-                                 "fagsak",
-                                 eksternFagsakId.toString(),
-                                 "kanBehandlingOpprettesManuelt",
-                                 "v1")
-                    .build()
-                    .toUri()
+    private fun kanBehandlingOpprettesManueltUri(
+        stønadstype: StønadType,
+        eksternFagsakId: Long
+    ) =
+        UriComponentsBuilder.fromUri(familieTilbakeUri)
+            .pathSegment(
+                "api",
+                "ytelsestype",
+                stønadstype.name,
+                "fagsak",
+                eksternFagsakId.toString(),
+                "kanBehandlingOpprettesManuelt",
+                "v1"
+            )
+            .build()
+            .toUri()
 
     private fun finnesÅpenBehandlingUri(eksternFagsakId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
-            .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/finnesApenBehandling/v1")
-            .build()
-            .toUri()
+        .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/finnesApenBehandling/v1")
+        .build()
+        .toUri()
 
     private fun finnBehandlingerUri(eksternFagsakId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
-            .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/behandlinger/v1")
-            .build()
-            .toUri()
-
+        .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/behandlinger/v1")
+        .build()
+        .toUri()
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
-        return postForEntity(hentForhåndsvisningVarselbrevUri,
-                             forhåndsvisVarselbrevRequest,
-                             HttpHeaders().apply { accept = listOf(MediaType.APPLICATION_PDF) })
+        return postForEntity(
+            hentForhåndsvisningVarselbrevUri,
+            forhåndsvisVarselbrevRequest,
+            HttpHeaders().apply { accept = listOf(MediaType.APPLICATION_PDF) }
+        )
     }
 
     fun finnesÅpenBehandling(fagsakEksternId: Long): Boolean {
@@ -76,19 +82,24 @@ class TilbakekrevingClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun kanBehandlingOpprettesManuelt(stønadstype: StønadType, eksternFagsakId: Long): KanBehandlingOpprettesManueltRespons {
         val response: Ressurs<KanBehandlingOpprettesManueltRespons> =
-                getForEntity(kanBehandlingOpprettesManueltUri(stønadstype, eksternFagsakId))
+            getForEntity(kanBehandlingOpprettesManueltUri(stønadstype, eksternFagsakId))
 
         return response.getDataOrThrow()
     }
 
-    fun opprettManuelTilbakekreving(eksternFagsakId: Long,
-                                    eksternBehandlingId: Long,
-                                    stønadstype: StønadType) {
+    fun opprettManuelTilbakekreving(
+        eksternFagsakId: Long,
+        eksternBehandlingId: Long,
+        stønadstype: StønadType
+    ) {
 
-        return postForEntity(opprettManueltTilbakekrevingUri,
-                             OpprettManueltTilbakekrevingRequest(eksternFagsakId.toString(),
-                                                                 Ytelsestype.valueOf(stønadstype.name),
-                                                                 eksternBehandlingId.toString()))
+        return postForEntity(
+            opprettManueltTilbakekrevingUri,
+            OpprettManueltTilbakekrevingRequest(
+                eksternFagsakId.toString(),
+                Ytelsestype.valueOf(stønadstype.name),
+                eksternBehandlingId.toString()
+            )
+        )
     }
-
 }

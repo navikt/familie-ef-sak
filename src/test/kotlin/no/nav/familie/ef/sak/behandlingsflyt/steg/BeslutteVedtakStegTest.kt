@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
-import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -63,30 +62,35 @@ internal class BeslutteVedtakStegTest {
     private val behandlingService = mockk<BehandlingService>()
     private val featureToggleService = mockk<FeatureToggleService>()
 
-    private val beslutteVedtakSteg = BeslutteVedtakSteg(taskRepository = taskRepository,
-                                                        fagsakService = fagsakService,
-                                                        oppgaveService = oppgaveService,
-                                                        iverksettClient = iverksett,
-                                                        iverksettingDtoMapper = iverksettingDtoMapper,
-                                                        totrinnskontrollService = totrinnskontrollService,
-                                                        behandlingService = behandlingService,
-                                                        vedtakService = vedtakService,
-                                                        vedtaksbrevService = vedtaksbrevService,
-                                                        featureToggleService = featureToggleService)
+    private val beslutteVedtakSteg = BeslutteVedtakSteg(
+        taskRepository = taskRepository,
+        fagsakService = fagsakService,
+        oppgaveService = oppgaveService,
+        iverksettClient = iverksett,
+        iverksettingDtoMapper = iverksettingDtoMapper,
+        totrinnskontrollService = totrinnskontrollService,
+        behandlingService = behandlingService,
+        vedtakService = vedtakService,
+        vedtaksbrevService = vedtaksbrevService,
+        featureToggleService = featureToggleService
+    )
 
     private val innloggetBeslutter = "sign2"
 
-    private val fagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD,
-                                identer = setOf(PersonIdent(ident = "12345678901")))
+    private val fagsak = fagsak(
+        stønadstype = StønadType.OVERGANGSSTØNAD,
+        identer = setOf(PersonIdent(ident = "12345678901"))
+    )
     private val behandlingId = UUID.randomUUID()
 
-    private val oppgave = Oppgave(id = UUID.randomUUID(),
-                                  behandlingId = behandlingId,
-                                  gsakOppgaveId = 123L,
-                                  type = Oppgavetype.BehandleSak,
-                                  erFerdigstilt = false)
+    private val oppgave = Oppgave(
+        id = UUID.randomUUID(),
+        behandlingId = behandlingId,
+        gsakOppgaveId = 123L,
+        type = Oppgavetype.BehandleSak,
+        erFerdigstilt = false
+    )
     private lateinit var taskSlot: MutableList<Task>
-
 
     @BeforeEach
     internal fun setUp() {
@@ -130,7 +134,7 @@ internal class BeslutteVedtakStegTest {
         assertThat(taskSlot[1].type).isEqualTo(PollStatusFraIverksettTask.TYPE)
         assertThat(taskSlot[2].type).isEqualTo(BehandlingsstatistikkTask.TYPE)
         assertThat(objectMapper.readValue<BehandlingsstatistikkTaskPayload>(taskSlot[2].payload).hendelse)
-                .isEqualTo(Hendelse.BESLUTTET)
+            .isEqualTo(Hendelse.BESLUTTET)
         verify(exactly = 1) { behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET) }
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }
         verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
@@ -158,18 +162,32 @@ internal class BeslutteVedtakStegTest {
         verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
     }
 
+    @Test
+    internal fun `skal ikke sende brev hvis årsaken er g-omregning`() {
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.G_OMREGNING))
+
+        verify(exactly = 0) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
+    }
+
     private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {
-        return beslutteVedtakSteg.utførOgReturnerNesteSteg(saksbehandling,
-                                                           BeslutteVedtakDto(godkjent = godkjent))
+        return beslutteVedtakSteg.utførOgReturnerNesteSteg(
+            saksbehandling,
+            BeslutteVedtakDto(godkjent = godkjent)
+        )
     }
 
     private fun opprettSaksbehandling(årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD) =
-            saksbehandling(fagsak,
-                           Behandling(id = behandlingId,
-                                      fagsakId = fagsak.id,
-                                      type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                      status = BehandlingStatus.FATTER_VEDTAK,
-                                      steg = beslutteVedtakSteg.stegType(),
-                                      resultat = BehandlingResultat.IKKE_SATT,
-                                      årsak = årsak))
+        saksbehandling(
+            fagsak,
+            Behandling(
+                id = behandlingId,
+                fagsakId = fagsak.id,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.FATTER_VEDTAK,
+                steg = beslutteVedtakSteg.stegType(),
+                resultat = BehandlingResultat.IKKE_SATT,
+                årsak = årsak
+            )
+        )
 }

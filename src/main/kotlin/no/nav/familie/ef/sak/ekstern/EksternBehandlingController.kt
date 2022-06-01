@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(
-        path = ["/api/ekstern/behandling"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+    path = ["/api/ekstern/behandling"],
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
 )
-class EksternBehandlingController(private val pdlClient: PdlClient,
-                                  private val eksternBehandlingService: EksternBehandlingService) {
+class EksternBehandlingController(
+    private val pdlClient: PdlClient,
+    private val eksternBehandlingService: EksternBehandlingService
+) {
 
     /**
      * Blir brukt av mottak for å sjekke om en perosn allerede har en behandling i ef-sak
@@ -31,8 +33,10 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
      */
     @PostMapping("finnes")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun finnesBehandlingForPerson(@RequestParam("type") stønadstype: StønadType?,
-                                  @RequestBody request: PersonIdent): Ressurs<Boolean> {
+    fun finnesBehandlingForPerson(
+        @RequestParam("type") stønadstype: StønadType?,
+        @RequestBody request: PersonIdent
+    ): Ressurs<Boolean> {
         val personidenter = pdlClient.hentPersonidenter(request.ident, historikk = true).identer()
         return Ressurs.success(eksternBehandlingService.finnesBehandlingFor(personidenter, stønadstype))
     }
@@ -41,16 +45,18 @@ class EksternBehandlingController(private val pdlClient: PdlClient,
      * Hvis man har alle identer til en person så kan man sende inn alle direkte, for å unngå oppslag mot pdl
      * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
      */
-    @PostMapping("harstoenad/flere-identer")
+    @PostMapping(
+        "harstoenad/flere-identer", // TODO kan fjerne harstoenad når har-aktiv-stoenad er i bruk
+        "har-loepende-stoenad"
+    )
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun harStønadSiste12MånederForPersonidenter(@RequestBody personidenter: Set<String>): Ressurs<Boolean> {
+    fun harAktivStønad(@RequestBody personidenter: Set<String>): Ressurs<Boolean> {
         if (personidenter.isEmpty()) {
             return Ressurs.failure("Minst en ident påkrevd for søk")
         }
         if (personidenter.any { it.length != 11 }) {
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
-        return Ressurs.success(eksternBehandlingService.harStønadSiste12Måneder(personidenter))
+        return Ressurs.success(eksternBehandlingService.harLøpendeStønad(personidenter))
     }
-
 }

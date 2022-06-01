@@ -16,16 +16,19 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-
 @RestController
-@RequestMapping(path = ["/api/ekstern/perioder"],
-                consumes = [APPLICATION_JSON_VALUE],
-                produces = [APPLICATION_JSON_VALUE])
+@RequestMapping(
+    path = ["/api/ekstern/perioder"],
+    consumes = [APPLICATION_JSON_VALUE],
+    produces = [APPLICATION_JSON_VALUE]
+)
 @Validated
 @ProtectedWithClaims(issuer = "azuread")
-class EksternStønadsperioderController(private val arenaStønadsperioderService: ArenaStønadsperioderService,
-                                       private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
-                                       private val tilgangService: TilgangService) {
+class EksternStønadsperioderController(
+    private val arenaStønadsperioderService: ArenaStønadsperioderService,
+    private val perioderForBarnetrygdService: PerioderForBarnetrygdService,
+    private val tilgangService: TilgangService
+) {
 
     /**
      * Brukes av Arena
@@ -51,6 +54,4 @@ class EksternStønadsperioderController(private val arenaStønadsperioderService
         }
         return Ressurs.success(perioderForBarnetrygdService.hentPerioderMedFullOvergangsstønad(request))
     }
-
-
 }

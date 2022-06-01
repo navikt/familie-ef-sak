@@ -16,9 +16,11 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 
 object RegelValidering {
 
-    fun validerVurdering(vilkårsregel: Vilkårsregel,
-                         oppdatering: List<DelvilkårsvurderingDto>,
-                         tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>) {
+    fun validerVurdering(
+        vilkårsregel: Vilkårsregel,
+        oppdatering: List<DelvilkårsvurderingDto>,
+        tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>
+    ) {
         validerAlleDelvilkårHarMinimumEttSvar(vilkårsregel.vilkårType, oppdatering)
         validerAlleHovedreglerFinnesMed(vilkårsregel, oppdatering, tidligereDelvilkårsvurderinger)
 
@@ -31,7 +33,7 @@ object RegelValidering {
      * Validerer att begrunnelse er ifylt hvis [SvarRegel.begrunnelseType]=[BegrunnelseType.PÅKREVD]
      */
     fun manglerPåkrevdBegrunnelse(svarRegel: SvarRegel, vurdering: VurderingDto): Boolean =
-            svarRegel.begrunnelseType == BegrunnelseType.PÅKREVD && vurdering.begrunnelse?.trim().isNullOrEmpty()
+        svarRegel.begrunnelseType == BegrunnelseType.PÅKREVD && vurdering.begrunnelse?.trim().isNullOrEmpty()
 
     /**
      * Kaster feil hvis
@@ -44,8 +46,10 @@ object RegelValidering {
      *   hvor det andre svaret egentlige er type [SluttSvarRegel]
      *
      */
-    private fun validerDelvilkår(vilkårsregel: Vilkårsregel,
-                                 delvilkårsvurderingDto: DelvilkårsvurderingDto) {
+    private fun validerDelvilkår(
+        vilkårsregel: Vilkårsregel,
+        delvilkårsvurderingDto: DelvilkårsvurderingDto
+    ) {
         val vilkårType = vilkårsregel.vilkårType
         delvilkårsvurderingDto.vurderinger.forEachIndexed { index, svar ->
             val (regelId: RegelId, svarId: SvarId?, _) = svar
@@ -76,9 +80,11 @@ object RegelValidering {
         }
     }
 
-    private fun validerAlleHovedreglerFinnesMed(vilkårsregel: Vilkårsregel,
-                                                delvilkår: List<DelvilkårsvurderingDto>,
-                                                tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>) {
+    private fun validerAlleHovedreglerFinnesMed(
+        vilkårsregel: Vilkårsregel,
+        delvilkår: List<DelvilkårsvurderingDto>,
+        tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>
+    ) {
         val aktuelleDelvilkår = aktuelleDelvilkår(tidligereDelvilkårsvurderinger)
         val delvilkårRegelIdn = delvilkår.map { it.hovedregel() }
         val aktuelleHvovedregler = vilkårsregel.hovedregler.filter { aktuelleDelvilkår.contains(it) }
@@ -87,26 +93,30 @@ object RegelValidering {
         }
         feilHvis(delvilkårRegelIdn.size != aktuelleHvovedregler.size) {
             "Feil i antall regler dto har ${delvilkårRegelIdn.size} " +
-            "mens vilkår har ${aktuelleHvovedregler.size} aktuelle delvilkår"
+                "mens vilkår har ${aktuelleHvovedregler.size} aktuelle delvilkår"
         }
     }
 
     private fun aktuelleDelvilkår(tidligereDelvilkårsvurderinger: List<Delvilkårsvurdering>): Set<RegelId> {
         return tidligereDelvilkårsvurderinger
-                .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
-                .map { it.hovedregel }
-                .toSet()
+            .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
+            .map { it.hovedregel }
+            .toSet()
     }
 
     /**
      * Valider att begrunnelse i svaret savnes hvis [SvarRegel.begrunnelseType]=[BegrunnelseType.UTEN]
      */
-    private fun validerSavnerBegrunnelseHvisUtenBegrunnelse(vilkårType: VilkårType,
-                                                            svarMapping: SvarRegel,
-                                                            vurdering: VurderingDto) {
+    private fun validerSavnerBegrunnelseHvisUtenBegrunnelse(
+        vilkårType: VilkårType,
+        svarMapping: SvarRegel,
+        vurdering: VurderingDto
+    ) {
         if (svarMapping.begrunnelseType == BegrunnelseType.UTEN && !vurdering.begrunnelse.isNullOrEmpty()) {
-            throw Feil("Begrunnelse for vilkårType=$vilkårType regelId=${vurdering.regelId} " +
-                       "svarId=${vurdering.svar} skal ikke ha begrunnelse")
+            throw Feil(
+                "Begrunnelse for vilkårType=$vilkårType regelId=${vurdering.regelId} " +
+                    "svarId=${vurdering.svar} skal ikke ha begrunnelse"
+            )
         }
     }
 }

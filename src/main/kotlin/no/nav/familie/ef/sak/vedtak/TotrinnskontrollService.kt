@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -29,9 +30,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class TotrinnskontrollService(private val behandlingshistorikkService: BehandlingshistorikkService,
-                              private val behandlingService: BehandlingService,
-                              private val tilgangService: TilgangService) {
+class TotrinnskontrollService(
+    private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val behandlingService: BehandlingService,
+    private val tilgangService: TilgangService,
+    private val validerOmregningService: ValiderOmregningService
+) {
 
     /**
      * Lagrer data om besluttning av totrinnskontroll
@@ -40,25 +44,31 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
     @Transactional
     fun lagreTotrinnskontrollOgReturnerBehandler(saksbehandling: Saksbehandling, beslutteVedtak: BeslutteVedtakDto): String {
         val sisteBehandlingshistorikk =
-                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
-
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
+        validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
-            throw Feil(message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
-                       frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt")
+            throw Feil(
+                message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
+                frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt"
+            )
         }
 
         if (beslutterErLikBehandler(sisteBehandlingshistorikk)) {
-            throw ApiFeil("Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
-                          HttpStatus.BAD_REQUEST)
+            throw ApiFeil(
+                "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
+                HttpStatus.BAD_REQUEST
+            )
         }
 
         val nyStatus = if (beslutteVedtak.godkjent) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
         val utfall = if (beslutteVedtak.godkjent) BESLUTTE_VEDTAK_GODKJENT else BESLUTTE_VEDTAK_UNDERKJENT
 
-        behandlingshistorikkService.opprettHistorikkInnslag(behandlingId = saksbehandling.id,
-                                                            stegtype = saksbehandling.steg,
-                                                            utfall = utfall,
-                                                            metadata = beslutteVedtak)
+        behandlingshistorikkService.opprettHistorikkInnslag(
+            behandlingId = saksbehandling.id,
+            stegtype = saksbehandling.steg,
+            utfall = utfall,
+            metadata = beslutteVedtak
+        )
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, nyStatus)
         return sisteBehandlingshistorikk.opprettetAv
@@ -66,8 +76,8 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
 
     fun hentBeslutter(behandlingId: UUID): String? {
         return behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
-                ?.opprettetAv
-                ?.takeIf { NAVIDENT_REGEX.matches(it) }
+            ?.opprettetAv
+            ?.takeIf { NAVIDENT_REGEX.matches(it) }
     }
 
     fun hentTotrinnskontrollStatus(behandlingId: UUID): TotrinnskontrollStatusDto {
@@ -85,9 +95,9 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
     }
 
     private fun behandlingErGodkjentEllerOpprettet(behandlingStatus: BehandlingStatus) =
-            behandlingStatus == BehandlingStatus.FERDIGSTILT
-            || behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK
-            || behandlingStatus == BehandlingStatus.OPPRETTET
+        behandlingStatus == BehandlingStatus.FERDIGSTILT ||
+            behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK ||
+            behandlingStatus == BehandlingStatus.OPPRETTET
 
     /**
      * Hvis behandlingsstatus er FATTER_VEDTAK så sjekkes det att saksbehandleren er autorisert til å fatte vedtak
@@ -95,12 +105,16 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
     private fun finnStatusForVedtakSomSkalFattes(behandlingId: UUID): TotrinnskontrollStatusDto {
         val historikkHendelse = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
         if (historikkHendelse.steg != StegType.SEND_TIL_BESLUTTER) {
-            throw Feil(message = "Siste historikken har feil steg, steg=${historikkHendelse.steg}",
-                       frontendFeilmelding = "Feil i historikken, kontakt brukerstøtte id=$behandlingId")
+            throw Feil(
+                message = "Siste historikken har feil steg, steg=${historikkHendelse.steg}",
+                frontendFeilmelding = "Feil i historikken, kontakt brukerstøtte id=$behandlingId"
+            )
         }
         return if (beslutterErLikBehandler(historikkHendelse) || !tilgangService.harTilgangTilRolle(BehandlerRolle.BESLUTTER)) {
-            TotrinnskontrollStatusDto(IKKE_AUTORISERT,
-                                      TotrinnskontrollDto(historikkHendelse.opprettetAvNavn, historikkHendelse.endretTid))
+            TotrinnskontrollStatusDto(
+                IKKE_AUTORISERT,
+                TotrinnskontrollDto(historikkHendelse.opprettetAvNavn, historikkHendelse.endretTid)
+            )
         } else {
             TotrinnskontrollStatusDto(KAN_FATTE_VEDTAK)
         }
@@ -111,26 +125,34 @@ class TotrinnskontrollService(private val behandlingshistorikkService: Behandlin
      */
     private fun finnStatusForVedtakSomErFattet(behandlingId: UUID): TotrinnskontrollStatusDto {
         val besluttetVedtakHendelse =
-                behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
                 ?: return TotrinnskontrollStatusDto(UAKTUELT)
         return when (besluttetVedtakHendelse.utfall) {
             BESLUTTE_VEDTAK_UNDERKJENT -> {
                 if (besluttetVedtakHendelse.metadata == null) {
-                    throw Feil(message = "Har underkjent vedtak - savner metadata",
-                               frontendFeilmelding = "Savner metadata, kontakt brukerstøtte id=$behandlingId")
+                    throw Feil(
+                        message = "Har underkjent vedtak - savner metadata",
+                        frontendFeilmelding = "Savner metadata, kontakt brukerstøtte id=$behandlingId"
+                    )
                 }
                 val beslutt = objectMapper.readValue<BeslutteVedtakDto>(besluttetVedtakHendelse.metadata.json)
-                TotrinnskontrollStatusDto(TOTRINNSKONTROLL_UNDERKJENT,
-                                          TotrinnskontrollDto(besluttetVedtakHendelse.opprettetAvNavn,
-                                                              besluttetVedtakHendelse.endretTid,
-                                                              beslutt.godkjent,
-                                                              beslutt.begrunnelse))
+                TotrinnskontrollStatusDto(
+                    TOTRINNSKONTROLL_UNDERKJENT,
+                    TotrinnskontrollDto(
+                        besluttetVedtakHendelse.opprettetAvNavn,
+                        besluttetVedtakHendelse.endretTid,
+                        beslutt.godkjent,
+                        beslutt.begrunnelse
+                    )
+                )
             }
-            else -> error("Skal ikke kunne være annen status enn UNDERKJENT når " +
-                          "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}")
+            else -> error(
+                "Skal ikke kunne være annen status enn UNDERKJENT når " +
+                    "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}"
+            )
         }
     }
 
     private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) =
-            SikkerhetContext.hentSaksbehandler() == beslutteVedtakHendelse.opprettetAv
+        SikkerhetContext.hentSaksbehandler() == beslutteVedtakHendelse.opprettetAv
 }

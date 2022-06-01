@@ -31,8 +31,9 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         wiremockServerItem.stubFor(WireMock.post(WireMock.anyUrl()).willReturn(WireMock.ok()))
         val restTemplate = restTemplateBuilder.build()
         restTemplate.postForEntity<String>("http://localhost:${wiremockServerItem.port()}", TestDto())
-        wiremockServerItem.verify(postRequestedFor(WireMock.anyUrl())
-                                          .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """))
+        wiremockServerItem.verify(
+            postRequestedFor(WireMock.anyUrl())
+                .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """))
         )
     }
 
@@ -45,8 +46,10 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         customizers.isAccessible = true
         assertThat(customizers.get(restTemplateBuilder) as Set<Any>).isEmpty()
         assertThat(catchThrowable { build.getForEntity<String>("http://microsoft") })
-                .hasMessageContaining("I/O error on GET request for \"http://microsoft\": " +
-                                      "microsoft: nodename nor servname provided")
+            .hasMessageContaining(
+                "I/O error on GET request for \"http://microsoft\": " +
+                    "microsoft: nodename nor servname provided"
+            )
     }
 
     companion object {

@@ -14,15 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping(path = ["/api/simulering"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class SimuleringController(
-        private val tilgangService: TilgangService,
-        private val behandlingService: BehandlingService,
-        private val simuleringService: SimuleringService,
+    private val tilgangService: TilgangService,
+    private val behandlingService: BehandlingService,
+    private val simuleringService: SimuleringService,
 ) {
 
     @GetMapping("/{behandlingId}")

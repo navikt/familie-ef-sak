@@ -9,56 +9,65 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Service
-class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: GjeldendeBarnRepository,
-                                     private val behandlingRepository: BehandlingRepository,
-                                     private val iverksettClient: IverksettClient) {
+class ForberedOppgaverForBarnService(
+    private val gjeldendeBarnRepository: GjeldendeBarnRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val iverksettClient: IverksettClient
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(sisteKjøring: LocalDate, kjøreDato: LocalDate = LocalDate.now()) {
-        val referanseDato = referanseDato(sisteKjøring)
+    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato: LocalDate, dryRun: Boolean = false) {
         val gjeldendeBarn =
-                gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, referanseDato) +
-                gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, referanseDato)
-        logger.info("Fant totalt ${gjeldendeBarn.size} barn, " +
-                    "av hvilke ${gjeldendeBarn.count { it.fraMigrering }} er fra migrerte behandlinger")
-        val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referanseDato, kjøreDato)
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, referansedato) +
+                gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, referansedato)
+        logger.info(
+            "Fant totalt ${gjeldendeBarn.size} barn, " +
+                "av hvilke ${gjeldendeBarn.count { it.fraMigrering }} er fra migrerte behandlinger"
+        )
+        val barnSomFyllerAar = barnSomFyllerAar(gjeldendeBarn, referansedato)
         if (barnSomFyllerAar.isEmpty()) {
             return
         }
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
+        logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
         if (oppgaver.isNotEmpty()) {
-            logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
-            sendOppgaverTilIverksett(oppgaver)
+            if (dryRun) {
+                oppgaver.forEach { logger.info("Dryrun - oppretter oppgave for ${it.behandlingId}") }
+            } else {
+                sendOppgaverTilIverksett(oppgaver)
+            }
         }
     }
 
     private fun lagOppgaverForBarn(barnSomFyllerAar: Map<UUID, Pair<BarnTilUtplukkForOppgave, String>>): List<OppgaveForBarn> {
         return behandlingRepository.finnEksterneIder(barnSomFyllerAar.map { it.key }.toSet()).map {
             val utplukketBarn = barnSomFyllerAar[it.behandlingId]
-                                ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje.")
+                ?: error("Kunne ikke finne behandlingsId fra utplukk. Dette skal ikke skje.")
             val beskrivelse = utplukketBarn.second
-            OppgaveForBarn(it.behandlingId,
-                           it.eksternFagsakId,
-                           utplukketBarn.first.fødselsnummerSøker,
-                           StønadType.OVERGANGSSTØNAD,
-                           beskrivelse)
+            OppgaveForBarn(
+                it.behandlingId,
+                it.eksternFagsakId,
+                utplukketBarn.first.fødselsnummerSøker,
+                StønadType.OVERGANGSSTØNAD,
+                beskrivelse
+            )
         }
     }
 
-    private fun barnSomFyllerAar(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>,
-                                 referanseDato: LocalDate,
-                                 kjøreDato: LocalDate): Map<UUID, Pair<BarnTilUtplukkForOppgave, String>> {
+    private fun barnSomFyllerAar(
+        barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>,
+        referansedato: LocalDate
+    ): Map<UUID, Pair<BarnTilUtplukkForOppgave, String>> {
         val barnSomFyllerAar = mutableMapOf<UUID, Pair<BarnTilUtplukkForOppgave, String>>()
         barnTilUtplukkForOppgave.forEach { barn ->
             val fødselsdato = fødselsdato(barn)
-            if (barnBlirEttÅr(referanseDato, fødselsdato, kjøreDato)) {
+            if (barnBlirEttÅr(fødselsdato, referansedato)) {
                 barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr())
-            } else if (barnBlirSeksMnd(referanseDato, fødselsdato, kjøreDato)) {
+            } else if (barnBlirSeksMnd(fødselsdato, referansedato)) {
                 barnSomFyllerAar[barn.behandlingId] = Pair(barn, OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd())
             }
         }
@@ -75,24 +84,17 @@ class ForberedOppgaverForBarnService(private val gjeldendeBarnRepository: Gjelde
         } ?: barnTilUtplukkForOppgave.termindatoBarn ?: error("Ingen datoer for barn funnet")
     }
 
-    private fun barnBlirEttÅr(referanseDato: LocalDate, fødselsdato: LocalDate, kjøreDato: LocalDate = LocalDate.now()): Boolean {
-        return referanseDato <= fødselsdato.plusYears(1)
-               && kjøreDato.plusWeeks(1) >= fødselsdato.plusYears(1)
+    private fun barnBlirEttÅr(
+        fødselsdato: LocalDate,
+        referansedato: LocalDate
+    ): Boolean {
+        return fødselsdato.plusYears(1) in referansedato..referansedato.plusDays(6)
     }
 
-    private fun barnBlirSeksMnd(referanseDato: LocalDate,
-                                fødselsdato: LocalDate,
-                                kjøreDato: LocalDate = LocalDate.now()): Boolean {
-        return referanseDato <= fødselsdato.plusDays(182)
-               && kjøreDato.plusWeeks(1) >= fødselsdato.plusDays(182L)
+    private fun barnBlirSeksMnd(
+        fødselsdato: LocalDate,
+        referansedato: LocalDate
+    ): Boolean {
+        return fødselsdato.plusDays(182) in referansedato..referansedato.plusDays(6)
     }
-
-    private fun referanseDato(sisteKjøring: LocalDate): LocalDate {
-        val periodeGap = ChronoUnit.DAYS.between(sisteKjøring, LocalDate.now()) - 7
-        if (periodeGap > 0) {
-            return LocalDate.now().minusDays(periodeGap)
-        }
-        return LocalDate.now()
-    }
-
 }

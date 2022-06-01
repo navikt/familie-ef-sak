@@ -1,0 +1,311 @@
+{
+  "fagsak": {
+    "fagsakId": "3549f9e2-ddd1-467d-82be-bfdb6c7f07e1",
+    "eksternId": 200000001,
+    "stønadstype": "OVERGANGSSTØNAD"
+  },
+  "behandling": {
+    "behandlingId": "08230110-9f26-4fa1-bdf5-1b5f1ea6f59d",
+    "forrigeBehandlingId": "39c7dc82-adc1-43db-a6f9-64b8e4352ff6",
+    "eksternId": 2,
+    "behandlingType": "REVURDERING",
+    "behandlingÅrsak": "G_OMREGNING",
+    "vilkårsvurderinger": [
+      {
+        "vilkårType": "SIVILSTAND",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "SIVILSTAND_UNNTAK",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "SAMLIV",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "LEVER_IKKE_MED_ANNEN_FORELDER",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "ALENEOMSORG",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "SKRIFTLIG_AVTALE_OM_DELT_BOSTED",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "NÆRE_BOFORHOLD",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "MER_AV_DAGLIG_OMSORG",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "NYTT_BARN_SAMME_PARTNER",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "AKTIVITET",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "FYLLER_BRUKER_AKTIVITETSPLIKT",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "SAGT_OPP_ELLER_REDUSERT",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "SAGT_OPP_ELLER_REDUSERT",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "TIDLIGERE_VEDTAKSPERIODER",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD",
+                "svar": "NEI",
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          },
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "FORUTGÅENDE_MEDLEMSKAP",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "SØKER_MEDLEM_I_FOLKETRYGDEN",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "LOVLIG_OPPHOLD",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "BOR_OG_OPPHOLDER_SEG_I_NORGE",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "vilkårType": "MOR_ELLER_FAR",
+        "resultat": "OPPFYLT",
+        "delvilkårsvurderinger": [
+          {
+            "resultat": "OPPFYLT",
+            "vurderinger": [
+              {
+                "regelId": "OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN",
+                "svar": null,
+                "begrunnelse": "Godkjent"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "aktivitetspliktInntrefferDato": null,
+    "kravMottatt": null
+  },
+  "søker": {
+    "personIdent": "321",
+    "barn": [
+      {
+        "personIdent": "01012067050",
+        "termindato": null
+      }
+    ],
+    "tilhørendeEnhet": "4489",
+    "adressebeskyttelse": "UGRADERT"
+  },
+  "vedtak": {
+    "resultat": "INNVILGET",
+    "vedtakstidspunkt": "2022-05-31T13:28:04.188823",
+    "opphørÅrsak": null,
+    "saksbehandlerId": "VL",
+    "beslutterId": "VL",
+    "tilkjentYtelse": {
+      "andelerTilkjentYtelse": [
+        {
+          "beløp": 11554,
+          "periodetype": null,
+          "inntekt": 277100,
+          "inntektsreduksjon": 8396,
+          "samordningsfradrag": 0,
+          "fraOgMed": "2022-01-01",
+          "tilOgMed": "2022-04-30",
+          "kildeBehandlingId": "39c7dc82-adc1-43db-a6f9-64b8e4352ff6"
+        },
+        {
+          "beløp": 12106,
+          "periodetype": null,
+          "inntekt": 290300,
+          "inntektsreduksjon": 8796,
+          "samordningsfradrag": 0,
+          "fraOgMed": "2022-05-01",
+          "tilOgMed": "2022-12-31",
+          "kildeBehandlingId": "e45b92e5-dd51-4201-846f-546e8ff9b9d6"
+        }
+      ],
+      "startdato": "2022-01-01"
+    },
+    "vedtaksperioder": [
+      {
+        "fraOgMed": "2022-05-01",
+        "tilOgMed": "2022-12-31",
+        "aktivitet": "BARN_UNDER_ETT_ÅR",
+        "periodeType": "HOVEDPERIODE"
+      }
+    ],
+    "tilbakekreving": null,
+    "brevmottakere": []
+  }
+}

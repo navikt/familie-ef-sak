@@ -6,11 +6,11 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Embedded
 import java.util.UUID
 
-data class Behandlingsjournalpost(@Id
-                                  val behandlingId: UUID,
-                                  val journalpostId: String,
-                                  val journalpostType: Journalposttype,
-                                  @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                                  val sporbar: Sporbar = Sporbar())
-
-
+data class Behandlingsjournalpost(
+    @Id
+    val behandlingId: UUID,
+    val journalpostId: String,
+    val journalpostType: Journalposttype,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)

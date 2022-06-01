@@ -50,8 +50,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
         lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
 
-        barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id),
-                                        barn(behandlingId = behandlingMedTidligereAndel.id)))
+        barnRepository.insertAll(
+            listOf(
+                barn(behandlingId = behandlingMedFremtidigAndel.id),
+                barn(behandlingId = behandlingMedTidligereAndel.id)
+            )
+        )
 
         val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
         assertThat(barnForUtplukk.size).isEqualTo(1)
@@ -77,10 +81,20 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med to personidenter av samme fagsak, forvent siste opprettede personident i resultat `() {
         val nyesteFnrSøker = "12345678910"
         val eldsteFnrSøker = "12345678911"
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersonerAvPersonIdenter(setOf(PersonIdent(
-                nyesteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now())), PersonIdent(
-                eldsteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now().minusDays(1)))))))
-
+        val fagsak = testoppsettService.lagreFagsak(
+            fagsak(
+                identer = fagsakpersonerAvPersonIdenter(
+                    setOf(
+                        PersonIdent(
+                            nyesteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now())
+                        ),
+                        PersonIdent(
+                            eldsteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
+                        )
+                    )
+                )
+            )
+        )
 
         val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak)
         lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
@@ -98,29 +112,45 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         val fagsakForTidligereAndel = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
         val fagsakForFremtidigAndel = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678911"))))
 
-        val behandlingMedTidligereAndel = behandlingRepository.insert(behandling(fagsakForTidligereAndel,
-                                                                                 status = BehandlingStatus.FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
+        val behandlingMedTidligereAndel = behandlingRepository.insert(
+            behandling(
+                fagsakForTidligereAndel,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET,
+                opprettetTid = LocalDateTime.now().minusDays(2)
+            )
+        )
 
-        val tidligereAndel = lagAndelTilkjentYtelse(beløp = 1,
-                                                    kildeBehandlingId = behandlingMedTidligereAndel.id,
-                                                    fraOgMed = LocalDate.now().minusMonths(2),
-                                                    tilOgMed = LocalDate.now().minusMonths(1))
+        val tidligereAndel = lagAndelTilkjentYtelse(
+            beløp = 1,
+            kildeBehandlingId = behandlingMedTidligereAndel.id,
+            fraOgMed = LocalDate.now().minusMonths(2),
+            tilOgMed = LocalDate.now().minusMonths(1)
+        )
 
-        tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandlingMedTidligereAndel.id,
-                                                          andelerTilkjentYtelse = listOf(tidligereAndel)))
+        tilkjentYtelseRepository.insert(
+            lagTilkjentYtelse(
+                behandlingId = behandlingMedTidligereAndel.id,
+                andelerTilkjentYtelse = listOf(tidligereAndel)
+            )
+        )
 
-        val behandlingMedFremtidigAndel = behandlingRepository.insert(behandling(fagsakForFremtidigAndel,
-                                                                                 status = BehandlingStatus.FERDIGSTILT,
-                                                                                 resultat = BehandlingResultat.INNVILGET,
-                                                                                 opprettetTid = LocalDateTime.now().minusDays(2)))
+        val behandlingMedFremtidigAndel = behandlingRepository.insert(
+            behandling(
+                fagsakForFremtidigAndel,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET,
+                opprettetTid = LocalDateTime.now().minusDays(2)
+            )
+        )
 
         lagreFremtidligAndel(behandlingMedFremtidigAndel, beløp = 1)
 
-        val barnListe = listOf(barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "1"),
-                               barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "2"),
-                               barn(behandlingId = behandlingMedTidligereAndel.id, personIdent = "3"))
+        val barnListe = listOf(
+            barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "1"),
+            barn(behandlingId = behandlingMedFremtidigAndel.id, personIdent = "2"),
+            barn(behandlingId = behandlingMedTidligereAndel.id, personIdent = "3")
+        )
 
         barnRepository.insertAll(barnListe)
         val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
@@ -184,45 +214,64 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     private fun finnBarnTilMigrerteBehandlinger() =
-            gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+        gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
     private fun finnBarnAvGjeldendeIverksatteBehandlinger() =
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+        gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, LocalDate.now())
 
-    private fun lagreInnvilgetBehandling(fagsak: Fagsak,
-                                         tidligereBehandling: Behandling? = null,
-                                         opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
-                                                                       ?: LocalDateTime.now()) =
-            behandlingRepository.insert(behandling(fagsak,
-                                                   status = BehandlingStatus.FERDIGSTILT,
-                                                   resultat = BehandlingResultat.INNVILGET,
-                                                   forrigeBehandlingId = tidligereBehandling?.id,
-                                                   opprettetTid = opprettetTid))
+    private fun lagreInnvilgetBehandling(
+        fagsak: Fagsak,
+        tidligereBehandling: Behandling? = null,
+        opprettetTid: LocalDateTime = tidligereBehandling?.sporbar?.opprettetTid?.plusHours(1)
+            ?: LocalDateTime.now()
+    ) =
+        behandlingRepository.insert(
+            behandling(
+                fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET,
+                forrigeBehandlingId = tidligereBehandling?.id,
+                opprettetTid = opprettetTid
+            )
+        )
 
     private fun lagreHistoriskAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
-        val andel = lagAndelTilkjentYtelse(beløp = beløp,
-                                           kildeBehandlingId = behandling.id,
-                                           fraOgMed = LocalDate.now().minusMonths(2),
-                                           tilOgMed = LocalDate.now().minusMonths(1))
-        return tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandling.id,
-                                                                 andelerTilkjentYtelse = listOf(andel)))
+        val andel = lagAndelTilkjentYtelse(
+            beløp = beløp,
+            kildeBehandlingId = behandling.id,
+            fraOgMed = LocalDate.now().minusMonths(2),
+            tilOgMed = LocalDate.now().minusMonths(1)
+        )
+        return tilkjentYtelseRepository.insert(
+            lagTilkjentYtelse(
+                behandlingId = behandling.id,
+                andelerTilkjentYtelse = listOf(andel)
+            )
+        )
     }
 
     private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
-        val andel = lagAndelTilkjentYtelse(beløp = beløp,
-                                           kildeBehandlingId = behandling.id,
-                                           fraOgMed = LocalDate.now().minusMonths(1),
-                                           tilOgMed = LocalDate.now().plusMonths(1))
-        return tilkjentYtelseRepository.insert(lagTilkjentYtelse(behandlingId = behandling.id,
-                                                                 andelerTilkjentYtelse = listOf(andel)))
+        val andel = lagAndelTilkjentYtelse(
+            beløp = beløp,
+            kildeBehandlingId = behandling.id,
+            fraOgMed = LocalDate.now().minusMonths(1),
+            tilOgMed = LocalDate.now().plusMonths(1)
+        )
+        return tilkjentYtelseRepository.insert(
+            lagTilkjentYtelse(
+                behandlingId = behandling.id,
+                andelerTilkjentYtelse = listOf(andel)
+            )
+        )
     }
 
     private fun barn(behandlingId: UUID, personIdent: String? = null, termindato: LocalDate? = LocalDate.now()): BehandlingBarn {
-        return BehandlingBarn(behandlingId = behandlingId,
-                              personIdent = personIdent,
-                              fødselTermindato = termindato,
-                              navn = null,
-                              søknadBarnId = UUID.randomUUID())
+        return BehandlingBarn(
+            behandlingId = behandlingId,
+            personIdent = personIdent,
+            fødselTermindato = termindato,
+            navn = null,
+            søknadBarnId = UUID.randomUUID()
+        )
     }
-
 }

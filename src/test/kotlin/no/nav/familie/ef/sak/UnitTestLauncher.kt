@@ -12,9 +12,11 @@ class UnitTestLauncher {
 
     fun main(args: Array<String>) {
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
-                .profiles("local",
-                          "mock-oauth")
-                .build()
+            .profiles(
+                "local",
+                "mock-oauth"
+            )
+            .build()
         app.run(*args)
     }
 }

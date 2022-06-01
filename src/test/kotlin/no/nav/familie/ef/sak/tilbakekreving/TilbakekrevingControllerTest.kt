@@ -26,7 +26,6 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
     @Autowired lateinit var behandlingService: BehandlingService
     @Autowired lateinit var fagsakService: FagsakService
 
-
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
@@ -35,13 +34,17 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal lagre siste versjon av tilbakekreving ved to kall`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("01010172272", OVERGANGSSTØNAD)
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                             fagsak.id,
-                                                             behandlingsårsak = BehandlingÅrsak.SØKNAD)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = BehandlingÅrsak.SØKNAD
+        )
         lagInitiellTilbakekreving(behandling)
-        val oppdatertTilbakekrevingsDto = TilbakekrevingDto(valg = OPPRETT_MED_VARSEL,
-                                                            varseltekst = "Dette er tekst",
-                                                            begrunnelse = "Nei")
+        val oppdatertTilbakekrevingsDto = TilbakekrevingDto(
+            valg = OPPRETT_MED_VARSEL,
+            varseltekst = "Dette er tekst",
+            begrunnelse = "Nei"
+        )
 
         lagreTilbakekreving(behandling, oppdatertTilbakekrevingsDto)
         val andreLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
@@ -50,27 +53,31 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagInitiellTilbakekreving(behandling: Behandling) {
-        val initiellTilbakekrevingDto = TilbakekrevingDto(valg = OPPRETT_UTEN_VARSEL,
-                                                          varseltekst = "",
-                                                          begrunnelse = "Ja")
+        val initiellTilbakekrevingDto = TilbakekrevingDto(
+            valg = OPPRETT_UTEN_VARSEL,
+            varseltekst = "",
+            begrunnelse = "Ja"
+        )
         lagreTilbakekreving(behandling, initiellTilbakekrevingDto)
         val førsteLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
         assertThat(førsteLagredeTilbakekrevingDto.body.getDataOrThrow()).isEqualTo(initiellTilbakekrevingDto)
     }
 
     private fun hentTilbakekreving(behandling: Behandling) =
-            restTemplate.exchange<Ressurs<TilbakekrevingDto?>>(localhost("/api/tilbakekreving/${behandling.id}"),
-                                                               HttpMethod.GET,
-                                                               HttpEntity<TilbakekrevingDto>(headers))
+        restTemplate.exchange<Ressurs<TilbakekrevingDto?>>(
+            localhost("/api/tilbakekreving/${behandling.id}"),
+            HttpMethod.GET,
+            HttpEntity<TilbakekrevingDto>(headers)
+        )
 
-    private fun lagreTilbakekreving(behandling: Behandling,
-                                    forventetTilbakekrevingsDto: TilbakekrevingDto) {
-        restTemplate.exchange<Ressurs<UUID>>(localhost("/api/tilbakekreving/${behandling.id}"),
-                                             HttpMethod.POST,
-                                             HttpEntity(forventetTilbakekrevingsDto, headers))
+    private fun lagreTilbakekreving(
+        behandling: Behandling,
+        forventetTilbakekrevingsDto: TilbakekrevingDto
+    ) {
+        restTemplate.exchange<Ressurs<UUID>>(
+            localhost("/api/tilbakekreving/${behandling.id}"),
+            HttpMethod.POST,
+            HttpEntity(forventetTilbakekrevingsDto, headers)
+        )
     }
 }
-
-
-
-

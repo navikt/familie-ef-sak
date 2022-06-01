@@ -10,7 +10,7 @@ Egenskap: Andelhistorikk: En periode splittes og en periode fjernes som følge a
       | 1            | 01.2021         | 03.2021         |
       | 2            | 01.2021         | 01.2021         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |

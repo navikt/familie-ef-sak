@@ -11,13 +11,14 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |                |
       | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |                |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
       | 1            |              |                       | 0       | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
       | 2            |              |                       | 0       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |
+      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 04.2022         | 04.2022         |
+      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 05.2022         | 05.2022         |
 
   Scenario: Flere sanksjoner mellom flere innvilgelser skal være med i vedtakshistorikken
 
@@ -30,7 +31,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | 5            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 02.2022         | 02.2022         |
       | 6            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 03.2022         | 04.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
@@ -49,14 +50,15 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
       | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
       | 1            | SPLITTET     | 2                     | 0       | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
       | 1            | FJERNET      | 2                     | 0       | BARN_UNDER_ETT_ÅR    | 03.2022         | 03.2022         |
       | 2            |              |                       | 0       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 04.2022         | 05.2022         |
+      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 04.2022         | 04.2022         |
+      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 05.2022         | 05.2022         |
 
   Scenario: Sanksjon blir erstattet i historikken
 
@@ -66,7 +68,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | SANKSJONERE     | SANKSJON       | IKKE_AKTIVITETSPLIKT | 02.2022         | 02.2022         |
       | 3            | INNVILGE        | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 02.2022         | 03.2022         |
 
-    Når lag andelhistorikk kjøres
+    Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |

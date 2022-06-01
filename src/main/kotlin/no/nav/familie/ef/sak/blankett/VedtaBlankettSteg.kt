@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class VedtaBlankettSteg(private val vedtakService: VedtakService, private val blankettRepository: BlankettRepository) :
-        BehandlingSteg<VedtakDto> {
+    BehandlingSteg<VedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
     }
@@ -26,9 +26,11 @@ class VedtaBlankettSteg(private val vedtakService: VedtakService, private val bl
         when (data) {
             is InnvilgelseOvergangsstønad, is Avslå -> {
                 vedtakService.slettVedtakHvisFinnes(saksbehandling.id)
-                vedtakService.lagreVedtak(vedtakDto = data,
-                                          behandlingId = saksbehandling.id,
-                                          stønadstype = saksbehandling.stønadstype)
+                vedtakService.lagreVedtak(
+                    vedtakDto = data,
+                    behandlingId = saksbehandling.id,
+                    stønadstype = saksbehandling.stønadstype
+                )
                 blankettRepository.deleteById(saksbehandling.id)
             }
             else -> {
@@ -37,5 +39,4 @@ class VedtaBlankettSteg(private val vedtakService: VedtakService, private val bl
             }
         }
     }
-
 }

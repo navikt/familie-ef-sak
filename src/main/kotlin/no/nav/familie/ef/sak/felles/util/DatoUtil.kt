@@ -32,7 +32,7 @@ fun LocalDate.isEqualOrBefore(other: LocalDate) = this == other || this.isBefore
 fun LocalDate.isEqualOrAfter(other: LocalDate) = this == other || this.isAfter(other)
 
 fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =
-        YearMonth.from(this).erPåfølgende(YearMonth.from(påfølgende))
+    YearMonth.from(this).erPåfølgende(YearMonth.from(påfølgende))
 
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
 

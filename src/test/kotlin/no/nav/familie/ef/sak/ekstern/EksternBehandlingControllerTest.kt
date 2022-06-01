@@ -39,7 +39,7 @@ internal class EksternBehandlingControllerTest {
     @BeforeEach
     internal fun setUp() {
         every { pdlClient.hentPersonidenter(ident1, true) }
-                .returns(PdlIdenter(listOf(PdlIdent(ident1, true), PdlIdent(ident2, false))))
+            .returns(PdlIdenter(listOf(PdlIdent(ident1, true), PdlIdent(ident2, false))))
     }
 
     @Test
@@ -48,7 +48,7 @@ internal class EksternBehandlingControllerTest {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns null
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-                .isEqualTo(false)
+            .isEqualTo(false)
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class EksternBehandlingControllerTest {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns behandling(fagsak(), type = BehandlingType.TEKNISK_OPPHØR)
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-                .isEqualTo(false)
+            .isEqualTo(false)
     }
 
     @Test
@@ -66,40 +66,42 @@ internal class EksternBehandlingControllerTest {
             behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns behandling(fagsak())
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-                .isEqualTo(true)
+            .isEqualTo(true)
     }
 
     @Test
     internal fun `uten stønadstype - skal returnere false når det ikke finnes noen behandling`() {
         every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), setOf(ident1, ident2)) } returns null
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
-                .isEqualTo(false)
+            .isEqualTo(false)
     }
 
     @Test
     internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {
         val finnesBehandlingForPerson =
-                eksternBehandlingController.harStønadSiste12MånederForPersonidenter(emptySet())
+            eksternBehandlingController.harAktivStønad(emptySet())
         assertThat(finnesBehandlingForPerson.status).isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test
     internal fun `opprett en ikke-utdatert og en utdatert andelsliste, forvent at en stønad for det siste året finnes`() {
         mockOpprettTilkjenteYtelser(opprettIkkeUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
-        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(true)
+        assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(true)
     }
 
     @Test
     internal fun `opprett bare utdaterte andeler, forvent at stønad for det siste året ikke finnes`() {
         mockOpprettTilkjenteYtelser(opprettUtdatertTilkjentYtelse(), opprettUtdatertTilkjentYtelse())
-        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+        assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
     }
 
     @Test
     internal fun `tomme lister med andeler, forvent at stønad for det siste året ikke finnes`() {
-        mockOpprettTilkjenteYtelser(lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
-                                    lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()))
-        assertThat(eksternBehandlingController.harStønadSiste12MånederForPersonidenter(setOf("12345678910")).data).isEqualTo(false)
+        mockOpprettTilkjenteYtelser(
+            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList()),
+            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList())
+        )
+        assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
     }
 
     @Test
@@ -113,41 +115,41 @@ internal class EksternBehandlingControllerTest {
             }
         }
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
-                .isEqualTo(true)
+            .isEqualTo(true)
         verify(exactly = 2) { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), any()) }
     }
 
     private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {
         return lagTilkjentYtelse(
-                andelerTilkjentYtelse = listOf(
-                        lagAndelTilkjentYtelse(
-                                beløp = 1,
-                                fraOgMed = LocalDate.of(2019, 1, 1),
-                                tilOgMed = LocalDate.of(2019, 2, 1)
-                        ),
-                        lagAndelTilkjentYtelse(
-                                beløp = 1,
-                                fraOgMed = LocalDate.of(2020, 1, 1),
-                                tilOgMed = LocalDate.now().minusMonths(11)
-                        )
+            andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse(
+                    beløp = 1,
+                    fraOgMed = LocalDate.of(2019, 1, 1),
+                    tilOgMed = LocalDate.of(2019, 2, 1)
+                ),
+                lagAndelTilkjentYtelse(
+                    beløp = 1,
+                    fraOgMed = LocalDate.of(2020, 1, 1),
+                    tilOgMed = LocalDate.now().plusMonths(11)
                 )
+            )
         )
     }
 
     private fun opprettUtdatertTilkjentYtelse(): TilkjentYtelse {
         return lagTilkjentYtelse(
-                andelerTilkjentYtelse = listOf(
-                        lagAndelTilkjentYtelse(
-                                beløp = 1,
-                                fraOgMed = LocalDate.of(2019, 1, 1),
-                                tilOgMed = LocalDate.of(2019, 2, 1)
-                        ),
-                        lagAndelTilkjentYtelse(
-                                beløp = 1,
-                                fraOgMed = LocalDate.now().minusMonths(14),
-                                tilOgMed = LocalDate.now().minusYears(1).minusMonths(1)
-                        )
+            andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse(
+                    beløp = 1,
+                    fraOgMed = LocalDate.of(2019, 1, 1),
+                    tilOgMed = LocalDate.of(2019, 2, 1)
+                ),
+                lagAndelTilkjentYtelse(
+                    beløp = 1,
+                    fraOgMed = LocalDate.now().minusMonths(14),
+                    tilOgMed = LocalDate.now().minusYears(1).minusMonths(1)
                 )
+            )
         )
     }
 
