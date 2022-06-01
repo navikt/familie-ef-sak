@@ -296,7 +296,12 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentMigreringInfo - siste periode har 0 som beløp, migrerer fra måneden bak den`() {
-        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(beløp = 0, vedtakId = 1)
+        val kjøremåned = YearMonth.of(2022,4)
+        val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
+            beløp = 0, vedtakId = 1,
+            stønadFom = kjøremåned.minusMonths(1).atDay(1),
+            stønadTom = kjøremåned.minusMonths(1).atEndOfMonth()
+        )
         val månedenFør = YearMonth.from(periode.stønadFom).minusMonths(1)
         val periode2 = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             stønadFom = månedenFør.atDay(1),
@@ -308,7 +313,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             InfotrygdPeriodeResponse(listOf(periode, periode2), emptyList(), emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
 
-        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, kjøremåned)
 
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.stønadFom).isEqualTo(månedenFør)
