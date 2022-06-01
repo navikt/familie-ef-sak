@@ -160,13 +160,11 @@ class BeregnYtelseSteg(
         }
         if (data is InnvilgelseBarnetilsyn) {
             barnService.validerBarnFinnesPåBehandling(saksbehandling.id, data.perioder.flatMap { it.barn }.toSet())
-            if (data.perioder.any { it.erMidlertidigOpphør }) {
-                validerMidlertidigOpphør(data.perioder, saksbehandling)
-            }
+            validerInnvilgelseBarnetilsyn(data.perioder, saksbehandling)
         }
     }
 
-    private fun validerMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>, saksbehandling: Saksbehandling) {
+    private fun validerInnvilgelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>, saksbehandling: Saksbehandling) {
         validerAntallBarnOgUtgifterVedMidlertidigOpphør(utgiftsperioder, saksbehandling.id)
         validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
         validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
