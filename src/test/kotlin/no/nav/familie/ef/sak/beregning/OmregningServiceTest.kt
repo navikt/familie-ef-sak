@@ -114,7 +114,17 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
 
         val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling, iverksettDtoSlot.captured.vedtak.vedtakstidspunkt)
-        assertThat(iverksettDtoSlot.captured).isEqualTo(expectedIverksettDto)
+        assertThat(iverksettDtoSlot.captured.vedtak).isEqualTo(expectedIverksettDto.vedtak)
+        assertThat(iverksettDtoSlot.captured.fagsak).isEqualTo(expectedIverksettDto.fagsak)
+        assertThat(iverksettDtoSlot.captured.søker).isEqualTo(expectedIverksettDto.søker)
+        assertThat(iverksettDtoSlot.captured.behandling.aktivitetspliktInntrefferDato).isEqualTo(expectedIverksettDto.behandling.aktivitetspliktInntrefferDato)
+        assertThat(iverksettDtoSlot.captured.behandling.behandlingId).isEqualTo(expectedIverksettDto.behandling.behandlingId)
+        assertThat(iverksettDtoSlot.captured.behandling.behandlingType).isEqualTo(expectedIverksettDto.behandling.behandlingType)
+        assertThat(iverksettDtoSlot.captured.behandling.behandlingÅrsak).isEqualTo(expectedIverksettDto.behandling.behandlingÅrsak)
+        assertThat(iverksettDtoSlot.captured.behandling.eksternId).isEqualTo(expectedIverksettDto.behandling.eksternId)
+        assertThat(iverksettDtoSlot.captured.behandling.forrigeBehandlingId).isEqualTo(expectedIverksettDto.behandling.forrigeBehandlingId)
+        assertThat(iverksettDtoSlot.captured.behandling.kravMottatt).isEqualTo(expectedIverksettDto.behandling.kravMottatt)
+        assertThat(iverksettDtoSlot.captured.behandling.vilkårsvurderinger).hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(
