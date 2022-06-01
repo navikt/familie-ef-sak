@@ -316,12 +316,12 @@ fun vedtaksperiodeDto(
     )
 
 fun behandlingBarn(
-    id: UUID,
+    id: UUID = UUID.randomUUID(),
     behandlingId: UUID,
-    søknadBarnId: UUID,
-    personIdent: String,
-    navn: String,
-    fødselTermindato: LocalDate
+    søknadBarnId: UUID? = null,
+    personIdent: String? = null,
+    navn: String? = null,
+    fødselTermindato: LocalDate? = null
 ): BehandlingBarn {
     return BehandlingBarn(
         id = id,

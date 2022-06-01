@@ -76,17 +76,13 @@ class VurderingService(
         feilHvisIkke(behandling.årsak == BehandlingÅrsak.G_OMREGNING) { "Maskinelle vurderinger kun for G-omregning." }
         val (_, metadata) = hentGrunnlagOgMetadata(behandling.id)
         val stønadstype = fagsakService.hentFagsakForBehandling(behandling.id).stønadstype
-
-        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
-            behandlingId = behandling.id,
+        kopierVurderingerTilNyBehandling(
+            eksisterendeBehandlingId = behandling.forrigeBehandlingId ?: error("Finner ikke forrige behandlingId"),
+            nyBehandlingsId = behandling.id,
             metadata = metadata,
-            stønadstype = stønadstype
+            stønadType = stønadstype
+
         )
-            .map { it.copy(resultat = Vilkårsresultat.OPPFYLT) }
-        vilkårsvurderingRepository.insertAll(nyeVilkårsvurderinger)
-        nyeVilkårsvurderinger.forEach {
-            vilkårsvurderingRepository.settMaskinelltOpprettet(it.id)
-        }
     }
 
     fun hentGrunnlagOgMetadata(behandlingId: UUID): Pair<VilkårGrunnlagDto, HovedregelMetadata> {

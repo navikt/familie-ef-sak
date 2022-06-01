@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Beløpsperiode
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
@@ -50,6 +51,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -76,6 +78,7 @@ internal class BeregnYtelseStegTest {
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
+    private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(
         tilkjentYtelseService,
@@ -86,7 +89,8 @@ internal class BeregnYtelseStegTest {
         vedtakService,
         tilbakekrevingService,
         barnService,
-        fagsakService
+        fagsakService,
+        validerOmregningService
     )
 
     private val slot = slot<TilkjentYtelse>()
@@ -1606,6 +1610,7 @@ internal class BeregnYtelseStegTest {
         AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
             andel = andelDto(1, fom, tom),
@@ -1621,6 +1626,7 @@ internal class BeregnYtelseStegTest {
         AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.SANKSJON_1_MND,
             vedtakstidspunkt = LocalDateTime.now(),
             saksbehandler = "",
             andel = andelDto(0, sanksjonMåned, sanksjonMåned),

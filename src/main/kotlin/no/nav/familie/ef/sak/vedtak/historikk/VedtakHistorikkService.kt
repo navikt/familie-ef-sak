@@ -2,12 +2,13 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.util.harPåfølgendeMåned
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.sammenhengende
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.slåSammen
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -20,6 +21,10 @@ class VedtakHistorikkService(
     private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
+    /**
+     * Slår sammen perioder som er sammenhengende, med samme aktivitet, og samme periodetype, unntatt sanksjoner
+     * Slår sammen inntekter som er sammenhengende, med samme inntekt og samordningsfradrag
+     */
     fun hentVedtakForOvergangsstønadFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseOvergangsstønad {
         val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
         feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
@@ -89,23 +94,4 @@ class VedtakHistorikkService(
             }
         }
     }
-
-    private fun List<AndelHistorikkDto>.slåSammen(harSammeVerdi: (AndelHistorikkDto, AndelHistorikkDto) -> Boolean): List<AndelHistorikkDto> {
-        return this.fold(mutableListOf()) { acc, entry ->
-            val last = acc.lastOrNull()
-            if (last != null && harSammeVerdi(last, entry)) {
-                acc.removeLast()
-                acc.add(last.copy(andel = last.andel.copy(stønadTil = entry.andel.stønadTil)))
-            } else {
-                acc.add(entry)
-            }
-            acc
-        }
-    }
-
-    private fun sammenhengende(
-        first: AndelHistorikkDto,
-        second: AndelHistorikkDto
-    ) =
-        first.andel.stønadTil.harPåfølgendeMåned(second.andel.stønadFra)
 }

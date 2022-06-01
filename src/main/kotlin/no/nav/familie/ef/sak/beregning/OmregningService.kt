@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -19,6 +20,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
@@ -33,6 +35,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
@@ -59,7 +62,9 @@ class OmregningService(
     private val vurderingService: VurderingService,
     private val liveRunBeregnYtelseSteg: BeregnYtelseSteg,
     private val dryRunBeregnYtelseSteg: DryRunBeregnYtelseSteg,
-    private val iverksettingDtoMapper: IverksettingDtoMapper
+    private val iverksettingDtoMapper: IverksettingDtoMapper,
+    private val søknadService: SøknadService,
+    private val barnService: BarnService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -69,12 +74,42 @@ class OmregningService(
         fagsakId: UUID,
         liveRun: Boolean
     ) {
-        logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
             "Feature toggle for omberegning er disabled"
         }
 
+        val forrigeTilkjentYtelse = validerBehandlingOgHentSisteTilkjentYtelse(fagsakId)
+        val innvilgelseOvergangsstønad = hentInnvilgelseForOvergangsstønad(fagsakId) ?: return
+
+        utførGOmregning(fagsakId, forrigeTilkjentYtelse, innvilgelseOvergangsstønad, liveRun)
+    }
+
+    private fun hentInnvilgelseForOvergangsstønad(fagsakId: UUID): InnvilgelseOvergangsstønad? {
+        val innvilgelseOvergangsstønad =
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
+                fagsakId,
+                YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed)
+            )
+        if (innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
+            logger.warn(
+                MarkerFactory.getMarker("G-Omregning - Manuell"),
+                "Fagsak med id $fagsakId har sanksjon og må manuelt behandles"
+            )
+            return null
+        }
+
+        if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
+            logger.warn(
+                MarkerFactory.getMarker("G-Omregning - Manuell"),
+                "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt."
+            )
+            return null
+        }
+        return innvilgelseOvergangsstønad
+    }
+
+    private fun validerBehandlingOgHentSisteTilkjentYtelse(fagsakId: UUID): TilkjentYtelse {
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
             ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
 
@@ -87,23 +122,17 @@ class OmregningService(
         feilHvis(forrigeTilkjentYtelse.grunnbeløpsdato == nyesteGrunnbeløpGyldigFraOgMed) {
             "Skal ikke utføre g-omregning når forrige tilkjent ytelse allerede har nyeste grunnbeløpsdato"
         }
+        return forrigeTilkjentYtelse
+    }
 
-        val innvilgelseOvergangsstønad =
-            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
-                fagsakId,
-                YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed)
-            )
-        feilHvis(innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
-            "Omregning av vedtak med sanksjon må manuellt behandles"
-        }
+    private fun utførGOmregning(
+        fagsakId: UUID,
+        forrigeTilkjentYtelse: TilkjentYtelse,
+        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
+        liveRun: Boolean
+    ) {
 
-        if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
-            logger.info(
-                MarkerFactory.getMarker("G-Omregning - samordningsfradrag"),
-                "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt."
-            )
-            throw OmregningMedSamordningsfradragException()
-        }
+        logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         val behandling = behandlingService.opprettBehandling(
             behandlingType = BehandlingType.REVURDERING,
@@ -112,8 +141,7 @@ class OmregningService(
         )
         logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
 
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-        vurderingService.opprettVilkårForOmregning(behandling)
+        kopierDataFraForrigeBehandling(behandling)
 
         val indeksjusterInntekt =
             BeregningUtils.indeksjusterInntekt(
@@ -157,6 +185,22 @@ class OmregningService(
             loggResultat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
             throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")
         }
+    }
+
+    private fun kopierDataFraForrigeBehandling(behandling: Behandling) {
+        val forrigeBehandlingId = behandling.forrigeBehandlingId
+            ?: error("Finner ikke forrigeBehandlingId til ${behandling.id}")
+        søknadService.kopierSøknad(forrigeBehandlingId, behandling.id)
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        barnService.opprettBarnForRevurdering(
+            behandlingId = behandling.id,
+            forrigeBehandlingId = forrigeBehandlingId,
+            nyeBarnPåRevurdering = emptyList(),
+            grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
+            stønadstype = StønadType.OVERGANGSSTØNAD
+        )
+
+        vurderingService.opprettVilkårForOmregning(behandling)
     }
 
     fun loggResultat(
@@ -228,7 +272,8 @@ class DryRunBeregnYtelseSteg(
     vedtakService: VedtakService,
     tilbakekrevingService: TilbakekrevingService,
     barnService: BarnService,
-    fagsakService: FagsakService
+    fagsakService: FagsakService,
+    validerOmregningService: ValiderOmregningService
 ) {
 
     private val beregnYtelseSteg = BeregnYtelseSteg(
@@ -240,7 +285,8 @@ class DryRunBeregnYtelseSteg(
         vedtakService,
         tilbakekrevingService,
         barnService,
-        fagsakService
+        fagsakService,
+        validerOmregningService
     )
 
     fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
@@ -297,4 +343,3 @@ class DryRunSimuleringService(
 }
 
 class DryRunException(melding: String) : IllegalStateException(melding)
-class OmregningMedSamordningsfradragException() : IllegalStateException()
