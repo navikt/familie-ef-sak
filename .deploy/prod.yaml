@@ -63,6 +63,8 @@ spec:
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: prod-gcp
+        - application: bidrag-grunnlag
+          cluster: prod-gcp
     outbound:
       rules:
         - application: familie-tilbake

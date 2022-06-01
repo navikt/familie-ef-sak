@@ -67,6 +67,8 @@ spec:
         - application: familie-ba-sak
           namespace: teamfamilie
           cluster: dev-gcp
+        - application: bidrag-grunnlag-feature
+          cluster: dev-gcp
     outbound:
       rules:
         - application: familie-tilbake
