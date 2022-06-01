@@ -4,12 +4,15 @@ import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET
 import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET_ARBEID
 import no.nav.familie.ef.sak.vilkår.VilkårType.ALDER_PÅ_BARN
 import no.nav.familie.ef.sak.vilkår.VilkårType.ALENEOMSORG
+import no.nav.familie.ef.sak.vilkår.VilkårType.DOKUMENTASJON_AV_UTDANNING
 import no.nav.familie.ef.sak.vilkår.VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER
+import no.nav.familie.ef.sak.vilkår.VilkårType.ER_UTDANNING_HENSIKTSMESSIG
 import no.nav.familie.ef.sak.vilkår.VilkårType.FORUTGÅENDE_MEDLEMSKAP
 import no.nav.familie.ef.sak.vilkår.VilkårType.INNTEKT
 import no.nav.familie.ef.sak.vilkår.VilkårType.LOVLIG_OPPHOLD
 import no.nav.familie.ef.sak.vilkår.VilkårType.MOR_ELLER_FAR
 import no.nav.familie.ef.sak.vilkår.VilkårType.NYTT_BARN_SAMME_PARTNER
+import no.nav.familie.ef.sak.vilkår.VilkårType.RETT_TIL_OVERGANGSSTØNAD
 import no.nav.familie.ef.sak.vilkår.VilkårType.SAGT_OPP_ELLER_REDUSERT
 import no.nav.familie.ef.sak.vilkår.VilkårType.SAMLIV
 import no.nav.familie.ef.sak.vilkår.VilkårType.SIVILSTAND
@@ -49,6 +52,19 @@ internal class VilkårTypeTest {
         DOKUMENTASJON_TILSYNSUTGIFTER,
     )
 
+    private val vilkårForSkolepenger = listOf(
+        FORUTGÅENDE_MEDLEMSKAP,
+        LOVLIG_OPPHOLD,
+        MOR_ELLER_FAR,
+        SIVILSTAND,
+        SAMLIV,
+        ALENEOMSORG,
+        NYTT_BARN_SAMME_PARTNER,
+        RETT_TIL_OVERGANGSSTØNAD,
+        DOKUMENTASJON_AV_UTDANNING,
+        ER_UTDANNING_HENSIKTSMESSIG
+    )
+
     @Test
     internal fun `skal hente ut vilkår for overgangsstønad`() {
         val filtrerteVilkårstyper = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)
@@ -64,6 +80,6 @@ internal class VilkårTypeTest {
     @Test
     internal fun `skal hente ut vilkår for skolepenger`() {
         val filtrerteVilkårstyper = VilkårType.hentVilkårForStønad(SKOLEPENGER)
-        assertThat(filtrerteVilkårstyper).isEmpty()
+        assertThat(filtrerteVilkårstyper).containsExactlyInAnyOrderElementsOf(vilkårForSkolepenger)
     }
 }
