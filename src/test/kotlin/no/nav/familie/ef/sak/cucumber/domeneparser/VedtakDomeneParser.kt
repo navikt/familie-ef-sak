@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.UtgiftsperiodeSkolepenger
@@ -77,6 +78,7 @@ object VedtakDomeneParser {
             Domenebegrep.TIL_OG_MED_DATO,
             VedtakDomenebegrep.STUDIETYPE,
             VedtakDomenebegrep.STUDIEBELASTNING,
+            VedtakDomenebegrep.DATO_FAKTURA,
             VedtakDomenebegrep.UTGIFTER,
         )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
@@ -175,15 +177,29 @@ object VedtakDomeneParser {
     }
 
     private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<UtgiftsperiodeSkolepenger> {
-        return rader.map { rad ->
-            UtgiftsperiodeSkolepenger(
+        var lastAdded: UtgiftsperiodeSkolepenger? = null
+        return rader.fold(mutableMapOf<UtgiftsperiodeSkolepenger, UtgiftsperiodeSkolepenger>()){ acc, rad ->
+            val utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0
+            val datoFra = parseFraOgMed(rad)
+            val periode = UtgiftsperiodeSkolepenger(
                 studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
-                datoFra = parseFraOgMed(rad),
+                datoFra = datoFra,
                 datoTil = parseTilOgMed(rad),
                 studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
-                utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
+                utgifter = emptyList(),
             )
-        }
+            val prev = acc[periode]
+            feilHvis(lastAdded != null && prev != null && lastAdded != prev) {
+                "Perioder av samme type studietype, dato fra, dato til og studiebelastning må komme i rekkefølge"
+            }
+            val prevOrDefault = prev ?: periode
+            val skolepengerUtgift = SkolepengerUtgift(
+                parseValgfriÅrMåned(VedtakDomenebegrep.DATO_FAKTURA, rad) ?: YearMonth.from(datoFra),
+                utgifter
+            )
+            acc[periode] = prevOrDefault.copy(utgifter = prevOrDefault.utgifter + skolepengerUtgift)
+            acc
+        }.values.toList()
     }
 
     fun mapOgSettPeriodeMedBeløp(
@@ -314,6 +330,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     ER_SANKSJON("Er sanksjon"),
     SANKSJONSÅRSAK("Sanksjonsårsak"),
     STUDIETYPE("Studietype"),
+    DATO_FAKTURA("Dato faktura"),
     STUDIEBELASTNING("Studiebelastning"),
     ;
 

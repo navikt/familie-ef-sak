@@ -1,9 +1,22 @@
 package no.nav.familie.ef.sak.beregning.skolepenger
 
+import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.time.Year
+import java.time.temporal.ChronoUnit.MONTHS
+
+private val ONE_HUNDRED: BigDecimal = 100.toBigDecimal()
+
+/**
+ * Er maksbeløp per skoleår? Eller kan det endre seg midt i?
+ */
+
+private val maksbeløpPerSkoleår = 68_000
 
 @Service
 class BeregningSkolepengerService {
@@ -16,18 +29,58 @@ class BeregningSkolepengerService {
         validerGyldigePerioder(utgiftsperioder)
         validerFornuftigeBeløp(utgiftsperioder)
 
-        return utgiftsperioder.map {
-            BeløpsperiodeSkolepengerDto(
-                it.tilPeriode(),
-                beløp = 100, // TODO håndtere senere
-                BeregningsgrunnlagSkolepengerDto(it.studietype, it.utgifter, it.studiebelastning)
+        // fra forrige vedtak
+        val tidligereForbruktePerioder = mutableMapOf<Year, Int>()
+
+        return utgiftsperioder.groupBy {
+            Year.of(if (it.årMånedFra.monthValue > 6) it.årMånedFra.year else it.årMånedFra.year.minus(1))
+        }.map {
+            val previous = tidligereForbruktePerioder.getOrDefault(it.key, 0)
+            BeløpsperiodeSkolepengerDto(it.key, beregn(previous, it.value))
+        }
+    }
+
+    private fun beregn(tidligereForbrukt: Int, perioder: List<UtgiftsperiodeSkolepengerDto>): List<BeløpSkolepenger> {
+        val maksbeløp = maksbeløpPerSkoleår
+        var nyForbrukt = tidligereForbrukt
+        return perioder.map { periode ->
+            val studiebelastning = periode.studiebelastning.toBigDecimal()
+            val antallMåneder = minOf(MONTHS.between(periode.årMånedFra, periode.årMånedTil) + 1, 10)
+            feilHvis(antallMåneder < 1 || antallMåneder > 10) {
+                "Antall måneder er $antallMåneder men må være 1-10"
+            }
+            val månedsdel = antallMåneder.toBigDecimal().divide(BigDecimal.TEN)
+            val maksbeløpFordeltAntallMåneder = maksbeløp.toBigDecimal().multiply(månedsdel).roundUp()
+            val maksbeløpEtterStudieredusering =
+                maksbeløpFordeltAntallMåneder.multiply(studiebelastning.divide(ONE_HUNDRED)).roundUp().toInt()
+            var tilgjengelig = maxOf(maksbeløpEtterStudieredusering - nyForbrukt, 0)
+            val nyeUtbetalinger = periode.utgifter.map {
+                val nyTilgjengelig = maxOf(tilgjengelig - it.utgifter, 0)
+                val utbetales = tilgjengelig - nyTilgjengelig
+                tilgjengelig = nyTilgjengelig
+                nyForbrukt += utbetales
+                DetaljertBeløpSkolepenger(utbetales, it)
+            }
+            BeløpSkolepenger(
+                maksbeløp = maksbeløp,
+                maksbeløpFordeltAntallMåneder = maksbeløpEtterStudieredusering,
+                tidligereForbrukt = tidligereForbrukt,
+                nyForbrukt = nyForbrukt,
+                nyeUtbetalinger = nyeUtbetalinger,
+                grunnlag = BeregningsgrunnlagSkolepengerDto(
+                    periode.studietype,
+                    periode.studiebelastning,
+                    periode.tilPeriode()
+                )
             )
         }
     }
 
     private fun validerFornuftigeBeløp(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>) {
 
-        brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
+        brukerfeilHvis(utgiftsperioder.any { periode -> periode.utgifter.any { it.utgifter < 0 } }) {
+            "Utgifter kan ikke være mindre enn 0"
+        }
 
         brukerfeilHvis(utgiftsperioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
         brukerfeilHvis(utgiftsperioder.any { it.studiebelastning > 100 }) { "Studiebelastning må være under eller lik 100" }

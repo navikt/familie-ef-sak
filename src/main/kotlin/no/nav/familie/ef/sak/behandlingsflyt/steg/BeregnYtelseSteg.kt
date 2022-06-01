@@ -281,7 +281,7 @@ class BeregnYtelseSteg(
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            // TODO hvordan skal vi håndtere revurdering? Man kan ikke revurdere fra dato x? Risikerer å avkorte en tidligere periode?
+            // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
             REVURDERING -> error("Håndterer ikke revurdering ennå")
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
@@ -446,11 +446,16 @@ class BeregnYtelseSteg(
     ): List<AndelTilkjentYtelse> {
         val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak)
         return beløpsperioder
-            .map {
+            .flatMap { it.perioder }
+            .flatMap { it.nyeUtbetalinger }
+            .groupBy { it.grunnlag.årMånedFra }
+            .map { it.key to it.value.sumOf { it.stønad } }
+            .filter { it.second > 0 }
+            .map { (årMåned, beløp) ->
                 AndelTilkjentYtelse(
-                    beløp = it.beløp,
-                    stønadFom = it.periode.fradato,
-                    stønadTom = YearMonth.from(it.periode.fradato).atEndOfMonth(), // settes til en måned
+                    beløp = beløp,
+                    stønadFom = årMåned.atDay(1),
+                    stønadTom = årMåned.atEndOfMonth(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,

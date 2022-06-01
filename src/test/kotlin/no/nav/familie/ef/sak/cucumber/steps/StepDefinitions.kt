@@ -179,7 +179,8 @@ class StepDefinitions {
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
     fun `forvent følgende vedtaksperiodene fra dato`(årMåned: String, dataTable: DataTable) {
-        val vedtak = vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
+        val vedtak =
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
         val perioder = vedtak.perioder
         dataTable.asMaps().mapIndexed { index, rad ->
             val periode = perioder[index]
@@ -197,7 +198,8 @@ class StepDefinitions {
 
     @Så("forvent følgende inntektsperioder fra dato: {}")
     fun `forvent følgende inntektsperioder fra dato`(årMåned: String, dataTable: DataTable) {
-        val vedtak = vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
+        val vedtak =
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
         val perioder = vedtak.inntekter
         dataTable.asMaps().mapIndexed { index, rad ->
             val periode = perioder[index]
@@ -206,20 +208,24 @@ class StepDefinitions {
             assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
 
             assertThat(periode.forventetInntekt?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.INNTEKT, rad))
-            assertThat(periode.samordningsfradrag?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad))
+            assertThat(periode.samordningsfradrag?.toInt()).isEqualTo(
+                parseInt(
+                    VedtakDomenebegrep.SAMORDNINGSFRADRAG,
+                    rad
+                )
+            )
         }
         assertThat(dataTable.asMaps()).hasSize(perioder.size)
     }
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")
     fun `forvent følgende andeler lagret`(behandling: Int, dataTable: DataTable) {
-        if (stønadstype == StønadType.SKOLEPENGER) return // TODO denne må slettes når vi fikset beregning av periodene
+        val behandlingId = behandlingIdTilUUID[behandling]
+        val gjeldendeTilkjentYtelse: TilkjentYtelse =
+            tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
         dataTable.asMaps().mapIndexed { index, rad ->
-            val behandlingId = behandlingIdTilUUID[behandling]
             val kildeBehandlingId =
                 behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, rad)]
-            val gjeldendeTilkjentYtelse: TilkjentYtelse =
-                tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
 
             val fraOgMed = parseFraOgMed(rad)
             val tilOgMed = parseTilOgMed(rad)
@@ -246,6 +252,12 @@ class StepDefinitions {
                 throw Throwable("Feilet rad $index", e)
             }
         }
+        feilHvis(gjeldendeTilkjentYtelse.andelerTilkjentYtelse.size > dataTable.asMaps().size) {
+            val andelerTilkjentYtelse = gjeldendeTilkjentYtelse.andelerTilkjentYtelse
+            val manglandeAndeler = andelerTilkjentYtelse.subList(dataTable.asMaps().size, andelerTilkjentYtelse.size)
+            "Mangler periodene: $manglandeAndeler"
+        }
+        assertThat(dataTable.asMaps().size).isEqualTo(gjeldendeTilkjentYtelse.andelerTilkjentYtelse.size)
     }
 
     private fun validerOgSettStønadstype(stønadType: StønadType) {

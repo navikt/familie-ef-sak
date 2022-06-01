@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
@@ -109,7 +110,7 @@ object VedtakDtoUtil {
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
             50,
-            500
+            listOf(SkolepengerUtgiftDto(YearMonth.of(2021, 1), 500))
         )
 
     fun sanksjonertPeriodeDto() =

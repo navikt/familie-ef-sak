@@ -59,6 +59,11 @@ data class UtgiftsperiodeSkolepenger(
     val datoFra: LocalDate,
     val datoTil: LocalDate,
     val studiebelastning: Int,
+    val utgifter: List<SkolepengerUtgift>
+)
+
+data class SkolepengerUtgift(
+    val årMånedFra: YearMonth,
     val utgifter: Int
 )
 

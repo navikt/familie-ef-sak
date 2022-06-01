@@ -12,30 +12,31 @@ Egenskap: Skolepenger med studiebelastning
 
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 30               | 100_000  |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 50               | 100_000  |
 
     Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
-      | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
-      | 08.2021         | 08.2021         | 100   | 1               |
+      | Fra og med dato | Til og med dato | Beløp  | Kildebehandling |
+      | 08.2021         | 08.2021         | 34_000 | 1               |
 
-  Scenario: To utgifter på ett skoleår, over grensen på første utgiften men med studiebelastning - får ikke noe utbetalt for den andre utgiften
+  Scenario: To utgifter på ett skoleår, over grensen på første utgiften men med studiebelastning
 
     Gitt følgende behandlinger for skolepenger
       | BehandlingId | Behandlingstype       |
       | 1            | FØRSTEGANGSBEHANDLING |
 
     Gitt følgende vedtak for skolepenger
-      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 30               | 100_000  |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 10.2021         | 06.2022         | 100              | 10_000   |
+      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 50               |              | 100_000  |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 10.2021      | 10_000   |
 
     Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
-      | 08.2021         | 08.2021         | 100   | 1               |
+      | 08.2021         | 08.2021         | 34000   | 1               |
+      | 10.2021         | 10.2021         | 10000   | 1               |
 
   Scenario: To utgifter på ett skoleår, over grensen på andre utgiften men med studiebelastning, får ikke noe utbetalt for den andre utgiften
 
@@ -44,12 +45,13 @@ Egenskap: Skolepenger med studiebelastning
       | 1            | FØRSTEGANGSBEHANDLING |
 
     Gitt følgende vedtak for skolepenger
-      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 10_000   |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 10.2021         | 06.2022         | 30               | 100_000  |
+      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              |              | 10_000   |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 30               | 10.2021      | 100_000  |
 
     Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
-      | 08.2021         | 08.2021         | 100   | 1               |
+      | 08.2021         | 08.2021         | 10_000   | 1               |
+      | 10.2021         | 10.2021         | 10_400   | 1               |

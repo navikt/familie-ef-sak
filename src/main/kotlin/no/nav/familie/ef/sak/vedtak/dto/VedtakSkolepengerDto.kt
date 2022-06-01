@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtak.dto
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.UtgiftsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
@@ -18,18 +19,23 @@ data class UtgiftsperiodeSkolepengerDto(
     val årMånedFra: YearMonth,
     val årMånedTil: YearMonth,
     val studiebelastning: Int,
-    val utgifter: Int
+    val utgifter: List<SkolepengerUtgiftDto>
 ) {
 
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 }
+
+data class SkolepengerUtgiftDto(
+    val årMånedFra: YearMonth,
+    val utgifter: Int
+)
 
 fun UtgiftsperiodeSkolepengerDto.tilDomene(): UtgiftsperiodeSkolepenger = UtgiftsperiodeSkolepenger(
     studietype = this.studietype,
     datoFra = this.årMånedFra.atDay(1),
     datoTil = this.årMånedTil.atEndOfMonth(),
     studiebelastning = this.studiebelastning,
-    utgifter = this.utgifter
+    utgifter = this.utgifter.map { SkolepengerUtgift(it.årMånedFra, it.utgifter) }
 )
 
 fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.INNVILGE): InnvilgelseSkolepenger {
@@ -44,7 +50,10 @@ fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.I
                 årMånedFra = YearMonth.from(it.datoFra),
                 årMånedTil = YearMonth.from(it.datoTil),
                 studiebelastning = it.studiebelastning,
-                utgifter = it.utgifter
+                utgifter = it.utgifter.map {
+                    SkolepengerUtgiftDto(årMånedFra = it.årMånedFra,
+                        utgifter = it.utgifter)
+                }
             )
         }
     )
