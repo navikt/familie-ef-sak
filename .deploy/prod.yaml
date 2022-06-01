@@ -64,6 +64,7 @@ spec:
           namespace: teamfamilie
           cluster: prod-gcp
         - application: bidrag-grunnlag
+          namespace: bidrag
           cluster: prod-gcp
     outbound:
       rules:
