@@ -1,12 +1,9 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,7 +18,6 @@ import java.util.UUID
 class BrevmottakereController(
     private val tilgangService: TilgangService,
     private val brevmottakereService: BrevmottakereService,
-    private val featureToggleService: FeatureToggleService
 ) {
 
     @GetMapping("/{behandlingId}")
@@ -38,12 +34,6 @@ class BrevmottakereController(
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        if (!featureToggleService.isEnabled("familie.ef.sak.brevmottakere-verge-og-fullmakt")) {
-            throw Feil(
-                "Brevmottaker-funksjonaliteten er ikke tilgjengelig",
-                httpStatus = HttpStatus.BAD_REQUEST
-            )
-        }
 
         return Ressurs.success(brevmottakereService.lagreBrevmottakere(behandlingId, brevmottakere))
     }
