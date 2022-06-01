@@ -38,7 +38,9 @@ internal class ArbeidsforholdControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentArbeidsforhold(fagsakId: UUID): ResponseEntity<Ressurs<List<ArbeidsforholdDto>>> =
-        restTemplate.exchange(localhost("/api/arbeidsforhold/fagsak/$fagsakId?ansettelsesperiodeFom=2021-01-01"),
+        restTemplate.exchange(
+            localhost("/api/arbeidsforhold/fagsak/$fagsakId?ansettelsesperiodeFom=2021-01-01"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<List<ArbeidsforholdDto>>>(headers))
+            HttpEntity<Ressurs<List<ArbeidsforholdDto>>>(headers)
+        )
 }

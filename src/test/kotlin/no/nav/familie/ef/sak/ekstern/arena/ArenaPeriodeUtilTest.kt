@@ -16,8 +16,10 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `sammenhengende periode fra ef og infotrygd slås sammen tvers stønadstyper`() {
         val request = request(of(2022, 1), of(2022, 1))
-        val perioder = internePerioder(listOf(periode(of(2021, 1), of(2022, 1))),
-                                       listOf(periode(of(2022, 2), of(2023, 1))))
+        val perioder = internePerioder(
+            listOf(periode(of(2021, 1), of(2022, 1))),
+            listOf(periode(of(2022, 2), of(2023, 1)))
+        )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2023, 1)))
@@ -26,30 +28,44 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `ikke sammenhengende periode tvers stønadstyper fra ef og infotrygd returneres oppdelte`() {
         val request = request(of(2022, 1), of(2022, 4))
-        val perioder = internePerioder(listOf(periode(of(2021, 1), of(2022, 1))),
-                                       listOf(periode(of(2022, 3), of(2023, 1))))
+        val perioder = internePerioder(
+            listOf(periode(of(2021, 1), of(2022, 1))),
+            listOf(periode(of(2022, 3), of(2023, 1)))
+        )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
-        assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2022, 1)),
-                                             lagResultatPeriode(of(2022, 3), of(2023, 1)))
+        assertThat(resultat).containsExactly(
+            lagResultatPeriode(of(2021, 1), of(2022, 1)),
+            lagResultatPeriode(of(2022, 3), of(2023, 1))
+        )
     }
 
     @Test
     internal fun `ikke sammenhengende periode av en type stønad fra ef og infotrygd returneres oppdelte`() {
         val request = request(of(2022, 1), of(2022, 4))
-        val perioder = internePerioder(listOf(periode(of(2021, 1), of(2022, 1)),
-                                              periode(of(2022, 3), of(2023, 1))))
+        val perioder = internePerioder(
+            listOf(
+                periode(of(2021, 1), of(2022, 1)),
+                periode(of(2022, 3), of(2023, 1))
+            )
+        )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
-        assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2022, 1)),
-                                             lagResultatPeriode(of(2022, 3), of(2023, 1)))
+        assertThat(resultat).containsExactly(
+            lagResultatPeriode(of(2021, 1), of(2022, 1)),
+            lagResultatPeriode(of(2022, 3), of(2023, 1))
+        )
     }
 
     @Test
     internal fun `request overlapper kun en av periodene`() {
         val request = request(of(2022, 1), of(2022, 1))
-        val perioder = internePerioder(listOf(periode(of(2021, 1), of(2022, 1)),
-                                              periode(of(2022, 3), of(2023, 1))))
+        val perioder = internePerioder(
+            listOf(
+                periode(of(2021, 1), of(2022, 1)),
+                periode(of(2022, 3), of(2023, 1))
+            )
+        )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2022, 1)))
@@ -58,8 +74,10 @@ internal class ArenaPeriodeUtilTest {
     @Test
     internal fun `overlappende periode fra ef og infotrygd slås sammen tvers stønadstyper`() {
         val request = request(of(2022, 1), of(2022, 1))
-        val perioder = internePerioder(listOf(periode(of(2021, 11), of(2022, 1))),
-                                       listOf(periode(of(2021, 1), of(2023, 1))))
+        val perioder = internePerioder(
+            listOf(periode(of(2021, 11), of(2022, 1))),
+            listOf(periode(of(2021, 1), of(2023, 1)))
+        )
 
         val resultat = slåSammenPerioderFraEfOgInfotrygd(request, perioder)
         assertThat(resultat).containsExactly(lagResultatPeriode(of(2021, 1), of(2023, 1)))
@@ -115,37 +133,37 @@ internal class ArenaPeriodeUtilTest {
             assertThat(resultat).isEmpty()
         }
     }
-
 }
 
 private val ident = "01234567890"
 
 private fun request(fom: YearMonth, tom: YearMonth) =
-        PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth())
+    PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth())
 
 private fun periode(fom: YearMonth, tom: YearMonth) =
-        InternPeriode(
-                personIdent = ident,
-                inntektsreduksjon = 0,
-                samordningsfradrag = 0,
-                utgifterBarnetilsyn = 0,
-                månedsbeløp = 0,
-                engangsbeløp = 0,
-                stønadFom = fom.atDay(1),
-                stønadTom = tom.atEndOfMonth(),
-                opphørsdato = null,
-                datakilde = PeriodeOvergangsstønad.Datakilde.EF)
+    InternPeriode(
+        personIdent = ident,
+        inntektsreduksjon = 0,
+        samordningsfradrag = 0,
+        utgifterBarnetilsyn = 0,
+        månedsbeløp = 0,
+        engangsbeløp = 0,
+        stønadFom = fom.atDay(1),
+        stønadTom = tom.atEndOfMonth(),
+        opphørsdato = null,
+        datakilde = PeriodeOvergangsstønad.Datakilde.EF
+    )
 
 private fun internePerioder(
-        overgangsstønad: List<InternPeriode> = emptyList(),
-        barnetilsyn: List<InternPeriode> = emptyList(),
-        skolepenger: List<InternPeriode> = emptyList()
+    overgangsstønad: List<InternPeriode> = emptyList(),
+    barnetilsyn: List<InternPeriode> = emptyList(),
+    skolepenger: List<InternPeriode> = emptyList()
 ) = InternePerioder(overgangsstønad, barnetilsyn, skolepenger)
 
 private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
-        PeriodeOvergangsstønad(
-                personIdent = ident,
-                fomDato = fom.atDay(1),
-                tomDato = tom.atEndOfMonth(),
-                datakilde = PeriodeOvergangsstønad.Datakilde.EF
-        )
+    PeriodeOvergangsstønad(
+        personIdent = ident,
+        fomDato = fom.atDay(1),
+        tomDato = tom.atEndOfMonth(),
+        datakilde = PeriodeOvergangsstønad.Datakilde.EF
+    )

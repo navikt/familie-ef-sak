@@ -73,8 +73,13 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
         settBehandlingTilIverksatt(behandling)
 
         behandlingRepository.insert(behandling2)
-        innvilg(saksbehandling2, listOf(vedtaksperiode), listOf(Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
-                                                                Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))))
+        innvilg(
+            saksbehandling2, listOf(vedtaksperiode),
+            listOf(
+                Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
+                Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))
+            )
+        )
         settBehandlingTilIverksatt(behandling2)
 
         assertThat(hentAndeler(behandling.id)).hasSize(1)
@@ -85,23 +90,31 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     fun settBehandlingTilIverksatt(behandling: Behandling) {
-        behandlingRepository.update(behandling.copy(status = BehandlingStatus.FERDIGSTILT,
-                                                    resultat = BehandlingResultat.INNVILGET))
+        behandlingRepository.update(
+            behandling.copy(
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
+        )
     }
 
     private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> =
-            tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+        tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
     private fun opprettVedtaksperiode(fra: YearMonth, til: YearMonth) =
-            VedtaksperiodeDto(fra, til, AktivitetType.BARNET_ER_SYKT, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+        VedtaksperiodeDto(fra, til, AktivitetType.BARNET_ER_SYKT, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
-    private fun innvilg(saksbehandling: Saksbehandling,
-                        vedtaksperioder: List<VedtaksperiodeDto>,
-                        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))) {
-        val vedtak = InnvilgelseOvergangsstønad(perioder = vedtaksperioder,
-                                                inntekter = inntekter,
-                                                periodeBegrunnelse = null,
-                                                inntektBegrunnelse = null)
+    private fun innvilg(
+        saksbehandling: Saksbehandling,
+        vedtaksperioder: List<VedtaksperiodeDto>,
+        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))
+    ) {
+        val vedtak = InnvilgelseOvergangsstønad(
+            perioder = vedtaksperioder,
+            inntekter = inntekter,
+            periodeBegrunnelse = null,
+            inntektBegrunnelse = null
+        )
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.amelding
 
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.amelding.ekstern.AMeldingInntektClient
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID

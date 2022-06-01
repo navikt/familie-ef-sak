@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -29,9 +28,11 @@ internal class MellomlagringBrevServiceTest {
     private val mellomlagerBrevRepository = mockk<MellomlagerBrevRepository>()
     private val mellomlagerFritekstbrevRepository = mockk<MellomlagerFritekstbrevRepository>()
     private val mellomlagerFrittståendeBrevRepository = mockk<MellomlagerFrittståendeBrevRepository>()
-    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(mellomlagerBrevRepository,
-                                                                                               mellomlagerFritekstbrevRepository,
-                                                                                               mellomlagerFrittståendeBrevRepository)
+    private val mellomlagringBrevService = no.nav.familie.ef.sak.brev.MellomlagringBrevService(
+        mellomlagerBrevRepository,
+        mellomlagerFritekstbrevRepository,
+        mellomlagerFrittståendeBrevRepository
+    )
 
     @BeforeAll
     fun setUp() {
@@ -49,30 +50,42 @@ internal class MellomlagringBrevServiceTest {
 
         every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns mellomlagretBrev
 
-        assertThat(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId,
-                                                                          sanityVersjon))
-                .isEqualTo(MellomlagretBrevSanity(brevmal = mellomlagretBrev.brevmal,
-                                                  brevverdier = mellomlagretBrev.brevverdier))
+        assertThat(
+            mellomlagringBrevService.hentOgValiderMellomlagretBrev(
+                behandlingId,
+                sanityVersjon
+            )
+        )
+            .isEqualTo(
+                MellomlagretBrevSanity(
+                    brevmal = mellomlagretBrev.brevmal,
+                    brevverdier = mellomlagretBrev.brevverdier
+                )
+            )
     }
 
     @Test
     fun `hentOgValiderMellomlagretBrev skal returnere null når sanityVersjon ikke matcher`() {
-        every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(behandlingId,
-                                                                                                  brevverdier,
-                                                                                                  brevmal,
-                                                                                                  "1",
-                                                                                                  LocalDate.now())
+        every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns MellomlagretBrev(
+            behandlingId,
+            brevverdier,
+            brevmal,
+            "1",
+            LocalDate.now()
+        )
         assertThat(mellomlagringBrevService.hentOgValiderMellomlagretBrev(behandlingId, "2")).isNull()
     }
 
     @Test
     fun `hentMellomlagretFrittståendeBrev skal returnere mellomlagret frittstående brev`() {
         val fagsakId = UUID.randomUUID()
-        val brev = MellomlagretFrittståendeBrev(id = UUID.randomUUID(),
-                                                fagsakId = fagsakId,
-                                                brev = Fritekstbrev(overskrift = "Hei", avsnitt = listOf()),
-                                                brevType = FrittståendeBrevKategori.INFORMASJONSBREV,
-                                                saksbehandlerIdent = "Bob")
+        val brev = MellomlagretFrittståendeBrev(
+            id = UUID.randomUUID(),
+            fagsakId = fagsakId,
+            brev = Fritekstbrev(overskrift = "Hei", avsnitt = listOf()),
+            brevType = FrittståendeBrevKategori.INFORMASJONSBREV,
+            saksbehandlerIdent = "Bob"
+        )
         every { mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, any()) } returns brev
         val mellomlagretFrittståendeBrev = mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId)
         assertThat(mellomlagretFrittståendeBrev).isNotNull

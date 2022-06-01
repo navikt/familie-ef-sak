@@ -10,14 +10,18 @@ import java.util.Properties
 import java.util.UUID
 
 @Service
-@TaskStepBeskrivelse(taskStepType = LagSaksbehandlingsblankettTask.TYPE,
-                     maxAntallFeil = 50,
-                     settTilManuellOppfølgning = true,
-                     triggerTidVedFeilISekunder = 15 * 60L,
-                     beskrivelse = "Lag blankett for å dokumentere saksbehandling (fallback).")
+@TaskStepBeskrivelse(
+    taskStepType = LagSaksbehandlingsblankettTask.TYPE,
+    maxAntallFeil = 50,
+    settTilManuellOppfølgning = true,
+    triggerTidVedFeilISekunder = 15 * 60L,
+    beskrivelse = "Lag blankett for å dokumentere saksbehandling (fallback)."
+)
 
-class LagSaksbehandlingsblankettTask(private val stegService: StegService,
-                                     private val behandlingService: BehandlingService) : AsyncTaskStep {
+class LagSaksbehandlingsblankettTask(
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val saksbehandling = behandlingService.hentSaksbehandling(UUID.fromString(task.payload))
@@ -27,14 +31,14 @@ class LagSaksbehandlingsblankettTask(private val stegService: StegService,
     companion object {
 
         fun opprettTask(behandlingId: UUID): Task =
-                Task(type = TYPE,
-                     payload = behandlingId.toString(),
-                     properties = Properties().apply {
-                         this["behandlingId"] = behandlingId.toString()
-                     })
+            Task(
+                type = TYPE,
+                payload = behandlingId.toString(),
+                properties = Properties().apply {
+                    this["behandlingId"] = behandlingId.toString()
+                }
+            )
 
         const val TYPE = "lagSaksbehandlingsblankettTask"
     }
-
-
 }

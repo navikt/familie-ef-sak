@@ -13,27 +13,29 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class Saksbehandling(val id: UUID,
-                          val eksternId: Long,
-                          val forrigeBehandlingId: UUID? = null,
-                          val type: BehandlingType,
-                          val status: BehandlingStatus,
-                          val steg: StegType,
-                          @Column("arsak")
-                          val årsak: BehandlingÅrsak,
-                          val kravMottatt: LocalDate? = null,
-                          val resultat: BehandlingResultat,
-                          @Column("henlagt_arsak")
-                          val henlagtÅrsak: HenlagtÅrsak? = null,
-                          val ident: String,
-                          val fagsakId: UUID,
-                          val eksternFagsakId: Long,
-                          @Column("stonadstype")
-                          val stønadstype: StønadType,
-                          val migrert: Boolean = false,
-                          val opprettetAv: String,
-                          val opprettetTid: LocalDateTime,
-                          val endretTid: LocalDateTime) {
+data class Saksbehandling(
+    val id: UUID,
+    val eksternId: Long,
+    val forrigeBehandlingId: UUID? = null,
+    val type: BehandlingType,
+    val status: BehandlingStatus,
+    val steg: StegType,
+    @Column("arsak")
+    val årsak: BehandlingÅrsak,
+    val kravMottatt: LocalDate? = null,
+    val resultat: BehandlingResultat,
+    @Column("henlagt_arsak")
+    val henlagtÅrsak: HenlagtÅrsak? = null,
+    val ident: String,
+    val fagsakId: UUID,
+    val eksternFagsakId: Long,
+    @Column("stonadstype")
+    val stønadstype: StønadType,
+    val migrert: Boolean = false,
+    val opprettetAv: String,
+    val opprettetTid: LocalDateTime,
+    val endretTid: LocalDateTime
+) {
 
     val erMigrering get() = årsak == BehandlingÅrsak.MIGRERING
 

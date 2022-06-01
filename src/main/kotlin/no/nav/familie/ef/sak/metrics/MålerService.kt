@@ -34,20 +34,36 @@ class MålerService(private val målerRepository: MålerRepository) {
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun antallLøpendeSaker() {
         val now = YearMonth.now()
-        val løpendeSaker = målerRepository.finnAntallLøpendeSaker(now.minusMonths(2).atDay(1),
-                                                                  now.plusMonths(2).atDay(1))
+        val løpendeSaker = målerRepository.finnAntallLøpendeSaker(
+            now.minusMonths(2).atDay(1),
+            now.plusMonths(2).atDay(1)
+        )
 
-        løpendeBehandlingerGauge.register(løpendeSaker.map {
-            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')),
-                              it.antall)
-        }, true)
+        løpendeBehandlingerGauge.register(
+            løpendeSaker.map {
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "ytelse", it.stonadstype.name,
+                        "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')
+                    ),
+                    it.antall
+                )
+            },
+            true
+        )
 
-        løpendeBehandlingerBeløpGauge.register(løpendeSaker.map {
-            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')),
-                              it.belop)
-        }, true)
+        løpendeBehandlingerBeløpGauge.register(
+            løpendeSaker.map {
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "ytelse", it.stonadstype.name,
+                        "maned", it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')
+                    ),
+                    it.belop
+                )
+            },
+            true
+        )
     }
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
@@ -62,9 +78,13 @@ class MålerService(private val målerRepository: MålerRepository) {
         val behandlinger = målerRepository.finnÅpneBehandlingerPerUke()
         logger.info("Åpne behandlinger per uke returnerte ${behandlinger.sumOf { it.antall }} fordelt på ${behandlinger.size} uker.")
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "ytelse", it.stonadstype.name,
+                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                ),
+                it.antall
+            )
         }
 
         åpneBehandlingerPerUkeGauge.register(rows, true)
@@ -73,12 +93,18 @@ class MålerService(private val målerRepository: MålerRepository) {
     @Scheduled(initialDelay = 90 * 1000L, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
         val behandlinger = målerRepository.finnÅpneBehandlinger()
-        logger.info("Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} " +
-                    "fordelt på ${behandlinger.size} statuser.")
+        logger.info(
+            "Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} " +
+                "fordelt på ${behandlinger.size} statuser."
+        )
         val rows = behandlinger.map {
-            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "status", it.status.name),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "ytelse", it.stonadstype.name,
+                    "status", it.status.name
+                ),
+                it.antall
+            )
         }
 
         åpneBehandlingerGauge.register(rows, true)
@@ -90,10 +116,14 @@ class MålerService(private val målerRepository: MålerRepository) {
         logger.info("Vedtak returnerte ${data.sumOf { it.antall }} fordelt på ${data.size} typer/uker.")
 
         val rows = data.map {
-            MultiGauge.Row.of(Tags.of("ytelse", it.stonadstype.name,
-                                      "resultat", it.resultat.name,
-                                      "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')),
-                              it.antall)
+            MultiGauge.Row.of(
+                Tags.of(
+                    "ytelse", it.stonadstype.name,
+                    "resultat", it.resultat.name,
+                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                ),
+                it.antall
+            )
         }
         vedtakGauge.register(rows)
     }
@@ -102,6 +132,4 @@ class MålerService(private val målerRepository: MålerRepository) {
 
         const val OPPDATERINGSFREKVENS = 30 * 60 * 1000L
     }
-
-
 }

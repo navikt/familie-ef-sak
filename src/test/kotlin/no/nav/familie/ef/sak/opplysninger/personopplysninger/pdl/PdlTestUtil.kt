@@ -5,7 +5,6 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
 
-
 object PdlTestUtil {
 
     fun parseSpørring(filnavn: String): Map<String, *> {
@@ -25,20 +24,20 @@ object PdlTestUtil {
         }
 
         val map =
-                konstruktørparametere(entitet)
-                        .map {
-                            val annotation = it.annotations.firstOrNull()
-                            val annotationClass = annotation?.annotationClass
-                            val annotationValue =
-                                    annotationClass?.declaredMemberProperties
-                                            ?.firstOrNull { kProperty1 -> kProperty1.name == "value" }
-                                            ?.getter
-                                            ?.call(annotation) as String?
-                            (annotationValue ?: it.name) to finnSøknadsfelt(entitet, it)
-                        }
-                        .associateBy({ it.first!! }, {
-                            finnFeltStruktur(getFeltverdi(it.second, entitet))
-                        })
+            konstruktørparametere(entitet)
+                .map {
+                    val annotation = it.annotations.firstOrNull()
+                    val annotationClass = annotation?.annotationClass
+                    val annotationValue =
+                        annotationClass?.declaredMemberProperties
+                            ?.firstOrNull { kProperty1 -> kProperty1.name == "value" }
+                            ?.getter
+                            ?.call(annotation) as String?
+                    (annotationValue ?: it.name) to finnSøknadsfelt(entitet, it)
+                }
+                .associateBy({ it.first!! }, {
+                    finnFeltStruktur(getFeltverdi(it.second, entitet))
+                })
 
         return map.ifEmpty { null }
     }
@@ -79,13 +78,13 @@ object PdlTestUtil {
      * Henter ut verdien for felt på entitet.
      */
     private fun getFeltverdi(felt: KProperty1<out Any, Any?>, entitet: Any) =
-            felt.getter.call(entitet)
+        felt.getter.call(entitet)
 
     /**
      * Finn første (og eneste) felt på entiteten som har samme navn som konstruktørparameter.
      */
     private fun finnSøknadsfelt(entity: Any, konstruktørparameter: KParameter) =
-            entity::class.declaredMemberProperties.first { it.name == konstruktørparameter.name }
+        entity::class.declaredMemberProperties.first { it.name == konstruktørparameter.name }
 
     /**
      * Konstruktørparametere er det eneste som gir oss en garantert rekkefølge for feltene, så vi henter disse først.

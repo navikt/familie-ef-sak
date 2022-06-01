@@ -17,15 +17,21 @@ import java.util.UUID
 @RequestMapping(path = ["/api/soknad"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class SøknadController(private val søknadService: SøknadService,
-                       private val tilgangService: TilgangService) {
+class SøknadController(
+    private val søknadService: SøknadService,
+    private val tilgangService: TilgangService
+) {
 
     @GetMapping("/{behandlingId}/datoer")
     fun hentSøknadDatoer(@PathVariable behandlingId: UUID): Ressurs<SøknadDatoerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
         brukerfeilHvis(søknadsgrunnlag == null) { "Mangler søknad for behandling=$behandlingId" }
-        return Ressurs.success(SøknadDatoerDto(søknadsdato = søknadsgrunnlag.datoMottatt,
-                                               søkerStønadFra = søknadsgrunnlag.søkerFra))
+        return Ressurs.success(
+            SøknadDatoerDto(
+                søknadsdato = søknadsgrunnlag.datoMottatt,
+                søkerStønadFra = søknadsgrunnlag.søkerFra
+            )
+        )
     }
 }

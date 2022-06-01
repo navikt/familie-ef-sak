@@ -52,8 +52,10 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal hente søknadsinformasjon gitt behandlingId`() {
         val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
-        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-                                                                         StønadType.OVERGANGSSTØNAD)
+        val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
+            søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+            StønadType.OVERGANGSSTØNAD
+        )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = behandlingÅrsak)
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
@@ -64,14 +66,14 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         Assertions.assertThat(respons.body?.data?.søkerStønadFra).isEqualTo(søknadSkjema.søkerFra)
         Assertions.assertThat(respons.body?.data?.søknadsdato).isEqualTo(søknadSkjema.datoMottatt)
-
     }
 
     private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> {
 
-        return restTemplate.exchange(localhost("/api/soknad/$behandlingId/datoer"),
-                                     HttpMethod.GET,
-                                     HttpEntity<Ressurs<SøknadDatoerDto>>(headers))
+        return restTemplate.exchange(
+            localhost("/api/soknad/$behandlingId/datoer"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<SøknadDatoerDto>>(headers)
+        )
     }
-
 }

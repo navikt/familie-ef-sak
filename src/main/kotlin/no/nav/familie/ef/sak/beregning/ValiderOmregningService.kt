@@ -10,9 +10,11 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 
 @Service
-class ValiderOmregningService(private val vedtakService: VedtakService,
-                              private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                              private val beregningService: BeregningService) {
+class ValiderOmregningService(
+    private val vedtakService: VedtakService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val beregningService: BeregningService
+) {
 
     fun validerHarGammelGOgKanLagres(saksbehandling: Saksbehandling) {
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) return
@@ -25,22 +27,22 @@ class ValiderOmregningService(private val vedtakService: VedtakService,
         if (tilkjentYtelse.grunnbeløpsdato < nyesteGrunnbeløpGyldigFraOgMed) return
 
         tilkjentYtelse.andelerTilkjentYtelse
-                .filter { it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed }
-                .forEach { andel ->
-                    val inntektsperiodeForAndel = Inntektsperiode(andel.stønadFom,
-                                                                  andel.stønadTom,
-                                                                  andel.inntekt.toBigDecimal(),
-                                                                  andel.samordningsfradrag.toBigDecimal())
-                    val beregnetAndel = beregningService.beregnYtelse(listOf(andel.periode), listOf(inntektsperiodeForAndel))
-                    brukerfeilHvis(beregnetAndel.size != 1 || beregnetAndel.first().beløp.toInt() != andel.beløp) {
-                        feilmeldingForFeilGBeløp(andel)
-                    }
+            .filter { it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed }
+            .forEach { andel ->
+                val inntektsperiodeForAndel = Inntektsperiode(
+                    andel.stønadFom,
+                    andel.stønadTom,
+                    andel.inntekt.toBigDecimal(),
+                    andel.samordningsfradrag.toBigDecimal()
+                )
+                val beregnetAndel = beregningService.beregnYtelse(listOf(andel.periode), listOf(inntektsperiodeForAndel))
+                brukerfeilHvis(beregnetAndel.size != 1 || beregnetAndel.first().beløp.toInt() != andel.beløp) {
+                    feilmeldingForFeilGBeløp(andel)
                 }
-
+            }
     }
 
-
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
-            "Kan ikke fullføre behandling: Det må revurderes fra " +
+        "Kan ikke fullføre behandling: Det må revurderes fra " +
             "${maxOf(andel.stønadFom, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
 }

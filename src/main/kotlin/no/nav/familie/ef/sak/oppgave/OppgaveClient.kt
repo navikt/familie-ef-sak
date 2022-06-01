@@ -23,9 +23,11 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
-class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
-                    integrasjonerConfig: IntegrasjonerConfig)
-    : AbstractPingableRestClient(restOperations, "oppgave") {
+class OppgaveClient(
+    @Qualifier("azure") restOperations: RestOperations,
+    integrasjonerConfig: IntegrasjonerConfig
+) :
+    AbstractPingableRestClient(restOperations, "oppgave") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
@@ -48,7 +50,7 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
         val uri = URI.create("$oppgaveUri/v4")
 
         val respons =
-                postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+            postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
         return pakkUtRespons(respons, uri, "hentOppgaver")
     }
 
@@ -64,8 +66,10 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
             return pakkUtRespons(respons, uri, "fordelOppgave").oppgaveId
         } catch (e: RessursException) {
             if (e.ressurs.melding.contains("allerede er ferdigstilt")) {
-                throw ApiFeil("Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.",
-                              HttpStatus.BAD_REQUEST)
+                throw ApiFeil(
+                    "Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.",
+                    HttpStatus.BAD_REQUEST
+                )
             }
             throw e
         }
@@ -79,28 +83,31 @@ class OppgaveClient(@Qualifier("azure") restOperations: RestOperations,
 
     fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
         val uri = UriComponentsBuilder.fromUri(oppgaveUri)
-                .pathSegment("mappe", "sok")
-                .queryParams(finnMappeRequest.toQueryParams())
-                .build()
-                .toUri()
+            .pathSegment("mappe", "sok")
+            .queryParams(finnMappeRequest.toQueryParams())
+            .build()
+            .toUri()
         val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)
         return pakkUtRespons(respons, uri, "finnMappe")
     }
 
-    private fun <T> pakkUtRespons(respons: Ressurs<T>,
-                                  uri: URI?,
-                                  metode: String): T {
+    private fun <T> pakkUtRespons(
+        respons: Ressurs<T>,
+        uri: URI?,
+        metode: String
+    ): T {
         val data = respons.data
         if (respons.status == Ressurs.Status.SUKSESS && data != null) {
             return data
         } else if (respons.status == Ressurs.Status.SUKSESS) {
             throw IntegrasjonException("Ressurs har status suksess, men mangler data")
         } else {
-            throw IntegrasjonException("Respons fra $metode feilet med status=${respons.status} melding=${respons.melding}",
-                                       null,
-                                       uri,
-                                       data)
+            throw IntegrasjonException(
+                "Respons fra $metode feilet med status=${respons.status} melding=${respons.melding}",
+                null,
+                uri,
+                data
+            )
         }
     }
-
 }

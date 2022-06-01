@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandling
 
-
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -9,7 +8,7 @@ import java.util.UUID
 
 @Repository
 interface BehandlingsjournalpostRepository :
-        RepositoryInterface<Behandlingsjournalpost, UUID>, InsertUpdateRepository<Behandlingsjournalpost> {
+    RepositoryInterface<Behandlingsjournalpost, UUID>, InsertUpdateRepository<Behandlingsjournalpost> {
 
     fun findAllByBehandlingId(behandlingId: UUID): List<Behandlingsjournalpost>
 }

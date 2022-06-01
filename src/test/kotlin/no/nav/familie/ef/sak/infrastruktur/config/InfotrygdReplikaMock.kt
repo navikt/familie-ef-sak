@@ -44,5 +44,4 @@ class InfotrygdReplikaMock {
             every { client.hentPersonerForMigrering(any()) } returns emptySet()
         }
     }
-
 }

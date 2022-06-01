@@ -32,9 +32,11 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak))
 
         val response: ResponseEntity<Ressurs<List<AndelHistorikkDto>>> =
-                restTemplate.exchange(localhost("/api/perioder/fagsak/${fagsak.id}/historikk"),
-                                      HttpMethod.GET,
-                                      HttpEntity(null, headers))
+            restTemplate.exchange(
+                localhost("/api/perioder/fagsak/${fagsak.id}/historikk"),
+                HttpMethod.GET,
+                HttpEntity(null, headers)
+            )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
@@ -45,9 +47,11 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak))
 
         val response: ResponseEntity<Ressurs<List<AndelHistorikkDto>>> =
-                restTemplate.exchange(localhost("/api/perioder/fagsak/${fagsak.id}/historikk?tilOgMedBehandlingId=${fagsak.id}"),
-                                      HttpMethod.GET,
-                                      HttpEntity(null, headers))
+            restTemplate.exchange(
+                localhost("/api/perioder/fagsak/${fagsak.id}/historikk?tilOgMedBehandlingId=${fagsak.id}"),
+                HttpMethod.GET,
+                HttpEntity(null, headers)
+            )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
     }

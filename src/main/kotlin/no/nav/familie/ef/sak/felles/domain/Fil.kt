@@ -18,6 +18,4 @@ data class Fil(val bytes: ByteArray) {
     override fun toString(): String {
         return "Fil(bytes=visesIkke)"
     }
-
-
 }

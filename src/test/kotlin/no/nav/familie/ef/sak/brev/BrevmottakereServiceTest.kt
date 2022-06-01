@@ -37,8 +37,10 @@ internal class BrevmottakereServiceTest {
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
         assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id,
-                                                    brevmottakereDto = brevmottakereDtoMed3Mottakere)
+            brevmottakereService.lagreBrevmottakere(
+                behandlingId = behandling.id,
+                brevmottakereDto = brevmottakereDtoMed3Mottakere
+            )
         }
     }
 
@@ -47,17 +49,27 @@ internal class BrevmottakereServiceTest {
 
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
-        val brevmottakereDto = BrevmottakereDto(personer = listOf(BrevmottakerPerson(personIdent = "123",
-                                                                                     mottakerRolle = BRUKER,
-                                                                                     navn = "navn"),
-                                                                  BrevmottakerPerson(personIdent = "123",
-                                                                                     mottakerRolle = VERGE,
-                                                                                     navn = "navn")),
-                                                organisasjoner = emptyList())
+        val brevmottakereDto = BrevmottakereDto(
+            personer = listOf(
+                BrevmottakerPerson(
+                    personIdent = "123",
+                    mottakerRolle = BRUKER,
+                    navn = "navn"
+                ),
+                BrevmottakerPerson(
+                    personIdent = "123",
+                    mottakerRolle = VERGE,
+                    navn = "navn"
+                )
+            ),
+            organisasjoner = emptyList()
+        )
 
         assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id,
-                                                    brevmottakereDto = brevmottakereDto)
+            brevmottakereService.lagreBrevmottakere(
+                behandlingId = behandling.id,
+                brevmottakereDto = brevmottakereDto
+            )
         }
     }
 
@@ -66,30 +78,49 @@ internal class BrevmottakereServiceTest {
 
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
-        val brevmottakereDto = BrevmottakereDto(personer = emptyList(),
-                                                organisasjoner = listOf(BrevmottakerOrganisasjon(organisasjonsnummer = "123",
-                                                                                                 navnHosOrganisasjon = "n",
-                                                                                                 mottakerRolle = FULLMAKT),
-                                                                        BrevmottakerOrganisasjon(organisasjonsnummer = "123",
-                                                                                                 navnHosOrganisasjon = "n",
-                                                                                                 mottakerRolle = FULLMAKT)))
+        val brevmottakereDto = BrevmottakereDto(
+            personer = emptyList(),
+            organisasjoner = listOf(
+                BrevmottakerOrganisasjon(
+                    organisasjonsnummer = "123",
+                    navnHosOrganisasjon = "n",
+                    mottakerRolle = FULLMAKT
+                ),
+                BrevmottakerOrganisasjon(
+                    organisasjonsnummer = "123",
+                    navnHosOrganisasjon = "n",
+                    mottakerRolle = FULLMAKT
+                )
+            )
+        )
 
         assertThrows<ApiFeil> {
-            brevmottakereService.lagreBrevmottakere(behandlingId = behandling.id,
-                                                    brevmottakereDto = brevmottakereDto)
+            brevmottakereService.lagreBrevmottakere(
+                behandlingId = behandling.id,
+                brevmottakereDto = brevmottakereDto
+            )
         }
     }
 
     private val brevmottakereDtoMed3Mottakere = BrevmottakereDto(
-            personer = listOf(
-                    BrevmottakerPerson("A",
-                                       "A",
-                                       VERGE),
-                    BrevmottakerPerson("B",
-                                       "B",
-                                       BRUKER)),
-            organisasjoner = listOf(
-                    BrevmottakerOrganisasjon("C",
-                                             "C",
-                                             FULLMAKT)))
+        personer = listOf(
+            BrevmottakerPerson(
+                "A",
+                "A",
+                VERGE
+            ),
+            BrevmottakerPerson(
+                "B",
+                "B",
+                BRUKER
+            )
+        ),
+        organisasjoner = listOf(
+            BrevmottakerOrganisasjon(
+                "C",
+                "C",
+                FULLMAKT
+            )
+        )
+    )
 }

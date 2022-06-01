@@ -19,13 +19,14 @@ import org.springframework.stereotype.Service
 @Deprecated("Brukes kun i blankettbehandling - skal fases ut etterhvert")
 @Service
 class BlankettSteg(
-        private val behandlingService: BehandlingService,
-        private val behandlingRepository: BehandlingRepository,
-        private val journalpostClient: JournalpostClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val blankettRepository: BlankettRepository,
-        private val totrinnskontrollService: TotrinnskontrollService,
-        private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
+    private val behandlingService: BehandlingService,
+    private val behandlingRepository: BehandlingRepository,
+    private val journalpostClient: JournalpostClient,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val blankettRepository: BlankettRepository,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val taskRepository: TaskRepository
+) : BehandlingSteg<Void?> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -46,23 +47,22 @@ class BlankettSteg(
             logger.info("steg=${stegType()} fant ikke beslutter på behandling=$saksbehandling")
         }
 
-        val arkiverDokumentRequest = BlankettHelper.lagArkiverBlankettRequestMotInfotrygd(personIdent,
-                                                                                          blankettPdf,
-                                                                                          enhet,
-                                                                                          journalpostForBehandling.sak?.fagsakId,
-                                                                                          saksbehandling.id)
+        val arkiverDokumentRequest = BlankettHelper.lagArkiverBlankettRequestMotInfotrygd(
+            personIdent,
+            blankettPdf,
+            enhet,
+            journalpostForBehandling.sak?.fagsakId,
+            saksbehandling.id
+        )
         val journalpostRespons = journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter)
         behandlingService.leggTilBehandlingsjournalpost(journalpostRespons.journalpostId, Journalposttype.N, saksbehandling.id)
 
         ferdigstillBehandling(saksbehandling)
     }
 
-
     private fun ferdigstillBehandling(saksbehandling: Saksbehandling) {
         taskRepository.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))
     }
 
     override fun stegType(): StegType = StegType.JOURNALFØR_BLANKETT
-
-
 }

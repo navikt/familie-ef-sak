@@ -8,8 +8,10 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
 @Service
-class VentePåTekniskOpphørStatus(private val iverksettClient: IverksettClient,
-                                 private val taskRepository: TaskRepository) : BehandlingSteg<Void?> {
+class VentePåTekniskOpphørStatus(
+    private val iverksettClient: IverksettClient,
+    private val taskRepository: TaskRepository
+) : BehandlingSteg<Void?> {
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         return iverksettClient.hentStatus(saksbehandling.id).let {

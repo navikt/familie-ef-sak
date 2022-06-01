@@ -8,13 +8,15 @@ import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
 @Table
-data class Tilbakekreving(@Id
-                          val behandlingId: UUID,
-                          val valg: Tilbakekrevingsvalg,
-                          val varseltekst: String? = null,
-                          val begrunnelse: String,
-                          @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-                          val sporbar: Sporbar = Sporbar())
+data class Tilbakekreving(
+    @Id
+    val behandlingId: UUID,
+    val valg: Tilbakekrevingsvalg,
+    val varseltekst: String? = null,
+    val begrunnelse: String,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
+    val sporbar: Sporbar = Sporbar()
+)
 
 enum class Tilbakekrevingsvalg {
     OPPRETT_MED_VARSEL,
@@ -23,7 +25,7 @@ enum class Tilbakekrevingsvalg {
 }
 
 fun Tilbakekreving.tilDto() = TilbakekrevingDto(
-        valg = this.valg,
-        varseltekst = this.varseltekst,
-        begrunnelse = this.begrunnelse,
+    valg = this.valg,
+    varseltekst = this.varseltekst,
+    begrunnelse = this.begrunnelse,
 )

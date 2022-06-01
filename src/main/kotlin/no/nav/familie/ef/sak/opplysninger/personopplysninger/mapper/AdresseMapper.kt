@@ -22,10 +22,12 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
 
     fun tilAdresse(adresse: Oppholdsadresse): AdresseDto {
         val visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed))
-        return AdresseDto(visningsadresse = visningsadresse,
-                          type = AdresseType.OPPHOLDSADRESSE,
-                          gyldigFraOgMed = adresse.gyldigFraOgMed,
-                          gyldigTilOgMed = adresse.gyldigTilOgMed)
+        return AdresseDto(
+            visningsadresse = visningsadresse,
+            type = AdresseType.OPPHOLDSADRESSE,
+            gyldigFraOgMed = adresse.gyldigFraOgMed,
+            gyldigTilOgMed = adresse.gyldigTilOgMed
+        )
     }
 
     fun tilAdresse(adresse: Kontaktadresse): AdresseDto {
@@ -33,19 +35,23 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             KontaktadresseType.INNLAND -> AdresseType.KONTAKTADRESSE
             KontaktadresseType.UTLAND -> AdresseType.KONTAKTADRESSE_UTLAND
         }
-        return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed)),
-                          type = type,
-                          gyldigFraOgMed = adresse.gyldigFraOgMed,
-                          gyldigTilOgMed = adresse.gyldigTilOgMed)
+        return AdresseDto(
+            visningsadresse = tilFormatertAdresse(adresse, datoEllerIdag(adresse.gyldigFraOgMed)),
+            type = type,
+            gyldigFraOgMed = adresse.gyldigFraOgMed,
+            gyldigTilOgMed = adresse.gyldigTilOgMed
+        )
     }
 
     fun tilAdresse(adresse: Bostedsadresse): AdresseDto {
         val gjeldendeDato = datoEllerIdag(adresse.gyldigFraOgMed)
-        return AdresseDto(visningsadresse = tilFormatertAdresse(adresse, gjeldendeDato),
-                          type = AdresseType.BOSTEDADRESSE,
-                          gyldigFraOgMed = adresse.gyldigFraOgMed,
-                          gyldigTilOgMed = adresse.gyldigTilOgMed,
-                          angittFlyttedato = angittFlyttedato(adresse.angittFlyttedato))
+        return AdresseDto(
+            visningsadresse = tilFormatertAdresse(adresse, gjeldendeDato),
+            type = AdresseType.BOSTEDADRESSE,
+            gyldigFraOgMed = adresse.gyldigFraOgMed,
+            gyldigTilOgMed = adresse.gyldigTilOgMed,
+            angittFlyttedato = angittFlyttedato(adresse.angittFlyttedato)
+        )
     }
 
     private fun angittFlyttedato(localDate: LocalDate?): LocalDate? {
@@ -67,7 +73,7 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
 
     private fun tilFormatertAdresse(oppholdsadresse: Oppholdsadresse, gjeldendeDato: LocalDate): String? {
         val adresse = oppholdsadresse.vegadresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
-                      ?: oppholdsadresse.utenlandskAdresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
+            ?: oppholdsadresse.utenlandskAdresse?.let { tilFormatertAdresse(it, gjeldendeDato) }
         return join(coAdresse(oppholdsadresse.coAdressenavn), adresse)
     }
 
@@ -96,51 +102,65 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     }
 
     private fun harPrefiks(coAdressenavn: String): Boolean {
-        return coAdressenavn.startsWith("c/o", true)
-               || coAdressenavn.startsWith("V/", true)
-               || coAdressenavn.startsWith("DBO v/", true)
-               || coAdressenavn.startsWith("v/DBO", true)
+        return coAdressenavn.startsWith("c/o", true) ||
+            coAdressenavn.startsWith("V/", true) ||
+            coAdressenavn.startsWith("DBO v/", true) ||
+            coAdressenavn.startsWith("v/DBO", true)
     }
 
-    //må feltet "postboks" ha med "postboks" i strengen? "postboks ${postboks}" ?
+    // må feltet "postboks" ha med "postboks" i strengen? "postboks ${postboks}" ?
     private fun tilFormatertAdresse(postboksadresse: Postboksadresse, gjeldendeDato: LocalDate): String? =
-            join(postboksadresse.postbokseier,
-                 postboksadresse.postboks,
-                 space(postboksadresse.postnummer, poststed(postboksadresse.postnummer, gjeldendeDato)))
+        join(
+            postboksadresse.postbokseier,
+            postboksadresse.postboks,
+            space(postboksadresse.postnummer, poststed(postboksadresse.postnummer, gjeldendeDato))
+        )
 
     private fun tilFormatertAdresse(matrikkeladresse: Matrikkeladresse, gjeldendeDato: LocalDate): String? =
-            join(matrikkeladresse.tilleggsnavn,
-                 matrikkeladresse.bruksenhetsnummer,
-                 space(matrikkeladresse.postnummer, poststed(matrikkeladresse.postnummer, gjeldendeDato)))
+        join(
+            matrikkeladresse.tilleggsnavn,
+            matrikkeladresse.bruksenhetsnummer,
+            space(matrikkeladresse.postnummer, poststed(matrikkeladresse.postnummer, gjeldendeDato))
+        )
 
     private fun tilFormatertAdresse(postadresseIFrittFormat: PostadresseIFrittFormat, gjeldendeDato: LocalDate): String? =
-            join(postadresseIFrittFormat.adresselinje1,
-                 postadresseIFrittFormat.adresselinje2,
-                 postadresseIFrittFormat.adresselinje3,
-                 space(postadresseIFrittFormat.postnummer, poststed(postadresseIFrittFormat.postnummer, gjeldendeDato)))
+        join(
+            postadresseIFrittFormat.adresselinje1,
+            postadresseIFrittFormat.adresselinje2,
+            postadresseIFrittFormat.adresselinje3,
+            space(postadresseIFrittFormat.postnummer, poststed(postadresseIFrittFormat.postnummer, gjeldendeDato))
+        )
 
     // har ikke med bygningEtasjeLeilighet, postboksNummerNavn
     private fun tilFormatertAdresse(utenlandskAdresse: UtenlandskAdresse, gjeldendeDato: LocalDate): String? {
-        return join(utenlandskAdresse.adressenavnNummer,
-                    space(utenlandskAdresse.postkode, utenlandskAdresse.bySted),
-                    utenlandskAdresse.regionDistriktOmraade,
-                    land(utenlandskAdresse.landkode, gjeldendeDato))
+        return join(
+            utenlandskAdresse.adressenavnNummer,
+            space(utenlandskAdresse.postkode, utenlandskAdresse.bySted),
+            utenlandskAdresse.regionDistriktOmraade,
+            land(utenlandskAdresse.landkode, gjeldendeDato)
+        )
     }
 
-    private fun tilFormatertAdresse(utenlandskAdresseIFrittFormat: UtenlandskAdresseIFrittFormat,
-                                    gjeldendeDato: LocalDate): String? {
-        return join(utenlandskAdresseIFrittFormat.adresselinje1,
-                    utenlandskAdresseIFrittFormat.adresselinje2,
-                    utenlandskAdresseIFrittFormat.adresselinje3,
-                    space(utenlandskAdresseIFrittFormat.postkode, utenlandskAdresseIFrittFormat.byEllerStedsnavn),
-                    land(utenlandskAdresseIFrittFormat.landkode, gjeldendeDato))
+    private fun tilFormatertAdresse(
+        utenlandskAdresseIFrittFormat: UtenlandskAdresseIFrittFormat,
+        gjeldendeDato: LocalDate
+    ): String? {
+        return join(
+            utenlandskAdresseIFrittFormat.adresselinje1,
+            utenlandskAdresseIFrittFormat.adresselinje2,
+            utenlandskAdresseIFrittFormat.adresselinje3,
+            space(utenlandskAdresseIFrittFormat.postkode, utenlandskAdresseIFrittFormat.byEllerStedsnavn),
+            land(utenlandskAdresseIFrittFormat.landkode, gjeldendeDato)
+        )
     }
 
     private fun tilFormatertAdresse(vegadresse: Vegadresse, gjeldendeDato: LocalDate): String? {
-        return join(space(vegadresse.adressenavn, vegadresse.husnummer, vegadresse.husbokstav),
-                    vegadresse.tilleggsnavn,
-                    vegadresse.bruksenhetsnummer,
-                    space(vegadresse.postnummer, poststed(vegadresse.postnummer, gjeldendeDato)))
+        return join(
+            space(vegadresse.adressenavn, vegadresse.husnummer, vegadresse.husbokstav),
+            vegadresse.tilleggsnavn,
+            vegadresse.bruksenhetsnummer,
+            space(vegadresse.postnummer, poststed(vegadresse.postnummer, gjeldendeDato))
+        )
     }
 
     private fun poststed(postnummer: String?, gjeldendeDato: LocalDate): String? {
@@ -161,5 +181,4 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             null
         } else filterNotNull.joinToString(separator)
     }
-
 }

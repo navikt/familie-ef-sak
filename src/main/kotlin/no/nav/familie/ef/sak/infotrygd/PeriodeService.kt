@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class PeriodeService(
-        private val pdlClient: PdlClient,
-        private val fagsakService: FagsakService,
-        private val behandlingService: BehandlingService,
-        private val tilkjentYtelseService: TilkjentYtelseService,
-        private val infotrygdService: InfotrygdService
+    private val pdlClient: PdlClient,
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val infotrygdService: InfotrygdService
 ) {
 
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
@@ -27,12 +27,18 @@ class PeriodeService(
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
 
         return InternePerioder(
-                overgangsstønad = slåSammenPerioder(hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD),
-                                                    perioderFraReplika.overgangsstønad),
-                barnetilsyn = slåSammenPerioder(hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN),
-                                                perioderFraReplika.barnetilsyn),
-                skolepenger = slåSammenPerioder(hentPerioderFraEf(personIdenter, StønadType.SKOLEPENGER),
-                                                perioderFraReplika.skolepenger)
+            overgangsstønad = slåSammenPerioder(
+                hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD),
+                perioderFraReplika.overgangsstønad
+            ),
+            barnetilsyn = slåSammenPerioder(
+                hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN),
+                perioderFraReplika.barnetilsyn
+            ),
+            skolepenger = slåSammenPerioder(
+                hentPerioderFraEf(personIdenter, StønadType.SKOLEPENGER),
+                perioderFraReplika.skolepenger
+            )
         )
     }
 
@@ -46,45 +52,44 @@ class PeriodeService(
 
     private fun hentPerioderFraEf(personIdenter: Set<String>, stønadstype: StønadType): EfInternPerioder? {
         return fagsakService.finnFagsak(personIdenter, stønadstype)
-                       ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
-                       ?.let { behandling ->
-                           val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
-                           val internperioder = tilInternPeriode(tilkjentYtelse)
-                           val startdato = tilkjentYtelse.startdato ?: error("Mangler starto for behandling=${behandling.id}")
-                           EfInternPerioder(startdato, internperioder)
-                       }
+            ?.let { behandlingService.finnSisteIverksatteBehandling(it.id) }
+            ?.let { behandling ->
+                val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
+                val internperioder = tilInternPeriode(tilkjentYtelse)
+                val startdato = tilkjentYtelse.startdato ?: error("Mangler starto for behandling=${behandling.id}")
+                EfInternPerioder(startdato, internperioder)
+            }
     }
 
     private fun tilInternPeriode(tilkjentYtelse: TilkjentYtelse) =
-            tilkjentYtelse.andelerTilkjentYtelse.map(AndelTilkjentYtelse::tilInternPeriode)
-                    // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
-                    // då vi ønsker de sortert på siste hendelsen først
-                    .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
-
+        tilkjentYtelse.andelerTilkjentYtelse.map(AndelTilkjentYtelse::tilInternPeriode)
+            // trenger å sortere de revers pga filtrerOgSorterPerioderFraInfotrygd gjør det,
+            // då vi ønsker de sortert på siste hendelsen først
+            .sortedWith(compareBy<InternPeriode> { it.stønadFom }.reversed())
 }
 
 private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriode(
-        personIdent = this.personIdent,
-        inntektsreduksjon = this.inntektsreduksjon,
-        samordningsfradrag = this.samordningsfradrag,
-        utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
-        månedsbeløp = this.beløp,
-        engangsbeløp = this.beløp,
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom,
-        opphørsdato = null,
-        datakilde = PeriodeOvergangsstønad.Datakilde.EF
+    personIdent = this.personIdent,
+    inntektsreduksjon = this.inntektsreduksjon,
+    samordningsfradrag = this.samordningsfradrag,
+    utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
+    månedsbeløp = this.beløp,
+    engangsbeløp = this.beløp,
+    stønadFom = this.stønadFom,
+    stønadTom = this.stønadTom,
+    opphørsdato = null,
+    datakilde = PeriodeOvergangsstønad.Datakilde.EF
 )
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
-        personIdent = this.personIdent,
-        inntektsreduksjon = this.inntektsreduksjon,
-        samordningsfradrag = this.samordningsfradrag,
-        utgifterBarnetilsyn = this.utgifterBarnetilsyn,
-        månedsbeløp = this.månedsbeløp,
-        engangsbeløp = this.engangsbeløp,
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom,
-        opphørsdato = this.opphørsdato,
-        datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD
+    personIdent = this.personIdent,
+    inntektsreduksjon = this.inntektsreduksjon,
+    samordningsfradrag = this.samordningsfradrag,
+    utgifterBarnetilsyn = this.utgifterBarnetilsyn,
+    månedsbeløp = this.månedsbeløp,
+    engangsbeløp = this.engangsbeløp,
+    stønadFom = this.stønadFom,
+    stønadTom = this.stønadTom,
+    opphørsdato = this.opphørsdato,
+    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD
 )

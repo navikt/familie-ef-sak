@@ -10,13 +10,13 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping(
-        path = ["/api/oppgaverforbarn"],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+    path = ["/api/oppgaverforbarn"],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @Unprotected
 class InitForberedOppgaverForBarnTaskController(
-        private val taskRepository: TaskRepository,
-        private val forberedOppgaverForBarnService: ForberedOppgaverForBarnService
+    private val taskRepository: TaskRepository,
+    private val forberedOppgaverForBarnService: ForberedOppgaverForBarnService
 ) {
 
     @PostMapping("/initialiser")

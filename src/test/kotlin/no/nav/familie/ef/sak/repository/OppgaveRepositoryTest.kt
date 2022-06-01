@@ -24,15 +24,15 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         val oppgave = oppgaveRepository.insert(oppgave(behandling, erFerdigstilt = true))
 
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(UUID.randomUUID(), Oppgavetype.BehandleSak))
-                .isNull()
+            .isNull()
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, Oppgavetype.BehandleSak))
-                .isNull()
+            .isNull()
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgave.type))
-                .isNull()
+            .isNull()
 
         val oppgaveIkkeFerdigstilt = oppgaveRepository.insert(oppgave(behandling))
         assertThat(oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandling.id, oppgave.type))
-                .isEqualTo(oppgaveIkkeFerdigstilt)
+            .isEqualTo(oppgaveIkkeFerdigstilt)
     }
 
     @Test
@@ -47,8 +47,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNotNull
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)?.gsakOppgaveId)
-                .isEqualTo(2)
-
+            .isEqualTo(2)
     }
 
     @Test
@@ -62,8 +61,7 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNotNull()
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)?.gsakOppgaveId)
-                .isEqualTo(1)
-
+            .isEqualTo(1)
     }
 
     @Test
@@ -72,7 +70,5 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNull()
-
     }
-
 }

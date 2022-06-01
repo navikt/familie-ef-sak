@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AutomatiskMigreringService(private val migreringsstatusRepository: MigreringsstatusRepository,
-                                 private val migreringService: MigreringService,
-                                 private val infotrygdReplikaClient: InfotrygdReplikaClient,
-                                 private val taskRepository: TaskRepository) {
+class AutomatiskMigreringService(
+    private val migreringsstatusRepository: MigreringsstatusRepository,
+    private val migreringService: MigreringService,
+    private val infotrygdReplikaClient: InfotrygdReplikaClient,
+    private val taskRepository: TaskRepository
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
@@ -27,7 +29,7 @@ class AutomatiskMigreringService(private val migreringsstatusRepository: Migreri
         val alleredeMigrert = migreringsstatusRepository.findAllByIdentIn(personerForMigrering).map { it.ident }
 
         val filtrerteIdenter = personerForMigrering.filterNot { alleredeMigrert.contains(it) }
-                .take(antall) // henter fler fra infotrygd enn vi skal migrere, men plukker ut første X antall
+            .take(antall) // henter fler fra infotrygd enn vi skal migrere, men plukker ut første X antall
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })

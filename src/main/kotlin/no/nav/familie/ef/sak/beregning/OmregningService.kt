@@ -47,25 +47,28 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-
 @Service
-class OmregningService(private val behandlingService: BehandlingService,
-                       private val vedtakHistorikkService: VedtakHistorikkService,
-                       private val taskService: TaskService,
-                       private val iverksettClient: IverksettClient,
-                       private val ytelseService: TilkjentYtelseService,
-                       private val grunnlagsdataService: GrunnlagsdataService,
-                       private val featureToggleService: FeatureToggleService,
-                       private val vurderingService: VurderingService,
-                       private val liveRunBeregnYtelseSteg: BeregnYtelseSteg,
-                       private val dryRunBeregnYtelseSteg: DryRunBeregnYtelseSteg,
-                       private val iverksettingDtoMapper: IverksettingDtoMapper) {
+class OmregningService(
+    private val behandlingService: BehandlingService,
+    private val vedtakHistorikkService: VedtakHistorikkService,
+    private val taskService: TaskService,
+    private val iverksettClient: IverksettClient,
+    private val ytelseService: TilkjentYtelseService,
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val featureToggleService: FeatureToggleService,
+    private val vurderingService: VurderingService,
+    private val liveRunBeregnYtelseSteg: BeregnYtelseSteg,
+    private val dryRunBeregnYtelseSteg: DryRunBeregnYtelseSteg,
+    private val iverksettingDtoMapper: IverksettingDtoMapper
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun utførGOmregning(fagsakId: UUID,
-                        liveRun: Boolean) {
+    fun utførGOmregning(
+        fagsakId: UUID,
+        liveRun: Boolean
+    ) {
         logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
@@ -73,7 +76,7 @@ class OmregningService(private val behandlingService: BehandlingService,
         }
 
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-                              ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
+            ?: error("FagsakId $fagsakId har mistet iverksatt behandling.")
 
         feilHvis(behandlingService.finnesÅpenBehandling(fagsakId)) {
             "Kan ikke omregne, det finnes åpen behandling på fagsak: $fagsakId"
@@ -86,45 +89,60 @@ class OmregningService(private val behandlingService: BehandlingService,
         }
 
         val innvilgelseOvergangsstønad =
-                vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId,
-                                                                           YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed))
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
+                fagsakId,
+                YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed)
+            )
         feilHvis(innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
             "Omregning av vedtak med sanksjon må manuellt behandles"
         }
 
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
-            logger.info(MarkerFactory.getMarker("G-Omregning - samordningsfradrag"),
-                        "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.")
+            logger.info(
+                MarkerFactory.getMarker("G-Omregning - samordningsfradrag"),
+                "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt."
+            )
             throw OmregningMedSamordningsfradragException()
         }
 
-        val behandling = behandlingService.opprettBehandling(behandlingType = BehandlingType.REVURDERING,
-                                                             fagsakId = fagsakId,
-                                                             behandlingsårsak = BehandlingÅrsak.G_OMREGNING)
+        val behandling = behandlingService.opprettBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            fagsakId = fagsakId,
+            behandlingsårsak = BehandlingÅrsak.G_OMREGNING
+        )
         logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForOmregning(behandling)
 
-
         val indeksjusterInntekt =
-                BeregningUtils.indeksjusterInntekt(forrigeTilkjentYtelse.grunnbeløpsdato,
-                                                   innvilgelseOvergangsstønad.inntekter.tilInntektsperioder())
+            BeregningUtils.indeksjusterInntekt(
+                forrigeTilkjentYtelse.grunnbeløpsdato,
+                innvilgelseOvergangsstønad.inntekter.tilInntektsperioder()
+            )
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
 
         if (liveRun) {
-            liveRunBeregnYtelseSteg.utførSteg(saksbehandling,
-                                              InnvilgelseOvergangsstønad(periodeBegrunnelse = null,
-                                                                         inntektBegrunnelse = null,
-                                                                         perioder = innvilgelseOvergangsstønad.perioder,
-                                                                         inntekter = indeksjusterInntekt.tilInntekt()))
+            liveRunBeregnYtelseSteg.utførSteg(
+                saksbehandling,
+                InnvilgelseOvergangsstønad(
+                    periodeBegrunnelse = null,
+                    inntektBegrunnelse = null,
+                    perioder = innvilgelseOvergangsstønad.perioder,
+                    inntekter = indeksjusterInntekt.tilInntekt()
+                )
+            )
         } else {
-            dryRunBeregnYtelseSteg.utførSteg(saksbehandling,
-                                             InnvilgelseOvergangsstønad(periodeBegrunnelse = null,
-                                                                        inntektBegrunnelse = null,
-                                                                        perioder = innvilgelseOvergangsstønad.perioder,
-                                                                        inntekter = indeksjusterInntekt.tilInntekt()))
+            dryRunBeregnYtelseSteg.utførSteg(
+                saksbehandling,
+                InnvilgelseOvergangsstønad(
+                    periodeBegrunnelse = null,
+                    inntektBegrunnelse = null,
+                    perioder = innvilgelseOvergangsstønad.perioder,
+                    inntekter = indeksjusterInntekt.tilInntekt()
+                )
+            )
         }
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
@@ -139,27 +157,30 @@ class OmregningService(private val behandlingService: BehandlingService,
             loggResultat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
             throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")
         }
-
     }
 
-    fun loggResultat(forrigeTilkjentYtelse: TilkjentYtelse,
-                     innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
-                     fagsakId: UUID,
-                     behandlingId: UUID) {
+    fun loggResultat(
+        forrigeTilkjentYtelse: TilkjentYtelse,
+        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
+        fagsakId: UUID,
+        behandlingId: UUID
+    ) {
         val omberegnetTilkjentYtelse = ytelseService.hentForBehandling(behandlingId)
 
-
-        val perioder = mapTilSammenlignbarePerioder(fagsakId,
-                                                    forrigeTilkjentYtelse,
-                                                    omberegnetTilkjentYtelse)
+        val perioder = mapTilSammenlignbarePerioder(
+            fagsakId,
+            forrigeTilkjentYtelse,
+            omberegnetTilkjentYtelse
+        )
 
         logger.info(MarkerFactory.getMarker("G-Omregning"), perioder.joinToString("\n"))
     }
 
-    fun mapTilSammenlignbarePerioder(fagsakId: UUID,
-                                     forrigeTilkjentYtelse: TilkjentYtelse,
-                                     omberegnetTilkjentYtelse: TilkjentYtelse): List<RapportDto> {
-
+    fun mapTilSammenlignbarePerioder(
+        fagsakId: UUID,
+        forrigeTilkjentYtelse: TilkjentYtelse,
+        omberegnetTilkjentYtelse: TilkjentYtelse
+    ): List<RapportDto> {
 
         return forrigeTilkjentYtelse.andelerTilkjentYtelse.filter {
             it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed
@@ -171,75 +192,86 @@ class OmregningService(private val behandlingService: BehandlingService,
             }
         }.map {
             val omberegnetAndelTilkjentYtelse =
-                    omberegnetTilkjentYtelse.andelerTilkjentYtelse.firstOrNull { andel ->
-                        it.periode.omslutter(andel.periode) || it.periode.omsluttesAv(andel.periode)
-                    } ?: error("Forventet omregnet andelTilkjentYtelse med fradato ${it.stønadFom}")
-            RapportDto(fagsakId,
-                       it.stønadFom,
-                       it.stønadTom,
-                       it.beløp,
-                       omberegnetAndelTilkjentYtelse.beløp,
-                       it.inntekt,
-                       omberegnetAndelTilkjentYtelse.inntekt)
+                omberegnetTilkjentYtelse.andelerTilkjentYtelse.firstOrNull { andel ->
+                    it.periode.omslutter(andel.periode) || it.periode.omsluttesAv(andel.periode)
+                } ?: error("Forventet omregnet andelTilkjentYtelse med fradato ${it.stønadFom}")
+            RapportDto(
+                fagsakId,
+                it.stønadFom,
+                it.stønadTom,
+                it.beløp,
+                omberegnetAndelTilkjentYtelse.beløp,
+                it.inntekt,
+                omberegnetAndelTilkjentYtelse.inntekt
+            )
         }
-
     }
 
-    data class RapportDto(val fagsakId: UUID,
-                          val fom: LocalDate,
-                          val tom: LocalDate,
-                          val gammelStønad: Int,
-                          val omberegnetStønad: Int,
-                          val gammelInntekt: Int,
-                          val omberegnetInntekt: Int)
+    data class RapportDto(
+        val fagsakId: UUID,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val gammelStønad: Int,
+        val omberegnetStønad: Int,
+        val gammelInntekt: Int,
+        val omberegnetInntekt: Int
+    )
 }
 
 @Service
-class DryRunBeregnYtelseSteg(tilkjentYtelseService: TilkjentYtelseService,
-                             beregningService: BeregningService,
-                             dryRunSimuleringService: DryRunSimuleringService,
-                             beregningBarnetilsynService: BeregningBarnetilsynService,
-                             beregningSkolepengerService: BeregningSkolepengerService,
-                             vedtakService: VedtakService,
-                             tilbakekrevingService: TilbakekrevingService,
-                             barnService: BarnService,
-                             fagsakService: FagsakService) {
+class DryRunBeregnYtelseSteg(
+    tilkjentYtelseService: TilkjentYtelseService,
+    beregningService: BeregningService,
+    dryRunSimuleringService: DryRunSimuleringService,
+    beregningBarnetilsynService: BeregningBarnetilsynService,
+    beregningSkolepengerService: BeregningSkolepengerService,
+    vedtakService: VedtakService,
+    tilbakekrevingService: TilbakekrevingService,
+    barnService: BarnService,
+    fagsakService: FagsakService
+) {
 
-    private val beregnYtelseSteg = BeregnYtelseSteg(tilkjentYtelseService,
-                                                    beregningService,
-                                                    beregningBarnetilsynService,
-                                                    beregningSkolepengerService,
-                                                    dryRunSimuleringService,
-                                                    vedtakService,
-                                                    tilbakekrevingService,
-                                                    barnService,
-                                                    fagsakService)
+    private val beregnYtelseSteg = BeregnYtelseSteg(
+        tilkjentYtelseService,
+        beregningService,
+        beregningBarnetilsynService,
+        beregningSkolepengerService,
+        dryRunSimuleringService,
+        vedtakService,
+        tilbakekrevingService,
+        barnService,
+        fagsakService
+    )
 
     fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
         beregnYtelseSteg.utførSteg(saksbehandling, data)
     }
-
 }
 
-
 @Service
-class DryRunSimuleringService(iverksettClient: IverksettClient,
-                              vedtakService: VedtakService,
-                              blankettSimuleringsService: BlankettSimuleringsService,
-                              simuleringsresultatRepository: SimuleringsresultatRepository,
-                              tilkjentYtelseService: TilkjentYtelseService,
-                              tilgangService: TilgangService) : SimuleringService(iverksettClient,
-                                                                                  vedtakService,
-                                                                                  blankettSimuleringsService,
-                                                                                  simuleringsresultatRepository,
-                                                                                  tilkjentYtelseService,
-                                                                                  tilgangService) {
+class DryRunSimuleringService(
+    iverksettClient: IverksettClient,
+    vedtakService: VedtakService,
+    blankettSimuleringsService: BlankettSimuleringsService,
+    simuleringsresultatRepository: SimuleringsresultatRepository,
+    tilkjentYtelseService: TilkjentYtelseService,
+    tilgangService: TilgangService
+) : SimuleringService(
+    iverksettClient,
+    vedtakService,
+    blankettSimuleringsService,
+    simuleringsresultatRepository,
+    tilkjentYtelseService,
+    tilgangService
+) {
 
     private val simuleringsoppsummering =
-            Simuleringsoppsummering(listOf(), null, BigDecimal.ZERO, BigDecimal.ZERO, null, null, null, null, null)
+        Simuleringsoppsummering(listOf(), null, BigDecimal.ZERO, BigDecimal.ZERO, null, null, null, null, null)
 
-    private val beriketSimuleringsresultat = BeriketSimuleringsresultat(DetaljertSimuleringResultat(listOf()),
-                                                                        simuleringsoppsummering)
+    private val beriketSimuleringsresultat = BeriketSimuleringsresultat(
+        DetaljertSimuleringResultat(listOf()),
+        simuleringsoppsummering
+    )
 
     override fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
         throw IllegalAccessException("Forventer ikke kall til simuler fra BeregnYtelseSteg.")
@@ -256,9 +288,11 @@ class DryRunSimuleringService(iverksettClient: IverksettClient,
     override fun slettSimuleringForBehandling(saksbehandling: Saksbehandling) {}
 
     override fun hentOgLagreSimuleringsresultat(saksbehandling: Saksbehandling): Simuleringsresultat {
-        return Simuleringsresultat(behandlingId = UUID.randomUUID(),
-                                   data = DetaljertSimuleringResultat(listOf()),
-                                   beriketData = beriketSimuleringsresultat)
+        return Simuleringsresultat(
+            behandlingId = UUID.randomUUID(),
+            data = DetaljertSimuleringResultat(listOf()),
+            beriketData = beriketSimuleringsresultat
+        )
     }
 }
 

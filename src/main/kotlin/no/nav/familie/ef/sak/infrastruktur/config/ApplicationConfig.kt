@@ -28,7 +28,6 @@ import org.springframework.web.client.RestTemplate
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
-
 @SpringBootConfiguration
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
@@ -72,16 +71,20 @@ class ApplicationConfig {
     fun restTemplateBuilder(objectMapper: ObjectMapper): RestTemplateBuilder {
         val jackson2HttpMessageConverter = MappingJackson2HttpMessageConverter(objectMapper)
         return RestTemplateBuilder()
-                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(30, ChronoUnit.SECONDS))
-                .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
+            .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+            .setReadTimeout(Duration.of(30, ChronoUnit.SECONDS))
+            .additionalMessageConverters(listOf(jackson2HttpMessageConverter) + RestTemplate().messageConverters)
     }
 
     @Bean("utenAuth")
-    fun restTemplate(restTemplateBuilder: RestTemplateBuilder,
-                     consumerIdClientInterceptor: ConsumerIdClientInterceptor): RestOperations {
-        return restTemplateBuilder.additionalInterceptors(consumerIdClientInterceptor,
-                                                          MdcValuesPropagatingClientInterceptor()).build()
+    fun restTemplate(
+        restTemplateBuilder: RestTemplateBuilder,
+        consumerIdClientInterceptor: ConsumerIdClientInterceptor
+    ): RestOperations {
+        return restTemplateBuilder.additionalInterceptors(
+            consumerIdClientInterceptor,
+            MdcValuesPropagatingClientInterceptor()
+        ).build()
     }
 
     /**
@@ -92,9 +95,10 @@ class ApplicationConfig {
     @Bean
     @Primary
     fun oAuth2HttpClient(): OAuth2HttpClient {
-        return RetryOAuth2HttpClient(RestTemplateBuilder()
-                                             .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                                             .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS)))
+        return RetryOAuth2HttpClient(
+            RestTemplateBuilder()
+                .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(2, ChronoUnit.SECONDS))
+        )
     }
-
 }

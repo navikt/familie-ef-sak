@@ -17,15 +17,19 @@ import java.time.YearMonth
  */
 object ArenaPeriodeUtil {
 
-    fun slåSammenPerioderFraEfOgInfotrygd(request: PerioderOvergangsstønadRequest,
-                                          perioder: InternePerioder): List<PeriodeOvergangsstønad> {
+    fun slåSammenPerioderFraEfOgInfotrygd(
+        request: PerioderOvergangsstønadRequest,
+        perioder: InternePerioder
+    ): List<PeriodeOvergangsstønad> {
         val måneder = finnUnikeÅrMånedForPerioder(perioder)
         val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
         return sammenslåtteÅrMåneder.map {
-            PeriodeOvergangsstønad(personIdent = request.personIdent,
-                                   fomDato = it.first.atDay(1),
-                                   tomDato = it.second.atEndOfMonth(),
-                                   datakilde = PeriodeOvergangsstønad.Datakilde.EF)
+            PeriodeOvergangsstønad(
+                personIdent = request.personIdent,
+                fomDato = it.first.atDay(1),
+                tomDato = it.second.atEndOfMonth(),
+                datakilde = PeriodeOvergangsstønad.Datakilde.EF
+            )
         }.filter { overlapper(request, it) }
     }
 
@@ -33,9 +37,9 @@ object ArenaPeriodeUtil {
         val requestFom = request.fomDato ?: LocalDate.now() // Arena sender alltid fom/tom-datoer, burde endre kontraktet
         val requestTom = request.tomDato ?: LocalDate.now()
         val range = periode.fomDato..periode.tomDato
-        return requestFom in range
-               || requestTom in range
-               || (requestFom < periode.fomDato && requestTom > periode.tomDato) // omslutter
+        return requestFom in range ||
+            requestTom in range ||
+            (requestFom < periode.fomDato && requestTom > periode.tomDato) // omslutter
     }
 
     private fun slåSammenÅrMåneder(måneder: MutableSet<YearMonth>): MutableList<Pair<YearMonth, YearMonth>> {
@@ -62,5 +66,4 @@ object ArenaPeriodeUtil {
         }
         return måneder
     }
-
 }

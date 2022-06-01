@@ -14,32 +14,37 @@ import java.util.UUID
 /**
  * Brukes for å utlede hvilke delvilkår som må besvares
  */
-data class HovedregelMetadata(val sivilstandSøknad: Sivilstand?,
-                              val sivilstandstype: Sivilstandstype,
-                              val erMigrering: Boolean = false,
-                              val barn: List<BehandlingBarn>,
-                              val søktOmBarnetilsyn: List<UUID>
+data class HovedregelMetadata(
+    val sivilstandSøknad: Sivilstand?,
+    val sivilstandstype: Sivilstandstype,
+    val erMigrering: Boolean = false,
+    val barn: List<BehandlingBarn>,
+    val søktOmBarnetilsyn: List<UUID>
 )
 
-abstract class Vilkårsregel(val vilkårType: VilkårType,
-                            val regler: Map<RegelId, RegelSteg>,
-                            @JsonIgnore
-                            val hovedregler: Set<RegelId>) {
+abstract class Vilkårsregel(
+    val vilkårType: VilkårType,
+    val regler: Map<RegelId, RegelSteg>,
+    @JsonIgnore
+    val hovedregler: Set<RegelId>
+) {
 
-    open fun initereDelvilkårsvurdering(metadata: HovedregelMetadata,
-                                        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-            : List<Delvilkårsvurdering> {
+    open fun initereDelvilkårsvurdering(
+        metadata: HovedregelMetadata,
+        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL
+    ): List<Delvilkårsvurdering> {
         return hovedregler.map {
-            Delvilkårsvurdering(resultat,
-                                vurderinger = listOf(Vurdering(it)))
+            Delvilkårsvurdering(
+                resultat,
+                vurderinger = listOf(Vurdering(it))
+            )
         }
     }
 
     constructor(vilkårType: VilkårType, regler: Set<RegelSteg>, hovedregler: Set<RegelId>) :
-            this(vilkårType, regler.associateBy { it.regelId }, hovedregler)
+        this(vilkårType, regler.associateBy { it.regelId }, hovedregler)
 
     fun regel(regelId: RegelId): RegelSteg {
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
-
 }

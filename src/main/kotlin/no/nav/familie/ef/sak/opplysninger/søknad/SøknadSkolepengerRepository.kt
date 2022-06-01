@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface SøknadSkolepengerRepository : RepositoryInterface<SøknadsskjemaSkolepenger, UUID>,
-                                        InsertUpdateRepository<SøknadsskjemaSkolepenger>
+interface SøknadSkolepengerRepository :
+    RepositoryInterface<SøknadsskjemaSkolepenger, UUID>,
+    InsertUpdateRepository<SøknadsskjemaSkolepenger>

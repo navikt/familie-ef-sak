@@ -22,10 +22,10 @@ import java.util.UUID
 
 @Service
 class SøknadService(
-        private val søknadRepository: SøknadRepository,
-        private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
-        private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
-        private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
+    private val søknadRepository: SøknadRepository,
+    private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
+    private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
+    private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -68,16 +68,22 @@ class SøknadService(
             logger.info("Finner ingen søknad på forrige behandling=$forrigeBehandlingId")
             return
         }
-        søknadRepository.insert(søknad.copy(id = UUID.randomUUID(),
-                                            behandlingId = nyBehandlingId,
-                                            sporbar = Sporbar()))
+        søknadRepository.insert(
+            søknad.copy(
+                id = UUID.randomUUID(),
+                behandlingId = nyBehandlingId,
+                sporbar = Sporbar()
+            )
+        )
     }
 
     @Transactional
-    fun lagreSøknadForOvergangsstønad(søknad: SøknadOvergangsstønad,
-                                      behandlingId: UUID,
-                                      fagsakId: UUID,
-                                      journalpostId: String) {
+    fun lagreSøknadForOvergangsstønad(
+        søknad: SøknadOvergangsstønad,
+        behandlingId: UUID,
+        fagsakId: UUID,
+        journalpostId: String
+    ) {
         val søknadsskjema = SøknadsskjemaMapper.tilDomene(søknad)
         søknadOvergangsstønadRepository.insert(søknadsskjema)
         søknadRepository.insert(SøknadMapper.toDomain(journalpostId, søknadsskjema, behandlingId))
@@ -100,5 +106,4 @@ class SøknadService(
     private fun hentSøknad(behandlingId: UUID): Søknad? {
         return søknadRepository.findByBehandlingId(behandlingId)
     }
-
 }

@@ -33,7 +33,7 @@ class ValiderOmregningServiceTest {
         mockNyTilkjentYtelse(saksbehandling, medRiktigBeløp = false)
 
         assertThatThrownBy { validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling) }
-                .isInstanceOf(ApiFeil::class.java)
+            .isInstanceOf(ApiFeil::class.java)
     }
 
     @Test
@@ -51,33 +51,44 @@ class ValiderOmregningServiceTest {
         mockVedtakOgForrigeTilkjentYtelse(saksbehandling)
 
         every { tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id) } returns
-                lagTilkjentYtelse(andelerTilkjentYtelse = listOf(
-                        lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 4, 1),
-                                               tilOgMed = LocalDate.of(2022, 8, 30),
-                                               samordningsfradrag = 5000,
-                                               beløp = 0)),
-                                  grunnbeløpsdato = LocalDate.of(2021, 5, 1))
+            lagTilkjentYtelse(
+                andelerTilkjentYtelse = listOf(
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.of(2022, 4, 1),
+                        tilOgMed = LocalDate.of(2022, 8, 30),
+                        samordningsfradrag = 5000,
+                        beløp = 0
+                    )
+                ),
+                grunnbeløpsdato = LocalDate.of(2021, 5, 1)
+            )
 
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
     }
 
     private fun mockNyTilkjentYtelse(saksbehandling: Saksbehandling, medRiktigBeløp: Boolean = true) {
         every { tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id) } returns
-                lagTilkjentYtelse(andelerTilkjentYtelse = listOf(
-                        lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 4, 1),
-                                               tilOgMed = LocalDate.of(2022, 4, 30),
-                                               samordningsfradrag = 5000,
-                                               beløp = 14950),
-                        lagAndelTilkjentYtelse(fraOgMed = LocalDate.of(2022, 5, 1),
-                                               tilOgMed = LocalDate.of(2022, 8, 30),
-                                               samordningsfradrag = 5000,
-                                               beløp = if (medRiktigBeløp) 15902 else 0
-                        )))
+            lagTilkjentYtelse(
+                andelerTilkjentYtelse = listOf(
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.of(2022, 4, 1),
+                        tilOgMed = LocalDate.of(2022, 4, 30),
+                        samordningsfradrag = 5000,
+                        beløp = 14950
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fraOgMed = LocalDate.of(2022, 5, 1),
+                        tilOgMed = LocalDate.of(2022, 8, 30),
+                        samordningsfradrag = 5000,
+                        beløp = if (medRiktigBeløp) 15902 else 0
+                    )
+                )
+            )
     }
 
     private fun mockVedtakOgForrigeTilkjentYtelse(saksbehandling: Saksbehandling) {
         every { tilkjentYtelseRepository.findByBehandlingId(saksbehandling.forrigeBehandlingId!!) } returns
-                lagTilkjentYtelse(emptyList(), grunnbeløpsdato = LocalDate.of(2021, 5, 1))
+            lagTilkjentYtelse(emptyList(), grunnbeløpsdato = LocalDate.of(2021, 5, 1))
         every { vedtakService.hentVedtak(saksbehandling.id) } returns vedtak(saksbehandling.id)
     }
 }

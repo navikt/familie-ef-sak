@@ -13,29 +13,33 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
-
 @Service
-class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRepository,
-                           private val søknadService: SøknadService,
-                           private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
-                           private val behandlingService: BehandlingService,
-                           private val fagsakService: FagsakService
+class GrunnlagsdataService(
+    private val grunnlagsdataRepository: GrunnlagsdataRepository,
+    private val søknadService: SøknadService,
+    private val grunnlagsdataRegisterService: GrunnlagsdataRegisterService,
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService
 ) {
 
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
         val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
         grunnlagsdataRepository.insert(grunnlagsdata)
-        return GrunnlagsdataMedMetadata(grunnlagsdata.data,
-                                        grunnlagsdata.lagtTilEtterFerdigstilling,
-                                        grunnlagsdata.sporbar.opprettetTid)
+        return GrunnlagsdataMedMetadata(
+            grunnlagsdata.data,
+            grunnlagsdata.lagtTilEtterFerdigstilling,
+            grunnlagsdata.sporbar.opprettetTid
+        )
     }
 
     fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
-        return GrunnlagsdataMedMetadata(grunnlagsdata.data,
-                                        grunnlagsdata.lagtTilEtterFerdigstilling,
-                                        grunnlagsdata.sporbar.opprettetTid)
+        return GrunnlagsdataMedMetadata(
+            grunnlagsdata.data,
+            grunnlagsdata.lagtTilEtterFerdigstilling,
+            grunnlagsdata.sporbar.opprettetTid
+        )
     }
 
     @Transactional
@@ -75,8 +79,10 @@ class GrunnlagsdataService(private val grunnlagsdataRepository: GrunnlagsdataRep
         }
     }
 
-    fun hentGrunnlagsdataFraRegister(personIdent: String,
-                                     barneforeldreFraSøknad: List<String>): GrunnlagsdataDomene {
+    fun hentGrunnlagsdataFraRegister(
+        personIdent: String,
+        barneforeldreFraSøknad: List<String>
+    ): GrunnlagsdataDomene {
         return grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
     }
 }

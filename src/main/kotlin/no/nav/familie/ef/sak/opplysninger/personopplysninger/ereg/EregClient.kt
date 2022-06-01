@@ -10,16 +10,16 @@ import java.net.URI
 
 @Component
 class EregClient(
-        @Value("\${FAMILIE_EF_PROXY_URL}")
-        private val familieEfProxyUri: URI,
-        @Qualifier("azure")
-        private val restOperations: RestOperations
+    @Value("\${FAMILIE_EF_PROXY_URL}")
+    private val familieEfProxyUri: URI,
+    @Qualifier("azure")
+    private val restOperations: RestOperations
 ) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
 
     fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<OrganisasjonDto> {
         val uriBuilder = UriComponentsBuilder.fromUri(familieEfProxyUri)
-                .pathSegment("api/ereg")
-                .queryParam("organisasjonsnumre", organisasjonsnumre)
+            .pathSegment("api/ereg")
+            .queryParam("organisasjonsnumre", organisasjonsnumre)
 
         return getForEntity(uriBuilder.build().toUri())
     }
@@ -29,5 +29,4 @@ class EregClient(
     override fun ping() {
         operations.optionsForAllow(pingUri)
     }
-
 }

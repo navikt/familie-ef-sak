@@ -43,7 +43,6 @@ import kotlin.test.assertFailsWith
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingServiceTest {
 
-
     private val tilbakekrevingRepository = mockk<TilbakekrevingRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
@@ -51,12 +50,14 @@ internal class TilbakekrevingServiceTest {
     private val simuleringService = mockk<SimuleringService>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val tilbakekrevingService =
-            TilbakekrevingService(tilbakekrevingRepository,
-                                  behandlingService,
-                                  fagsakService,
-                                  tilbakekrevingClient,
-                                  simuleringService,
-                                  arbeidsfordelingService)
+        TilbakekrevingService(
+            tilbakekrevingRepository,
+            behandlingService,
+            fagsakService,
+            tilbakekrevingClient,
+            simuleringService,
+            arbeidsfordelingService
+        )
 
     @BeforeAll
     fun setUp() {
@@ -76,12 +77,16 @@ internal class TilbakekrevingServiceTest {
         internal fun `skal ikke være mulig å lagre tilbakekreving for låst behandlig `() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak(), status = FERDIGSTILT)
             val tilbakekrevingDto =
-                    TilbakekrevingDto(valg = Tilbakekrevingsvalg.AVVENT,
-                                      varseltekst = "",
-                                      begrunnelse = "Dette er tekst ")
+                TilbakekrevingDto(
+                    valg = Tilbakekrevingsvalg.AVVENT,
+                    varseltekst = "",
+                    begrunnelse = "Dette er tekst "
+                )
             val feil = assertThrows<ApiFeil> {
-                tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
-                                                          behandlingId = UUID.randomUUID())
+                tilbakekrevingService.lagreTilbakekreving(
+                    tilbakekrevingDto,
+                    behandlingId = UUID.randomUUID()
+                )
             }
             assertThat(feil.message).isEqualTo("Behandlingen er låst for redigering")
         }
@@ -90,29 +95,36 @@ internal class TilbakekrevingServiceTest {
         internal fun `Skal kaste feil dersom vi forsøker lagre tilbakekreving med varsl som mangler varseltekst`() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
             val tilbakekrevingDto =
-                    TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
-                                      varseltekst = null,
-                                      begrunnelse = "tekst her")
+                TilbakekrevingDto(
+                    valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
+                    varseltekst = null,
+                    begrunnelse = "tekst her"
+                )
 
             val feil = assertThrows<ApiFeil> {
-                tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
-                                                          behandlingId = UUID.randomUUID())
+                tilbakekrevingService.lagreTilbakekreving(
+                    tilbakekrevingDto,
+                    behandlingId = UUID.randomUUID()
+                )
             }
             assertThat(feil.message).isEqualTo("Må fylle ut varseltekst for å lage tilbakekreving med varsel")
         }
-
 
         @Test
         internal fun `Skal kaste feil dersom vi forsøker lagre tilbakekreving med varsel som har tom varseltekst`() {
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak())
             val tilbakekrevingDto =
-                    TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
-                                      varseltekst = "   ",
-                                      begrunnelse = "tekst her")
+                TilbakekrevingDto(
+                    valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
+                    varseltekst = "   ",
+                    begrunnelse = "tekst her"
+                )
 
             val feil = assertThrows<ApiFeil> {
-                tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto,
-                                                          behandlingId = UUID.randomUUID())
+                tilbakekrevingService.lagreTilbakekreving(
+                    tilbakekrevingDto,
+                    behandlingId = UUID.randomUUID()
+                )
             }
             assertThat(feil.message).isEqualTo("Må fylle ut varseltekst for å lage tilbakekreving med varsel")
         }
@@ -124,9 +136,11 @@ internal class TilbakekrevingServiceTest {
             val forventetBegrunnelse = "tekst her"
             val varseltekst = "Dette er en varseltekst"
             val tilbakekrevingDto =
-                    TilbakekrevingDto(valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
-                                      varseltekst = varseltekst,
-                                      begrunnelse = forventetBegrunnelse)
+                TilbakekrevingDto(
+                    valg = Tilbakekrevingsvalg.OPPRETT_MED_VARSEL,
+                    varseltekst = varseltekst,
+                    begrunnelse = forventetBegrunnelse
+                )
 
             val behandlingId = UUID.randomUUID()
             every { tilbakekrevingRepository.deleteById(any()) } just Runs
@@ -141,15 +155,15 @@ internal class TilbakekrevingServiceTest {
     inner class GenererBrev {
 
         val simuleringsoppsummering = Simuleringsoppsummering(
-                perioder = listOf(),
-                fomDatoNestePeriode = null,
-                etterbetaling = BigDecimal.valueOf(5000),
-                feilutbetaling = BigDecimal.valueOf(40_000),
-                fom = LocalDate.of(2021, 1, 1),
-                tomDatoNestePeriode = null,
-                forfallsdatoNestePeriode = null,
-                tidSimuleringHentet = LocalDate.of(2021, 11, 1),
-                tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
+            perioder = listOf(),
+            fomDatoNestePeriode = null,
+            etterbetaling = BigDecimal.valueOf(5000),
+            feilutbetaling = BigDecimal.valueOf(40_000),
+            fom = LocalDate.of(2021, 1, 1),
+            tomDatoNestePeriode = null,
+            forfallsdatoNestePeriode = null,
+            tidSimuleringHentet = LocalDate.of(2021, 11, 1),
+            tomSisteUtbetaling = LocalDate.of(2021, 10, 31)
         )
 
         @Test
@@ -189,7 +203,7 @@ internal class TilbakekrevingServiceTest {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
             every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
-                    .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
+                .returns(KanBehandlingOpprettesManueltRespons(false, "Melding til front end."))
 
             val feil = assertFailsWith<ApiFeil> {
                 tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
@@ -205,24 +219,24 @@ internal class TilbakekrevingServiceTest {
             val behandling = behandling(fagsak)
             every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
-                    .returns(KanBehandlingOpprettesManueltRespons(true, "Ok."))
+                .returns(KanBehandlingOpprettesManueltRespons(true, "Ok."))
             every {
-                tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id,
-                                                                 behandling.eksternId.id,
-                                                                 fagsak.stønadstype)
+                tilbakekrevingClient.opprettManuelTilbakekreving(
+                    fagsak.eksternId.id,
+                    behandling.eksternId.id,
+                    fagsak.stønadstype
+                )
             } just runs
 
             tilbakekrevingService.opprettManuellTilbakekreving(fagsak.id)
 
             verify {
-                tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id,
-                                                                 behandling.eksternId.id,
-                                                                 fagsak.stønadstype)
+                tilbakekrevingClient.opprettManuelTilbakekreving(
+                    fagsak.eksternId.id,
+                    behandling.eksternId.id,
+                    fagsak.stønadstype
+                )
             }
         }
-
-
     }
-
 }
-

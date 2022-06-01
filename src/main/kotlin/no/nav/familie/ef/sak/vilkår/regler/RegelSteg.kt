@@ -22,17 +22,21 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
  *  }
  * }
  */
-data class RegelSteg(val regelId: RegelId,
-                     val svarMapping: Map<SvarId, SvarRegel>) {
+data class RegelSteg(
+    val regelId: RegelId,
+    val svarMapping: Map<SvarId, SvarRegel>
+) {
 
     fun svarMapping(svarId: SvarId): SvarRegel {
-        return svarMapping[svarId] ?: throw Feil("Finner ikke svarId=$svarId for regelId=${regelId}")
+        return svarMapping[svarId] ?: throw Feil("Finner ikke svarId=$svarId for regelId=$regelId")
     }
 }
 
 /**
  * Util for å sette opp svarmapping med [SvarId.JA] og [SvarId.NEI] som svarsalternativ
  */
-fun jaNeiSvarRegel(hvisJa: SvarRegel = SluttSvarRegel.OPPFYLT,
-                   hvisNei: SvarRegel = SluttSvarRegel.IKKE_OPPFYLT): Map<SvarId, SvarRegel> =
-        mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei)
+fun jaNeiSvarRegel(
+    hvisJa: SvarRegel = SluttSvarRegel.OPPFYLT,
+    hvisNei: SvarRegel = SluttSvarRegel.IKKE_OPPFYLT
+): Map<SvarId, SvarRegel> =
+    mapOf(SvarId.JA to hvisJa, SvarId.NEI to hvisNei)

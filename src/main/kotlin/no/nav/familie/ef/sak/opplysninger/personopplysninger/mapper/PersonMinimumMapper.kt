@@ -7,9 +7,9 @@ object PersonMinimumMapper {
 
     fun tilDto(personMinimum: PersonMinimum): PersonMinimumDto {
         return PersonMinimumDto(
-                navn = personMinimum.navn,
-                fødselsdato = personMinimum.fødselsdato,
-                personIdent = personMinimum.fødselsnummer
+            navn = personMinimum.navn,
+            fødselsdato = personMinimum.fødselsdato,
+            personIdent = personMinimum.fødselsnummer
         )
     }
 }

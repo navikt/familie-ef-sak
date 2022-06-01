@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -19,7 +18,8 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
 
     fun finnHendelseshistorikk(saksbehandling: Saksbehandling): List<HendelseshistorikkDto> {
         val (hendelserOpprettet, andreHendelser) = behandlingshistorikkRepository.findByBehandlingIdOrderByEndretTidDesc(
-                saksbehandling.id).map {
+            saksbehandling.id
+        ).map {
             it.tilHendelseshistorikkDto(saksbehandling)
         }.filter {
             it.hendelse != Hendelse.UKJENT
@@ -34,7 +34,7 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
     }
 
     fun finnSisteBehandlingshistorikk(behandlingId: UUID, type: StegType): Behandlingshistorikk? =
-            behandlingshistorikkRepository.findTopByBehandlingIdAndStegOrderByEndretTidDesc(behandlingId, type)
+        behandlingshistorikkRepository.findTopByBehandlingIdAndStegOrderByEndretTidDesc(behandlingId, type)
 
     fun opprettHistorikkInnslag(behandlingshistorikk: Behandlingshistorikk) {
         behandlingshistorikkRepository.insert(behandlingshistorikk)
@@ -43,23 +43,27 @@ class BehandlingshistorikkService(private val behandlingshistorikkRepository: Be
     /**
      * @param metadata json object that will be serialized
      */
-    fun opprettHistorikkInnslag(behandlingId: UUID,
-                                stegtype: StegType,
-                                utfall: StegUtfall?,
-                                metadata: Any?) {
-        opprettHistorikkInnslag(Behandlingshistorikk(
+    fun opprettHistorikkInnslag(
+        behandlingId: UUID,
+        stegtype: StegType,
+        utfall: StegUtfall?,
+        metadata: Any?
+    ) {
+        opprettHistorikkInnslag(
+            Behandlingshistorikk(
                 behandlingId = behandlingId,
                 steg = stegtype,
                 utfall = utfall,
                 metadata = metadata?.let {
                     JsonWrapper(objectMapper.writeValueAsString(it))
-                }))
+                }
+            )
+        )
     }
 
     fun finnVedtaksdatoForBehandlinger(fagsakId: UUID): Map<UUID, LocalDateTime> {
         return behandlingshistorikkRepository
-                .finnSisteEndringstidspunktForBehandlinger(fagsakId, StegType.SEND_TIL_BESLUTTER)
-                .associate { it.first to it.second.toLocalDateTime() }
+            .finnSisteEndringstidspunktForBehandlinger(fagsakId, StegType.SEND_TIL_BESLUTTER)
+            .associate { it.first to it.second.toLocalDateTime() }
     }
-
 }

@@ -7,9 +7,10 @@ object SagtOppEllerRedusertStillingMapper {
 
     fun tilDto(situasjon: Situasjon): SagtOppEllerRedusertStillingDto {
         val sagtOppEllerRedusertStilling = situasjon.sagtOppEllerRedusertStilling
-        return SagtOppEllerRedusertStillingDto(sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
-                                               årsak = situasjon.oppsigelseReduksjonÅrsak,
-                                               dato = situasjon.oppsigelseReduksjonTidspunkt)
+        return SagtOppEllerRedusertStillingDto(
+            sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
+            årsak = situasjon.oppsigelseReduksjonÅrsak,
+            dato = situasjon.oppsigelseReduksjonTidspunkt
+        )
     }
-
 }

@@ -8,16 +8,21 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
-class DokumentasjonTilsynsutgifterRegel : Vilkårsregel(vilkårType = VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER,
-                                                       regler = setOf(HAR_DOKUMENTERTE_TILSYNSUTGIFTER),
-                                                       hovedregler = regelIder(HAR_DOKUMENTERTE_TILSYNSUTGIFTER)) {
+class DokumentasjonTilsynsutgifterRegel : Vilkårsregel(
+    vilkårType = VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER,
+    regler = setOf(HAR_DOKUMENTERTE_TILSYNSUTGIFTER),
+    hovedregler = regelIder(HAR_DOKUMENTERTE_TILSYNSUTGIFTER)
+) {
 
     companion object {
 
         private val HAR_DOKUMENTERTE_TILSYNSUTGIFTER =
-                RegelSteg(regelId = RegelId.HAR_DOKUMENTERTE_TILSYNSUTGIFTER,
-                          svarMapping = jaNeiSvarRegel(hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                                                       hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE))
-
+            RegelSteg(
+                regelId = RegelId.HAR_DOKUMENTERTE_TILSYNSUTGIFTER,
+                svarMapping = jaNeiSvarRegel(
+                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+                )
+            )
     }
 }

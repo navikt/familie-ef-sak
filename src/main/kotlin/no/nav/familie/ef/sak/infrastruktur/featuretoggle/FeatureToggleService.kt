@@ -9,5 +9,4 @@ interface FeatureToggleService : DisposableBean {
     }
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
-
 }
