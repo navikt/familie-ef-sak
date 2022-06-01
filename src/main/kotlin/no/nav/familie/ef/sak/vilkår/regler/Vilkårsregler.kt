@@ -48,7 +48,10 @@ private val alleVilkårsregler = listOf(
     AktivitetArbeidRegel(),
     InntektRegel(),
     AlderPåBarnRegel(),
-    DokumentasjonTilsynsutgifterRegel()
+    DokumentasjonTilsynsutgifterRegel(),
+    RettTilOvergangsstønadRegel(),
+    DokumentasjonAvUtdanningRegel(),
+    UtdanningErHensiktsmessigRegel()
 )
 
 fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
