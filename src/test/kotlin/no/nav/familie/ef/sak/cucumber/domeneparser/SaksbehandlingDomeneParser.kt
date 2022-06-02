@@ -17,15 +17,22 @@ import java.util.UUID
 
 object SaksbehandlingDomeneParser {
 
-    fun mapSaksbehandlinger(dataTable: DataTable, stønadstype: StønadType): Map<UUID, Pair<Behandling, Saksbehandling>> {
+    fun mapSaksbehandlinger(
+        dataTable: DataTable,
+        stønadstype: StønadType
+    ): Map<UUID, Pair<Behandling, Saksbehandling>> {
         val fagsak = fagsak(stønadstype = stønadstype)
+        var forrigeBehandlingId: UUID? = null
         return dataTable.forHverBehandling { behandlingId, rader ->
             val rad = rader.first()
-            val forrigeBehandlingId = behandlingIdTilUUID[parseValgfriInt(SaksbehandlingDomeneBegrep.FORRIGE_BEHANDLING, rad)]
+            val forrigeBehandlingIdFraRad =
+                behandlingIdTilUUID[parseValgfriInt(SaksbehandlingDomeneBegrep.FORRIGE_BEHANDLING, rad)]
+                    ?: forrigeBehandlingId
+            forrigeBehandlingId = behandlingId
             val behandling = behandling(
                 fagsak = fagsak,
                 id = behandlingId,
-                forrigeBehandlingId = forrigeBehandlingId,
+                forrigeBehandlingId = forrigeBehandlingIdFraRad,
                 type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
             )
             behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))

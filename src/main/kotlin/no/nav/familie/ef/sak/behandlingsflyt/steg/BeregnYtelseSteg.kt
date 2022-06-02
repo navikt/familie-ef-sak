@@ -285,14 +285,21 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseSkolepenger,
         saksbehandling: Saksbehandling
     ) {
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-            lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
+        val forrigeTilkjentYtelse = saksbehandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
+            tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
+        }
+        val andelerTilkjentYtelse =
+            lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling, forrigeTilkjentYtelse)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
-
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
             // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
-            REVURDERING -> error("Håndterer ikke revurdering ennå")
+            REVURDERING -> {
+                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+                val nyttStartdato =
+                    min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler) ?: error("Mangler startdato")
+                andelerTilkjentYtelse to nyttStartdato
+            }
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -455,15 +462,10 @@ class BeregnYtelseSteg(
 
     private fun lagBeløpsperioderForInnvilgelseSkolepenger(
         vedtak: InnvilgelseSkolepenger,
-        saksbehandling: Saksbehandling
+        saksbehandling: Saksbehandling,
+        forrigeTilkjentYtelse: TilkjentYtelse?
     ): List<AndelTilkjentYtelse> {
-        val totaltutbetalt = saksbehandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
-            tilkjentYtelseService.hentForBehandling(forrigeBehandlingId).andelerTilkjentYtelse
-                .groupBy { YearMonth.from(it.stønadFom) }
-                .map { it.key to it.value.sumOf { it.beløp } }
-                .toMap()
-        } ?: emptyMap<YearMonth, Int>()
-        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak, totaltutbetalt)
+        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak.perioder, saksbehandling.id, forrigeTilkjentYtelse)
         return beløpsperioder.perioder
             .flatMap { it.utbetalinger }
             .groupBy { it.grunnlag.årMånedFra }

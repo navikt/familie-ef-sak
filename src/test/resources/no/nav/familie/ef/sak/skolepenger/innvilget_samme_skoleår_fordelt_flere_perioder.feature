@@ -5,10 +5,6 @@ Egenskap: Skolepenger samme skoleår flere skoleårsperioder
 
   Scenario: flere utgifter fordelt på flere perioder som går over maksbeløp er ikke tillatt
 
-    Gitt følgende behandlinger for skolepenger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
       | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 08.2021      | 20_000   |

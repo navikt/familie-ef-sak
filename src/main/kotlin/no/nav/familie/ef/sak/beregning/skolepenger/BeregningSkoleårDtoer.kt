@@ -5,8 +5,10 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
 import java.time.Year
+import java.util.UUID
 
 data class BeregningSkolepengerRequest(
+    val behandlingId: UUID,
     val utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>,
 )
 

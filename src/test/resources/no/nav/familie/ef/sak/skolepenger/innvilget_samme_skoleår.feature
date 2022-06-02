@@ -5,10 +5,6 @@ Egenskap: Skolepenger samme skoleår
 
   Scenario: A - En utgift på ett skoleår under maksbeløp
 
-    Gitt følgende behandlinger for skolepenger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
       | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 40_000   |
@@ -26,10 +22,6 @@ Egenskap: Skolepenger samme skoleår
 
   Scenario: B - En utgift på ett skoleår over maksbeløp skal gi maksbeløp
 
-    Gitt følgende behandlinger for skolepenger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
       | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 70_000   |
@@ -42,10 +34,6 @@ Egenskap: Skolepenger samme skoleår
 
   Scenario: C - En utgift på ett skoleår over grensen, med redusert studiebelastning, skal gi redusert beløp
 
-    Gitt følgende behandlinger for skolepenger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
       | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 50               | 38_000   |
@@ -57,10 +45,6 @@ Egenskap: Skolepenger samme skoleår
       | 08.2021         | 08.2021         | 34_000 | 1               |
 
   Scenario: flere utgifter som går over maksbeløp
-
-    Gitt følgende behandlinger for skolepenger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
 
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |

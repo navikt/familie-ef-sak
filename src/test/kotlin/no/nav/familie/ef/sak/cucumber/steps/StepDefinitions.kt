@@ -7,6 +7,7 @@ import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -68,10 +69,11 @@ class StepDefinitions {
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
 
+    private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val beregningService = BeregningService()
     private val beregningBarnetilsynService = BeregningBarnetilsynService()
-    private val beregningSkolepengerService = BeregningSkolepengerService()
+    private val beregningSkolepengerService = BeregningSkolepengerService(behandlingService, tilkjentYtelseService)
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
@@ -98,6 +100,10 @@ class StepDefinitions {
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
     private lateinit var lagredeVedtak: MutableList<Vedtak>
+
+    init {
+        every { behandlingService.hentSaksbehandling(any<UUID>()) } answers { saksbehandlinger[firstArg()]!!.second }
+    }
 
     @Gitt("følgende behandlinger for {}")
     fun følgende_behandlinger(stønadTypeArg: String, dataTable: DataTable) {
@@ -157,7 +163,6 @@ class StepDefinitions {
         Assertions.assertThatThrownBy { `beregner ytelse`() }
             .hasMessageContaining(feilmelding)
     }
-
 
     @Når("beregner ytelse")
     fun `beregner ytelse`() {
@@ -232,17 +237,19 @@ class StepDefinitions {
         val behandlingId = behandlingIdTilUUID[behandling]
         val gjeldendeTilkjentYtelse: TilkjentYtelse =
             tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
+        val gjeldendeAndelerTilkjentYtelse = gjeldendeTilkjentYtelse.andelerTilkjentYtelse
         dataTable.asMaps().mapIndexed { index, rad ->
             val kildeBehandlingId =
                 behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, rad)]
 
             val fraOgMed = parseFraOgMed(rad)
-            val tilOgMed = parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
+            val tilOgMed =
+                parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 
-            val gjelendeAndel = gjeldendeTilkjentYtelse.andelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
-                ?: error("Fant ingen andel med startdato $fraOgMed")
+            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
+                ?: error("Fant ingen andel med startdato $fraOgMed, forventer: $gjeldendeAndelerTilkjentYtelse")
 
             try {
 
@@ -261,12 +268,12 @@ class StepDefinitions {
                 throw Throwable("Feilet rad $index", e)
             }
         }
-        feilHvis(gjeldendeTilkjentYtelse.andelerTilkjentYtelse.size > dataTable.asMaps().size) {
-            val andelerTilkjentYtelse = gjeldendeTilkjentYtelse.andelerTilkjentYtelse
+        feilHvis(gjeldendeAndelerTilkjentYtelse.size > dataTable.asMaps().size) {
+            val andelerTilkjentYtelse = gjeldendeAndelerTilkjentYtelse
             val manglandeAndeler = andelerTilkjentYtelse.subList(dataTable.asMaps().size, andelerTilkjentYtelse.size)
             "Mangler periodene: $manglandeAndeler"
         }
-        assertThat(dataTable.asMaps().size).isEqualTo(gjeldendeTilkjentYtelse.andelerTilkjentYtelse.size)
+        assertThat(dataTable.asMaps().size).isEqualTo(gjeldendeAndelerTilkjentYtelse.size)
     }
 
     private fun validerOgSettStønadstype(stønadType: StønadType) {
@@ -287,7 +294,7 @@ class StepDefinitions {
                 acc + behandling(
                     id = id,
                     opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                    type = BehandlingType.REVURDERING,
+                    type = if (index == 0) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING,
                     forrigeBehandlingId = acc.lastOrNull()?.id
                 )
             }
@@ -317,7 +324,7 @@ class StepDefinitions {
             tilkjentYtelseService.opprettTilkjentYtelse(any())
         } answers {
             val tilkjentYtelse = firstArg<TilkjentYtelse>()
-            tilkjentYtelser.put(tilkjentYtelse.behandlingId, tilkjentYtelse)
+            tilkjentYtelser[tilkjentYtelse.behandlingId] = tilkjentYtelse
             tilkjentYtelse
         }
         every {

@@ -5,10 +5,6 @@ Egenskap: Skolepenger
 
   Scenario: Innvilget skolepenger
 
-    Gitt følgende behandlinger for skolepenger
-      | BehandlingId | Behandlingstype       |
-      | 1            | FØRSTEGANGSBEHANDLING |
-
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
       | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 01.2021         | 03.2021         | 100              | 01.2021      | 200      |
