@@ -296,8 +296,8 @@ class BeregnYtelseSteg(
             // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
             REVURDERING -> {
                 val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-                val nyttStartdato =
-                    min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler) ?: error("Mangler startdato")
+                val nyttStartdato = min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler)
+                    ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
                 andelerTilkjentYtelse to nyttStartdato
             }
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
@@ -465,7 +465,8 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling,
         forrigeTilkjentYtelse: TilkjentYtelse?
     ): List<AndelTilkjentYtelse> {
-        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak.perioder, saksbehandling.id, forrigeTilkjentYtelse)
+        val beløpsperioder =
+            beregningSkolepengerService.beregnYtelse(vedtak.perioder, saksbehandling.id, forrigeTilkjentYtelse)
         return beløpsperioder.perioder
             .flatMap { it.utbetalinger }
             .groupBy { it.grunnlag.årMånedFra }
