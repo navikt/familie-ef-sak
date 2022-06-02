@@ -35,9 +35,6 @@ class BeregningSkolepengerService {
         return utgiftsperioder.groupBy {
             Year.of(if (it.årMånedFra.monthValue > 6) it.årMånedFra.year else it.årMånedFra.year.minus(1))
         }.map {
-            feilHvis(it.value.map { it.studiebelastning }.toSet().size > 1) {
-                "Kan ikke ha ulike studiebelastninger under et skoleår ${it.key}/${it.key.plusYears(1)}"
-            }
             val previous = tidligereForbruktePerioder.getOrDefault(it.key, 0)
             BeløpsperiodeSkolepengerDto(it.key, beregn(previous, it.value))
         }
@@ -56,7 +53,8 @@ class BeregningSkolepengerService {
             val maksbeløpFordeltAntallMåneder = maksbeløp.toBigDecimal().multiply(månedsdel).roundUp()
             val maksbeløpEtterStudieredusering =
                 maksbeløpFordeltAntallMåneder.multiply(studiebelastning.divide(ONE_HUNDRED)).roundUp().toInt()
-            var tilgjengelig = maxOf(maksbeløpEtterStudieredusering - nyForbrukt, 0)
+            val tilgjengeligFraTidligere = maxOf(maksbeløp - nyForbrukt, 0)
+            var tilgjengelig = minOf(tilgjengeligFraTidligere, maksbeløpEtterStudieredusering)
             val nyeUtbetalinger = periode.utgifter.map {
                 val nyTilgjengelig = maxOf(tilgjengelig - it.utgifter, 0)
                 val utbetales = tilgjengelig - nyTilgjengelig
