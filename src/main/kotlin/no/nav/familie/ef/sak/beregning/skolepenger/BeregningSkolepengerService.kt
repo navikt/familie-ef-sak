@@ -35,6 +35,9 @@ class BeregningSkolepengerService {
         return utgiftsperioder.groupBy {
             Year.of(if (it.årMånedFra.monthValue > 6) it.årMånedFra.year else it.årMånedFra.year.minus(1))
         }.map {
+            feilHvis(it.value.map { it.studiebelastning }.toSet().size > 1) {
+                "Kan ikke ha ulike studiebelastninger under et skoleår ${it.key}/${it.key.plusYears(1)}"
+            }
             val previous = tidligereForbruktePerioder.getOrDefault(it.key, 0)
             BeløpsperiodeSkolepengerDto(it.key, beregn(previous, it.value))
         }

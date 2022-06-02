@@ -26,11 +26,13 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseTilOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -51,6 +53,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -150,6 +153,13 @@ class StepDefinitions {
         }
     }
 
+    @Når("beregner ytelse kaster feil med innehold {}")
+    fun `beregner ytelse kaster feil pga validering`(feilmelding: String) {
+        Assertions.assertThatThrownBy { `beregner ytelse`() }
+            .hasMessageContaining(feilmelding)
+    }
+
+
     @Når("beregner ytelse")
     fun `beregner ytelse`() {
         initialiserTilkjentYtelseOgVedtakMock()
@@ -228,7 +238,7 @@ class StepDefinitions {
                 behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, rad)]
 
             val fraOgMed = parseFraOgMed(rad)
-            val tilOgMed = parseTilOgMed(rad)
+            val tilOgMed = parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 

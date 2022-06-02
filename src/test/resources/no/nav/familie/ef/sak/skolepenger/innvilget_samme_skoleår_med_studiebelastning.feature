@@ -20,6 +20,39 @@ Egenskap: Skolepenger med studiebelastning
       | Fra og med dato | Til og med dato | Beløp  | Kildebehandling |
       | 08.2021         | 08.2021         | 34_000 | 1               |
 
+  Scenario: To utgift på ett skoleår under grensen, med redusert studiebelastning
+
+    Gitt følgende behandlinger for skolepenger
+      | BehandlingId | Behandlingstype       |
+      | 1            | FØRSTEGANGSBEHANDLING |
+
+    Gitt følgende vedtak for skolepenger
+      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 50               |              | 30_000   |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 50               | 10.2021      | 30_000   |
+
+    Når beregner ytelse
+
+    Så forvent følgende andeler lagret for behandling med id: 1
+      | Fra og med dato | Til og med dato | Beløp  | Kildebehandling |
+      | 08.2021         | 08.2021         | 30_000 | 1               |
+      | 10.2021         | 10.2021         | 4_000  | 1               |
+
+  Scenario: To utgift på ett skoleår under grensen, med ulike redusert studiebelastning kaster feil
+
+    Gitt følgende behandlinger for skolepenger
+      | BehandlingId | Behandlingstype       |
+      | 1            | FØRSTEGANGSBEHANDLING |
+
+    Gitt følgende vedtak for skolepenger
+      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 50               |              | 30_000   |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 75               | 10.2021      | 30_000   |
+
+    Når beregner ytelse kaster feil med innehold Kan ikke ha ulike studiebelastninger under et skoleår
+
+    # TODO - revurdering med annen studiebelastning?
+
   Scenario: To utgifter på ett skoleår, over grensen på første utgiften men med studiebelastning
 
     Gitt følgende behandlinger for skolepenger
@@ -35,8 +68,8 @@ Egenskap: Skolepenger med studiebelastning
 
     Så forvent følgende andeler lagret for behandling med id: 1
       | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
-      | 08.2021         | 08.2021         | 34000   | 1               |
-      | 10.2021         | 10.2021         | 10000   | 1               |
+      | 08.2021         | 08.2021         | 34000 | 1               |
+      | 10.2021         | 10.2021         | 10000 | 1               |
 
   Scenario: To utgifter på ett skoleår, over grensen på andre utgiften men med studiebelastning, får ikke noe utbetalt for den andre utgiften
 
@@ -52,6 +85,6 @@ Egenskap: Skolepenger med studiebelastning
     Når beregner ytelse
 
     Så forvent følgende andeler lagret for behandling med id: 1
-      | Fra og med dato | Til og med dato | Beløp | Kildebehandling |
-      | 08.2021         | 08.2021         | 10_000   | 1               |
-      | 10.2021         | 10.2021         | 10_400   | 1               |
+      | Fra og med dato | Til og med dato | Beløp  | Kildebehandling |
+      | 08.2021         | 08.2021         | 10_000 | 1               |
+      | 10.2021         | 10.2021         | 10_400 | 1               |
