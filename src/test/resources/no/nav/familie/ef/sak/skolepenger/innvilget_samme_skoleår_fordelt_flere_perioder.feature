@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Skolepenger samme skåleår
+Egenskap: Skolepenger samme skoleår
 
   Scenario: flere utgifter fordelt på flere perioder som går over maksbeløp,
 

@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Skolepenger samme skåleår, flere utgifter
+Egenskap: Skolepenger samme skoleår, flere utgifter
 
   Scenario: D - To utgifter på ett skoleår, over grensen på første utgiften - får ikke noe utbetalt for den andre utgiften
 

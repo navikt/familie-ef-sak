@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Skolepenger samme skåleår
+Egenskap: Skolepenger samme skoleår
 
   Scenario: et beløp (150_000) som går over 18 måneder splittes opp over 2 skoleår, med utbetaling fra samme dato
 
