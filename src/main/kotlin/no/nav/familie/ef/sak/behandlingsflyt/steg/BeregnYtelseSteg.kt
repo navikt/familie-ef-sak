@@ -232,7 +232,11 @@ class BeregnYtelseSteg(
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
+            REVURDERING -> nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
+                saksbehandling,
+                vedtak,
+                andelerTilkjentYtelse
+            )
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -253,12 +257,17 @@ class BeregnYtelseSteg(
     ) {
         // TODO: Må periodene være sammenhengende?
         //  brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
+            lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> nyeAndelerForRevurderingAvBarnetilsynMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
+            REVURDERING -> nyeAndelerForRevurderingAvBarnetilsynMedStartdato(
+                saksbehandling,
+                vedtak,
+                andelerTilkjentYtelse
+            )
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -276,7 +285,8 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseSkolepenger,
         saksbehandling: Saksbehandling
     ) {
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
+            lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
@@ -297,7 +307,8 @@ class BeregnYtelseSteg(
     }
 
     private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate {
-        return andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: error("Må ha med en periode i førstegangsbehandling")
+        return andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+            ?: error("Må ha med en periode i førstegangsbehandling")
     }
 
     private fun nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
@@ -307,7 +318,8 @@ class BeregnYtelseSteg(
     ): Pair<List<AndelTilkjentYtelse>, LocalDate> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
-        val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
+        val forrigeTilkjenteYtelse =
+            saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
@@ -324,7 +336,8 @@ class BeregnYtelseSteg(
     ): Pair<List<AndelTilkjentYtelse>, LocalDate> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
-        val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
+        val forrigeTilkjenteYtelse =
+            saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
@@ -444,7 +457,13 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseSkolepenger,
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
-        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak)
+        val totaltutbetalt = saksbehandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
+            tilkjentYtelseService.hentForBehandling(forrigeBehandlingId).andelerTilkjentYtelse
+                .groupBy { YearMonth.from(it.stønadFom) }
+                .map { it.key to it.value.sumOf { it.beløp } }
+                .toMap()
+        } ?: emptyMap<YearMonth, Int>()
+        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak, totaltutbetalt)
         return beløpsperioder.perioder
             .flatMap { it.utbetalinger }
             .groupBy { it.grunnlag.årMånedFra }
@@ -519,9 +538,15 @@ class BeregnYtelseSteg(
                 val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
 
                 if (overlappendeOpphør.overlapperIStartenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))), opphørsperioder)
+                    vurderPeriodeForOpphør(
+                        listOf(it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))),
+                        opphørsperioder
+                    )
                 } else if (overlappendeOpphør.overlapperISluttenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1))), opphørsperioder)
+                    vurderPeriodeForOpphør(
+                        listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1))),
+                        opphørsperioder
+                    )
                 } else { // periode blir delt i to av opphold.
                     vurderPeriodeForOpphør(
                         listOf(
@@ -535,8 +560,13 @@ class BeregnYtelseSteg(
         }.flatten()
     }
 
-    private fun andelerForOpphør(forrigeTilkjentYtelse: TilkjentYtelse, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
-        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false) {
+    private fun andelerForOpphør(
+        forrigeTilkjentYtelse: TilkjentYtelse,
+        opphørFom: LocalDate
+    ): List<AndelTilkjentYtelse> {
+        brukerfeilHvis(
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false
+        ) {
             "Kan ikke opphøre frem i tiden"
         }
 

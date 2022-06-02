@@ -45,6 +45,7 @@ Egenskap: Skolepenger med studiebelastning
     Gitt følgende behandlinger for skolepenger
       | BehandlingId | Behandlingstype       |
       | 1            | FØRSTEGANGSBEHANDLING |
+      | 2            | REVURDERING           |
 
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
@@ -63,6 +64,7 @@ Egenskap: Skolepenger med studiebelastning
     Gitt følgende behandlinger for skolepenger
       | BehandlingId | Behandlingstype       |
       | 1            | FØRSTEGANGSBEHANDLING |
+      | 2            | REVURDERING           |
 
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |

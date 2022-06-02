@@ -4,10 +4,12 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
+import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.Year
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit.MONTHS
 
 private val ONE_HUNDRED: BigDecimal = 100.toBigDecimal()
@@ -15,7 +17,6 @@ private val ONE_HUNDRED: BigDecimal = 100.toBigDecimal()
 /**
  * Er maksbeløp per skoleår? Eller kan det endre seg midt i?
  *
- * TODO: validere at tom_dato ikke kan gå over skoleår, då må man legge inn en ny BeløpsperiodeSkolepengerDto, med utbetaling bak i tiden
  */
 
 private val maksbeløpPerSkoleår = 68_000
@@ -23,21 +24,27 @@ private val maksbeløpPerSkoleår = 68_000
 @Service
 class BeregningSkolepengerService {
 
-    fun beregnYtelse(innvilgelse: InnvilgelseSkolepenger): BeregningSkolepengerResponse {
-        return beregnYtelse(innvilgelse.perioder)
+    fun beregnYtelse(
+        innvilgelse: InnvilgelseSkolepenger,
+        tidligereUtbetalinger: Map<YearMonth, Int>
+    ): BeregningSkolepengerResponse {
+        return beregnYtelse(innvilgelse.perioder, tidligereUtbetalinger)
     }
 
-    fun beregnYtelse(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>): BeregningSkolepengerResponse {
+    fun beregnYtelse(
+        utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>,
+        tidligereUtbetalinger: Map<YearMonth, Int>
+    ): BeregningSkolepengerResponse {
         validerGyldigePerioder(utgiftsperioder)
         validerFornuftigeBeløp(utgiftsperioder)
 
         // fra forrige vedtak
-        val tidligereForbruktePerioder = mutableMapOf<Year, Int>()
+        //val tidligereForbruktePerioder = mutableMapOf<Year, Map<YearMonth, Int>>()
 
         val perioder = utgiftsperioder.groupBy {
             Year.of(if (it.årMånedFra.monthValue > 6) it.årMånedFra.year else it.årMånedFra.year.minus(1))
         }.map {
-            val previous = tidligereForbruktePerioder.getOrDefault(it.key, 0)
+            val previous = tidligereUtbetalinger.getOrDefault(it.key, emptyMap())
             val periode = it.value.singleOrNull()
             brukerfeilHvis(periode == null) {
                 "Antall perioder for skoleår=${it.key} er fler enn 1"
@@ -49,11 +56,12 @@ class BeregningSkolepengerService {
 
     private fun beregn(
         skoleår: Year,
-        tidligereForbrukt: Int,
+        tidligereForbrukt: Map<YearMonth, Int>,
         periode: UtgiftsperiodeSkolepengerDto
     ): BeløpsperiodeSkolepenger {
         val maksbeløp = maksbeløpPerSkoleår
-        var nyForbrukt = tidligereForbrukt
+        val sumTidligereUtbetalt = tidligereForbrukt.values.sum()
+
         val studiebelastning = periode.studiebelastning.toBigDecimal()
         val antallMåneder = minOf(MONTHS.between(periode.årMånedFra, periode.årMånedTil) + 1, 10)
         feilHvis(antallMåneder < 1 || antallMåneder > 10) {
@@ -63,22 +71,34 @@ class BeregningSkolepengerService {
         val maksbeløpFordeltAntallMåneder = maksbeløp.toBigDecimal().multiply(månedsdel).roundUp()
         val maksbeløpEtterStudieredusering =
             maksbeløpFordeltAntallMåneder.multiply(studiebelastning.divide(ONE_HUNDRED)).roundUp().toInt()
-        val tilgjengeligFraTidligere = maxOf(maksbeløp - nyForbrukt, 0)
-        var tilgjengelig = minOf(tilgjengeligFraTidligere, maksbeløpEtterStudieredusering)
+        var tilgjengelig = maxOf(maksbeløpEtterStudieredusering - sumTidligereUtbetalt, 0)
+
+        val perioder2 = periode.utgifter.groupBy { it.årMånedFra }
+            .toSortedMap()
+            .map { (fra, utgifter) ->
+                val utgifterTotaltForPeriode = utgifter.sumOf { it.utgifter }
+                val tidligereForbruktForMåned = tidligereForbrukt[fra] ?: 0
+
+                //val nyttMuligBeløpForMåned = maxOf(tidligereForbruktForMåned, utgifterTotaltForPeriode)
+                val nyttMuligBeløp = maxOf(utgifterTotaltForPeriode - tidligereForbruktForMåned, 0)
+                val nyttBeløp = minOf(nyttMuligBeløp, tilgjengelig)
+                tilgjengelig -= nyttBeløp
+                BeregnetUtbetalingSkolepenger(nyttBeløp, SkolepengerUtgiftDto(fra, utgifterTotaltForPeriode))
+            }
         val nyeUtbetalinger = periode.utgifter.map {
             val nyTilgjengelig = maxOf(tilgjengelig - it.utgifter, 0)
             val utbetales = tilgjengelig - nyTilgjengelig
             tilgjengelig = nyTilgjengelig
-            nyForbrukt += utbetales
+            //nyForbrukt += utbetales
             BeregnetUtbetalingSkolepenger(utbetales, it)
         }
         return BeløpsperiodeSkolepenger(
             skoleår = skoleår,
             maksbeløp = maksbeløp,
             maksbeløpFordeltAntallMåneder = maksbeløpEtterStudieredusering,
-            alleredeUtbetalt = tidligereForbrukt,
-            nyForbrukt = nyForbrukt, // Burde denna være en løpende nyForbrukt fra forrige periode?
-            utbetalinger = nyeUtbetalinger,
+            alleredeUtbetalt = 0, //tidligereForbrukt,
+            nyForbrukt = 0, //nyForbrukt, // Burde denna være en løpende nyForbrukt fra forrige periode?
+            utbetalinger = perioder2,
             grunnlag = BeregningsgrunnlagSkolepengerDto(
                 periode.studietype,
                 periode.studiebelastning,
