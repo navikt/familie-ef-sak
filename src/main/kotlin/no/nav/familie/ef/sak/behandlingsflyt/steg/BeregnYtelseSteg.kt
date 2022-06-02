@@ -467,7 +467,10 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseBarnetilsyn,
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
-        val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
+        val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
+            vedtak.perioder.filterNot { it.erMidlertidigOpphør },
+            vedtak.perioderKontantstøtte, vedtak.tilleggsstønad.perioder
+        )
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
         return beløpsperioder
             .map {
