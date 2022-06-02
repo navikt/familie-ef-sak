@@ -14,6 +14,8 @@ private val ONE_HUNDRED: BigDecimal = 100.toBigDecimal()
 
 /**
  * Er maksbeløp per skoleår? Eller kan det endre seg midt i?
+ *
+ * TODO: validere at tom_dato ikke kan gå over skoleår, då må man legge inn en ny BeløpsperiodeSkolepengerDto, med utbetaling bak i tiden
  */
 
 private val maksbeløpPerSkoleår = 68_000
@@ -66,7 +68,7 @@ class BeregningSkolepengerService {
                 maksbeløp = maksbeløp,
                 maksbeløpFordeltAntallMåneder = maksbeløpEtterStudieredusering,
                 tidligereForbrukt = tidligereForbrukt,
-                nyForbrukt = nyForbrukt,
+                nyForbrukt = nyForbrukt, // Burde denna være en løpende nyForbrukt fra forrige periode?
                 nyeUtbetalinger = nyeUtbetalinger,
                 grunnlag = BeregningsgrunnlagSkolepengerDto(
                     periode.studietype,
