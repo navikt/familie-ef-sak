@@ -8,7 +8,7 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
     Gitt følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør |
       | 1            | INNVILGE        | 1           | 200      | 01.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
-      | 2            | INNVILGE        | 1           | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | ja                    |
+      | 2            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    |
       | 2            | INNVILGE        | 1           | 100      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
 
     Når beregner ytelse
