@@ -34,25 +34,8 @@ class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vi
     }
 }
 
-private val alleVilkårsregler = listOf(
-    ForutgåendeMedlemskapRegel(),
-    OppholdINorgeRegel(),
-    MorEllerFarRegel(),
-    SivilstandRegel(),
-    SamlivRegel(),
-    AleneomsorgRegel(),
-    NyttBarnSammePartnerRegel(),
-    AktivitetRegel(),
-    SagtOppEllerRedusertRegel(),
-    TidligareVedtaksperioderRegel(),
-    AktivitetArbeidRegel(),
-    InntektRegel(),
-    AlderPåBarnRegel(),
-    DokumentasjonTilsynsutgifterRegel(),
-    RettTilOvergangsstønadRegel(),
-    DokumentasjonAvUtdanningRegel(),
-    UtdanningErHensiktsmessigRegel()
-)
+private val alleVilkårsregler = StønadType.values().map {vilkårsreglerForStønad(it) }.flatten()
+
 
 fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
     when (stønadstype) {
