@@ -445,11 +445,10 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
         val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak)
-        return beløpsperioder
-            .flatMap { it.perioder }
-            .flatMap { it.nyeUtbetalinger }
+        return beløpsperioder.perioder
+            .flatMap { it.utbetalinger }
             .groupBy { it.grunnlag.årMånedFra }
-            .map { it.key to it.value.sumOf { it.stønad } }
+            .map { it.key to it.value.sumOf { it.beløp } }
             .filter { it.second > 0 }
             .map { (årMåned, beløp) ->
                 AndelTilkjentYtelse(

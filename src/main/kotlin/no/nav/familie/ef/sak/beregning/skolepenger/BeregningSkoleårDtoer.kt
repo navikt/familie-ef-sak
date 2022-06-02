@@ -10,18 +10,18 @@ data class BeregningSkolepengerRequest(
     val utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>,
 )
 
-data class BeløpsperiodeSkolepengerDto(
-    val skoleår: Year,
-    val perioder: List<BeløpSkolepenger>
+data class BeregningSkolepengerResponse(
+    val perioder: List<BeløpsperiodeSkolepenger>
 )
 
-data class BeløpSkolepenger(
+data class BeløpsperiodeSkolepenger(
+    val skoleår: Year,
     val maksbeløp: Int,
     val maksbeløpFordeltAntallMåneder: Int,
-    val tidligereForbrukt: Int,
-    val nyForbrukt: Int,
+    val alleredeUtbetalt: Int,
+    val nyForbrukt: Int, // ?
     val grunnlag: BeregningsgrunnlagSkolepengerDto,
-    val nyeUtbetalinger: List<DetaljertBeløpSkolepenger>
+    val utbetalinger: List<BeregnetUtbetalingSkolepenger>
 )
 
 data class BeregningsgrunnlagSkolepengerDto(
@@ -30,7 +30,7 @@ data class BeregningsgrunnlagSkolepengerDto(
     val periode: Periode,
 )
 
-data class DetaljertBeløpSkolepenger(
-    val stønad: Int,
+data class BeregnetUtbetalingSkolepenger(
+    val beløp: Int,
     val grunnlag: SkolepengerUtgiftDto
 )

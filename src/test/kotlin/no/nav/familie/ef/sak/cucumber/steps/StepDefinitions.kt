@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseFraOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseTilOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDato

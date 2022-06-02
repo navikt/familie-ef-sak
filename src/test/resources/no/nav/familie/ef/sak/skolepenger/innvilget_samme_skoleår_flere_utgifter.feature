@@ -10,9 +10,9 @@ Egenskap: Skolepenger samme skoleår, flere utgifter
       | 1            | FØRSTEGANGSBEHANDLING |
 
     Gitt følgende vedtak for skolepenger
-      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Utgifter |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 70_000   |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 10.2021         | 06.2022         | 100              | 70_000   |
+      | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              |              | 70_000   |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 10.2021      | 70_000   |
 
     Når beregner ytelse
 
@@ -47,7 +47,7 @@ Egenskap: Skolepenger samme skoleår, flere utgifter
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter |
       | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              |              | 60_000   |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 01.2022         | 06.2022         | 100              | 01.2022      | 60_000   |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 01.2022      | 60_000   |
 
     Når beregner ytelse
 

@@ -25,12 +25,12 @@ class BeregningSkolepengerController(
 ) {
 
     @PostMapping
-    fun beregnYtelse(@RequestBody request: BeregningSkolepengerRequest): Ressurs<List<BeløpsperiodeSkolepengerDto>> {
+    fun beregnYtelse(@RequestBody request: BeregningSkolepengerRequest): Ressurs<BeregningSkolepengerResponse> {
         return Ressurs.success(beregningSkolepengerService.beregnYtelse(request.utgiftsperioder))
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<List<BeløpsperiodeSkolepengerDto>> {
+    fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<BeregningSkolepengerResponse> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         val vedtak = vedtakService.hentVedtak(behandlingId).tilVedtakDto()
 

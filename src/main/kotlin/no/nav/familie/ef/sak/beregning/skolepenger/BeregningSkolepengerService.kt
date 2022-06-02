@@ -23,60 +23,68 @@ private val maksbeløpPerSkoleår = 68_000
 @Service
 class BeregningSkolepengerService {
 
-    fun beregnYtelse(innvilgelse: InnvilgelseSkolepenger): List<BeløpsperiodeSkolepengerDto> {
+    fun beregnYtelse(innvilgelse: InnvilgelseSkolepenger): BeregningSkolepengerResponse {
         return beregnYtelse(innvilgelse.perioder)
     }
 
-    fun beregnYtelse(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>): List<BeløpsperiodeSkolepengerDto> {
+    fun beregnYtelse(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>): BeregningSkolepengerResponse {
         validerGyldigePerioder(utgiftsperioder)
         validerFornuftigeBeløp(utgiftsperioder)
 
         // fra forrige vedtak
         val tidligereForbruktePerioder = mutableMapOf<Year, Int>()
 
-        return utgiftsperioder.groupBy {
+        val perioder = utgiftsperioder.groupBy {
             Year.of(if (it.årMånedFra.monthValue > 6) it.årMånedFra.year else it.årMånedFra.year.minus(1))
         }.map {
             val previous = tidligereForbruktePerioder.getOrDefault(it.key, 0)
-            BeløpsperiodeSkolepengerDto(it.key, beregn(previous, it.value))
+            val periode = it.value.singleOrNull()
+            brukerfeilHvis(periode == null) {
+                "Antall perioder for skoleår=${it.key} er fler enn 1"
+            }
+            beregn(it.key, previous, periode)
         }
+        return BeregningSkolepengerResponse(perioder)
     }
 
-    private fun beregn(tidligereForbrukt: Int, perioder: List<UtgiftsperiodeSkolepengerDto>): List<BeløpSkolepenger> {
+    private fun beregn(
+        skoleår: Year,
+        tidligereForbrukt: Int,
+        periode: UtgiftsperiodeSkolepengerDto
+    ): BeløpsperiodeSkolepenger {
         val maksbeløp = maksbeløpPerSkoleår
         var nyForbrukt = tidligereForbrukt
-        return perioder.map { periode ->
-            val studiebelastning = periode.studiebelastning.toBigDecimal()
-            val antallMåneder = minOf(MONTHS.between(periode.årMånedFra, periode.årMånedTil) + 1, 10)
-            feilHvis(antallMåneder < 1 || antallMåneder > 10) {
-                "Antall måneder er $antallMåneder men må være 1-10"
-            }
-            val månedsdel = antallMåneder.toBigDecimal().divide(BigDecimal.TEN)
-            val maksbeløpFordeltAntallMåneder = maksbeløp.toBigDecimal().multiply(månedsdel).roundUp()
-            val maksbeløpEtterStudieredusering =
-                maksbeløpFordeltAntallMåneder.multiply(studiebelastning.divide(ONE_HUNDRED)).roundUp().toInt()
-            val tilgjengeligFraTidligere = maxOf(maksbeløp - nyForbrukt, 0)
-            var tilgjengelig = minOf(tilgjengeligFraTidligere, maksbeløpEtterStudieredusering)
-            val nyeUtbetalinger = periode.utgifter.map {
-                val nyTilgjengelig = maxOf(tilgjengelig - it.utgifter, 0)
-                val utbetales = tilgjengelig - nyTilgjengelig
-                tilgjengelig = nyTilgjengelig
-                nyForbrukt += utbetales
-                DetaljertBeløpSkolepenger(utbetales, it)
-            }
-            BeløpSkolepenger(
-                maksbeløp = maksbeløp,
-                maksbeløpFordeltAntallMåneder = maksbeløpEtterStudieredusering,
-                tidligereForbrukt = tidligereForbrukt,
-                nyForbrukt = nyForbrukt, // Burde denna være en løpende nyForbrukt fra forrige periode?
-                nyeUtbetalinger = nyeUtbetalinger,
-                grunnlag = BeregningsgrunnlagSkolepengerDto(
-                    periode.studietype,
-                    periode.studiebelastning,
-                    periode.tilPeriode()
-                )
-            )
+        val studiebelastning = periode.studiebelastning.toBigDecimal()
+        val antallMåneder = minOf(MONTHS.between(periode.årMånedFra, periode.årMånedTil) + 1, 10)
+        feilHvis(antallMåneder < 1 || antallMåneder > 10) {
+            "Antall måneder er $antallMåneder men må være 1-10"
         }
+        val månedsdel = antallMåneder.toBigDecimal().divide(BigDecimal.TEN)
+        val maksbeløpFordeltAntallMåneder = maksbeløp.toBigDecimal().multiply(månedsdel).roundUp()
+        val maksbeløpEtterStudieredusering =
+            maksbeløpFordeltAntallMåneder.multiply(studiebelastning.divide(ONE_HUNDRED)).roundUp().toInt()
+        val tilgjengeligFraTidligere = maxOf(maksbeløp - nyForbrukt, 0)
+        var tilgjengelig = minOf(tilgjengeligFraTidligere, maksbeløpEtterStudieredusering)
+        val nyeUtbetalinger = periode.utgifter.map {
+            val nyTilgjengelig = maxOf(tilgjengelig - it.utgifter, 0)
+            val utbetales = tilgjengelig - nyTilgjengelig
+            tilgjengelig = nyTilgjengelig
+            nyForbrukt += utbetales
+            BeregnetUtbetalingSkolepenger(utbetales, it)
+        }
+        return BeløpsperiodeSkolepenger(
+            skoleår = skoleår,
+            maksbeløp = maksbeløp,
+            maksbeløpFordeltAntallMåneder = maksbeløpEtterStudieredusering,
+            alleredeUtbetalt = tidligereForbrukt,
+            nyForbrukt = nyForbrukt, // Burde denna være en løpende nyForbrukt fra forrige periode?
+            utbetalinger = nyeUtbetalinger,
+            grunnlag = BeregningsgrunnlagSkolepengerDto(
+                periode.studietype,
+                periode.studiebelastning,
+                periode.tilPeriode()
+            )
+        )
     }
 
     private fun validerFornuftigeBeløp(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>) {
