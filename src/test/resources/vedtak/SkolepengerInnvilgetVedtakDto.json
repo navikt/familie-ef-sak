@@ -6,7 +6,12 @@
       "årMånedFra": "2021-01",
       "årMånedTil": "2021-12",
       "studiebelastning": 50,
-      "utgifter": 500
+      "utgifter": [
+        {
+          "årMånedFra": "2021-01",
+          "utgifter": 500
+        }
+      ]
     }
   ],
   "resultatType": "INNVILGE",
