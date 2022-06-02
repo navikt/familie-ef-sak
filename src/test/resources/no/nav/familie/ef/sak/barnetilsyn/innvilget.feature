@@ -38,9 +38,6 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
       | BehandlingId | Beløp |
       | 1            | 15    |
 
-    Når beregner ytelse
+    Når beregner ytelse kan kaste feil
 
-    Så forvent følgende historikk
-      | BehandlingId | Endringstype | Endret i behandlingId | Kontantstøtte | Tilleggsstønad | Antall barn | Utgifter | Beløp |
-      | 1            |              |                       | 10            | 15             | 0           | 200      | 0     |
-
+    Så forvent følgende feil: Må ha med minst et barn på en periode som ikke er et midlertidig opphør

@@ -35,3 +35,5 @@ fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =
     YearMonth.from(this).erPåfølgende(YearMonth.from(påfølgende))
 
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
+
+fun YearMonth.erSammeMåned(sammeMåned: YearMonth): Boolean = this == sammeMåned

@@ -169,7 +169,8 @@ object VedtakDomeneParser {
                 datoTil = parseTilOgMed(rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                 barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(1, it).map { UUID.randomUUID() } }
-                    ?: emptyList()
+                    ?: emptyList(),
+                erMidlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
             )
         }
     }
@@ -315,6 +316,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     SANKSJONSÅRSAK("Sanksjonsårsak"),
     STUDIETYPE("Studietype"),
     STUDIEBELASTNING("Studiebelastning"),
+    ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     ;
 
     override fun nøkkel(): String {

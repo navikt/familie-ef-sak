@@ -65,6 +65,7 @@ class StepDefinitions {
     private var saksbehandlinger = mapOf<UUID, Pair<Behandling, Saksbehandling>>()
     private var inntekter = mapOf<UUID, InntektWrapper>()
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
+    private var beregnYtelseException: Exception? = null
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val beregningService = BeregningService()
@@ -175,6 +176,19 @@ class StepDefinitions {
             null,
             behandlingIdsToAktivitetArbeid
         )
+    }
+
+    @Når("beregner ytelse kan kaste feil")
+    fun `beregner ytelse kan kaste feil`() {
+        try {`beregner ytelse`()} catch (e: Exception) {
+            beregnYtelseException = e
+        }
+    }
+
+    @Så("forvent følgende feil: {}")
+    fun `forvent følgende feil`(feilmeldingTekst: String) {
+        assertThat(beregnYtelseException).isNotNull()
+        assertThat(beregnYtelseException).hasMessageContaining(feilmeldingTekst)
     }
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")

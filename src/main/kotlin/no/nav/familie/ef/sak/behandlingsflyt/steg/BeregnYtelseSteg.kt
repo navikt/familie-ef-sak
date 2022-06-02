@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
@@ -159,8 +160,52 @@ class BeregnYtelseSteg(
         }
         if (data is InnvilgelseBarnetilsyn) {
             barnService.validerBarnFinnesPåBehandling(saksbehandling.id, data.perioder.flatMap { it.barn }.toSet())
+            validerInnvilgelseBarnetilsyn(data.perioder, saksbehandling)
         }
     }
+
+    private fun validerInnvilgelseBarnetilsyn(utgiftsperioder: List<UtgiftsperiodeDto>, saksbehandling: Saksbehandling) {
+        validerAntallBarnOgUtgifterVedMidlertidigOpphør(utgiftsperioder, saksbehandling.id)
+        validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
+        validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
+    }
+
+    private fun validerAntallBarnOgUtgifterVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>, behandlingId: UUID) {
+        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphør && it.barn.isNotEmpty() }) {
+            "Kan ikke ta med barn på en periode som er et midlertidig opphør, på behandling=$behandlingId"
+        }
+        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphør && it.utgifter > 0 }) {
+            "kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør, på behandling=$behandlingId"
+        }
+        brukerfeilHvis(utgiftsperioder.any { !it.erMidlertidigOpphør && it.barn.isEmpty() }) {
+            "Må ha med minst et barn på en periode som ikke er et midlertidig opphør, på behandling=$behandlingId"
+        }
+        brukerfeilHvis(utgiftsperioder.any { !it.erMidlertidigOpphør && it.utgifter <= 0 }) {
+            "Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør, på behandling=$behandlingId"
+        }
+    }
+
+    private fun validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
+                                                           saksbehandling: Saksbehandling) {
+        val førstePeriodeErMidlertidigOpphør = utgiftsperioder.first().erMidlertidigOpphør
+        brukerfeilHvis(førstePeriodeErMidlertidigOpphør && saksbehandling.forrigeBehandlingId == null) {
+            "Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=${saksbehandling.id}"
+        }
+        val harIkkeInnvilgetBeløp =
+                if (saksbehandling.forrigeBehandlingId != null) tilkjentYtelseService.hentForBehandling(saksbehandling.forrigeBehandlingId).andelerTilkjentYtelse.all { it.beløp == 0 } else true
+        brukerfeilHvis(harIkkeInnvilgetBeløp && førstePeriodeErMidlertidigOpphør) {
+                "Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=${saksbehandling.id}"
+        }
+    }
+
+    private fun validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
+                                                                  saksbehandling: Saksbehandling) {
+        brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
+            "Perioder som er midlertidig opphør må være sammenhengende, på behandling=${saksbehandling.id}"
+        }
+    }
+
+
 
     private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
         when (data) {
@@ -422,7 +467,10 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseBarnetilsyn,
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
-        val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(vedtak)
+        val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
+            vedtak.perioder.filterNot { it.erMidlertidigOpphør },
+            vedtak.perioderKontantstøtte, vedtak.tilleggsstønad.perioder
+        )
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
         return beløpsperioder
             .map {

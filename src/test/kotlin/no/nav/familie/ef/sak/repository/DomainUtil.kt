@@ -230,11 +230,12 @@ fun tilkjentYtelse(
     stønadsår: Int = 2021,
     startdato: LocalDate? = null,
     grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår - 1, 5, 1),
-    samordningsfradrag: Int = 0
+    samordningsfradrag: Int = 0,
+    beløp: Int = 11554
 ): TilkjentYtelse {
     val andeler = listOf(
         AndelTilkjentYtelse(
-            beløp = 11554,
+            beløp = beløp,
             stønadFom = LocalDate.of(stønadsår, 1, 1),
             stønadTom = LocalDate.of(stønadsår, 12, 31),
             personIdent = personIdent,

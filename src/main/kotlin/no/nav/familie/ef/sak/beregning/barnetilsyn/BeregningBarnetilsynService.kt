@@ -14,14 +14,6 @@ import java.time.YearMonth
 @Service
 class BeregningBarnetilsynService {
 
-    fun beregnYtelseBarnetilsyn(innvilgelseBarnetilsyn: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
-        return beregnYtelseBarnetilsyn(
-            innvilgelseBarnetilsyn.perioder,
-            innvilgelseBarnetilsyn.perioderKontantstøtte,
-            innvilgelseBarnetilsyn.tilleggsstønad.perioder
-        )
-    }
-
     fun beregnYtelseBarnetilsyn(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,

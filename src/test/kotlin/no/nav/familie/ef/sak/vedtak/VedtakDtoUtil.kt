@@ -74,12 +74,12 @@ object VedtakDtoUtil {
         Sanksjonert(årsak, periode, begrunnelse)
 
     fun barnetilsynperiodeDto(barnId: UUID) =
-        UtgiftsperiodeDto(
-            YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12),
-            listOf(barnId),
-            500
-        )
+            UtgiftsperiodeDto(
+                    YearMonth.of(2021, 1),
+                    YearMonth.of(2021, 12),
+                    listOf(barnId),
+                    500,
+                    false)
 
     fun periodeMedBeløpDto() =
         PeriodeMedBeløpDto(

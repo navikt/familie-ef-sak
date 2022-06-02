@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.felles.util.erPåfølgende
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
@@ -34,10 +35,11 @@ data class PeriodeMedBeløpDto(
 }
 
 data class UtgiftsperiodeDto(
-    val årMånedFra: YearMonth,
-    val årMånedTil: YearMonth,
-    val barn: List<UUID>,
-    val utgifter: Int
+        val årMånedFra: YearMonth,
+        val årMånedTil: YearMonth,
+        val barn: List<UUID>,
+        val utgifter: Int,
+        val erMidlertidigOpphør: Boolean
 ) {
 
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
@@ -48,13 +50,24 @@ fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> =
         it.tilPeriode()
     }
 
+fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = this.foldIndexed(true) { index, acc, periode ->
+    if (index == 0) {
+        acc
+    } else {
+            val forrigePeriode = this[index - 1]
+            when {
+                forrigePeriode.årMånedTil.erPåfølgende(periode.årMånedFra) -> acc
+                else -> false
+            }
+    }
+}
+
 fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
-    Barnetilsynperiode(
-        datoFra = this.årMånedFra.atDay(1),
-        datoTil = this.årMånedTil.atEndOfMonth(),
-        utgifter = this.utgifter,
-        barn = this.barn
-    )
+        Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
+                           datoTil = this.årMånedTil.atEndOfMonth(),
+                           utgifter = this.utgifter,
+                           barn = this.barn,
+                           erMidlertidigOpphør = this.erMidlertidigOpphør)
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
     PeriodeMedBeløp(
@@ -74,7 +87,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 årMånedFra = YearMonth.from(it.datoFra),
                 årMånedTil = YearMonth.from(it.datoTil),
                 utgifter = it.utgifter.toInt(),
-                barn = it.barn
+                barn = it.barn,
+                erMidlertidigOpphør = it.erMidlertidigOpphør?: false
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
