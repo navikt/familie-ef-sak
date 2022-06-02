@@ -1459,7 +1459,7 @@ internal class BeregnYtelseStegTest {
 
         @BeforeEach
         internal fun setUp() {
-            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any()) } returns
+            every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
                     listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, 6284, grunnlag()))
         }
 
