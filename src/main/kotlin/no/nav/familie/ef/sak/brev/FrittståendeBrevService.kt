@@ -74,5 +74,7 @@ class FrittståendeBrevService(
             FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
             FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
             FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> FrittståendeBrevType.VARSEL_OM_SANKSJON
+            FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE
+            FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE
         }
 }
