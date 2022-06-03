@@ -29,7 +29,7 @@ class AvstemmingService(
         loggKonsistensavstemming(stønadstype, tilkjenteYtelser, transaksjonId, chunks.size)
         iverksettClient.sendStartmeldingKonsistensavstemming(emptyDto, transaksjonId)
         chunks.forEach {
-            val request = KonsistensavstemmingDto(stønadstype, tilkjenteYtelser, avstemmingstidspunkt)
+            val request = KonsistensavstemmingDto(stønadstype, it, avstemmingstidspunkt)
             iverksettClient.sendKonsistensavstemming(request, transaksjonId)
         }
         iverksettClient.sendSluttmeldingKonsistensavstemming(emptyDto, transaksjonId)
