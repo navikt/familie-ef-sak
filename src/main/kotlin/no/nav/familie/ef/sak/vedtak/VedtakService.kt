@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.vedtak
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -15,7 +16,10 @@ import java.time.LocalDate
 import java.util.UUID
 
 @Service
-class VedtakService(private val vedtakRepository: VedtakRepository) {
+class VedtakService(
+    private val vedtakRepository: VedtakRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
         return vedtakRepository.insert(vedtakDto.tilVedtak(behandlingId, stønadstype)).behandlingId
@@ -65,24 +69,31 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
         return null
     }
 
-    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, Int?> {
-        val vedtakList = vedtakRepository.findAllById(behandlingIds)
-        val dagensDatoMinusEnMåned = LocalDate.now().minusMonths(1)
-        val map = mutableMapOf<UUID, Int?>()
-        for (vedtak in vedtakList) {
+    fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, ForventetInntektForBehandling> {
+        return vedtakRepository.findAllById(behandlingIds).map {
+                vedtak ->
             if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
-                map.put(
-                    vedtak.behandlingId,
-                    vedtak.inntekter?.inntekter?.firstOrNull {
-                        dagensDatoMinusEnMåned.isEqualOrAfter(it.startDato) && dagensDatoMinusEnMåned.isEqualOrBefore(it.sluttDato)
-                    }?.inntekt?.toInt()
-                )
+                createForventetInntektForBehandling(vedtak)
             } else {
-                map.put(vedtak.behandlingId, null)
+                ForventetInntektForBehandling(vedtak.behandlingId, null, null)
             }
-        }
+        }.associateBy { it.behandlingId }
+    }
 
-        return map
+    private fun createForventetInntektForBehandling(vedtak: Vedtak): ForventetInntektForBehandling {
+        return ForventetInntektForBehandling(
+            vedtak.behandlingId,
+            createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(1)),
+            createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(2))
+        )
+    }
+
+    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: LocalDate): Int? {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
+        return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
+            forventetInntektForDato.isEqualOrAfter(it.stønadFom) &&
+                forventetInntektForDato.isEqualOrBefore(it.stønadTom)
+        }?.inntekt
     }
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
@@ -92,6 +103,28 @@ class VedtakService(private val vedtakRepository: VedtakRepository) {
     }
 }
 
+data class PersonIdentMedForventetInntekt(
+    val personIdent: String,
+    val forventetInntektForMåned: ForventetInntektForBehandling
+)
+
+data class ForventetInntektForBehandling(
+    val behandlingId: UUID,
+    val forventetInntektForrigeMåned: Int?,
+    val forventetInntektToMånederTilbake: Int?
+)
+
+data class ForventetInntektForPersonIdent(
+    val personIdent: String,
+    val forventetInntektForrigeMåned: Int?,
+    val forventetInntektToMånederTilbake: Int?
+)
+
 fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)
 fun LocalDate.isEqualOrBefore(dato: LocalDate) = this.equals(dato) || this.isBefore(dato)
-fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any { Periode(it.datoFra, it.datoTil).omslutter(dato) } ?: false
+fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
+    Periode(
+        it.datoFra,
+        it.datoTil
+    ).omslutter(dato)
+} ?: false

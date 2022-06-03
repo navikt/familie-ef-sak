@@ -130,26 +130,37 @@ class VedtakController(
 
     @PostMapping("/gjeldendeIverksatteBehandlingerMedInntekt")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"]) // Familie-ef-personhendelse bruker denne
-    fun hentPersonerMedAktivStonadOgForventetInntekt(@RequestBody personIdenter: List<String>): Ressurs<Map<String, Int?>> {
+    fun hentPersonerMedAktivStonadOgForventetInntekt(
+        @RequestBody
+        personIdenter: List<String>
+    ): Ressurs<List<ForventetInntektForPersonIdent>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
         val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
-        val identToForventetInntektMap = mutableMapOf<String, Int?>()
 
+        val personIdentMedForventetInntektList = mutableListOf<PersonIdentMedForventetInntekt>()
         val behandlingIdToForventetInntektMap =
             vedtakService.hentForventetInntektForBehandlingIds(personIdentToBehandlingIds.values)
 
         for (personIdent in personIdentToBehandlingIds.keys) {
             val behandlingId = personIdentToBehandlingIds[personIdent]
-            if (behandlingIdToForventetInntektMap[behandlingId] == null) {
+            val forventetInntektForBehandling = behandlingIdToForventetInntektMap[behandlingId]
+            if (forventetInntektForBehandling == null) {
                 secureLogger.warn("Fant ikke behandling $behandlingId knyttet til ident $personIdent - får ikke vurdert inntekt")
             } else {
-                val forventetInntekt = behandlingIdToForventetInntektMap[behandlingId]
-                identToForventetInntektMap[personIdent] = forventetInntekt
+                personIdentMedForventetInntektList.add(PersonIdentMedForventetInntekt(personIdent, forventetInntektForBehandling))
             }
         }
 
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt done")
-        return Ressurs.success(identToForventetInntektMap)
+        return Ressurs.success(
+            personIdentMedForventetInntektList.map {
+                ForventetInntektForPersonIdent(
+                    it.personIdent,
+                    it.forventetInntektForMåned.forventetInntektForrigeMåned,
+                    it.forventetInntektForMåned.forventetInntektToMånederTilbake
+                )
+            }
+        )
     }
 }
