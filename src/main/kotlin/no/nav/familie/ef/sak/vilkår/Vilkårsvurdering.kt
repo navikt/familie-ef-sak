@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -63,22 +64,25 @@ enum class Vilkårsresultat(val beskrivelse: String) {
 
 enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<StønadType>) {
 
-    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
-    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    FORUTGÅENDE_MEDLEMSKAP("§15-2 Forutgående medlemskap", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
+    LOVLIG_OPPHOLD("§15-3 Lovlig opphold", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
 
-    MOR_ELLER_FAR("§15-4 Mor eller far", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    MOR_ELLER_FAR("§15-4 Mor eller far", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
 
-    SIVILSTAND("§15-4 Sivilstand", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
-    SAMLIV("§15-4 Samliv", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
-    ALENEOMSORG("§15-4 Aleneomsorg", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
-    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner", listOf(OVERGANGSSTØNAD, BARNETILSYN)),
+    SIVILSTAND("§15-4 Sivilstand", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
+    SAMLIV("§15-4 Samliv", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
+    ALENEOMSORG("§15-4 Aleneomsorg", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
+    NYTT_BARN_SAMME_PARTNER("§15-4 Nytt barn samme partner", listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER)),
     SAGT_OPP_ELLER_REDUSERT("Sagt opp eller redusert stilling", listOf(OVERGANGSSTØNAD)),
     AKTIVITET("Aktivitet", listOf(OVERGANGSSTØNAD)),
     AKTIVITET_ARBEID("Aktivitet", listOf(BARNETILSYN)),
     TIDLIGERE_VEDTAKSPERIODER("Tidligere vedtaksperioder", listOf(OVERGANGSSTØNAD)),
     INNTEKT("§15-10 Inntekt", listOf(BARNETILSYN)),
     ALDER_PÅ_BARN("Alder på barn", listOf(BARNETILSYN)),
-    DOKUMENTASJON_TILSYNSUTGIFTER("Dokumentasjon av tilsynsutgifter", listOf(BARNETILSYN))
+    DOKUMENTASJON_TILSYNSUTGIFTER("Dokumentasjon av tilsynsutgifter", listOf(BARNETILSYN)),
+    RETT_TIL_OVERGANGSSTØNAD("Er vilkårene for rett til overgangsstønad oppfylt?", listOf(SKOLEPENGER)),
+    DOKUMENTASJON_AV_UTDANNING("Dokumentasjon av utdanning", listOf(SKOLEPENGER)),
+    ER_UTDANNING_HENSIKTSMESSIG("Er utdanning hensiktsmessig?", listOf(SKOLEPENGER))
     ;
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN

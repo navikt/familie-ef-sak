@@ -15,9 +15,13 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.SagtOppEllerRedusertRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SamlivRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.TidligareVedtaksperioderRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.skolepenger.DokumentasjonAvUtdanningRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.skolepenger.RettTilOvergangsstønadRegel
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.skolepenger.UtdanningErHensiktsmessigRegel
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 
 /**
  * Singleton for å holde på alle regler
@@ -30,22 +34,8 @@ class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vi
     }
 }
 
-private val alleVilkårsregler = listOf(
-    ForutgåendeMedlemskapRegel(),
-    OppholdINorgeRegel(),
-    MorEllerFarRegel(),
-    SivilstandRegel(),
-    SamlivRegel(),
-    AleneomsorgRegel(),
-    NyttBarnSammePartnerRegel(),
-    AktivitetRegel(),
-    SagtOppEllerRedusertRegel(),
-    TidligareVedtaksperioderRegel(),
-    AktivitetArbeidRegel(),
-    InntektRegel(),
-    AlderPåBarnRegel(),
-    DokumentasjonTilsynsutgifterRegel()
-)
+private val alleVilkårsregler = StønadType.values().map {vilkårsreglerForStønad(it) }.flatten()
+
 
 fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
     when (stønadstype) {
@@ -75,9 +65,17 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
             DokumentasjonTilsynsutgifterRegel(),
         )
 
-        // TODO fiks denne
-        else -> listOf(
-            ForutgåendeMedlemskapRegel()
+        SKOLEPENGER -> listOf(
+            ForutgåendeMedlemskapRegel(),
+            OppholdINorgeRegel(),
+            MorEllerFarRegel(),
+            SivilstandRegel(),
+            SamlivRegel(),
+            AleneomsorgRegel(),
+            NyttBarnSammePartnerRegel(),
+            RettTilOvergangsstønadRegel(),
+            DokumentasjonAvUtdanningRegel(),
+            UtdanningErHensiktsmessigRegel()
         )
     }
 

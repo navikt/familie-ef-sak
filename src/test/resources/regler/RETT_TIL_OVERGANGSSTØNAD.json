@@ -1,0 +1,18 @@
+{
+  "vilkårType" : "RETT_TIL_OVERGANGSSTØNAD",
+  "regler" : {
+    "RETT_TIL_OVERGANGSSTØNAD" : {
+      "regelId" : "RETT_TIL_OVERGANGSSTØNAD",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}

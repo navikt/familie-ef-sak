@@ -1,0 +1,18 @@
+{
+  "vilkårType" : "DOKUMENTASJON_AV_UTDANNING",
+  "regler" : {
+    "DOKUMENTASJON_AV_UTDANNING" : {
+      "regelId" : "DOKUMENTASJON_AV_UTDANNING",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
+    }
+  }
+}
