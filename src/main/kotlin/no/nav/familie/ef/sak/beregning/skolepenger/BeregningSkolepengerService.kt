@@ -81,7 +81,7 @@ class BeregningSkolepengerService {
             }
             val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
-                "Skoleåret $skoleår finnes allerede definiert"
+                "Skoleåret $skoleår er definiert flere ganger"
             }
         }
     }
