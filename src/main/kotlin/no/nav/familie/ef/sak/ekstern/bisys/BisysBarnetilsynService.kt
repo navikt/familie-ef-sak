@@ -41,7 +41,7 @@ class BisysBarnetilsynService(
 
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN)
-            ?: error("Kunne ikke finne fagsak for personident")
+            ?: return emptyList()
 
         val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }
