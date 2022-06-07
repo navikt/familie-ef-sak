@@ -65,7 +65,7 @@ class InfotrygdService(
         stønadstype: StønadType
     ): List<InfotrygdPeriode> {
         val personIdenter = hentPersonIdenter(personIdent)
-        val perioder = hentPerioderFraReplika(personIdenter)
+        val perioder = hentPerioderFraReplika(personIdenter, setOf(stønadstype))
         return when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> slåSammenPerioder(perioder.overgangsstønad)
             StønadType.BARNETILSYN -> slåSammenPerioder(perioder.barnetilsyn)
