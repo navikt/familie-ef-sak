@@ -514,11 +514,11 @@ class BeregnYtelseSteg(
     ): List<AndelTilkjentYtelse> {
         return beregningSkolepengerService.beregnYtelse(vedtak.skoleårsperioder, saksbehandling.id).perioder
             .filter { it.beløp > 0 }
-            .map { (årMåned, beløp) ->
+            .map {
                 AndelTilkjentYtelse(
-                    beløp = beløp,
-                    stønadFom = årMåned.atDay(1),
-                    stønadTom = årMåned.atEndOfMonth(),
+                    beløp = it.beløp,
+                    stønadFom = it.årMånedFra .atDay(1),
+                    stønadTom = it.årMånedFra.atEndOfMonth(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
