@@ -33,8 +33,9 @@ class BisysBarnetilsynService(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
-        return (hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato) + hentPerioderBarnetilsyn(personIdent, fomDato))
-            .sortedBy { it.periode.fom }
+        val infotrygdperioder = hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato)
+        val perioderBarnetilsyn = hentPerioderBarnetilsyn(personIdent, fomDato)
+        return slåSammenPerioder(infotrygdperioder, perioderBarnetilsyn)
     }
 
     private fun hentPerioderBarnetilsyn(personIdent: String, fomDato: LocalDate): List<BarnetilsynBisysPeriode> {
@@ -63,7 +64,7 @@ class BisysBarnetilsynService(
                 Datakilde.EF
             )
         }
-        return barnetilsynBisysPerioder
+        return barnetilsynBisysPerioder.sortedBy { it.periode.fom }
     }
 
     private fun hentInfotrygdPerioderBarnetilsyn(
@@ -71,10 +72,10 @@ class BisysBarnetilsynService(
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
         val barnetilsynBisysPerioder =
-            infotrygdService.hentPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 personIdent,
-                setOf(StønadType.BARNETILSYN)
-            ).barnetilsyn.filter { it.stønadTom >= fomDato }
+                StønadType.BARNETILSYN
+            ).filter { it.stønadTom >= fomDato }
                 .map { periode ->
                     BarnetilsynBisysPeriode(
                         Periode(periode.stønadFom, periode.stønadTom),
@@ -84,5 +85,25 @@ class BisysBarnetilsynService(
                     )
                 }
         return barnetilsynBisysPerioder
+    }
+
+    private fun slåSammenPerioder(
+        infotrygdPerioder: List<BarnetilsynBisysPeriode>,
+        efPerioder: List<BarnetilsynBisysPeriode>
+    ): List<BarnetilsynBisysPeriode> {
+        if (efPerioder.isEmpty()) {
+            return infotrygdPerioder
+        }
+        val startdato = efPerioder.first().periode.fom
+        val perioderFraInfotrygdSomBeholdes = infotrygdPerioder.mapNotNull {
+            if (it.periode.fom >= startdato) {
+                null
+            } else if (it.periode.tom > startdato) {
+                it.copy(periode = it.periode.copy(tom = startdato.minusDays(1)))
+            } else {
+                it
+            }
+        }
+        return (perioderFraInfotrygdSomBeholdes + efPerioder).sortedBy { it.periode.fom }
     }
 }
