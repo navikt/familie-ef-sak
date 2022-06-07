@@ -26,7 +26,7 @@ class BeregningSkolepengerController(
 
     @PostMapping
     fun beregnYtelse(@RequestBody request: BeregningSkolepengerRequest): Ressurs<BeregningSkolepengerResponse> {
-        return Ressurs.success(beregningSkolepengerService.beregnYtelse(request.utgiftsperioder, request.behandlingId))
+        return Ressurs.success(beregningSkolepengerService.beregnYtelse(request.skoleårsperioder, request.behandlingId))
     }
 
     @GetMapping("/{behandlingId}")
@@ -36,7 +36,7 @@ class BeregningSkolepengerController(
 
         if (vedtak is InnvilgelseSkolepenger) {
             // TODO vi kaller ikke beregning for de andre, men der har vi en enklere oppdeling av hvilke perioder som gir X beløp
-            return Ressurs.Companion.success(beregningSkolepengerService.beregnYtelse(vedtak.perioder))
+            return Ressurs.Companion.success(beregningSkolepengerService.beregnYtelse(vedtak.skoleårsperioder))
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }

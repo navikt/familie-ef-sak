@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
@@ -11,7 +10,7 @@ import java.time.YearMonth
 
 data class InnvilgelseSkolepenger(
     val begrunnelse: String?,
-    val perioder: List<SkoleårsperiodeSkolepengerDto>
+    val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
 ) :
     VedtakDto(resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger")
 
@@ -49,13 +48,13 @@ fun DelårsperiodeSkoleårDto.tilDomene() = DelårsperiodeSkoleårSkolepenger(
     studiebelastning = this.studiebelastning
 )
 
-fun Vedtak.mapInnvilgelseSkolepenger(resultatType: ResultatType = ResultatType.INNVILGE): InnvilgelseSkolepenger {
+fun Vedtak.mapInnvilgelseSkolepenger(): InnvilgelseSkolepenger {
     feilHvis(this.skolepenger == null) {
         "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
     }
     return InnvilgelseSkolepenger(
         begrunnelse = this.skolepenger.begrunnelse,
-        perioder = this.skolepenger.perioder.map { skoleår ->
+        skoleårsperioder = this.skolepenger.skoleårsperioder.map { skoleår ->
             SkoleårsperiodeSkolepengerDto(
                 perioder = skoleår.perioder.map { it.tilDto() },
                 utgifter = skoleår.utgifter.map { it.tilDto() }

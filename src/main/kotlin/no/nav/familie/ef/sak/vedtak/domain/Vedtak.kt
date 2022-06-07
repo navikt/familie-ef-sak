@@ -107,7 +107,7 @@ data class BarnetilsynWrapper(
 )
 
 data class SkolepengerWrapper(
-    val perioder: List<SkoleårsperiodeSkolepenger>,
+    val skoleårsperioder: List<SkoleårsperiodeSkolepenger>,
     val begrunnelse: String?
 )
 

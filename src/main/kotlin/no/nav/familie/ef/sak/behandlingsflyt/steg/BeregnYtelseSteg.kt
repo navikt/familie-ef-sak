@@ -512,7 +512,7 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseSkolepenger,
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
-        return beregningSkolepengerService.beregnYtelse(vedtak.perioder, saksbehandling.id).perioder
+        return beregningSkolepengerService.beregnYtelse(vedtak.skoleårsperioder, saksbehandling.id).perioder
             .filter { it.beløp > 0 }
             .map { (årMåned, beløp) ->
                 AndelTilkjentYtelse(

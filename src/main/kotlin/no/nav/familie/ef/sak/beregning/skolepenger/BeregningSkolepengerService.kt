@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import org.springframework.stereotype.Service
 import java.time.Year
-import java.time.YearMonth
 import java.util.UUID
 
 private val maksbeløpPerSkoleår = 68_000
@@ -39,14 +38,13 @@ class BeregningSkolepengerService {
             .flatMap { skoleårsperiode -> skoleårsperiode.utgifter }
             .groupBy { it.årMånedFra }
             .toSortedMap()
-            .map { BeløpsperiodeSkolepenger(it.key, it.value.sumOf { it.stønad }) }
+            .map {
+                BeløpsperiodeSkolepenger(
+                    årMånedFra = it.key,
+                    utgifter = it.value.sumOf { it.utgifter },
+                    beløp = it.value.sumOf { it.stønad })
+            }
     }
-
-    private fun tidligereUtbetalingerPerSkoleår(tidligereUtbetalinger: Map<YearMonth, Int>) =
-        tidligereUtbetalinger.entries
-            .groupBy { it.key.skoleår() }
-            .map { (skoleår, månedsbeløp) -> skoleår to månedsbeløp.associate { it.key to it.value } }
-            .toMap()
 
     private fun validerFornuftigeBeløp(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
         brukerfeilHvis(skoleårsperioder.isEmpty()) {
