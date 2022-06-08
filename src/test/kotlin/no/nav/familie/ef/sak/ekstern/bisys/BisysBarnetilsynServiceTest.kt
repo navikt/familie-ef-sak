@@ -309,7 +309,7 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `en infotrygdperiode med tom dato som overskyter tidligste ef-fom dato, forvent avkortning av inf-fom dato`() {
+    fun `en infotrygdperiode med tom dato som overskyter tidligste ef-fom dato, forvent avkortning av inf-tom dato`() {
         val efFom = LocalDate.MIN.plusDays(2)
         val efTom = LocalDate.MAX.minusDays(10)
         val andelhistorikkDto =
