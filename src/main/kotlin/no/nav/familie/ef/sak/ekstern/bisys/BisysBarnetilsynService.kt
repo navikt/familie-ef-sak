@@ -38,7 +38,11 @@ class BisysBarnetilsynService(
 
         val infotrygdperioder = hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato)
         val perioderBarnetilsyn = hentPerioderBarnetilsyn(personIdent, fomDato)
-        return slåSammenPerioder(infotrygdperioder, perioderBarnetilsyn.second, perioderBarnetilsyn.first)
+        return slåSammenPerioder(
+            infotrygdPerioder = infotrygdperioder,
+            efPerioder = perioderBarnetilsyn.second,
+            startdato = perioderBarnetilsyn.first
+        )
     }
 
     private fun hentPerioderBarnetilsyn(
