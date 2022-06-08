@@ -84,20 +84,18 @@ class BisysBarnetilsynService(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
-        val barnetilsynBisysPerioder =
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                personIdent,
-                StønadType.BARNETILSYN
-            ).filter { it.stønadTom >= fomDato }
-                .map { periode ->
-                    BarnetilsynBisysPeriode(
-                        Periode(periode.stønadFom, periode.stønadTom),
-                        periode.barnIdenter,
-                        periode.månedsbeløp,
-                        Datakilde.INFOTRYGD
-                    )
-                }
-        return barnetilsynBisysPerioder
+        return infotrygdService.hentSammenslåttePerioderFraReplika(
+            personIdent,
+            StønadType.BARNETILSYN
+        ).filter { it.stønadTom >= fomDato }
+            .map { periode ->
+                BarnetilsynBisysPeriode(
+                    Periode(periode.stønadFom, periode.stønadTom),
+                    periode.barnIdenter,
+                    periode.månedsbeløp,
+                    Datakilde.INFOTRYGD
+                )
+            }
     }
 
     private fun slåSammenPerioder(
