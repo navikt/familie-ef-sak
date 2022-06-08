@@ -35,7 +35,7 @@ class BeregningSkolepengerService {
         perioder: List<SkoleårsperiodeSkolepengerDto>
     ): List<BeløpsperiodeSkolepenger> {
         return perioder
-            .flatMap { skoleårsperiode -> skoleårsperiode.utgifter }
+            .flatMap { skoleårsperiode -> skoleårsperiode.utgiftsperioder }
             .groupBy { it.årMånedFra }
             .toSortedMap()
             .map {
@@ -50,10 +50,10 @@ class BeregningSkolepengerService {
         brukerfeilHvis(skoleårsperioder.isEmpty()) {
             "Ingen skoleårsperioder"
         }
-        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgifter.any { it.utgifter < 0 } }) {
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.utgifter < 0 } }) {
             "Utgifter kan ikke være mindre enn 0"
         }
-        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgifter.any { it.stønad > it.utgifter } }) {
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad > it.utgifter } }) {
             "Stønad kan ikke være høyere enn utgifter"
         }
 
@@ -70,7 +70,7 @@ class BeregningSkolepengerService {
 
     private fun validerUnderMaksBeløp(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
         val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
-        brukerfeilHvis(skoleårsperiode.utgifter.sumOf { it.stønad } > maksbeløpPerSkoleår) {
+        brukerfeilHvis(skoleårsperiode.utgiftsperioder.sumOf { it.stønad } > maksbeløpPerSkoleår) {
             "Stønad for skoleåret $skoleår er høyere enn $maksbeløpPerSkoleår"
         }
     }

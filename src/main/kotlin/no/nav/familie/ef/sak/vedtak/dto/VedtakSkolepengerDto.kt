@@ -16,7 +16,7 @@ data class InnvilgelseSkolepenger(
 
 data class SkoleårsperiodeSkolepengerDto(
     val perioder: List<DelårsperiodeSkoleårDto>,
-    val utgifter: List<SkolepengerUtgiftDto>
+    val utgiftsperioder: List<SkolepengerUtgiftDto>
 )
 
 data class DelårsperiodeSkoleårDto(
@@ -34,7 +34,7 @@ data class SkolepengerUtgiftDto(
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
     perioder = this.perioder.map { it.tilDomene() },
-    utgifter = this.utgifter.map { SkolepengerUtgift(
+    utgifter = this.utgiftsperioder.map { SkolepengerUtgift(
         årMånedFra = it.årMånedFra,
         utgifter = it.utgifter,
         stønad = it.stønad
@@ -57,7 +57,7 @@ fun Vedtak.mapInnvilgelseSkolepenger(): InnvilgelseSkolepenger {
         skoleårsperioder = this.skolepenger.skoleårsperioder.map { skoleår ->
             SkoleårsperiodeSkolepengerDto(
                 perioder = skoleår.perioder.map { it.tilDto() },
-                utgifter = skoleår.utgifter.map { it.tilDto() }
+                utgiftsperioder = skoleår.utgifter.map { it.tilDto() }
             )
         }
     )

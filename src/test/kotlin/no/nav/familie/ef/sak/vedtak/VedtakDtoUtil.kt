@@ -108,7 +108,7 @@ object VedtakDtoUtil {
     fun skolepengerperiodeDto() =
         SkoleårsperiodeSkolepengerDto(
             perioder = listOf(skolepengerDelårsperiode()),
-            utgifter = listOf(SkolepengerUtgiftDto(YearMonth.of(2021, 1), 500, 500))
+            utgiftsperioder = listOf(SkolepengerUtgiftDto(YearMonth.of(2021, 1), 500, 500))
         )
 
     fun skolepengerDelårsperiode() =
