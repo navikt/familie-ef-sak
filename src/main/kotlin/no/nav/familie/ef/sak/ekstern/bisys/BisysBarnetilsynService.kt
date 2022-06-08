@@ -49,7 +49,10 @@ class BisysBarnetilsynService(
         val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN)
             ?: return Pair(null, emptyList())
         val sisteGjeldendeBehandling =
-            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return emptyList()
+            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return Pair(
+                null,
+                emptyList()
+            )
         val startdato = tilkjentYtelseService.hentForBehandling(
             sisteGjeldendeBehandling.id
         ).startdato
@@ -102,7 +105,9 @@ class BisysBarnetilsynService(
         efPerioder: List<BarnetilsynBisysPeriode>,
         startdato: LocalDate?
     ): List<BarnetilsynBisysPeriode> {
-        val startdato = startdato ?: return infotrygdPerioder
+        if (startdato == null) {
+            return infotrygdPerioder
+        }
         val perioderFraInfotrygdSomBeholdes = infotrygdPerioder.mapNotNull {
             if (it.periode.fom >= startdato) {
                 null
