@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
@@ -55,12 +56,22 @@ data class Barnetilsynperiode(
     val erMidlertidigOpphør: Boolean? = false
 )
 
-data class UtgiftsperiodeSkolepenger(
+data class SkoleårsperiodeSkolepenger(
+    val perioder: List<DelårsperiodeSkoleårSkolepenger>,
+    val utgiftsperioder: List<SkolepengerUtgift>
+)
+
+data class DelårsperiodeSkoleårSkolepenger(
     val studietype: SkolepengerStudietype,
     val datoFra: LocalDate,
     val datoTil: LocalDate,
     val studiebelastning: Int,
-    val utgifter: Int
+)
+
+data class SkolepengerUtgift(
+    val årMånedFra: YearMonth,
+    val utgifter: Int,
+    val stønad: Int
 )
 
 enum class SkolepengerStudietype {
@@ -96,7 +107,7 @@ data class BarnetilsynWrapper(
 )
 
 data class SkolepengerWrapper(
-    val perioder: List<UtgiftsperiodeSkolepenger>,
+    val skoleårsperioder: List<SkoleårsperiodeSkolepenger>,
     val begrunnelse: String?
 )
 

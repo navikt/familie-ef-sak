@@ -268,6 +268,40 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(perioder).hasSize(1)
         assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
     }
+
+    @Test
+    fun `en infotrygdperiode, og ingen fagsak for person, forvent ingen feil og kun infotrygdperiode`() {
+        every {
+            fagsakService.finnFagsak(any(), StønadType.BARNETILSYN)
+        } returns null
+        every {
+            infotrygdService.hentPerioderFraReplika(
+                any(),
+                setOf(StønadType.BARNETILSYN)
+            ).barnetilsyn
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadTom = LocalDate.now()
+                    .plusMonths(
+                        1
+                    ),
+                beløp = 10
+            )
+        )
+        every {
+            tilkjentYtelseService.hentHistorikk(any(), any())
+        } returns emptyList()
+
+        val fomDato = LocalDate.now()
+        val perioder =
+            barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+                personident,
+                fomDato
+            ).barnetilsynBisysPerioder
+        assertThat(perioder).hasSize(1)
+        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
+    }
 }
 
 fun lagAndelHistorikkDto(

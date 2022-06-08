@@ -23,14 +23,15 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseFraOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
-import no.nav.familie.ef.sak.cucumber.domeneparser.parseTilOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -51,6 +52,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -151,6 +153,12 @@ class StepDefinitions {
         }
     }
 
+    @Når("beregner ytelse kaster feil med innehold {}")
+    fun `beregner ytelse kaster feil pga validering`(feilmelding: String) {
+        Assertions.assertThatThrownBy { `beregner ytelse`() }
+            .hasMessageContaining(feilmelding)
+    }
+
     @Når("beregner ytelse")
     fun `beregner ytelse`() {
         initialiserTilkjentYtelseOgVedtakMock()
@@ -193,7 +201,8 @@ class StepDefinitions {
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
     fun `forvent følgende vedtaksperiodene fra dato`(årMåned: String, dataTable: DataTable) {
-        val vedtak = vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
+        val vedtak =
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
         val perioder = vedtak.perioder
         dataTable.asMaps().mapIndexed { index, rad ->
             val periode = perioder[index]
@@ -211,7 +220,8 @@ class StepDefinitions {
 
     @Så("forvent følgende inntektsperioder fra dato: {}")
     fun `forvent følgende inntektsperioder fra dato`(årMåned: String, dataTable: DataTable) {
-        val vedtak = vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
+        val vedtak =
+            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
         val perioder = vedtak.inntekter
         dataTable.asMaps().mapIndexed { index, rad ->
             val periode = perioder[index]
@@ -220,28 +230,34 @@ class StepDefinitions {
             assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
 
             assertThat(periode.forventetInntekt?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.INNTEKT, rad))
-            assertThat(periode.samordningsfradrag?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad))
+            assertThat(periode.samordningsfradrag?.toInt()).isEqualTo(
+                parseInt(
+                    VedtakDomenebegrep.SAMORDNINGSFRADRAG,
+                    rad
+                )
+            )
         }
         assertThat(dataTable.asMaps()).hasSize(perioder.size)
     }
 
     @Så("forvent følgende andeler lagret for behandling med id: {int}")
     fun `forvent følgende andeler lagret`(behandling: Int, dataTable: DataTable) {
-        if (stønadstype == StønadType.SKOLEPENGER) return // TODO denne må slettes når vi fikset beregning av periodene
+        val behandlingId = behandlingIdTilUUID[behandling]
+        val gjeldendeTilkjentYtelse: TilkjentYtelse =
+            tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
+        val gjeldendeAndelerTilkjentYtelse = gjeldendeTilkjentYtelse.andelerTilkjentYtelse
         dataTable.asMaps().mapIndexed { index, rad ->
-            val behandlingId = behandlingIdTilUUID[behandling]
             val kildeBehandlingId =
                 behandlingIdTilUUID[parseInt(VedtakDomenebegrep.KILDE_BEHANDLING_ID, rad)]
-            val gjeldendeTilkjentYtelse: TilkjentYtelse =
-                tilkjentYtelser[behandlingId] ?: error("Fant ikke tilkjent ytelse med id $behandlingId")
 
             val fraOgMed = parseFraOgMed(rad)
-            val tilOgMed = parseTilOgMed(rad)
+            val tilOgMed =
+                parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 
-            val gjelendeAndel = gjeldendeTilkjentYtelse.andelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
-                ?: error("Fant ingen andel med startdato $fraOgMed")
+            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
+                ?: error("Fant ingen andel med startdato $fraOgMed, forventer: $gjeldendeAndelerTilkjentYtelse")
 
             try {
 
@@ -260,6 +276,12 @@ class StepDefinitions {
                 throw Throwable("Feilet rad $index", e)
             }
         }
+        feilHvis(gjeldendeAndelerTilkjentYtelse.size > dataTable.asMaps().size) {
+            val andelerTilkjentYtelse = gjeldendeAndelerTilkjentYtelse
+            val manglandeAndeler = andelerTilkjentYtelse.subList(dataTable.asMaps().size, andelerTilkjentYtelse.size)
+            "Mangler periodene: $manglandeAndeler"
+        }
+        assertThat(dataTable.asMaps().size).isEqualTo(gjeldendeAndelerTilkjentYtelse.size)
     }
 
     private fun validerOgSettStønadstype(stønadType: StønadType) {
@@ -280,7 +302,7 @@ class StepDefinitions {
                 acc + behandling(
                     id = id,
                     opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
-                    type = BehandlingType.REVURDERING,
+                    type = if (index == 0) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING,
                     forrigeBehandlingId = acc.lastOrNull()?.id
                 )
             }
@@ -310,7 +332,7 @@ class StepDefinitions {
             tilkjentYtelseService.opprettTilkjentYtelse(any())
         } answers {
             val tilkjentYtelse = firstArg<TilkjentYtelse>()
-            tilkjentYtelser.put(tilkjentYtelse.behandlingId, tilkjentYtelse)
+            tilkjentYtelser[tilkjentYtelse.behandlingId] = tilkjentYtelse
             tilkjentYtelse
         }
         every {

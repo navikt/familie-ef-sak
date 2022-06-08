@@ -3,19 +3,22 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
+import no.nav.familie.ef.sak.felles.util.skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
+import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
-import no.nav.familie.ef.sak.vedtak.domain.UtgiftsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -27,6 +30,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -77,7 +81,9 @@ object VedtakDomeneParser {
             Domenebegrep.TIL_OG_MED_DATO,
             VedtakDomenebegrep.STUDIETYPE,
             VedtakDomenebegrep.STUDIEBELASTNING,
+            VedtakDomenebegrep.DATO_FAKTURA,
             VedtakDomenebegrep.UTGIFTER,
+            VedtakDomenebegrep.BELØP,
         )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
             val perioder = when (vedtak.resultatType) {
@@ -141,14 +147,14 @@ object VedtakDomeneParser {
         }
     }
 
-    private fun validerSanksjonSkolepenger(perioder: List<UtgiftsperiodeSkolepenger>) {
+    private fun validerSanksjonSkolepenger(perioder: List<SkoleårsperiodeSkolepenger>) {
         feilHvisIkke(perioder.size == 1) {
             "Antall rader for sanksjonering må være 1, per behandlingId"
         }
         val periode = perioder.single()
-        feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
+        /*feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
             "Sanksjon strekker seg ikke 1 måned: ${periode.datoFra} - ${periode.datoTil}"
-        }
+        }*/
     }
 
     private fun mapPerioderForOvergangsstønad(rader: List<Map<String, String>>): List<Vedtaksperiode> {
@@ -175,16 +181,46 @@ object VedtakDomeneParser {
         }
     }
 
-    private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<UtgiftsperiodeSkolepenger> {
-        return rader.map { rad ->
-            UtgiftsperiodeSkolepenger(
-                studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
-                datoFra = parseFraOgMed(rad),
-                datoTil = parseTilOgMed(rad),
-                studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
-                utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
+    private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<SkoleårsperiodeSkolepenger> {
+        val skoleårsperioder = mutableMapOf<Year, SkoleårsperiodeSkolepenger>()
+        rader.forEach { rad ->
+            val datoFra = parseFraOgMed(rad)
+            val skoleår = YearMonth.from(datoFra).skoleår()
+            val delårsperiode = mapDelårsperiodeSkolepenger(rad, datoFra)
+            val utgift = mapSkolepengerUtgift(rad)
+
+            val skoleårsperiode: SkoleårsperiodeSkolepenger = skoleårsperioder.getOrDefault(
+                skoleår, SkoleårsperiodeSkolepenger(
+                    emptyList(),
+                    emptyList()
+                )
+            )
+            skoleårsperioder[skoleår] = skoleårsperiode.copy(
+                perioder = skoleårsperiode.perioder + delårsperiode,
+                utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift
             )
         }
+        return skoleårsperioder.values.toList()
+    }
+
+    private fun mapDelårsperiodeSkolepenger(
+        rad: Map<String, String>,
+        datoFra: LocalDate
+    ): DelårsperiodeSkoleårSkolepenger {
+        return DelårsperiodeSkoleårSkolepenger(
+            studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
+            datoFra = datoFra,
+            datoTil = parseTilOgMed(rad),
+            studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
+        )
+    }
+
+    private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
+        return SkolepengerUtgift(
+            årMånedFra = parseÅrMåned(VedtakDomenebegrep.DATO_FAKTURA, rad),
+            utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
+            stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
+        )
     }
 
     fun mapOgSettPeriodeMedBeløp(
@@ -315,6 +351,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     ER_SANKSJON("Er sanksjon"),
     SANKSJONSÅRSAK("Sanksjonsårsak"),
     STUDIETYPE("Studietype"),
+    DATO_FAKTURA("Dato faktura"),
     STUDIEBELASTNING("Studiebelastning"),
     ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     ;
