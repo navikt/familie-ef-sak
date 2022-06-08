@@ -108,7 +108,8 @@ object SøknadsskjemaMapper {
             sivilstandsplaner = tilDomene(kontraktsøknad.sivilstandsplaner?.verdi),
             barn = tilDomene(kontraktsøknad.barn.verdi),
             utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,
-            utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi)
+            utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi),
+            tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi)
         )
     }
 
@@ -292,8 +293,8 @@ object SøknadsskjemaMapper {
                 linjeKursGrad = it.gjeldendeUtdanning!!.verdi.linjeKursGrad.verdi,
                 fra = it.gjeldendeUtdanning!!.verdi.nårVarSkalDuVæreElevStudent.verdi.fra,
                 til = it.gjeldendeUtdanning!!.verdi.nårVarSkalDuVæreElevStudent.verdi.til,
-                offentligEllerPrivat = it.offentligEllerPrivat.svarId,
-                heltidEllerDeltid = it.heltidEllerDeltid.svarId,
+                offentligEllerPrivat = it.offentligEllerPrivat.verdi,
+                heltidEllerDeltid = it.heltidEllerDeltid.verdi,
                 hvorMyeSkalDuStudere = it.hvorMyeSkalDuStudere?.verdi,
                 hvaErMåletMedUtdanningen = it.hvaErMåletMedUtdanningen?.verdi,
                 utdanningEtterGrunnskolen = it.utdanningEtterGrunnskolen.verdi,
