@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 
 internal class DatoUtilTest {
@@ -84,6 +85,22 @@ internal class DatoUtilTest {
             assertThat(min(first, first)).isEqualTo(first)
             assertThat(min(first, second)).isEqualTo(first)
             assertThat(min(second, first)).isEqualTo(first)
+        }
+    }
+
+    @Nested
+    inner class Skoleår {
+
+        @Test
+        internal fun `skal mappe alle måneder fra juli til samme år`() {
+            assertThat(IntRange(7, 12).map { YearMonth.of(2021, it).skoleår() })
+                .containsOnly(Year.of(2021))
+        }
+
+        @Test
+        internal fun `skal mappe alle måneder fra januar til juni til forrige år år`() {
+            assertThat(IntRange(1, 6).map { YearMonth.of(2021, it).skoleår() })
+                .containsOnly(Year.of(2020))
         }
     }
 }

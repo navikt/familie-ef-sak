@@ -144,7 +144,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             resultatType = this.resultatType,
             behandlingId = behandlingId,
             skolepenger = SkolepengerWrapper(
-                perioder = this.perioder.map { it.tilDomene() },
+                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() },
                 begrunnelse = this.begrunnelse
             )
         )
