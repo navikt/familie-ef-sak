@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.ekstern.bisys
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
@@ -20,6 +21,7 @@ import java.time.LocalDate
 class BisysBarnetilsynService(
     private val personService: PersonService,
     private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
     private val barnService: BarnService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService
@@ -33,16 +35,24 @@ class BisysBarnetilsynService(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
+
         val infotrygdperioder = hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato)
         val perioderBarnetilsyn = hentPerioderBarnetilsyn(personIdent, fomDato)
-        return slåSammenPerioder(infotrygdperioder, perioderBarnetilsyn)
+        return slåSammenPerioder(infotrygdperioder, perioderBarnetilsyn.second, perioderBarnetilsyn.first)
     }
 
-    private fun hentPerioderBarnetilsyn(personIdent: String, fomDato: LocalDate): List<BarnetilsynBisysPeriode> {
-
+    private fun hentPerioderBarnetilsyn(
+        personIdent: String,
+        fomDato: LocalDate
+    ): Pair<LocalDate?, List<BarnetilsynBisysPeriode>> {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN)
-            ?: return emptyList()
+            ?: return Pair(null, emptyList())
+        val sisteGjeldendeBehandling =
+            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return emptyList()
+        val startdato = tilkjentYtelseService.hentForBehandling(
+            sisteGjeldendeBehandling.id
+        ).startdato
 
         val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }
@@ -64,7 +74,7 @@ class BisysBarnetilsynService(
                 Datakilde.EF
             )
         }
-        return barnetilsynBisysPerioder.sortedBy { it.periode.fom }
+        return Pair(startdato, barnetilsynBisysPerioder.sortedBy { it.periode.fom })
     }
 
     private fun hentInfotrygdPerioderBarnetilsyn(
@@ -89,12 +99,10 @@ class BisysBarnetilsynService(
 
     private fun slåSammenPerioder(
         infotrygdPerioder: List<BarnetilsynBisysPeriode>,
-        efPerioder: List<BarnetilsynBisysPeriode>
+        efPerioder: List<BarnetilsynBisysPeriode>,
+        startdato: LocalDate?
     ): List<BarnetilsynBisysPeriode> {
-        if (efPerioder.isEmpty()) {
-            return infotrygdPerioder
-        }
-        val startdato = efPerioder.first().periode.fom
+        val startdato = startdato ?: return infotrygdPerioder
         val perioderFraInfotrygdSomBeholdes = infotrygdPerioder.mapNotNull {
             if (it.periode.fom >= startdato) {
                 null
