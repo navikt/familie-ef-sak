@@ -197,7 +197,7 @@ object VedtakDomeneParser {
             )
             skoleårsperioder[skoleår] = skoleårsperiode.copy(
                 perioder = skoleårsperiode.perioder + delårsperiode,
-                utgifter = skoleårsperiode.utgifter + utgift
+                utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift
             )
         }
         return skoleårsperioder.values.toList()
