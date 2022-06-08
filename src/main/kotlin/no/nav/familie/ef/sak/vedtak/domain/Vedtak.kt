@@ -58,7 +58,7 @@ data class Barnetilsynperiode(
 
 data class SkoleårsperiodeSkolepenger(
     val perioder: List<DelårsperiodeSkoleårSkolepenger>,
-    val utgifter: List<SkolepengerUtgift>
+    val utgiftsperioder: List<SkolepengerUtgift>
 )
 
 data class DelårsperiodeSkoleårSkolepenger(
