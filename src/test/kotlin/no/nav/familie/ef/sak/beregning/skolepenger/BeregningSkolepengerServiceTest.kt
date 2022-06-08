@@ -63,7 +63,7 @@ internal class BeregningSkolepengerServiceTest {
             val skoleårsperioder = emptyList<SkoleårsperiodeSkolepengerDto>()
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
+                .isInstanceOf(Feil::class.java)
                 .hasMessageContaining("Mangler skoleår")
         }
 
@@ -72,7 +72,7 @@ internal class BeregningSkolepengerServiceTest {
             val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(), listOf(utgift())))
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
+                .isInstanceOf(Feil::class.java)
                 .hasMessageContaining("Mangler skoleårsperioder")
         }
 
@@ -81,7 +81,7 @@ internal class BeregningSkolepengerServiceTest {
             val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf()))
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
+                .isInstanceOf(Feil::class.java)
                 .hasMessageContaining("Mangler utgiftsperioder")
         }
     }
@@ -114,8 +114,10 @@ internal class BeregningSkolepengerServiceTest {
 
         @Test
         internal fun `samme skoleår i flere skoleårsperioder er ikke gyldig`() {
-            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift()))
-            val skoleårsperioder = listOf(periode, periode)
+            val delårsperiode = delårsperiode()
+            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode), listOf(utgift()))
+            val periode2 = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode), listOf(utgift()))
+            val skoleårsperioder = listOf(periode, periode2)
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
@@ -131,6 +133,18 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
                 .hasMessageContaining("Skoleår 2021 inneholder overlappende perioder")
+        }
+
+        @Test
+        internal fun `utgifter med samme ider er ikke gyldig`() {
+            val utgift = utgift()
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift, utgift)),
+            )
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
+                .isInstanceOf(Feil::class.java) // Dette er ikke brukerfeil
+                .hasMessageContaining("Det finnes duplikat av ider på utgifter")
         }
 
         @Disabled

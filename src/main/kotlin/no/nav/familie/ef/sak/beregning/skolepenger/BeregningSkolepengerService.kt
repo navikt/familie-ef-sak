@@ -102,14 +102,18 @@ class BeregningSkolepengerService(
     }
 
     private fun validerGyldigePerioder(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
-        brukerfeilHvis(skoleårsperioder.isEmpty()) {
+        feilHvis(skoleårsperioder.isEmpty()) {
             "Mangler skoleår"
         }
-        brukerfeilHvis(skoleårsperioder.any { it.perioder.isEmpty() }) {
+        feilHvis(skoleårsperioder.any { it.perioder.isEmpty() }) {
             "Mangler skoleårsperioder"
         }
-        brukerfeilHvis(skoleårsperioder.any { it.utgiftsperioder.isEmpty() }) {
+        feilHvis(skoleårsperioder.any { it.utgiftsperioder.isEmpty() }) {
             "Mangler utgiftsperioder"
+        }
+        val utgiftsIder = skoleårsperioder.flatMap { it.utgiftsperioder.map { it.id } }
+        feilHvis(utgiftsIder.size != utgiftsIder.toSet().size) {
+            "Det finnes duplikat av ider på utgifter $skoleårsperioder"
         }
     }
 
