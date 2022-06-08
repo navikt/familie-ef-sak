@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.hentUtgiftUUID
 import no.nav.familie.ef.sak.felles.util.skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -79,6 +80,7 @@ object VedtakDomeneParser {
             VedtakDomenebegrep.RESULTAT_TYPE,
             Domenebegrep.FRA_OG_MED_DATO,
             Domenebegrep.TIL_OG_MED_DATO,
+            VedtakDomenebegrep.ID_UTGIFT,
             VedtakDomenebegrep.STUDIETYPE,
             VedtakDomenebegrep.STUDIEBELASTNING,
             VedtakDomenebegrep.DATO_FAKTURA,
@@ -196,7 +198,7 @@ object VedtakDomeneParser {
                 )
             )
             skoleårsperioder[skoleår] = skoleårsperiode.copy(
-                perioder = skoleårsperiode.perioder + delårsperiode,
+                perioder = (skoleårsperiode.perioder.toSet() + delårsperiode).toList(),
                 utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift
             )
         }
@@ -217,7 +219,7 @@ object VedtakDomeneParser {
 
     private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
         return SkolepengerUtgift(
-            id = UUID.randomUUID(),
+            id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
             årMånedFra = parseÅrMåned(VedtakDomenebegrep.DATO_FAKTURA, rad),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
@@ -351,6 +353,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     KONTANTSTØTTE("Kontantstøtte"),
     ER_SANKSJON("Er sanksjon"),
     SANKSJONSÅRSAK("Sanksjonsårsak"),
+    ID_UTGIFT("Id utgift"),
     STUDIETYPE("Studietype"),
     DATO_FAKTURA("Dato faktura"),
     STUDIEBELASTNING("Studiebelastning"),

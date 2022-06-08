@@ -20,8 +20,8 @@ Egenskap: Skolepenger
 
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter | Beløp |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 08.2021      | 200      | 200    |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 01.2022      | 300      | 300    |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 12.2021         | 100              | 08.2021      | 200      | 200    |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 01.2022         | 06.2022         | 100              | 01.2022      | 300      | 300    |
 
     Når beregner ytelse
 
@@ -34,8 +34,8 @@ Egenskap: Skolepenger
 
     Gitt følgende vedtak for skolepenger
       | BehandlingId | Vedtaksresultat | Studietype           | Fra og med dato | Til og med dato | Studiebelastning | Dato faktura | Utgifter | Beløp |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 08.2021      | 200      | 200    |
-      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 06.2022         | 100              | 08.2021      | 300      | 300    |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 08.2021         | 08.2021         | 100              | 08.2021      | 200      | 200    |
+      | 1            | INNVILGE        | HØGSKOLE_UNIVERSITET | 09.2021         | 06.2022         | 100              | 08.2021      | 300      | 300    |
 
     Når beregner ytelse
 

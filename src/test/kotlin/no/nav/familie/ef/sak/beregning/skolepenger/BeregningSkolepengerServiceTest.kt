@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
@@ -129,7 +130,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("SKoleår 2021 inneholder overlappende perioder")
+                .hasMessageContaining("Skoleår 2021 inneholder overlappende perioder")
         }
 
         @Disabled
@@ -143,7 +144,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("SKoleår 2021 inneholder overlappende perioder")
+                .hasMessageContaining("Skoleår 2021 inneholder overlappende perioder")
         }
     }
 
@@ -228,6 +229,23 @@ internal class BeregningSkolepengerServiceTest {
                 .hasMessageContainingAll(
                     "Mangler utgiftsperioder fra forrige vedtak",
                     "fakturadato=2021-08 utgifter=100 stønad=50"
+                )
+        }
+
+        @Test
+        internal fun `revurdering med endret beløp for utgiftsperiode er ikke tillatt`() {
+            val delårsperiode = delårsperiode()
+            val utgift = utgift()
+            val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode), listOf(utgift)))
+            val revurderingsperioder =
+                listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode), listOf(utgift.copy(stønad = 100))))
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(skoleårsperioder)
+
+            assertThatThrownBy { service.beregnYtelse(revurderingsperioder, revurdering.id) }
+                .isInstanceOf(Feil::class.java) // denne skal ikke være brukerfeil (ApiFeil)
+                .hasMessageContaining(
+                    "Utgiftsperiode er endret for skoleår=2021 id=${utgift.id} er endret",
                 )
         }
     }

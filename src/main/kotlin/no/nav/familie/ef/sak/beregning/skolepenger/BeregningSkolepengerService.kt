@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDto
 import org.springframework.stereotype.Service
@@ -50,7 +51,7 @@ class BeregningSkolepengerService(
         validerGyldigePerioder(perioder)
         validerFornuftigeBeløp(perioder)
         validerSkoleår(perioder)
-        validerForrigePerioderFortsattFinnes(perioder, forrigePerioder)
+        validerForrigePerioder(perioder, forrigePerioder)
 
         val perioder = beregnSkoleårsperioder(perioder)
         return BeregningSkolepengerResponse(perioder)
@@ -126,7 +127,7 @@ class BeregningSkolepengerService(
                 "Skoleåret $skoleår er definiert flere ganger"
             }
             brukerfeilHvis(skoleårsperiode.perioder.map { it.tilPeriode() }.harOverlappende()) {
-                "SKoleår $skoleår inneholder overlappende perioder"
+                "Skoleår $skoleår inneholder overlappende perioder"
             }
             val studietype = skoleårsperiode.perioder.first().studietype
             brukerfeilHvisIkke(skoleårsperiode.perioder.all { it.studietype == studietype }) {
@@ -135,14 +136,39 @@ class BeregningSkolepengerService(
         }
     }
 
-    private fun validerForrigePerioderFortsattFinnes(
+    private fun validerForrigePerioder(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
         forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
     ) {
         val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
             periode.utgiftsperioder.map { it.id to it }
         }.toMap()
-        val nyeIder = perioder.flatMap { periode -> periode.utgiftsperioder.map { it.id } }.toSet()
+        validerForrigePerioderFortsattFinnes(perioder, tidligereUtgiftIder)
+        validerForrigePerioderErUendrede(perioder, tidligereUtgiftIder)
+    }
+
+    private fun validerForrigePerioderErUendrede(
+        skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
+        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>
+    ) {
+        skoleårsperioder.forEach { skoleårsperiode ->
+            val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
+            val endretUtgift = skoleårsperiode.utgiftsperioder.find { utgift ->
+                val tidligereUtgift = tidligereUtgiftIder[utgift.id]
+                tidligereUtgift != null && tidligereUtgift != utgift
+            }
+            feilHvis(endretUtgift != null) {
+                "Utgiftsperiode er endret for skoleår=$skoleår id=${endretUtgift?.id} er endret" +
+                    "ny=$endretUtgift tidligere=${tidligereUtgiftIder[endretUtgift?.id]}"
+            }
+        }
+    }
+
+    private fun validerForrigePerioderFortsattFinnes(
+        skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
+        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>
+    ) {
+        val nyeIder = skoleårsperioder.flatMap { periode -> periode.utgiftsperioder.map { it.id } }.toSet()
         val manglende = tidligereUtgiftIder.entries.filterNot { nyeIder.contains(it.key) }
         brukerfeilHvis(manglende.isNotEmpty()) {
             val manglendePerioder = manglende.joinToString(", \n") { (_, utgiftsperiode) ->
