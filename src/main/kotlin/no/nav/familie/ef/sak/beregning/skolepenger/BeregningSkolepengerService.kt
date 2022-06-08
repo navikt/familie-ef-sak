@@ -58,12 +58,20 @@ class BeregningSkolepengerService {
         }
 
         skoleårsperioder.forEach { skoleårsperiode ->
-            brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
-            brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning > 100 }) { "Studiebelastning må være under eller lik 100" }
-            val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
-            brukerfeilHvis(skoleårsperiode.utgifter.sumOf { it.stønad } > maksbeløpPerSkoleår) {
-                "Stønad for skoleåret $skoleår er høyere enn $maksbeløpPerSkoleår"
-            }
+            validerStudiebelastning(skoleårsperiode)
+            validerUnderMaksBeløp(skoleårsperiode)
+        }
+    }
+
+    private fun validerStudiebelastning(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
+        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
+        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning > 100 }) { "Studiebelastning må være under eller lik 100" }
+    }
+
+    private fun validerUnderMaksBeløp(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
+        val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
+        brukerfeilHvis(skoleårsperiode.utgifter.sumOf { it.stønad } > maksbeløpPerSkoleår) {
+            "Stønad for skoleåret $skoleår er høyere enn $maksbeløpPerSkoleår"
         }
     }
 
