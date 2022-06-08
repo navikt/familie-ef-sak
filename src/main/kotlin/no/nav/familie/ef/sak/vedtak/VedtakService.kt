@@ -42,6 +42,10 @@ class VedtakService(
         return vedtakRepository.findAllByIdOrThrow(behandlingIder) { it.behandlingId }
     }
 
+    fun hentVedtakDto(behandlingId: UUID): VedtakDto {
+        return hentVedtakHvisEksisterer(behandlingId) ?: error("Finner ikke vedtak for behandling=$behandlingId")
+    }
+
     fun hentVedtakHvisEksisterer(behandlingId: UUID): VedtakDto? {
         return vedtakRepository.findByIdOrNull(behandlingId)?.tilVedtakDto()
     }
@@ -70,8 +74,7 @@ class VedtakService(
     }
 
     fun hentForventetInntektForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, ForventetInntektForBehandling> {
-        return vedtakRepository.findAllById(behandlingIds).map {
-                vedtak ->
+        return vedtakRepository.findAllById(behandlingIds).map { vedtak ->
             if (vedtak.erVedtakAktivtForDato(LocalDate.now())) {
                 createForventetInntektForBehandling(vedtak)
             } else {

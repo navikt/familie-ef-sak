@@ -7,6 +7,7 @@ import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -69,11 +70,15 @@ class StepDefinitions {
     private var beregnetAndelHistorikkList = listOf<AndelHistorikkDto>()
     private var beregnYtelseException: Exception? = null
 
+    private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
+    private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val beregningService = BeregningService()
     private val beregningBarnetilsynService = BeregningBarnetilsynService()
-    private val beregningSkolepengerService = BeregningSkolepengerService()
-    private val vedtakService = mockk<VedtakService>(relaxed = true)
+    private val beregningSkolepengerService = BeregningSkolepengerService(
+        behandlingService = behandlingService,
+        vedtakService = vedtakService
+    )
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnService = mockk<BarnService>(relaxed = true)
@@ -99,6 +104,16 @@ class StepDefinitions {
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
     private lateinit var tilkjentYtelser: MutableMap<UUID, TilkjentYtelse>
     private lateinit var lagredeVedtak: MutableList<Vedtak>
+
+    init {
+        every { behandlingService.hentSaksbehandling(any<UUID>()) } answers {
+            val behandlingId = firstArg<UUID>()
+            val behandlingIdInt = behandlingIdTilUUID.entries.find { it.value == behandlingId }?.key
+            val pair = saksbehandlinger[behandlingId] ?: error("Finner ikke behandling=$behandlingId ($behandlingIdInt)")
+            pair.second
+        }
+        every { vedtakService.hentVedtak(any()) } answers { lagredeVedtak.single { it.behandlingId == firstArg() } }
+    }
 
     @Gitt("følgende behandlinger for {}")
     fun følgende_behandlinger(stønadTypeArg: String, dataTable: DataTable) {
@@ -163,7 +178,7 @@ class StepDefinitions {
     fun `beregner ytelse`() {
         initialiserTilkjentYtelseOgVedtakMock()
 
-        val behandlinger = mapBehandlinger()
+        saksbehandlinger = mapBehandlinger()
 
         if (stønadstype == StønadType.OVERGANGSSTØNAD) {
             // Skriver over inntekt hvis inntekter er definiert
@@ -173,14 +188,14 @@ class StepDefinitions {
         }
 
         gittVedtak.map {
-            beregnYtelseSteg.utførSteg(behandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
+            beregnYtelseSteg.utførSteg(saksbehandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
         }
         // kan ikke beregne historikk ennå
         if (stønadstype == StønadType.SKOLEPENGER) return
         beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
             tilkjentYtelser.values.toList(),
             lagredeVedtak,
-            behandlinger.values.map { it.first }.toList(),
+            saksbehandlinger.values.map { it.first }.toList(),
             null,
             behandlingIdsToAktivitetArbeid
         )
@@ -188,7 +203,9 @@ class StepDefinitions {
 
     @Når("beregner ytelse kan kaste feil")
     fun `beregner ytelse kan kaste feil`() {
-        try {`beregner ytelse`()} catch (e: Exception) {
+        try {
+            `beregner ytelse`()
+        } catch (e: Exception) {
             beregnYtelseException = e
         }
     }

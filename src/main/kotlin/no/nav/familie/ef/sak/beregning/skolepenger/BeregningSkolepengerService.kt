@@ -1,9 +1,14 @@
 package no.nav.familie.ef.sak.beregning.skolepenger
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.felles.dto.harOverlappende
 import no.nav.familie.ef.sak.felles.util.skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
+import no.nav.familie.ef.sak.vedtak.dto.tilDto
 import org.springframework.stereotype.Service
 import java.time.Year
 import java.util.UUID
@@ -11,21 +16,41 @@ import java.util.UUID
 private val maksbeløpPerSkoleår = 68_000
 
 @Service
-class BeregningSkolepengerService {
+class BeregningSkolepengerService(
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService
+) {
 
     fun beregnYtelse(
         utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID
     ): BeregningSkolepengerResponse {
-        return beregnYtelse(utgiftsperioder)
+        val forrigePerioder = hentPerioderFraForrigeVedtak(behandlingId)
+        return beregnYtelse(utgiftsperioder, forrigePerioder)
     }
 
-    fun beregnYtelse(
+    private fun hentPerioderFraForrigeVedtak(behandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
+        return behandlingService.hentSaksbehandling(behandlingId).forrigeBehandlingId?.let { forrigeBehandlingId ->
+            hentPerioder(forrigeBehandlingId)
+        } ?: emptyList()
+    }
+
+    private fun hentPerioder(forrigeBehandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
+        val vedtak = vedtakService.hentVedtak(forrigeBehandlingId)
+        feilHvis(vedtak.skolepenger == null) {
+            "Vedtak for forrigeBehandlingId=$forrigeBehandlingId mangler skolepenger"
+        }
+        return vedtak.skolepenger.skoleårsperioder.map { it.tilDto() }
+    }
+
+    private fun beregnYtelse(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
     ): BeregningSkolepengerResponse {
         validerGyldigePerioder(perioder)
         validerFornuftigeBeløp(perioder)
         validerSkoleår(perioder)
+        validerForrigePerioderFortsattFinnes(perioder, forrigePerioder)
 
         val perioder = beregnSkoleårsperioder(perioder)
         return BeregningSkolepengerResponse(perioder)
@@ -47,11 +72,11 @@ class BeregningSkolepengerService {
     }
 
     private fun validerFornuftigeBeløp(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
-        brukerfeilHvis(skoleårsperioder.isEmpty()) {
-            "Ingen skoleårsperioder"
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.utgifter < 1 } }) {
+            "Utgifter må være høyere enn 0kr"
         }
-        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.utgifter < 0 } }) {
-            "Utgifter kan ikke være mindre enn 0"
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad < 0 } }) {
+            "Stønad kan ikke være lavere enn 0kr"
         }
         brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad > it.utgifter } }) {
             "Stønad kan ikke være høyere enn utgifter"
@@ -75,22 +100,57 @@ class BeregningSkolepengerService {
         }
     }
 
-    private fun validerGyldigePerioder(utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>) {
-        brukerfeilHvis(utgiftsperioder.isEmpty()) {
-            "Ingen utgiftsperioder"
+    private fun validerGyldigePerioder(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
+        brukerfeilHvis(skoleårsperioder.isEmpty()) {
+            "Mangler skoleår"
+        }
+        brukerfeilHvis(skoleårsperioder.any { it.perioder.isEmpty() }) {
+            "Mangler skoleårsperioder"
+        }
+        brukerfeilHvis(skoleårsperioder.any { it.utgiftsperioder.isEmpty() }) {
+            "Mangler utgiftsperioder"
         }
     }
 
     private fun validerSkoleår(perioder: List<SkoleårsperiodeSkolepengerDto>) {
         val tidligereSkoleår = mutableSetOf<Year>()
         perioder.forEach { skoleårsperiode ->
-            brukerfeilHvisIkke(skoleårsperiode.perioder.all { it.årMånedFra.skoleår() == it.årMånedTil.skoleår() }) {
+            val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
+            brukerfeilHvisIkke(skoleårsperiode.perioder.all {
+                val fraSkoleår = it.årMånedFra.skoleår()
+                skoleår == fraSkoleår && fraSkoleår == it.årMånedTil.skoleår()
+            }) {
                 "Alle perioder i et skoleår må være det samme skoleåret"
             }
-            val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
                 "Skoleåret $skoleår er definiert flere ganger"
             }
+            brukerfeilHvis(skoleårsperiode.perioder.map { it.tilPeriode() }.harOverlappende()) {
+                "SKoleår $skoleår inneholder overlappende perioder"
+            }
+            val studietype = skoleårsperiode.perioder.first().studietype
+            brukerfeilHvisIkke(skoleårsperiode.perioder.all { it.studietype == studietype }) {
+                "Skoleår $skoleår inneholder ulike studietyper"
+            }
+        }
+    }
+
+    private fun validerForrigePerioderFortsattFinnes(
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+    ) {
+        val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
+            periode.utgiftsperioder.map { it.id to it }
+        }.toMap()
+        val nyeIder = perioder.flatMap { periode -> periode.utgiftsperioder.map { it.id } }.toSet()
+        val manglende = tidligereUtgiftIder.entries.filterNot { nyeIder.contains(it.key) }
+        brukerfeilHvis(manglende.isNotEmpty()) {
+            val manglendePerioder = manglende.joinToString(", \n") { (_, utgiftsperiode) ->
+                "fakturadato=${utgiftsperiode.årMånedFra} " +
+                    "utgifter=${utgiftsperiode.utgifter} " +
+                    "stønad=${utgiftsperiode.stønad}"
+            }
+            "Mangler utgiftsperioder fra forrige vedtak \n$manglendePerioder"
         }
     }
 }
