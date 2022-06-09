@@ -19,8 +19,11 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtaksresultat
@@ -35,19 +38,26 @@ import no.nav.familie.kontrakter.ef.iverksett.BarnDto
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import no.nav.familie.kontrakter.ef.iverksett.DelvilkårsvurderingDto
+import no.nav.familie.kontrakter.ef.iverksett.DelårsperiodeSkoleårSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.IverksettSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.PeriodeMedBeløpDto
+import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype
+import no.nav.familie.kontrakter.ef.iverksett.SkolepengerUtgiftDto
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingMedVarselDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
+import no.nav.familie.kontrakter.ef.iverksett.Utgiftstype
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
@@ -144,7 +154,22 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto
                 )
             }
-            else -> error("Har ikke støtte å mappe iverksett for ${saksbehandling.stønadstype}")
+            StønadType.SKOLEPENGER -> {
+                val vedtakDto = mapVedtaksdetaljerSkolepengerDto(
+                    vedtak,
+                    saksbehandler,
+                    beslutter,
+                    tilkjentYtelse,
+                    tilbakekreving,
+                    brevmottakere
+                )
+                IverksettSkolepengerDto(
+                    behandling = behandlingsdetaljer,
+                    fagsak = fagsakdetaljerDto,
+                    søker = søkerDto,
+                    vedtak = vedtakDto
+                )
+            }
         }
     }
 
@@ -158,7 +183,10 @@ class IverksettingDtoMapper(
         }
     }
 
-    private fun mapTilbakekrevingMedVarsel(tilbakekreving: Tilbakekreving, behandlingId: UUID): TilbakekrevingMedVarselDto? {
+    private fun mapTilbakekrevingMedVarsel(
+        tilbakekreving: Tilbakekreving,
+        behandlingId: UUID
+    ): TilbakekrevingMedVarselDto? {
         if (tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL) {
             val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsoppsummering(behandlingId)
             val perioder = lagretSimuleringsresultat.hentSammenhengendePerioderMedFeilutbetaling()
@@ -217,7 +245,7 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.perioder?.tilVedtaksperiodeOvergangsstønadDto()
+            vedtaksperioder = vedtak.perioder?.tilVedtaksperiode()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere
@@ -239,12 +267,34 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperiodeBarnetilsynDto()
+            vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperiode()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
             tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder)
+        )
+
+    @Improvement("Opphørårsak må utledes ved revurdering")
+    private fun mapVedtaksdetaljerSkolepengerDto(
+        vedtak: Vedtak,
+        saksbehandler: String,
+        beslutter: String,
+        tilkjentYtelse: TilkjentYtelse?,
+        tilbakekreving: TilbakekrevingDto?,
+        brevmottakere: List<Brevmottaker>
+    ): VedtaksdetaljerSkolepengerDto =
+        VedtaksdetaljerSkolepengerDto(
+            resultat = vedtak.resultatType.tilVedtaksresultat(),
+            vedtakstidspunkt = LocalDateTime.now(),
+            opphørÅrsak = null,
+            saksbehandlerId = saksbehandler,
+            beslutterId = beslutter,
+            tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
+            vedtaksperioder = vedtak.skolepenger?.tilVedtaksperiode()
+                ?: emptyList(),
+            tilbakekreving = tilbakekreving,
+            brevmottakere = brevmottakere
         )
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
@@ -317,7 +367,7 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
     }
 )
 
-fun PeriodeWrapper.tilVedtaksperiodeOvergangsstønadDto(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
+fun PeriodeWrapper.tilVedtaksperiode(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
     .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     .map {
         VedtaksperiodeOvergangsstønadDto(
@@ -328,7 +378,7 @@ fun PeriodeWrapper.tilVedtaksperiodeOvergangsstønadDto(): List<VedtaksperiodeOv
         )
     }
 
-fun BarnetilsynWrapper.tilVedtaksperiodeBarnetilsynDto(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
+fun BarnetilsynWrapper.tilVedtaksperiode(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
     .map {
         VedtaksperiodeBarnetilsynDto(
             fraOgMed = it.datoFra,
@@ -337,6 +387,28 @@ fun BarnetilsynWrapper.tilVedtaksperiodeBarnetilsynDto(): List<VedtaksperiodeBar
             antallBarn = it.barn.size
         )
     }
+
+fun SkolepengerWrapper.tilVedtaksperiode(): List<VedtaksperiodeSkolepengerDto> = this.skoleårsperioder
+    .map { skoleårsperiode ->
+        VedtaksperiodeSkolepengerDto(
+            perioder = skoleårsperiode.perioder.map { it.tilIverksettDto() },
+            utgiftsperioder = skoleårsperiode.utgiftsperioder.map { it.tilIverksettDto() }
+        )
+    }
+
+fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleårSkolepengerDto(
+    studietype = SkolepengerStudietype.valueOf(this.studietype.name),
+    fraOgMed = this.datoFra,
+    tilOgMed = this.datoTil,
+    studiebelastning = this.studiebelastning
+)
+
+fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
+    utgiftstyper = this.utgiftstyper.map { type -> Utgiftstype.valueOf(type.name) }.toSet(),
+    utgiftsdato = this.utgiftsdato,
+    utgifter = this.utgifter,
+    stønad = this.stønad
+)
 
 private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) =
     perioder?.map { it.tilPeriodeMedBeløpDto() } ?: emptyList()
