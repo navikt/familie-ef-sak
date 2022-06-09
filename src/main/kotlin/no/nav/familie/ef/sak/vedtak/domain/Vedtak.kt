@@ -70,13 +70,21 @@ data class DelårsperiodeSkoleårSkolepenger(
 
 data class SkolepengerUtgift(
     val id: UUID,
-    val årMånedFra: YearMonth,
+    val utgiftstyper: Set<Utgiftstype>,
+    val utgiftsdato: LocalDate,
     val utgifter: Int,
     val stønad: Int
 )
 
 enum class SkolepengerStudietype {
-    HØGSKOLE_UNIVERSITET
+    HØGSKOLE_UNIVERSITET,
+    VIDEREGÅENDE,
+}
+
+enum class Utgiftstype {
+    SEMESTERAVGIFT,
+    STUDIEAVGIFT,
+    EKSAMENSAVGIFT,
 }
 
 data class PeriodeMedBeløp(
