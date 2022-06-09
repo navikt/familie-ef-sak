@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.felles.dto.harOverlappende
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
@@ -104,13 +105,6 @@ class BeregningBarnetilsynService {
 
 private fun List<Periode>.harPeriodeFør(årMåned: YearMonth): Boolean {
     return this.any { it.fradato.yearMonth() < årMåned }
-}
-
-private fun List<Periode>.harOverlappende(): Boolean {
-    val sortedBy = this.sortedBy { it.fradato }
-    return sortedBy.zipWithNext { a, b ->
-        a.overlapper(b)
-    }.any { it }
 }
 
 fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =

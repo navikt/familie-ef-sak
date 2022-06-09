@@ -40,3 +40,10 @@ data class Periode(
 
     private val lengde: Period = Period.between(fradato, tildato)
 }
+
+fun List<Periode>.harOverlappende(): Boolean {
+    val sortedBy = this.sortedBy { it.fradato }
+    return sortedBy.zipWithNext { a, b ->
+        a.overlapper(b)
+    }.any { it }
+}
