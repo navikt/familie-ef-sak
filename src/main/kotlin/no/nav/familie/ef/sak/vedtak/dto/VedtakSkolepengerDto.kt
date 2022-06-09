@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 import java.util.UUID
@@ -22,7 +23,7 @@ data class SkoleårsperiodeSkolepengerDto(
 )
 
 data class DelårsperiodeSkoleårDto(
-    val studietype: SkolepengerStudietype, // TODO valider alle er like
+    val studietype: SkolepengerStudietype,
     val årMånedFra: YearMonth,
     val årMånedTil: YearMonth,
     val studiebelastning: Int,
@@ -32,6 +33,7 @@ data class DelårsperiodeSkoleårDto(
 
 data class SkolepengerUtgiftDto(
     val id: UUID,
+    val utgiftstyper: Set<Utgiftstype>? = null, // TODO kan fjerne nullable når frontend lagt til utgiftstyper (husk mapping rad 46)
     val årMånedFra: YearMonth,
     val utgifter: Int,
     val stønad: Int,
@@ -41,7 +43,8 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
     perioder = this.perioder.map { it.tilDomene() },
     utgiftsperioder = this.utgiftsperioder.map { SkolepengerUtgift(
         id = it.id,
-        årMånedFra = it.årMånedFra,
+        utgiftstyper = it.utgiftstyper ?: emptySet(),
+        utgiftsdato = it.årMånedFra.atDay(1),
         utgifter = it.utgifter,
         stønad = it.stønad
     ) }
@@ -79,7 +82,8 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
 
 fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
-    årMånedFra = this.årMånedFra,
+    utgiftstyper = this.utgiftstyper,
+    årMånedFra = YearMonth.from(this.utgiftsdato),
     utgifter = this.utgifter,
     stønad = this.stønad,
 )

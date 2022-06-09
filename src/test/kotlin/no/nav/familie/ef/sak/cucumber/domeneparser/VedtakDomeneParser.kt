@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.felles.util.skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.førsteDagenIMånedenEllerDefault
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
@@ -220,7 +221,8 @@ object VedtakDomeneParser {
     private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
         return SkolepengerUtgift(
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
-            årMånedFra = parseÅrMåned(VedtakDomenebegrep.DATO_FAKTURA, rad),
+            utgiftstyper = emptySet(),
+            utgiftsdato = parseValgfriÅrMånedEllerDato(VedtakDomenebegrep.DATO_FAKTURA, rad).førsteDagenIMånedenEllerDefault(),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
         )
