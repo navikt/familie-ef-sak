@@ -69,6 +69,7 @@ data class DelårsperiodeSkoleårSkolepenger(
 )
 
 data class SkolepengerUtgift(
+    val id: UUID,
     val årMånedFra: YearMonth,
     val utgifter: Int,
     val stønad: Int

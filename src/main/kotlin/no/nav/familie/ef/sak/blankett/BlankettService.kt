@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -110,7 +109,7 @@ class BlankettService(
     }
 
     private fun hentVedtak(behandlingId: UUID): VedtakDto {
-        return vedtakService.hentVedtak(behandlingId).tilVedtakDto()
+        return vedtakService.hentVedtakDto(behandlingId)
     }
 
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {
