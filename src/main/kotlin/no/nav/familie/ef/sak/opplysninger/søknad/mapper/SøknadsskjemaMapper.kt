@@ -108,7 +108,8 @@ object SøknadsskjemaMapper {
             sivilstandsplaner = tilDomene(kontraktsøknad.sivilstandsplaner?.verdi),
             barn = tilDomene(kontraktsøknad.barn.verdi),
             utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,
-            utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi)
+            utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi),
+            tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi)
         )
     }
 
