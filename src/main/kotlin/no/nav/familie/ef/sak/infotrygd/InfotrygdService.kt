@@ -60,17 +60,9 @@ class InfotrygdService(
         return hentPerioderFraReplika(personIdenter)
     }
 
-    fun hentSammenslåttePerioderFraReplika(
-        personIdent: String,
-        stønadstype: StønadType
-    ): List<InfotrygdPeriode> {
+    fun hentInfotrygdPerioderFraReplika(personIdent: String, stønadstyper : Set<StønadType>): InfotrygdPeriodeResponse {
         val personIdenter = hentPersonIdenter(personIdent)
-        val perioder = hentPerioderFraReplika(personIdenter, setOf(stønadstype))
-        return when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> slåSammenPerioder(perioder.overgangsstønad)
-            StønadType.BARNETILSYN -> slåSammenPerioder(perioder.barnetilsyn)
-            StønadType.SKOLEPENGER -> slåSammenPerioder(perioder.skolepenger)
-        }
+        return hentPerioderFraReplika(personIdenter, stønadstyper)
     }
 
     /**
