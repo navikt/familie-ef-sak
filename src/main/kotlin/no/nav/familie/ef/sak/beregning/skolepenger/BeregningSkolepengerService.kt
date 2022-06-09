@@ -125,7 +125,7 @@ class BeregningSkolepengerService(
                 val fraSkoleår = it.årMånedFra.skoleår()
                 skoleår == fraSkoleår && fraSkoleår == it.årMånedTil.skoleår()
             }) {
-                "Alle perioder i et skoleår må være det samme skoleåret"
+                "Alle perioder i et skoleår må være i det samme skoleåret"
             }
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
                 "Skoleåret $skoleår er definiert flere ganger"
@@ -134,8 +134,11 @@ class BeregningSkolepengerService(
                 "Skoleår $skoleår inneholder overlappende perioder"
             }
             val studietype = skoleårsperiode.perioder.first().studietype
-            brukerfeilHvisIkke(skoleårsperiode.perioder.all { it.studietype == studietype }) {
+            feilHvis(skoleårsperiode.perioder.any { it.studietype != studietype }) {
                 "Skoleår $skoleår inneholder ulike studietyper"
+            }
+            feilHvis(skoleårsperiode.utgiftsperioder.any { it.utgiftstyper.isEmpty() }) {
+                "Skoleåret $skoleår mangler utgiftstyper for en eller flere utgifter"
             }
         }
     }
@@ -144,6 +147,7 @@ class BeregningSkolepengerService(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
         forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
     ) {
+        if (forrigePerioder.isEmpty()) return
         val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
             periode.utgiftsperioder.map { it.id to it }
         }.toMap()
