@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,7 +27,7 @@ class AutomatiskMigreringController(
         brukerfeilHvis(antall > 100) {
             "Kan ikke migrere fler enn 100"
         }
-        brukerfeilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.automatisk-migrering")) {
+        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.AUTOMATISK_MIGRERING)) {
             "Feature toggle for migrering er slått av"
         }
         automatiskMigreringService.migrerAutomatisk(antall)

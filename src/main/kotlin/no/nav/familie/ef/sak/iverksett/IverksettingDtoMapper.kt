@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
+import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.ef.iverksett.AdressebeskyttelseGradering
 import no.nav.familie.kontrakter.ef.iverksett.AktivitetType
 import no.nav.familie.kontrakter.ef.iverksett.BarnDto
@@ -144,7 +145,24 @@ class IverksettingDtoMapper(
                     vedtak = vedtakDto
                 )
             }
-            else -> error("Har ikke støtte å mappe iverksett for ${saksbehandling.stønadstype}")
+            else -> IverksettBarnetilsynDto(
+                behandling = behandlingsdetaljer,
+                fagsak = fagsakdetaljerDto,
+                søker = søkerDto,
+                vedtak = VedtaksdetaljerBarnetilsynDto(
+                    resultat = Vedtaksresultat.INNVILGET,
+                    vedtakstidspunkt = LocalDateTime.now(),
+                    opphørÅrsak = null,
+                    saksbehandlerId = saksbehandler,
+                    beslutterId = beslutter,
+                    tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
+                    vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperiodeBarnetilsynDto() ?: emptyList(),
+                    tilbakekreving = tilbakekreving,
+                    brevmottakere = brevmottakere,
+                    kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
+                    tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder)
+                )
+            )
         }
     }
 

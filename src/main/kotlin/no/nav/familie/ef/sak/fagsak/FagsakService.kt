@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -139,7 +140,7 @@ class FagsakService(
         person: FagsakPerson,
         gjeldendePersonIdent: PdlIdent
     ) =
-        if (featureToggleService.isEnabled("familie.ef.sak.synkroniser-personidenter")) {
+        if (featureToggleService.isEnabled(Toggle.SYNKRONISER_PERSONIDENTER)) {
             fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
         } else {
             person
@@ -188,10 +189,10 @@ class FagsakService(
     private fun validerStønadstype(stønadstype: StønadType) {
         when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> {}
-            StønadType.BARNETILSYN -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.barnetilsyn")) {
+            StønadType.BARNETILSYN -> feilHvisIkke(featureToggleService.isEnabled(Toggle.BARNETILSYN)) {
                 "Støtter ikke opprettelse av fagsak for barnetilsyn"
             }
-            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.skolepenger")) {
+            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled(Toggle.SKOLEPENGER)) {
                 "Støtter ikke opprettelse av fagsak for skolepenger"
             }
         }

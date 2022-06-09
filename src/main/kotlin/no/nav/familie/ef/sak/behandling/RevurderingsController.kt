@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -28,7 +29,10 @@ class RevurderingsController(
     fun startRevurdering(@RequestBody revurderingInnhold: RevurderingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        feilHvis(revurderingInnhold.barn.isNotEmpty() && !featureToggleService.isEnabled("familie.ef.sak.kan-legge-til-nye-barn-paa-revurdering")) {
+        feilHvis(
+            revurderingInnhold.barn.isNotEmpty() &&
+                !featureToggleService.isEnabled(Toggle.KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING)
+        ) {
             "Feature toggle for revurdering med barn er disabled"
         }
         brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {

@@ -6,6 +6,7 @@ import no.finn.unleash.UnleashContextProvider
 import no.finn.unleash.util.UnleashConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.ByEnvironmentStrategy
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.ByUserIdStrategy
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -53,8 +54,8 @@ class FeatureToggleConfig(
         )
 
         return object : FeatureToggleService {
-            override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                return unleash.isEnabled(toggleId, defaultValue)
+            override fun isEnabled(toggleId: Toggle, defaultValue: Boolean): Boolean {
+                return unleash.isEnabled(toggleId.toggleId, defaultValue)
             }
 
             // Spring trigger denne ved shutdown. Gjøres for å unngå at unleash fortsetter å gjøre kall ut
@@ -76,7 +77,7 @@ class FeatureToggleConfig(
 
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
         return object : FeatureToggleService {
-            override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
+            override fun isEnabled(toggleId: Toggle, defaultValue: Boolean): Boolean {
                 if (unleash.environment == "local") {
                     return true
                 }

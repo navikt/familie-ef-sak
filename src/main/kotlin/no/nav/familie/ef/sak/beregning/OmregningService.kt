@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -75,7 +76,7 @@ class OmregningService(
         liveRun: Boolean
     ) {
 
-        feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.omberegning")) {
+        feilHvisIkke(featureToggleService.isEnabled(Toggle.OMBEREGNING)) {
             "Feature toggle for omberegning er disabled"
         }
 

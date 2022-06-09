@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.beregning.DryRunException
 import no.nav.familie.ef.sak.beregning.OmregningService
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -40,7 +41,7 @@ class GOmregningTask(
         try {
             omregningService.utførGOmregning(
                 fagsakId,
-                featureToggleService.isEnabled("familie.ef.sak.omberegning.live.run")
+                featureToggleService.isEnabled(Toggle.OMBERENING_LIVE_RUN)
             )
         } catch (e: DryRunException) {
             logger.info("G-OmberegningTask for fagsakId $fagsakId ruller tilbake fordi den er kjørt i dry run-modus.")

@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -93,7 +94,7 @@ class ValiderOmregningServiceTest {
 
         @BeforeEach
         internal fun setUp() {
-            val toggle = "familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"
+            val toggle = Toggle.G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK
             every { featureToggleService.isEnabled(toggle) } returns false
         }
 
