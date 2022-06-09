@@ -69,11 +69,11 @@ internal class BisysBarnetilsynServiceTest {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns lagBehandlingerForSisteIverksatte().first()
         every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarn
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+        } returns emptyList()
     }
 
     @Test
@@ -186,14 +186,12 @@ internal class BisysBarnetilsynServiceTest {
                 behandlingBarn = behandlingBarn
             )
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            listOf(
-                lagInfotrygdPeriode(
+        } returns listOf(
+            lagInfotrygdPeriode(
                 vedtakId = 1,
                 stønadFom = LocalDate.MIN,
                 stønadTom = LocalDate.now()
@@ -202,8 +200,6 @@ internal class BisysBarnetilsynServiceTest {
                     ),
                 beløp = 10
             )
-        ),
-        emptyList()
         )
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
@@ -224,23 +220,19 @@ internal class BisysBarnetilsynServiceTest {
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().plusMonths(2), behandlingBarn = behandlingBarn)
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            listOf(
-                lagInfotrygdPeriode(
-                    vedtakId = 1,
-                    stønadTom = LocalDate.now()
-                        .minusMonths(
-                            1
-                        ),
-                    beløp = 10
-                )
-            ),
-            emptyList()
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadTom = LocalDate.now()
+                    .minusMonths(
+                        1
+                    ),
+                beløp = 10
+            )
         )
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
@@ -262,22 +254,19 @@ internal class BisysBarnetilsynServiceTest {
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusMonths(1), behandlingBarn = behandlingBarn)
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            listOf(
-                lagInfotrygdPeriode(
-                    vedtakId = 1,
-                    stønadTom = LocalDate.now()
-                        .plusMonths(
-                            1
-                        ),
-                )
-            ),
-            emptyList()
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadTom = LocalDate.now()
+                    .plusMonths(
+                        1
+                    ),
+                beløp = 10
+            )
         )
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
@@ -300,23 +289,19 @@ internal class BisysBarnetilsynServiceTest {
             fagsakService.finnFagsak(any(), StønadType.BARNETILSYN)
         } returns null
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            listOf(
-                lagInfotrygdPeriode(
-                    vedtakId = 1,
-                    stønadTom = LocalDate.now()
-                        .plusMonths(
-                            1
-                        ),
-                    beløp = 10
-                )
-            ),
-            emptyList()
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadTom = LocalDate.now()
+                    .plusMonths(
+                        1
+                    ),
+                beløp = 10
+            )
         )
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
@@ -341,24 +326,18 @@ internal class BisysBarnetilsynServiceTest {
         val andelhistorikkDto =
             lagAndelHistorikkDto(fraOgMed = efFom, tilOgMed = efTom, behandlingBarn = behandlingBarn)
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            listOf(
-                lagInfotrygdPeriode(
-                    vedtakId = 1,
-                    stønadFom = LocalDate.MIN,
-                    stønadTom = LocalDate.MAX,
-                    beløp = 10
-                )
-            ),
-            emptyList()
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadFom = LocalDate.MIN,
+                stønadTom = LocalDate.MAX,
+                beløp = 10
+            )
         )
-
-
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
@@ -390,21 +369,17 @@ internal class BisysBarnetilsynServiceTest {
                 behandlingBarn = behandlingBarn
             )
         every {
-            infotrygdService.hentInfotrygdPerioderFraReplika(
+            infotrygdService.hentSammenslåttePerioderFraReplika(
                 any(),
-                setOf(StønadType.BARNETILSYN)
+                StønadType.BARNETILSYN
             )
-        } returns InfotrygdPeriodeResponse(
-            emptyList(),
-            listOf(
-                lagInfotrygdPeriode(
-                    vedtakId = 1,
-                    stønadFom = startdato,
-                    stønadTom = LocalDate.MAX,
-                    beløp = 10
-                )
-            ),
-            emptyList()
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadFom = startdato,
+                stønadTom = LocalDate.MAX,
+                beløp = 10
+            )
         )
         every {
             tilkjentYtelseService.hentHistorikk(any(), any())
