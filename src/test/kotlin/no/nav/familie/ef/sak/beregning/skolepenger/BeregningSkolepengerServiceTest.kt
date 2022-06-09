@@ -285,6 +285,7 @@ internal class BeregningSkolepengerServiceTest {
         stønad: Int = 50
     ) = SkolepengerUtgiftDto(
         id = id,
+        utgiftstyper = emptySet(),
         årMånedFra = fra,
         utgifter = utgifter,
         stønad = stønad
