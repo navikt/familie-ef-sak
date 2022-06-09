@@ -221,6 +221,7 @@ object VedtakDomeneParser {
     private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
         return SkolepengerUtgift(
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
+            utgiftstyper = emptySet(),
             utgiftsdato = parseValgfriÅrMånedEllerDato(VedtakDomenebegrep.DATO_FAKTURA, rad).førsteDagenIMånedenEllerDefault(),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
