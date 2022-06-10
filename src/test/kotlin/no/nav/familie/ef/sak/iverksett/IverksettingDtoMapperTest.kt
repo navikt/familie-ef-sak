@@ -35,6 +35,8 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -51,10 +53,12 @@ import no.nav.familie.kontrakter.ef.iverksett.FagsakdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.IverksettSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -73,7 +77,9 @@ import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
 import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatIverksett
 import no.nav.familie.kontrakter.ef.iverksett.AktivitetType as AktivitetTypeIverksett
+import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype as SkolepengerStudietypeIverksett
 import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
+import no.nav.familie.kontrakter.ef.iverksett.Utgiftstype as UtgiftstypeIverksett
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType as VedtaksperiodeTypeIverksett
 
 internal class IverksettingDtoMapperTest {
@@ -190,6 +196,16 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
+    internal fun `map skolepenger til IverksettDto - sjekk alle felter`() {
+        val behandlingId = mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(stønadType = StønadType.SKOLEPENGER)
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+
+        assertAlleFelter(iverksettDto as IverksettSkolepengerDto, behandlingId)
+    }
+
+    @Test
     internal fun `skal kunne mappe alle enums`() {
         BehandlingType.values().forEach { BehandlingTypeIverksett.valueOf(it.name) }
 
@@ -202,6 +218,9 @@ internal class IverksettingDtoMapperTest {
         VedtaksperiodeType.values()
             .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
             .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
+
+        SkolepengerStudietype.values().forEach { SkolepengerStudietypeIverksett.valueOf(it.name) }
+        Utgiftstype.values().forEach { UtgiftstypeIverksett.valueOf(it.name) }
     }
 
     private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
@@ -211,6 +230,11 @@ internal class IverksettingDtoMapperTest {
 
     private fun assertAlleFelter(iverksettDto: IverksettBarnetilsynDto, behandlingId: UUID?) {
         assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.BARNETILSYN)
+        assertVedtaksperiode(iverksettDto.vedtak)
+    }
+
+    private fun assertAlleFelter(iverksettDto: IverksettSkolepengerDto, behandlingId: UUID?) {
+        assertAlleFelterIverksettDto(iverksettDto, behandlingId, StønadType.SKOLEPENGER)
         assertVedtaksperiode(iverksettDto.vedtak)
     }
 
@@ -340,9 +364,30 @@ internal class IverksettingDtoMapperTest {
         assertThat(tilleggsstønad.beløp).isEqualTo(2)
     }
 
+    private fun assertVedtaksperiode(vedtak: VedtaksdetaljerSkolepengerDto) {
+        assertThat(vedtak.vedtaksperioder).hasSize(1)
+        val vedtaksperiode = vedtak.vedtaksperioder[0]
+
+        assertThat(vedtaksperiode.perioder).hasSize(1)
+        assertThat(vedtaksperiode.perioder[0].studietype).isEqualTo(SkolepengerStudietypeIverksett.HØGSKOLE_UNIVERSITET)
+        assertThat(vedtaksperiode.perioder[0].fraOgMed).isEqualTo(LocalDate.of(2021, 3, 1))
+        assertThat(vedtaksperiode.perioder[0].tilOgMed).isEqualTo(LocalDate.of(2021, 3, 31))
+        assertThat(vedtaksperiode.perioder[0].studiebelastning).isEqualTo(50)
+
+        assertThat(vedtaksperiode.utgiftsperioder).hasSize(1)
+        assertThat(vedtaksperiode.utgiftsperioder[0].utgiftstyper)
+            .containsExactlyInAnyOrder(UtgiftstypeIverksett.EKSAMENSAVGIFT)
+        assertThat(vedtaksperiode.utgiftsperioder[0].utgiftsdato).isEqualTo(LocalDate.of(2021, 2, 1))
+        assertThat(vedtaksperiode.utgiftsperioder[0].utgifter).isEqualTo(200)
+        assertThat(vedtaksperiode.utgiftsperioder[0].stønad).isEqualTo(150)
+    }
+
     private fun mockReturnerObjekterMedAlleFelterFylt(): UUID? {
         val grunnlagsdata =
-            opprettGrunnlagsdata().copy(søker = søker(), barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")))
+            opprettGrunnlagsdata().copy(
+                søker = søker(),
+                barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn"))
+            )
         every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
             grunnlagsdata,
             false,
@@ -360,7 +405,11 @@ internal class IverksettingDtoMapperTest {
                 behandlingBarn = behandlingBarn
             )
         )
-        every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns listOf(objectMapper.readValue(vilkårsvurderingJson))
+        every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns listOf(
+            objectMapper.readValue(
+                vilkårsvurderingJson
+            )
+        )
         every { vedtakService.hentVedtak(any()) } returns objectMapper.readValue(vedtakJson)
         every { brevmottakereRepository.findByIdOrNull(any()) } returns objectMapper.readValue(brevmottakereJson)
         every { tilbakekrevingService.hentTilbakekreving(any()) } returns objectMapper.readValue(tilbakekrevingJson)
@@ -443,6 +492,32 @@ internal class IverksettingDtoMapperTest {
         }
     """.trimIndent()
 
+    private val vedtakSkolepengerJson = """
+        {
+           "skoleårsperioder": [
+             {
+               "perioder": [
+                 {
+                   "studietype": "HØGSKOLE_UNIVERSITET",
+                   "datoFra": "2021-03-01",
+                   "datoTil": "2021-03-31",
+                   "studiebelastning": 50
+                 }
+               ],
+               "utgiftsperioder": [
+                 {
+                   "id": "61516ce4-ae65-456b-a4d0-751dd3451bb6",
+                   "utgiftstyper": ["EKSAMENSAVGIFT"],
+                   "utgiftsdato": "2021-02-01",
+                   "utgifter": 200,
+                   "stønad": 150
+                 }
+               ]
+             }
+           ]
+          }
+    """
+
     private val vedtakJson = """
         {
             "behandlingId": "73144d90-d238-41d2-833b-fc719dae23cb",
@@ -481,6 +556,7 @@ internal class IverksettingDtoMapperTest {
                     "beløp": 2
                 }] 
             },
+            "skolepenger": $vedtakSkolepengerJson,
             "samordningsfradragType": "UFØRETRYGD",
             "saksbehandlerIdent": "saksbehandlerIdent",
             "opphørFom": "2022-03-27",
