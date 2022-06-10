@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
@@ -112,6 +113,7 @@ object VedtakDtoUtil {
             utgiftsperioder = listOf(
                 SkolepengerUtgiftDto(
                     id = UUID.fromString("c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d"),
+                    utgiftstyper = setOf(Utgiftstype.SEMESTERAVGIFT),
                     årMånedFra = YearMonth.of(2021, 1),
                     utgifter = 500,
                     stønad = 500

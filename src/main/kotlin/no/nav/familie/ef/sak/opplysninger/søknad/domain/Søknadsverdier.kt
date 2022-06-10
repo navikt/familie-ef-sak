@@ -17,7 +17,7 @@ data class Søknadsverdier(
 )
 
 fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
-    aktivitet = null,
+    aktivitet = Aktivitet(underUtdanning = this.utdanning, tidligereUtdanninger = this.tidligereUtdanninger),
     barn = this.barn,
     fødselsnummer = this.fødselsnummer,
     medlemskap = this.medlemskap,
@@ -26,7 +26,6 @@ fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
     bosituasjon = this.bosituasjon,
     situasjon = null,
     datoMottatt = this.datoMottatt,
-
 )
 
 fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(

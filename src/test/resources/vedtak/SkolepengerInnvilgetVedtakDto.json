@@ -11,6 +11,7 @@
       "utgiftsperioder": [
         {
           "id": "c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d",
+          "utgiftstyper": ["SEMESTERAVGIFT"],
           "årMånedFra": "2021-01",
           "utgifter": 500,
           "stønad": 500

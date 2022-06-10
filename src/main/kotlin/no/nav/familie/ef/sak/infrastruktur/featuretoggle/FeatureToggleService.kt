@@ -38,6 +38,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_OPPGAVEBENK_MIGRER_FAGSAK("familie.ef.sak.frontend-oppgavebenk-migrer-fagsak"),
     FRONTEND_VISE_OPPRETT_NY_BEHANDLING_BARNETILSYN("familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-barnetilsyn"),
     FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN("familie.ef.sak.frontend-journalforing-kan-legge-til-terminbarn"),
+    FRONTEND_SKOLEPENGER_REVURDERING("familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-skolepenger"),
     ;
 
     companion object {
