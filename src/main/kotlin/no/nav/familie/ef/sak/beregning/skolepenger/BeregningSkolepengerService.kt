@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning.skolepenger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp.maksbeløp
 import no.nav.familie.ef.sak.felles.dto.harOverlappende
 import no.nav.familie.ef.sak.felles.util.skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -14,8 +15,9 @@ import org.springframework.stereotype.Service
 import java.time.Year
 import java.util.UUID
 
-private val maksbeløpPerSkoleår = 68_000
-
+/**
+ * Skoleår 2021 = 21/22
+ */
 @Service
 class BeregningSkolepengerService(
     private val behandlingService: BehandlingService,
@@ -95,9 +97,11 @@ class BeregningSkolepengerService(
     }
 
     private fun validerUnderMaksBeløp(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
-        val skoleår = skoleårsperiode.perioder.first().årMånedFra.skoleår()
-        brukerfeilHvis(skoleårsperiode.utgiftsperioder.sumOf { it.stønad } > maksbeløpPerSkoleår) {
-            "Stønad for skoleåret $skoleår er høyere enn $maksbeløpPerSkoleår"
+        val førstePeriode = skoleårsperiode.perioder.first()
+        val skoleår = førstePeriode.årMånedFra.skoleår()
+        val maksbeløp = maksbeløp(førstePeriode.studietype, skoleår)
+        brukerfeilHvis(skoleårsperiode.utgiftsperioder.sumOf { it.stønad } > maksbeløp) {
+            "Stønad for skoleåret $skoleår er høyere enn $maksbeløp"
         }
     }
 
