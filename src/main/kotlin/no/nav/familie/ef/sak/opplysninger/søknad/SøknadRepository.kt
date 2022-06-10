@@ -20,5 +20,5 @@ interface SøknadRepository : RepositoryInterface<Søknad, UUID>, InsertUpdateRe
                     JOIN soknadsskjema ss ON soknad.soknadsskjema_id = ss.id
                     WHERE soknad.behandling_id = :behandlingId"""
     )
-    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime
+    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime?
 }
