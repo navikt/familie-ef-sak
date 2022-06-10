@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning.skolepenger
 
+import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype.HØGSKOLE_UNIVERSITET
@@ -25,13 +26,13 @@ object SkolepengerMaksbeløp {
         Year.of(2020) to 27_794,
     )
 
-    fun maksbeløp(studietype: SkolepengerStudietype, skoleår: Year): Int {
+    fun maksbeløp(studietype: SkolepengerStudietype, skoleår: Skoleår): Int {
         val maksbeløp = when (studietype) {
-            HØGSKOLE_UNIVERSITET -> høgskoleUniversitet[skoleår]
-            VIDEREGÅENDE -> videregående[skoleår]
+            HØGSKOLE_UNIVERSITET -> høgskoleUniversitet[skoleår.år]
+            VIDEREGÅENDE -> videregående[skoleår.år]
         }
         brukerfeilHvis(maksbeløp == null) {
-            "Finner ikke maksbeløp for studietype=$studietype skoleår=$skoleår"
+            "Finner ikke maksbeløp for studietype=$studietype skoleår=${skoleår}"
         }
         return maksbeløp
     }
