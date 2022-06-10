@@ -217,13 +217,13 @@ internal class TilbakekrevingServiceTest {
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
             every { fagsakService.fagsakMedOppdatertPersonIdent(fagsak.id) } returns fagsak
             val behandling = behandling(fagsak)
-            every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
+            every { behandlingService.hentBehandlingPåEksternId(654321) } returns behandling
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
-                .returns(KanBehandlingOpprettesManueltRespons(true, "Ok.", "ref"))
+                .returns(KanBehandlingOpprettesManueltRespons(true, "Ok.", "654321"))
             every {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
                     fagsak.eksternId.id,
-                    "ref",
+                    "654321",
                     fagsak.stønadstype
                 )
             } just runs
@@ -233,7 +233,7 @@ internal class TilbakekrevingServiceTest {
             verify {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
                     fagsak.eksternId.id,
-                    "ref",
+                    "654321",
                     fagsak.stønadstype
                 )
             }
