@@ -20,7 +20,7 @@ class UtdanningErHensiktsmessigRegel : Vilkårsregel(
                 regelId = RegelId.NAVKONTOR_VURDERING,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT
+                    hvisNei = SluttSvarRegel.OPPFYLT
                 )
             )
 
