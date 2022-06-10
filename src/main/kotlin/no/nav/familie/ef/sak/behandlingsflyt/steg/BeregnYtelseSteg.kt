@@ -186,27 +186,29 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                                           saksbehandling: Saksbehandling) {
+    private fun validerTidligereVedtakVedMidlertidigOpphør(
+        utgiftsperioder: List<UtgiftsperiodeDto>,
+        saksbehandling: Saksbehandling
+    ) {
         val førstePeriodeErMidlertidigOpphør = utgiftsperioder.first().erMidlertidigOpphør
         brukerfeilHvis(førstePeriodeErMidlertidigOpphør && saksbehandling.forrigeBehandlingId == null) {
             "Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=${saksbehandling.id}"
         }
         val harIkkeInnvilgetBeløp =
-                if (saksbehandling.forrigeBehandlingId != null) tilkjentYtelseService.hentForBehandling(saksbehandling.forrigeBehandlingId).andelerTilkjentYtelse.all { it.beløp == 0 } else true
+            if (saksbehandling.forrigeBehandlingId != null) tilkjentYtelseService.hentForBehandling(saksbehandling.forrigeBehandlingId).andelerTilkjentYtelse.all { it.beløp == 0 } else true
         brukerfeilHvis(harIkkeInnvilgetBeløp && førstePeriodeErMidlertidigOpphør) {
-                "Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=${saksbehandling.id}"
+            "Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=${saksbehandling.id}"
         }
     }
 
-    private fun validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                                                  saksbehandling: Saksbehandling) {
+    private fun validerSammenhengendePerioderVedMidlertidigOpphør(
+        utgiftsperioder: List<UtgiftsperiodeDto>,
+        saksbehandling: Saksbehandling
+    ) {
         brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
             "Perioder som er midlertidig opphør må være sammenhengende, på behandling=${saksbehandling.id}"
         }
     }
-
-
 
     private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
         when (data) {
@@ -517,7 +519,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    stønadFom = it.årMånedFra .atDay(1),
+                    stønadFom = it.årMånedFra.atDay(1),
                     stønadTom = it.årMånedFra.atEndOfMonth(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,

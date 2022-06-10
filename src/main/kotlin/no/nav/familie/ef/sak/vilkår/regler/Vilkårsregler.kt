@@ -34,8 +34,7 @@ class Vilkårsregler private constructor(val vilkårsregler: Map<VilkårType, Vi
     }
 }
 
-private val alleVilkårsregler = StønadType.values().map {vilkårsreglerForStønad(it) }.flatten()
-
+private val alleVilkårsregler = StønadType.values().map { vilkårsreglerForStønad(it) }.flatten()
 
 fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
     when (stønadstype) {

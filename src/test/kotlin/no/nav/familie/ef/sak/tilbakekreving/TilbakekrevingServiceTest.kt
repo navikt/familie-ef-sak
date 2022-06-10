@@ -219,11 +219,11 @@ internal class TilbakekrevingServiceTest {
             val behandling = behandling(fagsak)
             every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
             every { tilbakekrevingClient.kanBehandlingOpprettesManuelt(fagsak.stønadstype, fagsak.eksternId.id) }
-                .returns(KanBehandlingOpprettesManueltRespons(true, "Ok."))
+                .returns(KanBehandlingOpprettesManueltRespons(true, "Ok.", "ref"))
             every {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
                     fagsak.eksternId.id,
-                    behandling.eksternId.id,
+                    "ref",
                     fagsak.stønadstype
                 )
             } just runs
@@ -233,7 +233,7 @@ internal class TilbakekrevingServiceTest {
             verify {
                 tilbakekrevingClient.opprettManuelTilbakekreving(
                     fagsak.eksternId.id,
-                    behandling.eksternId.id,
+                    "ref",
                     fagsak.stønadstype
                 )
             }
