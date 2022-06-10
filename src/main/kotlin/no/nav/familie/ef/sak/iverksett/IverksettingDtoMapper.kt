@@ -245,7 +245,7 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.perioder?.tilVedtaksperiode()
+            vedtaksperioder = vedtak.perioder?.tilVedtaksperioder()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere
@@ -267,7 +267,7 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperiode()
+            vedtaksperioder = vedtak.barnetilsyn?.tilVedtaksperioder()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
@@ -291,7 +291,7 @@ class IverksettingDtoMapper(
             saksbehandlerId = saksbehandler,
             beslutterId = beslutter,
             tilkjentYtelse = tilkjentYtelse?.tilIverksettDto(),
-            vedtaksperioder = vedtak.skolepenger?.tilVedtaksperiode()
+            vedtaksperioder = vedtak.skolepenger?.tilVedtaksperioder()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere
@@ -367,7 +367,7 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
     }
 )
 
-fun PeriodeWrapper.tilVedtaksperiode(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
+fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
     .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     .map {
         VedtaksperiodeOvergangsstønadDto(
@@ -378,7 +378,7 @@ fun PeriodeWrapper.tilVedtaksperiode(): List<VedtaksperiodeOvergangsstønadDto> 
         )
     }
 
-fun BarnetilsynWrapper.tilVedtaksperiode(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
+fun BarnetilsynWrapper.tilVedtaksperioder(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
     .map {
         VedtaksperiodeBarnetilsynDto(
             fraOgMed = it.datoFra,
@@ -388,7 +388,7 @@ fun BarnetilsynWrapper.tilVedtaksperiode(): List<VedtaksperiodeBarnetilsynDto> =
         )
     }
 
-fun SkolepengerWrapper.tilVedtaksperiode(): List<VedtaksperiodeSkolepengerDto> = this.skoleårsperioder
+fun SkolepengerWrapper.tilVedtaksperioder(): List<VedtaksperiodeSkolepengerDto> = this.skoleårsperioder
     .map { skoleårsperiode ->
         VedtaksperiodeSkolepengerDto(
             perioder = skoleårsperiode.perioder.map { it.tilIverksettDto() },
