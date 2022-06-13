@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
@@ -29,6 +31,12 @@ data class DelårsperiodeSkoleårDto(
     val studiebelastning: Int,
 ) {
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
+
+    // Brukes for å ikke være en del av json som blir serialisert
+    @delegate:JsonIgnore
+    val skoleår: Skoleår by lazy {
+        Skoleår(årMånedFra, årMånedTil)
+    }
 }
 
 data class SkolepengerUtgiftDto(

@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.felles.util
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Year
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -38,6 +37,3 @@ fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
 
 fun YearMonth.erSammeMåned(sammeMåned: YearMonth): Boolean = this == sammeMåned
-
-fun YearMonth.skoleår(): Year =
-    Year.of(if (this.monthValue > 6) this.year else this.year.minus(1))

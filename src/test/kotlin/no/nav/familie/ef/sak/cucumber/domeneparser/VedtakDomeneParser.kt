@@ -4,7 +4,7 @@ import io.cucumber.datatable.DataTable
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.hentUtgiftUUID
-import no.nav.familie.ef.sak.felles.util.skoleår
+import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
@@ -33,7 +33,6 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -178,28 +177,24 @@ object VedtakDomeneParser {
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
-                barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let { IntRange(1, it).map { UUID.randomUUID() } }
-                    ?: emptyList(),
+                barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
+                    IntRange(1, it).map { UUID.randomUUID() }
+                } ?: emptyList(),
                 erMidlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
             )
         }
     }
 
     private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<SkoleårsperiodeSkolepenger> {
-        val skoleårsperioder = mutableMapOf<Year, SkoleårsperiodeSkolepenger>()
+        val skoleårsperioder = mutableMapOf<Skoleår, SkoleårsperiodeSkolepenger>()
         rader.forEach { rad ->
             val datoFra = parseFraOgMed(rad)
-            val skoleår = YearMonth.from(datoFra).skoleår()
+            val skoleår = Skoleår(YearMonth.from(datoFra), YearMonth.from(datoFra))
             val delårsperiode = mapDelårsperiodeSkolepenger(rad, datoFra)
             val utgift = mapSkolepengerUtgift(rad)
 
-            val skoleårsperiode: SkoleårsperiodeSkolepenger = skoleårsperioder.getOrDefault(
-                skoleår,
-                SkoleårsperiodeSkolepenger(
-                    emptyList(),
-                    emptyList()
-                )
-            )
+            val skoleårsperiode: SkoleårsperiodeSkolepenger = skoleårsperioder
+                .getOrDefault(skoleår, SkoleårsperiodeSkolepenger(emptyList(), emptyList()))
             skoleårsperioder[skoleår] = skoleårsperiode.copy(
                 perioder = (skoleårsperiode.perioder.toSet() + delårsperiode).toList(),
                 utgiftsperioder = skoleårsperiode.utgiftsperioder + utgift
@@ -224,7 +219,10 @@ object VedtakDomeneParser {
         return SkolepengerUtgift(
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
             utgiftstyper = setOf(Utgiftstype.SEMESTERAVGIFT),
-            utgiftsdato = parseValgfriÅrMånedEllerDato(VedtakDomenebegrep.DATO_FAKTURA, rad).førsteDagenIMånedenEllerDefault(),
+            utgiftsdato = parseValgfriÅrMånedEllerDato(
+                VedtakDomenebegrep.DATO_FAKTURA,
+                rad
+            ).førsteDagenIMånedenEllerDefault(),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
         )
