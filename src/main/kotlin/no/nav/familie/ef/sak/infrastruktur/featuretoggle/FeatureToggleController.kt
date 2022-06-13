@@ -21,7 +21,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.MIGRERING,
         Toggle.FRONTEND_VIS_SANKSJON_EN_MÅNED,
         Toggle.KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING,
-        Toggle.FRONTEND_VIS_TILBAKEKREVING,
         Toggle.FRONTEND_OPPGAVEBENK_MIGRER_FAGSAK,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_BEHANDLE_BARNETILSYN,
