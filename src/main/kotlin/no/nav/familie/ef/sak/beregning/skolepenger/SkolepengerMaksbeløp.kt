@@ -21,7 +21,7 @@ object SkolepengerMaksbeløp {
     )
 
     private val videregående = mapOf<Year, Int>(
-        Year.of(2022) to 0, // TODO,
+        Year.of(2022) to 29_002,
         Year.of(2021) to 28_433,
         Year.of(2020) to 27_794,
     )

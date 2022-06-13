@@ -7,30 +7,35 @@ import java.time.YearMonth
 
 data class Skoleår(val år: Year) {
 
+    constructor(fra: YearMonth, til: YearMonth) : this(utledSkoleår(fra, til))
+
+    // ty = Year formatted with 2 digits
     override fun toString(): String {
         return String.format("%ty/%ty", år, år.plusYears(1))
     }
-}
 
-fun beregnOgValiderSkoleår(fra: YearMonth, til: YearMonth): Skoleår {
-    brukerfeilHvis(til < fra) {
-        "Ugyldig skoleårsperiode: Tildato=$til må være etter eller lik fradato=$fra"
-    }
-    if (fra.month > Month.JUNE) {
-        brukerfeilHvis(til.year == fra.year + 1 && til.month > Month.AUGUST) {
-            "Ugyldig skoleårsperiode: Når tildato er i neste år, så må måneden være før september"
+    companion object {
+        fun utledSkoleår(fra: YearMonth, til: YearMonth): Year {
+            brukerfeilHvis(til < fra) {
+                "Ugyldig skoleårsperiode: Tildato=$til må være etter eller lik fradato=$fra"
+            }
+            if (fra.month > Month.JUNE) {
+                brukerfeilHvis(til.year == fra.year + 1 && til.month > Month.AUGUST) {
+                    "Ugyldig skoleårsperiode: Når tildato er i neste år, så må måneden være før september"
+                }
+                brukerfeilHvis(til.year > fra.year + 1) {
+                    "Ugyldig skoleårsperiode: Fradato og tildato må være i det samme skoleåret"
+                }
+                return Year.of(fra.year)
+            } else {
+                brukerfeilHvis(til.year != fra.year) {
+                    "Ugyldig skoleårsperiode: Fradato før juli må ha tildato i det samme året"
+                }
+                brukerfeilHvis(til.month > Month.AUGUST) {
+                    "Ugyldig skoleårsperiode: Fradato før juli må ha sluttmåned før september"
+                }
+                return Year.of(fra.year - 1)
+            }
         }
-        brukerfeilHvis(til.year > fra.year + 1) {
-            "Ugyldig skoleårsperiode: Fradato og tildato må være i det samme skoleåret"
-        }
-        return Skoleår(Year.of(fra.year))
-    } else {
-        brukerfeilHvis(til.year != fra.year) {
-            "Ugyldig skoleårsperiode: Fradato før juli må ha tildato i det samme året"
-        }
-        brukerfeilHvis(til.month > Month.AUGUST) {
-            "Ugyldig skoleårsperiode: Fradato før juli må ha sluttmåned før september"
-        }
-        return Skoleår(Year.of(fra.year - 1))
     }
 }

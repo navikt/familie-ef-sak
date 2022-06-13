@@ -24,6 +24,14 @@ internal class SkolepengerMaksbeløpTest {
     }
 
     @Test
+    internal fun `finnes beløp for hvert år`() {
+        IntRange(2020, 2022).forEach {
+            maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(it))
+            maksbeløpForÅr(VIDEREGÅENDE, Year.of(it))
+        }
+    }
+
+    @Test
     internal fun `maksbeløp for skoleår som ikke er definiert kaster exception`() {
         assertThatThrownBy { assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2019))) }
             .isInstanceOf(ApiFeil::class.java)
