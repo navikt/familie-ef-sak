@@ -15,7 +15,7 @@ import java.time.Year
 object SkolepengerMaksbeløp {
 
     private val høgskoleUniversitet = mapOf<Year, Int>(
-        Year.of(2022) to 69_500 ,
+        Year.of(2022) to 69_500,
         Year.of(2021) to 68_136,
         Year.of(2020) to 66_604,
     )
@@ -32,7 +32,7 @@ object SkolepengerMaksbeløp {
             VIDEREGÅENDE -> videregående[skoleår.år]
         }
         brukerfeilHvis(maksbeløp == null) {
-            "Finner ikke maksbeløp for studietype=$studietype skoleår=${skoleår}"
+            "Finner ikke maksbeløp for studietype=$studietype skoleår=$skoleår"
         }
         return maksbeløp
     }

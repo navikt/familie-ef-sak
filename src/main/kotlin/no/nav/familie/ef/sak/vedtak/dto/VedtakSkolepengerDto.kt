@@ -37,7 +37,6 @@ data class DelårsperiodeSkoleårDto(
     val skoleår: Skoleår by lazy {
         beregnOgValiderSkoleår(årMånedFra, årMånedTil)
     }
-
 }
 
 data class SkolepengerUtgiftDto(

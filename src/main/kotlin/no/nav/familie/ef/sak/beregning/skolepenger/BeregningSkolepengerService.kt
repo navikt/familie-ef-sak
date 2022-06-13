@@ -125,9 +125,11 @@ class BeregningSkolepengerService(
         val tidligereSkoleår = mutableSetOf<Skoleår>()
         perioder.forEach { skoleårsperiode ->
             val skoleår = skoleårsperiode.perioder.first().skoleår
-            brukerfeilHvisIkke(skoleårsperiode.perioder.all {
-                skoleår == it.skoleår
-            }) {
+            brukerfeilHvisIkke(
+                skoleårsperiode.perioder.all {
+                    skoleår == it.skoleår
+                }
+            ) {
                 "Alle perioder i et skoleår må være det samme skoleåret"
             }
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
