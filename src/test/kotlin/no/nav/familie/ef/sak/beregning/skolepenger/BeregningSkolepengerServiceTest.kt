@@ -96,7 +96,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Alle perioder i et skoleår må være i det samme skoleåret")
+                .hasMessageContaining("Ugyldig skoleårsperiode: Når tildato er i neste år, så må måneden være før september")
         }
 
         @Test
@@ -157,20 +157,21 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
-                .hasMessageContaining("Skoleåret 2021 mangler utgiftstyper for en eller flere utgifter")
+                .hasMessageContaining("Skoleåret 21/22 mangler utgiftstyper for en eller flere utgifter")
         }
 
         @Test
         internal fun `skoleår inneholder ulike studietyper`() {
             val delårsperiode1 = delårsperiode(til = defaultFra)
-            val delårsperiode2 = delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
+            val delårsperiode2 =
+                delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
             val skoleårsperioder = listOf(
                 SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
-                .hasMessageContaining("Skoleår 2021 inneholder ulike studietyper")
+                .hasMessageContaining("Skoleår 21/22 inneholder ulike studietyper")
         }
     }
 
