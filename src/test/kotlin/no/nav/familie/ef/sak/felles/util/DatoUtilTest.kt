@@ -100,10 +100,10 @@ internal class DatoUtilTest {
             IntRange(7, 12).map { fraMåned ->
                 val fra = YearMonth.of(år, fraMåned)
                 IntRange(fraMåned, 12).forEach { tilMåned ->
-                    assertThat(beregnOgValiderSkoleår(fra, YearMonth.of(år, tilMåned))).isEqualTo(skoleår2021)
+                    assertThat(Skoleår(fra, YearMonth.of(år, tilMåned))).isEqualTo(skoleår2021)
                 }
                 IntRange(1, 6).forEach { tilMåned ->
-                    assertThat(beregnOgValiderSkoleår(fra, YearMonth.of(år + 1, tilMåned))).isEqualTo(skoleår2021)
+                    assertThat(Skoleår(fra, YearMonth.of(år + 1, tilMåned))).isEqualTo(skoleår2021)
                 }
             }
         }
@@ -114,7 +114,7 @@ internal class DatoUtilTest {
             IntRange(1, 6).map { fraMåned ->
                 val fra = YearMonth.of(år, fraMåned)
                 IntRange(fraMåned, 8).forEach { tilMåned ->
-                    assertThat(beregnOgValiderSkoleår(fra, YearMonth.of(år, tilMåned))).isEqualTo(skoleår2021)
+                    assertThat(Skoleår(fra, YearMonth.of(år, tilMåned))).isEqualTo(skoleår2021)
                 }
             }
         }
@@ -123,40 +123,40 @@ internal class DatoUtilTest {
         internal fun `kan ikke ha tildato før fradato`() {
             assertThatThrownBy {
                 val fra = YearMonth.of(2021, 7)
-                beregnOgValiderSkoleår(fra, fra.minusMonths(1))
+                Skoleår(fra, fra.minusMonths(1))
             }.hasMessage("Ugyldig skoleårsperiode: Tildato=2021-06 må være etter eller lik fradato=2021-07")
         }
 
         @Test
         internal fun `fradato etter juni må ha tildato før september`() {
             val feilmelding = "Ugyldig skoleårsperiode: Når tildato er i neste år, så må måneden være før september"
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 7), YearMonth.of(2022, 9)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 7), YearMonth.of(2022, 9)) }
                 .hasMessage(feilmelding)
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 7), YearMonth.of(2022, 12)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 7), YearMonth.of(2022, 12)) }
                 .hasMessage(feilmelding)
         }
 
         @Test
         internal fun `fradato etter juni må ha tildato i neste år`() {
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 8), YearMonth.of(2023, 1)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 8), YearMonth.of(2023, 1)) }
                 .hasMessage("Ugyldig skoleårsperiode: Fradato og tildato må være i det samme skoleåret")
         }
 
         @Test
         internal fun `fradato før juli må ha sluttmåned før september`() {
             val feilmelding = "Ugyldig skoleårsperiode: Fradato før juli må ha sluttmåned før september"
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 6), YearMonth.of(2021, 9)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 6), YearMonth.of(2021, 9)) }
                 .hasMessage(feilmelding)
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 6), YearMonth.of(2021, 12)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 6), YearMonth.of(2021, 12)) }
                 .hasMessage(feilmelding)
         }
 
         @Test
         internal fun `fradato før juli med må ha tildato i samme år`() {
             val feilmelding = "Ugyldig skoleårsperiode: Fradato før juli må ha tildato i det samme året"
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 6), YearMonth.of(2022, 1)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 6), YearMonth.of(2022, 1)) }
                 .hasMessage(feilmelding)
-            assertThatThrownBy { beregnOgValiderSkoleår(YearMonth.of(2021, 6), YearMonth.of(2022, 2)) }
+            assertThatThrownBy { Skoleår(YearMonth.of(2021, 6), YearMonth.of(2022, 2)) }
                 .hasMessage(feilmelding)
         }
 
