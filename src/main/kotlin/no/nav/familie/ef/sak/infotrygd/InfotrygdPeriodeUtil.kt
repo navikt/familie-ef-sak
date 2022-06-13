@@ -45,18 +45,23 @@ object InfotrygdPeriodeUtil {
             .filter { it.kode != InfotrygdEndringKode.ANNULERT && it.kode != InfotrygdEndringKode.UAKTUELL }
             .groupBy { it.stønadId }
             .values
-            .flatMap(this::slåSammenPerioder)
+            .flatMap(this::fjernPerioderSomErOverskrevet)
             .sortedByDescending { it.stønadFom }
     }
 
-    private fun slåSammenPerioder(perioder: List<InfotrygdPeriode>): MutableList<InfotrygdPeriode> {
+    /* NB! forventer sorterte infotrygdperioder - nyest først.
+    * NB 2 - dette er ikke en slå sammen, men en kutt periode som ikke gjelder (vi bruker den senest vedtatte versjonen av en periode),
+    */
+    private fun fjernPerioderSomErOverskrevet(perioder: List<InfotrygdPeriode>): MutableList<InfotrygdPeriode> {
         val list = mutableListOf<InfotrygdPeriode>()
 
         for (periode in perioder) {
             val minStønadFom = list.minByOrNull { it.stønadFom }
             if (minStønadFom != null && periode.stønadFom.isEqualOrAfter(minStønadFom.stønadFom)) {
+                // Fordi vi sorterer vil den "eldste" ikke bety noe - vi tar den ikke med videre
                 continue
             } else if (minStønadFom != null && minStønadFom.erPeriodeOverlappende(periode)) {
+                // Vi kutter den tidligere perioden - den nye perioden overtar herfra
                 list.add(periode.copy(stønadTom = minStønadFom.stønadFom.minusDays(1)))
             } else {
                 list.add(periode)
