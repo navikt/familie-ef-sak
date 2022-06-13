@@ -68,7 +68,8 @@ class BeregningSkolepengerService(
                 BeløpsperiodeSkolepenger(
                     årMånedFra = it.key,
                     utgifter = it.value.sumOf { it.utgifter },
-                    beløp = it.value.sumOf { it.stønad })
+                    beløp = it.value.sumOf { it.stønad }
+                )
             }
     }
 

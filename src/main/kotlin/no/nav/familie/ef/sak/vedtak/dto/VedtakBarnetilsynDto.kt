@@ -35,11 +35,11 @@ data class PeriodeMedBeløpDto(
 }
 
 data class UtgiftsperiodeDto(
-        val årMånedFra: YearMonth,
-        val årMånedTil: YearMonth,
-        val barn: List<UUID>,
-        val utgifter: Int,
-        val erMidlertidigOpphør: Boolean
+    val årMånedFra: YearMonth,
+    val årMånedTil: YearMonth,
+    val barn: List<UUID>,
+    val utgifter: Int,
+    val erMidlertidigOpphør: Boolean
 ) {
 
     fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
@@ -54,20 +54,22 @@ fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = this.foldIndexed(true)
     if (index == 0) {
         acc
     } else {
-            val forrigePeriode = this[index - 1]
-            when {
-                forrigePeriode.årMånedTil.erPåfølgende(periode.årMånedFra) -> acc
-                else -> false
-            }
+        val forrigePeriode = this[index - 1]
+        when {
+            forrigePeriode.årMånedTil.erPåfølgende(periode.årMånedFra) -> acc
+            else -> false
+        }
     }
 }
 
 fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
-        Barnetilsynperiode(datoFra = this.årMånedFra.atDay(1),
-                           datoTil = this.årMånedTil.atEndOfMonth(),
-                           utgifter = this.utgifter,
-                           barn = this.barn,
-                           erMidlertidigOpphør = this.erMidlertidigOpphør)
+    Barnetilsynperiode(
+        datoFra = this.årMånedFra.atDay(1),
+        datoTil = this.årMånedTil.atEndOfMonth(),
+        utgifter = this.utgifter,
+        barn = this.barn,
+        erMidlertidigOpphør = this.erMidlertidigOpphør
+    )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
     PeriodeMedBeløp(
@@ -88,7 +90,7 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 årMånedTil = YearMonth.from(it.datoTil),
                 utgifter = it.utgifter.toInt(),
                 barn = it.barn,
-                erMidlertidigOpphør = it.erMidlertidigOpphør?: false
+                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },

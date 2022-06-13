@@ -158,35 +158,44 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
 
-private fun Sanksjonert.sanksjonertTilVedtak(behandlingId: UUID,
-                                             stønadstype: StønadType) =
-        when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> {
-                val vedtaksperiode = Vedtaksperiode(periode.datoFra(),
-                                                    periode.datoTil(),
-                                                    AktivitetType.IKKE_AKTIVITETSPLIKT,
-                                                    VedtaksperiodeType.SANKSJON)
-                Vedtak(behandlingId = behandlingId,
-                       sanksjonsårsak = this.sanksjonsårsak,
-                       perioder = PeriodeWrapper(listOf(vedtaksperiode)),
-                       internBegrunnelse = this.internBegrunnelse,
-                       resultatType = ResultatType.SANKSJONERE)
-            }
-            StønadType.BARNETILSYN -> {
-                val vedtaksperiode = Barnetilsynperiode(datoFra = periode.datoFra(),
-                                                        datoTil = periode.datoTil(),
-                                                        utgifter = 0,
-                                                        barn = emptyList(),
-                                                        erMidlertidigOpphør = true
-                )
-                Vedtak(behandlingId = behandlingId,
-                       sanksjonsårsak = this.sanksjonsårsak,
-                       barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
-                       internBegrunnelse = this.internBegrunnelse,
-                       resultatType = ResultatType.SANKSJONERE)
-            }
-            StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+private fun Sanksjonert.sanksjonertTilVedtak(
+    behandlingId: UUID,
+    stønadstype: StønadType
+) =
+    when (stønadstype) {
+        StønadType.OVERGANGSSTØNAD -> {
+            val vedtaksperiode = Vedtaksperiode(
+                periode.datoFra(),
+                periode.datoTil(),
+                AktivitetType.IKKE_AKTIVITETSPLIKT,
+                VedtaksperiodeType.SANKSJON
+            )
+            Vedtak(
+                behandlingId = behandlingId,
+                sanksjonsårsak = this.sanksjonsårsak,
+                perioder = PeriodeWrapper(listOf(vedtaksperiode)),
+                internBegrunnelse = this.internBegrunnelse,
+                resultatType = ResultatType.SANKSJONERE
+            )
         }
+        StønadType.BARNETILSYN -> {
+            val vedtaksperiode = Barnetilsynperiode(
+                datoFra = periode.datoFra(),
+                datoTil = periode.datoTil(),
+                utgifter = 0,
+                barn = emptyList(),
+                erMidlertidigOpphør = true
+            )
+            Vedtak(
+                behandlingId = behandlingId,
+                sanksjonsårsak = this.sanksjonsårsak,
+                barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
+                internBegrunnelse = this.internBegrunnelse,
+                resultatType = ResultatType.SANKSJONERE
+            )
+        }
+        StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
+    }
 
 fun Vedtak.tilVedtakDto(): VedtakDto =
     when (this.resultatType) {
@@ -246,7 +255,7 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {
             return mapper.treeToValue(node, InnvilgelseBarnetilsyn::class.java)
-                    .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
+                .copy(resultatType = ResultatType.INNVILGE_UTEN_UTBETALING)
         }
 
         return when (ResultatType.valueOf(node.get("resultatType").asText())) {
