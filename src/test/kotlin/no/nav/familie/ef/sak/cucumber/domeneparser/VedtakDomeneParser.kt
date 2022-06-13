@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.hentUtgiftUUID
 import no.nav.familie.ef.sak.felles.util.Skoleår
-import no.nav.familie.ef.sak.felles.util.beregnOgValiderSkoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
@@ -22,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -189,7 +189,7 @@ object VedtakDomeneParser {
         val skoleårsperioder = mutableMapOf<Skoleår, SkoleårsperiodeSkolepenger>()
         rader.forEach { rad ->
             val datoFra = parseFraOgMed(rad)
-            val skoleår = beregnOgValiderSkoleår(YearMonth.from(datoFra), YearMonth.from(datoFra))
+            val skoleår = Skoleår(YearMonth.from(datoFra), YearMonth.from(datoFra))
             val delårsperiode = mapDelårsperiodeSkolepenger(rad, datoFra)
             val utgift = mapSkolepengerUtgift(rad)
 
@@ -218,7 +218,7 @@ object VedtakDomeneParser {
     private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
         return SkolepengerUtgift(
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
-            utgiftstyper = emptySet(),
+            utgiftstyper = setOf(Utgiftstype.SEMESTERAVGIFT),
             utgiftsdato = parseValgfriÅrMånedEllerDato(
                 VedtakDomenebegrep.DATO_FAKTURA,
                 rad

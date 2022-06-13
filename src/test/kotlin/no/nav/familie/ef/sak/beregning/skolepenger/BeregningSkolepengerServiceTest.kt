@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -20,7 +21,6 @@ import no.nav.familie.ef.sak.vedtak.dto.tilDomene
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -96,7 +96,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Når tildato er i neste år, så må måneden være før september")
+                .hasMessageContaining("Alle perioder i et skoleår må være i det samme skoleåret")
         }
 
         @Test
@@ -110,7 +110,7 @@ internal class BeregningSkolepengerServiceTest {
                 listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())))
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Alle perioder i et skoleår må være det samme skoleåret")
+                .hasMessageContaining("Alle perioder i et skoleår må være i det samme skoleåret")
         }
 
         @Test
@@ -140,7 +140,7 @@ internal class BeregningSkolepengerServiceTest {
         internal fun `utgifter med samme ider er ikke gyldig`() {
             val utgift = utgift()
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift, utgift)),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift)),
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -148,18 +148,29 @@ internal class BeregningSkolepengerServiceTest {
                 .hasMessageContaining("Det finnes duplikat av ider på utgifter")
         }
 
-        @Disabled
+        @Test
+        internal fun `må inneholde en utgiftstype`() {
+            val utgift = utgift(utgiftstyper = emptySet())
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
+            )
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
+                .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
+                .hasMessageContaining("Skoleåret 2021 mangler utgiftstyper for en eller flere utgifter")
+        }
+
         @Test
         internal fun `skoleår inneholder ulike studietyper`() {
             val delårsperiode1 = delårsperiode(til = defaultFra)
-            val delårsperiode2 = delårsperiode(fra = defaultFra.plusMonths(1)) // TODO sett annen studietype
+            val delårsperiode2 = delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
             val skoleårsperioder = listOf(
                 SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Skoleår 2021 inneholder overlappende perioder")
+                .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
+                .hasMessageContaining("Skoleår 2021 inneholder ulike studietyper")
         }
     }
 
@@ -281,12 +292,13 @@ internal class BeregningSkolepengerServiceTest {
 
     private fun utgift(
         id: UUID = UUID.randomUUID(),
+        utgiftstyper: Set<Utgiftstype> = setOf(Utgiftstype.SEMESTERAVGIFT),
         fra: YearMonth = defaultFra,
         utgifter: Int = 100,
         stønad: Int = 50
     ) = SkolepengerUtgiftDto(
         id = id,
-        utgiftstyper = emptySet(),
+        utgiftstyper = utgiftstyper,
         årMånedFra = fra,
         utgifter = utgifter,
         stønad = stønad
