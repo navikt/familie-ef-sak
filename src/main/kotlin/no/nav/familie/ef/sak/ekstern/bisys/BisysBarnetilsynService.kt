@@ -90,13 +90,13 @@ class BisysBarnetilsynService(
     ): List<BarnetilsynBisysPeriode> {
         return infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(
             personIdent
-        ).filter { it.stønadTom >= fomDato }
+        ).filter { it.stønadTom >= fomDato } // TODO trenger vi dette filetret, eller fikses dette her: no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
             .map { periode ->
                 BarnetilsynBisysPeriode(
-                    Periode(periode.stønadFom, periode.stønadTom),
-                    periode.barnIdenter,
-                    periode.månedsbeløp,
-                    Datakilde.INFOTRYGD
+                    periode = Periode(periode.stønadFom, periode.stønadTom),
+                    barnIdenter = periode.barnIdenter,
+                    månedsbeløp = periode.månedsbeløp,
+                    datakilde = Datakilde.INFOTRYGD
                 )
             }
     }
