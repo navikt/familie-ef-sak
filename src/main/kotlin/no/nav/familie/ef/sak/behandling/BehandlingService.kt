@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
@@ -81,7 +82,11 @@ class BehandlingService(
         journalpost: Journalpost
     ): Behandling {
         val behandling =
-            opprettBehandling(behandlingType = behandlingType, fagsakId = fagsakId, behandlingsårsak = BehandlingÅrsak.SØKNAD)
+            opprettBehandling(
+                behandlingType = behandlingType,
+                fagsakId = fagsakId,
+                behandlingsårsak = BehandlingÅrsak.SØKNAD
+            )
         behandlingsjournalpostRepository.insert(
             Behandlingsjournalpost(
                 behandling.id,
@@ -117,15 +122,18 @@ class BehandlingService(
         kravMottatt: LocalDate? = null,
         erMigrering: Boolean = false
     ): Behandling {
-        feilHvis(erMigrering && !featureToggleService.isEnabled("familie.ef.sak.migrering")) {
+        feilHvis(erMigrering && !featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
         }
-        feilHvis(behandlingsårsak == BehandlingÅrsak.G_OMREGNING && !featureToggleService.isEnabled("familie.ef.sak.g-beregning")) {
+        feilHvis(
+            behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
+                !featureToggleService.isEnabled(Toggle.G_BEREGNING)
+        ) {
             "Feature toggle for g-omregning er disabled"
         }
         feilHvis(
             behandlingsårsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-                !featureToggleService.isEnabled("familie.ef.sak.behandling-korrigering")
+                !featureToggleService.isEnabled(Toggle.BEHANDLING_KORRIGERING)
         ) {
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }

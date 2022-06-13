@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -143,7 +144,7 @@ class VedtaksbrevService(
             )
         }
 
-        if (featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")) {
+        if (featureToggleService.isEnabled(Toggle.VALIDERE_BESLUTTERPDF_ER_NULL)) {
             feilHvisIkke(vedtaksbrev.beslutterPdf == null) {
                 "Det finnes allerede et beslutterbrev"
             }

@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -151,7 +152,7 @@ class MigreringService(
         samordningsfradrag: Int,
         erReellArbeidssøker: Boolean = false
     ): Behandling {
-        feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.migrering")) {
+        feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
         }
         fagsakService.settFagsakTilMigrert(fagsak.id)

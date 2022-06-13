@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -37,7 +38,7 @@ class ValiderOmregningService(
         if (!saksbehandling.erOmregning || saksbehandling.erMaskinellOmregning) {
             return
         }
-        if (featureToggleService.isEnabled("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak")) {
+        if (featureToggleService.isEnabled(Toggle.G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK)) {
             logger.warn("Skipper validering av tidligere perioder vid g-omregning for behandling=${saksbehandling.id}")
             return
         }

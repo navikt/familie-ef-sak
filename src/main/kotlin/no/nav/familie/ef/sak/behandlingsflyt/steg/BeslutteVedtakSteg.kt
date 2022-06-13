@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -76,7 +77,7 @@ class BeslutteVedtakSteg(
                 }
             }
         } else {
-            if (!featureToggleService.isEnabled("familie.ef.sak.skal-validere-beslutterpdf-er-null")) {
+            if (!featureToggleService.isEnabled(Toggle.VALIDERE_BESLUTTERPDF_ER_NULL)) {
                 vedtaksbrevService.slettVedtaksbrev(saksbehandling)
             }
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
