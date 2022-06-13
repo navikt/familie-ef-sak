@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -285,7 +286,7 @@ internal class BeregningSkolepengerServiceTest {
         stønad: Int = 50
     ) = SkolepengerUtgiftDto(
         id = id,
-        utgiftstyper = emptySet(),
+        utgiftstyper = setOf(Utgiftstype.SEMESTERAVGIFT),
         årMånedFra = fra,
         utgifter = utgifter,
         stønad = stønad
