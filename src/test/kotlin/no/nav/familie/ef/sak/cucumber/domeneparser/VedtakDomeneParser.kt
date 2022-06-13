@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -193,7 +194,8 @@ object VedtakDomeneParser {
             val utgift = mapSkolepengerUtgift(rad)
 
             val skoleårsperiode: SkoleårsperiodeSkolepenger = skoleårsperioder.getOrDefault(
-                skoleår, SkoleårsperiodeSkolepenger(
+                skoleår,
+                SkoleårsperiodeSkolepenger(
                     emptyList(),
                     emptyList()
                 )
@@ -221,7 +223,7 @@ object VedtakDomeneParser {
     private fun mapSkolepengerUtgift(rad: Map<String, String>): SkolepengerUtgift {
         return SkolepengerUtgift(
             id = hentUtgiftUUID(parseValgfriInt(VedtakDomenebegrep.ID_UTGIFT, rad) ?: 1),
-            utgiftstyper = emptySet(),
+            utgiftstyper = setOf(Utgiftstype.SEMESTERAVGIFT),
             utgiftsdato = parseValgfriÅrMånedEllerDato(VedtakDomenebegrep.DATO_FAKTURA, rad).førsteDagenIMånedenEllerDefault(),
             utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
             stønad = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0

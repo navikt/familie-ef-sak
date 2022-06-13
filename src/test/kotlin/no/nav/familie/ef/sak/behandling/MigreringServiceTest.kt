@@ -296,7 +296,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `hentMigreringInfo - siste periode har 0 som beløp, migrerer fra måneden bak den`() {
-        val kjøremåned = YearMonth.of(2022,4)
+        val kjøremåned = YearMonth.of(2022, 4)
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             beløp = 0, vedtakId = 1,
             stønadFom = kjøremåned.minusMonths(1).atDay(1),

@@ -33,7 +33,7 @@ data class DelårsperiodeSkoleårDto(
 
 data class SkolepengerUtgiftDto(
     val id: UUID,
-    val utgiftstyper: Set<Utgiftstype>? = null, // TODO kan fjerne nullable når frontend lagt til utgiftstyper (husk mapping rad 46)
+    val utgiftstyper: Set<Utgiftstype>,
     val årMånedFra: YearMonth,
     val utgifter: Int,
     val stønad: Int,
@@ -41,13 +41,15 @@ data class SkolepengerUtgiftDto(
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
     perioder = this.perioder.map { it.tilDomene() },
-    utgiftsperioder = this.utgiftsperioder.map { SkolepengerUtgift(
-        id = it.id,
-        utgiftstyper = it.utgiftstyper ?: emptySet(),
-        utgiftsdato = it.årMånedFra.atDay(1),
-        utgifter = it.utgifter,
-        stønad = it.stønad
-    ) }
+    utgiftsperioder = this.utgiftsperioder.map {
+        SkolepengerUtgift(
+            id = it.id,
+            utgiftstyper = it.utgiftstyper,
+            utgiftsdato = it.årMånedFra.atDay(1),
+            utgifter = it.utgifter,
+            stønad = it.stønad
+        )
+    }
 )
 
 fun DelårsperiodeSkoleårDto.tilDomene() = DelårsperiodeSkoleårSkolepenger(

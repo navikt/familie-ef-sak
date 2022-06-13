@@ -42,12 +42,12 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
     private val fagsak = fagsak(fagsakpersoner(setOf("1")), StønadType.BARNETILSYN)
     private val behandling = behandling(fagsak)
     val barn = behandlingBarn(
-            id = UUID.randomUUID(),
-            behandlingId = behandling.id,
-            søknadBarnId = UUID.randomUUID(),
-            personIdent = "01010112345",
-            navn = "Ola",
-            fødselTermindato = LocalDate.now()
+        id = UUID.randomUUID(),
+        behandlingId = behandling.id,
+        søknadBarnId = UUID.randomUUID(),
+        personIdent = "01010112345",
+        navn = "Ola",
+        fødselTermindato = LocalDate.now()
     )
     private val barnBehandling1 = listOf(barn)
     private val saksbehandling = saksbehandling(fagsak, behandling)
@@ -114,30 +114,32 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
 
     fun settBehandlingTilIverksatt(behandling: Behandling) {
         behandlingRepository.update(
-                behandling.copy(
-                        status = BehandlingStatus.FERDIGSTILT,
-                        resultat = BehandlingResultat.INNVILGET
-                )
+            behandling.copy(
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
         )
     }
 
     private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> =
-            tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+        tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
     private fun opprettUtgiftsperiode(fra: YearMonth, til: YearMonth, barnId: List<UUID>, beløp: BigDecimal) =
-            UtgiftsperiodeDto(fra, til, barnId, beløp.toInt(), false)
+        UtgiftsperiodeDto(fra, til, barnId, beløp.toInt(), false)
 
-    private fun innvilge(saksbehandling: Saksbehandling,
-                         utgiftsperioder: List<UtgiftsperiodeDto>) {
+    private fun innvilge(
+        saksbehandling: Saksbehandling,
+        utgiftsperioder: List<UtgiftsperiodeDto>
+    ) {
         val vedtak = InnvilgelseBarnetilsyn(
-                perioder = utgiftsperioder,
-                begrunnelse = null,
-                perioderKontantstøtte = listOf(),
-                tilleggsstønad = TilleggsstønadDto(
-                        harTilleggsstønad = false,
-                        perioder = listOf(),
-                        begrunnelse = null
-                ),
+            perioder = utgiftsperioder,
+            begrunnelse = null,
+            perioderKontantstøtte = listOf(),
+            tilleggsstønad = TilleggsstønadDto(
+                harTilleggsstønad = false,
+                perioder = listOf(),
+                begrunnelse = null
+            ),
         )
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }
