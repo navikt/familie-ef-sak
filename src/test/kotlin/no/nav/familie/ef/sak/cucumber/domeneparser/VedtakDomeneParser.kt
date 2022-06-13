@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.hentUtgiftUUID
 import no.nav.familie.ef.sak.felles.util.Skoleår
-import no.nav.familie.ef.sak.felles.util.skoleår
+import no.nav.familie.ef.sak.felles.util.beregnOgValiderSkoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
@@ -189,7 +189,7 @@ object VedtakDomeneParser {
         val skoleårsperioder = mutableMapOf<Skoleår, SkoleårsperiodeSkolepenger>()
         rader.forEach { rad ->
             val datoFra = parseFraOgMed(rad)
-            val skoleår = skoleår(YearMonth.from(datoFra), YearMonth.from(datoFra))
+            val skoleår = beregnOgValiderSkoleår(YearMonth.from(datoFra), YearMonth.from(datoFra))
             val delårsperiode = mapDelårsperiodeSkolepenger(rad, datoFra)
             val utgift = mapSkolepengerUtgift(rad)
 

@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.vedtak.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.Skoleår
-import no.nav.familie.ef.sak.felles.util.skoleår
+import no.nav.familie.ef.sak.felles.util.beregnOgValiderSkoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
@@ -36,7 +35,7 @@ data class DelårsperiodeSkoleårDto(
 
     @delegate:JsonIgnore
     val skoleår: Skoleår by lazy {
-        skoleår(årMånedFra, årMånedTil)
+        beregnOgValiderSkoleår(årMånedFra, årMånedTil)
     }
 
 }
