@@ -135,13 +135,11 @@ class TilbakekrevingService(
         if (!kanBehandlingOpprettesManuelt.kanBehandlingOpprettes) {
             throw ApiFeil(kanBehandlingOpprettesManuelt.melding, HttpStatus.BAD_REQUEST)
         }
+        val kravgrunnlagsreferanse = kanBehandlingOpprettesManuelt.kravgrunnlagsreferanse
+            ?: error("Kravgrunnlagsreferanse mangler for fagsak: $fagsakId. Tilbakekreving kan ikke opprettes.")
 
-        val behandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
-            ?: throw Feil(
-                "Kan ikke opprette manuell tilbakekreving for fagsak uten iverksatt behandling. " +
-                    "fagsakId=$fagsakId"
-            )
+        behandlingService.hentBehandlingPåEksternId(kravgrunnlagsreferanse.toLong())
 
-        tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id, behandling.eksternId.id, fagsak.stønadstype)
+        tilbakekrevingClient.opprettManuelTilbakekreving(fagsak.eksternId.id, kravgrunnlagsreferanse, fagsak.stønadstype)
     }
 }

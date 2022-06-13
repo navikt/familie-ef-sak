@@ -194,11 +194,13 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     )
 
     private fun lagUtgiftsperioder(barn: BehandlingBarn): UtgiftsperiodeDto {
-        val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
-                                               årMånedTil = YearMonth.of(2022, 3),
-                                               barn = listOf(barn.id),
-                                               utgifter = 2500,
-                                               erMidlertidigOpphør = false)
+        val utgiftsperiode = UtgiftsperiodeDto(
+            årMånedFra = YearMonth.of(2022, 1),
+            årMånedTil = YearMonth.of(2022, 3),
+            barn = listOf(barn.id),
+            utgifter = 2500,
+            erMidlertidigOpphør = false
+        )
         return utgiftsperiode
     }
 

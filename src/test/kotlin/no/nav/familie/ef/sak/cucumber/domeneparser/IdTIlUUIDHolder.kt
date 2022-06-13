@@ -10,6 +10,6 @@ object IdTIlUUIDHolder {
     private val utgiftIder = mutableMapOf<Int, UUID>()
 
     fun hentUtgiftUUID(int: Int): UUID {
-        return utgiftIder.getOrPut(int) {UUID.randomUUID()}
+        return utgiftIder.getOrPut(int) { UUID.randomUUID() }
     }
 }
