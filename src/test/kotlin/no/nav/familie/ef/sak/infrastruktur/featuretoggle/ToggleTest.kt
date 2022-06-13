@@ -19,9 +19,12 @@ internal class ToggleTest {
                 error("Toggle=$toggle mangler toggleId")
             }
             if (!regex.matches(toggle.toggleId)) {
-                val ugyldigeTegn =
-                    toggle.toggleId.split("").filter { it.isNotEmpty() }.filterNot { regex.matches(it) }.toSet()
-                error("Toggle=$toggle inneholder ugyldige tegn: $ugyldigeTegn")
+                val ugyldigeTegn = toggle.toggleId.split("")
+                    .filter { it.isNotEmpty() }
+                    .filterNot { regex.matches(it) }
+                    .map { "'$it'" }
+                    .toSet()
+                error("Toggle=$toggle inneholder ugyldige tegn=$ugyldigeTegn")
             }
         }
     }
