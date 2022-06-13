@@ -54,8 +54,8 @@ class FeatureToggleConfig(
         )
 
         return object : FeatureToggleService {
-            override fun isEnabled(toggleId: Toggle, defaultValue: Boolean): Boolean {
-                return unleash.isEnabled(toggleId.toggleId, defaultValue)
+            override fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
+                return unleash.isEnabled(toggle.toggleId, defaultValue)
             }
 
             // Spring trigger denne ved shutdown. Gjøres for å unngå at unleash fortsetter å gjøre kall ut
@@ -77,7 +77,7 @@ class FeatureToggleConfig(
 
     private fun lagDummyFeatureToggleService(): FeatureToggleService {
         return object : FeatureToggleService {
-            override fun isEnabled(toggleId: Toggle, defaultValue: Boolean): Boolean {
+            override fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
                 if (unleash.environment == "local") {
                     return true
                 }

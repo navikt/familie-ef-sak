@@ -4,11 +4,11 @@ import org.springframework.beans.factory.DisposableBean
 
 interface FeatureToggleService : DisposableBean {
 
-    fun isEnabled(toggleId: Toggle): Boolean {
-        return isEnabled(toggleId, false)
+    fun isEnabled(toggle: Toggle): Boolean {
+        return isEnabled(toggle, false)
     }
 
-    fun isEnabled(toggleId: Toggle, defaultValue: Boolean): Boolean
+    fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean
 }
 
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
