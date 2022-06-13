@@ -41,13 +41,15 @@ data class SkolepengerUtgiftDto(
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
     perioder = this.perioder.map { it.tilDomene() },
-    utgiftsperioder = this.utgiftsperioder.map { SkolepengerUtgift(
-        id = it.id,
-        utgiftstyper = it.utgiftstyper ?: emptySet(),
-        utgiftsdato = it.årMånedFra.atDay(1),
-        utgifter = it.utgifter,
-        stønad = it.stønad
-    ) }
+    utgiftsperioder = this.utgiftsperioder.map {
+        SkolepengerUtgift(
+            id = it.id,
+            utgiftstyper = it.utgiftstyper ?: emptySet(),
+            utgiftsdato = it.årMånedFra.atDay(1),
+            utgifter = it.utgifter,
+            stønad = it.stønad
+        )
+    }
 )
 
 fun DelårsperiodeSkoleårDto.tilDomene() = DelårsperiodeSkoleårSkolepenger(

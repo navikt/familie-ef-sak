@@ -69,7 +69,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(2000)
 
         val responsRevurdering: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
-                hentBeløpsperioderForBehandling(revurdering.id)
+            hentBeløpsperioderForBehandling(revurdering.id)
         val beløpsperioderRevurdering = responsRevurdering.body.data
         Assertions.assertThat(beløpsperioderRevurdering).hasSize(1)
         Assertions.assertThat(beløpsperioderRevurdering?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
@@ -104,26 +104,35 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         )
 
         val søknad = SøknadMedVedlegg(Testsøknad.søknadBarnetilsyn, emptyList())
-        val tilkjentYtelse = lagTilkjentYtelse(behandlingId = førstegangsbehandling.id,
-                                               andelerTilkjentYtelse = listOf(lagAndelTilkjentYtelse(
-                                                       fraOgMed = LocalDate.of(2022, 1, 1),
-                                                       kildeBehandlingId = førstegangsbehandling.id,
-                                                       beløp = 2000,
-                                                       tilOgMed = LocalDate.of(2022, 4, 30),
-                                               )))
-        val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 1),
-                                               årMånedTil = YearMonth.of(2022, 4),
-                                               barn = listOf(barn.id),
-                                               utgifter = 2500,
-                                               erMidlertidigOpphør = false)
+        val tilkjentYtelse = lagTilkjentYtelse(
+            behandlingId = førstegangsbehandling.id,
+            andelerTilkjentYtelse = listOf(
+                lagAndelTilkjentYtelse(
+                    fraOgMed = LocalDate.of(2022, 1, 1),
+                    kildeBehandlingId = førstegangsbehandling.id,
+                    beløp = 2000,
+                    tilOgMed = LocalDate.of(2022, 4, 30),
+                )
+            )
+        )
+        val utgiftsperiode = UtgiftsperiodeDto(
+            årMånedFra = YearMonth.of(2022, 1),
+            årMånedTil = YearMonth.of(2022, 4),
+            barn = listOf(barn.id),
+            utgifter = 2500,
+            erMidlertidigOpphør = false
+        )
 
-        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
-                                               perioder = listOf(utgiftsperiode),
-                                               perioderKontantstøtte = listOf(),
-                                               tilleggsstønad = TilleggsstønadDto(harTilleggsstønad = false,
-                                                                                  perioder = listOf(),
-                                                                                  begrunnelse = null))
-
+        val vedtakDto = InnvilgelseBarnetilsyn(
+            begrunnelse = "",
+            perioder = listOf(utgiftsperiode),
+            perioderKontantstøtte = listOf(),
+            tilleggsstønad = TilleggsstønadDto(
+                harTilleggsstønad = false,
+                perioder = listOf(),
+                begrunnelse = null
+            )
+        )
 
         søknadService.lagreSøknadForBarnetilsyn(søknad.søknad, førstegangsbehandling.id, fagsak.id, "1234")
         tilkjentYtelseRepository.insert(tilkjentYtelse)
@@ -169,18 +178,24 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val barn = barnRepository.findByBehandlingId(forrigeBehandlingId)
             .map { it.copy(behandlingId = revurdering.id, id = UUID.randomUUID()) }
         barnRepository.insertAll(barn)
-        val utgiftsperiode = UtgiftsperiodeDto(årMånedFra = YearMonth.of(2022, 3),
-                                               årMånedTil = YearMonth.of(2022, 6),
-                                               barn = barn.map { it.id },
-                                               utgifter = 3000,
-                                               erMidlertidigOpphør = false)
+        val utgiftsperiode = UtgiftsperiodeDto(
+            årMånedFra = YearMonth.of(2022, 3),
+            årMånedTil = YearMonth.of(2022, 6),
+            barn = barn.map { it.id },
+            utgifter = 3000,
+            erMidlertidigOpphør = false
+        )
 
-        val vedtakDto = InnvilgelseBarnetilsyn(begrunnelse = "",
-                                               perioder = listOf(utgiftsperiode),
-                                               perioderKontantstøtte = listOf(),
-                                               tilleggsstønad = TilleggsstønadDto(harTilleggsstønad = false,
-                                                                                  perioder = listOf(),
-                                                                                  begrunnelse = null))
+        val vedtakDto = InnvilgelseBarnetilsyn(
+            begrunnelse = "",
+            perioder = listOf(utgiftsperiode),
+            perioderKontantstøtte = listOf(),
+            tilleggsstønad = TilleggsstønadDto(
+                harTilleggsstønad = false,
+                perioder = listOf(),
+                begrunnelse = null
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering

@@ -193,7 +193,8 @@ object VedtakDomeneParser {
             val utgift = mapSkolepengerUtgift(rad)
 
             val skoleårsperiode: SkoleårsperiodeSkolepenger = skoleårsperioder.getOrDefault(
-                skoleår, SkoleårsperiodeSkolepenger(
+                skoleår,
+                SkoleårsperiodeSkolepenger(
                     emptyList(),
                     emptyList()
                 )
