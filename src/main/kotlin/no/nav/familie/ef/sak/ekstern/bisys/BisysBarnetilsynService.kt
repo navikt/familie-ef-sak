@@ -88,9 +88,8 @@ class BisysBarnetilsynService(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
-        return infotrygdService.hentSammenslåttePerioderFraReplika(
-            personIdent,
-            StønadType.BARNETILSYN
+        return infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(
+            personIdent
         ).filter { it.stønadTom >= fomDato }
             .map { periode ->
                 BarnetilsynBisysPeriode(

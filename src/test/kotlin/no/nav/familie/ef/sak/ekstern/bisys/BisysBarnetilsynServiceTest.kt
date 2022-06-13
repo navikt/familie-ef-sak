@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -69,10 +68,7 @@ internal class BisysBarnetilsynServiceTest {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns lagBehandlingerForSisteIverksatte().first()
         every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarn
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns emptyList()
     }
 
@@ -186,10 +182,7 @@ internal class BisysBarnetilsynServiceTest {
                 behandlingBarn = behandlingBarn
             )
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
@@ -220,10 +213,7 @@ internal class BisysBarnetilsynServiceTest {
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().plusMonths(2), behandlingBarn = behandlingBarn)
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
@@ -254,10 +244,7 @@ internal class BisysBarnetilsynServiceTest {
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusMonths(1), behandlingBarn = behandlingBarn)
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
@@ -289,10 +276,7 @@ internal class BisysBarnetilsynServiceTest {
             fagsakService.finnFagsak(any(), StønadType.BARNETILSYN)
         } returns null
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
@@ -326,10 +310,7 @@ internal class BisysBarnetilsynServiceTest {
         val andelhistorikkDto =
             lagAndelHistorikkDto(fraOgMed = efFom, tilOgMed = efTom, behandlingBarn = behandlingBarn)
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
@@ -369,10 +350,7 @@ internal class BisysBarnetilsynServiceTest {
                 behandlingBarn = behandlingBarn
             )
         every {
-            infotrygdService.hentSammenslåttePerioderFraReplika(
-                any(),
-                StønadType.BARNETILSYN
-            )
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
