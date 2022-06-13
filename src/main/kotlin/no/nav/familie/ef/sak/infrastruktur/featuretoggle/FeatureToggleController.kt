@@ -33,7 +33,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
 
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {
-        return funksjonsbrytere.associate { it.name to featureToggleService.isEnabled(it) }
+        return funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
     }
 
     @GetMapping("/{toggleId}")
