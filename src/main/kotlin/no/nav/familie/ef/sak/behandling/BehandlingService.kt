@@ -62,6 +62,8 @@ class BehandlingService(
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
+    fun finnGamleUferdigeBehandligner() = behandlingRepository.finnGamleUferdigeBehandligner()
+
     fun finnesÅpenBehandling(fagsakId: UUID) =
         behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
 

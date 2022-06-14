@@ -199,4 +199,15 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     ): List<Pair<String, UUID>>
 
     fun existsByFagsakIdAndTypeIn(fagsakId: UUID, typer: Set<BehandlingType>): Boolean
+
+    // language=PostgreSQL
+    @Query(
+            """
+            SELECT b.*
+            FROM behandling b
+            WHERE NOT b.status = 'FERDIGSTILT'
+            ORDER BY b.opprettet_tid DESC
+            """
+    )
+    fun finnGamleUferdigeBehandligner()
 }

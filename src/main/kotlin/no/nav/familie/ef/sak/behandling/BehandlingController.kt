@@ -39,6 +39,12 @@ class BehandlingController(
         return Ressurs.success(saksbehandling.tilDto())
     }
 
+    @GetMapping("gamlebehandlinger")
+    fun hentGamleUferdigeBehandlinger(): Ressurs<Any> {
+        val gamleBehandlinger = behandlingService.finnGamleUferdigeBehandligner()
+        return Ressurs.success(gamleBehandlinger)
+    }
+
     @PostMapping("{behandlingId}/reset/{steg}")
     fun resetSteg(@PathVariable behandlingId: UUID, @PathVariable steg: StegType): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
