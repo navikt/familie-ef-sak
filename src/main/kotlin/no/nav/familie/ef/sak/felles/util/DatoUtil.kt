@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter
 object DatoFormat {
 
     val DATE_FORMAT_ISO_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
+    val YEAR_MONTH_FORMAT_NORSK = DateTimeFormatter.ofPattern("MM.yyyy")
 }
 
 fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now()
