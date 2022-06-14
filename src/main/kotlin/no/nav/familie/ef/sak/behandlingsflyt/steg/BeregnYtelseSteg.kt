@@ -117,10 +117,11 @@ class BeregnYtelseSteg(
         if (behandling.erOmregning) {
             return
         }
-
+/*
         innvilget.perioder.firstOrNull()?.let {
             validerStartTidEtterSanksjon(it.årMånedFra, behandling)
         }
+ */
     }
 
     private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
@@ -185,27 +186,29 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                                           saksbehandling: Saksbehandling) {
+    private fun validerTidligereVedtakVedMidlertidigOpphør(
+        utgiftsperioder: List<UtgiftsperiodeDto>,
+        saksbehandling: Saksbehandling
+    ) {
         val førstePeriodeErMidlertidigOpphør = utgiftsperioder.first().erMidlertidigOpphør
         brukerfeilHvis(førstePeriodeErMidlertidigOpphør && saksbehandling.forrigeBehandlingId == null) {
             "Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=${saksbehandling.id}"
         }
         val harIkkeInnvilgetBeløp =
-                if (saksbehandling.forrigeBehandlingId != null) tilkjentYtelseService.hentForBehandling(saksbehandling.forrigeBehandlingId).andelerTilkjentYtelse.all { it.beløp == 0 } else true
+            if (saksbehandling.forrigeBehandlingId != null) tilkjentYtelseService.hentForBehandling(saksbehandling.forrigeBehandlingId).andelerTilkjentYtelse.all { it.beløp == 0 } else true
         brukerfeilHvis(harIkkeInnvilgetBeløp && førstePeriodeErMidlertidigOpphør) {
-                "Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=${saksbehandling.id}"
+            "Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=${saksbehandling.id}"
         }
     }
 
-    private fun validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder: List<UtgiftsperiodeDto>,
-                                                                  saksbehandling: Saksbehandling) {
+    private fun validerSammenhengendePerioderVedMidlertidigOpphør(
+        utgiftsperioder: List<UtgiftsperiodeDto>,
+        saksbehandling: Saksbehandling
+    ) {
         brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
             "Perioder som er midlertidig opphør må være sammenhengende, på behandling=${saksbehandling.id}"
         }
     }
-
-
 
     private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
         when (data) {
@@ -277,7 +280,11 @@ class BeregnYtelseSteg(
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
+            REVURDERING -> nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
+                saksbehandling,
+                vedtak,
+                andelerTilkjentYtelse
+            )
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -298,12 +305,17 @@ class BeregnYtelseSteg(
     ) {
         // TODO: Må periodene være sammenhengende?
         //  brukerfeilHvis(!vedtak.perioder.erSammenhengende()) { "Periodene må være sammenhengende" }
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
+        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> =
+            lagBeløpsperioderForInnvilgelseBarnetilsyn(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
 
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> nyeAndelerForRevurderingAvBarnetilsynMedStartdato(saksbehandling, vedtak, andelerTilkjentYtelse)
+            REVURDERING -> nyeAndelerForRevurderingAvBarnetilsynMedStartdato(
+                saksbehandling,
+                vedtak,
+                andelerTilkjentYtelse
+            )
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -321,12 +333,20 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseSkolepenger,
         saksbehandling: Saksbehandling
     ) {
-        val andelerTilkjentYtelse: List<AndelTilkjentYtelse> = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
+        val forrigeTilkjentYtelse = saksbehandling.forrigeBehandlingId?.let { forrigeBehandlingId ->
+            tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
+        }
+        val andelerTilkjentYtelse = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
         brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
-
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
-            REVURDERING -> error("Håndterer ikke revurdering ennå") // TODO
+            // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
+            REVURDERING -> {
+                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+                val nyttStartdato = min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler)
+                    ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
+                andelerTilkjentYtelse to nyttStartdato
+            }
             else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
@@ -341,7 +361,8 @@ class BeregnYtelseSteg(
     }
 
     private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate {
-        return andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: error("Må ha med en periode i førstegangsbehandling")
+        return andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+            ?: error("Må ha med en periode i førstegangsbehandling")
     }
 
     private fun nyeAndelerForRevurderingAvOvergangsstønadMedStartdato(
@@ -351,7 +372,8 @@ class BeregnYtelseSteg(
     ): Pair<List<AndelTilkjentYtelse>, LocalDate> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
-        val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
+        val forrigeTilkjenteYtelse =
+            saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
@@ -368,7 +390,8 @@ class BeregnYtelseSteg(
     ): Pair<List<AndelTilkjentYtelse>, LocalDate> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
-        val forrigeTilkjenteYtelse = saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
+        val forrigeTilkjenteYtelse =
+            saksbehandling.forrigeBehandlingId?.let { hentForrigeTilkjenteYtelse(saksbehandling) }
         validerOpphørsperioder(opphørsperioder, finnInnvilgedePerioder(vedtak), forrigeTilkjenteYtelse)
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
@@ -491,13 +514,13 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseSkolepenger,
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
-        val beløpsperioder = beregningSkolepengerService.beregnYtelse(vedtak)
-        return beløpsperioder
+        return beregningSkolepengerService.beregnYtelse(vedtak.skoleårsperioder, saksbehandling.id).perioder
+            .filter { it.beløp > 0 }
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    stønadFom = it.periode.fradato,
-                    stønadTom = it.periode.tildato,
+                    stønadFom = it.årMånedFra.atDay(1),
+                    stønadTom = it.årMånedFra.atEndOfMonth(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
@@ -562,9 +585,15 @@ class BeregnYtelseSteg(
                 val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
 
                 if (overlappendeOpphør.overlapperIStartenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))), opphørsperioder)
+                    vurderPeriodeForOpphør(
+                        listOf(it.copy(stønadFom = overlappendeOpphør.tildato.plusDays(1))),
+                        opphørsperioder
+                    )
                 } else if (overlappendeOpphør.overlapperISluttenAv(tilkjentPeriode)) {
-                    vurderPeriodeForOpphør(listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1))), opphørsperioder)
+                    vurderPeriodeForOpphør(
+                        listOf(it.copy(stønadTom = overlappendeOpphør.fradato.minusDays(1))),
+                        opphørsperioder
+                    )
                 } else { // periode blir delt i to av opphold.
                     vurderPeriodeForOpphør(
                         listOf(
@@ -578,8 +607,13 @@ class BeregnYtelseSteg(
         }.flatten()
     }
 
-    private fun andelerForOpphør(forrigeTilkjentYtelse: TilkjentYtelse, opphørFom: LocalDate): List<AndelTilkjentYtelse> {
-        brukerfeilHvis(forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false) {
+    private fun andelerForOpphør(
+        forrigeTilkjentYtelse: TilkjentYtelse,
+        opphørFom: LocalDate
+    ): List<AndelTilkjentYtelse> {
+        brukerfeilHvis(
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false
+        ) {
             "Kan ikke opphøre frem i tiden"
         }
 

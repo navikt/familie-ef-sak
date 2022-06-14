@@ -29,5 +29,7 @@ data class SøknadsskjemaSkolepenger(
     override val barn: Set<SøknadBarn>,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "aktivitet_under_utdanning_")
     val utdanning: UnderUtdanning,
-    val utdanningsutgifter: Dokumentasjon? = null
+    val utdanningsutgifter: Dokumentasjon? = null,
+    @MappedCollection(idColumn = "soknadsskjema_id")
+    val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet()
 ) : ISøknadsskjema

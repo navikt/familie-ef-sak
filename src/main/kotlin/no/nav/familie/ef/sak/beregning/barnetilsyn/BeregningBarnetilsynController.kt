@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
@@ -46,7 +45,7 @@ class BeregningBarnetilsynController(
     @GetMapping("/{behandlingId}")
     fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        val vedtak = vedtakService.hentVedtak(behandlingId).tilVedtakDto()
+        val vedtak = vedtakService.hentVedtakDto(behandlingId)
 
         if (vedtak is InnvilgelseBarnetilsyn) {
             return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(vedtak))

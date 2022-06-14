@@ -13,28 +13,25 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 class FeatureToggleController(private val featureToggleService: FeatureToggleService) {
 
-    private val funksjonsbrytere = listOf(
-        "familie.ef.sak.tekniskopphor",
-        "familie.ef.sak.behandling-korrigering",
-        "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
-        "familie.ef.sak.frontend-vis-oppdatering-av-registeropplysninger",
-        "familie.ef.sak.brevmottakere-verge-og-fullmakt",
-        "familie.ef.sak.migrering",
-        "familie.ef.sak.frontend-vis-sanksjon-en-maned",
-        "familie.ef.sak.kan-legge-til-nye-barn-paa-revurdering",
-        "familie.ef.sak.frontend-vis-tilbakekreving",
-        "familie.ef.sak.frontend-oppgavebenk-migrer-fagsak",
-        "familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost",
-        "familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning",
-        "familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-barnetilsyn",
-        "familie.ef.sak.frontend-journalforing-kan-legge-til-terminbarn",
-        "familie.ef.sak.skolepenger"
-
+    private val funksjonsbrytere = setOf(
+        Toggle.BEHANDLING_KORRIGERING,
+        Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
+        Toggle.FRONTEND_VIS_OPPDATERING_REGISTEROPPLYSNINGER,
+        Toggle.BREVMOTTAKERE_VERGE_OG_FULLMAKT,
+        Toggle.MIGRERING,
+        Toggle.FRONTEND_VIS_SANKSJON_EN_MÅNED,
+        Toggle.KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING,
+        Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
+        Toggle.FRONTEND_BEHANDLE_BARNETILSYN,
+        Toggle.FRONTEND_VISE_OPPRETT_NY_BEHANDLING_BARNETILSYN,
+        Toggle.FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN,
+        Toggle.SKOLEPENGER,
+        Toggle.FRONTEND_SKOLEPENGER_REVURDERING,
     )
 
     @GetMapping
     fun sjekkAlle(): Map<String, Boolean> {
-        return funksjonsbrytere.associateWith { featureToggleService.isEnabled(it) }
+        return funksjonsbrytere.associate { it.toggleId to featureToggleService.isEnabled(it) }
     }
 
     @GetMapping("/{toggleId}")
@@ -42,6 +39,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         @PathVariable toggleId: String,
         @RequestParam("defaultverdi") defaultVerdi: Boolean? = false
     ): Boolean {
-        return featureToggleService.isEnabled(toggleId, defaultVerdi ?: false)
+        val toggle = Toggle.byToggleId(toggleId)
+        return featureToggleService.isEnabled(toggle, defaultVerdi ?: false)
     }
 }

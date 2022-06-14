@@ -1,41 +1,195 @@
 package no.nav.familie.ef.sak.beregning.skolepenger
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp.maksbeløp
+import no.nav.familie.ef.sak.felles.dto.harOverlappende
+import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
-import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeSkolepengerDto
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
+import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
+import no.nav.familie.ef.sak.vedtak.dto.tilDto
 import org.springframework.stereotype.Service
+import java.util.UUID
 
+/**
+ * Skoleår 2021 = 21/22
+ */
 @Service
-class BeregningSkolepengerService {
+class BeregningSkolepengerService(
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService
+) {
 
-    fun beregnYtelse(innvilgelse: InnvilgelseSkolepenger): List<BeløpsperiodeSkolepengerDto> {
-        return beregnYtelse(innvilgelse.perioder)
+    fun beregnYtelse(
+        utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
+        behandlingId: UUID
+    ): BeregningSkolepengerResponse {
+        val forrigePerioder = hentPerioderFraForrigeVedtak(behandlingId)
+        return beregnYtelse(utgiftsperioder, forrigePerioder)
     }
 
-    fun beregnYtelse(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>): List<BeløpsperiodeSkolepengerDto> {
-        validerGyldigePerioder(utgiftsperioder)
-        validerFornuftigeBeløp(utgiftsperioder)
+    private fun hentPerioderFraForrigeVedtak(behandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
+        return behandlingService.hentSaksbehandling(behandlingId).forrigeBehandlingId?.let { forrigeBehandlingId ->
+            hentPerioder(forrigeBehandlingId)
+        } ?: emptyList()
+    }
 
-        return utgiftsperioder.map {
-            BeløpsperiodeSkolepengerDto(
-                it.tilPeriode(),
-                beløp = 100, // TODO håndtere senere
-                BeregningsgrunnlagSkolepengerDto(it.studietype, it.utgifter, it.studiebelastning)
-            )
+    private fun hentPerioder(forrigeBehandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
+        val vedtak = vedtakService.hentVedtak(forrigeBehandlingId)
+        feilHvis(vedtak.skolepenger == null) {
+            "Vedtak for forrigeBehandlingId=$forrigeBehandlingId mangler skolepenger"
+        }
+        return vedtak.skolepenger.skoleårsperioder.map { it.tilDto() }
+    }
+
+    private fun beregnYtelse(
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+    ): BeregningSkolepengerResponse {
+        validerGyldigePerioder(perioder)
+        validerFornuftigeBeløp(perioder)
+        validerSkoleår(perioder)
+        validerForrigePerioder(perioder, forrigePerioder)
+
+        val perioder = beregnSkoleårsperioder(perioder)
+        return BeregningSkolepengerResponse(perioder)
+    }
+
+    private fun beregnSkoleårsperioder(
+        perioder: List<SkoleårsperiodeSkolepengerDto>
+    ): List<BeløpsperiodeSkolepenger> {
+        return perioder
+            .flatMap { skoleårsperiode -> skoleårsperiode.utgiftsperioder }
+            .groupBy { it.årMånedFra }
+            .toSortedMap()
+            .map {
+                BeløpsperiodeSkolepenger(
+                    årMånedFra = it.key,
+                    utgifter = it.value.sumOf { it.utgifter },
+                    beløp = it.value.sumOf { it.stønad }
+                )
+            }
+    }
+
+    private fun validerFornuftigeBeløp(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.utgifter < 1 } }) {
+            "Utgifter må være høyere enn 0kr"
+        }
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad < 0 } }) {
+            "Stønad kan ikke være lavere enn 0kr"
+        }
+        brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad > it.utgifter } }) {
+            "Stønad kan ikke være høyere enn utgifter"
+        }
+
+        skoleårsperioder.forEach { skoleårsperiode ->
+            validerStudiebelastning(skoleårsperiode)
+            validerUnderMaksBeløp(skoleårsperiode)
         }
     }
 
-    private fun validerFornuftigeBeløp(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>) {
-
-        brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
-
-        brukerfeilHvis(utgiftsperioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
-        brukerfeilHvis(utgiftsperioder.any { it.studiebelastning > 100 }) { "Studiebelastning må være under eller lik 100" }
+    private fun validerStudiebelastning(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
+        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
+        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning > 100 }) { "Studiebelastning må være under eller lik 100" }
     }
 
-    private fun validerGyldigePerioder(utgiftsperioder: List<UtgiftsperiodeSkolepengerDto>) {
-        brukerfeilHvis(utgiftsperioder.isEmpty()) {
-            "Ingen utgiftsperioder"
+    private fun validerUnderMaksBeløp(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
+        val førstePeriode = skoleårsperiode.perioder.first()
+        val skoleår = førstePeriode.skoleår
+        val maksbeløp = maksbeløp(førstePeriode.studietype, skoleår)
+        brukerfeilHvis(skoleårsperiode.utgiftsperioder.sumOf { it.stønad } > maksbeløp) {
+            "Stønad for skoleåret $skoleår er høyere enn $maksbeløp"
+        }
+    }
+
+    private fun validerGyldigePerioder(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
+        feilHvis(skoleårsperioder.isEmpty()) {
+            "Mangler skoleår"
+        }
+        feilHvis(skoleårsperioder.any { it.perioder.isEmpty() }) {
+            "Mangler skoleårsperioder"
+        }
+        feilHvis(skoleårsperioder.any { it.utgiftsperioder.isEmpty() }) {
+            "Mangler utgiftsperioder"
+        }
+        val utgiftsIder = skoleårsperioder.flatMap { it.utgiftsperioder.map { it.id } }
+        feilHvis(utgiftsIder.size != utgiftsIder.toSet().size) {
+            "Det finnes duplikat av ider på utgifter $skoleårsperioder"
+        }
+    }
+
+    private fun validerSkoleår(perioder: List<SkoleårsperiodeSkolepengerDto>) {
+        val tidligereSkoleår = mutableSetOf<Skoleår>()
+        perioder.forEach { skoleårsperiode ->
+            val skoleår = skoleårsperiode.perioder.first().skoleår
+            brukerfeilHvisIkke(
+                skoleårsperiode.perioder.all {
+                    skoleår == it.skoleår
+                }
+            ) {
+                "Alle perioder i et skoleår må være i det samme skoleåret"
+            }
+            brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
+                "Skoleåret $skoleår er definiert flere ganger"
+            }
+            brukerfeilHvis(skoleårsperiode.perioder.map { it.tilPeriode() }.harOverlappende()) {
+                "Skoleår $skoleår inneholder overlappende perioder"
+            }
+            val studietype = skoleårsperiode.perioder.first().studietype
+            feilHvis(skoleårsperiode.perioder.any { it.studietype != studietype }) {
+                "Skoleår $skoleår inneholder ulike studietyper"
+            }
+            feilHvis(skoleårsperiode.utgiftsperioder.any { it.utgiftstyper.isEmpty() }) {
+                "Skoleåret $skoleår mangler utgiftstyper for en eller flere utgifter"
+            }
+        }
+    }
+
+    private fun validerForrigePerioder(
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+    ) {
+        if (forrigePerioder.isEmpty()) return
+        val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
+            periode.utgiftsperioder.map { it.id to it }
+        }.toMap()
+        validerForrigePerioderFortsattFinnes(perioder, tidligereUtgiftIder)
+        validerForrigePerioderErUendrede(perioder, tidligereUtgiftIder)
+    }
+
+    private fun validerForrigePerioderErUendrede(
+        skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
+        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>
+    ) {
+        skoleårsperioder.forEach { skoleårsperiode ->
+            val skoleår = skoleårsperiode.perioder.first().skoleår
+            val endretUtgift = skoleårsperiode.utgiftsperioder.find { utgift ->
+                val tidligereUtgift = tidligereUtgiftIder[utgift.id]
+                tidligereUtgift != null && tidligereUtgift != utgift
+            }
+            feilHvis(endretUtgift != null) {
+                "Utgiftsperiode er endret for skoleår=$skoleår id=${endretUtgift?.id} er endret" +
+                    "ny=$endretUtgift tidligere=${tidligereUtgiftIder[endretUtgift?.id]}"
+            }
+        }
+    }
+
+    private fun validerForrigePerioderFortsattFinnes(
+        skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
+        tidligereUtgiftIder: Map<UUID, SkolepengerUtgiftDto>
+    ) {
+        val nyeIder = skoleårsperioder.flatMap { periode -> periode.utgiftsperioder.map { it.id } }.toSet()
+        val manglende = tidligereUtgiftIder.entries.filterNot { nyeIder.contains(it.key) }
+        brukerfeilHvis(manglende.isNotEmpty()) {
+            val manglendePerioder = manglende.joinToString(", \n") { (_, utgiftsperiode) ->
+                "fakturadato=${utgiftsperiode.årMånedFra} " +
+                    "utgifter=${utgiftsperiode.utgifter} " +
+                    "stønad=${utgiftsperiode.stønad}"
+            }
+            "Mangler utgiftsperioder fra forrige vedtak \n$manglendePerioder"
         }
     }
 }

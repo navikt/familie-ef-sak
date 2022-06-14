@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
-import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,18 +24,18 @@ class BeregningSkolepengerController(
 ) {
 
     @PostMapping
-    fun beregnYtelse(@RequestBody request: BeregningSkolepengerRequest): Ressurs<List<BeløpsperiodeSkolepengerDto>> {
-        return Ressurs.success(beregningSkolepengerService.beregnYtelse(request.utgiftsperioder))
+    fun beregnYtelse(@RequestBody request: BeregningSkolepengerRequest): Ressurs<BeregningSkolepengerResponse> {
+        return Ressurs.success(beregningSkolepengerService.beregnYtelse(request.skoleårsperioder, request.behandlingId))
     }
 
     @GetMapping("/{behandlingId}")
-    fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<List<BeløpsperiodeSkolepengerDto>> {
+    fun hentBeregning(@PathVariable behandlingId: UUID): Ressurs<BeregningSkolepengerResponse> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        val vedtak = vedtakService.hentVedtak(behandlingId).tilVedtakDto()
+        val vedtak = vedtakService.hentVedtakDto(behandlingId)
 
         if (vedtak is InnvilgelseSkolepenger) {
             // TODO vi kaller ikke beregning for de andre, men der har vi en enklere oppdeling av hvilke perioder som gir X beløp
-            return Ressurs.Companion.success(beregningSkolepengerService.beregnYtelse(vedtak))
+            return Ressurs.Companion.success(beregningSkolepengerService.beregnYtelse(vedtak.skoleårsperioder, behandlingId))
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }

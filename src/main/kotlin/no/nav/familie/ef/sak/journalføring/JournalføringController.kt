@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
@@ -74,7 +75,7 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @RequestBody request: JournalføringTilNyBehandlingRequest
     ): Ressurs<Long> {
-        feilHvisIkke(featureToggleService.isEnabled("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost")) {
+        feilHvisIkke(featureToggleService.isEnabled(Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST)) {
             "Funksjonen opprettBehandlingPåFerdigstiltJournalføring er skrudd av for denne brukeren"
         }
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)

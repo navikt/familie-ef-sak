@@ -55,16 +55,35 @@ data class Barnetilsynperiode(
     val erMidlertidigOpphør: Boolean? = false
 )
 
-data class UtgiftsperiodeSkolepenger(
+data class SkoleårsperiodeSkolepenger(
+    val perioder: List<DelårsperiodeSkoleårSkolepenger>,
+    val utgiftsperioder: List<SkolepengerUtgift>
+)
+
+data class DelårsperiodeSkoleårSkolepenger(
     val studietype: SkolepengerStudietype,
     val datoFra: LocalDate,
     val datoTil: LocalDate,
     val studiebelastning: Int,
-    val utgifter: Int
+)
+
+data class SkolepengerUtgift(
+    val id: UUID,
+    val utgiftstyper: Set<Utgiftstype>,
+    val utgiftsdato: LocalDate,
+    val utgifter: Int,
+    val stønad: Int
 )
 
 enum class SkolepengerStudietype {
-    HØGSKOLE_UNIVERSITET
+    HØGSKOLE_UNIVERSITET,
+    VIDEREGÅENDE,
+}
+
+enum class Utgiftstype {
+    SEMESTERAVGIFT,
+    STUDIEAVGIFT,
+    EKSAMENSAVGIFT,
 }
 
 data class PeriodeMedBeløp(
@@ -96,7 +115,7 @@ data class BarnetilsynWrapper(
 )
 
 data class SkolepengerWrapper(
-    val perioder: List<UtgiftsperiodeSkolepenger>,
+    val skoleårsperioder: List<SkoleårsperiodeSkolepenger>,
     val begrunnelse: String?
 )
 

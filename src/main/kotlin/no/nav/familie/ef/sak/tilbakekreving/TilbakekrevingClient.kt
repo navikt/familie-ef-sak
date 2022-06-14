@@ -89,7 +89,7 @@ class TilbakekrevingClient(
 
     fun opprettManuelTilbakekreving(
         eksternFagsakId: Long,
-        eksternBehandlingId: Long,
+        kravgrunnlagsreferanse: String,
         stønadstype: StønadType
     ) {
 
@@ -98,7 +98,7 @@ class TilbakekrevingClient(
             OpprettManueltTilbakekrevingRequest(
                 eksternFagsakId.toString(),
                 Ytelsestype.valueOf(stønadstype.name),
-                eksternBehandlingId.toString()
+                kravgrunnlagsreferanse
             )
         )
     }
