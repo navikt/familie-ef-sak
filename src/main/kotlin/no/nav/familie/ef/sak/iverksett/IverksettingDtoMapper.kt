@@ -5,8 +5,10 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
+import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -67,6 +69,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
@@ -400,7 +403,12 @@ fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleår
     studietype = SkolepengerStudietype.valueOf(this.studietype.name),
     fraOgMed = this.datoFra,
     tilOgMed = this.datoTil,
-    studiebelastning = this.studiebelastning
+    studiebelastning = this.studiebelastning,
+    maksSatsForSkoleår = SkolepengerMaksbeløp.maksbeløp(
+        this.studietype,
+        Skoleår(YearMonth.from(this.datoFra), YearMonth.from(this.datoTil))
+    )
+
 )
 
 fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
