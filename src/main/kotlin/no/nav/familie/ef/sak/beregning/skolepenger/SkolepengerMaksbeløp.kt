@@ -26,10 +26,17 @@ object SkolepengerMaksbeløp {
         Year.of(2020) to 27_794,
     )
 
+    /**
+     * I 2022, når det ikke finnes beløp for neste år så skal man kunne hente beløp for 2023
+     */
+    private fun hentBeløpForSkoleårEllerSkoleåretFør(map: Map<Year, Int>, skoleår: Skoleår): Int? {
+        return map[skoleår.år] ?: map[skoleår.år.minusYears(1)]
+    }
+
     fun maksbeløp(studietype: SkolepengerStudietype, skoleår: Skoleår): Int {
         val maksbeløp = when (studietype) {
-            HØGSKOLE_UNIVERSITET -> høgskoleUniversitet[skoleår.år]
-            VIDEREGÅENDE -> videregående[skoleår.år]
+            HØGSKOLE_UNIVERSITET -> hentBeløpForSkoleårEllerSkoleåretFør(høgskoleUniversitet, skoleår)
+            VIDEREGÅENDE -> hentBeløpForSkoleårEllerSkoleåretFør(videregående, skoleår)
         }
         brukerfeilHvis(maksbeløp == null) {
             "Finner ikke maksbeløp for studietype=$studietype skoleår=$skoleår"
