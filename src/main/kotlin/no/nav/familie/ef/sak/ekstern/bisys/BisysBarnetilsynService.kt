@@ -40,26 +40,19 @@ class BisysBarnetilsynService(
         val perioderBarnetilsyn = hentPerioderBarnetilsyn(personIdent, fomDato)
         return slåSammenPerioder(
             infotrygdPerioder = infotrygdperioder,
-            efPerioder = perioderBarnetilsyn.second,
-            startdato = perioderBarnetilsyn.first
+            efPerioder = perioderBarnetilsyn,
         )
     }
 
     private fun hentPerioderBarnetilsyn(
         personIdent: String,
         fomDato: LocalDate
-    ): Pair<LocalDate?, List<BarnetilsynBisysPeriode>> {
+    ): EfPerioder? {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
-        val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN)
-            ?: return Pair(null, emptyList())
+        val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN) ?: return null
         val sisteGjeldendeBehandling =
-            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return Pair(
-                null,
-                emptyList()
-            )
-        val startdato = tilkjentYtelseService.hentForBehandling(
-            sisteGjeldendeBehandling.id
-        ).startdato
+            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return null
+        val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
 
         val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }
@@ -74,23 +67,21 @@ class BisysBarnetilsynService(
             BarnetilsynBisysPeriode(
                 Periode(andel.andel.stønadFra, andel.andel.stønadTil),
                 andel.andel.barn.map {
-                    barnIdenter[it]
-                        ?: error("Fant ingen personident for barn=$it")
+                    barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
                 },
                 andel.andel.beløp,
                 Datakilde.EF
             )
         }
-        return Pair(startdato, barnetilsynBisysPerioder.sortedBy { it.periode.fom })
+        return EfPerioder(startdato, barnetilsynBisysPerioder.sortedBy { it.periode.fom })
     }
 
     private fun hentInfotrygdPerioderBarnetilsyn(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
-        return infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(
-            personIdent
-        ).filter { it.stønadTom >= fomDato } // TODO trenger vi dette filetret, eller fikses dette her: no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
+        return infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(personIdent)
+            .filter { it.stønadTom >= fomDato } // TODO trenger vi dette filetret, eller fikses dette her: no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
             .map { periode ->
                 BarnetilsynBisysPeriode(
                     periode = Periode(periode.stønadFom, periode.stønadTom),
@@ -103,12 +94,14 @@ class BisysBarnetilsynService(
 
     private fun slåSammenPerioder(
         infotrygdPerioder: List<BarnetilsynBisysPeriode>,
-        efPerioder: List<BarnetilsynBisysPeriode>,
-        startdato: LocalDate?
+        efPerioder: EfPerioder?
     ): List<BarnetilsynBisysPeriode> {
-        if (startdato == null) {
+        if (efPerioder == null) {
             return infotrygdPerioder
         }
+        val startdato = efPerioder.startdato
+        val perioder = efPerioder.perioder
+
         val perioderFraInfotrygdSomBeholdes = infotrygdPerioder.mapNotNull {
             if (it.periode.fom >= startdato) {
                 null
@@ -118,6 +111,8 @@ class BisysBarnetilsynService(
                 it
             }
         }
-        return (perioderFraInfotrygdSomBeholdes + efPerioder).sortedBy { it.periode.fom }
+        return (perioderFraInfotrygdSomBeholdes + perioder).sortedBy { it.periode.fom }
     }
+
+    data class EfPerioder(val startdato: LocalDate, val perioder: List<BarnetilsynBisysPeriode>)
 }
