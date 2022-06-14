@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning.skolepenger
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp.maksbeløp
 import no.nav.familie.ef.sak.felles.dto.harOverlappende
+import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
@@ -82,7 +83,7 @@ class BeregningSkolepengerService(
             "Stønad kan ikke være lavere enn 0kr"
         }
         brukerfeilHvis(skoleårsperioder.any { periode -> periode.utgiftsperioder.any { it.stønad > it.utgifter } }) {
-            "Stønad kan ikke være høyere enn utgifter"
+            "Stønad kan ikke være overstige utgifter"
         }
 
         skoleårsperioder.forEach { skoleårsperiode ->
@@ -93,7 +94,7 @@ class BeregningSkolepengerService(
 
     private fun validerStudiebelastning(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
         brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
-        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning > 100 }) { "Studiebelastning må være under eller lik 100" }
+        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning > 100 }) { "Studiebelastning kan ikke overstige 100%" }
     }
 
     private fun validerUnderMaksBeløp(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
@@ -101,7 +102,7 @@ class BeregningSkolepengerService(
         val skoleår = førstePeriode.skoleår
         val maksbeløp = maksbeløp(førstePeriode.studietype, skoleår)
         brukerfeilHvis(skoleårsperiode.utgiftsperioder.sumOf { it.stønad } > maksbeløp) {
-            "Stønad for skoleåret $skoleår er høyere enn $maksbeløp"
+            "Stønad for skoleåret $skoleår overstiger $maksbeløp"
         }
     }
 
@@ -125,15 +126,14 @@ class BeregningSkolepengerService(
         val tidligereSkoleår = mutableSetOf<Skoleår>()
         perioder.forEach { skoleårsperiode ->
             val skoleår = skoleårsperiode.perioder.first().skoleår
-            brukerfeilHvisIkke(
-                skoleårsperiode.perioder.all {
-                    skoleår == it.skoleår
-                }
-            ) {
-                "Alle perioder i et skoleår må være i det samme skoleåret"
+            val periodeUtenforSkoleår = skoleårsperiode.perioder.find { skoleår != it.skoleår }
+            brukerfeilHvis(periodeUtenforSkoleår != null) {
+                val fra = periodeUtenforSkoleår?.årMånedFra?.format(YEAR_MONTH_FORMAT_NORSK)
+                val til = periodeUtenforSkoleår?.årMånedTil?.format(YEAR_MONTH_FORMAT_NORSK)
+                "Periode $fra-$til er definert utenfor skoleåret $skoleår"
             }
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
-                "Skoleåret $skoleår er definiert flere ganger"
+                "Skoleåret $skoleår er definert flere ganger"
             }
             brukerfeilHvis(skoleårsperiode.perioder.map { it.tilPeriode() }.harOverlappende()) {
                 "Skoleår $skoleår inneholder overlappende perioder"

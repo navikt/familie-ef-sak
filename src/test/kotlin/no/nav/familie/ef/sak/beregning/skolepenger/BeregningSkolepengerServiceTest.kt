@@ -110,7 +110,7 @@ internal class BeregningSkolepengerServiceTest {
                 listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())))
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Alle perioder i et skoleår må være i det samme skoleåret")
+                .hasMessageContaining("Periode 08.2022-06.2023 er definert utenfor skoleåret 21/22")
         }
 
         @Test
@@ -122,7 +122,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Skoleåret 21/22 er definiert flere ganger")
+                .hasMessageContaining("Skoleåret 21/22 er definert flere ganger")
         }
 
         @Test
@@ -204,7 +204,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Stønad kan ikke være høyere enn utgifter")
+                .hasMessageContaining("Stønad kan ikke være overstige utgifter")
         }
 
         @Test
@@ -224,7 +224,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Studiebelastning må være under eller lik 100")
+                .hasMessageContaining("Studiebelastning kan ikke overstige 100%")
         }
     }
 
