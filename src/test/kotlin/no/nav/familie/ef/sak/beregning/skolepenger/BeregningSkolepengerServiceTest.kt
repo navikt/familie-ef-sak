@@ -122,7 +122,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Skoleåret 21/22 er definert flere ganger")
+                .hasMessageContaining("Skoleåret 21/22 kan ikke legges inn flere ganger")
         }
 
         @Test
@@ -208,13 +208,24 @@ internal class BeregningSkolepengerServiceTest {
         }
 
         @Test
-        internal fun `studiebelastning kan ikke være under 1%`() {
-            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(studiebelastning = 0)), listOf(utgift()))
+        internal fun `studiebelastning må være 50-100%`() {
+            listOf(50, 51, 99, 100).forEach {
+                val perioder = listOf(delårsperiode(studiebelastning = it))
+                service.beregnYtelse(
+                    listOf(SkoleårsperiodeSkolepengerDto(perioder, listOf(utgift()))),
+                    førstegangsbehandling.id
+                )
+            }
+        }
+
+        @Test
+        internal fun `studiebelastning kan ikke være under 50%`() {
+            val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(studiebelastning = 49)), listOf(utgift()))
             val skoleårsperioder = listOf(periode)
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Studiebelastning må være over 0")
+                .hasMessageContaining("Studiebelastning må være mellom 50-100%")
         }
 
         @Test
@@ -224,7 +235,7 @@ internal class BeregningSkolepengerServiceTest {
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(ApiFeil::class.java)
-                .hasMessageContaining("Studiebelastning kan ikke overstige 100%")
+                .hasMessageContaining("Studiebelastning må være mellom 50-100%")
         }
     }
 

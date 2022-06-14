@@ -93,8 +93,9 @@ class BeregningSkolepengerService(
     }
 
     private fun validerStudiebelastning(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
-        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning < 1 }) { "Studiebelastning må være over 0" }
-        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning > 100 }) { "Studiebelastning kan ikke overstige 100%" }
+        brukerfeilHvis(skoleårsperiode.perioder.any { it.studiebelastning < 50 || it.studiebelastning > 100 }) {
+            "Studiebelastning må være mellom 50-100%"
+        }
     }
 
     private fun validerUnderMaksBeløp(skoleårsperiode: SkoleårsperiodeSkolepengerDto) {
@@ -102,7 +103,7 @@ class BeregningSkolepengerService(
         val skoleår = førstePeriode.skoleår
         val maksbeløp = maksbeløp(førstePeriode.studietype, skoleår)
         brukerfeilHvis(skoleårsperiode.utgiftsperioder.sumOf { it.stønad } > maksbeløp) {
-            "Stønad for skoleåret $skoleår overstiger $maksbeløp"
+            "Stønad for skoleåret $skoleår overstiger makssats $maksbeløp"
         }
     }
 
@@ -133,7 +134,7 @@ class BeregningSkolepengerService(
                 "Periode $fra-$til er definert utenfor skoleåret $skoleår"
             }
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
-                "Skoleåret $skoleår er definert flere ganger"
+                "Skoleåret $skoleår kan ikke legges inn flere ganger"
             }
             brukerfeilHvis(skoleårsperiode.perioder.map { it.tilPeriode() }.harOverlappende()) {
                 "Skoleår $skoleår inneholder overlappende perioder"
