@@ -119,7 +119,7 @@ class BehandlingsstatistikkTask(
         when (stønadType) {
             OVERGANGSSTØNAD -> vedtak.periodeBegrunnelse
             BARNETILSYN -> vedtak.barnetilsyn?.begrunnelse
-            SKOLEPENGER -> throw NotImplementedError("Skolepenger er ikke implementert")
+            SKOLEPENGER -> vedtak.skolepenger?.begrunnelse
         }
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
