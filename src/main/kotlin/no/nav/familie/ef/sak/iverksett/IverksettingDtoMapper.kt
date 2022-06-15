@@ -297,7 +297,8 @@ class IverksettingDtoMapper(
             vedtaksperioder = vedtak.skolepenger?.tilVedtaksperioder()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
-            brevmottakere = brevmottakere
+            brevmottakere = brevmottakere,
+            begrunnelse = vedtak.skolepenger?.begrunnelse
         )
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
