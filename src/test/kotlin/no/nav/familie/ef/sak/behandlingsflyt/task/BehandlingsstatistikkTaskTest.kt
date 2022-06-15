@@ -132,6 +132,27 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.stønadstype).isEqualTo(StønadType.OVERGANGSSTØNAD)
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(periodeBegrunnelse)
+        assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
+    }
+
+
+    @Test
+    internal fun `skal bruke opprettetDato for behandlingen dersom søknad ikke foreligger`() {
+
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
+        every { søknadService.finnDatoMottattForSøknad(any()) } returns null
+        every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
+
+        val task = Task(
+            type = "behandlingsstatistikkTask",
+            payload = objectMapper.writeValueAsString(payload)
+        )
+
+        behandlingsstatistikkTask.doTask(task)
+
+        val behandlingsstatistikk = behandlingsstatistikkSlot.captured
+        assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(behandling.sporbar.opprettetTid.atZone((ZoneId.of("Europe/Oslo"))))
+
     }
 
     @Test
@@ -173,5 +194,6 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.stønadstype).isEqualTo(StønadType.BARNETILSYN)
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(begrunnelse)
+        assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
     }
 }

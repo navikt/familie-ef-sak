@@ -54,7 +54,7 @@ class SøknadService(
         return søknadBarnetilsynRepository.findByIdOrThrow(søknad.soknadsskjemaId)
     }
 
-    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime {
+    fun finnDatoMottattForSøknad(behandlingId: UUID): LocalDateTime? {
         return søknadRepository.finnDatoMottattForSøknad(behandlingId)
     }
 

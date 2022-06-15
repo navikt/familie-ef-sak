@@ -133,7 +133,7 @@ class BehandlingsstatistikkTask(
 
     private fun finnHenvendelsestidspunkt(saksbehandling: Saksbehandling): LocalDateTime {
         return when (saksbehandling.type) {
-            FØRSTEGANGSBEHANDLING, BLANKETT -> søknadService.finnDatoMottattForSøknad(saksbehandling.id)
+            FØRSTEGANGSBEHANDLING, BLANKETT -> søknadService.finnDatoMottattForSøknad(saksbehandling.id) ?: saksbehandling.opprettetTid
             REVURDERING -> saksbehandling.opprettetTid
             else -> error("Støtter ikke uthenting av henvendelsestidspunkt for sak med ${saksbehandling.type}")
         }
