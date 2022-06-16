@@ -230,9 +230,8 @@ class JournalføringService(
                         fagsak.hentAktivIdent(),
                         fagsak.stønadstype
                     )
-                StønadType.BARNETILSYN ->
+                StønadType.BARNETILSYN, StønadType.SKOLEPENGER ->
                     infotrygdPeriodeValideringService.validerHarIkkeÅpenSakIInfotrygd(fagsak)
-                StønadType.SKOLEPENGER -> error("Ikke implementert validering perioder infotrygd for skolepenger")
             }
         }
     }
