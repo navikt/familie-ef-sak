@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
@@ -52,6 +53,14 @@ class VedtakDtoMapperTest {
         val vedtakJson = readFile("SkolepengerInnvilgetVedtakDto.json")
 
         val vedtak = innvilgelseSkolepengerDto()
+        assertErLik(vedtak, vedtakJson)
+    }
+
+    @Test
+    fun `deserialiser og serialiser opphørt skolepenger vedtak dto`() {
+        val vedtakJson = readFile("SkolepengerOpphørDto.json")
+
+        val vedtak = opphørSkolepengerDto()
         assertErLik(vedtak, vedtakJson)
     }
 

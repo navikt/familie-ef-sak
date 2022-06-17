@@ -26,10 +26,11 @@ class BeregningSkolepengerService(
 
     fun beregnYtelse(
         utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
-        behandlingId: UUID
+        behandlingId: UUID,
+        erOpphør: Boolean = false
     ): BeregningSkolepengerResponse {
         val forrigePerioder = hentPerioderFraForrigeVedtak(behandlingId)
-        return beregnYtelse(utgiftsperioder, forrigePerioder)
+        return beregnYtelse(utgiftsperioder, forrigePerioder, erOpphør)
     }
 
     private fun hentPerioderFraForrigeVedtak(behandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
@@ -48,12 +49,13 @@ class BeregningSkolepengerService(
 
     private fun beregnYtelse(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
+        erOpphør: Boolean
     ): BeregningSkolepengerResponse {
         validerGyldigePerioder(perioder)
         validerFornuftigeBeløp(perioder)
         validerSkoleår(perioder)
-        validerForrigePerioder(perioder, forrigePerioder)
+        validerForrigePerioder(perioder, forrigePerioder, erOpphør)
 
         val perioder = beregnSkoleårsperioder(perioder)
         return BeregningSkolepengerResponse(perioder)
@@ -66,11 +68,11 @@ class BeregningSkolepengerService(
             .flatMap { skoleårsperiode -> skoleårsperiode.utgiftsperioder }
             .groupBy { it.årMånedFra }
             .toSortedMap()
-            .map {
+            .map { (key, value) ->
                 BeløpsperiodeSkolepenger(
-                    årMånedFra = it.key,
-                    utgifter = it.value.sumOf { it.utgifter },
-                    beløp = it.value.sumOf { it.stønad }
+                    årMånedFra = key,
+                    utgifter = value.sumOf { it.utgifter },
+                    beløp = value.sumOf { it.stønad }
                 )
             }
     }
@@ -151,14 +153,27 @@ class BeregningSkolepengerService(
 
     private fun validerForrigePerioder(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
+        erOpphør: Boolean
     ) {
         if (forrigePerioder.isEmpty()) return
         val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
             periode.utgiftsperioder.map { it.id to it }
         }.toMap()
-        validerForrigePerioderFortsattFinnes(perioder, tidligereUtgiftIder)
-        validerForrigePerioderErUendrede(perioder, tidligereUtgiftIder)
+        if (erOpphør) {
+            validerIngenNyePerioderFinnes(perioder, forrigePerioder)
+        } else {
+            validerForrigePerioderFortsattFinnes(perioder, tidligereUtgiftIder)
+            validerForrigePerioderErUendrede(perioder, tidligereUtgiftIder)
+        }
+    }
+
+    private fun validerIngenNyePerioderFinnes(
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+    ) {
+        // Diskusjon med funksjonelle om man faktiskt skal kunne endre tidligere perioder, eller kun slette
+        TODO("Not yet implemented")
     }
 
     private fun validerForrigePerioderErUendrede(

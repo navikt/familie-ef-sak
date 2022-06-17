@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.OpphørSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
@@ -53,6 +54,12 @@ object VedtakDtoUtil {
 
     fun innvilgelseSkolepengerDto() =
         InnvilgelseSkolepenger(
+            "begrunnelse",
+            listOf(skolepengerperiodeDto())
+        )
+
+    fun opphørSkolepengerDto() =
+        OpphørSkolepenger(
             "begrunnelse",
             listOf(skolepengerperiodeDto())
         )
