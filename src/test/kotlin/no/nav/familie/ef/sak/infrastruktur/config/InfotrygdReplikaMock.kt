@@ -34,9 +34,18 @@ class InfotrygdReplikaMock {
                 val firstArg = firstArg<InfotrygdPeriodeRequest>()
                 val personIdent = firstArg.personIdenter.first()
                 InfotrygdPeriodeResponse(
-                    listOf(lagInfotrygdPeriode()),
-                    listOf(lagInfotrygdPeriode(personIdent)),
-                    emptyList()
+                    overgangsstønad = listOf(lagInfotrygdPeriode()),
+                    barnetilsyn = listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = personIdent,
+                            beløp = 234,
+                            inntektsgrunnlag = 321,
+                            samordningsfradrag = 0,
+                            utgifterBarnetilsyn = 1000,
+                            barnIdenter = listOf("123", "234")
+                        )
+                    ),
+                    skolepenger = emptyList()
                 )
             }
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
