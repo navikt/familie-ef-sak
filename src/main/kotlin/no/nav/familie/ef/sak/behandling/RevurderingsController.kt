@@ -41,6 +41,12 @@ class RevurderingsController(
                 "eller med revurderingsårsak \"Nye opplysninger\". " +
                 "Hvis du trenger å \"flytte\" en søknad som er journalført mot infotrygd, kontakt superbrukere for flytting av journalpost"
         }
+        brukerfeilHvis(
+            revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
+                revurderingInnhold.barn.isNotEmpty()
+        ) {
+            "Kan ikke sende inn nye barn på revurdering med årsak G-omregning"
+        }
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
     }
