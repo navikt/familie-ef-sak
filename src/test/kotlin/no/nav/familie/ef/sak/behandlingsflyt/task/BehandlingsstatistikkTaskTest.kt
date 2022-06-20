@@ -135,7 +135,6 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
     }
 
-
     @Test
     internal fun `skal bruke opprettetDato for behandlingen dersom søknad ikke foreligger`() {
 
@@ -152,7 +151,6 @@ internal class BehandlingsstatistikkTaskTest {
 
         val behandlingsstatistikk = behandlingsstatistikkSlot.captured
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(behandling.sporbar.opprettetTid.atZone((ZoneId.of("Europe/Oslo"))))
-
     }
 
     @Test
