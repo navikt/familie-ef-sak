@@ -13,6 +13,12 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 import java.util.UUID
 
+/**
+ * Innvilgelse og opphør blir nesten behandlet likt for skolepenger.
+ * De begge oppdaterer Vedtak med totaltbilde for et state.
+ * Innvilgelse tillaterer ikke sletting av perioder eller sletting/endring av utgifter
+ * De har ulike resultattyper for at man skal vite hvilken typ av hendelse det er
+ */
 sealed class VedtakSkolepengerDto(
     resultatType: ResultatType,
     _type: String
