@@ -19,7 +19,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     OMBERENING_LIVE_RUN("familie.ef.sak.omberegning.live.run"),
     OMBEREGNING("familie.ef.sak.omberegning"),
 
-    VALIDERE_BESLUTTERPDF_ER_NULL("familie.ef.sak.skal-validere-beslutterpdf-er-null"),
     SYNKRONISER_PERSONIDENTER("familie.ef.sak.synkroniser-personidenter"),
     BARNETILSYN("familie.ef.sak.barnetilsyn"),
     SKOLEPENGER("familie.ef.sak.skolepenger"),
@@ -28,7 +27,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING("familie.ef.sak.kan-legge-til-nye-barn-paa-revurdering"),
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
-    BREVMOTTAKERE_VERGE_OG_FULLMAKT("familie.ef.sak.brevmottakere-verge-og-fullmakt"),
 
     FRONTEND_BEHANDLE_BARNETILSYN("familie.ef.sak.frontend-behandle-barnetilsyn-i-ny-losning"),
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),

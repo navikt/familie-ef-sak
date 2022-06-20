@@ -83,16 +83,16 @@ internal class BeregnYtelseStegTest {
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(
-            tilkjentYtelseService,
-            beregningService,
-            beregningBarnetilsynService,
-            beregningSkolepengerService,
-            simuleringService,
-            vedtakService,
-            tilbakekrevingService,
-            barnService,
-            fagsakService,
-            validerOmregningService
+        tilkjentYtelseService,
+        beregningService,
+        beregningBarnetilsynService,
+        beregningSkolepengerService,
+        simuleringService,
+        vedtakService,
+        tilbakekrevingService,
+        barnService,
+        fagsakService,
+        validerOmregningService
     )
 
     private val slot = slot<TilkjentYtelse>()

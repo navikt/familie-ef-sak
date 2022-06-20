@@ -17,7 +17,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.BEHANDLING_KORRIGERING,
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
         Toggle.FRONTEND_VIS_OPPDATERING_REGISTEROPPLYSNINGER,
-        Toggle.BREVMOTTAKERE_VERGE_OG_FULLMAKT,
         Toggle.MIGRERING,
         Toggle.FRONTEND_VIS_SANKSJON_EN_MÅNED,
         Toggle.KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING,

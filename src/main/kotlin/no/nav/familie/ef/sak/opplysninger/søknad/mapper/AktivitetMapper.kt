@@ -97,7 +97,10 @@ object AktivitetMapper {
                 heltidEllerDeltid = utdanning.heltidEllerDeltid,
                 hvaErMåletMedUtdanningen = utdanning.hvaErMåletMedUtdanningen,
                 hvorMyeSkalDuStudere = utdanning.hvorMyeSkalDuStudere,
-                utdanningEtterGrunnskolen = utdanning.utdanningEtterGrunnskolen
+                utdanningEtterGrunnskolen = utdanning.utdanningEtterGrunnskolen,
+                semesteravgift = utdanning.semesteravgift,
+                studieavgift = utdanning.studieavgift,
+                eksamensgebyr = utdanning.eksamensgebyr
             )
         }
     }
