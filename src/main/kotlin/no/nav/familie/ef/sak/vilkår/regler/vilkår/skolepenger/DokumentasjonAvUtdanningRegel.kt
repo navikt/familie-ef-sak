@@ -10,13 +10,23 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 
 class DokumentasjonAvUtdanningRegel : Vilkårsregel(
     vilkårType = VilkårType.DOKUMENTASJON_AV_UTDANNING,
-    regler = setOf(DOKUMENTASJON_AV_UTDANNING),
-    hovedregler = regelIder(DOKUMENTASJON_AV_UTDANNING)
+    regler = setOf(DOKUMENTASJON_AV_UTDANNING, DOKUMENTASJON_AV_UTGIFTER),
+    hovedregler = regelIder(DOKUMENTASJON_AV_UTDANNING, DOKUMENTASJON_AV_UTGIFTER)
 ) {
+
     companion object {
         private val DOKUMENTASJON_AV_UTDANNING =
             RegelSteg(
                 regelId = RegelId.DOKUMENTASJON_AV_UTDANNING,
+                jaNeiSvarRegel(
+                    hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
+                )
+            )
+
+        private val DOKUMENTASJON_AV_UTGIFTER =
+            RegelSteg(
+                regelId = RegelId.DOKUMENTASJON_AV_UTGIFTER,
                 jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
