@@ -19,7 +19,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     OMBERENING_LIVE_RUN("familie.ef.sak.omberegning.live.run"),
     OMBEREGNING("familie.ef.sak.omberegning"),
 
-    VALIDERE_BESLUTTERPDF_ER_NULL("familie.ef.sak.skal-validere-beslutterpdf-er-null"),
     SYNKRONISER_PERSONIDENTER("familie.ef.sak.synkroniser-personidenter"),
     BARNETILSYN("familie.ef.sak.barnetilsyn"),
     SKOLEPENGER("familie.ef.sak.skolepenger"),

@@ -77,9 +77,6 @@ class BeslutteVedtakSteg(
                 }
             }
         } else {
-            if (!featureToggleService.isEnabled(Toggle.VALIDERE_BESLUTTERPDF_ER_NULL)) {
-                vedtaksbrevService.slettVedtaksbrev(saksbehandling)
-            }
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
