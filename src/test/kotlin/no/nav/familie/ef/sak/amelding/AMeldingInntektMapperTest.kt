@@ -65,7 +65,6 @@ internal class AMeldingInntektMapperTest {
 
         assertThat(inntektForVirksomhet.navn).isEqualTo("orgnavn")
         assertThat(inntektForVirksomhet.identifikator).isEqualTo("805824352")
-
         assertThat(inntektDto.avvik).hasSize(1)
         assertThat(inntektDto.avvik.first()).isEqualTo("805824352 (2021-10) - Feil på innsendt a-melding.")
     }

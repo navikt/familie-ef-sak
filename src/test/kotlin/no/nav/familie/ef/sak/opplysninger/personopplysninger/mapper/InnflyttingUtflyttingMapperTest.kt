@@ -21,6 +21,7 @@ internal class InnflyttingUtflyttingMapperTest {
         val mappetInnflytting = mappet[0]
         assertThat(mappetInnflytting.fraflyttingsland).isEqualTo("Sverige")
         assertThat(mappetInnflytting.fraflyttingssted).isEqualTo("Sted")
+        assertThat(mappetInnflytting.dato).isNull()
     }
 
     @Test

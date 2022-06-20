@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.mapper
 
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
@@ -185,6 +186,33 @@ internal class AdresseMapperTest {
             .isEqualTo("1, 2, 3, 0575 Oslo")
     }
 
+    @Test
+    internal fun `Bostedsadresse - sjekk alle felter utenom visningsadresse`() {
+        val adresseDto = mapper.tilAdresse(bostedsadresse)
+        assertThat(adresseDto.angittFlyttedato).isEqualTo(bostedsadresse.angittFlyttedato)
+        assertThat(adresseDto.gyldigFraOgMed).isEqualTo(bostedsadresse.gyldigFraOgMed)
+        assertThat(adresseDto.gyldigTilOgMed).isEqualTo(bostedsadresse.gyldigTilOgMed)
+        assertThat(adresseDto.type).isEqualTo(AdresseType.BOSTEDADRESSE)
+    }
+
+    @Test
+    internal fun `Kontaktadresse - sjekk alle felter utenom visningsadresse`() {
+        val kontaktadresse = kontaktadresse(KontaktadresseType.INNLAND)
+        val adresseDto = mapper.tilAdresse(kontaktadresse)
+        assertThat(adresseDto.type).isEqualTo(AdresseType.KONTAKTADRESSE)
+        assertThat(adresseDto.gyldigFraOgMed).isEqualTo(kontaktadresse.gyldigFraOgMed)
+        assertThat(adresseDto.gyldigTilOgMed).isEqualTo(kontaktadresse.gyldigTilOgMed)
+    }
+
+    @Test
+    internal fun `Oppholdsadresse sjekk alle felter utenom visningsadresse`() {
+        val oppholdsadresse = oppholdsadresse()
+        val adresseDto = mapper.tilAdresse(oppholdsadresse)
+        assertThat(adresseDto.type).isEqualTo(AdresseType.OPPHOLDSADRESSE)
+        assertThat(adresseDto.gyldigFraOgMed).isEqualTo(oppholdsadresse.gyldigFraOgMed)
+        assertThat(adresseDto.gyldigTilOgMed).isEqualTo(oppholdsadresse.gyldigTilOgMed)
+    }
+
     private fun utenlandskAdresseFrittFormat(): UtenlandskAdresseIFrittFormat {
         return UtenlandskAdresseIFrittFormat(
             "1",
@@ -216,6 +244,17 @@ internal class AdresseMapperTest {
             utenlandskAdresse = null,
             utenlandskAdresseIFrittFormat = null,
             vegadresse = null
+        )
+
+    private fun oppholdsadresse() =
+        Oppholdsadresse(
+            coAdressenavn = null,
+            gyldigFraOgMed = LocalDate.of(2021, 5, 5),
+            gyldigTilOgMed = LocalDate.of(2021, 7, 7),
+            utenlandskAdresse = null,
+            vegadresse = null,
+            oppholdAnnetSted = "oppholdAnnetSted",
+            metadata = Metadata(false)
         )
 
     private fun vegadresse(): Vegadresse =
