@@ -72,7 +72,10 @@ data class UnderUtdanningDto(
     val heltidEllerDeltid: String?,
     val hvorMyeSkalDuStudere: Int?,
     val hvaErMåletMedUtdanningen: String?,
-    val utdanningEtterGrunnskolen: Boolean
+    val utdanningEtterGrunnskolen: Boolean,
+    val semesteravgift: Int?,
+    val studieavgift: Int?,
+    val eksamensgebyr: Int?,
 )
 
 data class UtdanningDto(

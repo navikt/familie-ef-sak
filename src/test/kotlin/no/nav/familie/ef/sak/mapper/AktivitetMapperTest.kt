@@ -85,7 +85,10 @@ internal class AktivitetMapperTest {
             utdanningEtterGrunnskolen = true,
             fra = LocalDate.now(),
             til = LocalDate.now().plusYears(1),
-            linjeKursGrad = "Kurs"
+            linjeKursGrad = "Kurs",
+            semesteravgift = 30000,
+            studieavgift = 0,
+            eksamensgebyr = 1500,
         )
 
     private fun tidligereUtdanning(): Set<TidligereUtdanning> =

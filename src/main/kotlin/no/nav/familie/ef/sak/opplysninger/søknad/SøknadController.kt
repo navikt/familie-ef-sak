@@ -34,17 +34,4 @@ class SøknadController(
             )
         )
     }
-
-    @GetMapping("/{behandlingId}/utgifter-skolepenger")
-    fun hentUtgifterFraSøknadForSkolepenger(@PathVariable behandlingId: UUID): Ressurs<SkolepengerSøknadsutgifterDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId)
-        return Ressurs.success(
-            SkolepengerSøknadsutgifterDto(
-                semesteravgift = søknadsgrunnlag?.aktivitet?.underUtdanning?.semesteravgift,
-                studieavgift = søknadsgrunnlag?.aktivitet?.underUtdanning?.studieavgift,
-                eksamensgebyr = søknadsgrunnlag?.aktivitet?.underUtdanning?.eksamensgebyr,
-            )
-        )
-    }
 }
