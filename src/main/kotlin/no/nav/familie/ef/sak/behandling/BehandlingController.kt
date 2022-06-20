@@ -41,7 +41,7 @@ class BehandlingController(
 
     @GetMapping("gamlebehandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<Any> {
-        val gamleBehandlinger = behandlingService.finnGamleUferdigeBehandligner()
+        val gamleBehandlinger = behandlingService.hentGamleUferdigeBehandlinger()
         return Ressurs.success(gamleBehandlinger)
     }
 

@@ -206,8 +206,10 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             SELECT b.*
             FROM behandling b
             WHERE NOT b.status = 'FERDIGSTILT'
+            AND b.opprettet_tid < NOW() - INTERVAL '30 days'
             ORDER BY b.opprettet_tid DESC
+            LIMIT 10
             """
     )
-    fun finnGamleUferdigeBehandligner()
+    fun hentGamleUferdigeBehandlinger(): List<Behandling>
 }
