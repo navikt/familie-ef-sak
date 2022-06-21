@@ -24,7 +24,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     SKOLEPENGER_OPPHØR("familie.ef.sak.skolepenger-opphor"),
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
-    KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING("familie.ef.sak.kan-legge-til-nye-barn-paa-revurdering"),
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 

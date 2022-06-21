@@ -29,12 +29,6 @@ class RevurderingsController(
     fun startRevurdering(@RequestBody revurderingInnhold: RevurderingDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(revurderingInnhold.fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        feilHvis(
-            revurderingInnhold.barn.isNotEmpty() &&
-                !featureToggleService.isEnabled(Toggle.KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING)
-        ) {
-            "Feature toggle for revurdering med barn er disabled"
-        }
         brukerfeilHvis(revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
             "Systemet har ikke støtte for å revurdere med årsak “Søknad” for øyeblikket. " +
                 "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +

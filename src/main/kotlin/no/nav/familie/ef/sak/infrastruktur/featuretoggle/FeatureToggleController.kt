@@ -17,7 +17,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.BEHANDLING_KORRIGERING,
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
         Toggle.MIGRERING,
-        Toggle.KAN_LEGGE_TIL_NYE_BARN_PÅ_REVURDERING,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN,
         Toggle.SKOLEPENGER,
