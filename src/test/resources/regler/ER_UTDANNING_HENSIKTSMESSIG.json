@@ -5,11 +5,11 @@
       "regelId" : "NAVKONTOR_VURDERING",
       "svarMapping" : {
         "JA" : {
-          "begrunnelseType" : "UTEN",
-          "regelId" : "SLUTT_NODE"
+          "regelId" : "SAKSBEHANDLER_VURDERING",
+          "begrunnelseType" : "UTEN"
         },
         "NEI" : {
-          "begrunnelseType" : "UTEN",
+          "begrunnelseType" : "PÅKREVD",
           "regelId" : "SLUTT_NODE"
         }
       }
