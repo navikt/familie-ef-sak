@@ -36,7 +36,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
-import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -79,7 +78,6 @@ import no.nav.familie.kontrakter.ef.felles.Vilkårsresultat as VilkårsresultatI
 import no.nav.familie.kontrakter.ef.iverksett.AktivitetType as AktivitetTypeIverksett
 import no.nav.familie.kontrakter.ef.iverksett.SkolepengerStudietype as SkolepengerStudietypeIverksett
 import no.nav.familie.kontrakter.ef.iverksett.SvarId as SvarIdIverksett
-import no.nav.familie.kontrakter.ef.iverksett.Utgiftstype as UtgiftstypeIverksett
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType as VedtaksperiodeTypeIverksett
 
 internal class IverksettingDtoMapperTest {
@@ -220,7 +218,6 @@ internal class IverksettingDtoMapperTest {
             .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
 
         SkolepengerStudietype.values().forEach { SkolepengerStudietypeIverksett.valueOf(it.name) }
-        Utgiftstype.values().forEach { UtgiftstypeIverksett.valueOf(it.name) }
     }
 
     private fun assertAlleFelter(iverksettDto: IverksettOvergangsstønadDto, behandlingId: UUID?) {
@@ -375,8 +372,6 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtaksperiode.perioder[0].studiebelastning).isEqualTo(50)
 
         assertThat(vedtaksperiode.utgiftsperioder).hasSize(1)
-        assertThat(vedtaksperiode.utgiftsperioder[0].utgiftstyper)
-            .containsExactlyInAnyOrder(UtgiftstypeIverksett.EKSAMENSAVGIFT)
         assertThat(vedtaksperiode.utgiftsperioder[0].utgiftsdato).isEqualTo(LocalDate.of(2021, 2, 1))
         assertThat(vedtaksperiode.utgiftsperioder[0].utgifter).isEqualTo(200)
         assertThat(vedtaksperiode.utgiftsperioder[0].stønad).isEqualTo(150)
@@ -507,7 +502,6 @@ internal class IverksettingDtoMapperTest {
                "utgiftsperioder": [
                  {
                    "id": "61516ce4-ae65-456b-a4d0-751dd3451bb6",
-                   "utgiftstyper": ["EKSAMENSAVGIFT"],
                    "utgiftsdato": "2021-02-01",
                    "utgifter": 200,
                    "stønad": 150

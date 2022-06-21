@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -148,18 +147,6 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(Feil::class.java) // Dette er ikke brukerfeil
                 .hasMessageContaining("Det finnes duplikat av ider på utgifter")
-        }
-
-        @Test
-        internal fun `må inneholde en utgiftstype`() {
-            val utgift = utgift(utgiftstyper = emptySet())
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
-            )
-
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
-                .hasMessageContaining("Skoleåret 21/22 mangler utgiftstyper for en eller flere utgifter")
         }
 
         @Test
@@ -495,13 +482,11 @@ internal class BeregningSkolepengerServiceTest {
 
     private fun utgift(
         id: UUID = UUID.randomUUID(),
-        utgiftstyper: Set<Utgiftstype> = setOf(Utgiftstype.SEMESTERAVGIFT),
         fra: YearMonth = defaultFra,
         utgifter: Int = defaultUtgift,
         stønad: Int = defaultStønad
     ) = SkolepengerUtgiftDto(
         id = id,
-        utgiftstyper = utgiftstyper,
         årMånedFra = fra,
         utgifter = utgifter,
         stønad = stønad

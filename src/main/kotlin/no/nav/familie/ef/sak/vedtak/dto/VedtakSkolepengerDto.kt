@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
-import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 import java.util.UUID
@@ -65,7 +64,6 @@ data class DelårsperiodeSkoleårDto(
 
 data class SkolepengerUtgiftDto(
     val id: UUID,
-    val utgiftstyper: Set<Utgiftstype>,
     val årMånedFra: YearMonth,
     val utgifter: Int,
     val stønad: Int,
@@ -76,7 +74,6 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
     utgiftsperioder = this.utgiftsperioder.map {
         SkolepengerUtgift(
             id = it.id,
-            utgiftstyper = it.utgiftstyper,
             utgiftsdato = it.årMånedFra.atDay(1),
             utgifter = it.utgifter,
             stønad = it.stønad
@@ -126,7 +123,6 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
 
 fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
-    utgiftstyper = this.utgiftstyper,
     årMånedFra = YearMonth.from(this.utgiftsdato),
     utgifter = this.utgifter,
     stønad = this.stønad,

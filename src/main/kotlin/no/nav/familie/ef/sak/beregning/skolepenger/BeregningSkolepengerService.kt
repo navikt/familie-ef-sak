@@ -147,9 +147,6 @@ class BeregningSkolepengerService(
             feilHvis(skoleårsperiode.perioder.any { it.studietype != studietype }) {
                 "Skoleår $skoleår inneholder ulike studietyper"
             }
-            feilHvis(skoleårsperiode.utgiftsperioder.any { it.utgiftstyper.isEmpty() }) {
-                "Skoleåret $skoleår mangler utgiftstyper for en eller flere utgifter"
-            }
         }
     }
 
