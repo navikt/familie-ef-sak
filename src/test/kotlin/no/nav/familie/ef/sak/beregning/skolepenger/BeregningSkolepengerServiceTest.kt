@@ -369,7 +369,6 @@ internal class BeregningSkolepengerServiceTest {
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
-            service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
             val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
             assertThat(perioder.perioder)
                 .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
