@@ -5,9 +5,11 @@ import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp.maksbel
 import no.nav.familie.ef.sak.felles.dto.harOverlappende
 import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.Skoleår
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
@@ -26,10 +28,11 @@ class BeregningSkolepengerService(
 
     fun beregnYtelse(
         utgiftsperioder: List<SkoleårsperiodeSkolepengerDto>,
-        behandlingId: UUID
+        behandlingId: UUID,
+        erOpphør: Boolean = false
     ): BeregningSkolepengerResponse {
         val forrigePerioder = hentPerioderFraForrigeVedtak(behandlingId)
-        return beregnYtelse(utgiftsperioder, forrigePerioder)
+        return beregnYtelse(utgiftsperioder, forrigePerioder, erOpphør)
     }
 
     private fun hentPerioderFraForrigeVedtak(behandlingId: UUID): List<SkoleårsperiodeSkolepengerDto> {
@@ -48,12 +51,13 @@ class BeregningSkolepengerService(
 
     private fun beregnYtelse(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
+        erOpphør: Boolean
     ): BeregningSkolepengerResponse {
-        validerGyldigePerioder(perioder)
+        validerGyldigePerioder(perioder, erOpphør)
         validerFornuftigeBeløp(perioder)
         validerSkoleår(perioder)
-        validerForrigePerioder(perioder, forrigePerioder)
+        validerForrigePerioder(perioder, forrigePerioder, erOpphør)
 
         val perioder = beregnSkoleårsperioder(perioder)
         return BeregningSkolepengerResponse(perioder)
@@ -66,11 +70,11 @@ class BeregningSkolepengerService(
             .flatMap { skoleårsperiode -> skoleårsperiode.utgiftsperioder }
             .groupBy { it.årMånedFra }
             .toSortedMap()
-            .map {
+            .map { (key, value) ->
                 BeløpsperiodeSkolepenger(
-                    årMånedFra = it.key,
-                    utgifter = it.value.sumOf { it.utgifter },
-                    beløp = it.value.sumOf { it.stønad }
+                    årMånedFra = key,
+                    utgifter = value.sumOf { it.utgifter },
+                    beløp = value.sumOf { it.stønad }
                 )
             }
     }
@@ -107,8 +111,8 @@ class BeregningSkolepengerService(
         }
     }
 
-    private fun validerGyldigePerioder(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>) {
-        feilHvis(skoleårsperioder.isEmpty()) {
+    private fun validerGyldigePerioder(skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>, erOpphør: Boolean) {
+        feilHvis(!erOpphør && skoleårsperioder.isEmpty()) {
             "Mangler skoleår"
         }
         feilHvis(skoleårsperioder.any { it.perioder.isEmpty() }) {
@@ -151,14 +155,72 @@ class BeregningSkolepengerService(
 
     private fun validerForrigePerioder(
         perioder: List<SkoleårsperiodeSkolepengerDto>,
-        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>,
+        erOpphør: Boolean
     ) {
         if (forrigePerioder.isEmpty()) return
         val tidligereUtgiftIder = forrigePerioder.flatMap { periode ->
             periode.utgiftsperioder.map { it.id to it }
         }.toMap()
-        validerForrigePerioderFortsattFinnes(perioder, tidligereUtgiftIder)
-        validerForrigePerioderErUendrede(perioder, tidligereUtgiftIder)
+        if (erOpphør) {
+            validerIngenNyePerioderFinnes(perioder, forrigePerioder)
+            validerNoeErFjernet(perioder, forrigePerioder)
+        } else {
+            validerForrigePerioderFortsattFinnes(perioder, tidligereUtgiftIder)
+            validerForrigePerioderErUendrede(perioder, tidligereUtgiftIder)
+        }
+    }
+
+    private fun validerIngenNyePerioderFinnes(
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+    ) {
+        val forrigePerioderPerSkoleår = forrigePerioder.associateBy { it.perioder.first().skoleår }
+        val nyePerioderPerSkoleår = perioder.associateBy { it.perioder.first().skoleår }
+        feilHvisIkke(forrigePerioderPerSkoleår.keys.containsAll(nyePerioderPerSkoleår.keys)) {
+            "Det finnes nye skoleårsperioder"
+        }
+        nyePerioderPerSkoleår.entries.forEach { (skoleår, skoleårsperiode) ->
+            val forrigePeriodeForSkoleår = forrigePerioderPerSkoleår[skoleår] ?: return
+            feilHvis(forrigePeriodeForSkoleår.perioder.size < skoleårsperiode.perioder.size) {
+                "En ny periode for skoleår=$skoleår er lagt til"
+            }
+            feilHvis(
+                forrigePeriodeForSkoleår.perioder.size == skoleårsperiode.perioder.size &&
+                    forrigePeriodeForSkoleår.perioder != skoleårsperiode.perioder
+            ) {
+                "Perioder for $skoleår er endrede"
+            }
+            feilHvis(forrigePeriodeForSkoleår.utgiftsperioder.size < skoleårsperiode.utgiftsperioder.size) {
+                "En ny utgiftsperiode for skoleår=$skoleår er lagt til"
+            }
+            feilHvis(
+                forrigePeriodeForSkoleår.utgiftsperioder.size == skoleårsperiode.utgiftsperioder.size &&
+                    forrigePeriodeForSkoleår.utgiftsperioder != skoleårsperiode.utgiftsperioder
+            ) {
+                "Utgiftsperioder for $skoleår er endrede"
+            }
+        }
+    }
+
+    private fun validerNoeErFjernet(
+        perioder: List<SkoleårsperiodeSkolepengerDto>,
+        forrigePerioder: List<SkoleårsperiodeSkolepengerDto>
+    ) {
+        if (forrigePerioder.size != perioder.size) {
+            return
+        }
+        val forrigePerioderPerSkoleår = forrigePerioder.associateBy { it.perioder.first().skoleår }
+        perioder.associateBy { it.perioder.first().skoleår }.entries.forEach { (skoleår, skoleårsperiode) ->
+            val forrigePeriodeForSkoleår = forrigePerioderPerSkoleår[skoleår] ?: return
+            if (forrigePeriodeForSkoleår.perioder.size != skoleårsperiode.perioder.size) {
+                return
+            }
+            if (forrigePeriodeForSkoleår.utgiftsperioder.size != skoleårsperiode.utgiftsperioder.size) {
+                return
+            }
+        }
+        throw Feil("Finner ikke noe som er endret mellom forrigePerioder=$forrigePerioder og nyePerioder=$perioder")
     }
 
     private fun validerForrigePerioderErUendrede(

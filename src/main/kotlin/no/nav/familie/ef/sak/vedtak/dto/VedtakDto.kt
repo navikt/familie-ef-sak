@@ -148,6 +148,14 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
                 begrunnelse = this.begrunnelse
             )
         )
+    is OpphørSkolepenger -> Vedtak(
+        resultatType = this.resultatType,
+        behandlingId = behandlingId,
+        skolepenger = SkolepengerWrapper(
+            skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() },
+            begrunnelse = this.begrunnelse
+        )
+    )
     is Opphør ->
         Vedtak(
             behandlingId = behandlingId,
@@ -211,10 +219,16 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             avslåBegrunnelse = this.avslåBegrunnelse,
             avslåÅrsak = this.avslåÅrsak,
         )
-        ResultatType.OPPHØRT -> Opphør(
-            begrunnelse = this.avslåBegrunnelse,
-            opphørFom = YearMonth.from(this.opphørFom)
-        )
+        ResultatType.OPPHØRT -> {
+            if (this.skolepenger != null) {
+                mapOpphørSkolepenger()
+            } else {
+                Opphør(
+                    begrunnelse = this.avslåBegrunnelse,
+                    opphørFom = YearMonth.from(this.opphørFom)
+                )
+            }
+        }
         ResultatType.SANKSJONERE -> Sanksjonert(
             sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
             periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
@@ -251,6 +265,10 @@ private class VedtakDtoDeserializer : StdDeserializer<VedtakDto>(VedtakDto::clas
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseSkolepenger") {
             return mapper.treeToValue(node, InnvilgelseSkolepenger::class.java)
+        }
+
+        if (node.get("_type") != null && node.get("_type").textValue() == "OpphørSkolepenger") {
+            return mapper.treeToValue(node, OpphørSkolepenger::class.java)
         }
 
         if (node.get("_type") != null && node.get("_type").textValue() == "InnvilgelseBarnetilsynUtenUtbetaling") {

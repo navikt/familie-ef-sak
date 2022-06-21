@@ -13,11 +13,35 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 import java.util.UUID
 
+/**
+ * Innvilgelse og opphør blir nesten behandlet likt for skolepenger.
+ * De begge oppdaterer Vedtak med totaltbilde for et state.
+ * Innvilgelse tillaterer ikke sletting av perioder eller sletting/endring av utgifter
+ * De har ulike resultattyper for at man skal vite hvilken typ av hendelse det er
+ */
+sealed class VedtakSkolepengerDto(
+    resultatType: ResultatType,
+    _type: String
+) : VedtakDto(resultatType, _type) {
+    abstract val begrunnelse: String?
+    abstract val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+
+    fun erOpphør() = this is OpphørSkolepenger
+}
+
 data class InnvilgelseSkolepenger(
-    val begrunnelse: String?,
-    val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
-) :
-    VedtakDto(resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger")
+    override val begrunnelse: String?,
+    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+) : VedtakSkolepengerDto(
+    resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger"
+)
+
+const val VEDTAK_SKOLEPENGER_OPPHØR_TYPE = "OpphørSkolepenger"
+
+data class OpphørSkolepenger(
+    override val begrunnelse: String?,
+    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+) : VedtakSkolepengerDto(resultatType = ResultatType.OPPHØRT, _type = VEDTAK_SKOLEPENGER_OPPHØR_TYPE)
 
 data class SkoleårsperiodeSkolepengerDto(
     val perioder: List<DelårsperiodeSkoleårDto>,
@@ -72,6 +96,16 @@ fun Vedtak.mapInnvilgelseSkolepenger(): InnvilgelseSkolepenger {
         "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
     }
     return InnvilgelseSkolepenger(
+        begrunnelse = this.skolepenger.begrunnelse,
+        skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() }
+    )
+}
+
+fun Vedtak.mapOpphørSkolepenger(): OpphørSkolepenger {
+    feilHvis(this.skolepenger == null) {
+        "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
+    }
+    return OpphørSkolepenger(
         begrunnelse = this.skolepenger.begrunnelse,
         skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() }
     )
