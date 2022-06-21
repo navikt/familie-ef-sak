@@ -36,10 +36,12 @@ data class InnvilgelseSkolepenger(
     resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger"
 )
 
+const val VEDTAK_SKOLEPENGER_OPPHØR_TYPE = "OpphørSkolepenger"
+
 data class OpphørSkolepenger(
     override val begrunnelse: String?,
     override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
-) : VedtakSkolepengerDto(resultatType = ResultatType.OPPHØRT, _type = "OpphørSkolepenger")
+) : VedtakSkolepengerDto(resultatType = ResultatType.OPPHØRT, _type = VEDTAK_SKOLEPENGER_OPPHØR_TYPE)
 
 data class SkoleårsperiodeSkolepengerDto(
     val perioder: List<DelårsperiodeSkoleårDto>,

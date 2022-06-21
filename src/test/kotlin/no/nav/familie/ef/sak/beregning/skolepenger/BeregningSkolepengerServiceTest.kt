@@ -38,6 +38,8 @@ internal class BeregningSkolepengerServiceTest {
 
     private val defaultFra = YearMonth.of(2021, 8)
     private val defaultTil = YearMonth.of(2022, 6)
+    private val defaultUtgift = 100
+    private val defaultStønad = 50
 
     @BeforeEach
     internal fun setUp() {
@@ -311,7 +313,8 @@ internal class BeregningSkolepengerServiceTest {
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
-            service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder).hasSize(0)
         }
 
         @Test
@@ -328,7 +331,9 @@ internal class BeregningSkolepengerServiceTest {
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
-            service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
         }
 
         @Test
@@ -346,7 +351,9 @@ internal class BeregningSkolepengerServiceTest {
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
-            service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
         }
 
         @Test
@@ -363,6 +370,9 @@ internal class BeregningSkolepengerServiceTest {
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
             service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
         }
     }
 
@@ -488,8 +498,8 @@ internal class BeregningSkolepengerServiceTest {
         id: UUID = UUID.randomUUID(),
         utgiftstyper: Set<Utgiftstype> = setOf(Utgiftstype.SEMESTERAVGIFT),
         fra: YearMonth = defaultFra,
-        utgifter: Int = 100,
-        stønad: Int = 50
+        utgifter: Int = defaultUtgift,
+        stønad: Int = defaultStønad
     ) = SkolepengerUtgiftDto(
         id = id,
         utgiftstyper = utgiftstyper,
