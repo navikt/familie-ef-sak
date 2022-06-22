@@ -21,12 +21,14 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     internal fun `skal kaste exception hvis man bruker save eller saveAll`() {
         assertThat(
             catchThrowable {
+                @Suppress("DEPRECATION")
                 fagsakRepository.save(fagsakDomain())
             }
         ).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(
             catchThrowable {
+                @Suppress("DEPRECATION")
                 fagsakRepository.saveAll(listOf(fagsakDomain(), fagsakDomain()))
             }
         ).isInstanceOf(DbActionExecutionException::class.java)

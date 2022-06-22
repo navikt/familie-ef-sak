@@ -72,7 +72,7 @@ class InfotrygdPeriodeValideringService(
                 MigreringExceptionType.MANGLER_PERIODER
             )
         }
-        val perioderMedBeløp = gjeldendePerioder.filter { it.beløp != 0 }
+        val perioderMedBeløp = gjeldendePerioder.filter { it.månedsbeløp != 0 }
         if (perioderMedBeløp.isEmpty()) {
             throw MigreringException(
                 "Har ikke noen perioder med beløp å migrere",
@@ -155,7 +155,7 @@ class InfotrygdPeriodeValideringService(
                 MigreringExceptionType.FEIL_FOM_DATO
             )
         }
-        if (periode.beløp == 0) {
+        if (periode.månedsbeløp == 0) {
             throw MigreringException(
                 "Beløp er 0 på siste perioden, har ikke støtte for det ennå. fom=$stønadFom",
                 MigreringExceptionType.BELØP_0

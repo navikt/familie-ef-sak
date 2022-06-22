@@ -396,7 +396,7 @@ fun lagAndelHistorikkDto(
         andel = AndelMedGrunnlagDto(
             lagAndelTilkjentYtelse(
                 beløp = beløp,
-                fraOgMed = fraOgMed!!,
+                fraOgMed = fraOgMed,
                 tilOgMed = tilOgMed
             ),
             null
