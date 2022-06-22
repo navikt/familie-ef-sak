@@ -59,8 +59,8 @@ class BeregningSkolepengerService(
         validerSkoleår(perioder)
         validerForrigePerioder(perioder, forrigePerioder, erOpphør)
 
-        val perioder = beregnSkoleårsperioder(perioder)
-        return BeregningSkolepengerResponse(perioder)
+        val beregnedePerioder = beregnSkoleårsperioder(perioder)
+        return BeregningSkolepengerResponse(beregnedePerioder)
     }
 
     private fun beregnSkoleårsperioder(

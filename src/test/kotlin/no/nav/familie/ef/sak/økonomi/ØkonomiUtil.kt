@@ -25,7 +25,7 @@ fun lagTilkjentYtelse(
         vedtakstidspunkt = vedtaksdato.atStartOfDay().truncatedTo(ChronoUnit.MILLIS),
         type = type,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
-        startdato = startdato ?: andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: error("Må ha med startdato"),
+        startdato = startdato,
         grunnbeløpsdato = grunnbeløpsdato
     )
 

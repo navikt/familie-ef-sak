@@ -161,8 +161,7 @@ internal class VurderingServiceTest {
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = BARNETILSYN)
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
-        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
-            { it.invocation.args.first() as List<Vilkårsvurdering> }
+        every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers { firstArg() }
         val vilkår = VilkårType.hentVilkårForStønad(BARNETILSYN)
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)

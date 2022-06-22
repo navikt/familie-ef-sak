@@ -23,8 +23,6 @@ data class SummertInfotrygdPeriodeDto(
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int,
     val utgifterBarnetilsyn: Int,
-    @Deprecated("Bruk månedsbeløp / engangsbeløp")
-    val beløp: Int,
     val månedsbeløp: Int,
     val engangsbeløp: Int,
     val aktivitet: InfotrygdAktivitetstype?
@@ -39,7 +37,6 @@ fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
         utgifterBarnetilsyn = this.utgifterBarnetilsyn,
-        beløp = this.månedsbeløp,
         månedsbeløp = this.månedsbeløp,
         engangsbeløp = this.engangsbeløp,
         aktivitet = this.aktivitetstype
