@@ -23,6 +23,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.SKOLEPENGER,
         Toggle.SKOLEPENGER_OPPHØR,
         Toggle.FRONTEND_SKOLEPENGER_REVURDERING,
+        Toggle.FRONTEND_FILTRERE_BARN_BARNETILSYN
     )
 
     @GetMapping
