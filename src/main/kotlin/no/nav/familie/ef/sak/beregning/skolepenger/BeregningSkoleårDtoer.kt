@@ -7,6 +7,7 @@ import java.util.UUID
 data class BeregningSkolepengerRequest(
     val behandlingId: UUID,
     val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
+    val erOpphør: Boolean = false
 )
 
 data class BeregningSkolepengerResponse(

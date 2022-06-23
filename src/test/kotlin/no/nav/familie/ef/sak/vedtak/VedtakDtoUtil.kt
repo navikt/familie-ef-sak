@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
-import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
@@ -13,6 +12,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.Opphør
+import no.nav.familie.ef.sak.vedtak.dto.OpphørSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
 import no.nav.familie.ef.sak.vedtak.dto.SanksjonertPeriodeDto
@@ -53,6 +53,12 @@ object VedtakDtoUtil {
 
     fun innvilgelseSkolepengerDto() =
         InnvilgelseSkolepenger(
+            "begrunnelse",
+            listOf(skolepengerperiodeDto())
+        )
+
+    fun opphørSkolepengerDto() =
+        OpphørSkolepenger(
             "begrunnelse",
             listOf(skolepengerperiodeDto())
         )
@@ -113,7 +119,6 @@ object VedtakDtoUtil {
             utgiftsperioder = listOf(
                 SkolepengerUtgiftDto(
                     id = UUID.fromString("c076a0b9-0eb9-4a1b-bdcb-d75ebc40570d"),
-                    utgiftstyper = setOf(Utgiftstype.SEMESTERAVGIFT),
                     årMånedFra = YearMonth.of(2021, 1),
                     utgifter = 500,
                     stønad = 500

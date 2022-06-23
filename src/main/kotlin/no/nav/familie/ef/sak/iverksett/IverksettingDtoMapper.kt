@@ -53,7 +53,6 @@ import no.nav.familie.kontrakter.ef.iverksett.SøkerDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingDto
 import no.nav.familie.kontrakter.ef.iverksett.TilbakekrevingMedVarselDto
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseDto
-import no.nav.familie.kontrakter.ef.iverksett.Utgiftstype
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerSkolepengerDto
@@ -413,7 +412,6 @@ fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleår
 )
 
 fun SkolepengerUtgift.tilIverksettDto() = SkolepengerUtgiftDto(
-    utgiftstyper = this.utgiftstyper.map { type -> Utgiftstype.valueOf(type.name) }.toSet(),
     utgiftsdato = this.utgiftsdato,
     utgifter = this.utgifter,
     stønad = this.stønad

@@ -26,7 +26,8 @@ object InfotrygdPeriodeTestUtil {
         kode: InfotrygdEndringKode = InfotrygdEndringKode.NY,
         sakstype: InfotrygdSakstype = InfotrygdSakstype.SØKNAD,
         aktivitetstype: InfotrygdAktivitetstype? = InfotrygdAktivitetstype.BRUKERKONTAKT,
-        kodeOvergangsstønad: InfotrygdOvergangsstønadKode? = InfotrygdOvergangsstønadKode.BARN_UNDER_1_3_ÅR
+        kodeOvergangsstønad: InfotrygdOvergangsstønadKode? = InfotrygdOvergangsstønadKode.BARN_UNDER_1_3_ÅR,
+        barnIdenter: List<String> = emptyList()
     ): InfotrygdPeriode {
         return InfotrygdPeriode(
             personIdent = personIdent,
@@ -49,7 +50,8 @@ object InfotrygdPeriodeTestUtil {
             vedtakstidspunkt = LocalDateTime.now(),
             stønadFom = stønadFom,
             stønadTom = stønadTom,
-            opphørsdato = opphørsdato
+            opphørsdato = opphørsdato,
+            barnIdenter = barnIdenter
         )
     }
 }

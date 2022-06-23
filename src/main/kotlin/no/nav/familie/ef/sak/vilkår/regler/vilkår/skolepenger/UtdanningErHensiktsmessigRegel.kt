@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår.skolepenger
 
 import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
@@ -11,7 +12,7 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 class UtdanningErHensiktsmessigRegel : Vilkårsregel(
     vilkårType = VilkårType.ER_UTDANNING_HENSIKTSMESSIG,
     regler = setOf(NAVKONTOR_VURDERING, SAKSBEHANDLER_VURDERING),
-    hovedregler = regelIder(NAVKONTOR_VURDERING, SAKSBEHANDLER_VURDERING)
+    hovedregler = regelIder(NAVKONTOR_VURDERING)
 ) {
 
     companion object {
@@ -19,8 +20,8 @@ class UtdanningErHensiktsmessigRegel : Vilkårsregel(
             RegelSteg(
                 regelId = RegelId.NAVKONTOR_VURDERING,
                 svarMapping = jaNeiSvarRegel(
-                    hvisJa = SluttSvarRegel.OPPFYLT,
-                    hvisNei = SluttSvarRegel.OPPFYLT
+                    hvisJa = NesteRegel(RegelId.SAKSBEHANDLER_VURDERING),
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
                 )
             )
 

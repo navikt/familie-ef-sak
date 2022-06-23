@@ -56,7 +56,7 @@ class PeriodeService(
             ?.let { behandling ->
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
                 val internperioder = tilInternPeriode(tilkjentYtelse)
-                val startdato = tilkjentYtelse.startdato ?: error("Mangler starto for behandling=${behandling.id}")
+                val startdato = tilkjentYtelse.startdato
                 EfInternPerioder(startdato, internperioder)
             }
     }

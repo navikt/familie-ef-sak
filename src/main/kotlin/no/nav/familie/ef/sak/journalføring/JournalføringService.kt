@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
@@ -194,12 +193,6 @@ class JournalføringService(
         barnSomSkalFødes: List<BarnSomSkalFødes>,
         årsak: BehandlingÅrsak? = null
     ): Behandling {
-        feilHvis(
-            fagsak.stønadstype == StønadType.BARNETILSYN &&
-                !featureToggleService.isEnabled(Toggle.FRONTEND_BEHANDLE_BARNETILSYN)
-        ) {
-            "Journalføring av barnetilsyn er ikke skrudd på"
-        }
 
         val behandling = behandlingService.opprettBehandling(
             behandlingType = behandlingstype,
@@ -230,9 +223,8 @@ class JournalføringService(
                         fagsak.hentAktivIdent(),
                         fagsak.stønadstype
                     )
-                StønadType.BARNETILSYN ->
+                StønadType.BARNETILSYN, StønadType.SKOLEPENGER ->
                     infotrygdPeriodeValideringService.validerHarIkkeÅpenSakIInfotrygd(fagsak)
-                StønadType.SKOLEPENGER -> error("Ikke implementert validering perioder infotrygd for skolepenger")
             }
         }
     }

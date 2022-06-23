@@ -405,7 +405,7 @@ object AndelHistorikkParser {
                 acc
             }
             .map { holder ->
-                val andelerTilkjentYtelse =
+                @Suppress("UNCHECKED_CAST") val andelerTilkjentYtelse =
                     if (holder.andeler.contains(null)) {
                         feilHvis(holder.andeler.size > 1) {
                             "Andeler kan kun inneholde ett element som mangler stønadFom/stønadTom savnes"

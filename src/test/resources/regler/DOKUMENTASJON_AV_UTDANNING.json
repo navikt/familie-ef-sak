@@ -13,6 +13,19 @@
           "regelId" : "SLUTT_NODE"
         }
       }
+    },
+    "DOKUMENTASJON_AV_UTGIFTER_UTDANNING" : {
+      "regelId" : "DOKUMENTASJON_AV_UTGIFTER_UTDANNING",
+      "svarMapping" : {
+        "JA" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        },
+        "NEI" : {
+          "begrunnelseType" : "PÅKREVD",
+          "regelId" : "SLUTT_NODE"
+        }
+      }
     }
   }
 }

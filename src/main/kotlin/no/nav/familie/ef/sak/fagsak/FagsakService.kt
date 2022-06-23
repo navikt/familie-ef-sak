@@ -189,9 +189,7 @@ class FagsakService(
     private fun validerStønadstype(stønadstype: StønadType) {
         when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> {}
-            StønadType.BARNETILSYN -> feilHvisIkke(featureToggleService.isEnabled(Toggle.BARNETILSYN)) {
-                "Støtter ikke opprettelse av fagsak for barnetilsyn"
-            }
+            StønadType.BARNETILSYN -> {}
             StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled(Toggle.SKOLEPENGER)) {
                 "Støtter ikke opprettelse av fagsak for skolepenger"
             }
