@@ -43,7 +43,7 @@ class BehandlingController(
     @GetMapping("gamlebehandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<Any> {
         val gamleBehandlinger = behandlingService.hentGamleUferdigeBehandlinger()
-        return Ressurs.success(gamleBehandlinger.tilDto())
+        return Ressurs.success(gamleBehandlinger)
     }
 
     @PostMapping("{behandlingId}/reset/{steg}")

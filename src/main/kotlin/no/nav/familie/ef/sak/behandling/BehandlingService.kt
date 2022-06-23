@@ -62,7 +62,15 @@ class BehandlingService(
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-    fun hentGamleUferdigeBehandlinger() = behandlingRepository.hentGamleUferdigeBehandlinger()
+    fun hentGamleUferdigeBehandlinger(): List<Any> {
+        val gamleOvergangsstønadsbehandlinger = behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD)
+        val gamleBarnetilsynsbehandlinger = behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN)
+        val gamleSkolepengerbehandlinger = behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER)
+
+
+
+        return listOf(gamleBarnetilsynsbehandlinger).flatten()
+    }
 
     fun finnesÅpenBehandling(fagsakId: UUID) =
         behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
