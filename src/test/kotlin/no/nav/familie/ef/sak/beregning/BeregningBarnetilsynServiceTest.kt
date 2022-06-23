@@ -516,7 +516,7 @@ class BeregningBarnetilsynServiceTest {
     }
 
     @Test
-    fun `merge to påfølgende måneder med hull ifm fradatoer, forvent NotImplementedError`() {
+    fun `merge to påfølgende måneder med hull ifm fradatoer`() {
 
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = mars2000.atEndOfMonth()
@@ -536,7 +536,7 @@ class BeregningBarnetilsynServiceTest {
     }
 
     @Test
-    fun `merge to påfølgende måneder med hull ifm fradatoer og forskjellige beløp, forvent NotImplementedError`() {
+    fun `merge to påfølgende måneder med hull ifm fradatoer og forskjellige beløp`() {
 
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = mars2000.atEndOfMonth()

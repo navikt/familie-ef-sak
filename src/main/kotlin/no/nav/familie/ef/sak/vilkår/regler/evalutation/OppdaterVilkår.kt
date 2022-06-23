@@ -178,12 +178,11 @@ object OppdaterVilkår {
         stønadstype: StønadType
     ): List<Vilkårsvurdering> {
         return when (stønadstype) {
-            OVERGANGSSTØNAD -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId))
+            OVERGANGSSTØNAD, SKOLEPENGER -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId))
             BARNETILSYN -> listOf(
                 lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
                 lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId)
             )
-            SKOLEPENGER -> throw NotImplementedError("Ikke implementert for skolepenger")
         }
     }
 
