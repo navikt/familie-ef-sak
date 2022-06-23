@@ -8,16 +8,39 @@ import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
-import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import java.time.YearMonth
 import java.util.UUID
 
+/**
+ * Innvilgelse og opphør blir nesten behandlet likt for skolepenger.
+ * De begge oppdaterer Vedtak med totaltbilde for et state.
+ * Innvilgelse tillaterer ikke sletting av perioder eller sletting/endring av utgifter
+ * De har ulike resultattyper for at man skal vite hvilken typ av hendelse det er
+ */
+sealed class VedtakSkolepengerDto(
+    resultatType: ResultatType,
+    _type: String
+) : VedtakDto(resultatType, _type) {
+    abstract val begrunnelse: String?
+    abstract val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+
+    fun erOpphør() = this is OpphørSkolepenger
+}
+
 data class InnvilgelseSkolepenger(
-    val begrunnelse: String?,
-    val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
-) :
-    VedtakDto(resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger")
+    override val begrunnelse: String?,
+    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+) : VedtakSkolepengerDto(
+    resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger"
+)
+
+const val VEDTAK_SKOLEPENGER_OPPHØR_TYPE = "OpphørSkolepenger"
+
+data class OpphørSkolepenger(
+    override val begrunnelse: String?,
+    override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
+) : VedtakSkolepengerDto(resultatType = ResultatType.OPPHØRT, _type = VEDTAK_SKOLEPENGER_OPPHØR_TYPE)
 
 data class SkoleårsperiodeSkolepengerDto(
     val perioder: List<DelårsperiodeSkoleårDto>,
@@ -41,7 +64,6 @@ data class DelårsperiodeSkoleårDto(
 
 data class SkolepengerUtgiftDto(
     val id: UUID,
-    val utgiftstyper: Set<Utgiftstype>,
     val årMånedFra: YearMonth,
     val utgifter: Int,
     val stønad: Int,
@@ -52,7 +74,6 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
     utgiftsperioder = this.utgiftsperioder.map {
         SkolepengerUtgift(
             id = it.id,
-            utgiftstyper = it.utgiftstyper,
             utgiftsdato = it.årMånedFra.atDay(1),
             utgifter = it.utgifter,
             stønad = it.stønad
@@ -77,6 +98,16 @@ fun Vedtak.mapInnvilgelseSkolepenger(): InnvilgelseSkolepenger {
     )
 }
 
+fun Vedtak.mapOpphørSkolepenger(): OpphørSkolepenger {
+    feilHvis(this.skolepenger == null) {
+        "Mangler felter fra vedtak for vedtak=${this.behandlingId}"
+    }
+    return OpphørSkolepenger(
+        begrunnelse = this.skolepenger.begrunnelse,
+        skoleårsperioder = this.skolepenger.skoleårsperioder.map { it.tilDto() }
+    )
+}
+
 fun SkoleårsperiodeSkolepenger.tilDto() =
     SkoleårsperiodeSkolepengerDto(
         perioder = this.perioder.map { it.tilDto() },
@@ -92,7 +123,6 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
 
 fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
-    utgiftstyper = this.utgiftstyper,
     årMånedFra = YearMonth.from(this.utgiftsdato),
     utgifter = this.utgifter,
     stønad = this.stønad,

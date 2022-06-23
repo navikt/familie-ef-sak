@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseBarnetilsynDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseOvergangsstønadDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.innvilgelseSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørDto
+import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.opphørSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.VedtakDtoUtil.sanksjonertDto
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -328,6 +329,14 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         internal fun `innvilgelse skolepenger`() {
             val behandling = opprettBehandling()
             val vedtak = innvilgelseSkolepengerDto()
+
+            assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
+        }
+
+        @Test
+        internal fun `opphør skolepenger`() {
+            val behandling = opprettBehandling()
+            val vedtak = opphørSkolepengerDto()
 
             assertInnsendtVedtakErLikHentetVedtak(vedtak, behandling)
         }

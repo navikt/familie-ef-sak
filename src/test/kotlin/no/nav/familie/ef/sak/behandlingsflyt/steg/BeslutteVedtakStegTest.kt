@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -111,7 +110,6 @@ internal class BeslutteVedtakStegTest {
         every { iverksett.iverksett(any(), any()) } just Runs
         every { iverksett.iverksettUtenBrev(any()) } just Runs
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
-        every { featureToggleService.isEnabled(Toggle.VALIDERE_BESLUTTERPDF_ER_NULL) } returns false
         every { vedtakService.oppdaterBeslutter(any(), any()) } just Runs
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, id = behandlingId, resultat = secondArg())

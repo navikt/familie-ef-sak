@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.behandling
@@ -154,7 +153,6 @@ internal class VedtaksbrevServiceTest {
     @Test
     internal fun `skal kaste feil når det finnes beslutterpdf i forveien`() {
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterPdf = Fil("123".toByteArray()))
-        every { featureToggleService.isEnabled(Toggle.VALIDERE_BESLUTTERPDF_ER_NULL) } returns true
 
         val feil = assertThrows<Feil> {
             vedtaksbrevService.lagEndeligBeslutterbrev(
@@ -172,7 +170,6 @@ internal class VedtaksbrevServiceTest {
 
         val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterident = "tilfeldigvisFeilIdent")
-        every { featureToggleService.isEnabled(Toggle.VALIDERE_BESLUTTERPDF_ER_NULL) } returns true
         val brevSlot = slot<Vedtaksbrev>()
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()

@@ -165,7 +165,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @ReadingConverter
     class StringTilDokumentConverter : Converter<String, Dokumentasjon> {
 
-        override fun convert(s: String?): Dokumentasjon? {
+        override fun convert(s: String): Dokumentasjon {
             return objectMapper.readValue(s, Dokumentasjon::class.java)
         }
     }
@@ -173,21 +173,16 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @WritingConverter
     class YearMonthTilLocalDateConverter : Converter<YearMonth, LocalDate> {
 
-        override fun convert(yearMonth: YearMonth?): LocalDate? {
-            return yearMonth?.let {
-                LocalDate.of(it.year, it.month, 1)
-            }
+        override fun convert(yearMonth: YearMonth): LocalDate {
+            return yearMonth.atDay(1)
         }
     }
 
     @ReadingConverter
     class LocalDateTilYearMonthConverter : Converter<Date, YearMonth> {
 
-        override fun convert(date: Date?): YearMonth? {
-            return date?.let {
-                val localDate = date.toLocalDate()
-                YearMonth.of(localDate.year, localDate.month)
-            }
+        override fun convert(date: Date): YearMonth {
+            return YearMonth.from(date.toLocalDate())
         }
     }
 

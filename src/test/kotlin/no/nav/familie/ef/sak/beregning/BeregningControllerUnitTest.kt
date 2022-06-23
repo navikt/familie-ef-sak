@@ -29,7 +29,6 @@ internal class BeregningControllerUnitTest {
         beregningService = BeregningService(),
         tilgangService = mockk(relaxed = true),
         tilkjentYtelseService = tilkjentytelseService,
-        vurderingService = mockk(relaxed = true),
         vedtakService = vedtakService
     )
 

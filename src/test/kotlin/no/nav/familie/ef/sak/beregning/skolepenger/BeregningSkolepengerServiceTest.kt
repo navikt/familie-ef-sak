@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Utgiftstype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.DelårsperiodeSkoleårDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -38,6 +37,8 @@ internal class BeregningSkolepengerServiceTest {
 
     private val defaultFra = YearMonth.of(2021, 8)
     private val defaultTil = YearMonth.of(2022, 6)
+    private val defaultUtgift = 100
+    private val defaultStønad = 50
 
     @BeforeEach
     internal fun setUp() {
@@ -146,18 +147,6 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
                 .isInstanceOf(Feil::class.java) // Dette er ikke brukerfeil
                 .hasMessageContaining("Det finnes duplikat av ider på utgifter")
-        }
-
-        @Test
-        internal fun `må inneholde en utgiftstype`() {
-            val utgift = utgift(utgiftstyper = emptySet())
-            val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
-            )
-
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
-                .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
-                .hasMessageContaining("Skoleåret 21/22 mangler utgiftstyper for en eller flere utgifter")
         }
 
         @Test
@@ -288,6 +277,195 @@ internal class BeregningSkolepengerServiceTest {
         }
     }
 
+    @Nested
+    inner class Opphør_ValiderFinnesEndringer {
+
+        @Test
+        internal fun `ingen endringer kaster feil`() {
+            val utgift = utgift()
+            val tidligerePerioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)))
+            val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift.copy())))
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Finner ikke noe som er endret mellom")
+        }
+
+        @Test
+        internal fun `skal oppdage hvis alle skoleårsperioder er fjernet`() {
+            val tidligerePerioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())))
+            val skoleårsperioder = emptyList<SkoleårsperiodeSkolepengerDto>()
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder).hasSize(0)
+        }
+
+        @Test
+        internal fun `skal oppdage hvis en skoleårsperioder er fjernet`() {
+            val utgift = utgift()
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                    listOf(utgift())
+                )
+            )
+            val skoleårsperioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)))
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+        }
+
+        @Test
+        internal fun `skal oppdage hvis alle delårsperiode er fjernet`() {
+            val utgift = utgift()
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
+                    listOf(utgift)
+                )
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift.copy()))
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+        }
+
+        @Test
+        internal fun `skal oppdage hvis en utgift er fjernet`() {
+            val utgift1 = utgift()
+            val utgift2 = utgift()
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1, utgift2))
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift1))
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
+        }
+    }
+
+    @Nested
+    inner class Opphør_validerIngenNyePerioderFinnes {
+
+        @Test
+        internal fun `skal oppdage en ny skoleårsperioder`() {
+            val tidligerePerioder = listOf(SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())))
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift())),
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                    listOf(utgift())
+                )
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Det finnes nye skoleårsperioder")
+        }
+
+        @Test
+        internal fun `skal oppdage hvis en delårsperiode er lagt til`() {
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(til = defaultFra)),
+                    listOf(utgift())
+                )
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(til = defaultFra), delårsperiode(fra = defaultTil)),
+                    listOf(utgift())
+                )
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("En ny periode for skoleår=21/22 er lagt til")
+        }
+
+        @Test
+        internal fun `skal oppdage hvis en delårsperiode er endret`() {
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode()),
+                    listOf(utgift())
+                )
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift()))
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Perioder for 21/22 er endrede")
+        }
+
+        @Test
+        internal fun `skal oppdage hvis en utgift er lagt til`() {
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode()),
+                    listOf(utgift())
+                )
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode()),
+                    listOf(utgift(), utgift())
+                )
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("En ny utgiftsperiode for skoleår=21/22 er lagt til")
+        }
+
+        @Test
+        internal fun `skal oppdage hvis en utgiftsperiode er endret`() {
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode()),
+                    listOf(utgift())
+                )
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift(stønad = 1)))
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
+                .isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Utgiftsperioder for 21/22 er endrede")
+        }
+    }
+
     private fun vedtak(
         skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>,
         behandlingId: UUID = UUID.randomUUID(),
@@ -304,13 +482,11 @@ internal class BeregningSkolepengerServiceTest {
 
     private fun utgift(
         id: UUID = UUID.randomUUID(),
-        utgiftstyper: Set<Utgiftstype> = setOf(Utgiftstype.SEMESTERAVGIFT),
         fra: YearMonth = defaultFra,
-        utgifter: Int = 100,
-        stønad: Int = 50
+        utgifter: Int = defaultUtgift,
+        stønad: Int = defaultStønad
     ) = SkolepengerUtgiftDto(
         id = id,
-        utgiftstyper = utgiftstyper,
         årMånedFra = fra,
         utgifter = utgifter,
         stønad = stønad

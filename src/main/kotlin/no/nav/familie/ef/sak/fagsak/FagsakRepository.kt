@@ -34,7 +34,7 @@ interface FagsakRepository : RepositoryInterface<FagsakDomain, UUID>, InsertUpda
                         ON b.fagsak_id = f.id 
                     WHERE b.id = :behandlingId"""
     )
-    fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDomain
+    fun finnFagsakTilBehandling(behandlingId: UUID): FagsakDomain?
 
     // language=PostgreSQL
     @Query(

@@ -83,16 +83,16 @@ internal class BeregnYtelseStegTest {
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
     private val steg = BeregnYtelseSteg(
-            tilkjentYtelseService,
-            beregningService,
-            beregningBarnetilsynService,
-            beregningSkolepengerService,
-            simuleringService,
-            vedtakService,
-            tilbakekrevingService,
-            barnService,
-            fagsakService,
-            validerOmregningService
+        tilkjentYtelseService,
+        beregningService,
+        beregningBarnetilsynService,
+        beregningSkolepengerService,
+        simuleringService,
+        vedtakService,
+        tilbakekrevingService,
+        barnService,
+        fagsakService,
+        validerOmregningService
     )
 
     private val slot = slot<TilkjentYtelse>()
@@ -562,14 +562,16 @@ internal class BeregnYtelseStegTest {
                     lagSaksbehandling(stønadType = StønadType.BARNETILSYN),
                     innvilget(emptyList(), emptyList())
                 )
-            }.isInstanceOf(Feil::class.java).hasMessageContaining("Feil stønadstype")
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Stønadstype=BARNETILSYN har ikke støtte for InnvilgelseOvergangsstønad")
 
             assertThatThrownBy {
                 utførSteg(
                     lagSaksbehandling(stønadType = StønadType.OVERGANGSSTØNAD),
                     innvilgetBarnetilsyn(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
                 )
-            }.isInstanceOf(Feil::class.java).hasMessageContaining("Feil stønadstype")
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Stønadstype=OVERGANGSSTØNAD har ikke støtte for InnvilgelseBarnetilsyn")
         }
     }
 
