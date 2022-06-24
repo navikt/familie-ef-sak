@@ -21,8 +21,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN,
         Toggle.SKOLEPENGER,
         Toggle.SKOLEPENGER_OPPHØR,
-        Toggle.FRONTEND_SKOLEPENGER_REVURDERING,
-        Toggle.FRONTEND_FILTRERE_BARN_BARNETILSYN
+        Toggle.FRONTEND_SKOLEPENGER_REVURDERING
     )
 
     @GetMapping
