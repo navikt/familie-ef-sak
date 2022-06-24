@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -43,7 +44,7 @@ class BehandlingController(
     @GetMapping("gamlebehandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<Any> {
         val gamleBehandlinger = behandlingService.hentGamleUferdigeBehandlinger()
-        return Ressurs.success(gamleBehandlinger)
+        return Ressurs.success(gamleBehandlinger.tilDto())
     }
 
     @PostMapping("{behandlingId}/reset/{steg}")

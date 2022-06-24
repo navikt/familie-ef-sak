@@ -203,7 +203,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     // language=PostgreSQL
     @Query(
             """
-            SELECT b.*, f.*
+            SELECT b.*, f.stonadstype
             FROM behandling b
             JOIN fagsak f ON f.id = b.fagsak_id
             WHERE NOT b.status = 'FERDIGSTILT'
@@ -212,5 +212,5 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             ORDER BY b.opprettet_tid
             """
     )
-    fun hentGamleUferdigeBehandlinger(stønadstype: StønadType): List<Any>
+    fun hentGamleUferdigeBehandlinger(stønadstype: StønadType): List<Behandling>
 }
