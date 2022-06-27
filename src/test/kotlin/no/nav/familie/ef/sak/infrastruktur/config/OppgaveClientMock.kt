@@ -31,7 +31,15 @@ class OppgaveClientMock {
         val oppgaveClient: OppgaveClient = mockk()
 
         val oppgaver: MutableMap<Long, Oppgave> =
-            listOf(oppgave1, oppgave2, oppgave3, tilbakekreving1, oppgavePapirsøknad).associateBy { it.id!! }.toMutableMap()
+            listOf(
+                oppgave1,
+                oppgave2,
+                oppgave3,
+                tilbakekreving1,
+                oppgavePapirsøknad,
+                oppgaveEttersending,
+                oppgaveEttersendingUtenBehandlesAvApplikasjon
+            ).associateBy { it.id!! }.toMutableMap()
         var maxId: Long = oppgaver.values.maxOf { it.id!! }
         every {
             oppgaveClient.hentOppgaver(any())
@@ -140,7 +148,11 @@ class OppgaveClientMock {
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
-        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "familie-ef-sak", journalpostId = "2345")
+        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "2345")
+    private val oppgaveEttersending =
+        lagOppgave(6L, Oppgavetype.Journalføring, beskivelse = "Ettersending", behandlesAvApplikasjon = "familie-ef-sak", journalpostId = "2345")
+    private val oppgaveEttersendingUtenBehandlesAvApplikasjon =
+        lagOppgave(7L, Oppgavetype.Journalføring, beskivelse = "Ettersending uten behandlesAvApplikasjon", behandlesAvApplikasjon = "", journalpostId = "2345")
     private val tilbakekreving1 = lagOppgave(
         4L,
         Oppgavetype.BehandleSak,

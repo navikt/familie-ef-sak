@@ -82,6 +82,12 @@ class OppgaveController(
             )
     }
 
+    @GetMapping("/gosys/{gsakOppgaveId}")
+    fun hentOppgaveFraGosys(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<OppgaveEfDto> {
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
+    }
+
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
         return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
