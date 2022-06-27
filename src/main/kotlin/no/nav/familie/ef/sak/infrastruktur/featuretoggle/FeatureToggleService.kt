@@ -16,8 +16,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     MIGRERING("familie.ef.sak.migrering"),
     G_BEREGNING("familie.ef.sak.g-beregning"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
-    OMBERENING_LIVE_RUN("familie.ef.sak.omberegning.live.run"),
-    OMBEREGNING("familie.ef.sak.omberegning"),
 
     SYNKRONISER_PERSONIDENTER("familie.ef.sak.synkroniser-personidenter"),
     SKOLEPENGER("familie.ef.sak.skolepenger"),
