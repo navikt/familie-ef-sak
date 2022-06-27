@@ -18,7 +18,6 @@ import java.util.UUID
 data class GammelBehandlingDto (
         val id: UUID,
         val fagsakId: UUID,
-        val forrigeBehandlingId: UUID? = null,
         val versjon: Int = 0,
 
         val type: BehandlingType,
