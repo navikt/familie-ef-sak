@@ -18,7 +18,6 @@ import java.util.UUID
 data class GammelBehandlingDto (
         val id: UUID,
         val fagsakId: UUID,
-        val versjon: Int = 0,
 
         val type: BehandlingType,
         val status: BehandlingStatus,
@@ -26,7 +25,6 @@ data class GammelBehandlingDto (
         val stønadstype: StønadType? = null,
         @Column("arsak")
         val årsak: BehandlingÅrsak,
-        val kravMottatt: LocalDate? = null,
 
         @Column("opprettet_tid")
         val opprettet: LocalDate? = null,
