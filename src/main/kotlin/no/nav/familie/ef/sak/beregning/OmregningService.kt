@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -10,36 +9,19 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
-import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
-import no.nav.familie.ef.sak.simulering.SimuleringService
-import no.nav.familie.ef.sak.simulering.Simuleringsresultat
-import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
-import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
-import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
-import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.slf4j.MarkerFactory
@@ -47,7 +29,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -59,10 +40,8 @@ class OmregningService(
     private val iverksettClient: IverksettClient,
     private val ytelseService: TilkjentYtelseService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val featureToggleService: FeatureToggleService,
     private val vurderingService: VurderingService,
-    private val liveRunBeregnYtelseSteg: BeregnYtelseSteg,
-    private val dryRunBeregnYtelseSteg: DryRunBeregnYtelseSteg,
+    private val beregnYtelseSteg: BeregnYtelseSteg,
     private val iverksettingDtoMapper: IverksettingDtoMapper,
     private val søknadService: SøknadService,
     private val barnService: BarnService
@@ -71,19 +50,12 @@ class OmregningService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun utførGOmregning(
-        fagsakId: UUID,
-        liveRun: Boolean
-    ) {
-
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.OMBEREGNING)) {
-            "Feature toggle for omberegning er disabled"
-        }
+    fun utførGOmregning(fagsakId: UUID) {
 
         val forrigeTilkjentYtelse = validerBehandlingOgHentSisteTilkjentYtelse(fagsakId)
         val innvilgelseOvergangsstønad = hentInnvilgelseForOvergangsstønad(fagsakId) ?: return
 
-        utførGOmregning(fagsakId, forrigeTilkjentYtelse, innvilgelseOvergangsstønad, liveRun)
+        utførGOmregning(fagsakId, forrigeTilkjentYtelse, innvilgelseOvergangsstønad)
     }
 
     private fun hentInnvilgelseForOvergangsstønad(fagsakId: UUID): InnvilgelseOvergangsstønad? {
@@ -130,7 +102,6 @@ class OmregningService(
         fagsakId: UUID,
         forrigeTilkjentYtelse: TilkjentYtelse,
         innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
-        liveRun: Boolean
     ) {
 
         logger.info("Starter på g-omregning av fagsak=$fagsakId")
@@ -152,40 +123,23 @@ class OmregningService(
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
 
-        if (liveRun) {
-            liveRunBeregnYtelseSteg.utførSteg(
-                saksbehandling,
-                InnvilgelseOvergangsstønad(
-                    periodeBegrunnelse = null,
-                    inntektBegrunnelse = null,
-                    perioder = innvilgelseOvergangsstønad.perioder,
-                    inntekter = indeksjusterInntekt.tilInntekt()
-                )
+        beregnYtelseSteg.utførSteg(
+            saksbehandling,
+            InnvilgelseOvergangsstønad(
+                periodeBegrunnelse = null,
+                inntektBegrunnelse = null,
+                perioder = innvilgelseOvergangsstønad.perioder,
+                inntekter = indeksjusterInntekt.tilInntekt()
             )
-        } else {
-            dryRunBeregnYtelseSteg.utførSteg(
-                saksbehandling,
-                InnvilgelseOvergangsstønad(
-                    periodeBegrunnelse = null,
-                    inntektBegrunnelse = null,
-                    perioder = innvilgelseOvergangsstønad.perioder,
-                    inntekter = indeksjusterInntekt.tilInntekt()
-                )
-            )
-        }
+        )
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
         behandlingService.oppdaterStegPåBehandling(behandling.id, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
 
         val iverksettDto = iverksettingDtoMapper.tilDtoMaskineltBehandlet(saksbehandling)
-        if (liveRun) {
-            iverksettClient.iverksettUtenBrev(iverksettDto)
-            taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
-        } else {
-            loggResultat(forrigeTilkjentYtelse, innvilgelseOvergangsstønad, fagsakId, behandling.id)
-            throw DryRunException("Feature toggle familie.ef.sak.omberegning.live.run er ikke satt. Transaksjon rulles tilbake!")
-        }
+        iverksettClient.iverksettUtenBrev(iverksettDto)
+        taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
     }
 
     private fun kopierDataFraForrigeBehandling(behandling: Behandling) {
@@ -200,147 +154,6 @@ class OmregningService(
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = StønadType.OVERGANGSSTØNAD
         )
-
         vurderingService.opprettVilkårForOmregning(behandling)
     }
-
-    fun loggResultat(
-        forrigeTilkjentYtelse: TilkjentYtelse,
-        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
-        fagsakId: UUID,
-        behandlingId: UUID
-    ) {
-        val omberegnetTilkjentYtelse = ytelseService.hentForBehandling(behandlingId)
-
-        val perioder = mapTilSammenlignbarePerioder(
-            fagsakId,
-            forrigeTilkjentYtelse,
-            omberegnetTilkjentYtelse
-        )
-
-        logger.info(MarkerFactory.getMarker("G-Omregning"), perioder.joinToString("\n"))
-    }
-
-    fun mapTilSammenlignbarePerioder(
-        fagsakId: UUID,
-        forrigeTilkjentYtelse: TilkjentYtelse,
-        omberegnetTilkjentYtelse: TilkjentYtelse
-    ): List<RapportDto> {
-
-        return forrigeTilkjentYtelse.andelerTilkjentYtelse.filter {
-            it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed
-        }.map {
-            if (it.stønadFom < nyesteGrunnbeløpGyldigFraOgMed) {
-                it.copy(stønadFom = nyesteGrunnbeløpGyldigFraOgMed)
-            } else {
-                it
-            }
-        }.map {
-            val omberegnetAndelTilkjentYtelse =
-                omberegnetTilkjentYtelse.andelerTilkjentYtelse.firstOrNull { andel ->
-                    it.periode.omslutter(andel.periode) || it.periode.omsluttesAv(andel.periode)
-                } ?: error("Forventet omregnet andelTilkjentYtelse med fradato ${it.stønadFom}")
-            RapportDto(
-                fagsakId,
-                it.stønadFom,
-                it.stønadTom,
-                it.beløp,
-                omberegnetAndelTilkjentYtelse.beløp,
-                it.inntekt,
-                omberegnetAndelTilkjentYtelse.inntekt
-            )
-        }
-    }
-
-    data class RapportDto(
-        val fagsakId: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val gammelStønad: Int,
-        val omberegnetStønad: Int,
-        val gammelInntekt: Int,
-        val omberegnetInntekt: Int
-    )
 }
-
-@Service
-class DryRunBeregnYtelseSteg(
-    tilkjentYtelseService: TilkjentYtelseService,
-    beregningService: BeregningService,
-    dryRunSimuleringService: DryRunSimuleringService,
-    beregningBarnetilsynService: BeregningBarnetilsynService,
-    beregningSkolepengerService: BeregningSkolepengerService,
-    vedtakService: VedtakService,
-    tilbakekrevingService: TilbakekrevingService,
-    barnService: BarnService,
-    fagsakService: FagsakService,
-    validerOmregningService: ValiderOmregningService
-) {
-
-    private val beregnYtelseSteg = BeregnYtelseSteg(
-        tilkjentYtelseService,
-        beregningService,
-        beregningBarnetilsynService,
-        beregningSkolepengerService,
-        dryRunSimuleringService,
-        vedtakService,
-        tilbakekrevingService,
-        barnService,
-        fagsakService,
-        validerOmregningService
-    )
-
-    fun utførSteg(saksbehandling: Saksbehandling, data: VedtakDto) {
-        beregnYtelseSteg.utførSteg(saksbehandling, data)
-    }
-}
-
-@Service
-class DryRunSimuleringService(
-    iverksettClient: IverksettClient,
-    vedtakService: VedtakService,
-    blankettSimuleringsService: BlankettSimuleringsService,
-    simuleringsresultatRepository: SimuleringsresultatRepository,
-    tilkjentYtelseService: TilkjentYtelseService,
-    tilgangService: TilgangService
-) : SimuleringService(
-    iverksettClient,
-    vedtakService,
-    blankettSimuleringsService,
-    simuleringsresultatRepository,
-    tilkjentYtelseService,
-    tilgangService
-) {
-
-    private val simuleringsoppsummering =
-        Simuleringsoppsummering(listOf(), null, BigDecimal.ZERO, BigDecimal.ZERO, null, null, null, null, null)
-
-    private val beriketSimuleringsresultat = BeriketSimuleringsresultat(
-        DetaljertSimuleringResultat(listOf()),
-        simuleringsoppsummering
-    )
-
-    override fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-        throw IllegalAccessException("Forventer ikke kall til simuler fra BeregnYtelseSteg.")
-    }
-
-    override fun hentLagretSimuleringsoppsummering(behandlingId: UUID): Simuleringsoppsummering {
-        throw IllegalAccessException("Forventer ikke kall til hentLagretSimuleringsoppsummering er fra BeregnYtelseSteg.")
-    }
-
-    override fun hentLagretSimmuleringsresultat(behandlingId: UUID): BeriketSimuleringsresultat {
-        throw IllegalAccessException("Forventer ikke kall til hentLagretSimmuleringsresultat fra BeregnYtelseSteg.")
-    }
-
-    override fun slettSimuleringForBehandling(saksbehandling: Saksbehandling) {}
-
-    override fun hentOgLagreSimuleringsresultat(saksbehandling: Saksbehandling): Simuleringsresultat {
-        return Simuleringsresultat(
-            behandlingId = UUID.randomUUID(),
-            data = DetaljertSimuleringResultat(listOf()),
-            beriketData = beriketSimuleringsresultat
-        )
-    }
-}
-
-class DryRunException(melding: String) : IllegalStateException(melding)

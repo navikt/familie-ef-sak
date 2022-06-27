@@ -16,7 +16,7 @@ import java.util.UUID
 internal class GOmregningTaskTest {
 
     private val taskService = mockk<TaskService>()
-    private val gOmregningTask = GOmregningTask(mockk(), taskService, mockk())
+    private val gOmregningTask = GOmregningTask(mockk(), taskService)
 
     private val taskSlot = slot<Task>()
 

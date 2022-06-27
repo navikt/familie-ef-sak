@@ -2,9 +2,6 @@ package no.nav.familie.ef.sak.behandling.grunnbelop
 
 import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
@@ -14,9 +11,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class GOmregningTaskService(
-    val fagsakRepository: FagsakRepository,
-    val featureToggleService: FeatureToggleService,
-    val gOmregningTask: GOmregningTask
+    private val fagsakRepository: FagsakRepository,
+    private val gOmregningTask: GOmregningTask
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -24,9 +20,6 @@ class GOmregningTaskService(
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
 
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.OMBEREGNING)) {
-            "Feature toggle for omberegning er disabled"
-        }
         logger.info("Starter opprettelse av tasker for G-omregning.")
         val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
         try {
