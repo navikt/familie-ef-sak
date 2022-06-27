@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.arbeidsforhold.tilDto
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.behandling.dto.GammelBehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
@@ -42,9 +43,9 @@ class BehandlingController(
     }
 
     @GetMapping("gamlebehandlinger")
-    fun hentGamleUferdigeBehandlinger(): Ressurs<Any> {
+    fun hentGamleUferdigeBehandlinger(): Ressurs<List<GammelBehandlingDto>> {
         val gamleBehandlinger = behandlingService.hentGamleUferdigeBehandlinger()
-        return Ressurs.success(gamleBehandlinger.tilDto())
+        return Ressurs.success(gamleBehandlinger)
     }
 
     @PostMapping("{behandlingId}/reset/{steg}")

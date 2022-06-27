@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
+import no.nav.familie.ef.sak.behandling.dto.GammelBehandlingDto
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -63,12 +64,8 @@ class BehandlingService(
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-    fun hentGamleUferdigeBehandlinger(): List<Behandling> {
-        val gamleBarnetilsynsbehandlinger = behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN)
-        val gamleOvergangsstønadbehandlinger = behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD)
-        val gamleSkolepengerbehandlinger = behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER)
-
-        return listOf(gamleBarnetilsynsbehandlinger, gamleOvergangsstønadbehandlinger, gamleSkolepengerbehandlinger).flatten()
+    fun hentGamleUferdigeBehandlinger(): List<GammelBehandlingDto> {
+        return behandlingRepository.hentGamleUferdigeBehandlinger()
     }
 
     fun finnesÅpenBehandling(fagsakId: UUID) =

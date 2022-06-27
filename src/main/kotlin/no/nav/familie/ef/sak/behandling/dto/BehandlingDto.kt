@@ -22,7 +22,7 @@ data class BehandlingDto(
     val resultat: BehandlingResultat,
     val opprettet: LocalDateTime,
     val behandlingsårsak: BehandlingÅrsak,
-    val stønadstype: StønadType? = null,
+    val stønadstype: StønadType,
     val vedtaksdato: LocalDateTime? = null
 )
 
@@ -42,21 +42,6 @@ fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = n
         vedtaksdato = vedtaksdato
             ?: (if (this.status == BehandlingStatus.FERDIGSTILT) this.sporbar.endret.endretTid else null)
     )
-
-fun List<Behandling>.tilDto() = this.map {
-    BehandlingDto(
-            id = it.id,
-            forrigeBehandlingId = it.forrigeBehandlingId,
-            fagsakId = it.fagsakId,
-            steg = it.steg,
-            type = it.type,
-            status = it.status,
-            sistEndret = it.sporbar.endret.endretTid,
-            resultat = it.resultat,
-            opprettet = it.sporbar.opprettetTid,
-            behandlingsårsak = it.årsak,
-    )
-}
 
 fun Saksbehandling.tilDto(): BehandlingDto =
     BehandlingDto(

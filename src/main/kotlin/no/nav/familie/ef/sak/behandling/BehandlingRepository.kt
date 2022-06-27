@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.EksternId
+import no.nav.familie.ef.sak.behandling.dto.GammelBehandlingDto
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -208,9 +209,9 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
             JOIN fagsak f ON f.id = b.fagsak_id
             WHERE NOT b.status = 'FERDIGSTILT'
             AND b.opprettet_tid < NOW() - INTERVAL '30 days'
-            AND f.stonadstype=:stønadstype
+            AND b.type != 'BLANKETT' AND b.type != 'TEKNISK_OPPHØR' 
             ORDER BY b.opprettet_tid
             """
     )
-    fun hentGamleUferdigeBehandlinger(stønadstype: StønadType): List<Behandling>
+    fun hentGamleUferdigeBehandlinger(): List<GammelBehandlingDto>
 }
