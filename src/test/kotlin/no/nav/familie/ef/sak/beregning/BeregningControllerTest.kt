@@ -64,8 +64,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(
             behandling(
                 fagsak,
-                steg = StegType.VEDTA_BLANKETT,
-                type = BehandlingType.BLANKETT,
+                steg = StegType.BESLUTTE_VEDTAK,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.UTREDES
             )
         )
@@ -87,8 +87,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(
             behandling(
                 fagsak,
-                steg = StegType.VEDTA_BLANKETT,
-                type = BehandlingType.BLANKETT,
+                steg = StegType.BESLUTTE_VEDTAK,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.UTREDES
             )
         )
@@ -148,7 +148,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
 
-    private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak, Behandling> {
+    private fun lagFagsakOgBehandling(stegType: StegType = StegType.BESLUTTE_VEDTAK): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
         val førstegangsbehandling = behandlingRepository.insert(
             behandling(

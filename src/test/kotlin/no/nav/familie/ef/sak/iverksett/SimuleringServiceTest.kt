@@ -112,64 +112,6 @@ internal class SimuleringServiceTest {
     }
 
     @Test
-    internal fun `skal bruke lagret vedtak for simulering av blankett`() {
-
-        val behandling = behandling(fagsak = fagsak, type = BehandlingType.BLANKETT)
-
-        val årMånedFraStart = YearMonth.of(2021, 1)
-        val årMånedGEndring = YearMonth.of(2021, 5)
-        val årMånedFraSlutt = YearMonth.of(2021, 12)
-        val vedtak = InnvilgelseOvergangsstønad(
-            periodeBegrunnelse = "Ok",
-            inntektBegrunnelse = "ok",
-            perioder = listOf(
-                VedtaksperiodeDto(
-                    årMånedFra = årMånedFraStart,
-                    årMånedTil = årMånedFraSlutt,
-                    aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                    periodeType = VedtaksperiodeType.HOVEDPERIODE
-                )
-            ),
-            inntekter = listOf(
-                Inntekt(
-                    årMånedFra = årMånedFraStart,
-                    forventetInntekt = BigDecimal(300000),
-                    samordningsfradrag = BigDecimal(300)
-                )
-            ),
-            samordningsfradragType = SamordningsfradragType.UFØRETRYGD
-
-        )
-
-        every { behandlingService.hentBehandling(any()) } returns behandling
-
-        every {
-            vedtakService.hentVedtakHvisEksisterer(any())
-        } returns vedtak
-
-        val simulerSlot = slot<SimuleringDto>()
-        every {
-            iverksettClient.simuler(capture(simulerSlot))
-        } returns BeriketSimuleringsresultat(mockk(), mockk())
-
-        simuleringService.simuler(saksbehandling(fagsak, behandling))
-
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed)
-            .isEqualTo(årMånedFraStart.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed)
-            .isEqualTo(årMånedGEndring.atDay(1).minusDays(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
-            .isGreaterThan(0)
-
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().fraOgMed)
-            .isEqualTo(årMånedGEndring.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().tilOgMed)
-            .isEqualTo(årMånedFraSlutt.atEndOfMonth())
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().beløp)
-            .isGreaterThan(0)
-    }
-
-    @Test
     internal fun `skal feile hvis behandlingen ikke er redigerbar og mangler lagret simulering`() {
         val behandling =
             behandling(fagsak = fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)

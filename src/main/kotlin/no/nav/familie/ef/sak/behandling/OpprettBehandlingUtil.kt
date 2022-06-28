@@ -27,7 +27,6 @@ object OpprettBehandlingUtil {
         validerMigreringErRevurdering(behandlingType, erMigrering)
 
         when (behandlingType) {
-            BehandlingType.BLANKETT -> validerKanOppretteBlankett(tidligereBehandlinger)
             BehandlingType.FØRSTEGANGSBEHANDLING -> validerKanOppretteFørstegangsbehandling(sisteBehandling)
             BehandlingType.REVURDERING -> validerKanOppretteRevurdering(sisteBehandling, erMigrering)
             BehandlingType.TEKNISK_OPPHØR -> validerTekniskOpphør(sisteBehandling, sistIverksatteBehandling)
@@ -61,21 +60,10 @@ object OpprettBehandlingUtil {
         }
     }
 
-    private fun validerKanOppretteBlankett(tidligereBehandlinger: List<Behandling>) {
-        if (tidligereBehandlinger.any { it.type != BehandlingType.BLANKETT }) {
-            throw ApiFeil(
-                "Kan ikke å opprette blankettbehandling når fagsaken allerede har andre typer behandlinger",
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
     private fun validerKanOppretteFørstegangsbehandling(sisteBehandling: Behandling?) {
-        if (sisteBehandling != null &&
-            !(sisteBehandling.type == BehandlingType.BLANKETT || sisteBehandling.type == BehandlingType.TEKNISK_OPPHØR)
-        ) {
+        if (sisteBehandling != null && sisteBehandling.type != BehandlingType.TEKNISK_OPPHØR) {
             throw ApiFeil(
-                "Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør",
+                "Siste behandlingen for en førstegangsbehandling må være av typen teknisk opphør",
                 HttpStatus.BAD_REQUEST
             )
         }
@@ -85,11 +73,11 @@ object OpprettBehandlingUtil {
         if (sisteBehandling == null && !erMigrering) {
             throw ApiFeil("Det finnes ikke en tidligere behandling på fagsaken", HttpStatus.BAD_REQUEST)
         }
-        if (!erMigrering && sisteBehandling?.type == BehandlingType.BLANKETT) {
-            throw ApiFeil("Siste behandling ble behandlet i infotrygd, denne må migreres", HttpStatus.BAD_REQUEST)
-        }
-        if (erMigrering && sisteBehandling != null && sisteBehandling.type != BehandlingType.BLANKETT) {
-            throw ApiFeil("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før", HttpStatus.BAD_REQUEST)
+        if (erMigrering && sisteBehandling != null) {
+            throw ApiFeil(
+                "Det er ikke mulig å opprette en migrering når det finnes en behandling fra før",
+                HttpStatus.BAD_REQUEST
+            )
         }
         if (sisteBehandling?.type == BehandlingType.TEKNISK_OPPHØR) {
             throw ApiFeil(

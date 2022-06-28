@@ -77,7 +77,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         Assertions.assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(3000)
     }
 
-    private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak, Behandling> {
+    private fun lagFagsakOgBehandling(stegType: StegType = StegType.BESLUTTE_VEDTAK): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(
             fagsak(
                 stønadstype = StønadType.BARNETILSYN,

@@ -235,7 +235,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     ): IverksettOvergangsstønadDto {
 
         val nyBehandling =
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
+            behandlingRepository.finnSisteBehandling(
                 StønadType.OVERGANGSSTØNAD,
                 fagsak.personIdenter.map {
                     it.ident

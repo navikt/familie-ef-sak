@@ -45,7 +45,7 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `skal returnere false når det ikke finnes en behandling`() {
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
+            behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns null
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
             .isEqualTo(false)
@@ -54,7 +54,7 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `skal returnere false når en behandling finnes som er teknisk opphør`() {
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
+            behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns behandling(fagsak(), type = BehandlingType.TEKNISK_OPPHØR)
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
             .isEqualTo(false)
@@ -63,7 +63,7 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `skal returnere true når behandling finnes`() {
         every {
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
+            behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns behandling(fagsak())
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
             .isEqualTo(true)
@@ -71,7 +71,7 @@ internal class EksternBehandlingControllerTest {
 
     @Test
     internal fun `uten stønadstype - skal returnere false når det ikke finnes noen behandling`() {
-        every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), setOf(ident1, ident2)) } returns null
+        every { behandlingRepository.finnSisteBehandling(any(), setOf(ident1, ident2)) } returns null
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
             .isEqualTo(false)
     }
@@ -107,7 +107,7 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
         var counter = 0
-        every { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), setOf(ident1, ident2)) } answers {
+        every { behandlingRepository.finnSisteBehandling(any(), setOf(ident1, ident2)) } answers {
             if (counter++ == 1) {
                 behandling(fagsak())
             } else {
@@ -116,7 +116,7 @@ internal class EksternBehandlingControllerTest {
         }
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
             .isEqualTo(true)
-        verify(exactly = 2) { behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(any(), any()) }
+        verify(exactly = 2) { behandlingRepository.finnSisteBehandling(any(), any()) }
     }
 
     private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {

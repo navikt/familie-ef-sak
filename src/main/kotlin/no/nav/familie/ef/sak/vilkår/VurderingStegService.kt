@@ -104,9 +104,7 @@ class VurderingStegService(
     }
 
     private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
-        if (saksbehandling.type != BehandlingType.BLANKETT) {
-            taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
-        }
+        taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
     }
 
     private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {

@@ -46,11 +46,6 @@ enum class StegType(
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
     ),
-    VEDTA_BLANKETT(
-        rekkefølge = 2,
-        tillattFor = BehandlerRolle.SAKSBEHANDLER,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
-    ),
     SEND_TIL_BESLUTTER(
         rekkefølge = 3,
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
@@ -67,11 +62,6 @@ enum class StegType(
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
     VENTE_PÅ_TEKNISK_OPPHØR_STATUS(
-        rekkefølge = 5,
-        tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
-    ),
-    JOURNALFØR_BLANKETT(
         rekkefølge = 5,
         tillattFor = BehandlerRolle.SYSTEM,
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
@@ -110,38 +100,23 @@ enum class StegType(
     }
 
     fun hentNesteSteg(behandlingType: BehandlingType): StegType {
-        return when (behandlingType) {
-            BehandlingType.TEKNISK_OPPHØR ->
-                when (this) {
-                    VENTE_PÅ_TEKNISK_OPPHØR_STATUS -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
-                    BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-                    else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
-                }
-            BehandlingType.BLANKETT ->
-                when (this) {
-                    VILKÅR -> VEDTA_BLANKETT
-                    VEDTA_BLANKETT -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> JOURNALFØR_BLANKETT
-                    JOURNALFØR_BLANKETT -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
-                    BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-                    else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
-                }
-            else ->
-                when (this) {
-                    VILKÅR -> BEREGNE_YTELSE
-                    BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
-                    SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                    BESLUTTE_VEDTAK -> VENTE_PÅ_STATUS_FRA_IVERKSETT
-                    VENTE_PÅ_STATUS_FRA_IVERKSETT -> LAG_SAKSBEHANDLINGSBLANKETT
-                    LAG_SAKSBEHANDLINGSBLANKETT -> FERDIGSTILLE_BEHANDLING
-                    FERDIGSTILLE_BEHANDLING -> PUBLISER_VEDTAKSHENDELSE
-                    PUBLISER_VEDTAKSHENDELSE -> BEHANDLING_FERDIGSTILT
-                    BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-                    else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
-                }
+        return if (behandlingType == BehandlingType.TEKNISK_OPPHØR) when (this) {
+            VENTE_PÅ_TEKNISK_OPPHØR_STATUS -> FERDIGSTILLE_BEHANDLING
+            FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
+            BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
+            else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
+        }
+        else when (this) {
+            VILKÅR -> BEREGNE_YTELSE
+            BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
+            SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+            BESLUTTE_VEDTAK -> VENTE_PÅ_STATUS_FRA_IVERKSETT
+            VENTE_PÅ_STATUS_FRA_IVERKSETT -> LAG_SAKSBEHANDLINGSBLANKETT
+            LAG_SAKSBEHANDLINGSBLANKETT -> FERDIGSTILLE_BEHANDLING
+            FERDIGSTILLE_BEHANDLING -> PUBLISER_VEDTAKSHENDELSE
+            PUBLISER_VEDTAKSHENDELSE -> BEHANDLING_FERDIGSTILT
+            BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
+            else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
         }
     }
 }

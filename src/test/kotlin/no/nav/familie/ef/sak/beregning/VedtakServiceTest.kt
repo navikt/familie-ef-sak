@@ -61,7 +61,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -103,7 +103,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -123,7 +123,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -144,7 +144,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 

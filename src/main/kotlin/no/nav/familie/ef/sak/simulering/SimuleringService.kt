@@ -37,10 +37,13 @@ class SimuleringService(
 
     @Transactional
     fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-        return when (saksbehandling.type) {
-            BehandlingType.BLANKETT -> simulerForBlankett(saksbehandling)
-            else -> simulerForBehandling(saksbehandling)
+        if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
+            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        ) {
+            return hentLagretSimuleringsoppsummering(saksbehandling.id)
         }
+        val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
+        return simuleringsresultat.beriketData.oppsummering
     }
 
     fun hentLagretSimuleringsoppsummering(behandlingId: UUID): Simuleringsoppsummering {
@@ -79,17 +82,6 @@ class SimuleringService(
         )
     }
 
-    private fun simulerForBehandling(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-
-        if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
-            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
-        ) {
-            return hentLagretSimuleringsoppsummering(saksbehandling.id)
-        }
-        val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
-        return simuleringsresultat.beriketData.oppsummering
-    }
-
     private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
 
@@ -120,16 +112,5 @@ class SimuleringService(
                 throwable = e
             )
         }
-    }
-
-    private fun simulerForBlankett(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-        val vedtak = vedtakService.hentVedtakHvisEksisterer(saksbehandling.id)
-        val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, saksbehandling)
-        val simuleringDto = SimuleringDto(
-            nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
-            forrigeBehandlingId = null
-
-        )
-        return iverksettClient.simuler(simuleringDto).oppsummering
     }
 }

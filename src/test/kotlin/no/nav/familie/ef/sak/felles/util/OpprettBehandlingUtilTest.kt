@@ -34,7 +34,7 @@ internal class OpprettBehandlingUtilTest {
                     status = BehandlingStatus.FERDIGSTILT
                 )
             )
-            if (it == BehandlingType.TEKNISK_OPPHØR || it == BehandlingType.BLANKETT) {
+            if (it == BehandlingType.TEKNISK_OPPHØR) {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, tidligereBehandlinger, null)
             } else {
                 assertThat(
@@ -135,26 +135,6 @@ internal class OpprettBehandlingUtilTest {
     }
 
     @Test
-    fun `revurdering - skal ikke være mulig å opprette en revurdering hvis forrige behandling er blankett`() {
-        assertThat(
-            catchThrowable {
-                validerKanOppretteNyBehandling(
-                    BehandlingType.REVURDERING,
-                    listOf(
-                        behandling(
-                            fagsak = fagsak,
-                            type = BehandlingType.BLANKETT,
-                            henlagtÅrsak = HenlagtÅrsak.BEHANDLES_I_GOSYS,
-                            status = BehandlingStatus.FERDIGSTILT
-                        )
-                    ),
-                    null
-                )
-            }
-        ).hasMessage("Siste behandling ble behandlet i infotrygd, denne må migreres")
-    }
-
-    @Test
     fun `revurdering - skal ikke være mulig å opprette en revurdering hvis forrige behandling er teknisk opphør`() {
         assertThat(
             catchThrowable {
@@ -205,7 +185,7 @@ internal class OpprettBehandlingUtilTest {
             catchThrowable {
                 validerKanOppretteNyBehandling(
                     BehandlingType.TEKNISK_OPPHØR,
-                    listOf(BehandlingOppsettUtil.ferdigstiltBlankett), null
+                    listOf(BehandlingOppsettUtil.førstegangsbehandlingUnderBehandling), null
                 )
             }
         ).hasMessage("Siste behandlingen må være iverksatt for å kunne utføre teknisk opphør")
@@ -226,16 +206,6 @@ internal class OpprettBehandlingUtilTest {
         @Test
         internal fun `skal kunne opprette en migrering uten tidligere behandlinger`() {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(), null, erMigrering = true)
-        }
-
-        @Test
-        internal fun `skal kunne opprette en migrering når tidligere behanding er blankett`() {
-            validerKanOppretteNyBehandling(
-                BehandlingType.REVURDERING,
-                listOf(BehandlingOppsettUtil.ferdigstiltBlankett),
-                null,
-                erMigrering = true
-            )
         }
 
         @Test

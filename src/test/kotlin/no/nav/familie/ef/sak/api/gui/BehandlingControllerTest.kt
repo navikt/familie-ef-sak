@@ -45,21 +45,11 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal henlegge behandling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678901"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
-        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.BEHANDLES_I_GOSYS))
+        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.FØRSTEGANGSBEHANDLING))
+        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
-    }
-
-    @Test
-    internal fun `Skal ikke være mulig å henlegge blankett med annet enn BEHANDLES_I_GOSYS`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678901"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
-        val respons = henlegg(behandling.id, HenlagtDto(årsak = HenlagtÅrsak.FEILREGISTRERT))
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(respons.body?.frontendFeilmelding).isEqualTo("Blankett kan bare henlegges med årsak BEHANDLES_I_GOSYS")
     }
 
     @Test

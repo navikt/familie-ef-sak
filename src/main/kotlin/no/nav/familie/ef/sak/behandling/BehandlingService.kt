@@ -68,35 +68,11 @@ class BehandlingService(
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
             ?: hentBehandlinger(fagsakId).lastOrNull {
-                it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT
+                it.status == FERDIGSTILT && it.resultat != HENLAGT
             }
 
     fun finnGjeldendeIverksatteBehandlinger(stonadstype: StønadType) =
         behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
-
-    @Transactional
-    fun opprettBehandlingForBlankett(
-        behandlingType: BehandlingType,
-        fagsakId: UUID,
-        søknad: SøknadOvergangsstønadKontrakt,
-        journalpost: Journalpost
-    ): Behandling {
-        val behandling =
-            opprettBehandling(
-                behandlingType = behandlingType,
-                fagsakId = fagsakId,
-                behandlingsårsak = BehandlingÅrsak.SØKNAD
-            )
-        behandlingsjournalpostRepository.insert(
-            Behandlingsjournalpost(
-                behandling.id,
-                journalpost.journalpostId,
-                journalpost.journalposttype
-            )
-        )
-        søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
-        return behandling
-    }
 
     fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> {
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)

@@ -42,7 +42,7 @@ class EksternBehandlingService(
         stønadstype: StønadType,
         personidenter: Set<String>
     ): Boolean {
-        return behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(stønadstype, personidenter)?.let {
+        return behandlingRepository.finnSisteBehandling(stønadstype, personidenter)?.let {
             it.type != BehandlingType.TEKNISK_OPPHØR
         } ?: false
     }
