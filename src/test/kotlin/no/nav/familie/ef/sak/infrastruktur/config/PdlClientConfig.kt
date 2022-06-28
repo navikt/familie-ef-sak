@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
@@ -210,6 +211,7 @@ class PdlClientConfig {
                 dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
                 fødsel = listOf(fødsel(1994, 11, 1)),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
+                folkeregisteridentifikator = listOf(FolkeregisteridentifikatorMedMetadata("1", metadataGjeldende))
             )
 
         private fun forelderBarnRelasjoner(): List<ForelderBarnRelasjon> =

@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioderAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
@@ -35,7 +36,10 @@ object GrunnlagsdataMapper {
             personIdent = personIdent
         )
 
-    fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
+    fun mapAnnenForelder(
+        barneForeldre: Map<String, PdlAnnenForelder>,
+        tidligereVedtaksperioderAnnenForelder: Map<String, TidligereVedtaksperioderAnnenForelder>
+    ) =
         barneForeldre.map {
             AnnenForelderMedIdent(
                 adressebeskyttelse = it.value.adressebeskyttelse,
@@ -43,7 +47,8 @@ object GrunnlagsdataMapper {
                 fødsel = it.value.fødsel,
                 bostedsadresse = it.value.bostedsadresse,
                 dødsfall = it.value.dødsfall,
-                navn = it.value.navn.gjeldende()
+                navn = it.value.navn.gjeldende(),
+                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.key)
             )
         }
 
@@ -92,7 +97,10 @@ object GrunnlagsdataMapper {
                 ?: vergemaal
         }
 
-    private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {
+    private fun mapSivivilstand(
+        pdlSøker: PdlSøker,
+        andrePersoner: Map<String, PdlPersonKort>
+    ): List<SivilstandMedNavn> {
 
         return pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]

@@ -65,6 +65,12 @@ query($identer: [ID!]!){
                     historisk
                 }
             }
+            folkeregisteridentifikator(historikk: true) {
+                identifikasjonsnummer
+                metadata {
+                    historisk
+                }
+            }
             navn {
                 fornavn
                 mellomnavn

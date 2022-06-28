@@ -168,6 +168,8 @@ object PdlTestdata {
             )
         )
 
+    val folkeregisteridentifikatorAnnenForelder = listOf(FolkeregisteridentifikatorMedMetadata("1", metadataGjeldende))
+
     val pdlAnnenForelderData =
         PersonBolk(
             listOf(
@@ -178,7 +180,8 @@ object PdlTestdata {
                         bostedsadresse,
                         dødsfall,
                         fødsel,
-                        navn
+                        folkeregisteridentifikatorAnnenForelder,
+                        navn,
                     )
                 )
             )

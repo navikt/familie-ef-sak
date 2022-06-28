@@ -124,6 +124,7 @@ data class PdlAnnenForelder(
     override val bostedsadresse: List<Bostedsadresse>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+    val folkeregisteridentifikator: List<FolkeregisteridentifikatorMedMetadata>,
     val navn: List<Navn>
 ) : PdlPerson
 
@@ -140,6 +141,12 @@ data class DeltBosted(
 data class Folkeregistermetadata(
     val gyldighetstidspunkt: LocalDateTime?,
     @JsonProperty("opphoerstidspunkt") val opphørstidspunkt: LocalDateTime?
+)
+
+data class FolkeregisteridentifikatorMedMetadata(
+    @JsonProperty("identifikasjonsnummer")
+    val ident: String,
+    val metadata: Metadata
 )
 
 data class Bostedsadresse(

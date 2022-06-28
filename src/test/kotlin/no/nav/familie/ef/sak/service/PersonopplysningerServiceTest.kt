@@ -6,8 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.infotrygd.InfotrygdService
-import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
@@ -15,6 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
@@ -39,6 +38,8 @@ internal class PersonopplysningerServiceTest {
     private lateinit var søknadService: SøknadService
     private lateinit var behandlingService: BehandlingService
 
+    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>()
+
     @BeforeEach
     internal fun setUp() {
         personopplysningerIntegrasjonerClient = mockk(relaxed = true)
@@ -48,11 +49,10 @@ internal class PersonopplysningerServiceTest {
         søknadService = mockk()
         val pdlClient = PdlClientConfig().pdlClient()
 
-        val infotrygdService = InfotrygdService(InfotrygdReplikaMock().infotrygdReplikaClient(), pdlClient)
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
             pdlClient,
             personopplysningerIntegrasjonerClient,
-            infotrygdService
+            tidligereVedaksperioderService
         )
 
         grunnlagsdataService = GrunnlagsdataService(

@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassordningDto
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 
 object BarnMedSamværMapper {
 
@@ -160,7 +161,8 @@ object BarnMedSamværMapper {
             fødselsdato = pdlAnnenForelder.fødsel.gjeldende().fødselsdato,
             dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
             bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
-            land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode
+            land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode,
+            tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder.tilDto()
         )
     }
 }

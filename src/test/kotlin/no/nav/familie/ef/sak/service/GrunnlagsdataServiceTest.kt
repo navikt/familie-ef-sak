@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -13,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegist
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype
@@ -38,11 +38,11 @@ internal class GrunnlagsdataServiceTest {
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val infotrygdReplikaClient = InfotrygdReplikaMock().infotrygdReplikaClient()
-    private val infotrygdService = InfotrygdService(infotrygdReplikaClient, pdlClient)
+    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>()
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         pdlClient,
         personopplysningerIntegrasjonerClient,
-        infotrygdService
+        tidligereVedaksperioderService
     )
 
     private val søknad = SøknadsskjemaMapper.tilDomene(
