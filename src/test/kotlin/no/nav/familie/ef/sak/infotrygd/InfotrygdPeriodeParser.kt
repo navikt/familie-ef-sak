@@ -52,7 +52,6 @@ object InfotrygdPeriodeParser {
             inntektsreduksjon = getValue(row, KEY_INNT_FRADRAG)!!.toInt(),
             samordningsfradrag = getValue(row, KEY_SUM_FRADRAG)!!.toInt(),
             utgifterBarnetilsyn = 0,
-            beløp = 0,
             månedsbeløp = getValue(row, KEY_NETTO_BELØP)!!.toInt(),
             engangsbeløp = 0,
             stønadFom = LocalDate.parse(
@@ -74,7 +73,6 @@ object InfotrygdPeriodeParser {
             aktivitetstype = null,
             startDato = LocalDate.now(),
             vedtakstidspunkt = LocalDateTime.now(),
-            stønadBeløp = 0 // kanskje fjerne ?
         )
 
     private fun getValue(row: Map<String, String>, key: String) = row[key]?.trim()
