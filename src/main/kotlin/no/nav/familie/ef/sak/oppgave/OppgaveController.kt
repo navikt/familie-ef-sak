@@ -82,7 +82,7 @@ class OppgaveController(
             )
     }
 
-    @GetMapping("/gosys/{gsakOppgaveId}")
+    @GetMapping("/oppslag/{gsakOppgaveId}")
     fun hentOppgaveFraGosys(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<OppgaveEfDto> {
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
