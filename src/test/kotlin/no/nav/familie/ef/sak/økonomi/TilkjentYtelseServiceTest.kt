@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.økonomi
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
@@ -12,7 +11,6 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -26,15 +24,10 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
-    private val vurderingService = mockk<VurderingService>()
-    private val barnService = mockk<BarnService>()
     private val tilkjentYtelseService = TilkjentYtelseService(
         behandlingService,
-        mockk(),
         tilkjentYtelseRepository,
         fagsakService,
-        vurderingService,
-        barnService
     )
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))

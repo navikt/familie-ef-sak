@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.vedtak.historikk
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
@@ -18,7 +18,7 @@ import java.util.UUID
 @Service
 class VedtakHistorikkService(
     private val fagsakService: FagsakService,
-    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val andelsHistorikkService: AndelsHistorikkService,
 ) {
 
     /**
@@ -77,7 +77,7 @@ class VedtakHistorikkService(
     }
 
     private fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
-        return tilkjentYtelseService.hentHistorikk(fagsakId, null)
+        return andelsHistorikkService.hentHistorikk(fagsakId, null)
             .filter { it.erIkkeFjernet() }
             .sortedBy { it.andel.stønadFra }
     }

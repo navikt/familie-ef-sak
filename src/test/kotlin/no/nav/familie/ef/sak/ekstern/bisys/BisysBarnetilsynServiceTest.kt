@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
@@ -38,6 +39,7 @@ internal class BisysBarnetilsynServiceTest {
     val fagsakService: FagsakService = mockk()
     val barnService: BarnService = mockk()
     val tilkjentYtelseService: TilkjentYtelseService = mockk()
+    val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     val infotrygdService: InfotrygdService = mockk()
     val behandlingService: BehandlingService = mockk()
     val barnetilsynBisysService = BisysBarnetilsynService(
@@ -46,6 +48,7 @@ internal class BisysBarnetilsynServiceTest {
         behandlingService,
         barnService,
         tilkjentYtelseService,
+        andelsHistorikkService,
         infotrygdService
     )
 
@@ -75,7 +78,7 @@ internal class BisysBarnetilsynServiceTest {
     @Test
     fun `personident med ingen historikk, forvent tom liste med barntilsynBisysPerioder`() {
         mockTilkjentYtelse()
-        every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns emptyList()
+        every { andelsHistorikkService.hentHistorikk(any(), any()) } returns emptyList()
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
@@ -93,7 +96,7 @@ internal class BisysBarnetilsynServiceTest {
                 behandlingBarn = behandlingBarn,
                 endring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
             )
-        every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
+        every { andelsHistorikkService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
@@ -107,7 +110,7 @@ internal class BisysBarnetilsynServiceTest {
         mockTilkjentYtelse()
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().plusDays(1), behandlingBarn = behandlingBarn, beløp = 0)
-        every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
+        every { andelsHistorikkService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
@@ -121,7 +124,7 @@ internal class BisysBarnetilsynServiceTest {
         mockTilkjentYtelse()
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
-        every { tilkjentYtelseService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
+        every { andelsHistorikkService.hentHistorikk(any(), any()) } returns listOf(andelhistorikkDto)
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
@@ -137,7 +140,7 @@ internal class BisysBarnetilsynServiceTest {
             lagAndelHistorikkDto(tilOgMed = LocalDate.now(), behandlingBarn = behandlingBarn)
 
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
         val fomDato = LocalDate.now()
@@ -161,7 +164,7 @@ internal class BisysBarnetilsynServiceTest {
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
 
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto, gammelAndelhistorikkDto)
         val fomDato = LocalDate.now()
         assertThat(
@@ -195,7 +198,7 @@ internal class BisysBarnetilsynServiceTest {
             )
         )
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
         val fomDato = LocalDate.now()
@@ -225,7 +228,7 @@ internal class BisysBarnetilsynServiceTest {
             )
         )
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
         val fomDato = LocalDate.now()
@@ -256,7 +259,7 @@ internal class BisysBarnetilsynServiceTest {
             )
         )
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
         val fomDato = LocalDate.now()
@@ -288,7 +291,7 @@ internal class BisysBarnetilsynServiceTest {
             )
         )
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns emptyList()
 
         val fomDato = LocalDate.now()
@@ -320,7 +323,7 @@ internal class BisysBarnetilsynServiceTest {
             )
         )
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
         val fomDato = LocalDate.now()
@@ -360,7 +363,7 @@ internal class BisysBarnetilsynServiceTest {
             )
         )
         every {
-            tilkjentYtelseService.hentHistorikk(any(), any())
+            andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
         val fomDato = LocalDate.MIN
