@@ -6,9 +6,14 @@ import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,13 +27,18 @@ import java.util.UUID
 @RequestMapping(path = ["/api/sok"])
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class SøkController(private val søkService: SøkService, private val tilgangService: TilgangService) {
+class SøkController(
+    private val søkService: SøkService,
+    private val personService: PersonService,
+    private val tilgangService: TilgangService
+) {
 
     @PostMapping("", "/person")
     fun søkPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<Søkeresultat> {
         validerPersonIdent(personIdentRequest)
+        val personIdenter = hentOgValiderAtIdentEksisterer(personIdentRequest)
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(søkService.søkPerson(personIdentRequest.personIdent))
+        return Ressurs.success(søkService.søkPerson(personIdenter))
     }
 
     @PostMapping("/person/uten-fagsak")
@@ -60,4 +70,11 @@ class SøkController(private val søkService: SøkService, private val tilgangSe
     private fun validerPersonIdent(personIdentRequest: PersonIdentDto) {
         validerIdent(personIdentRequest.personIdent)
     }
+
+    private fun hentOgValiderAtIdentEksisterer(personIdentRequest: PersonIdentDto): PdlIdenter =
+        try {
+            personService.hentPersonIdenter(personIdentRequest.personIdent)
+        } catch (exception: PdlNotFoundException) {
+            throw ApiFeil("Finner ingen personer for valgt personident", HttpStatus.BAD_REQUEST)
+        }
 }

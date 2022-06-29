@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.slot
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
@@ -89,8 +91,14 @@ class PdlClientConfig {
 
         every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("12345678901232", false)))
 
-        every { pdlClient.hentPersonidenter(any(), eq(true)) } answers
-            { PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true))) }
+        val personIdent = slot<String>()
+        every { pdlClient.hentPersonidenter(capture(personIdent), eq(true)) } answers {
+            if (personIdent.captured == "19117313797") {
+                throw PdlNotFoundException()
+            } else {
+                PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true)))
+            }
+        }
 
         every { pdlClient.hentIdenterBolk(listOf("123", "456")) }
             .returns(
