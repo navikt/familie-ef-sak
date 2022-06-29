@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
@@ -24,6 +25,7 @@ class BisysBarnetilsynService(
     private val behandlingService: BehandlingService,
     private val barnService: BarnService,
     private val tilkjentYtelseService: TilkjentYtelseService,
+    private val andelsHistorikkService: AndelsHistorikkService,
     private val infotrygdService: InfotrygdService
 ) {
 
@@ -54,7 +56,7 @@ class BisysBarnetilsynService(
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return null
         val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
 
-        val historikk = tilkjentYtelseService.hentHistorikk(fagsak.id, null)
+        val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }
             .filter { it.andel.beløp > 0 && it.andel.stønadTil >= fomDato }
 

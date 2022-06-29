@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilDto
@@ -22,7 +23,8 @@ import java.util.UUID
 @Validated
 class PeriodeController(
     private val tilgangService: TilgangService,
-    private val tilkjentYtelseService: TilkjentYtelseService
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val andelsHistorikkService: AndelsHistorikkService,
 ) {
 
     @GetMapping("/{behandlingId}")
@@ -37,6 +39,6 @@ class PeriodeController(
         @RequestParam tilOgMedBehandlingId: UUID? = null
     ): Ressurs<List<AndelHistorikkDto>> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(tilkjentYtelseService.hentHistorikk(fagsakId, tilOgMedBehandlingId).reversed())
+        return Ressurs.success(andelsHistorikkService.hentHistorikk(fagsakId, tilOgMedBehandlingId).reversed())
     }
 }

@@ -15,6 +15,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class TilkjentYtelseController(
     private val tilkjentYtelseService: TilkjentYtelseService,
+    private val andelsHistorikkService: AndelsHistorikkService,
     private val tilgangService: TilgangService
 ) {
 
@@ -27,6 +28,6 @@ class TilkjentYtelseController(
     @GetMapping("/barn/{behandlingId}")
     fun hentBarnMedLøpendeUtbetalinger(@PathVariable behandlingId: UUID): Ressurs<BarnMedLøpendeStønad> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(tilkjentYtelseService.utledLøpendeUtbetalingForBarnIBarnetilsyn(behandlingId))
+        return Ressurs.success(andelsHistorikkService.utledLøpendeUtbetalingForBarnIBarnetilsyn(behandlingId))
     }
 }
