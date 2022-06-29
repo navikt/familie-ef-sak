@@ -74,6 +74,13 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `Skal feile hvis personIdenten ikke finnes i pdl`() {
+        val response = søkPerson("19117313797")
+        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
+    }
+
+    @Test
     internal fun `Skal feile hvis personIdenten har feil lengde`() {
         val response = søkPerson("010101999990")
         assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
