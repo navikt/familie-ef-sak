@@ -89,7 +89,14 @@ class PdlClientConfig {
 
         every { pdlClient.hentAndreForeldre(any()) } returns mapOf(annenForelderFnr to annenForelder())
 
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("12345678901232", false)))
+        val personIdentAktør = slot<String>()
+        every { pdlClient.hentAktørIder(capture(personIdentAktør)) } answers {
+            if (personIdentAktør.captured == "19117313797") {
+                throw PdlNotFoundException()
+            } else {
+                PdlIdenter(listOf(PdlIdent("12345678901232", false)))
+            }
+        }
 
         val personIdent = slot<String>()
         every { pdlClient.hentPersonidenter(capture(personIdent), eq(true)) } answers {

@@ -74,11 +74,7 @@ class PdlClientTest {
         val response = pdlClient.hentAndreForeldre(listOf("11111122222"))
 
         assertThat(response["11111122222"]?.bostedsadresse?.get(0)?.gyldigFraOgMed).isEqualTo(
-            LocalDate.of(
-                1966,
-                11,
-                18
-            )
+            LocalDate.of(1966, 11, 18)
         )
     }
 
