@@ -124,10 +124,10 @@ class PdlClientConfig {
 
         private val startdato = LocalDate.of(2020, 1, 1)
         private val sluttdato = LocalDate.of(2021, 1, 1)
-        private const val barnFnr = "01012067050"
-        private const val barn2Fnr = "14041385481"
-        private const val søkerFnr = "01010172272"
-        private const val annenForelderFnr = "17097926735"
+        const val barnFnr = "01012067050"
+        const val barn2Fnr = "14041385481"
+        const val søkerFnr = "01010172272"
+        const val annenForelderFnr = "17097926735"
         private const val fnrPåAdresseSøk = "01012067050"
 
         fun lagPersonKort(it: String) =
@@ -211,7 +211,12 @@ class PdlClientConfig {
                 dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
                 fødsel = listOf(fødsel(1994, 11, 1)),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
-                folkeregisteridentifikator = listOf(FolkeregisteridentifikatorMedMetadata("1", metadataGjeldende))
+                folkeregisteridentifikator = listOf(
+                    FolkeregisteridentifikatorMedMetadata(
+                        annenForelderFnr,
+                        metadataGjeldende
+                    )
+                )
             )
 
         private fun forelderBarnRelasjoner(): List<ForelderBarnRelasjon> =

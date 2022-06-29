@@ -38,7 +38,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var søknadService: SøknadService
     private lateinit var behandlingService: BehandlingService
 
-    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>()
+    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
 
     @BeforeEach
     internal fun setUp() {

@@ -40,7 +40,8 @@ object PdlTestdata {
         )
     )
 
-    private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
+    private val adressebeskyttelse =
+        listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 
     private val bostedsadresse = listOf(
         Bostedsadresse(
@@ -58,7 +59,8 @@ object PdlTestdata {
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
 
-    private val familierelasjon = listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
+    private val familierelasjon =
+        listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
 
     private val fødsel = listOf(Fødsel(1, LocalDate.now(), "", "", "", metadataGjeldende))
 
@@ -168,7 +170,10 @@ object PdlTestdata {
             )
         )
 
-    val folkeregisteridentifikatorAnnenForelder = listOf(FolkeregisteridentifikatorMedMetadata("1", metadataGjeldende))
+    val ennenForelderIdentifikator = "2"
+
+    val folkeregisteridentifikatorAnnenForelder =
+        listOf(FolkeregisteridentifikatorMedMetadata(ennenForelderIdentifikator, metadataGjeldende))
 
     val pdlAnnenForelderData =
         PersonBolk(

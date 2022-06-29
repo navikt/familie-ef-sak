@@ -39,7 +39,7 @@ internal class VilkårGrunnlagServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val medlemskapMapper = MedlemskapMapper(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
     private val behandlingService = mockk<BehandlingService>()
-    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>()
+    private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         pdlClient,

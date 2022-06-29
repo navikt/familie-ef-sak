@@ -1409,6 +1409,57 @@
         "name" : "personIdent",
         "type" : "String",
         "nullable" : false
+      },
+      "tidligereVedtaksperioder" : {
+        "name" : "tidligereVedtaksperioder",
+        "type" : "Object",
+        "fields" : {
+          "efSak" : {
+            "name" : "efSak",
+            "type" : "Object",
+            "fields" : {
+              "harTidligereOvergangsstønad" : {
+                "name" : "harTidligereOvergangsstønad",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereBarnetilsyn" : {
+                "name" : "harTidligereBarnetilsyn",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereSkolepenger" : {
+                "name" : "harTidligereSkolepenger",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "infotrygd" : {
+            "name" : "infotrygd",
+            "type" : "Object",
+            "fields" : {
+              "harTidligereOvergangsstønad" : {
+                "name" : "harTidligereOvergangsstønad",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereBarnetilsyn" : {
+                "name" : "harTidligereBarnetilsyn",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereSkolepenger" : {
+                "name" : "harTidligereSkolepenger",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          }
+        },
+        "nullable" : true
       }
     },
     "nullable" : false
