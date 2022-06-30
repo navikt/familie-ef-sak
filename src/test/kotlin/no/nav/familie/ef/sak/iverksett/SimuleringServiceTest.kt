@@ -9,8 +9,6 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.beregning.BeregningService
-import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
@@ -18,17 +16,10 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
-import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
-import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
-import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -39,26 +30,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.YearMonth
 
 internal class SimuleringServiceTest {
 
     private val iverksettClient = mockk<IverksettClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
-    private val vedtakService = mockk<VedtakService>()
     private val simuleringsresultatRepository = mockk<SimuleringsresultatRepository>()
-    private val beregningService = BeregningService()
-    private val blankettSimuleringsService = BlankettSimuleringsService(beregningService)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val tilgangService = mockk<TilgangService>()
 
     private val simuleringService = SimuleringService(
         iverksettClient = iverksettClient,
-        vedtakService = vedtakService,
-        blankettSimuleringsService = blankettSimuleringsService,
         simuleringsresultatRepository = simuleringsresultatRepository,
         tilkjentYtelseService = tilkjentYtelseService,
         tilgangService = tilgangService

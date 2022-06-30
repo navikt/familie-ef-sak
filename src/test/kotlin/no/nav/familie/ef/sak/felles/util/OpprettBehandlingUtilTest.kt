@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOpprette
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.repository.behandling
@@ -41,7 +40,7 @@ internal class OpprettBehandlingUtilTest {
                     catchThrowable {
                         validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, tidligereBehandlinger, null)
                     }
-                ).hasMessage("Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør")
+                ).hasMessage("Siste behandlingen for en førstegangsbehandling må være av typen teknisk opphør")
             }
         }
     }
@@ -62,7 +61,7 @@ internal class OpprettBehandlingUtilTest {
                     null
                 )
             }
-        ).hasMessage("Siste behandlingen for en førstegangsbehandling må være av typen blankett eller teknisk opphør")
+        ).hasMessage("Siste behandlingen for en førstegangsbehandling må være av typen teknisk opphør")
     }
 
     @Test
@@ -188,7 +187,7 @@ internal class OpprettBehandlingUtilTest {
                     listOf(BehandlingOppsettUtil.førstegangsbehandlingUnderBehandling), null
                 )
             }
-        ).hasMessage("Siste behandlingen må være iverksatt for å kunne utføre teknisk opphør")
+        ).hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
 
         assertThat(
             catchThrowable {

@@ -1,3 +1,5 @@
 DELETE
-FROM behandling
-WHERE behandling.type = 'BLANKETT';
+FROM fagsak
+WHERE id IN (SELECT fagsak_id
+             FROM behandling
+             WHERE behandling.type = 'BLANKETT');
