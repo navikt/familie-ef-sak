@@ -140,7 +140,7 @@ class MigreringService(
     }
 
     /**
-     * Skal kun kalles direkte fra denne klassen eller [TestSaksbehandlingController]
+     * Skal kun kalles direkte fra denne klassen eller [TestSaksbehandlingControll]
      */
     @Transactional
     fun opprettMigrering(

@@ -104,7 +104,10 @@ class BehandlingsstatistikkTask(
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
-                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(stønadType, vedtak)
+                    ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
+                        stønadType,
+                        vedtak
+                    )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
                     ResultatType.HENLEGGE -> error("Ikke implementert")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
@@ -126,7 +129,9 @@ class BehandlingsstatistikkTask(
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER ->
                 gjeldendeSaksbehandler
                     ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG -> vedtak?.saksbehandlerIdent ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
+                vedtak?.saksbehandlerIdent
+                    ?: error("Mangler saksbehandler på vedtaket")
         }
     }
 

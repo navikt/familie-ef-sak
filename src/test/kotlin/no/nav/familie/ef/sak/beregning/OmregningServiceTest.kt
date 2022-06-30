@@ -134,7 +134,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         assertThat(iverksettDto).usingRecursiveComparison()
             .ignoringFields("behandling.vilkårsvurderinger")
             .isEqualTo(expectedIverksettDto)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger).hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger)
+            .hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(

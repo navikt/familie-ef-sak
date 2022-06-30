@@ -18,8 +18,10 @@ import java.util.UUID
 
 internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var behandlingService: BehandlingService
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var behandlingService: BehandlingService
     private val behandlingÅrsak = BehandlingÅrsak.SØKNAD
 
     @Test
@@ -93,7 +95,12 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal finne siste behandling med avslåtte hvis kun avslått`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT))
+        val behandling = behandlingRepository.insert(
+            behandling(fagsak).copy(
+                resultat = BehandlingResultat.AVSLÅTT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
     }
@@ -101,8 +108,18 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal finne siste behandling med avslåtte hvis avslått og henlagt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val avslag = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT))
-        behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT))
+        val avslag = behandlingRepository.insert(
+            behandling(fagsak).copy(
+                resultat = BehandlingResultat.AVSLÅTT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
+        behandlingRepository.insert(
+            behandling(fagsak).copy(
+                resultat = BehandlingResultat.HENLAGT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(avslag.id)
     }
@@ -110,9 +127,24 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal plukke ut førstegangsbehandling hvis det finnes førstegangsbehandling, avslått og henlagt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val førstegang = behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT))
-        behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT))
-        behandlingRepository.insert(behandling(fagsak).copy(resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT))
+        val førstegang = behandlingRepository.insert(
+            behandling(fagsak).copy(
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
+        behandlingRepository.insert(
+            behandling(fagsak).copy(
+                resultat = BehandlingResultat.AVSLÅTT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
+        behandlingRepository.insert(
+            behandling(fagsak).copy(
+                resultat = BehandlingResultat.HENLAGT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(førstegang.id)
     }
