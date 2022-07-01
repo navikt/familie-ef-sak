@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
@@ -15,9 +14,8 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertSti
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
-import no.nav.familie.ef.sak.vilkår.dto.TidligereInnvilgetVedtakDto
-import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -59,7 +57,7 @@ class VilkårGrunnlagService(
         val sagtOppEllerRedusertStilling = søknad?.situasjon?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it) }
 
         return VilkårGrunnlagDto(
-            tidligereVedtaksperioder = mapTidligereVedtaksperioder(grunnlagsdata.tidligereVedtaksperioder),
+            tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,
             sivilstand = sivilstand,
             bosituasjon = søknad?.let { BosituasjonMapper.tilDto(it.bosituasjon) },
@@ -70,17 +68,6 @@ class VilkårGrunnlagService(
             lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling,
             registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt
         )
-    }
-
-    private fun mapTidligereVedtaksperioder(tidligereVedtaksperioder: TidligereVedtaksperioder?): TidligereVedtaksperioderDto {
-        val infotrygd = tidligereVedtaksperioder?.infotrygd?.let {
-            TidligereInnvilgetVedtakDto(
-                harTidligereOvergangsstønad = it.harTidligereOvergangsstønad,
-                harTidligereBarnetilsyn = it.harTidligereBarnetilsyn,
-                harTidligereSkolepenger = it.harTidligereSkolepenger
-            )
-        }
-        return TidligereVedtaksperioderDto(infotrygd = infotrygd)
     }
 
     private fun mapBarnMedSamvær(

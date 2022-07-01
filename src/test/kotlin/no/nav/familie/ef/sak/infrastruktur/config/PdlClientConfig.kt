@@ -140,8 +140,8 @@ class PdlClientConfig {
         private val sluttdato = LocalDate.of(2021, 1, 1)
         private const val barnFnr = "01012067050"
         private const val barn2Fnr = "14041385481"
-        private const val søkerFnr = "01010172272"
-        private const val annenForelderFnr = "17097926735"
+        const val søkerFnr = "01010172272"
+        const val annenForelderFnr = "17097926735"
         private const val fnrPåAdresseSøk = "01012067050"
 
         fun lagPersonKort(it: String) =

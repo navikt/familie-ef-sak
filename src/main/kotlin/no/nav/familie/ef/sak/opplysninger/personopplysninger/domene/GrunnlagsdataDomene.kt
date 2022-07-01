@@ -108,7 +108,10 @@ data class FullmaktMedNavn(
     val navn: String?
 )
 
-data class TidligereVedtaksperioder(val infotrygd: TidligereInnvilgetVedtak)
+data class TidligereVedtaksperioder(
+    val infotrygd: TidligereInnvilgetVedtak,
+    val sak: TidligereInnvilgetVedtak? = null
+)
 
 data class TidligereInnvilgetVedtak(
     val harTidligereOvergangsstønad: Boolean,
