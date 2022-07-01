@@ -15,8 +15,14 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
+import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -56,6 +62,29 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
+    }
+
+    @Test
+    internal fun `Skal klare å inserte ett vedtak med resultatet avslå`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
+        val behandling = behandlingRepository.insert(
+            behandling(
+                fagsak,
+                steg = StegType.BEREGNE_YTELSE,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.UTREDES
+            )
+        )
+        val vedtakDto = Avslå(avslåBegrunnelse = "avslår vedtaket", avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT)
+        val vedtak = Vedtak(
+            behandlingId = behandling.id,
+            avslåBegrunnelse = "avslår vedtaket",
+            avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
+            resultatType = ResultatType.AVSLÅ
+        )
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
+
+        assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
     }
 
     @Test
