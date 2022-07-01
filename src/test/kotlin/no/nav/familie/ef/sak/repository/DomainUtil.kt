@@ -145,8 +145,13 @@ fun Behandling.innvilgetOgFerdigstilt() =
         status = BehandlingStatus.FERDIGSTILT
     )
 
+val defaultIdenter = setOf(PersonIdent("15"))
+fun fagsakPerson(
+    identer: Set<PersonIdent> = defaultIdenter
+) = FagsakPerson(identer = identer)
+
 fun fagsak(
-    identer: Set<PersonIdent> = setOf(PersonIdent("15")),
+    identer: Set<PersonIdent> = defaultIdenter,
     stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
     id: UUID = UUID.randomUUID(),
     eksternId: EksternFagsakId = EksternFagsakId(),
