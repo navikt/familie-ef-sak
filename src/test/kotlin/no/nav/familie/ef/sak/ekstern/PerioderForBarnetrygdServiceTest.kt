@@ -129,4 +129,53 @@ internal class PerioderForBarnetrygdServiceTest {
         assertThat(perioder[1].fomDato).isEqualTo(periode2.stønadFom)
         assertThat(perioder[1].tomDato).isEqualTo(periode4.stønadFom.minusDays(1))
     }
+
+    @Test
+    internal fun `periode omsluter annen periode`() {
+        val periode1 = lagInternPeriode(stønadFom = LocalDate.of(2008, 8, 1), stønadTom = LocalDate.of(2009, 3, 31))
+        val periode2 = lagInternPeriode(stønadFom = LocalDate.of(2008, 12, 1), stønadTom = LocalDate.of(2009, 3, 31))
+
+        every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns
+            listOf(periode1, periode2)
+
+        val perioder = service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder
+
+        assertThat(perioder).hasSize(1)
+        assertThat(perioder[0].fomDato).isEqualTo(periode1.stønadFom)
+        assertThat(perioder[0].tomDato).isEqualTo(periode1.stønadTom)
+    }
+
+    @Test
+    internal fun `periode overlapper delvis`() {
+        val periode1 = lagInternPeriode(stønadFom = LocalDate.of(2008, 8, 1), stønadTom = LocalDate.of(2009, 1, 31))
+        val periode2 = lagInternPeriode(stønadFom = LocalDate.of(2008, 12, 1), stønadTom = LocalDate.of(2009, 3, 31))
+
+        every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns
+            listOf(periode1, periode2)
+
+        val perioder = service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder
+
+        assertThat(perioder).hasSize(2)
+        assertThat(perioder[0].fomDato).isEqualTo(periode2.stønadFom)
+        assertThat(perioder[0].tomDato).isEqualTo(periode2.stønadTom)
+        assertThat(perioder[1].fomDato).isEqualTo(periode1.stønadFom)
+        assertThat(perioder[1].tomDato).isEqualTo(periode2.stønadFom.minusDays(1))
+    }
+
+    @Test
+    internal fun `periode overlapper ikke`() {
+        val periode1 = lagInternPeriode(stønadFom = LocalDate.of(2008, 8, 1), stønadTom = LocalDate.of(2009, 1, 31))
+        val periode2 = lagInternPeriode(stønadFom = LocalDate.of(2009, 12, 1), stønadTom = LocalDate.of(2009, 12, 31))
+
+        every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns
+            listOf(periode1, periode2)
+
+        val perioder = service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder
+
+        assertThat(perioder).hasSize(2)
+        assertThat(perioder[0].fomDato).isEqualTo(periode2.stønadFom)
+        assertThat(perioder[0].tomDato).isEqualTo(periode2.stønadTom)
+        assertThat(perioder[1].fomDato).isEqualTo(periode1.stønadFom)
+        assertThat(perioder[1].tomDato).isEqualTo(periode1.stønadTom)
+    }
 }
