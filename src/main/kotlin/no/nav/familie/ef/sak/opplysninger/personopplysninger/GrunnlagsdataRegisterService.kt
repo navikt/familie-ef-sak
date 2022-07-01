@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
@@ -46,9 +47,11 @@ class GrunnlagsdataRegisterService(
     private fun hentTidligereVedtaksperioderAnnenForelder(
         barneForeldre: Map<String, PdlAnnenForelder>
     ): Map<String, TidligereVedtaksperioder> {
-        return barneForeldre.entries.associate { (key, value) ->
-            val personIdenter = value.folkeregisteridentifikator.map { it.ident }.toSet()
-            key to tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdenter)
+        return loggTid("antall=${barneForeldre.size}") {
+            barneForeldre.entries.associate { (key, value) ->
+                val personIdenter = value.folkeregisteridentifikator.map { it.ident }.toSet()
+                key to tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdenter)
+            }
         }
     }
 
