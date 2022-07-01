@@ -105,7 +105,7 @@ internal class PerioderForBarnetrygdServiceTest {
     }
 
     @Test
-    internal fun `skal fjerne perioder som omsluttes og splitte opp perioder som overlapper for Infotrygdperioder2`() {
+    internal fun `skal splitte og fjerne perioder riktig - også når det foreligger duplikate perioder som endres underveis i prosessen`() {
         val periode1 =
             lagInternPeriode(beløp = 1, stønadFom = LocalDate.of(2008, 12, 1), stønadTom = LocalDate.of(2009, 3, 31))
         val periode2 =
