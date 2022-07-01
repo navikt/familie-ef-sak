@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.filtrerOgSorterPerioderFraInfotrygd
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeUtil.slåSammenInfotrygdperioder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -143,27 +142,5 @@ internal class InfotrygdPeriodeUtilTest {
         val nyePerioder = filtrerOgSorterPerioderFraInfotrygd(listOf(periode2, periode1, periode4, periode3))
 
         assertThat(nyePerioder).isEqualTo(listOf(periode4, periode3, periode2, periode1))
-    }
-
-    @Test
-    internal fun `skal slå sammen perioder som overlapper`() {
-        // 01.10.2008 - 31.03.2009
-        // 01.12.2008 - 31.03.2009
-        val periode1 = lagInfotrygdPeriode(
-            stønadId = 1,
-            vedtakId = 1,
-            stønadFom = LocalDate.of(2008, 10, 1),
-            stønadTom = LocalDate.of(2009, 3, 31)
-        )
-        val periode2 = lagInfotrygdPeriode(
-            stønadId = 1,
-            vedtakId = 2,
-            stønadFom = LocalDate.of(2008, 12, 1),
-            stønadTom = LocalDate.of(2009, 3, 31)
-        )
-
-        val nyePerioder = slåSammenInfotrygdperioder(listOf(periode1, periode2))
-
-        assertThat(nyePerioder).isEqualTo(listOf(periode1))
     }
 }
