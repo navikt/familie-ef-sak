@@ -35,7 +35,7 @@ class PerioderForBarnetrygdService(
     private fun infotrygdperioderUtenOverlapp(perioder: List<PeriodeOvergangsstønad>) =
         perioder
             .sortedWith(compareByDescending<PeriodeOvergangsstønad> { it.tomDato }.thenByDescending { it.fomDato })
-            .fold<PeriodeOvergangsstønad, MutableList<PeriodeOvergangsstønad>>(mutableListOf()) { acc, gjeldende ->
+            .fold(mutableListOf<PeriodeOvergangsstønad>()) { acc, gjeldende ->
                 acc.fjernDuplikatOgSplittOverlappendePeriode(gjeldende)
             }
             .sortedByDescending { it.fomDato }
