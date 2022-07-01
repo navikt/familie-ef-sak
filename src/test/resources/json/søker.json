@@ -33,6 +33,14 @@
       ],
       "doedsfall": [],
       "forelderBarnRelasjon": [],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "11111111111",
+          "metadata":  {
+            "historisk": false
+          }
+        }
+      ],
       "foedsel": [
         {
           "foedselsaar": null,

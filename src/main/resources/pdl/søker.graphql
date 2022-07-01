@@ -67,6 +67,12 @@ query($ident: ID!){
                 historisk
             }
         }
+        folkeregisteridentifikator(historikk: true) {
+            identifikasjonsnummer
+            metadata {
+                historisk
+            }
+        }
         folkeregisterpersonstatus {
             status
             forenkletStatus

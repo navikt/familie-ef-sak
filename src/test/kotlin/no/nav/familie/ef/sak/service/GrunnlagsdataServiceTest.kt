@@ -136,8 +136,11 @@ internal class GrunnlagsdataServiceTest {
         val personIdent = PdlClientConfig.søkerFnr
         val defaultTidligereInnvilgetVedtak = TidligereInnvilgetVedtak(true, true, false)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdent) } returns
+        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(setOf(personIdent))) } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak)
+
+        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr)) } returns
+            TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak, defaultTidligereInnvilgetVedtak)
 
         val grunnlagsdata = service.hentGrunnlagsdataFraRegister(personIdent, emptyList())
 
@@ -146,6 +149,9 @@ internal class GrunnlagsdataServiceTest {
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereBarnetilsyn).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereSkolepenger).isFalse
 
-        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdent) }
+        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(personIdent)) }
+        verify(exactly = 1) {
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr))
+        }
     }
 }

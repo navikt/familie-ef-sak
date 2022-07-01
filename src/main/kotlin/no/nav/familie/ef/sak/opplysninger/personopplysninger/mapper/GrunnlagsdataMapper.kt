@@ -36,7 +36,10 @@ object GrunnlagsdataMapper {
             personIdent = personIdent
         )
 
-    fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
+    fun mapAnnenForelder(
+        barneForeldre: Map<String, PdlAnnenForelder>,
+        tidligereVedtaksperioderAnnenForelder: Map<String, TidligereVedtaksperioder>
+    ) =
         barneForeldre.map {
             AnnenForelderMedIdent(
                 adressebeskyttelse = it.value.adressebeskyttelse,
@@ -44,7 +47,8 @@ object GrunnlagsdataMapper {
                 fødsel = it.value.fødsel,
                 bostedsadresse = it.value.bostedsadresse,
                 dødsfall = it.value.dødsfall,
-                navn = it.value.navn.gjeldende()
+                navn = it.value.navn.gjeldende(),
+                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.value.folkeregisteridentifikator.gjeldende().ident)
             )
         }
 
@@ -93,7 +97,10 @@ object GrunnlagsdataMapper {
                 ?: vergemaal
         }
 
-    private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {
+    private fun mapSivivilstand(
+        pdlSøker: PdlSøker,
+        andrePersoner: Map<String, PdlPersonKort>
+    ): List<SivilstandMedNavn> {
 
         return pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]

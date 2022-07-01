@@ -22,6 +22,8 @@ fun List<Folkeregisterpersonstatus>.gjeldende(): Folkeregisterpersonstatus? = th
 fun List<Dødsfall>.gjeldende(): Dødsfall? = this.firstOrNull()
 fun List<Adressebeskyttelse>.gjeldende(): Adressebeskyttelse? = this.find { !it.metadata.historisk }
 fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = this.distinct().single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
+fun List<FolkeregisteridentifikatorMedMetadata>.gjeldende(): FolkeregisteridentifikatorMedMetadata =
+    this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }
 
 fun List<SivilstandMedNavn>.gjeldende(): SivilstandMedNavn = this.find { !it.metadata.historisk } ?: this.first()
 

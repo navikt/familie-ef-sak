@@ -71,7 +71,8 @@ data class AnnenForelderMedIdent(
     val dødsfall: List<Dødsfall>,
     val fødsel: List<Fødsel>,
     val navn: Navn,
-    val personIdent: String
+    val personIdent: String,
+    val tidligereVedtaksperioder: TidligereVedtaksperioder?
 )
 
 data class BarnMedIdent(
@@ -114,7 +115,7 @@ data class TidligereVedtaksperioder(
 )
 
 data class TidligereInnvilgetVedtak(
-    val harTidligereOvergangsstønad: Boolean,
-    val harTidligereBarnetilsyn: Boolean,
-    val harTidligereSkolepenger: Boolean
+    val harTidligereOvergangsstønad: Boolean = false,
+    val harTidligereBarnetilsyn: Boolean = false,
+    val harTidligereSkolepenger: Boolean = false
 )
