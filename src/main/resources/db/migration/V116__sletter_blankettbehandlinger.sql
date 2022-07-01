@@ -94,17 +94,6 @@ WHERE behandling_id IN (SELECT id
                         FROM behandling
                         WHERE behandling.type = 'BLANKETT');
 DELETE
-FROM andel_tilkjent_ytelse
-WHERE tilkjent_ytelse IN (SELECT t.id
-                          FROM tilkjent_ytelse t
-                                   JOIN behandling b ON b.id = t.behandling_id
-                          WHERE b.type = 'BLANKETT');
-DELETE
-FROM tilkjent_ytelse
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-DELETE
 FROM behandlingshistorikk
 WHERE behandling_id IN (SELECT id
                         FROM behandling
@@ -126,41 +115,6 @@ WHERE behandling_id IN (SELECT id
                         WHERE behandling.type = 'BLANKETT');
 DELETE
 FROM grunnlagsdata
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-DELETE
-FROM vedtaksbrev
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-DELETE
-FROM mellomlagret_brev
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-DELETE
-FROM simuleringsresultat
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-UPDATE behandling
-SET forrige_behandling_id = NULL
-WHERE forrige_behandling_id IN (SELECT id
-                                FROM behandling
-                                WHERE behandling.type = 'BLANKETT');
-DELETE
-FROM tilbakekreving
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-DELETE
-FROM mellomlagret_fritekstbrev
-WHERE behandling_id IN (SELECT id
-                        FROM behandling
-                        WHERE behandling.type = 'BLANKETT');
-DELETE
-FROM brevmottakere
 WHERE behandling_id IN (SELECT id
                         FROM behandling
                         WHERE behandling.type = 'BLANKETT');
