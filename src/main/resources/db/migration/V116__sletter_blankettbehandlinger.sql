@@ -1,9 +1,9 @@
 DELETE
 FROM soknad_soker
-WHERE grunnlag_soknad_id IN (SELECT soknad_grunnlag.id
-                             FROM soknad_grunnlag
-                                      JOIN behandling ON soknad_grunnlag.behandling_id = behandling.id
-                                 AND behandling.type = 'BLANKETT');
+WHERE grunnlag_soknad_id IN (SELECT sg.id
+                             FROM soknad_grunnlag sg
+                                      JOIN behandling b ON sg.behandling_id = b.id
+                                 AND b.type = 'BLANKETT');
 DELETE
 FROM vedlegg
 WHERE grunnlag_soknad_id IN (SELECT sg.id
@@ -47,9 +47,9 @@ WHERE soknadsskjema_id IN (SELECT s.id
                                AND b.type = 'BLANKETT');
 DELETE
 FROM soknad_barnepassordning
-WHERE barn_id IN (SELECT b.id
-                  FROM soknad_barn
-                           JOIN soknadsskjema s ON soknad_barn.soknadsskjema_id = s.id
+WHERE barn_id IN (SELECT sb.id
+                  FROM soknad_barn sb
+                           JOIN soknadsskjema s ON sb.soknadsskjema_id = s.id
                            JOIN soknad_grunnlag sg ON s.id = sg.soknadsskjema_id
                            JOIN behandling b ON b.id = sg.behandling_id
                       AND b.type = 'BLANKETT');;
