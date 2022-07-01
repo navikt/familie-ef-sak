@@ -20,6 +20,9 @@ class TidligereVedaksperioderService(
     private val infotrygdService: InfotrygdService,
 ) {
 
+    /**
+     * @param personIdenter for 1 person
+     */
     fun hentTidligereVedtaksperioder(personIdenter: Set<String>): TidligereVedtaksperioder {
         val tidligereInnvilgetVedtak =
             mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(personIdenter))

@@ -13,8 +13,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorStatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
@@ -67,7 +67,7 @@ class PdlClientConfig {
     fun pdlSaksbehandlerClient(): PdlSaksbehandlerClient {
         val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
         val pdlPersonFraSøk = PdlPersonFraSøk(
-            listOf(element = Folkeregisteridentifikator(fnrPåAdresseSøk)),
+            listOf(element = FolkeregisteridentifikatorFraSøk(fnrPåAdresseSøk)),
             bostedsadresse(),
             listOf(lagNavn())
         )
@@ -160,7 +160,7 @@ class PdlClientConfig {
                 emptyList()
             )
 
-        val folkeregisteridentifikatorSøker = FolkeregisteridentifikatorMedMetadata(
+        val folkeregisteridentifikatorSøker = Folkeregisteridentifikator(
             søkerFnr,
             FolkeregisteridentifikatorStatus.I_BRUK,
             metadataGjeldende
@@ -237,7 +237,7 @@ class PdlClientConfig {
                 fødsel = listOf(fødsel(1994, 11, 1)),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
                 folkeregisteridentifikator = listOf(
-                    FolkeregisteridentifikatorMedMetadata(
+                    Folkeregisteridentifikator(
                         annenForelderFnr,
                         FolkeregisteridentifikatorStatus.I_BRUK,
                         metadataGjeldende

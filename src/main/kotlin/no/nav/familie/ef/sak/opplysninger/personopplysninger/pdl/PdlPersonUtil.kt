@@ -21,8 +21,8 @@ fun List<DeltBosted>.gjeldende(): DeltBosted? = this.find { !it.metadata.histori
 fun List<Folkeregisterpersonstatus>.gjeldende(): Folkeregisterpersonstatus? = this.find { !it.metadata.historisk }
 fun List<Dødsfall>.gjeldende(): Dødsfall? = this.firstOrNull()
 fun List<Adressebeskyttelse>.gjeldende(): Adressebeskyttelse? = this.find { !it.metadata.historisk }
-fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator = this.distinct().single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
-fun List<FolkeregisteridentifikatorMedMetadata>.gjeldende(): FolkeregisteridentifikatorMedMetadata =
+fun List<FolkeregisteridentifikatorFraSøk>.gjeldende(): FolkeregisteridentifikatorFraSøk = this.distinct().single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
+fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator =
     this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }
 
 fun List<SivilstandMedNavn>.gjeldende(): SivilstandMedNavn = this.find { !it.metadata.historisk } ?: this.first()

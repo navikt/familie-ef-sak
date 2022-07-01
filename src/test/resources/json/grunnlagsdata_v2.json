@@ -1088,6 +1088,29 @@
           }
         },
         "nullable" : false
+      },
+      "folkeregisteridentifikator" : {
+        "name" : "folkeregisteridentifikator",
+        "type" : "Collection",
+        "fields" : {
+          "personIdent" : {
+            "name" : "personIdent",
+            "type" : "String",
+            "nullable" : false
+          },
+          "status" : {
+            "name" : "status",
+            "type" : "Enum",
+            "values" : [ "I_BRUK", "OPPHOERT" ],
+            "nullable" : false
+          },
+          "historisk" : {
+            "name" : "historisk",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : true
       }
     },
     "nullable" : false
@@ -1409,6 +1432,29 @@
         "name" : "personIdent",
         "type" : "String",
         "nullable" : false
+      },
+      "folkeregisteridentifikator" : {
+        "name" : "folkeregisteridentifikator",
+        "type" : "Collection",
+        "fields" : {
+          "personIdent" : {
+            "name" : "personIdent",
+            "type" : "String",
+            "nullable" : false
+          },
+          "status" : {
+            "name" : "status",
+            "type" : "Enum",
+            "values" : [ "I_BRUK", "OPPHOERT" ],
+            "nullable" : false
+          },
+          "historisk" : {
+            "name" : "historisk",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : true
       },
       "tidligereVedtaksperioder" : {
         "name" : "tidligereVedtaksperioder",

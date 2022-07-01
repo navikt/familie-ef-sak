@@ -83,7 +83,7 @@ object PdlTestdata {
     val søkerIdentifikator = "1"
 
     val folkeregisteridentifikatorSøker = listOf(
-        FolkeregisteridentifikatorMedMetadata(
+        Folkeregisteridentifikator(
             søkerIdentifikator,
             FolkeregisteridentifikatorStatus.I_BRUK,
             metadataGjeldende
@@ -184,7 +184,7 @@ object PdlTestdata {
     val ennenForelderIdentifikator = "2"
 
     val folkeregisteridentifikatorAnnenForelder = listOf(
-        FolkeregisteridentifikatorMedMetadata(
+        Folkeregisteridentifikator(
             ennenForelderIdentifikator,
             FolkeregisteridentifikatorStatus.I_BRUK,
             metadataGjeldende
@@ -226,7 +226,7 @@ object PdlTestdata {
             hits = listOf(
                 PersonSøkTreff(
                     PdlPersonFraSøk(
-                        listOf(Folkeregisteridentifikator("123456789")),
+                        listOf(FolkeregisteridentifikatorFraSøk("123456789")),
                         bostedsadresse,
                         navn
                     )

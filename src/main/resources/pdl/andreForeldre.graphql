@@ -67,6 +67,7 @@ query($identer: [ID!]!){
             }
             folkeregisteridentifikator(historikk: true) {
                 identifikasjonsnummer
+                status
                 metadata {
                     historisk
                 }

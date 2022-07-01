@@ -92,7 +92,7 @@ data class PdlSøker(
     override val bostedsadresse: List<Bostedsadresse>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-    val folkeregisteridentifikator: List<FolkeregisteridentifikatorMedMetadata>,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
     val fullmakt: List<Fullmakt>,
@@ -128,7 +128,7 @@ data class PdlAnnenForelder(
     override val bostedsadresse: List<Bostedsadresse>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
-    val folkeregisteridentifikator: List<FolkeregisteridentifikatorMedMetadata>,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
     val navn: List<Navn>
 ) : PdlPerson
 
@@ -147,7 +147,7 @@ data class Folkeregistermetadata(
     @JsonProperty("opphoerstidspunkt") val opphørstidspunkt: LocalDateTime?
 )
 
-data class FolkeregisteridentifikatorMedMetadata(
+data class Folkeregisteridentifikator(
     @JsonProperty("identifikasjonsnummer")
     val ident: String,
     val status: FolkeregisteridentifikatorStatus,

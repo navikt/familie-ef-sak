@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
@@ -16,6 +17,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator as FolkeregisteridentifikatorPdl
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon as ForelderBarnRelasjonPdl
 
 object GrunnlagsdataMapper {
@@ -48,7 +50,8 @@ object GrunnlagsdataMapper {
                 bostedsadresse = it.value.bostedsadresse,
                 dødsfall = it.value.dødsfall,
                 navn = it.value.navn.gjeldende(),
-                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.value.folkeregisteridentifikator.gjeldende().ident)
+                folkeregisteridentifikator = mapFolkeregisteridentifikator(it.value.folkeregisteridentifikator),
+                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.key)
             )
         }
 
@@ -71,8 +74,12 @@ object GrunnlagsdataMapper {
         telefonnummer = pdlSøker.telefonnummer,
         tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
         utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-        vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner)
+        vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner),
+        folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator)
     )
+
+    private fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) =
+        list.map { Folkeregisteridentifikator(it.ident, it.status, it.metadata.historisk) }
 
     private fun List<ForelderBarnRelasjonPdl>.mapForelderBarnRelasjon() =
         this.mapNotNull {
