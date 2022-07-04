@@ -42,7 +42,7 @@ class BehandlingController(
         return Ressurs.success(saksbehandling.tilDto())
     }
 
-    @GetMapping("gamlebehandlinger")
+    @GetMapping("gamle-behandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<GammelBehandlingDto>> {
         val gamleBehandlinger = behandlingService.hentGamleUferdigeBehandlinger()
         return Ressurs.success(gamleBehandlinger)
