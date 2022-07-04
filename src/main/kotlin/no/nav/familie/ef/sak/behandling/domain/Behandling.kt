@@ -54,7 +54,6 @@ data class Behandling(
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
     REVURDERING("Revurdering"),
-    TEKNISK_OPPHØR("Teknisk opphør")
 }
 
 enum class BehandlingResultat(val displayName: String) {

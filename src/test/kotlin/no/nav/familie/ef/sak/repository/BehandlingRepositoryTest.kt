@@ -150,38 +150,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `finnSisteBehandlingSomIkkeErBlankett - skal returnere teknisk opphør`() {
-        val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR))
-
-        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter))
-            .isEqualTo(behandling)
-    }
-
-    @Test
-    fun `finnSisteIverksatteBehandling - skal returnere teknisk opphør hvis siste behandling er teknisk opphør`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
-        )
-        val tekniskOpphørBehandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                type = BehandlingType.TEKNISK_OPPHØR,
-                resultat = BehandlingResultat.OPPHØRT
-            )
-        )
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id))
-            .isEqualTo(tekniskOpphørBehandling)
-    }
-
-    @Test
     fun `finnSisteIverksatteBehandling - skal ikke returnere noe hvis behandlingen ikke er ferdigstilt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
         behandlingRepository.insert(
