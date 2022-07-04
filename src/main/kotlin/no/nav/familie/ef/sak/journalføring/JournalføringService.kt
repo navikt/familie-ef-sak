@@ -216,7 +216,7 @@ class JournalføringService(
     }
 
     private fun validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak: Fagsak) {
-        if (!behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(fagsak.id)) {
+        if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
                 StønadType.OVERGANGSSTØNAD ->
                     infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(

@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
@@ -54,6 +55,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OmregningServiceTest : OppslagSpringRunnerTest() {
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
 
     @Autowired
     lateinit var omregningService: OmregningService
@@ -235,20 +239,17 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         vedtakstidspunkt: LocalDateTime
     ): IverksettOvergangsstønadDto {
 
-        val nyBehandling =
-            behandlingRepository.finnSisteBehandling(
-                StønadType.OVERGANGSSTØNAD,
-                fagsak.personIdenter.map {
-                    it.ident
-                }.toSet()
-            ) ?: error("Impossibru! :p")
+        val personidenter = fagsak.personIdenter.map { it.ident }.toSet()
+        val forrigeBehandling = fagsakService.finnFagsak(personidenter, StønadType.OVERGANGSSTØNAD)?.let {
+            behandlingRepository.findByFagsakId(it.id).maxByOrNull { it.sporbar.opprettetTid }
+        } ?: error("Finner ikke tidligere iverksatt behandling")
 
         val expectedIverksettDto: IverksettOvergangsstønadDto =
             ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
 
         val andelerTilkjentYtelse = expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
             if (it.fraOgMed >= nyesteGrunnbeløpGyldigFraOgMed) {
-                it.copy(kildeBehandlingId = nyBehandling.id)
+                it.copy(kildeBehandlingId = forrigeBehandling.id)
             } else {
                 it.copy(kildeBehandlingId = behandling.id)
             }
@@ -256,8 +257,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val tilkjentYtelseDto = expectedIverksettDto.vedtak.tilkjentYtelse?.copy(andelerTilkjentYtelse = andelerTilkjentYtelse)
         val vedtak = expectedIverksettDto.vedtak.copy(tilkjentYtelse = tilkjentYtelseDto, vedtakstidspunkt = vedtakstidspunkt)
         val behandlingsdetaljerDto = expectedIverksettDto.behandling.copy(
-            behandlingId = nyBehandling.id,
-            eksternId = nyBehandling.eksternId.id
+            behandlingId = forrigeBehandling.id,
+            eksternId = forrigeBehandling.eksternId.id
         )
         return expectedIverksettDto.copy(
             vedtak = vedtak,
