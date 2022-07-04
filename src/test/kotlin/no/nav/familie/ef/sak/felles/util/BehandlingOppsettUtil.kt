@@ -43,14 +43,6 @@ object BehandlingOppsettUtil {
             sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3))
         )
 
-    val ferdigstiltBlankett = behandling(fagsak)
-        .copy(
-            type = BehandlingType.BLANKETT,
-            status = BehandlingStatus.FERDIGSTILT,
-            resultat = BehandlingResultat.INNVILGET,
-            sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(2))
-        )
-
     val henlagtRevurdering = behandling(fagsak)
         .copy(
             type = BehandlingType.REVURDERING,
@@ -90,7 +82,6 @@ object BehandlingOppsettUtil {
     fun lagBehandlingerForSisteIverksatte() = listOf(
         henlagtFørstegangsbehandling,
         iverksattFørstegangsbehandling,
-        ferdigstiltBlankett,
         henlagtRevurdering,
         revurderingUnderArbeid
     )

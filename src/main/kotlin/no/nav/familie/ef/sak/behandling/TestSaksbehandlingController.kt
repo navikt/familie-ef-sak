@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.TestBehandlingsType.BARNETILSYN
-import no.nav.familie.ef.sak.behandling.TestBehandlingsType.BLANKETT
 import no.nav.familie.ef.sak.behandling.TestBehandlingsType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.TestBehandlingsType.MIGRERING
 import no.nav.familie.ef.sak.behandling.TestBehandlingsType.SKOLEPENGER
@@ -80,7 +79,6 @@ class TestSaksbehandlingController(
 
         val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
             FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(søknadBuilder.søknadOvergangsstønad, fagsak)
-            BLANKETT -> lagBlankettBehandling(personIdent, søknadBuilder.søknadOvergangsstønad, fagsak)
             MIGRERING -> lagMigreringBehandling(fagsak)
             BARNETILSYN -> lagBarnetilsynBehandling(søknadBuilder.søknadBarnetilsyn, fagsak)
             SKOLEPENGER -> lagSkolepengerBehandling(søknadBuilder.søknadSkolepenger, fagsak)
@@ -230,12 +228,6 @@ class TestSaksbehandlingController(
         return behandling
     }
 
-    private fun lagBlankettBehandling(fnr: String, søknad: SøknadOvergangsstønad, fagsak: Fagsak): Behandling {
-        val journalpostId = arkiver(fnr)
-        val journalpost = journalpostClient.hentJournalpost(journalpostId)
-        return behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-    }
-
     private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
         return migreringService.opprettMigrering(
             fagsak = fagsak,
@@ -268,7 +260,7 @@ class TestSaksbehandlingController(
 
 private fun TestBehandlingsType.tilStønadstype(): StønadType =
     when (this) {
-        FØRSTEGANGSBEHANDLING, BLANKETT, MIGRERING -> StønadType.OVERGANGSSTØNAD
+        FØRSTEGANGSBEHANDLING, MIGRERING -> StønadType.OVERGANGSSTØNAD
         BARNETILSYN -> StønadType.BARNETILSYN
         SKOLEPENGER -> StønadType.SKOLEPENGER
     }
@@ -280,7 +272,6 @@ data class TestFagsakRequest(
 
 enum class TestBehandlingsType {
     FØRSTEGANGSBEHANDLING,
-    BLANKETT,
     MIGRERING,
     BARNETILSYN,
     SKOLEPENGER

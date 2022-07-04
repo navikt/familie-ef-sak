@@ -9,8 +9,6 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.beregning.BeregningService
-import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
@@ -18,17 +16,10 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
-import no.nav.familie.ef.sak.simulering.BlankettSimuleringsService
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
-import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
-import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
-import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -39,26 +30,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.repository.findByIdOrNull
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.YearMonth
 
 internal class SimuleringServiceTest {
 
     private val iverksettClient = mockk<IverksettClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
-    private val vedtakService = mockk<VedtakService>()
     private val simuleringsresultatRepository = mockk<SimuleringsresultatRepository>()
-    private val beregningService = BeregningService()
-    private val blankettSimuleringsService = BlankettSimuleringsService(beregningService)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val tilgangService = mockk<TilgangService>()
 
     private val simuleringService = SimuleringService(
         iverksettClient = iverksettClient,
-        vedtakService = vedtakService,
-        blankettSimuleringsService = blankettSimuleringsService,
         simuleringsresultatRepository = simuleringsresultatRepository,
         tilkjentYtelseService = tilkjentYtelseService,
         tilgangService = tilgangService
@@ -109,64 +93,6 @@ internal class SimuleringServiceTest {
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed)
             .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
         assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(forrigeBehandlingId)
-    }
-
-    @Test
-    internal fun `skal bruke lagret vedtak for simulering av blankett`() {
-
-        val behandling = behandling(fagsak = fagsak, type = BehandlingType.BLANKETT)
-
-        val årMånedFraStart = YearMonth.of(2021, 1)
-        val årMånedGEndring = YearMonth.of(2021, 5)
-        val årMånedFraSlutt = YearMonth.of(2021, 12)
-        val vedtak = InnvilgelseOvergangsstønad(
-            periodeBegrunnelse = "Ok",
-            inntektBegrunnelse = "ok",
-            perioder = listOf(
-                VedtaksperiodeDto(
-                    årMånedFra = årMånedFraStart,
-                    årMånedTil = årMånedFraSlutt,
-                    aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
-                    periodeType = VedtaksperiodeType.HOVEDPERIODE
-                )
-            ),
-            inntekter = listOf(
-                Inntekt(
-                    årMånedFra = årMånedFraStart,
-                    forventetInntekt = BigDecimal(300000),
-                    samordningsfradrag = BigDecimal(300)
-                )
-            ),
-            samordningsfradragType = SamordningsfradragType.UFØRETRYGD
-
-        )
-
-        every { behandlingService.hentBehandling(any()) } returns behandling
-
-        every {
-            vedtakService.hentVedtakHvisEksisterer(any())
-        } returns vedtak
-
-        val simulerSlot = slot<SimuleringDto>()
-        every {
-            iverksettClient.simuler(capture(simulerSlot))
-        } returns BeriketSimuleringsresultat(mockk(), mockk())
-
-        simuleringService.simuler(saksbehandling(fagsak, behandling))
-
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed)
-            .isEqualTo(årMånedFraStart.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed)
-            .isEqualTo(årMånedGEndring.atDay(1).minusDays(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
-            .isGreaterThan(0)
-
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().fraOgMed)
-            .isEqualTo(årMånedGEndring.atDay(1))
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().tilOgMed)
-            .isEqualTo(årMånedFraSlutt.atEndOfMonth())
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.last().beløp)
-            .isGreaterThan(0)
     }
 
     @Test

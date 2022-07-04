@@ -1,83 +1,34 @@
 package no.nav.familie.ef.sak.blankett
 
-import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Fil
-import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.journalføring.JournalføringService
-import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.oppgave.OppgaveRepository
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
 class BlankettService(
-    private val tilgangService: TilgangService,
     private val vurderingService: VurderingService,
     private val blankettClient: BlankettClient,
     private val blankettRepository: BlankettRepository,
-    private val journalføringService: JournalføringService,
     private val behandlingService: BehandlingService,
     private val søknadService: SøknadService,
-    private val fagsakService: FagsakService,
     private val personopplysningerService: PersonopplysningerService,
-    private val oppgaveRepository: OppgaveRepository,
-    private val barnService: BarnService,
-    private val grunnlagsdataService: GrunnlagsdataService,
     private val vedtakService: VedtakService
 ) {
-
-    @Transactional
-    fun opprettBlankettBehandling(journalpostId: String, oppgaveId: Long): Behandling {
-        val journalpost = journalføringService.hentJournalpost(journalpostId)
-        val personIdent = journalføringService.hentIdentForJournalpost(journalpost)
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.CREATE)
-        val søknad = journalføringService.hentSøknadFraJournalpostForOvergangsstønad(journalpostId)
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
-        val behandling = behandlingService.opprettBehandlingForBlankett(BehandlingType.BLANKETT, fagsak.id, søknad, journalpost)
-        opprettEfOppgave(behandling.id, oppgaveId)
-        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
-
-        barnService.opprettBarnPåBehandlingMedSøknadsdata(
-            behandling.id,
-            fagsak.id,
-            grunnlagsdata.grunnlagsdata.barn,
-            fagsak.stønadstype
-        )
-        return behandling
-    }
-
-    private fun opprettEfOppgave(behandlingId: UUID, oppgaveId: Long) {
-        val oppgave = Oppgave(
-            gsakOppgaveId = oppgaveId,
-            behandlingId = behandlingId,
-            type = Oppgavetype.BehandleSak
-        )
-        oppgaveRepository.insert(oppgave)
-    }
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(
             BlankettPdfBehandling(årsak = behandling.årsak, stønadstype = behandling.stønadstype),
             lagPersonopplysningerDto(behandling),
-            hentVilkårDto(behandlingId),
+            vurderingService.hentEllerOpprettVurderinger(behandlingId),
             hentVedtak(behandlingId),
             lagSøknadsdatoer(behandlingId)
         )
@@ -93,8 +44,6 @@ class BlankettService(
         }
         return blankettRepository.insert(blankett)
     }
-
-    private fun hentVilkårDto(behandlingId: UUID) = vurderingService.hentEllerOpprettVurderinger(behandlingId)
 
     private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto? {
         val søknadsgrunnlag = søknadService.hentSøknadsgrunnlag(behandlingId) ?: return null
@@ -115,9 +64,5 @@ class BlankettService(
     private fun hentGjeldendeNavn(hentAktivIdent: String): String {
         val navnMap = personopplysningerService.hentGjeldeneNavn(listOf(hentAktivIdent))
         return navnMap.getValue(hentAktivIdent)
-    }
-
-    fun hentBlankettPdf(behandlingId: UUID): Blankett? {
-        return blankettRepository.findByIdOrNull(behandlingId)
     }
 }

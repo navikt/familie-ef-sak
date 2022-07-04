@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
@@ -296,12 +295,10 @@ class MigreringService(
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
         } else {
             val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
-            if (behandlinger.any { it.type != BehandlingType.BLANKETT }) {
-                throw MigreringException("Fagsaken har allerede behandlinger", MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER)
-            } else if (behandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+            if (behandlinger.isNotEmpty()) {
                 throw MigreringException(
-                    "Fagsaken har behandling som ikke er ferdigstilt",
-                    MigreringExceptionType.IKKE_FERDIGSTILT_BEHANDLING
+                    "Fagsaken har allerede behandlinger",
+                    MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER
                 )
             }
         }

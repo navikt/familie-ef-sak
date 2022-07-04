@@ -10,17 +10,13 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTIL
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLING
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.JOURNALFØR_BLANKETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VEDTA_BLANKETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
-import no.nav.familie.ef.sak.blankett.BlankettSteg
-import no.nav.familie.ef.sak.blankett.VedtaBlankettSteg
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -60,12 +56,6 @@ class StegService(
     }
 
     @Transactional
-    fun håndterVedtaBlankett(saksbehandling: Saksbehandling, vedtak: VedtakDto): Behandling {
-        val behandlingSteg: VedtaBlankettSteg = hentBehandlingSteg(VEDTA_BLANKETT)
-        return håndterSteg(saksbehandling, behandlingSteg, vedtak)
-    }
-
-    @Transactional
     fun håndterSendTilBeslutter(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
@@ -77,14 +67,6 @@ class StegService(
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
         return håndterSteg(saksbehandling, behandlingSteg, data)
-    }
-
-    @Deprecated("Brukes kun i blankettbehandling - skal fases ut etterhvert")
-    @Transactional
-    fun håndterBlankett(saksbehandling: Saksbehandling): Behandling {
-        val behandlingSteg: BlankettSteg = hentBehandlingSteg(JOURNALFØR_BLANKETT)
-
-        return håndterSteg(saksbehandling, behandlingSteg, null)
     }
 
     @Transactional

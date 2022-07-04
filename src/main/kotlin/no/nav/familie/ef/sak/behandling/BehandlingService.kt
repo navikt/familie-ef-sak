@@ -28,7 +28,6 @@ import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOvergangsstønadKontrakt
 
 @Service
 class BehandlingService(
@@ -68,35 +66,11 @@ class BehandlingService(
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
             ?: hentBehandlinger(fagsakId).lastOrNull {
-                it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT
+                it.status == FERDIGSTILT && it.resultat != HENLAGT
             }
 
     fun finnGjeldendeIverksatteBehandlinger(stonadstype: StønadType) =
         behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
-
-    @Transactional
-    fun opprettBehandlingForBlankett(
-        behandlingType: BehandlingType,
-        fagsakId: UUID,
-        søknad: SøknadOvergangsstønadKontrakt,
-        journalpost: Journalpost
-    ): Behandling {
-        val behandling =
-            opprettBehandling(
-                behandlingType = behandlingType,
-                fagsakId = fagsakId,
-                behandlingsårsak = BehandlingÅrsak.SØKNAD
-            )
-        behandlingsjournalpostRepository.insert(
-            Behandlingsjournalpost(
-                behandling.id,
-                journalpost.journalpostId,
-                journalpost.journalposttype
-            )
-        )
-        søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
-        return behandling
-    }
 
     fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> {
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)

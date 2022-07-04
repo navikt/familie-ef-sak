@@ -124,12 +124,12 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f ON f.id = b.fagsak_id
         JOIN person_ident pi ON f.fagsak_person_id = pi.fagsak_person_id
-        WHERE pi.ident IN (:personidenter) AND f.stonadstype = :stønadstype AND b.type != 'BLANKETT'
+        WHERE pi.ident IN (:personidenter) AND f.stonadstype = :stønadstype
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """
     )
-    fun finnSisteBehandlingSomIkkeErBlankett(
+    fun finnSisteBehandling(
         stønadstype: StønadType,
         personidenter: Set<String>
     ): Behandling?
@@ -141,7 +141,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         WHERE b.fagsak_id = :fagsakId
-         AND b.type != 'BLANKETT'
          AND b.resultat IN ('OPPHØRT', 'INNVILGET')
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC

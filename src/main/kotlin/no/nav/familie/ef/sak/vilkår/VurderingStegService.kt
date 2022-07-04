@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.vilkår
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
@@ -104,9 +103,7 @@ class VurderingStegService(
     }
 
     private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
-        if (saksbehandling.type != BehandlingType.BLANKETT) {
-            taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
-        }
+        taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
     }
 
     private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {

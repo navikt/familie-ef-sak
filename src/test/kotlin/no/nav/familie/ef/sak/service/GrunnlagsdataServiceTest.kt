@@ -87,20 +87,6 @@ internal class GrunnlagsdataServiceTest {
     }
 
     @Test
-    internal fun `skal kaste feil hvis behandlingen er blanket og savner grunnlagsdata`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT)
-        val behandlingId = behandling.id
-
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns null
-        every { behandlingService.hentBehandling(behandlingId) } returns behandling
-
-        assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
-
-        verify(exactly = 0) { pdlClient.hentSøker(any()) }
-    }
-
-    @Test
     internal fun `skal hente navn til relatertVedSivilstand fra sivilstand når personen har sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.GIFT, null, "11111122222", null, Metadata(false))
         val pdlSøker = PdlClientConfig.opprettPdlSøker().copy(
