@@ -31,8 +31,6 @@ class BeregningBarnetilsynController(
         @RequestBody
         barnetilsynBeregningRequest: BeregningBarnetilsynRequest
     ): Ressurs<List<BeløpsperiodeBarnetilsynDto>> {
-
-        // TODO valider
         return Ressurs.success(
             beregningBarnetilsynService.beregnYtelseBarnetilsyn(
                 barnetilsynBeregningRequest.utgiftsperioder,

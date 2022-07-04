@@ -38,6 +38,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -72,6 +73,7 @@ class StepDefinitions {
 
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
+    private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val beregningService = BeregningService()
     private val beregningBarnetilsynService = BeregningBarnetilsynService()
@@ -87,6 +89,7 @@ class StepDefinitions {
 
     private val beregnYtelseSteg = BeregnYtelseSteg(
         tilkjentYtelseService,
+        andelsHistorikkService,
         beregningService,
         beregningBarnetilsynService,
         beregningSkolepengerService,
@@ -98,7 +101,7 @@ class StepDefinitions {
         validerOmregningService
     )
 
-    private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, tilkjentYtelseService)
+    private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, andelsHistorikkService)
 
     private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
@@ -357,7 +360,7 @@ class StepDefinitions {
         } answers {
             tilkjentYtelser.getValue(firstArg())
         }
-        every { tilkjentYtelseService.hentHistorikk(any(), any()) } answers {
+        every { andelsHistorikkService.hentHistorikk(any(), any()) } answers {
             beregnetAndelHistorikkList
         }
         return tilkjentYtelser

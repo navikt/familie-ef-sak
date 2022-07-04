@@ -42,6 +42,7 @@ class BehandlingController(
     @PostMapping("{behandlingId}/reset/{steg}")
     fun resetSteg(@PathVariable behandlingId: UUID, @PathVariable steg: StegType): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
         stegService.resetSteg(behandlingId, steg)
         return Ressurs.success(behandlingId)
     }
@@ -49,6 +50,7 @@ class BehandlingController(
     @PostMapping("{behandlingId}/vent")
     fun settPåVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
         behandlingService.settPåVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
@@ -56,6 +58,7 @@ class BehandlingController(
     @PostMapping("{behandlingId}/aktiver")
     fun taAvVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
         behandlingService.taAvVent(behandlingId)
         return Ressurs.success(behandlingId)
     }

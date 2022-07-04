@@ -47,7 +47,13 @@ class ApiExceptionHandler {
     fun handleThrowable(feil: ApiFeil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
         secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
-        logger.info("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
+        logger.info(
+            "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
+            rootCause(
+                feil
+            )
+            }: ${feil.message} "
+        )
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.funksjonellFeil(
                 frontendFeilmelding = feil.feil,
@@ -60,14 +66,27 @@ class ApiExceptionHandler {
     fun handleThrowable(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(feil)
         secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
-        logger.error("En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${rootCause(feil)}: ${feil.message} ")
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
+        logger.error(
+            "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
+            rootCause(
+                feil
+            )
+            }: ${feil.message} "
+        )
+        return ResponseEntity.status(feil.httpStatus)
+            .body(Ressurs.failure(frontendFeilmelding = feil.frontendFeilmelding))
     }
 
     @ExceptionHandler(PdlNotFoundException::class)
     fun handleThrowable(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("Finner ikke personen i PDL")
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Ressurs.failure(frontendFeilmelding = "Finner ikke personen"))
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                Ressurs.funksjonellFeil(
+                    frontendFeilmelding = "Finner ingen personer for valgt personident",
+                    melding = "Finner ingen personer for valgt personident"
+                )
+            )
     }
 
     @ExceptionHandler(ManglerTilgang::class)

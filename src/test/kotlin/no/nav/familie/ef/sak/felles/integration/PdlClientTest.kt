@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import org.assertj.core.api.Assertions
@@ -72,7 +73,9 @@ class PdlClientTest {
 
         val response = pdlClient.hentAndreForeldre(listOf("11111122222"))
 
-        assertThat(response["11111122222"]?.bostedsadresse?.get(0)?.gyldigFraOgMed).isEqualTo(LocalDate.of(1966, 11, 18))
+        assertThat(response["11111122222"]?.bostedsadresse?.get(0)?.gyldigFraOgMed).isEqualTo(
+            LocalDate.of(1966, 11, 18)
+        )
     }
 
     @Test
@@ -180,6 +183,16 @@ class PdlClientTest {
                     .willReturn(okJson(readFile("hent_identer_bolk.json")))
             )
             assertDoesNotThrow { pdlClient.hentIdenterBolk((1..PdlClient.MAKS_ANTALL_IDENTER).map { "$it" }) }
+        }
+
+        @Test
+        fun `skal håndtere hentIdenter hvor det ikke finnes en person`() {
+            wiremockServerItem.stubFor(
+                post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                    .willReturn(okJson(readFile("hent_identer_finnes_ikke.json")))
+            )
+
+            assertThrows<PdlNotFoundException> { pdlClient.hentPersonidenter("12345678901") }
         }
     }
 

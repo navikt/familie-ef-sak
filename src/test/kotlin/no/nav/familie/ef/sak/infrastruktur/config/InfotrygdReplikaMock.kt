@@ -31,26 +31,29 @@ class InfotrygdReplikaMock {
         fun resetMock(client: InfotrygdReplikaClient) {
             clearMocks(client)
             every { client.hentPerioder(any()) } answers {
-                val firstArg = firstArg<InfotrygdPeriodeRequest>()
-                val personIdent = firstArg.personIdenter.first()
-                InfotrygdPeriodeResponse(
-                    overgangsstønad = listOf(lagInfotrygdPeriode()),
-                    barnetilsyn = listOf(
-                        lagInfotrygdPeriode(
-                            personIdent = personIdent,
-                            beløp = 234,
-                            inntektsgrunnlag = 321,
-                            samordningsfradrag = 0,
-                            utgifterBarnetilsyn = 1000,
-                            barnIdenter = listOf("123", "234")
-                        )
-                    ),
-                    skolepenger = emptyList()
-                )
+                hentPerioderDefaultResponse(firstArg())
             }
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
             every { client.hentPersonerForMigrering(any()) } returns emptySet()
+        }
+
+        fun hentPerioderDefaultResponse(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
+            val personIdent = request.personIdenter.first()
+            return InfotrygdPeriodeResponse(
+                overgangsstønad = listOf(lagInfotrygdPeriode()),
+                barnetilsyn = listOf(
+                    lagInfotrygdPeriode(
+                        personIdent = personIdent,
+                        beløp = 234,
+                        inntektsgrunnlag = 321,
+                        samordningsfradrag = 0,
+                        utgifterBarnetilsyn = 1000,
+                        barnIdenter = listOf("123", "234")
+                    )
+                ),
+                skolepenger = emptyList()
+            )
         }
     }
 }
