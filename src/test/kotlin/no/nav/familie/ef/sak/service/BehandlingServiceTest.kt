@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
-import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.BEHANDLES_I_GOSYS
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
@@ -80,18 +79,6 @@ internal class BehandlingServiceTest {
 
     @Nested
     inner class HenleggBehandling {
-
-        @Test
-        internal fun `skal henlegge behandling som er blankett og status utredes`() {
-            val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.UTREDES)
-            henleggOgForventOk(behandling, BEHANDLES_I_GOSYS)
-        }
-
-        @Test
-        internal fun `skal henlegge behandling som er blankett og status opprettet`() {
-            val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT, status = BehandlingStatus.OPPRETTET)
-            henleggOgForventOk(behandling, BEHANDLES_I_GOSYS)
-        }
 
         @Test
         internal fun `skal kunne henlegge behandling som er førstegangsbehandling`() {

@@ -3,13 +3,11 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
-import no.nav.familie.ef.sak.blankett.JournalførBlankettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -56,25 +54,17 @@ class BeslutteVedtakSteg(
 
         return if (data.godkjent) {
             vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
-            when (saksbehandling.type) {
-                BehandlingType.BLANKETT -> {
-                    opprettTaskForJournalførBlankett(saksbehandling)
-                    stegType().hentNesteSteg(saksbehandling.type)
-                }
-                else -> {
-                    val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
-                    oppdaterResultatPåBehandling(saksbehandling.id)
-                    opprettPollForStatusOppgave(saksbehandling.id)
-                    opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-                    if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning) {
-                        iverksettClient.iverksettUtenBrev(iverksettDto)
-                    } else {
-                        val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
-                        iverksettClient.iverksett(iverksettDto, fil)
-                    }
-                    StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
-                }
+            val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
+            oppdaterResultatPåBehandling(saksbehandling.id)
+            opprettPollForStatusOppgave(saksbehandling.id)
+            opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
+            if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning) {
+                iverksettClient.iverksettUtenBrev(iverksettDto)
+            } else {
+                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
+                iverksettClient.iverksett(iverksettDto, fil)
             }
+            StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
@@ -92,7 +82,10 @@ class BeslutteVedtakSteg(
     fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
         when (resultat) {
-            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
+            ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(
+                behandlingId,
+                BehandlingResultat.INNVILGET
+            )
             ResultatType.OPPHØRT -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.OPPHØRT)
             ResultatType.AVSLÅ -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.AVSLÅTT)
             ResultatType.SANKSJONERE -> behandlingService.oppdaterResultatPåBehandling(behandlingId, BehandlingResultat.INNVILGET)
@@ -126,10 +119,6 @@ class BeslutteVedtakSteg(
                 )
             )
         )
-    }
-
-    private fun opprettTaskForJournalførBlankett(saksbehandling: Saksbehandling) {
-        taskRepository.save(JournalførBlankettTask.opprettTask(saksbehandling))
     }
 
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {

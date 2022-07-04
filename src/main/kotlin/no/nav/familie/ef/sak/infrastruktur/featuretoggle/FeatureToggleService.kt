@@ -16,8 +16,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     MIGRERING("familie.ef.sak.migrering"),
     G_BEREGNING("familie.ef.sak.g-beregning"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
-    OMBERENING_LIVE_RUN("familie.ef.sak.omberegning.live.run"),
-    OMBEREGNING("familie.ef.sak.omberegning"),
 
     SYNKRONISER_PERSONIDENTER("familie.ef.sak.synkroniser-personidenter"),
     SKOLEPENGER("familie.ef.sak.skolepenger"),
@@ -30,7 +28,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN("familie.ef.sak.frontend-journalforing-kan-legge-til-terminbarn"),
     FRONTEND_SKOLEPENGER_REVURDERING("familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-skolepenger"),
-    FRONTEND_FILTRERE_BARN_BARNETILSYN("familie.ef.sak.frontend.filtrere-barn-barnetilsyn")
+
+    FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder")
     ;
 
     companion object {

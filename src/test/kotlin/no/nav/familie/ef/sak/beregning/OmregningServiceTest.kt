@@ -49,22 +49,38 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var omregningService: OmregningService
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var vedtakRepository: VedtakRepository
-    @Autowired lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired lateinit var taskRepository: TaskRepository
-    @Autowired lateinit var iverksettClient: IverksettClient
-    @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-    @Autowired lateinit var barnRepository: BarnRepository
-    @Autowired lateinit var søknadService: SøknadService
+    @Autowired
+    lateinit var omregningService: OmregningService
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    lateinit var taskRepository: TaskRepository
+
+    @Autowired
+    lateinit var iverksettClient: IverksettClient
+
+    @Autowired
+    lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    lateinit var barnRepository: BarnRepository
+
+    @Autowired
+    lateinit var søknadService: SøknadService
 
     val personService = mockk<PersonService>()
     val år = nyesteGrunnbeløpGyldigFraOgMed.year
@@ -106,7 +122,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandlingId)
         vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
 
-        omregningService.utførGOmregning(fagsakId, true)
+        omregningService.utførGOmregning(fagsakId)
         val nyBehandling = behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
@@ -115,79 +131,16 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
         val iverksettDto = iverksettDtoSlot.captured
         val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling, iverksettDto.vedtak.vedtakstidspunkt)
-        assertThat(iverksettDto.vedtak).isEqualTo(expectedIverksettDto.vedtak)
-        assertThat(iverksettDto.fagsak).isEqualTo(expectedIverksettDto.fagsak)
-        assertThat(iverksettDto.søker).isEqualTo(expectedIverksettDto.søker)
-        assertThat(iverksettDto.behandling.aktivitetspliktInntrefferDato).isEqualTo(expectedIverksettDto.behandling.aktivitetspliktInntrefferDato)
-        assertThat(iverksettDto.behandling.behandlingId).isEqualTo(expectedIverksettDto.behandling.behandlingId)
-        assertThat(iverksettDto.behandling.behandlingType).isEqualTo(expectedIverksettDto.behandling.behandlingType)
-        assertThat(iverksettDto.behandling.behandlingÅrsak).isEqualTo(expectedIverksettDto.behandling.behandlingÅrsak)
-        assertThat(iverksettDto.behandling.eksternId).isEqualTo(expectedIverksettDto.behandling.eksternId)
-        assertThat(iverksettDto.behandling.forrigeBehandlingId).isEqualTo(expectedIverksettDto.behandling.forrigeBehandlingId)
-        assertThat(iverksettDto.behandling.kravMottatt).isEqualTo(expectedIverksettDto.behandling.kravMottatt)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger).hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
+        assertThat(iverksettDto).usingRecursiveComparison()
+            .ignoringFields("behandling.vilkårsvurderinger")
+            .isEqualTo(expectedIverksettDto)
+        assertThat(iverksettDto.behandling.vilkårsvurderinger)
+            .hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(
-            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id)
-                .single { it.type == VilkårType.ALENEOMSORG }.barnId
+            vilkårsvurderingRepository.findByBehandlingId(nyBehandling.id).single { it.type == VilkårType.ALENEOMSORG }.barnId
         ).isNotNull
-    }
-
-    @Test
-    fun `utførGOmregning kjørt med liveRun=false kaster exception og etterlater seg ingen spor i databasen`() {
-
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år))
-        vedtakRepository.insert(vedtak(behandling.id, år = år))
-
-        val barn = barnRepository.insert(
-            behandlingBarn(
-                behandlingId = behandling.id,
-                personIdent = "01012067050",
-                navn = "Kid Kiddesen"
-            )
-        )
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
-
-        val vilkårsvurderinger = lagVilkårsvurderinger(barn, behandling.id)
-        vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
-
-        assertThrows<DryRunException> { omregningService.utførGOmregning(fagsak.id, false) }
-
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
-        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
-        verify(exactly = 0) { iverksettClient.simuler(any()) }
-        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
-    }
-
-    @Test
-    fun `utførGOmregning med samordningsfradrag returner og etterlater seg ingen spor i databasen i dry run`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
-        val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
-        vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
-
-        omregningService.utførGOmregning(fagsak.id, false)
-
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
-        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
-        verify(exactly = 0) { iverksettClient.simuler(any()) }
-        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
     }
 
     @Test
@@ -204,37 +157,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
         vedtakRepository.insert(vedtak(behandling.id, år = år, inntekter = InntektWrapper(listOf(inntektsperiode))))
 
-        omregningService.utførGOmregning(fagsak.id, true)
-
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
-        assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
-        verify(exactly = 0) { iverksettClient.simuler(any()) }
-        verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
-    }
-
-    @Test
-    fun `utførGOmregning med sanksjon returner og etterlater seg ingen spor i databasen i dry run`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("321"))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
-        val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
-        val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
-        vedtakRepository.insert(
-            vedtak(
-                behandlingId = behandling.id,
-                år = år,
-                inntekter = InntektWrapper(listOf(inntektsperiode)),
-                perioder = PeriodeWrapper(listOf(vedtaksperiode))
-            )
-        )
-
-        omregningService.utførGOmregning(fagsak.id, false)
+        omregningService.utførGOmregning(fagsak.id)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
@@ -264,7 +187,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             )
         )
 
-        omregningService.utførGOmregning(fagsak.id, true)
+        omregningService.utførGOmregning(fagsak.id)
 
         assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
@@ -306,10 +229,14 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         return vilkårsvurderinger
     }
 
-    fun iverksettMedOppdaterteIder(fagsak: Fagsak, behandling: Behandling, vedtakstidspunkt: LocalDateTime): IverksettOvergangsstønadDto {
+    fun iverksettMedOppdaterteIder(
+        fagsak: Fagsak,
+        behandling: Behandling,
+        vedtakstidspunkt: LocalDateTime
+    ): IverksettOvergangsstønadDto {
 
         val nyBehandling =
-            behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(
+            behandlingRepository.finnSisteBehandling(
                 StønadType.OVERGANGSSTØNAD,
                 fagsak.personIdenter.map {
                     it.ident

@@ -162,6 +162,33 @@ internal class BeregningSkolepengerServiceTest {
                 .isInstanceOf(Feil::class.java) // Dette burde vært håndtert i frontend
                 .hasMessageContaining("Skoleår 21/22 inneholder ulike studietyper")
         }
+
+        @Test
+        internal fun `skal kunne flytte på ordningen av skoleårsperioder`() {
+            val utgift = utgift()
+            val utgift2 = utgift()
+            val tidligerePerioder = listOf(
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift)),
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                    listOf(utgift2)
+                )
+            )
+            val skoleårsperioder = listOf(
+                SkoleårsperiodeSkolepengerDto(
+                    listOf(delårsperiode(fra = defaultFra.plusYears(1), til = defaultTil.plusYears(1))),
+                    listOf(utgift2)
+                ),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift))
+            )
+
+            every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
+
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id)
+            assertThat(perioder.perioder).hasSize(1)
+            assertThat(perioder.perioder[0].beløp).isEqualTo(utgift.stønad + utgift2.stønad)
+            assertThat(perioder.perioder[0].årMånedFra).isEqualTo(utgift.årMånedFra)
+        }
     }
 
     @Nested
@@ -406,22 +433,23 @@ internal class BeregningSkolepengerServiceTest {
         }
 
         @Test
-        internal fun `skal oppdage hvis en delårsperiode er endret`() {
+        internal fun `skal tillate endringer på delårsperioder`() {
+            val utgift = utgift()
             val tidligerePerioder = listOf(
                 SkoleårsperiodeSkolepengerDto(
                     listOf(delårsperiode()),
-                    listOf(utgift())
+                    listOf(utgift)
                 )
             )
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift()))
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(til = defaultFra)), listOf(utgift))
             )
 
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
-            assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
-                .isInstanceOf(Feil::class.java)
-                .hasMessageContaining("Perioder for 21/22 er endrede")
+            val perioder = service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true)
+            assertThat(perioder.perioder)
+                .containsOnly(BeløpsperiodeSkolepenger(defaultFra, defaultUtgift, defaultStønad))
         }
 
         @Test

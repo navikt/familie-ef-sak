@@ -143,51 +143,10 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
-        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
+        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter))
             .isEqualTo(behandling)
-        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, setOf("3"))).isNull()
-        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(BARNETILSYN, personidenter)).isNull()
-    }
-
-    @Test
-    fun `finnSisteBehandlingSomIkkeErBlankett - skal returnere teknisk opphør`() {
-        val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR))
-
-        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter))
-            .isEqualTo(behandling)
-    }
-
-    @Test
-    fun `skal ikke returnere behandling hvis det er blankett`() {
-        val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
-        behandlingRepository.insert(behandling(fagsak, type = BehandlingType.BLANKETT))
-
-        assertThat(behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(OVERGANGSSTØNAD, personidenter)).isNull()
-    }
-
-    @Test
-    fun `finnSisteIverksatteBehandling - skal returnere teknisk opphør hvis siste behandling er teknisk opphør`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
-        )
-        val tekniskOpphørBehandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                type = BehandlingType.TEKNISK_OPPHØR,
-                resultat = BehandlingResultat.OPPHØRT
-            )
-        )
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id))
-            .isEqualTo(tekniskOpphørBehandling)
+        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, setOf("3"))).isNull()
+        assertThat(behandlingRepository.finnSisteBehandling(BARNETILSYN, personidenter)).isNull()
     }
 
     @Test
@@ -204,21 +163,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `finnSisteIverksatteBehandling - skal ikke returnere noe hvis behandlingen er type blankett`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                type = BehandlingType.BLANKETT,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
-        )
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
-    }
-
-    @Test
-    fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling, ikke henlagt eller blankett`() {
+    fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))).copy(id = førstegangsbehandling.fagsakId))
 
@@ -316,7 +261,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        fun `skal filtrere vekk blankett før den henter siste behandling`() {
+        fun `skal filtrere vekk henlagte og avslåtte behandlinger før den henter siste behandling`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             val behandling = behandlingRepository.insert(
                 behandling(
@@ -324,36 +269,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     status = FERDIGSTILT,
                     resultat = BehandlingResultat.INNVILGET,
                     opprettetTid = LocalDateTime.now().minusDays(2)
-                )
-            )
-            behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    type = BehandlingType.BLANKETT,
-                    status = FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET
-                )
-            )
-            assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD))
-                .containsExactly(behandling.id)
-        }
-
-        @Test
-        fun `skal filtrere vekk henlagte-, avslåtte- eller blankettbehandlinger før den henter siste behandling`() {
-            val fagsak = testoppsettService.lagreFagsak(fagsak())
-            val behandling = behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    status = FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(2)
-                )
-            )
-            behandlingRepository.insert(
-                behandling(
-                    fagsak, type = BehandlingType.BLANKETT,
-                    status = FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET
                 )
             )
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
@@ -383,7 +298,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 behandling(
                     fagsak,
                     status = FERDIGSTILT,
-                    type = BehandlingType.BLANKETT
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING
                 )
             )
             assertThat(

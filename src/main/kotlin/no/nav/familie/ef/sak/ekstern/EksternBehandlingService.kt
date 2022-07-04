@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -19,9 +18,9 @@ class EksternBehandlingService(
 
     fun finnesBehandlingFor(personidenter: Set<String>, stønadstype: StønadType?): Boolean {
         return if (stønadstype != null) {
-            return eksistererBehandlingSomIkkeErBlankett(stønadstype, personidenter)
+            return eksistererBehandling(stønadstype, personidenter)
         } else {
-            StønadType.values().any { eksistererBehandlingSomIkkeErBlankett(it, personidenter) }
+            StønadType.values().any { eksistererBehandling(it, personidenter) }
         }
     }
 
@@ -34,17 +33,11 @@ class EksternBehandlingService(
         return sisteStønadsdato >= LocalDate.now()
     }
 
-    /**
-     * Hvis siste behandling er teknisk opphør, skal vi returnere false,
-     * hvis ikke så skal vi returnere true hvis det finnes en behandling
-     */
-    private fun eksistererBehandlingSomIkkeErBlankett(
+    private fun eksistererBehandling(
         stønadstype: StønadType,
         personidenter: Set<String>
     ): Boolean {
-        return behandlingRepository.finnSisteBehandlingSomIkkeErBlankett(stønadstype, personidenter)?.let {
-            it.type != BehandlingType.TEKNISK_OPPHØR
-        } ?: false
+        return behandlingRepository.finnSisteBehandling(stønadstype, personidenter) != null
     }
 
     private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {

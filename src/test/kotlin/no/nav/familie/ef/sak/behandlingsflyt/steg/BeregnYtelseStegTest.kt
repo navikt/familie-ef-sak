@@ -31,6 +31,7 @@ import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -72,6 +73,7 @@ import java.util.UUID
 internal class BeregnYtelseStegTest {
 
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
+    private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val beregningService = mockk<BeregningService>()
     private val beregningBarnetilsynService = mockk<BeregningBarnetilsynService>()
     private val beregningSkolepengerService = mockk<BeregningSkolepengerService>()
@@ -84,6 +86,7 @@ internal class BeregnYtelseStegTest {
 
     private val steg = BeregnYtelseSteg(
         tilkjentYtelseService,
+        andelsHistorikkService,
         beregningService,
         beregningBarnetilsynService,
         beregningSkolepengerService,
@@ -1416,7 +1419,7 @@ internal class BeregnYtelseStegTest {
             val sankskjonsMåned = YearMonth.of(2021, 8)
 
             every {
-                tilkjentYtelseService.hentHistorikk(any(), any())
+                andelsHistorikkService.hentHistorikk(any(), any())
             } returns listOf(
                 andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
                 andelhistorikkSanksjon(sankskjonsMåned),
@@ -1439,7 +1442,7 @@ internal class BeregnYtelseStegTest {
             val sankskjonsMåned = YearMonth.of(2021, 8)
 
             every {
-                tilkjentYtelseService.hentHistorikk(any(), any())
+                andelsHistorikkService.hentHistorikk(any(), any())
             } returns listOf(
                 andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
                 andelhistorikkSanksjon(sankskjonsMåned),

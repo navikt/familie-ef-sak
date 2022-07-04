@@ -70,7 +70,7 @@ data class SkolepengerUtgiftDto(
 )
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
-    perioder = this.perioder.map { it.tilDomene() },
+    perioder = this.perioder.map { it.tilDomene() }.sortedBy { it.datoFra },
     utgiftsperioder = this.utgiftsperioder.map {
         SkolepengerUtgift(
             id = it.id,
@@ -78,7 +78,7 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
             utgifter = it.utgifter,
             stønad = it.stønad
         )
-    }
+    }.sortedBy { it.utgiftsdato }
 )
 
 fun DelårsperiodeSkoleårDto.tilDomene() = DelårsperiodeSkoleårSkolepenger(

@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -36,12 +37,11 @@ class SøkService(
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun søkPerson(personIdentFraRequest: String): Søkeresultat {
-        val personIdenter = personService.hentPersonIdenter(personIdentFraRequest)
-        val gjeldendePersonIdent = personIdenter.gjeldende().ident
-        if (personIdenter.identer.isEmpty()) {
-            throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
+    fun søkPerson(personIdenter: PdlIdenter): Søkeresultat {
+        brukerfeilHvis(personIdenter.identer.isEmpty()) {
+            "Finner ingen personer for valgt personident"
         }
+        val gjeldendePersonIdent = personIdenter.gjeldende().ident
         val fagsaker =
             fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
         val fagsakPerson = fagsakPersonService.finnPerson(personIdenter.identer())

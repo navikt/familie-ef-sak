@@ -52,8 +52,7 @@ class SendTilBeslutterSteg(
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
-        if (saksbehandling.type !== BehandlingType.BLANKETT &&
-            saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
+        if (saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
             saksbehandling.årsak !== BehandlingÅrsak.G_OMREGNING &&
             !vedtaksbrevRepository.existsById(saksbehandling.id)
         ) {
@@ -93,7 +92,6 @@ class SendTilBeslutterSteg(
     private fun erIkkeRelevantForTilbakekreving(saksbehandling: Saksbehandling): Boolean {
         val resultatType = vedtakService.hentVedtaksresultat(saksbehandling.id)
         return saksbehandling.type == BehandlingType.FØRSTEGANGSBEHANDLING ||
-            saksbehandling.type == BehandlingType.BLANKETT ||
             resultatType == ResultatType.AVSLÅ ||
             resultatType == ResultatType.HENLEGGE
     }
@@ -137,7 +135,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
-        if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING) return
+        if (saksbehandling.årsak in setOf(BehandlingÅrsak.KORRIGERING_UTEN_BREV, BehandlingÅrsak.G_OMREGNING)) return
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 

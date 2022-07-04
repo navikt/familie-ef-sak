@@ -46,12 +46,18 @@ import java.util.UUID
 
 class BeregningControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var vilkårsvurderingService: VurderingService
-    @Autowired private lateinit var søknadService: SøknadService
-    @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+    @Autowired
+    private lateinit var vilkårsvurderingService: VurderingService
+    @Autowired
+    private lateinit var søknadService: SøknadService
+    @Autowired
+    private lateinit var grunnlagsdataService: GrunnlagsdataService
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @BeforeEach
     fun setUp() {
@@ -64,8 +70,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(
             behandling(
                 fagsak,
-                steg = StegType.VEDTA_BLANKETT,
-                type = BehandlingType.BLANKETT,
+                steg = StegType.BEREGNE_YTELSE,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 status = BehandlingStatus.UTREDES
             )
         )
@@ -76,37 +82,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
             resultatType = ResultatType.AVSLÅ
         )
-        val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
-
-        assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
-    }
-
-    @Test
-    internal fun `Skal klare å inserte ett vedtak med resultatet innvilge`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(""))))
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                steg = StegType.VEDTA_BLANKETT,
-                type = BehandlingType.BLANKETT,
-                status = BehandlingStatus.UTREDES
-            )
-        )
-        val vedtakDto = InnvilgelseOvergangsstønad(
-            periodeBegrunnelse = "periode begrunnelse",
-            inntektBegrunnelse = "inntekt begrunnelse"
-        )
-
-        val respons: ResponseEntity<Ressurs<UUID>> = fatteVedtak(behandling.id, vedtakDto)
-        val vedtak = Vedtak(
-            behandlingId = behandling.id,
-            periodeBegrunnelse = "periode begrunnelse",
-            inntektBegrunnelse = "inntekt begrunnelse",
-            resultatType = ResultatType.INNVILGE,
-            inntekter = InntektWrapper(emptyList()),
-            avslåBegrunnelse = null,
-            perioder = PeriodeWrapper(emptyList())
-        )
+        val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
         assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
     }
@@ -124,7 +100,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
-        assertThat(respons.body.frontendFeilmelding).isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
+        assertThat(respons.body.frontendFeilmelding)
+            .isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
     }
 
     @Test
@@ -148,7 +125,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
 
-    private fun lagFagsakOgBehandling(stegType: StegType = StegType.VEDTA_BLANKETT): Pair<Fagsak, Behandling> {
+    private fun lagFagsakOgBehandling(stegType: StegType = StegType.BESLUTTE_VEDTAK): Pair<Fagsak, Behandling> {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("12345678910"))))
         val førstegangsbehandling = behandlingRepository.insert(
             behandling(
@@ -238,14 +215,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         tilkjentYtelseRepository.insert(tilkjentYtelse)
         vedtakService.lagreVedtak(vedtakDto, revurdering.id, fagsak.stønadstype)
         return revurdering
-    }
-
-    private fun fatteVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {
-        return restTemplate.exchange(
-            localhost("/api/beregning/$id/lagre-blankettvedtak"),
-            HttpMethod.POST,
-            HttpEntity(vedtakDto, headers)
-        )
     }
 
     private fun fullførVedtak(id: UUID, vedtakDto: VedtakDto): ResponseEntity<Ressurs<UUID>> {

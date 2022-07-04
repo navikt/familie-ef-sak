@@ -22,7 +22,6 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
             JOIN behandling b ON b.id = ty.behandling_id
         WHERE b.fagsak_id = :fagsakId
          AND b.status = 'FERDIGSTILT'
-         AND b.type != 'BLANKETT'
          AND b.resultat IN ('OPPHØRT', 'INNVILGET') 
         ORDER BY b.opprettet_tid ASC"""
     )

@@ -2042,6 +2042,28 @@
           }
         },
         "nullable" : false
+      },
+      "sak" : {
+        "name" : "sak",
+        "type" : "Object",
+        "fields" : {
+          "harTidligereOvergangsstønad" : {
+            "name" : "harTidligereOvergangsstønad",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "harTidligereBarnetilsyn" : {
+            "name" : "harTidligereBarnetilsyn",
+            "type" : "Boolean",
+            "nullable" : false
+          },
+          "harTidligereSkolepenger" : {
+            "name" : "harTidligereSkolepenger",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : true
       }
     },
     "nullable" : true

@@ -46,10 +46,17 @@ import java.util.UUID
 
 internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var vedtakRepository: VedtakRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+
+    @Autowired
+    private lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Test
     fun `lagre og hent vedtak, lagre igjen - da skal første slettes`() {
@@ -61,7 +68,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -103,7 +110,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -123,7 +130,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -144,7 +151,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 fagsak,
                 steg = StegType.VILKÅR,
                 status = BehandlingStatus.UTREDES,
-                type = BehandlingType.BLANKETT
+                type = BehandlingType.FØRSTEGANGSBEHANDLING
             )
         )
 
@@ -185,7 +192,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentForventetInntektForVedtakOgDato - filtrer vekk vedtak som slutter en måned frem i tid`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
-        val vedtak = vedtakRepository.insert(vedtak(behandling.id))
+        vedtakRepository.insert(vedtak(behandling.id))
         val behandlingIds = listOf(behandling.id)
         val behandlingIdToForventetInntektMap = vedtakService.hentForventetInntektForBehandlingIds(behandlingIds)
 
@@ -210,7 +217,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
             500_000
         )
         assertThat(behandlingIdToForventetInntektMap[behandlingIdMedVedtakForrigeMåned]?.forventetInntektForrigeMåned).isNull()
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedVedtakForrigeMåned]?.forventetInntektToMånederTilbake).isNull()
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedVedtakForrigeMåned]?.forventetInntektToMånederTilbake)
+            .isNull()
     }
 
     @Test
@@ -241,12 +249,12 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandlingIdToForventetInntektMap =
             vedtakService.hentForventetInntektForBehandlingIds(listOf(behandlingIdMedForskjelligInntektsperioder))
 
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektToMånederTilbake).isEqualTo(
-            500_000
-        )
-        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektForrigeMåned).isEqualTo(
-            400_000
-        )
+        assertThat(
+            behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]
+                ?.forventetInntektToMånederTilbake
+        ).isEqualTo(500_000)
+        assertThat(behandlingIdToForventetInntektMap[behandlingIdMedForskjelligInntektsperioder]?.forventetInntektForrigeMåned)
+            .isEqualTo(400_000)
     }
 
     @Test
@@ -342,7 +350,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        internal fun `avslag`() {
+        internal fun avslag() {
             val behandling = opprettBehandling()
             val vedtak = avslagDto()
 
@@ -350,7 +358,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        internal fun `opphør`() {
+        internal fun opphør() {
             val behandling = opprettBehandling()
             val vedtak = opphørDto()
 
@@ -358,7 +366,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         }
 
         @Test
-        internal fun `sanksjonering`() {
+        internal fun sanksjonering() {
             val behandling = opprettBehandling()
             val vedtak = sanksjonertDto()
 
