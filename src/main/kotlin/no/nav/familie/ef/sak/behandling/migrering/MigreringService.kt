@@ -140,7 +140,7 @@ class MigreringService(
     }
 
     /**
-     * Skal kun kalles direkte fra denne klassen eller [TestSaksbehandlingControll]
+     * Skal kun kalles direkte fra denne klassen eller [TestSaksbehandlingController]
      */
     @Transactional
     fun opprettMigrering(
@@ -295,10 +295,10 @@ class MigreringService(
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
         } else {
             val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
-            if (behandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+            if (behandlinger.isNotEmpty()) {
                 throw MigreringException(
-                    "Fagsaken har behandling som ikke er ferdigstilt",
-                    MigreringExceptionType.IKKE_FERDIGSTILT_BEHANDLING
+                    "Fagsaken har allerede behandlinger",
+                    MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER
                 )
             }
         }
