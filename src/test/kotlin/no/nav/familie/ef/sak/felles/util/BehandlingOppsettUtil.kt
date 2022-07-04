@@ -72,13 +72,6 @@ object BehandlingOppsettUtil {
             resultat = BehandlingResultat.IKKE_SATT
         )
 
-    val iverksattTekniskOpphør = behandling(fagsak)
-        .copy(
-            type = BehandlingType.TEKNISK_OPPHØR,
-            status = BehandlingStatus.FERDIGSTILT,
-            resultat = BehandlingResultat.INNVILGET
-        )
-
     fun lagBehandlingerForSisteIverksatte() = listOf(
         henlagtFørstegangsbehandling,
         iverksattFørstegangsbehandling,

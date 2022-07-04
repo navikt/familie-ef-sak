@@ -67,17 +67,6 @@ internal class FerdigstillBehandlingStegTest {
         assertThat(
             catchThrowable {
                 task.utførSteg(
-                    saksbehandling(
-                        fagsak,
-                        behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR)
-                    ),
-                    null
-                )
-            }
-        )
-        assertThat(
-            catchThrowable {
-                task.utførSteg(
                     saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.REVURDERING)),
                     null
                 )

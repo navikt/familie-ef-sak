@@ -113,7 +113,7 @@ class BehandlingService(
         }
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling, erMigrering)
+        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, erMigrering)
 
         val behandling = behandlingRepository.insert(
             Behandling(

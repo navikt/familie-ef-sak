@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -47,15 +46,6 @@ internal class EksternBehandlingControllerTest {
         every {
             behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
         } returns null
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-            .isEqualTo(false)
-    }
-
-    @Test
-    internal fun `skal returnere false når en behandling finnes som er teknisk opphør`() {
-        every {
-            behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
-        } returns behandling(fagsak(), type = BehandlingType.TEKNISK_OPPHØR)
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
             .isEqualTo(false)
     }

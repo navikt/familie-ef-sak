@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -52,28 +51,6 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 behandlingsårsak = behandlingÅrsak
             )
         }.hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
-    }
-
-    @Test
-    internal fun `opprettBehandling - skal ikke være mulig å opprette en revurdering om forrige behandling er teknisk opphør`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                type = BehandlingType.TEKNISK_OPPHØR
-            )
-        )
-        assertThat(
-            catchThrowable {
-                behandlingService.opprettBehandling(
-                    BehandlingType.REVURDERING,
-                    fagsak.id,
-                    behandlingsårsak = behandlingÅrsak
-                )
-            }
-        )
-            .hasMessage("Det er ikke mulig å lage en revurdering når siste behandlingen er teknisk opphør")
     }
 
     @Test

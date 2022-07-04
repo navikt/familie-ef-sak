@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -24,25 +23,14 @@ internal class BehandlingStegTest {
                 StegType.BEHANDLING_FERDIGSTILT
             )
 
-        validerSteg(riktigRekkefølge, BehandlingType.FØRSTEGANGSBEHANDLING)
+        validerSteg(riktigRekkefølge)
     }
 
-    @Test
-    fun `Tester rekkefølgen på steg - TEKNISK_OPPHØR`() {
-        val riktigRekkefølge = listOf(
-            StegType.VENTE_PÅ_TEKNISK_OPPHØR_STATUS,
-            StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_FERDIGSTILT
-        )
-
-        validerSteg(riktigRekkefølge, BehandlingType.TEKNISK_OPPHØR)
-    }
-
-    private fun validerSteg(riktigRekkefølge: List<StegType>, behandlingType: BehandlingType) {
+    private fun validerSteg(riktigRekkefølge: List<StegType>) {
         var steg: StegType = riktigRekkefølge.first()
         riktigRekkefølge.forEach {
             assertEquals(steg, it)
-            steg = steg.hentNesteSteg(behandlingType = behandlingType)
+            steg = steg.hentNesteSteg()
         }
     }
 
