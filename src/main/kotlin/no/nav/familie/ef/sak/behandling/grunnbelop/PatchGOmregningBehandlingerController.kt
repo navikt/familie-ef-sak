@@ -43,7 +43,7 @@ class PatchGOmregningBehandlingerController(
                 "Oppretter task med status påbegynt og ferdig for disse. (skal persistere ${liveRun.skalPersistere})"
         )
 
-        behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv != "VL" }.forEach {
+        behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv == "VL" }.forEach {
             val taskPåbegynt = opprettTask(
                 it.id,
                 Hendelse.PÅBEGYNT,
