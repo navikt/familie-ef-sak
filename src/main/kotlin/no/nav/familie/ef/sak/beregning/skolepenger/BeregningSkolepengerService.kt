@@ -182,12 +182,6 @@ class BeregningSkolepengerService(
             feilHvis(forrigePeriodeForSkoleår.perioder.size < skoleårsperiode.perioder.size) {
                 "En ny periode for skoleår=$skoleår er lagt til"
             }
-            feilHvis(
-                forrigePeriodeForSkoleår.perioder.size == skoleårsperiode.perioder.size &&
-                    forrigePeriodeForSkoleår.perioder != skoleårsperiode.perioder
-            ) {
-                "Perioder for $skoleår er endrede"
-            }
             feilHvis(forrigePeriodeForSkoleår.utgiftsperioder.size < skoleårsperiode.utgiftsperioder.size) {
                 "En ny utgiftsperiode for skoleår=$skoleår er lagt til"
             }
@@ -210,7 +204,7 @@ class BeregningSkolepengerService(
         val forrigePerioderPerSkoleår = forrigePerioder.associateBy { it.perioder.first().skoleår }
         perioder.associateBy { it.perioder.first().skoleår }.entries.forEach { (skoleår, skoleårsperiode) ->
             val forrigePeriodeForSkoleår = forrigePerioderPerSkoleår[skoleår] ?: return
-            if (forrigePeriodeForSkoleår.perioder.size != skoleårsperiode.perioder.size) {
+            if (forrigePeriodeForSkoleår.perioder != skoleårsperiode.perioder) {
                 return
             }
             if (forrigePeriodeForSkoleår.utgiftsperioder.size != skoleårsperiode.utgiftsperioder.size) {
