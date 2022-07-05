@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.arbeidsforhold.tilDto
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
-import no.nav.familie.ef.sak.behandling.dto.GammelBehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
@@ -43,8 +41,13 @@ class BehandlingController(
     }
 
     @GetMapping("gamle-behandlinger")
-    fun hentGamleUferdigeBehandlinger(): Ressurs<List<GammelBehandlingDto>> {
-        val gamleBehandlinger = behandlingService.hentGamleUferdigeBehandlinger()
+    fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
+        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD).tilDto(StønadType.OVERGANGSSTØNAD)
+        val gamleSkolepengerBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).tilDto(StønadType.SKOLEPENGER)
+        val gamleBarnetilsynBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).tilDto(StønadType.BARNETILSYN)
+
+        val gamleBehandlinger = listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
+
         return Ressurs.success(gamleBehandlinger)
     }
 
