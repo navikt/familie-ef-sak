@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
@@ -65,12 +66,14 @@ class BehandlingsstatistikkTask(
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
             saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
+        val erAutomatiskGOmregning = saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING && saksbehandling.opprettetAv == "VL"
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
             behandlingId = behandlingId,
             eksternBehandlingId = saksbehandling.eksternId,
             personIdent = saksbehandling.ident,
-            gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
+            gjeldendeSaksbehandlerId = if (erAutomatiskGOmregning) "VL"
+            else finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
             beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
             else null,
             eksternFagsakId = saksbehandling.eksternFagsakId,

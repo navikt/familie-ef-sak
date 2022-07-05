@@ -8,6 +8,8 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.Unprotected
@@ -93,5 +95,6 @@ private fun opprettTask(
             this["hendelse"] = hendelse.name
             this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
             this["oppgaveId"] = ""
+            this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
         }
     )
