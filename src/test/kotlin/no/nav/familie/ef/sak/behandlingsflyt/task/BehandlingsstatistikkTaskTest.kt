@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -57,13 +58,14 @@ internal class BehandlingsstatistikkTaskTest {
     val tildeltEnhet = "4488"
     val periodeBegrunnelse = "Lorem ipsum"
     val inntektBegrunnelse = "Inntektus loremus ipsums"
-
+    val behandlingMetode = BehandlingMetode.MANUELL
     val payload = BehandlingsstatistikkTaskPayload(
         behandling.id,
         hendelse,
         hendelseTidspunkt.toLocalDateTime(),
         saksbehandlerId,
-        oppgaveId
+        oppgaveId,
+        behandlingMetode
     )
 
     val oppgaveMock = mockk<Oppgave>()

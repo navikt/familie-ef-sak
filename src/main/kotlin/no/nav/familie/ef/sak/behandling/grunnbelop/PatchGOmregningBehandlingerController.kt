@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -82,7 +83,8 @@ private fun opprettTask(
                 hendelse,
                 hendelseTidspunkt,
                 "VL",
-                null
+                null,
+                BehandlingMetode.BATCH
             )
         ),
         properties = Properties().apply {
