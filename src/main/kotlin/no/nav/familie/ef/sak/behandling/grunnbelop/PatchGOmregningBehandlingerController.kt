@@ -39,7 +39,7 @@ class PatchGOmregningBehandlingerController(
         val behandlingerMedÅrsakGOmregning = behandlingRepository.findByÅrsak(BehandlingÅrsak.G_OMREGNING)
 
         logger.info(
-            "Patch behandlingsstatistikk: Funnet ${behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv != "VL" }.size} behandlinger med årsak G-Omregning og som er opprettet automatisk. " +
+            "Patch behandlingsstatistikk: Funnet ${behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv == "VL" }.size} behandlinger med årsak G-Omregning og som er opprettet automatisk. " +
                 "Oppretter task med status påbegynt og ferdig for disse. (skal persistere ${liveRun.skalPersistere})"
         )
 
