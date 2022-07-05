@@ -39,8 +39,9 @@ class PatchGOmregningBehandlingerController(
         val behandlingerMedÅrsakGOmregning = behandlingRepository.findByÅrsak(BehandlingÅrsak.G_OMREGNING)
 
         logger.info(
-            "Patch behandlingsstatistikk: Funnet ${behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv == "VL" }.size} behandlinger med årsak G-Omregning og som er opprettet automatisk. " +
-                "Oppretter task med status påbegynt og ferdig for disse. (skal persistere ${liveRun.skalPersistere})"
+            "Patch behandlingsstatistikk: Fant ${behandlingerMedÅrsakGOmregning.size} behandlinger med årsak G-omregning." +
+                "Hvorav ${behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv == "VL" }.size} opprettet automatisk. " +
+                "Oppretter task med status påbegynt og ferdig for de som er opprettet automatisk. (skal persistere ${liveRun.skalPersistere})"
         )
 
         behandlingerMedÅrsakGOmregning.filter { it.sporbar.opprettetAv == "VL" }.forEach {
@@ -61,7 +62,7 @@ class PatchGOmregningBehandlingerController(
             }
         }
 
-        return if (liveRun.skalPersistere) Ressurs.success("patch send behandlingsstatistikk kjørt")
+        return if (liveRun.skalPersistere) Ressurs.success("Patch send behandlingsstatistikk kjørt")
         else Ressurs.success("Patch ikke kjørt.")
     }
 }
