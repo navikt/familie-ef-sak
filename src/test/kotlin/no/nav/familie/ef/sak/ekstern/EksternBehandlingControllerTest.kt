@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.ekstern
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -26,10 +26,10 @@ import java.util.UUID
 internal class EksternBehandlingControllerTest {
 
     private val pdlClient = mockk<PdlClient>()
-    private val behandlingRepository = mockk<BehandlingRepository>()
+    private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingRepository, fagsakService)
+    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService)
     private val eksternBehandlingController = EksternBehandlingController(pdlClient, eksternBehandlingService)
 
     private val ident1 = "11111111111"
@@ -42,10 +42,22 @@ internal class EksternBehandlingControllerTest {
     }
 
     @Test
+    internal fun `skal returnere false når det ikke finnes fagsak på personen`() {
+        every {
+            fagsakService.finnFagsak(setOf(ident1, ident2), StønadType.OVERGANGSSTØNAD)
+        } returns null
+        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
+            .isEqualTo(false)
+    }
+
+    @Test
     internal fun `skal returnere false når det ikke finnes en behandling`() {
         every {
-            behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
-        } returns null
+            fagsakService.finnFagsak(setOf(ident1, ident2), StønadType.OVERGANGSSTØNAD)
+        } returns fagsak()
+        every {
+            behandlingService.finnesBehandlingForFagsak(any())
+        } returns false
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
             .isEqualTo(false)
     }
@@ -53,17 +65,28 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `skal returnere true når behandling finnes`() {
         every {
-            behandlingRepository.finnSisteBehandling(StønadType.OVERGANGSSTØNAD, setOf(ident1, ident2))
-        } returns behandling(fagsak())
+            fagsakService.finnFagsak(setOf(ident1, ident2), StønadType.OVERGANGSSTØNAD)
+        } returns fagsak()
+        every {
+            behandlingService.finnesBehandlingForFagsak(any())
+        } returns true
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
             .isEqualTo(true)
     }
 
     @Test
     internal fun `uten stønadstype - skal returnere false når det ikke finnes noen behandling`() {
-        every { behandlingRepository.finnSisteBehandling(any(), setOf(ident1, ident2)) } returns null
+        every { fagsakService.finnFagsak(setOf(ident1, ident2), any()) } returns fagsak()
+        every {
+            behandlingService.finnesBehandlingForFagsak(any())
+        } returns false
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
             .isEqualTo(false)
+        verify(exactly = 1) {
+            fagsakService.finnFagsak(any(), StønadType.OVERGANGSSTØNAD)
+            fagsakService.finnFagsak(any(), StønadType.BARNETILSYN)
+            fagsakService.finnFagsak(any(), StønadType.SKOLEPENGER)
+        }
     }
 
     @Test
@@ -97,16 +120,13 @@ internal class EksternBehandlingControllerTest {
     @Test
     internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
         var counter = 0
-        every { behandlingRepository.finnSisteBehandling(any(), setOf(ident1, ident2)) } answers {
-            if (counter++ == 1) {
-                behandling(fagsak())
-            } else {
-                null
-            }
+        every { fagsakService.finnFagsak(setOf(ident1, ident2), any()) } returns fagsak()
+        every { behandlingService.finnesBehandlingForFagsak(any()) } answers {
+            counter++ == 1
         }
         assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
             .isEqualTo(true)
-        verify(exactly = 2) { behandlingRepository.finnSisteBehandling(any(), any()) }
+        verify(exactly = 2) { behandlingService.finnesBehandlingForFagsak(any()) }
     }
 
     private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {
@@ -151,7 +171,7 @@ internal class EksternBehandlingControllerTest {
 
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak()
         every {
-            behandlingRepository.finnSisteIverksatteBehandling(any())
+            behandlingService.finnSisteIverksatteBehandling(any())
         } returns behandling1 andThen behandling2 andThen null
 
         every { tilkjentYtelseService.hentForBehandling(uuid1) } returns tilkjentYtelse

@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
@@ -12,8 +11,6 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
-import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
-import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -138,18 +135,6 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun finnSisteBehandlingSomIkkeErBlankett() {
-        val personidenter = setOf("1", "2")
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))))
-        val behandling = behandlingRepository.insert(behandling(fagsak))
-
-        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, personidenter))
-            .isEqualTo(behandling)
-        assertThat(behandlingRepository.finnSisteBehandling(OVERGANGSSTØNAD, setOf("3"))).isNull()
-        assertThat(behandlingRepository.finnSisteBehandling(BARNETILSYN, personidenter)).isNull()
-    }
-
-    @Test
     fun `finnSisteIverksatteBehandling - skal ikke returnere noe hvis behandlingen ikke er ferdigstilt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
         behandlingRepository.insert(
@@ -227,72 +212,16 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         }
     }
 
-    @Test
-    fun `skal finne behandlingsider til behandlinger som er iverksatte`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET,
-                opprettetTid = LocalDateTime.now().minusDays(2)
-            )
-        )
-        val behandling2 = behandlingRepository.insert(
-            behandling(
-                fagsak,
-                status = FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
-        )
-        assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD))
-            .containsExactly(behandling2.id)
-    }
-
     @Nested
-    inner class FinnSisteIverksatteBehandlinger {
+    inner class ExistsByFagsak {
 
         @Test
-        fun `skal ikke finne behandling hvis siste er avslått eller henlagt`() {
-            val fagsak = testoppsettService.lagreFagsak(fagsak())
-            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
-            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
-            assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).isEmpty()
+        fun `inner ikke når det ikke finnes noen behandlinger`() {
+            assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
 
         @Test
-        fun `skal filtrere vekk henlagte og avslåtte behandlinger før den henter siste behandling`() {
-            val fagsak = testoppsettService.lagreFagsak(fagsak())
-            val behandling = behandlingRepository.insert(
-                behandling(
-                    fagsak,
-                    status = FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET,
-                    opprettetTid = LocalDateTime.now().minusDays(2)
-                )
-            )
-            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT))
-            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT, resultat = BehandlingResultat.HENLAGT))
-            assertThat(behandlingRepository.finnSisteIverksatteBehandlinger(OVERGANGSSTØNAD)).containsExactly(
-                behandling.id
-            )
-        }
-    }
-    @Nested
-    inner class ExistsByFagsakIdAndTypeIn {
-
-        @Test
-        fun `existsByFagsakIdAndTypeIn - finner ikke når det ikke finnes noen behandlinger`() {
-            assertThat(
-                behandlingRepository.existsByFagsakIdAndTypeIn(
-                    UUID.randomUUID(),
-                    setOf(BehandlingType.REVURDERING)
-                )
-            ).isFalse
-        }
-
-        @Test
-        fun `existsByFagsakIdAndTypeIn - finner ikke når det kun finnes av annen type`() {
+        fun `finner ikke når det kun finnes av annen type`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             behandlingRepository.insert(
                 behandling(
@@ -301,16 +230,11 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     type = BehandlingType.FØRSTEGANGSBEHANDLING
                 )
             )
-            assertThat(
-                behandlingRepository.existsByFagsakIdAndTypeIn(
-                    UUID.randomUUID(),
-                    setOf(BehandlingType.REVURDERING)
-                )
-            ).isFalse
+            assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
 
         @Test
-        fun `existsByFagsakIdAndTypeIn - true når det av typen man spør etter`() {
+        fun `true når det av typen man spør etter`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             behandlingRepository.insert(
                 behandling(
@@ -319,12 +243,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     type = BehandlingType.REVURDERING
                 )
             )
-            assertThat(
-                behandlingRepository.existsByFagsakIdAndTypeIn(
-                    UUID.randomUUID(),
-                    setOf(BehandlingType.REVURDERING)
-                )
-            ).isFalse
+            assertThat(behandlingRepository.existsByFagsakId(UUID.randomUUID())).isFalse
         }
     }
 

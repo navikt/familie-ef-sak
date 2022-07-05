@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.ekstern
 
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -12,7 +12,7 @@ import java.util.UUID
 @Service
 class EksternBehandlingService(
     val tilkjentYtelseService: TilkjentYtelseService,
-    val behandlingRepository: BehandlingRepository,
+    val behandlingService: BehandlingService,
     val fagsakService: FagsakService
 ) {
 
@@ -37,12 +37,13 @@ class EksternBehandlingService(
         stønadstype: StønadType,
         personidenter: Set<String>
     ): Boolean {
-        return behandlingRepository.finnSisteBehandling(stønadstype, personidenter) != null
+        val fagsak = fagsakService.finnFagsak(personidenter, stønadstype) ?: return false
+        return behandlingService.finnesBehandlingForFagsak(fagsak.id)
     }
 
     private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
         return StønadType.values().mapNotNull { fagsakService.finnFagsak(personidenter, it) }
-            .mapNotNull { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
+            .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
             .map { it.id }
             .toSet()
     }
