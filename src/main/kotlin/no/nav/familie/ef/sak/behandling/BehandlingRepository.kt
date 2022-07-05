@@ -141,9 +141,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """
         SELECT DISTINCT pi.ident 
         FROM gjeldende_iverksatte_behandlinger gib 
-            JOIN behandling b ON b.id = gib.id
-            JOIN fagsak f ON f.id = b.fagsak_id
-            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+            JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE gib.stonadstype=:stønadstype
     """
     )
@@ -154,9 +152,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """
         SELECT pi.ident AS first, gib.id AS second 
         FROM gjeldende_iverksatte_behandlinger gib 
-            JOIN behandling b ON b.id = gib.id
-            JOIN fagsak f ON f.id = b.fagsak_id
-            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+            JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE pi.ident IN (:personidenter)
             AND gib.stonadstype=:stønadstype
     """
