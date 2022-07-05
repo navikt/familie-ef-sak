@@ -51,7 +51,6 @@ internal class BehandlingServiceTest {
             behandlingRepository,
             behandlingshistorikkService,
             taskService,
-            mockk(),
             mockFeatureToggleService()
         )
     private val behandlingSlot = slot<Behandling>()

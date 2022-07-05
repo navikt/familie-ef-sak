@@ -154,7 +154,7 @@ internal class JournalføringServiceTest {
                 )
             )
 
-        every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns true
+        every { behandlingService.finnesBehandlingForFagsak(any()) } returns true
 
         every {
             fagsakService.hentFagsak(any())
@@ -324,7 +324,7 @@ internal class JournalføringServiceTest {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
 
-        every { behandlingService.harFørstegangsbehandlingEllerRevurderingFraFør(any()) } returns false
+        every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
         every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(any(), any()) } throws ApiFeil(
             "feil",
             BAD_REQUEST

@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 
 interface BehandlingSteg<T> {
 
@@ -14,10 +13,10 @@ interface BehandlingSteg<T> {
      */
     fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: T): StegType {
         utførSteg(saksbehandling, data)
-        return nesteSteg(saksbehandling)
+        return nesteSteg()
     }
 
-    fun nesteSteg(saksbehandling: Saksbehandling) = stegType().hentNesteSteg(saksbehandling.type)
+    fun nesteSteg() = stegType().hentNesteSteg()
 
     fun utførSteg(saksbehandling: Saksbehandling, data: T)
 
@@ -61,11 +60,6 @@ enum class StegType(
         tillattFor = BehandlerRolle.SYSTEM,
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    VENTE_PÅ_TEKNISK_OPPHØR_STATUS(
-        rekkefølge = 5,
-        tillattFor = BehandlerRolle.SYSTEM,
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
-    ),
     LAG_SAKSBEHANDLINGSBLANKETT(
         rekkefølge = 6,
         tillattFor = BehandlerRolle.SYSTEM,
@@ -99,14 +93,8 @@ enum class StegType(
         return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
     }
 
-    fun hentNesteSteg(behandlingType: BehandlingType): StegType {
-        return if (behandlingType == BehandlingType.TEKNISK_OPPHØR) when (this) {
-            VENTE_PÅ_TEKNISK_OPPHØR_STATUS -> FERDIGSTILLE_BEHANDLING
-            FERDIGSTILLE_BEHANDLING -> BEHANDLING_FERDIGSTILT
-            BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-            else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
-        }
-        else when (this) {
+    fun hentNesteSteg(): StegType {
+        return when (this) {
             VILKÅR -> BEREGNE_YTELSE
             BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
             SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
@@ -116,7 +104,6 @@ enum class StegType(
             FERDIGSTILLE_BEHANDLING -> PUBLISER_VEDTAKSHENDELSE
             PUBLISER_VEDTAKSHENDELSE -> BEHANDLING_FERDIGSTILT
             BEHANDLING_FERDIGSTILT -> BEHANDLING_FERDIGSTILT
-            else -> throw IllegalStateException("StegType ${displayName()} ugyldig ved ${behandlingType.visningsnavn}")
         }
     }
 }
