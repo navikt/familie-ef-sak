@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.Unprotected
@@ -88,13 +89,16 @@ private fun opprettTask(
                 null,
                 BehandlingMetode.BATCH
             )
-        ),
-        properties = Properties().apply {
-            this["saksbehandler"] = "VL"
-            this["behandlingId"] = behandlingId.toString()
-            this["hendelse"] = hendelse.name
-            this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
-            this["oppgaveId"] = ""
-            this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-        }
+        )
+    ).copy(
+        metadataWrapper = PropertiesWrapper(
+                Properties().apply {
+                    this["saksbehandler"] = "VL"
+                    this["behandlingId"] = behandlingId.toString()
+                    this["hendelse"] = hendelse.name
+                    this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
+                    this["oppgaveId"] = ""
+                    this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+                }
+        )
     )
