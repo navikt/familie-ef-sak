@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelseDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class AvstemmingServiceTest {
@@ -29,7 +29,7 @@ internal class AvstemmingServiceTest {
                     "1", listOf()
                 )
             )
-        service.konsistensavstemOppdrag(StønadType.OVERGANGSSTØNAD, LocalDate.now())
+        service.konsistensavstemOppdrag(StønadType.OVERGANGSSTØNAD, LocalDateTime.now())
 
         verifyOrder {
             iverksettClient.sendStartmeldingKonsistensavstemming(any(), any())
