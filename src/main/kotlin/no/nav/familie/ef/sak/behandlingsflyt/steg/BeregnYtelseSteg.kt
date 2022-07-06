@@ -248,20 +248,20 @@ class BeregnYtelseSteg(
         val opphørsdato = vedtak.opphørFom.atDay(1)
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(saksbehandling)
         val nyeAndeler = andelerForOpphør(forrigeTilkjenteYtelse, opphørsdato)
-        val nyttOpphørsdato = beregnNyttOpphørsdatoForRevurdering(nyeAndeler, opphørsdato, forrigeTilkjenteYtelse)
+        val nyStartdato = beregnNyttStartdatoForRevurdering(nyeAndeler, opphørsdato, forrigeTilkjenteYtelse)
         tilkjentYtelseService.opprettTilkjentYtelse(
             TilkjentYtelse(
                 personident = saksbehandling.ident,
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = nyeAndeler,
                 samordningsfradragType = null,
-                startdato = nyttOpphørsdato,
+                startdato = nyStartdato,
                 grunnbeløpsdato = forrigeTilkjenteYtelse.grunnbeløpsdato
             )
         )
     }
 
-    private fun beregnNyttOpphørsdatoForRevurdering(
+    private fun beregnNyttStartdatoForRevurdering(
         nyeAndeler: List<AndelTilkjentYtelse>,
         opphørsdato: LocalDate,
         forrigeTilkjenteYtelse: TilkjentYtelse
@@ -389,8 +389,8 @@ class BeregnYtelseSteg(
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
-        val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
-        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeOpphørsdato)
+        val forrigeStartdato = forrigeTilkjenteYtelse?.startdato
+        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeStartdato)
         return nyeAndeler to startdato
     }
 
@@ -407,8 +407,8 @@ class BeregnYtelseSteg(
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
-        val forrigeOpphørsdato = forrigeTilkjenteYtelse?.startdato
-        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeOpphørsdato)
+        val forrigeStartdato = forrigeTilkjenteYtelse?.startdato
+        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeStartdato)
         return nyeAndeler to startdato
     }
 
@@ -438,9 +438,9 @@ class BeregnYtelseSteg(
     private fun nyttStartdato(
         behandlingId: UUID,
         perioder: List<Periode>,
-        forrigeOpphørsdato: LocalDate?
+        forrigeStartdato: LocalDate?
     ): LocalDate {
-        val startdato = min(perioder.minOfOrNull { it.fradato }, forrigeOpphørsdato)
+        val startdato = min(perioder.minOfOrNull { it.fradato }, forrigeStartdato)
         feilHvis(startdato == null) {
             "Klarer ikke å beregne startdato for behandling=$behandlingId"
         }

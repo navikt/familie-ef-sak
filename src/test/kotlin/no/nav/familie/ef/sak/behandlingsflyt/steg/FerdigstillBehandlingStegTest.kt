@@ -49,12 +49,6 @@ internal class FerdigstillBehandlingStegTest {
     }
 
     @Test
-    internal fun `skal ikke opprette publiseringstask hvis behandlingen er type blankett`() {
-        task.utførSteg(saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.BLANKETT)), null)
-        verify(exactly = 0) { taskRepository.save(any()) }
-    }
-
-    @Test
     internal fun `skal ikke opprette BehandlingsstatistikkTask for maskinelle g-omregninger`() {
         utførStegGOmregning(SYSTEM_FORKORTELSE)
         assertThat(taskSlot).hasSize(1)
@@ -70,17 +64,6 @@ internal class FerdigstillBehandlingStegTest {
 
     @Test
     internal fun `skal kaste feil hvis behandlingen er av andre typer`() {
-        assertThat(
-            catchThrowable {
-                task.utførSteg(
-                    saksbehandling(
-                        fagsak,
-                        behandling(fagsak, type = BehandlingType.TEKNISK_OPPHØR)
-                    ),
-                    null
-                )
-            }
-        )
         assertThat(
             catchThrowable {
                 task.utførSteg(

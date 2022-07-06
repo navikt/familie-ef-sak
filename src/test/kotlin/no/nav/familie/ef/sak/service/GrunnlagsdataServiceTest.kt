@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
-import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.annenForelderFnr
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
@@ -82,20 +81,6 @@ internal class GrunnlagsdataServiceTest {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns null
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
-        assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
-
-        verify(exactly = 0) { pdlClient.hentSøker(any()) }
-    }
-
-    @Test
-    internal fun `skal kaste feil hvis behandlingen er blanket og savner grunnlagsdata`() {
-        val behandling = behandling(fagsak(), type = BehandlingType.BLANKETT)
-        val behandlingId = behandling.id
-
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns null
-        every { behandlingService.hentBehandling(behandlingId) } returns behandling
-
         assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
 
         verify(exactly = 0) { pdlClient.hentSøker(any()) }

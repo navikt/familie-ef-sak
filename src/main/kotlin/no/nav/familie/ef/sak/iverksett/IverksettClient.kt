@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
-import no.nav.familie.kontrakter.ef.iverksett.TekniskOpphørDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import org.springframework.beans.factory.annotation.Qualifier
@@ -82,11 +81,6 @@ class IverksettClient(
     fun iverksettUtenBrev(iverksettDto: IverksettDto) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett/uten-brev")
         postForEntity<Any>(url, iverksettDto)
-    }
-
-    fun iverksettTekniskOpphør(tekniskOpphørDto: TekniskOpphørDto) {
-        val url = URI.create("$familieEfIverksettUri/api/tekniskopphor")
-        postForEntity<Any>(url, tekniskOpphørDto, HttpHeaders().medContentTypeJsonUTF8())
     }
 
     fun hentStatus(behandlingId: UUID): IverksettStatus {

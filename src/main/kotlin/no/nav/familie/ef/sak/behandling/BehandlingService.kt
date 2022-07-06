@@ -23,12 +23,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -37,7 +34,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad as SøknadOvergangsstønadKontrakt
 
 @Service
 class BehandlingService(
@@ -45,16 +41,12 @@ class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
-    private val søknadService: SøknadService,
     private val featureToggleService: FeatureToggleService
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentAktivIdent(behandlingId: UUID): String = behandlingRepository.finnAktivIdent(behandlingId)
-
-    fun hentAktiveIdenter(behandlingIds: Collection<UUID>): Map<UUID, String> =
-        behandlingRepository.finnAktiveIdenter(behandlingIds).toMap()
 
     fun hentEksterneIder(behandlingIder: Set<UUID>) = behandlingIder.takeIf { it.isNotEmpty() }
         ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
@@ -68,35 +60,8 @@ class BehandlingService(
     fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
             ?: hentBehandlinger(fagsakId).lastOrNull {
-                it.type != BehandlingType.BLANKETT && it.status == FERDIGSTILT && it.resultat != HENLAGT
+                it.status == FERDIGSTILT && it.resultat != HENLAGT
             }
-
-    fun finnGjeldendeIverksatteBehandlinger(stonadstype: StønadType) =
-        behandlingRepository.finnSisteIverksatteBehandlinger(stonadstype)
-
-    @Transactional
-    fun opprettBehandlingForBlankett(
-        behandlingType: BehandlingType,
-        fagsakId: UUID,
-        søknad: SøknadOvergangsstønadKontrakt,
-        journalpost: Journalpost
-    ): Behandling {
-        val behandling =
-            opprettBehandling(
-                behandlingType = behandlingType,
-                fagsakId = fagsakId,
-                behandlingsårsak = BehandlingÅrsak.SØKNAD
-            )
-        behandlingsjournalpostRepository.insert(
-            Behandlingsjournalpost(
-                behandling.id,
-                journalpost.journalpostId,
-                journalpost.journalposttype
-            )
-        )
-        søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsakId, journalpost.journalpostId)
-        return behandling
-    }
 
     fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> {
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
@@ -139,7 +104,7 @@ class BehandlingService(
         }
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, forrigeBehandling, erMigrering)
+        validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, erMigrering)
 
         val behandling = behandlingRepository.insert(
             Behandling(
@@ -196,14 +161,8 @@ class BehandlingService(
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
-    fun harFørstegangsbehandlingEllerRevurderingFraFør(fagsakId: UUID) =
-        behandlingRepository.existsByFagsakIdAndTypeIn(
-            fagsakId,
-            setOf(
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                BehandlingType.REVURDERING
-            )
-        )
+    fun finnesBehandlingForFagsak(fagsakId: UUID) =
+        behandlingRepository.existsByFagsakId(fagsakId)
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
         return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }

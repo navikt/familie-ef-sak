@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder

@@ -1,8 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -11,7 +9,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -30,8 +27,6 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BeregningController(
-    private val stegService: StegService,
-    private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
@@ -46,14 +41,6 @@ class BeregningController(
 
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
         return Ressurs.success(beregningService.beregnYtelse(vedtaksperioder, inntektsperioder))
-    }
-
-    @PostMapping(value = ["/{behandlingId}/lagre-vedtak", "/{behandlingId}/lagre-blankettvedtak"])
-    fun lagreBlankettVedtak(@PathVariable behandlingId: UUID, @RequestBody vedtak: VedtakDto): Ressurs<UUID> {
-        val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
-
-        return Ressurs.success(stegService.håndterVedtaBlankett(behandling, vedtak).id)
     }
 
     @GetMapping("/{behandlingId}")

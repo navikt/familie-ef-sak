@@ -23,15 +23,10 @@ class FerdigstillBehandlingSteg(
         logger.info("Ferdigstiller behandling [${saksbehandling.id}]")
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FERDIGSTILT)
 
-        when (saksbehandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
-                taskRepository.save(PubliserVedtakshendelseTask.opprettTask(saksbehandling.id))
-                if (!saksbehandling.erMigrering && !saksbehandling.erMaskinellOmregning) {
-                    taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = saksbehandling.id))
-                }
-            }
-            BehandlingType.BLANKETT, BehandlingType.TEKNISK_OPPHØR -> {
-                // ignore
+        if (saksbehandling.type in setOf(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING)) {
+            taskRepository.save(PubliserVedtakshendelseTask.opprettTask(saksbehandling.id))
+            if (!saksbehandling.erMigrering && !saksbehandling.erMaskinellOmregning) {
+                taskRepository.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = saksbehandling.id))
             }
         }
     }

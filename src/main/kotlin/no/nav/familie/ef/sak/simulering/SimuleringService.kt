@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.simulering
 
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -12,7 +11,6 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
-import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -26,8 +24,6 @@ import java.util.UUID
 @Service
 class SimuleringService(
     private val iverksettClient: IverksettClient,
-    private val vedtakService: VedtakService,
-    private val blankettSimuleringsService: BlankettSimuleringsService,
     private val simuleringsresultatRepository: SimuleringsresultatRepository,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService
@@ -37,10 +33,13 @@ class SimuleringService(
 
     @Transactional
     fun simuler(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-        return when (saksbehandling.type) {
-            BehandlingType.BLANKETT -> simulerForBlankett(saksbehandling)
-            else -> simulerForBehandling(saksbehandling)
+        if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
+            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
+        ) {
+            return hentLagretSimuleringsoppsummering(saksbehandling.id)
         }
+        val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
+        return simuleringsresultat.beriketData.oppsummering
     }
 
     fun hentLagretSimuleringsoppsummering(behandlingId: UUID): Simuleringsoppsummering {
@@ -79,17 +78,6 @@ class SimuleringService(
         )
     }
 
-    private fun simulerForBehandling(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-
-        if (saksbehandling.status.behandlingErLåstForVidereRedigering() ||
-            !tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER)
-        ) {
-            return hentLagretSimuleringsoppsummering(saksbehandling.id)
-        }
-        val simuleringsresultat = hentOgLagreSimuleringsresultat(saksbehandling)
-        return simuleringsresultat.beriketData.oppsummering
-    }
-
     private fun simulerMedTilkjentYtelse(saksbehandling: Saksbehandling): BeriketSimuleringsresultat {
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(saksbehandling.id)
 
@@ -120,16 +108,5 @@ class SimuleringService(
                 throwable = e
             )
         }
-    }
-
-    private fun simulerForBlankett(saksbehandling: Saksbehandling): Simuleringsoppsummering {
-        val vedtak = vedtakService.hentVedtakHvisEksisterer(saksbehandling.id)
-        val tilkjentYtelseForBlankett = blankettSimuleringsService.genererTilkjentYtelseForBlankett(vedtak, saksbehandling)
-        val simuleringDto = SimuleringDto(
-            nyTilkjentYtelseMedMetaData = tilkjentYtelseForBlankett,
-            forrigeBehandlingId = null
-
-        )
-        return iverksettClient.simuler(simuleringDto).oppsummering
     }
 }
