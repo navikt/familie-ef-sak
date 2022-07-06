@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
@@ -18,6 +17,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun findByFagsakId(fagsakId: UUID): List<Behandling>
 
     fun findByFagsakIdAndStatus(fagsakId: UUID, status: BehandlingStatus): List<Behandling>
+
+    fun existsByFagsakId(fagsakId: UUID): Boolean
 
     // language=PostgreSQL
     @Query(
@@ -40,16 +41,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
                     """
     )
     fun finnAktivIdent(behandlingId: UUID): String
-
-    // language=PostgreSQL
-    @Query(
-        """SELECT b.id AS first, pi.ident AS second FROM fagsak f
-                    JOIN behandling b ON f.id = b.fagsak_id
-                    JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
-                    WHERE b.id in (:behandlingIds)
-            """
-    )
-    fun finnAktiveIdenter(behandlingIds: Collection<UUID>): List<Pair<UUID, String>>
 
     // language=PostgreSQL
     @Query(
@@ -123,24 +114,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         SELECT b.*, be.id AS eksternid_id
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
-        JOIN fagsak f ON f.id = b.fagsak_id
-        JOIN person_ident pi ON f.fagsak_person_id = pi.fagsak_person_id
-        WHERE pi.ident IN (:personidenter) AND f.stonadstype = :stønadstype
-        ORDER BY b.opprettet_tid DESC
-        LIMIT 1
-    """
-    )
-    fun finnSisteBehandling(
-        stønadstype: StønadType,
-        personidenter: Set<String>
-    ): Behandling?
-
-    // language=PostgreSQL
-    @Query(
-        """
-        SELECT b.*, be.id AS eksternid_id
-        FROM behandling b
-        JOIN behandling_ekstern be ON b.id = be.behandling_id
         WHERE b.fagsak_id = :fagsakId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET')
          AND b.status = 'FERDIGSTILT'
@@ -165,17 +138,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     fun finnEksterneIder(behandlingId: Set<UUID>): Set<EksternId>
 
     // language=PostgreSQL
-    @Query("""SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype""")
-    fun finnSisteIverksatteBehandlinger(stønadstype: StønadType): Set<UUID>
-
-    // language=PostgreSQL
     @Query(
         """
         SELECT DISTINCT pi.ident 
         FROM gjeldende_iverksatte_behandlinger gib 
-            JOIN behandling b ON b.id = gib.id
-            JOIN fagsak f ON f.id = b.fagsak_id
-            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+            JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE gib.stonadstype=:stønadstype
     """
     )
@@ -186,9 +153,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """
         SELECT pi.ident AS first, gib.id AS second 
         FROM gjeldende_iverksatte_behandlinger gib 
-            JOIN behandling b ON b.id = gib.id
-            JOIN fagsak f ON f.id = b.fagsak_id
-            JOIN person_ident pi ON f.fagsak_person_id=pi.fagsak_person_id
+            JOIN person_ident pi ON gib.fagsak_person_id=pi.fagsak_person_id
         WHERE pi.ident IN (:personidenter)
             AND gib.stonadstype=:stønadstype
     """
