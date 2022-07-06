@@ -92,13 +92,13 @@ private fun opprettTask(
         )
     ).copy(
         metadataWrapper = PropertiesWrapper(
-                Properties().apply {
-                    this["saksbehandler"] = "VL"
-                    this["behandlingId"] = behandlingId.toString()
-                    this["hendelse"] = hendelse.name
-                    this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
-                    this["oppgaveId"] = ""
-                    this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-                }
+            Properties().apply {
+                this["saksbehandler"] = "VL"
+                this["behandlingId"] = behandlingId.toString()
+                this["hendelse"] = hendelse.name
+                this["hendelseTidspunkt"] = hendelseTidspunkt.toString()
+                this["oppgaveId"] = ""
+                this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+            }
         )
     )

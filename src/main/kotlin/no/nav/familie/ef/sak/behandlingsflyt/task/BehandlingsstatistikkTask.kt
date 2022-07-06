@@ -90,7 +90,8 @@ class BehandlingsstatistikkTask(
             henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
             relatertEksternBehandlingId = relatertEksternBehandlingId,
             relatertBehandlingId = null,
-            behandlingMetode = behandlingMetode
+            behandlingMetode = behandlingMetode,
+            behandlingÅrsak = saksbehandling.årsak
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
