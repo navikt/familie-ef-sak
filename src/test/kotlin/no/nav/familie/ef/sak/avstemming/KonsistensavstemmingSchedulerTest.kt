@@ -55,7 +55,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
         assertThat(oppdatertJobb.opprettet).isTrue
         val tasks = taskRepository.findAll().toList().sortedBy { it.triggerTid }
         assertThat(tasks).hasSize(2)
-        assertThat(tasks[0].triggerTid).isEqualTo(nesteJobb.atTime(8, 0))
-        assertThat(tasks[1].triggerTid).isEqualTo(nesteJobb.atTime(8, 20))
+        assertThat(tasks[0].triggerTid).isEqualTo(nesteJobb.atTime(22, 0))
+        assertThat(tasks[1].triggerTid).isEqualTo(nesteJobb.atTime(22, 20))
     }
 }
