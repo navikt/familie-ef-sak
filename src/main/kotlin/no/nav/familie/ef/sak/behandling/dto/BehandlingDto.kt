@@ -45,17 +45,17 @@ fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = n
 
 fun List<Behandling>.tilDto(stønadstype: StønadType) = this.map {
     BehandlingDto(
-            id = it.id,
-            forrigeBehandlingId = it.forrigeBehandlingId,
-            fagsakId = it.fagsakId,
-            steg = it.steg,
-            type = it.type,
-            status = it.status,
-            sistEndret = it.sporbar.endret.endretTid,
-            resultat = it.resultat,
-            opprettet = it.sporbar.opprettetTid,
-            behandlingsårsak = it.årsak,
-            stønadstype = stønadstype
+        id = it.id,
+        forrigeBehandlingId = it.forrigeBehandlingId,
+        fagsakId = it.fagsakId,
+        steg = it.steg,
+        type = it.type,
+        status = it.status,
+        sistEndret = it.sporbar.endret.endretTid,
+        resultat = it.resultat,
+        opprettet = it.sporbar.opprettetTid,
+        behandlingsårsak = it.årsak,
+        stønadstype = stønadstype
     )
 }
 
