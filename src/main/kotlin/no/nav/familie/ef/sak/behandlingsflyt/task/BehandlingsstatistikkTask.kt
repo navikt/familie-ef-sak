@@ -15,6 +15,8 @@ import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -51,7 +53,7 @@ class BehandlingsstatistikkTask(
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
 
     override fun doTask(task: Task) {
-        val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId) =
+        val (behandlingId, hendelse, hendelseTidspunkt, gjeldendeSaksbehandler, oppgaveId, behandlingMetode) =
             objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -64,12 +66,14 @@ class BehandlingsstatistikkTask(
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
             saksbehandling.forrigeBehandlingId?.let { behandlingService.hentBehandling(it).eksternId.id }
+        val erAutomatiskGOmregning = saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING && saksbehandling.opprettetAv == "VL"
 
         val behandlingsstatistikkDto = BehandlingsstatistikkDto(
             behandlingId = behandlingId,
             eksternBehandlingId = saksbehandling.eksternId,
             personIdent = saksbehandling.ident,
-            gjeldendeSaksbehandlerId = finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
+            gjeldendeSaksbehandlerId = if (erAutomatiskGOmregning) "VL"
+            else finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
             beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
             else null,
             eksternFagsakId = saksbehandling.eksternFagsakId,
@@ -85,7 +89,9 @@ class BehandlingsstatistikkTask(
             behandlingstype = BehandlingType.valueOf(saksbehandling.type.name),
             henvendelseTidspunkt = henvendelseTidspunkt.atZone(zoneIdOslo),
             relatertEksternBehandlingId = relatertEksternBehandlingId,
-            relatertBehandlingId = null
+            relatertBehandlingId = null,
+            behandlingMetode = behandlingMetode,
+            behandlingÅrsak = saksbehandling.årsak
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
@@ -200,7 +206,8 @@ class BehandlingsstatistikkTask(
             hendelse: Hendelse,
             hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
             gjeldendeSaksbehandler: String? = null,
-            oppgaveId: Long? = null
+            oppgaveId: Long? = null,
+            behandlingMetode: BehandlingMetode? = null
         ): Task =
             Task(
                 type = TYPE,
@@ -210,7 +217,8 @@ class BehandlingsstatistikkTask(
                         hendelse,
                         hendelseTidspunkt,
                         gjeldendeSaksbehandler,
-                        oppgaveId
+                        oppgaveId,
+                        behandlingMetode
                     )
                 ),
                 properties = Properties().apply {
@@ -231,5 +239,6 @@ data class BehandlingsstatistikkTaskPayload(
     val hendelse: Hendelse,
     val hendelseTidspunkt: LocalDateTime,
     val gjeldendeSaksbehandler: String?,
-    val oppgaveId: Long?
+    val oppgaveId: Long?,
+    val behandlingMetode: BehandlingMetode?
 )
