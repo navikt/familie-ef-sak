@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.util.UUID
 
 @RestController
@@ -42,9 +43,11 @@ class BehandlingController(
 
     @GetMapping("gamle-behandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
-        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD).tilDto(StønadType.OVERGANGSSTØNAD)
-        val gamleSkolepengerBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).tilDto(StønadType.SKOLEPENGER)
-        val gamleBarnetilsynBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).tilDto(StønadType.BARNETILSYN)
+        val enMånedSiden = LocalDateTime.now().minusMonths(1);
+
+        val gamleOvergangsstønadBehandlinger = behandlingService.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden).tilDto(StønadType.OVERGANGSSTØNAD)
+        val gamleSkolepengerBehandlinger = behandlingService.hentUferdigeBehandlingerFørDato(StønadType.SKOLEPENGER, enMånedSiden).tilDto(StønadType.SKOLEPENGER)
+        val gamleBarnetilsynBehandlinger = behandlingService.hentUferdigeBehandlingerFørDato(StønadType.BARNETILSYN, enMånedSiden).tilDto(StønadType.BARNETILSYN)
 
         val gamleBehandlinger = listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
 

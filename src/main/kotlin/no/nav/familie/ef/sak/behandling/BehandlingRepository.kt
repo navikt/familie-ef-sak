@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -169,11 +170,11 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM behandling b
         JOIN fagsak f ON f.id = b.fagsak_id
         WHERE NOT b.status = 'FERDIGSTILT'
-        AND b.opprettet_tid < NOW() - INTERVAL '30 days'
+        AND b.opprettet_tid < :opprettetTidFør
         AND f.stonadstype=:stønadstype
         AND b.type != 'BLANKETT' AND b.type != 'TEKNISK_OPPHØR' 
         ORDER BY b.opprettet_tid
         """
     )
-    fun hentGamleUferdigeBehandlinger(stønadstype: StønadType): List<Behandling>
+    fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
 }

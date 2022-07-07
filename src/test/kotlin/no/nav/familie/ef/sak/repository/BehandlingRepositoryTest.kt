@@ -22,7 +22,6 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.test.assertTrue
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -47,13 +46,15 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `hentGamleUferdigeBehandlinger skal bare hente behandlinger som er eldre enn en måned`() {
+    fun `hentUferdigeBehandlingerFørDato skal bare hente behandlinger før en gitt dato`() {
+        val enMånedSiden = LocalDateTime.now().minusMonths(1);
+
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2)))
         val annenFagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
 
-        assertThat(behandlingRepository.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD)).size().isEqualTo(1)
+        assertThat(behandlingRepository.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden)).size().isEqualTo(1)
     }
 
     @Test

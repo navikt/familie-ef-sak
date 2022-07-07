@@ -34,6 +34,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -55,8 +56,8 @@ class BehandlingService(
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-    fun hentGamleUferdigeBehandlinger(stønadtype: StønadType): List<Behandling> {
-        return behandlingRepository.hentGamleUferdigeBehandlinger(stønadtype)
+    fun hentUferdigeBehandlingerFørDato(stønadtype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling> {
+        return behandlingRepository.hentUferdigeBehandlingerFørDato(stønadtype, opprettetTidFør)
     }
 
     fun finnesÅpenBehandling(fagsakId: UUID) =
