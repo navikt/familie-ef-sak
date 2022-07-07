@@ -38,6 +38,6 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
       | BehandlingId | Beløp |
       | 1            | 15    |
 
-    Når beregner ytelse kan kaste feil
+    Når beregner ytelse kaster feil
 
     Så forvent følgende feil: Må ha med minst et barn på en periode som ikke er et midlertidig opphør

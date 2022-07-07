@@ -143,6 +143,16 @@ class StepDefinitions {
         }
     }
 
+    @Gitt("behandling {int} opphører alle perioder for skolepenger")
+    fun opphør_alle_skolepenger(behandlingIdInt: Int) {
+        val behandlingId = behandlingIdTilUUID[behandlingIdInt] ?: error("Finner ikke id for $behandlingIdInt")
+        validerOgSettStønadstype(StønadType.SKOLEPENGER)
+        if (gittVedtak.any { it.behandlingId == behandlingId }) {
+            error("Kan ikke opphøre med behandlingId som allerede har et vedtak")
+        }
+        gittVedtak = gittVedtak + VedtakDomeneParser.opphørSkolepengerUtenPerioder(behandlingId)
+    }
+
     @Gitt("følgende inntekter")
     fun følgende_inntekter(dataTable: DataTable) {
         feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
@@ -204,18 +214,21 @@ class StepDefinitions {
         )
     }
 
-    @Når("beregner ytelse kan kaste feil")
-    fun `beregner ytelse kan kaste feil`() {
+    @Når("beregner ytelse kaster feil")
+    fun `beregner ytelse kaster feil`() {
         try {
             `beregner ytelse`()
         } catch (e: Exception) {
             beregnYtelseException = e
         }
+        if (beregnYtelseException == null) {
+            error("Forventet at beregn ytelse kaster feil")
+        }
     }
 
     @Så("forvent følgende feil: {}")
     fun `forvent følgende feil`(feilmeldingTekst: String) {
-        assertThat(beregnYtelseException).isNotNull()
+        assertThat(beregnYtelseException).isNotNull
         assertThat(beregnYtelseException).hasMessageContaining(feilmeldingTekst)
     }
 
