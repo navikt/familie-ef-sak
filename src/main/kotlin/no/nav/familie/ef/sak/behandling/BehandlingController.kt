@@ -43,11 +43,9 @@ class BehandlingController(
 
     @GetMapping("gamle-behandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
-        val enMånedSiden = LocalDateTime.now().minusMonths(1);
-
-        val gamleOvergangsstønadBehandlinger = behandlingService.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden).tilDto(StønadType.OVERGANGSSTØNAD)
-        val gamleSkolepengerBehandlinger = behandlingService.hentUferdigeBehandlingerFørDato(StønadType.SKOLEPENGER, enMånedSiden).tilDto(StønadType.SKOLEPENGER)
-        val gamleBarnetilsynBehandlinger = behandlingService.hentUferdigeBehandlingerFørDato(StønadType.BARNETILSYN, enMånedSiden).tilDto(StønadType.BARNETILSYN)
+        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD).tilDto(StønadType.OVERGANGSSTØNAD)
+        val gamleSkolepengerBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).tilDto(StønadType.SKOLEPENGER)
+        val gamleBarnetilsynBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).tilDto(StønadType.BARNETILSYN)
 
         val gamleBehandlinger = listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
 

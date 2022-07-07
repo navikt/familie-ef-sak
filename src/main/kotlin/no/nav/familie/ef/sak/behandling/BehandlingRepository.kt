@@ -172,8 +172,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE NOT b.status = 'FERDIGSTILT'
         AND b.opprettet_tid < :opprettetTidFør
         AND f.stonadstype=:stønadstype
-        AND b.type != 'BLANKETT' AND b.type != 'TEKNISK_OPPHØR' 
-        ORDER BY b.opprettet_tid
         """
     )
     fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
