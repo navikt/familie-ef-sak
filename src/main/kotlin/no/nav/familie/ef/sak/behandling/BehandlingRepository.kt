@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -161,4 +162,17 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         personidenter: Collection<String>,
         stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
     ): List<Pair<String, UUID>>
+
+    // language=PostgreSQL
+    @Query(
+        """
+        SELECT b.*, f.stonadstype
+        FROM behandling b
+        JOIN fagsak f ON f.id = b.fagsak_id
+        WHERE NOT b.status = 'FERDIGSTILT'
+        AND b.opprettet_tid < :opprettetTidFør
+        AND f.stonadstype=:stønadstype
+        """
+    )
+    fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
 }

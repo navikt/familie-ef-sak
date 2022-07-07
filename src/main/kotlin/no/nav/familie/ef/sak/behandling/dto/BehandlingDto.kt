@@ -56,5 +56,4 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         opprettet = this.opprettetTid,
         behandlingsårsak = this.årsak,
         stønadstype = stønadstype
-
     )

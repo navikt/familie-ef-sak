@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.util.UUID
 
 @RestController
@@ -37,6 +39,16 @@ class BehandlingController(
         val saksbehandling: Saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
         return Ressurs.success(saksbehandling.tilDto())
+    }
+
+    @GetMapping("gamle-behandlinger")
+    fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
+        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD).map{ it.tilDto(StønadType.OVERGANGSSTØNAD) }
+        val gamleSkolepengerBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).map { it.tilDto(StønadType.SKOLEPENGER) }
+        val gamleBarnetilsynBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).map { it.tilDto(StønadType.BARNETILSYN) }
+        val gamleBehandlinger = listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
+
+        return Ressurs.success(gamleBehandlinger)
     }
 
     @PostMapping("{behandlingId}/reset/{steg}")

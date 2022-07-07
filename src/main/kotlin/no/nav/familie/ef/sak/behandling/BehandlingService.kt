@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -33,6 +34,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -53,6 +55,12 @@ class BehandlingService(
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+    fun hentGamleUferdigeBehandlinger(stønadtype: StønadType): List<Behandling> {
+        val enMånedSiden = LocalDateTime.now().minusMonths(1)
+
+        return behandlingRepository.hentUferdigeBehandlingerFørDato(stønadtype, enMånedSiden)
+    }
 
     fun finnesÅpenBehandling(fagsakId: UUID) =
         behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)

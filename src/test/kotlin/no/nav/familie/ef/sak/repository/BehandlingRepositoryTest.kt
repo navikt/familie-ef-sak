@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -42,6 +43,18 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(behandlingRepository.findByFagsakId(UUID.randomUUID())).isEmpty()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id)).containsOnly(behandling)
+    }
+
+    @Test
+    fun `hentUferdigeBehandlingerFørDato skal bare hente behandlinger før en gitt dato`() {
+        val enMånedSiden = LocalDateTime.now().minusMonths(1);
+
+        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
+        behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2)))
+        val annenFagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.OVERGANGSSTØNAD))
+        behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
+
+        assertThat(behandlingRepository.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden)).size().isEqualTo(1)
     }
 
     @Test
