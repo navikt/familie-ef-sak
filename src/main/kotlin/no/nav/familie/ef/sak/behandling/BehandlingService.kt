@@ -57,7 +57,7 @@ class BehandlingService(
         behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
     fun hentGamleUferdigeBehandlinger(stønadtype: StønadType): List<Behandling> {
-        val enMånedSiden = LocalDateTime.now().minusMonths(1);
+        val enMånedSiden = LocalDateTime.now().minusMonths(1)
 
         return behandlingRepository.hentUferdigeBehandlingerFørDato(stønadtype, enMånedSiden)
     }
