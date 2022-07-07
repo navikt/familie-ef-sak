@@ -16,14 +16,6 @@ class EksternBehandlingService(
     val fagsakService: FagsakService
 ) {
 
-    fun finnesBehandlingFor(personidenter: Set<String>, stønadstype: StønadType?): Boolean {
-        return if (stønadstype != null) {
-            return eksistererBehandling(stønadstype, personidenter)
-        } else {
-            StønadType.values().any { eksistererBehandling(it, personidenter) }
-        }
-    }
-
     fun harLøpendeStønad(personidenter: Set<String>): Boolean {
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
         val sisteStønadsdato = behandlingIDer
@@ -31,14 +23,6 @@ class EksternBehandlingService(
             .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
             .maxOfOrNull { it } ?: LocalDate.MIN
         return sisteStønadsdato >= LocalDate.now()
-    }
-
-    private fun eksistererBehandling(
-        stønadstype: StønadType,
-        personidenter: Set<String>
-    ): Boolean {
-        val fagsak = fagsakService.finnFagsak(personidenter, stønadstype) ?: return false
-        return behandlingService.finnesBehandlingForFagsak(fagsak.id)
     }
 
     private fun hentAlleBehandlingIDer(personidenter: Set<String>): Set<UUID> {
