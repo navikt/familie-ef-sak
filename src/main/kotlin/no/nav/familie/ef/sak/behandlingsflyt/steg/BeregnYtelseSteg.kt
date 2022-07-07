@@ -293,7 +293,6 @@ class BeregnYtelseSteg(
                 vedtak,
                 andelerTilkjentYtelse
             )
-            else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
@@ -324,7 +323,6 @@ class BeregnYtelseSteg(
                 vedtak,
                 andelerTilkjentYtelse
             )
-            else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
@@ -345,10 +343,7 @@ class BeregnYtelseSteg(
             tilkjentYtelseService.hentForBehandling(forrigeBehandlingId)
         }
         val andelerTilkjentYtelse = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
-        brukerfeilHvis(andelerTilkjentYtelse.isEmpty()) { "Innvilget vedtak må ha minimum en beløpsperiode" }
-        feilHvis(saksbehandling.type == FØRSTEGANGSBEHANDLING && vedtak !is InnvilgelseSkolepenger) {
-            "Kan opprette tilkjent ytelse for ${vedtak.javaClass.simpleName} på førstegangsbehandling"
-        }
+        validerSkolepenger(saksbehandling, vedtak, andelerTilkjentYtelse, forrigeTilkjentYtelse)
         val (nyeAndeler, startdato) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
             // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
@@ -358,7 +353,6 @@ class BeregnYtelseSteg(
                     ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
                 andelerTilkjentYtelse to nyttStartdato
             }
-            else -> error("Steg ikke støttet for type=${saksbehandling.type}")
         }
 
         tilkjentYtelseService.opprettTilkjentYtelse(
@@ -369,6 +363,27 @@ class BeregnYtelseSteg(
                 startdato = startdato
             )
         )
+    }
+
+    private fun validerSkolepenger(
+        saksbehandling: Saksbehandling,
+        vedtak: VedtakSkolepengerDto,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        forrigeTilkjentYtelse: TilkjentYtelse?
+    ) {
+        feilHvis(saksbehandling.type == FØRSTEGANGSBEHANDLING && vedtak !is InnvilgelseSkolepenger) {
+            "Kan ikke opprette tilkjent ytelse for ${vedtak.javaClass.simpleName} på førstegangsbehandling"
+        }
+        brukerfeilHvis(!vedtak.erOpphør() && andelerTilkjentYtelse.isEmpty()) {
+            "Innvilget vedtak må ha minimum en beløpsperiode"
+        }
+        brukerfeilHvis(
+            forrigeTilkjentYtelse != null &&
+                forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
+                vedtak.erOpphør()
+        ) {
+            "Kan ikke opphøre når det ikke finnes noen perioder å opphøre"
+        }
     }
 
     private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate {

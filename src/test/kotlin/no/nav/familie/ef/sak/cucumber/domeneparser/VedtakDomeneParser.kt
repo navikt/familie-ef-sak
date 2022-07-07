@@ -74,6 +74,12 @@ object VedtakDomeneParser {
         }
     }
 
+    fun opphørSkolepengerUtenPerioder(behandlingId: UUID) = Vedtak(
+        resultatType = ResultatType.OPPHØRT,
+        skolepenger = SkolepengerWrapper(emptyList(), null),
+        behandlingId = behandlingId
+    )
+
     fun mapVedtakForSkolepenger(dataTable: DataTable): List<Vedtak> {
         val gyldigeKolonner = listOf(
             Domenebegrep.BEHANDLING_ID,
@@ -89,6 +95,7 @@ object VedtakDomeneParser {
         )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
             val perioder = when (vedtak.resultatType) {
+                ResultatType.OPPHØRT,
                 ResultatType.INNVILGE -> mapPerioderForSkolepenger(rader)
                 ResultatType.SANKSJONERE -> {
                     val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
