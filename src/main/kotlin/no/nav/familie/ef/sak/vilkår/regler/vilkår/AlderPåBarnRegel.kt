@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -28,21 +29,21 @@ class AlderPåBarnRegel(
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
     ) {
-
+    private val logger = LoggerFactory.getLogger(javaClass)
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
         val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == gjeldendeBarn }?.personIdent
         val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
             harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
         ) null
         else SvarId.NEI
-
+        logger.info("BarnId: ${gjeldendeBarn} harFullførtFjerdetrinn: ${harFullførtFjerdetrinn} fødselsdato")
         return listOf(
             Delvilkårsvurdering(
-                resultat = Vilkårsresultat.OPPFYLT,
+                resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 listOf(
                     Vurdering(
                         regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
-                        svar = harFullførtFjerdetrinn
+                        svar = SvarId.NEI
                     )
                 )
             ),
@@ -79,15 +80,16 @@ class AlderPåBarnRegel(
                 )
             )
     }
-}
+    fun harFullførtFjerdetrinn(fødselsdato: LocalDate): Boolean {
 
-fun harFullførtFjerdetrinn(fødselsdato: LocalDate): Boolean {
-
-    val alder = YearMonth.now().year - fødselsdato.year
-    var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
-    if (YearMonth.now().month.value > 6) { // Erstatt .now() med skoleåret søknaden gjelder for
-        skoletrinn--
+        val alder = YearMonth.now().year - fødselsdato.year
+        var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
+        if (YearMonth.now().month.value > 6) { // Erstatt .now() med skoleåret søknaden gjelder for
+            skoletrinn--
+        }
+        logger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
+        return skoletrinn > 4
     }
 
-    return skoletrinn > 4
 }
+
