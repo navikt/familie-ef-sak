@@ -8,11 +8,9 @@ import java.io.File
 
 internal class VilkårsregelTest {
 
-    /**
-     * Hvis en
-     */
     @Test
-    internal fun `sjekker att output fortsatt er det samme på json`() {
+    @Disabled
+    internal fun `sjekker at output fortsatt er det samme på json`() {
         val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
         Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {
             val json = objectWriter.writeValueAsString(it.value)

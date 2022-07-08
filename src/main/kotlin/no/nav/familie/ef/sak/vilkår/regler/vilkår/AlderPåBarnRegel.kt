@@ -36,7 +36,7 @@ class AlderPåBarnRegel(
             harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
         ) null
         else SvarId.NEI
-        logger.info("BarnId: ${gjeldendeBarn} harFullførtFjerdetrinn: ${harFullførtFjerdetrinn} fødselsdato")
+        logger.info("BarnId: $gjeldendeBarn harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
         return listOf(
             Delvilkårsvurdering(
                 resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
@@ -90,6 +90,4 @@ class AlderPåBarnRegel(
         logger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
         return skoletrinn > 4
     }
-
 }
-
