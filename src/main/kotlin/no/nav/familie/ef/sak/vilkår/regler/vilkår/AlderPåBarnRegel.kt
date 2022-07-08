@@ -1,6 +1,11 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.NesteRegel
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
@@ -9,12 +14,44 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 
-class AlderPåBarnRegel : Vilkårsregel(
-    vilkårType = VilkårType.ALDER_PÅ_BARN,
-    regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
-    hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
-) {
+class AlderPåBarnRegel(
+    @JsonIgnore
+    val gjeldendeBarn: UUID? = null
+) :
+    Vilkårsregel(
+        vilkårType = VilkårType.ALDER_PÅ_BARN,
+        regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
+        hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
+    ) {
+
+    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
+        val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == gjeldendeBarn }?.personIdent
+        val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
+            harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
+        ) null
+        else SvarId.NEI
+
+        return listOf(
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
+                        svar = harFullførtFjerdetrinn
+                    )
+                )
+            ),
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                listOf(Vurdering(regelId = RegelId.UNNTAK_ALDER))
+            )
+        )
+    }
 
     companion object {
 
@@ -42,4 +79,15 @@ class AlderPåBarnRegel : Vilkårsregel(
                 )
             )
     }
+}
+
+fun harFullførtFjerdetrinn(fødselsdato: LocalDate): Boolean {
+
+    val alder = YearMonth.now().year - fødselsdato.year
+    var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
+    if (YearMonth.now().month.value > 6) { // Erstatt .now() med skoleåret søknaden gjelder for
+        skoletrinn--
+    }
+
+    return skoletrinn > 4
 }

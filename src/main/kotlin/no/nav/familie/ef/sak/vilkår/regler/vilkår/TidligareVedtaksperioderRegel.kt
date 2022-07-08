@@ -29,14 +29,14 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat
     ): List<Delvilkårsvurdering> {
-        val harTidligereMotattOvergangsstønad = if (metadata.erMigrering) null else SvarId.NEI
+        val harTidligereMottattOvergangsstønad = if (metadata.erMigrering) null else SvarId.NEI
         return listOf(
             Delvilkårsvurdering(
                 resultat = Vilkårsresultat.OPPFYLT,
                 listOf(
                     Vurdering(
                         regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-                        svar = harTidligereMotattOvergangsstønad
+                        svar = harTidligereMottattOvergangsstønad
                     )
                 )
             ),

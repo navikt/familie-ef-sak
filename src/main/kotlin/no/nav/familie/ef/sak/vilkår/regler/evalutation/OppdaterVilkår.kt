@@ -181,7 +181,7 @@ object OppdaterVilkår {
             OVERGANGSSTØNAD, SKOLEPENGER -> listOf(lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId))
             BARNETILSYN -> listOf(
                 lagNyVilkårsvurdering(AleneomsorgRegel(), metadata, behandlingId, barnId),
-                lagNyVilkårsvurdering(AlderPåBarnRegel(), metadata, behandlingId, barnId)
+                lagNyVilkårsvurdering(AlderPåBarnRegel(barnId), metadata, behandlingId, barnId)
             )
         }
     }
