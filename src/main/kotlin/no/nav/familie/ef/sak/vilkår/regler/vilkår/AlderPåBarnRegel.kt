@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -21,7 +20,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class AlderPåBarnRegel(
-    @JsonIgnore
     val gjeldendeBarn: UUID? = null
 ) :
     Vilkårsregel(
@@ -29,7 +27,9 @@ class AlderPåBarnRegel(
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
     ) {
+
     private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
         val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == gjeldendeBarn }?.personIdent
         val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
@@ -46,10 +46,6 @@ class AlderPåBarnRegel(
                         svar = SvarId.NEI
                     )
                 )
-            ),
-            Delvilkårsvurdering(
-                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                listOf(Vurdering(regelId = RegelId.UNNTAK_ALDER))
             )
         )
     }
