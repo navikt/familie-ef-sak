@@ -28,6 +28,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN("familie.ef.sak.frontend-journalforing-kan-legge-til-terminbarn"),
     FRONTEND_SKOLEPENGER_REVURDERING("familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-skolepenger"),
+    FRONTEND_GJENBRUKE_VILKÅR("familie.ef.sak.frontend-skal-vise-alertboks-gjenbruk-vilkar"),
 
     FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder")
     ;

@@ -22,7 +22,8 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.SKOLEPENGER,
         Toggle.SKOLEPENGER_OPPHØR,
         Toggle.FRONTEND_SKOLEPENGER_REVURDERING,
-        Toggle.FRONTEND_PREFYLL_VEDTAKSPERIODER
+        Toggle.FRONTEND_PREFYLL_VEDTAKSPERIODER,
+        Toggle.FRONTEND_GJENBRUKE_VILKÅR
     )
 
     @GetMapping
