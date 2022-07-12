@@ -9,7 +9,6 @@ import java.io.File
 internal class VilkårsregelTest {
 
     @Test
-    @Disabled
     internal fun `sjekker at output fortsatt er det samme på json`() {
         val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
         Vilkårsregler.ALLE_VILKÅRSREGLER.vilkårsregler.forEach {

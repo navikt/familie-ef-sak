@@ -19,9 +19,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-class AlderPåBarnRegel(
-    val gjeldendeBarn: UUID? = null
-) :
+class AlderPåBarnRegel() :
     Vilkårsregel(
         vilkårType = VilkårType.ALDER_PÅ_BARN,
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
@@ -30,20 +28,20 @@ class AlderPåBarnRegel(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
-        val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == gjeldendeBarn }?.personIdent
+    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat, barnId: UUID?): List<Delvilkårsvurdering> {
+        val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
         val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
             harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
         ) null
         else SvarId.NEI
-        logger.info("BarnId: $gjeldendeBarn harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
+        logger.info("BarnId: $barnId harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
         return listOf(
             Delvilkårsvurdering(
-                resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 listOf(
                     Vurdering(
                         regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
-                        svar = SvarId.NEI
+                        svar = harFullførtFjerdetrinn
                     )
                 )
             )
