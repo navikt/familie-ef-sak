@@ -26,7 +26,7 @@ class AlderPåBarnRegel() :
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
     ) {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat, barnId: UUID?): List<Delvilkårsvurdering> {
         val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
@@ -34,7 +34,7 @@ class AlderPåBarnRegel() :
             harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
         ) null
         else SvarId.NEI
-        logger.info("BarnId: $barnId harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
+        secureLogger.info("BarnId: $barnId harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
         return listOf(
             Delvilkårsvurdering(
                 resultat = if (harFullførtFjerdetrinn == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
@@ -81,7 +81,7 @@ class AlderPåBarnRegel() :
         if (YearMonth.now().month.value > 6) { // Erstatt .now() med skoleåret søknaden gjelder for
             skoletrinn--
         }
-        logger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
+        secureLogger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
         return skoletrinn > 4
     }
 }

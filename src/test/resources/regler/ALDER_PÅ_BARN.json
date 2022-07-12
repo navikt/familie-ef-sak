@@ -31,5 +31,14 @@
         }
       }
     }
+  },
+  "secureLogger" : {
+    "name" : "secureLogger",
+    "additive" : true,
+    "traceEnabled" : false,
+    "debugEnabled" : false,
+    "infoEnabled" : true,
+    "warnEnabled" : true,
+    "errorEnabled" : true
   }
 }
