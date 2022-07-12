@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -26,6 +27,7 @@ class AlderPåBarnRegel() :
         hovedregler = regelIder(HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
     ) {
 
+    @JsonIgnore
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat, barnId: UUID?): List<Delvilkårsvurdering> {
