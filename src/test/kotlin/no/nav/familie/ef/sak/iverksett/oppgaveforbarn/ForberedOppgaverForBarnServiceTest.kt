@@ -256,6 +256,13 @@ internal class ForberedOppgaverForBarnServiceTest {
     }
 
     @Test
+    fun test() {
+        val date = LocalDate.of(2021, 12, 2)
+        val halvtÅr = date.plusDays(182)
+        println(halvtÅr) // 02.06.2022
+    }
+
+    @Test
     fun `barn fra vanlige behandlinger og migrerte fagsaker blir med i listen over oppgaver`() {
         val termindato = LocalDate.now().minusYears(1).plusDays(6)
         val fødselsdato = LocalDate.now().minusDays(182)
