@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -19,6 +20,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     lateinit var behandlingService: BehandlingService
     private val behandlingÅrsak = BehandlingÅrsak.SØKNAD
@@ -124,5 +126,57 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(førstegang.id)
+    }
+
+    @Test
+    internal fun `hentBehandlingForGjenbrukAvVilkår - skal returnere en sortert liste av aktuelle behandlinger for vilkårsgjenbruk`() {
+        val fagsakPersonId = UUID.randomUUID()
+        val fagsakOs = testoppsettService.lagreFagsak(
+            fagsak(
+                stønadstype = StønadType.OVERGANGSSTØNAD,
+                fagsakPersonId = fagsakPersonId
+            )
+        )
+        val fagsakBt = testoppsettService.lagreFagsak(
+            fagsak(
+                stønadstype = StønadType.BARNETILSYN,
+                fagsakPersonId = fagsakPersonId
+            )
+        )
+        val fagsakSp = testoppsettService.lagreFagsak(
+            fagsak(
+                stønadstype = StønadType.SKOLEPENGER,
+                fagsakPersonId = fagsakPersonId
+            )
+        )
+
+        behandlingRepository.insert(
+            behandling(fagsakOs).copy(
+                resultat = BehandlingResultat.HENLAGT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
+        val førstegangBt = behandlingRepository.insert(
+            behandling(fagsakBt).copy(
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
+        val førstegangSp = behandlingRepository.insert(
+            behandling(fagsakSp).copy(
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+        )
+        behandlingRepository.insert(
+            behandling(fagsakSp).copy(
+                resultat = BehandlingResultat.IKKE_SATT,
+                status = BehandlingStatus.UTREDES
+            )
+        )
+
+        val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsakPersonId)
+        val behandlingerForVilkårsgjenbrukkLagret = listOf(førstegangSp, førstegangBt)
+        assertThat(behandlingerForVilkårsgjenbrukHentet).isEqualTo(behandlingerForVilkårsgjenbrukkLagret)
     }
 }
