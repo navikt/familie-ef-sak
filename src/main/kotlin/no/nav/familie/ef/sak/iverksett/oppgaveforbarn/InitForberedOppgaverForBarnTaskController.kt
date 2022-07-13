@@ -5,6 +5,7 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
@@ -25,7 +26,7 @@ class InitForberedOppgaverForBarnTaskController(
     }
 
     @PostMapping("/dry-run")
-    fun dryRun() {
-        forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(LocalDate.of(2022, 5, 20), dryRun = true)
+    fun dryRun(@RequestParam referansedato: LocalDate) {
+        forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato, dryRun = true)
     }
 }

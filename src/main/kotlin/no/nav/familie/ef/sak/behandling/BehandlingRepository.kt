@@ -123,6 +123,20 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     )
     fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
 
+    @Query(
+        """
+        SELECT b.*, be.id AS eksternid_id
+        FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
+        JOIN fagsak f on b.fagsak_id = f.id 
+        WHERE f.fagsak_person_id = :fagsakPersonId
+         AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT')
+         AND b.status = 'FERDIGSTILT'
+        ORDER BY b.opprettet_tid DESC
+    """
+    )
+    fun finnBehandlingForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
+
     fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 
     // language=PostgreSQL

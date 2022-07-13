@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
@@ -88,5 +89,14 @@ class BehandlingController(
         val saksbehandling = behandlingService.hentSaksbehandling(eksternBehandlingId)
         tilgangService.validerTilgangTilPersonMedBarn(saksbehandling.ident, AuditLoggerEvent.ACCESS)
         return Ressurs.success(saksbehandling.tilDto())
+    }
+
+    @GetMapping("/gjenbruk/{behandlingId}")
+    fun hentBehandlingForGjenbrukAvVilkår(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingDto>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
+        val behandlinger: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+        return Ressurs.success(behandlinger.map { it.tilDto(fagsakService.hentFagsak(it.fagsakId).stønadstype) })
     }
 }
