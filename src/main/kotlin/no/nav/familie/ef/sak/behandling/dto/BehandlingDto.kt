@@ -23,7 +23,8 @@ data class BehandlingDto(
     val opprettet: LocalDateTime,
     val behandlingsårsak: BehandlingÅrsak,
     val stønadstype: StønadType,
-    val vedtaksdato: LocalDateTime? = null
+    val vedtaksdato: LocalDateTime? = null,
+    val henlagtÅrsak: HenlagtÅrsak? = null
 )
 
 fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = null): BehandlingDto =
@@ -38,6 +39,7 @@ fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = n
         resultat = this.resultat,
         opprettet = this.sporbar.opprettetTid,
         behandlingsårsak = this.årsak,
+        henlagtÅrsak = this.henlagtÅrsak,
         stønadstype = stønadstype,
         vedtaksdato = vedtaksdato
             ?: (if (this.status == BehandlingStatus.FERDIGSTILT) this.sporbar.endret.endretTid else null)
@@ -55,5 +57,7 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         resultat = this.resultat,
         opprettet = this.opprettetTid,
         behandlingsårsak = this.årsak,
-        stønadstype = stønadstype
+        henlagtÅrsak = this.henlagtÅrsak,
+        stønadstype = stønadstype,
+        vedtaksdato = if (this.status == BehandlingStatus.FERDIGSTILT) this.endretTid else null
     )

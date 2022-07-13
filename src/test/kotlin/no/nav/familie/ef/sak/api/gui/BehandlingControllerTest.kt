@@ -50,6 +50,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
+        assertThat(respons.body?.data!!.henlagtÅrsak).isEqualTo(HenlagtÅrsak.FEILREGISTRERT)
     }
 
     @Test
@@ -60,6 +61,7 @@ internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.data!!.resultat).isEqualTo(BehandlingResultat.HENLAGT)
+        assertThat(respons.body?.data!!.henlagtÅrsak).isEqualTo(HenlagtÅrsak.FEILREGISTRERT)
     }
 
     private fun hentBehandling(id: UUID): ResponseEntity<Ressurs<BehandlingDto>> {
