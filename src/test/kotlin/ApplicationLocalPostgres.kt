@@ -28,6 +28,8 @@ fun main(args: Array<String>) {
             "mock-inntekt",
             "mock-ereg",
             "mock-aareg",
+            "mock-brev",
+            "mock-dokument",
             "mock-tilbakekreving"
         )
         .properties(properties)
