@@ -29,6 +29,8 @@ data class SvarPåVurderingerDto(
     val delvilkårsvurderinger: List<DelvilkårsvurderingDto>
 )
 
+data class GjenbrukVilkårsvurderingerDto(val behandlingId: UUID, val kopierBehandlingId: UUID)
+
 data class DelvilkårsvurderingDto(
     val resultat: Vilkårsresultat,
     val vurderinger: List<VurderingDto>
@@ -63,6 +65,15 @@ fun Vilkårsvurdering.tilDto() =
             .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
             .map { it.tilDto() }
     )
+
+fun List<VilkårsvurderingDto>.tilSvarPåVurderingerDto(behandlingId: UUID, vurderinger: List<VilkårsvurderingDto>) =
+    this.map {
+        SvarPåVurderingerDto(
+            id = vurderinger.filter { a -> a.vilkårType === it.vilkårType }[0].id,
+            behandlingId = behandlingId,
+            delvilkårsvurderinger = it.delvilkårsvurderinger
+        )
+    }
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }
 fun VurderingDto.tilDomene() = Vurdering(this.regelId, this.svar, this.begrunnelse)

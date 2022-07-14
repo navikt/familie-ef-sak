@@ -2,10 +2,12 @@ package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.vilkår.dto.GjenbrukVilkårsvurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.tilSvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -80,5 +82,29 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
+    }
+
+    @PostMapping("gjenbruk")
+    fun gjenbrukVilkår(@RequestBody request: GjenbrukVilkårsvurderingerDto): Ressurs<VilkårDto> {
+        tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        val (vurderingerFraTidligereBehandling, _) = vurderingService.hentEllerOpprettVurderinger(request.kopierBehandlingId)
+        val (vurderingerPåNåværendeBehandling, _) = vurderingService.hentEllerOpprettVurderinger(request.behandlingId)
+        try {
+            vurderingerFraTidligereBehandling.tilSvarPåVurderingerDto(
+                request.behandlingId,
+                vurderingerPåNåværendeBehandling
+            )
+                .forEach { vurderingStegService.oppdaterVilkår(it) }
+            return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
+        } catch (e: Exception) {
+            secureLogger.warn(
+                "behandlingId=${request.behandlingId}" +
+                    " tidligereBehandlingId=${request.kopierBehandlingId}" +
+                    " Gjenbruk av vilkår gikk galt"
+            )
+            throw e
+        }
     }
 }
