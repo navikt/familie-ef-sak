@@ -120,6 +120,8 @@ class MålerService(private val målerRepository: MålerRepository) {
                 Tags.of(
                     "ytelse", it.stonadstype.name,
                     "resultat", it.resultat.name,
+                    "arsak", it.arsak.name,
+                    "henlagtarsak", it.henlagt_arsak?.name,
                     "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
                 ),
                 it.antall
