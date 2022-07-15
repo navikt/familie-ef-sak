@@ -47,7 +47,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentUferdigeBehandlingerFørDato skal bare hente behandlinger før en gitt dato`() {
-        val enMånedSiden = LocalDateTime.now().minusMonths(1);
+        val enMånedSiden = LocalDateTime.now().minusMonths(1)
 
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2)))
