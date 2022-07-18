@@ -53,13 +53,15 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
     @Query(
         """SELECT stonadstype,
                      resultat,
+                     arsak,
+                     henlagt_arsak,
                      EXTRACT(ISOYEAR FROM behandling.endret_tid) AS år,
                      EXTRACT(WEEK FROM behandling.endret_tid) AS uke,
                      COUNT(*) AS antall
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               WHERE status = 'FERDIGSTILT'
-              GROUP BY stonadstype, resultat, år, uke"""
+              GROUP BY stonadstype, resultat, arsak, henlagt_arsak, år, uke"""
     )
     fun finnVedtakPerUke(): List<VedtakPerUke>
 
