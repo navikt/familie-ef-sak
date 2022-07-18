@@ -80,7 +80,7 @@ class AlderPåBarnRegel() :
 
         val alder = YearMonth.now().year - fødselsdato.year
         var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
-        if (YearMonth.now().month.value > 6) { // Erstatt .now() med skoleåret søknaden gjelder for
+        if (YearMonth.now().month.plus(1).value > 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles
             skoletrinn--
         }
         secureLogger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")

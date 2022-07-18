@@ -32,7 +32,11 @@ data class Vilkårsvurdering(
     val sporbar: Sporbar = Sporbar(),
     @Column("delvilkar")
     val delvilkårsvurdering: DelvilkårsvurderingWrapper
-)
+) {
+    init {
+        require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
+    }
+}
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
@@ -61,6 +65,7 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes");
 
     fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
+    fun erIkkeDelvilkårsresultat() = this != AUTOMATISK_OPPFYLT
 }
 
 enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<StønadType>) {
