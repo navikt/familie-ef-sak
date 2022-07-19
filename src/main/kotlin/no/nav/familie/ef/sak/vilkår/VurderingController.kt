@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.dto.tilSvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.tilVurderingerForInngangsvilkår
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -89,22 +89,9 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        val (vurderingerFraTidligereBehandling, _) = vurderingService.hentEllerOpprettVurderinger(request.kopierBehandlingId)
-        val (vurderingerPåNåværendeBehandling, _) = vurderingService.hentEllerOpprettVurderinger(request.behandlingId)
-        try {
-            vurderingerFraTidligereBehandling.tilSvarPåVurderingerDto(
-                request.behandlingId,
-                vurderingerPåNåværendeBehandling
-            )
-                .forEach { vurderingStegService.oppdaterVilkår(it) }
-            return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
-        } catch (e: Exception) {
-            secureLogger.warn(
-                "behandlingId=${request.behandlingId}" +
-                    " tidligereBehandlingId=${request.kopierBehandlingId}" +
-                    " Gjenbruk av vilkår gikk galt"
-            )
-            throw e
-        }
+        // val (tidligereVurderinger, _) = vurderingService.hentEllerOpprettVurderinger(request.kopierBehandlingId)
+        // val (nåværendeVurderinger, _) = vurderingService.hentEllerOpprettVurderinger(request.behandlingId)
+        vurderingService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, request.kopierBehandlingId)
+        return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
     }
 }

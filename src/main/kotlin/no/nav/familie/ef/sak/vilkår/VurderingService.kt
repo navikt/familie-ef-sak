@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
@@ -90,7 +91,8 @@ class VurderingService(
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
-        val søktOmBarnetilsyn = grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
+        val søktOmBarnetilsyn =
+            grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
@@ -148,7 +150,8 @@ class VurderingService(
         metadata: HovedregelMetadata,
         stønadType: StønadType
     ) {
-        val tidligereVurderinger = vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId).associateBy { it.id }
+        val tidligereVurderinger =
+            vilkårsvurderingRepository.findByBehandlingId(eksisterendeBehandlingId).associateBy { it.id }
         val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(eksisterendeBehandlingId)
         val barnIdMap = byggBarnMapFraTidligereTilNyId(barnPåForrigeBehandling, metadata.barn)
         validerAtVurderingerKanKopieres(tidligereVurderinger, eksisterendeBehandlingId)
@@ -166,6 +169,95 @@ class VurderingService(
         tilbakestillEndretTidForKopierteVurderinger(kopiAvVurderinger, tidligereVurderinger)
     }
 
+    @Transactional
+    fun gjenbrukInngangsvilkårVurderinger(
+        nåværendeBehandlingId: UUID,
+        tidligereBehandlingId: UUID,
+    ) {
+        validerAtVurderingerKanGjenbrukes()
+        val barnPåBeggeBehandlingerMaps = finnBarnPåBeggeBehandlinger(tidligereBehandlingId, nåværendeBehandlingId)
+        val sivilstandErLik =
+            hentGrunnlagsdataOgValiderSivilstand(tidligereBehandlingId, nåværendeBehandlingId)
+        val (tidligereVurderinger, nåværendeVurderinger) = finnVurderingerSomSkalGjenbrukes(
+            tidligereBehandlingId,
+            sivilstandErLik,
+            barnPåBeggeBehandlingerMaps.second,
+            nåværendeBehandlingId
+        )
+
+        val vurderingerSomSkalLagres = tidligereVurderinger.map {
+            // val nåværendeVurdering = nåværendeVurderinger.filter { b -> tidligereVurdering.type == b.type }
+            // val barnId = if (tidligereVurdering.type == VilkårType.ALENEOMSORG) barnPåBeggeBehandlingerMaps.second.
+            if (it.type == VilkårType.ALENEOMSORG) {
+                val nåværendeVurdering = nåværendeVurderinger.first { b -> it.type == b.type && barnPåBeggeBehandlingerMaps.second.containsKey(it.barnId) }
+                it.copy(
+                    id = nåværendeVurdering.id,
+                    behandlingId = nåværendeBehandlingId,
+                    sporbar = nåværendeVurdering.sporbar,
+                    barnId = nåværendeVurdering.barnId,
+                )
+            } else {
+                val nåværendeVurdering = nåværendeVurderinger.first { b -> it.type == b.type }
+                it.copy(
+                    id = nåværendeVurdering.id,
+                    behandlingId = nåværendeBehandlingId,
+                    sporbar = nåværendeVurdering.sporbar,
+                )
+            }
+        }
+
+        vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
+    }
+
+    private fun finnBarnPåBeggeBehandlinger(tidligereBehandlingId: UUID, nåværendeBehandlingId: UUID): Pair<Map<String?, BehandlingBarn>, Map<UUID, BehandlingBarn>> {
+        val barnPåForrigeBehandling =
+            barnService.finnBarnPåBehandling(tidligereBehandlingId)
+        val barnPåNåværendeBehandling =
+            barnService.finnBarnPåBehandling(nåværendeBehandlingId)
+        val barnPåForrigeBehandlingSomErINåværede = barnPåForrigeBehandling.filter {forrige -> barnPåNåværendeBehandling.map {nåværende -> nåværende.personIdent }.contains(forrige.personIdent) }
+        val barnPåNåværendeBehandlingSomVarIForrige = barnPåNåværendeBehandling.filter {nåværende -> barnPåForrigeBehandling.map {forrige -> forrige.personIdent }.contains(nåværende.personIdent) }
+
+        val forrigeMap = barnPåForrigeBehandlingSomErINåværede.associate { it.personIdent to it }
+        val nåværendeMap = barnPåNåværendeBehandlingSomVarIForrige.associate { it.personIdent to it }
+
+        val forrigeVurderingIdTilNåværendeBarnMap = barnPåNåværendeBehandlingSomVarIForrige.associate { forrigeMap[it.personIdent]!!.id to it }
+
+        val personIdentMap = barnPåNåværendeBehandlingSomVarIForrige.associate { it.personIdent to it }
+        val forrigeBehandlingIdMap = barnPåNåværendeBehandlingSomVarIForrige.associate { it.id to it }
+
+
+        return Pair(personIdentMap, forrigeVurderingIdTilNåværendeBarnMap)
+    }
+
+    private fun finnVurderingerSomSkalGjenbrukes(
+        tidligereBehandlingId: UUID,
+        sivilstandErLik: Boolean,
+        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
+        nåværendeBehandlingId: UUID
+    ): Pair<List<Vilkårsvurdering>, List<Vilkårsvurdering>> {
+        val tidligereVurderinger =
+            vilkårsvurderingRepository.findByBehandlingId(tidligereBehandlingId)
+                .filter {
+                    it.type.erInngangsvilkår() && skalGjenbrukeVurdering(
+                        it,
+                        sivilstandErLik,
+                        barnPåBeggeBehandlinger
+                    )
+                }
+        val nåværendeVurderinger =
+            vilkårsvurderingRepository.findByBehandlingId(nåværendeBehandlingId)
+        return Pair(tidligereVurderinger, nåværendeVurderinger)
+    }
+
+    private fun hentGrunnlagsdataOgValiderSivilstand(
+        tidligereBehandlingId: UUID,
+        nåværendeBehandlingId: UUID
+    ): Boolean {
+        val tidligereGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(tidligereBehandlingId)
+        val nåværendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(nåværendeBehandlingId)
+        return tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand.gjeldende() == nåværendeGrunnlagsdata.grunnlagsdata.søker.sivilstand.gjeldende()
+    }
+
     fun aktivitetArbeidForBehandlingIds(behandlingIds: Collection<UUID>): Map<UUID, SvarId?> {
         val vilkårsvurderinger =
             vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, behandlingIds)
@@ -178,6 +270,28 @@ class VurderingService(
             }.single()
         }
     }
+
+    private fun validerAtVurderingerKanGjenbrukes() {
+        if (false) {
+            val melding = "Noe gikk galt"
+            throw Feil(melding, melding)
+        }
+    }
+
+    private fun skalGjenbrukeVurdering(
+        vurdering: Vilkårsvurdering,
+        sivilstandErLik: Boolean,
+        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>
+    ): Boolean {
+        return when (vurdering.type) {
+            VilkårType.SIVILSTAND -> sivilstandErLik
+            VilkårType.ALENEOMSORG -> barnPåBeggeBehandlinger.containsKey(vurdering.barnId)
+            else -> true
+        }
+    }
+
+    private fun erMatchendeBarn(detteBarn: BehandlingBarn, annetBarn: BehandlingBarn): Boolean =
+        (detteBarn.personIdent != null && detteBarn.personIdent == annetBarn.personIdent)
 
     private fun validerAtVurderingerKanKopieres(
         tidligereVurderinger: Map<UUID, Vilkårsvurdering>,
@@ -246,7 +360,8 @@ class VurderingService(
 
     fun erAlleVilkårOppfylt(behandlingId: UUID): Boolean {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
-        val lagredeVilkårsvurderinger: List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        val lagredeVilkårsvurderinger: List<Vilkårsvurdering> =
+            vilkårsvurderingRepository.findByBehandlingId(behandlingId)
         return OppdaterVilkår.erAlleVilkårsvurderingerOppfylt(lagredeVilkårsvurderinger, stønadstype)
     }
 
@@ -258,7 +373,8 @@ class VurderingService(
         ): Map<UUID, BehandlingBarn> {
             val barnFraForrigeBehandlingMap = barnPåForrigeBehandling.associateBy { it.id }.toMutableMap()
             return barnPåGjeldendeBehandling.mapNotNull { nyttBarn ->
-                val forrigeBarnId = barnFraForrigeBehandlingMap.entries.firstOrNull { nyttBarn.erMatchendeBarn(it.value) }?.key
+                val forrigeBarnId =
+                    barnFraForrigeBehandlingMap.entries.firstOrNull { nyttBarn.erMatchendeBarn(it.value) }?.key
                 barnFraForrigeBehandlingMap.remove(forrigeBarnId)
                 forrigeBarnId?.let { Pair(forrigeBarnId, nyttBarn) }
             }.associate { it.first to it.second }

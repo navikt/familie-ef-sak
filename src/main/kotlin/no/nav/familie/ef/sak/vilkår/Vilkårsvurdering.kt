@@ -87,6 +87,8 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN
 
+    fun erInngangsvilkår(): Boolean = this.gjelderStønader.containsAll(listOf(OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER))
+
     companion object {
 
         fun hentVilkårForStønad(stønadstype: StønadType): List<VilkårType> = values().filter {
