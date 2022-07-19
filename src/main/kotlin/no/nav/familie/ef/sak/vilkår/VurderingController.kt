@@ -89,8 +89,6 @@ class VurderingController(
         tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        // val (tidligereVurderinger, _) = vurderingService.hentEllerOpprettVurderinger(request.kopierBehandlingId)
-        // val (nåværendeVurderinger, _) = vurderingService.hentEllerOpprettVurderinger(request.behandlingId)
         vurderingService.gjenbrukInngangsvilkårVurderinger(request.behandlingId, request.kopierBehandlingId)
         return Ressurs.success(vurderingService.hentEllerOpprettVurderinger(request.behandlingId))
     }

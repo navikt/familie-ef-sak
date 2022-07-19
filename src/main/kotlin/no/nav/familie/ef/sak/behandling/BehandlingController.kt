@@ -96,7 +96,7 @@ class BehandlingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        val behandlinger: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
-        return Ressurs.success(behandlinger.map { it.tilDto(fagsakService.hentFagsak(it.fagsakId).stønadstype) })
+        val behandlingerForGjenbruk: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+        return Ressurs.success(behandlingerForGjenbruk.map { it.tilDto(fagsakService.hentFagsak(it.fagsakId).stønadstype) })
     }
 }
