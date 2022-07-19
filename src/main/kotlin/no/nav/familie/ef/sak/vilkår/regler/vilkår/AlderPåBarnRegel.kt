@@ -17,10 +17,9 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
-class AlderPåBarnRegel() :
+class AlderPåBarnRegel :
     Vilkårsregel(
         vilkårType = VilkårType.ALDER_PÅ_BARN,
         regler = setOf(HAR_ALDER_LAVERE_ENN_GRENSEVERDI, UNNTAK_ALDER),
@@ -76,11 +75,12 @@ class AlderPåBarnRegel() :
                 )
             )
     }
-    fun harFullførtFjerdetrinn(fødselsdato: LocalDate): Boolean {
 
-        val alder = YearMonth.now().year - fødselsdato.year
+    fun harFullførtFjerdetrinn(fødselsdato: LocalDate, datoForBeregning: LocalDate = LocalDate.now()): Boolean {
+
+        val alder = datoForBeregning.year - fødselsdato.year
         var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
-        if (YearMonth.now().month.plus(1).value > 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles
+        if (datoForBeregning.month.plus(1).value < 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles
             skoletrinn--
         }
         secureLogger.info("Fødselsdato: $fødselsdato gir skoletrinn $skoletrinn")
