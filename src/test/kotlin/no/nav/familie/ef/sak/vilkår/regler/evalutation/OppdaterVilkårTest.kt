@@ -23,10 +23,12 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledRes
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class OppdaterVilkårTest {
@@ -61,6 +63,45 @@ internal class OppdaterVilkårTest {
         assertThat(nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }).hasSize(2)
         val barnIdMedAlderPåBarnVilkår = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }.map { it.barnId }
         assertThat(barnIdMedAlderPåBarnVilkår).containsAll(listOf(barn.id, barnUtenSøknad.id))
+    }
+
+    @Test
+    fun `ALDER_PÅ_BARN-vurderinger skal automatisk vurderes ved opprettelse - barnetilsyn`() {
+
+        val behandlingId = UUID.randomUUID()
+        val barn = BehandlingBarn(
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = FnrGenerator.generer(LocalDate.now().minusYears(5)),
+            navn = null,
+            fødselTermindato = null,
+        )
+        val barnUtenSøknad = barn.copy(
+            id = UUID.randomUUID(),
+            personIdent = FnrGenerator.generer(LocalDate.now().minusYears(4))
+        )
+        val metadata = HovedregelMetadata(
+            sivilstandSøknad = null,
+            sivilstandstype = GIFT,
+            erMigrering = false,
+            barn = listOf(barn, barnUtenSøknad),
+            søktOmBarnetilsyn = listOf(barn.id)
+        )
+
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
+            behandlingId,
+            metadata,
+            StønadType.BARNETILSYN
+        )
+
+        val alderPåBarnVilkår = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }
+        assertThat(alderPåBarnVilkår).hasSize(2)
+        for (vilkårsvurdering in alderPåBarnVilkår) {
+            val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
+            assertThat(delvilkårsvurderinger.size).isEqualTo(1)
+            assertThat(delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+        }
     }
 
     @Test
