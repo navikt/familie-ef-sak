@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -42,7 +43,10 @@ class AlderPåBarnRegel :
                 listOf(
                     Vurdering(
                         regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
-                        svar = harFullførtFjerdetrinn
+                        svar = harFullførtFjerdetrinn,
+                        begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI)
+                            "Automatisk oppfylt: Ut ifra barnets alder, er det automatisk vurdert at barnet ikke har fullført fjerde skoletrinn den ${LocalDate.now().norskFormat()}"
+                        else null
                     )
                 )
             )
