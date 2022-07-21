@@ -17,6 +17,7 @@ data class PersonopplysningerDto(
     val kjønn: Kjønn,
     val adressebeskyttelse: Adressebeskyttelse?,
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+    val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?,
     val telefonnummer: TelefonnummerDto?,
     val statsborgerskap: List<StatsborgerskapDto>,
