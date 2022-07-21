@@ -49,7 +49,7 @@ class PersonopplysningerMapper(
                 ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
                 ?.let { Folkeregisterpersonstatus.fraPdl(it) },
-            fødselsdato = søker.fødsel.first().fødselsdato,
+            fødselsdato = søker.fødsel.gjeldende().fødselsdato,
             dødsdato = søker.dødsfall?.dødsdato,
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),

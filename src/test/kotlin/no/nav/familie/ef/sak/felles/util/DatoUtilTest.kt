@@ -109,7 +109,7 @@ internal class DatoUtilTest {
         }
 
         @Test
-        internal fun `skal mappe alle måneder fra januar til juni til forrige år år`() {
+        internal fun `skal mappe alle måneder fra januar til juni til forrige år`() {
             val år = 2022
             IntRange(1, 6).map { fraMåned ->
                 val fra = YearMonth.of(år, fraMåned)
