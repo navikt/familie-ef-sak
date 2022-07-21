@@ -9,6 +9,7 @@
   "kjønn" : "KVINNE",
   "adressebeskyttelse" : "UGRADERT",
   "folkeregisterpersonstatus" : "BOSATT",
+  "fødselsdato" : "2018-01-01",
   "dødsdato" : null,
   "telefonnummer" : {
     "landskode" : "+47",
