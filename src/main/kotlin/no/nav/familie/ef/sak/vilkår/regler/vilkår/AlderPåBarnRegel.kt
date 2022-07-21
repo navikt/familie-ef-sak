@@ -45,7 +45,7 @@ class AlderPåBarnRegel :
                         regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
                         svar = harFullførtFjerdetrinn,
                         begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI)
-                            "Automatisk oppfylt: Ut ifra barnets alder, er det automatisk vurdert at barnet ikke har fullført fjerde skoletrinn den ${LocalDate.now().norskFormat()}"
+                            "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()} automatisk vurdert at barnet ikke har fullført 4. skoleår."
                         else null
                     )
                 )
