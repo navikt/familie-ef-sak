@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.svarTilDomene
+import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler.Companion.ALLE_VILKÅRSREGLER
@@ -192,12 +193,13 @@ object OppdaterVilkår {
         behandlingId: UUID,
         barnId: UUID? = null
     ): Vilkårsvurdering {
-        val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(metadata)
+        val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(metadata, barnId = barnId)
         return Vilkårsvurdering(
             behandlingId = behandlingId,
             type = vilkårsregel.vilkårType,
             barnId = barnId,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
+            resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår
         )
     }
 }

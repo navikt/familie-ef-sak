@@ -3,11 +3,12 @@ package no.nav.familie.ef.sak.cucumber.steps
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
-import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.ANTALL_BARN
@@ -18,12 +19,18 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.Beregni
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.TIL_OG_MED_MND
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
 import org.assertj.core.api.Assertions.assertThat
 import java.math.BigDecimal.ZERO
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
 class BeregningBarnetilsynStepDefinitions {
+
+    private lateinit var gittFødselsdato: LocalDate
+    private var datoForKjøring: LocalDate? = null
+    private var resultatHarFullførtFjerdetrinn: Boolean? = null
 
     val beregningBarnetilsynService = BeregningBarnetilsynService()
     val kontantStøtteperioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
@@ -42,7 +49,7 @@ class BeregningBarnetilsynStepDefinitions {
         }
     }
 
-    @Og("kontantstøtteperioder")
+    @Gitt("kontantstøtteperioder")
     fun kontantstøtteperioder(dataTable: DataTable) {
         dataTable.asMaps().map {
             val fraÅrMåned = parseÅrMåned(FRA_MND, it)
@@ -52,7 +59,7 @@ class BeregningBarnetilsynStepDefinitions {
         }
     }
 
-    @Og("tilleggsstønadsperioder")
+    @Gitt("tilleggsstønadsperioder")
     fun tilleggsstønadsperioder(dataTable: DataTable) {
         dataTable.asMaps().map {
             val fraÅrMåned = parseÅrMåned(FRA_MND, it)
@@ -60,6 +67,17 @@ class BeregningBarnetilsynStepDefinitions {
             val beløp = it["Beløp"]!!.toInt()
             tilleggsstønadPerioder.add(PeriodeMedBeløpDto(fraÅrMåned, tilÅrMåned, beløp))
         }
+    }
+
+    @Gitt("følgende fødselsdato {string} for barn")
+    fun fødselsdato_og_dato_for_sjekk_på_fullført_fjerdetrinn(fødselsdato: String) {
+        gittFødselsdato = parseDato(fødselsdato)
+    }
+
+    @Når("sjekk på om barn har fullført fjerde skoletrinn utføres den {string}")
+    fun sjekk_har_fullført_fjerde_skoletrinn(datoSjekkUtføres: String) {
+        datoForKjøring = parseDato(datoSjekkUtføres)
+        resultatHarFullførtFjerdetrinn = AlderPåBarnRegel().harFullførtFjerdetrinn(gittFødselsdato, parseDato(datoSjekkUtføres))
     }
 
     @Når("vi beregner perioder med barnetilsyn")
@@ -99,6 +117,11 @@ class BeregningBarnetilsynStepDefinitions {
         val forventet = hentUtForventet(dataTable)
         sjekkAtAlleFelterErSomForventet(forventet)
         assertThat(beregnYtelseBarnetilsynResultat).size().isEqualTo(forventet.size)
+    }
+
+    @Så("forvent resultat {string}")
+    fun forvent_resultat_fjerde_skoletrinn(forventetResultat: String) {
+        assertThat(resultatHarFullførtFjerdetrinn).isEqualTo(parseBoolean(forventetResultat))
     }
 
     private fun sjekkAtAlleFelterErSomForventet(forventet: List<ForventetPeriodeMedGrunnlag>) {
