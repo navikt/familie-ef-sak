@@ -46,13 +46,13 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettInngangsvilkår()
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(respons.body.data).isNotNull
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data).isNotNull
     }
 
     @Test
     internal fun `oppdaterVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!
+        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", StønadType.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
@@ -68,7 +68,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `nullstillVilkår skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!
+        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", StønadType.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
@@ -96,7 +96,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere vurderingen for FORUTGÅENDE_MEDLEMSKAP som har ett spørsmål som vi setter til JA`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!
+        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
         val oppdatertVilkårsvarMedJa = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
             restTemplate.exchange(
@@ -106,13 +106,13 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
     @Test
     internal fun `skal nullstille vurderingen for TIDLIGERE VEDTAKSPERIODER og initiere delvilkårsvurderingene med riktig resultattype`() {
-        val opprettetVurdering = opprettInngangsvilkår().body.data!!
+        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
         val oppdatertVilkårsvarMedJa = OppdaterVilkårsvurderingDto(
             opprettetVurdering.vurderinger.first { it.vilkårType == VilkårType.TIDLIGERE_VEDTAKSPERIODER }.id,
             opprettetVurdering.vurderinger.first().behandlingId
@@ -125,14 +125,14 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        assertThat(respons.body.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING }?.resultat).isEqualTo(
+        assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(respons.body?.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING }?.resultat).isEqualTo(
             Vilkårsresultat.IKKE_TATT_STILLING_TIL
         )
-        assertThat(respons.body.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD }?.resultat).isEqualTo(
+        assertThat(respons.body?.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD }?.resultat).isEqualTo(
             Vilkårsresultat.OPPFYLT
         )
-        assertThat(respons.body.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
+        assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
 
     private fun lagOppdaterVilkårsvurdering(opprettetVurdering: VilkårDto, vilkårType: VilkårType): SvarPåVurderingerDto {
