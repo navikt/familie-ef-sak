@@ -48,7 +48,8 @@
     "gyldigFraOgMed" : "2021-01-01",
     "gyldigTilOgMed" : "2020-01-01",
     "motpartsPersonident" : "11111133333",
-    "navn" : "11111133333 mellomnavn Etternavn"
+    "navn" : "11111133333 mellomnavn Etternavn",
+    "omraader" : [ ]
   } ],
   "egenAnsatt" : true,
   "navEnhet" : "1 - Enhet",

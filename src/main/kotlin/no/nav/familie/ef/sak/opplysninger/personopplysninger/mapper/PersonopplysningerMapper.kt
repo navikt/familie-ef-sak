@@ -72,7 +72,8 @@ class PersonopplysningerMapper(
                     gyldigFraOgMed = it.gyldigFraOgMed,
                     gyldigTilOgMed = it.gyldigTilOgMed,
                     motpartsPersonident = it.motpartsPersonident,
-                    navn = it.navn
+                    navn = it.navn,
+                    omraader = it.omraader
                 )
             }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
