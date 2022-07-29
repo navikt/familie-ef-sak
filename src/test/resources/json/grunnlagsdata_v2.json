@@ -355,7 +355,7 @@
             "type" : "String",
             "nullable" : true
           },
-          "omraader" : {
+          "områder" : {
             "name" : "omraader",
             "type" : "Collection",
             "fields" : { },
