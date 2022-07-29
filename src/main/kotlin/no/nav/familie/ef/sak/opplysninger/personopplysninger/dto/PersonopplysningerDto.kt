@@ -110,7 +110,7 @@ data class FullmaktDto(
     val gyldigTilOgMed: LocalDate,
     val motpartsPersonident: String,
     val navn: String?,
-    val omraader: List<String>
+    val områder: List<String>
 )
 
 @Suppress("unused") // Kopi fra PDL
