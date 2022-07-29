@@ -354,6 +354,12 @@
             "name" : "navn",
             "type" : "String",
             "nullable" : true
+          },
+          "omraader" : {
+            "name" : "omraader",
+            "type" : "Collection",
+            "fields" : { },
+            "nullable" : false
           }
         },
         "nullable" : false
