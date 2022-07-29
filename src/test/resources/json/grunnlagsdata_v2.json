@@ -356,7 +356,7 @@
             "nullable" : true
           },
           "områder" : {
-            "name" : "omraader",
+            "name" : "områder",
             "type" : "Collection",
             "fields" : { },
             "nullable" : false
