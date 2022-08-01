@@ -73,7 +73,7 @@ class PersonopplysningerMapper(
                     gyldigTilOgMed = it.gyldigTilOgMed,
                     motpartsPersonident = it.motpartsPersonident,
                     navn = it.navn,
-                    områder = it.områder
+                    områder = it.områder.map { mapOmråde(it) }
                 )
             }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
@@ -92,6 +92,13 @@ class PersonopplysningerMapper(
             oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
             vergemål = mapVergemål(søker)
         )
+    }
+
+    private fun mapOmråde(område: String): String {
+        return when (område) {
+            "*" -> "ALLE"
+            else -> område
+        }
     }
 
     private fun mapVergemål(søker: Søker) =
