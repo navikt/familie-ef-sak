@@ -114,8 +114,7 @@ object GrunnlagsdataMapper {
                 gyldigFraOgMed = it.gyldigFraOgMed,
                 gyldigTilOgMed = it.gyldigTilOgMed,
                 motpartsPersonident = it.motpartsPersonident,
-                navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn(),
-                områder = it.omraader
+                navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn()
             )
         }
     }
