@@ -105,8 +105,7 @@ data class FullmaktMedNavn(
     val gyldigFraOgMed: LocalDate,
     val gyldigTilOgMed: LocalDate,
     val motpartsPersonident: String,
-    val navn: String?,
-    val områder: List<String>
+    val navn: String?
 )
 
 data class TidligereVedtaksperioder(
