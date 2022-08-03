@@ -6,6 +6,7 @@ import java.util.UUID
 
 data class BeløpsperiodeBarnetilsynDto(
     val fellesperiode: Periode,
+    @Deprecated("Bruk fellesperiode", ReplaceWith("fellesperiode"))
     val periode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
         fellesperiode.fomDato,
         fellesperiode.tomDato
