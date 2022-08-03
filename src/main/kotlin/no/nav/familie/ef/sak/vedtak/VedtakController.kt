@@ -50,6 +50,7 @@ class VedtakController(
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
     private val featureToggleService: FeatureToggleService,
+    private val nullstillVedtakService: NullstillVedtakService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -113,7 +114,9 @@ class VedtakController(
     @DeleteMapping("/{behandlingId}")
     fun nullstillVedtak(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.DELETE)
-        vedtakService.slettVedtak(behandlingId)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        nullstillVedtakService.nullstillVedtak(behandlingId)
         return Ressurs.success(behandlingId)
     }
 

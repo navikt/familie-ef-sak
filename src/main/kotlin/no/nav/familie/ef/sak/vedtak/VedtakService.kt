@@ -30,10 +30,6 @@ class VedtakService(
             ?.let { vedtakRepository.deleteById(behandlingId) }
     }
 
-    fun slettVedtak(behandlingId: UUID) {
-        vedtakRepository.findByIdOrThrow(behandlingId).let { vedtakRepository.deleteById(it.behandlingId) }
-    }
-
     fun hentVedtak(behandlingId: UUID): Vedtak {
         return vedtakRepository.findByIdOrThrow(behandlingId)
     }
