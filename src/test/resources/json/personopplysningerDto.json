@@ -9,6 +9,7 @@
   "kjønn" : "KVINNE",
   "adressebeskyttelse" : "UGRADERT",
   "folkeregisterpersonstatus" : "BOSATT",
+  "fødselsdato" : "2018-01-01",
   "dødsdato" : null,
   "telefonnummer" : {
     "landskode" : "+47",
@@ -47,7 +48,8 @@
     "gyldigFraOgMed" : "2021-01-01",
     "gyldigTilOgMed" : "2020-01-01",
     "motpartsPersonident" : "11111133333",
-    "navn" : "11111133333 mellomnavn Etternavn"
+    "navn" : "11111133333 mellomnavn Etternavn",
+    "områder" : [ ]
   } ],
   "egenAnsatt" : true,
   "navEnhet" : "1 - Enhet",

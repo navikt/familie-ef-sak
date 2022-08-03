@@ -17,6 +17,7 @@ data class PersonopplysningerDto(
     val kjønn: Kjønn,
     val adressebeskyttelse: Adressebeskyttelse?,
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
+    val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?,
     val telefonnummer: TelefonnummerDto?,
     val statsborgerskap: List<StatsborgerskapDto>,
@@ -108,7 +109,8 @@ data class FullmaktDto(
     val gyldigFraOgMed: LocalDate,
     val gyldigTilOgMed: LocalDate,
     val motpartsPersonident: String,
-    val navn: String?
+    val navn: String?,
+    val områder: List<String>
 )
 
 @Suppress("unused") // Kopi fra PDL
