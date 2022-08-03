@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -195,7 +196,7 @@ object VedtakDomeneParser {
         val skoleårsperioder = mutableMapOf<Skoleår, SkoleårsperiodeSkolepenger>()
         rader.forEach { rad ->
             val datoFra = parseFraOgMed(rad)
-            val skoleår = Skoleår(YearMonth.from(datoFra), YearMonth.from(datoFra))
+            val skoleår = Skoleår(Periode(datoFra, datoFra))
             val delårsperiode = mapDelårsperiodeSkolepenger(rad, datoFra)
             val utgift = mapSkolepengerUtgift(rad)
 
@@ -215,8 +216,7 @@ object VedtakDomeneParser {
     ): DelårsperiodeSkoleårSkolepenger {
         return DelårsperiodeSkoleårSkolepenger(
             studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
-            datoFra = datoFra,
-            datoTil = parseTilOgMed(rad),
+            periode = Periode(datoFra, parseTilOgMed(rad)),
             studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
         )
     }
@@ -241,8 +241,7 @@ object VedtakDomeneParser {
         val beløpsperioder = dataTable.forHverBehandling { behandlingId, rader ->
             behandlingId to rader.map { rad ->
                 PeriodeMedBeløp(
-                    datoFra = parseFraOgMed(rad),
-                    datoTil = parseTilOgMed(rad),
+                    Periode(parseFraOgMed(rad), parseTilOgMed(rad)),
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
                 )
             }
@@ -257,8 +256,7 @@ object VedtakDomeneParser {
         perioder.firstOrNull()?.let {
             listOf(
                 Inntektsperiode(
-                    it.datoFra,
-                    LocalDate.MAX,
+                    Periode(it.datoFra, LocalDate.MAX),
                     BigDecimal.ZERO,
                     BigDecimal.ZERO
                 )
@@ -272,8 +270,7 @@ object VedtakDomeneParser {
                 acc.removeLastOrNull()?.copy(sluttDato = datoFra.minusDays(1))?.let { acc.add(it) }
                 acc.add(
                     Inntektsperiode(
-                        datoFra,
-                        LocalDate.MAX,
+                        Periode(datoFra, LocalDate.MAX),
                         BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
                         BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)
                     )

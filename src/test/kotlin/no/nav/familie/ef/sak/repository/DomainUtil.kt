@@ -41,6 +41,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
@@ -285,7 +286,7 @@ fun inntektsperiode(
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)
 ) =
-    Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
+    Inntektsperiode(Periode(startDato, sluttDato), inntekt, samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
@@ -318,6 +319,7 @@ fun vedtaksperiodeDto(
     VedtaksperiodeDto(
         årMånedFra = årMånedFra,
         årMånedTil = årMånedTil,
+        periode = Periode(årMånedFra, årMånedTil),
         aktivitet = aktivitet,
         periodeType = periodeType
     )

@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.ekstern
 
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde.EF

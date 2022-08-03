@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
@@ -28,8 +27,7 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
     return AndelTilkjentYtelseDto(
         beløp = this.beløp,
-        stønadFra = this.stønadFom,
-        stønadTil = this.stønadTom,
+        periode = this.periode,
         inntekt = this.inntekt,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag
@@ -37,10 +35,10 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
 }
 
 fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> {
-    return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map { andel ->
+    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
-            periode = Periode(fradato = andel.stønadFom, tildato = andel.stønadTom),
+            fellesperiode = andel.periode,
             beregningsgrunnlag = Beregningsgrunnlag(
                 inntekt = andel.inntekt.toBigDecimal(),
                 samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
@@ -53,13 +51,13 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
 }
 
 fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
-    val startDato = vedtak.perioder.first().årMånedFra.atDay(1)
+    val startDato = vedtak.perioder.first().periode.fomDato
     val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
         val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
         BeløpsperiodeBarnetilsynDto(
-            periode = Periode(it.stønadFom, it.stønadTom),
+            fellesperiode = it.periode,
             beløp = it.beløp,
             beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
                 beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,

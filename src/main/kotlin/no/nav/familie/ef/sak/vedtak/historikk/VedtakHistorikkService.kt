@@ -51,8 +51,9 @@ class VedtakHistorikkService(
             .fraDato(fra)
             .map {
                 VedtaksperiodeDto(
-                    YearMonth.from(it.andel.stønadFra),
-                    YearMonth.from(it.andel.stønadTil),
+                    it.andel.periode.fomMåned,
+                    it.andel.periode.tomMåned,
+                    it.andel.periode,
                     it.aktivitet ?: error("Mangler aktivitet data=$it"),
                     it.periodeType ?: error("Mangler periodetype data=$it")
                 )
@@ -69,7 +70,7 @@ class VedtakHistorikkService(
             .fraDato(fra)
             .map {
                 Inntekt(
-                    YearMonth.from(it.andel.stønadFra),
+                    it.andel.periode.fomMåned,
                     BigDecimal(it.andel.inntekt),
                     BigDecimal(it.andel.samordningsfradrag)
                 )
@@ -85,10 +86,10 @@ class VedtakHistorikkService(
     private fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
         val dato = fra.atDay(1)
         return this.mapNotNull {
-            if (it.andel.stønadFra >= dato) {
+            if (it.andel.periode.fomDato >= dato) {
                 it
-            } else if (it.andel.stønadTil > dato) {
-                it.copy(andel = it.andel.copy(stønadFra = dato))
+            } else if (it.andel.periode.tomDato > dato) {
+                it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fomDato = dato), stønadFra = dato))
             } else {
                 null
             }

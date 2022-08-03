@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.kontrakter.felles.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -44,8 +44,10 @@ internal class BeregningTest {
                 ) {
                     assertThat(
                         finnGrunnbeløpsPerioder(
-                            LocalDate.parse(periode.first),
-                            LocalDate.parse(periode.second)
+                            Periode(
+                                LocalDate.parse(periode.first),
+                                LocalDate.parse(periode.second)
+                            )
                         )
                     )
                         .isEqualTo(
@@ -55,9 +57,9 @@ internal class BeregningTest {
                                         LocalDate.parse(it.first),
                                         LocalDate.parse(it.second)
                                     ),
-                                    null,
-                                    it.third.toBigDecimal(),
-                                    it.third.toBigDecimal()
+                                    beregningsgrunnlag = null,
+                                    beløp = it.third.toBigDecimal(),
+                                    beløpFørSamordning = it.third.toBigDecimal()
                                 )
                             }
                         )

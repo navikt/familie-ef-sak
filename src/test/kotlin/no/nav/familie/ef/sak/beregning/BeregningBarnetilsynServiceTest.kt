@@ -6,10 +6,10 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsyn
 import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.split
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.kontrakter.felles.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -150,12 +150,13 @@ class BeregningBarnetilsynServiceTest {
             val utgiftsperiode1 = UtgiftsperiodeDto(
                 januar2022,
                 april2022,
+                Periode(januar2022, april2022),
                 barn = listOf(UUID.randomUUID()),
                 utgifter = 10,
                 erMidlertidigOpphør = false
             )
             val utgiftsperiode2 = UtgiftsperiodeDto(
-                mars2022, juli2022, barn = listOf(UUID.randomUUID()), utgifter = 10,
+                mars2022, juli2022, Periode(mars2000, juli2022), barn = listOf(UUID.randomUUID()), utgifter = 10,
                 erMidlertidigOpphør = false
             )
             val feil = assertThrows<ApiFeil> {
@@ -179,7 +180,7 @@ class BeregningBarnetilsynServiceTest {
                     tilleggsstønadsperioder = listOf()
                 )
             }
-            assertThat(feil.message).contains("Kontantstøtteperioder [Periode(fradato=2022-01-01, tildato=2022-04-30), Periode(fradato=2022-04-01, tildato=2022-04-30)] overlapper")
+            assertThat(feil.message).contains("Kontantstøtteperioder [Periode(fomDato=2022-01-01, tomDato=2022-04-30), Periode(fomDato=2022-04-01, tomDato=2022-04-30)] overlapper")
         }
 
         @Test
@@ -201,11 +202,11 @@ class BeregningBarnetilsynServiceTest {
     fun `Skal lage tre perioder når tre forskjellige beløp i en 12,md periode`() {
         val barnUUID = UUID.randomUUID()
         val utgiftsperiode1 =
-            UtgiftsperiodeDto(januar2022, mars2022, barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2022, mars2022, Periode(januar2022, mars2022), barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
         val utgiftsperiode2 =
-            UtgiftsperiodeDto(april2022, juli2022, barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(april2022, juli2022, Periode(april2022, juli2022), barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
         val utgiftsperiode3 =
-            UtgiftsperiodeDto(august2022, desember2022, barn = listOf(barnUUID), utgifter = 20, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(august2022, desember2022, Periode(august2022, desember2022), barn = listOf(barnUUID), utgifter = 20, erMidlertidigOpphør = false)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(
@@ -226,15 +227,15 @@ class BeregningBarnetilsynServiceTest {
         val barnUUID = UUID.randomUUID()
 
         val utgiftsperiode1 =
-            UtgiftsperiodeDto(januar2022, mars2022, barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2022, mars2022, Periode(januar2022, mars2022), barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
         val utgiftsperiode2 =
-            UtgiftsperiodeDto(april2022, juli2022, barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(april2022, juli2022, Periode(april2022, juli2022), barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
         val utgiftsperiode3 =
-            UtgiftsperiodeDto(august2022, desember, barn = listOf(barnUUID), utgifter = 20, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(august2022, desember, Periode(august2022, desember), barn = listOf(barnUUID), utgifter = 20, erMidlertidigOpphør = false)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar2022, årMånedTil = januar2022, beløp = 10)
-        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april2022, årMånedTil = april2022, beløp = 10)
-        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august2022, årMånedTil = august2022, beløp = 10)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar2022, årMånedTil = januar2022, periode = Periode(januar2022, januar2022), beløp = 10)
+        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april2022, årMånedTil = april2022, periode = Periode(april2022, april2022), beløp = 10)
+        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august2022, årMånedTil = august2022, periode = Periode(august2022, august2022), beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(
@@ -259,11 +260,11 @@ class BeregningBarnetilsynServiceTest {
         val barnUUID = UUID.randomUUID()
 
         val utgiftsperiode1 =
-            UtgiftsperiodeDto(januar2022, juli2022, barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2022, juli2022, Periode(januar2022, juli2022), barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
         val utgiftsperiode2 =
-            UtgiftsperiodeDto(august2022, desember2022, barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(august2022, desember2022, Periode(august2022, desember2022), barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = august2022, beløp = 10)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = august2022, Periode(juli2022, august2022), beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(
@@ -283,13 +284,13 @@ class BeregningBarnetilsynServiceTest {
         val barnUUID = UUID.randomUUID()
 
         val utgiftsperiode1 =
-            UtgiftsperiodeDto(januar2022, juli2022, barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2022, juli2022, Periode(januar2022, juli2022), barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
         val utgiftsperiode2 =
-            UtgiftsperiodeDto(august2022, desember2022, barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(august2022, desember2022, Periode(august2022, desember2022), barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = mai2022, årMånedTil = september2022, beløp = 10)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = mai2022, årMånedTil = september2022, periode = Periode(mai2022, september2022), beløp = 10)
         val tilleggsstønadPeriodeDto =
-            PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = november2022, beløp = 10)
+            PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = november2022, periode = Periode(juli2022, november2022), beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(
@@ -307,22 +308,22 @@ class BeregningBarnetilsynServiceTest {
         val barnUUID = UUID.randomUUID()
 
         val utgiftsperiode1 =
-            UtgiftsperiodeDto(januar2022, mars2022, barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2022, mars2022, Periode(januar2022, mars2022), barn = listOf(barnUUID), utgifter = 10, erMidlertidigOpphør = false)
         val utgiftsperiode2 =
-            UtgiftsperiodeDto(april2022, juli2022, barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(april2022, juli2022, Periode(april2022, juli2022), barn = listOf(barnUUID), utgifter = 1, erMidlertidigOpphør = false)
         val utgiftsperiode3 =
-            UtgiftsperiodeDto(august2022, desember2022, barn = listOf(barnUUID), utgifter = 20, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(august2022, desember2022, Periode(august2022, desember2022), barn = listOf(barnUUID), utgifter = 20, erMidlertidigOpphør = false)
 
-        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar2022, årMånedTil = januar2022, beløp = 10)
-        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april2022, årMånedTil = april2022, beløp = 10)
-        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august2022, årMånedTil = august2022, beløp = 10)
+        val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(årMånedFra = januar2022, årMånedTil = januar2022, Periode(januar2022, januar2022), beløp = 10)
+        val kontantStøtteperiodeApril = PeriodeMedBeløpDto(årMånedFra = april2022, årMånedTil = april2022, Periode(april2022, april2022), beløp = 10)
+        val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(årMånedFra = august2022, årMånedTil = august2022, Periode(august2022, august2022), beløp = 10)
 
         val tilleggsstønadsperiodeMars =
-            PeriodeMedBeløpDto(årMånedFra = mars2022, årMånedTil = mars2022, 10)
+            PeriodeMedBeløpDto(årMånedFra = mars2022, årMånedTil = mars2022, Periode(mars2022, mars2022), 10)
         val tilleggsstønadsperiodeJuli =
-            PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = juli2022, 10)
+            PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = juli2022, Periode(juli2022, juli2022), 10)
         val tilleggsstønadsperiodeDesember =
-            PeriodeMedBeløpDto(årMånedFra = desember2022, årMånedTil = desember2022, 10)
+            PeriodeMedBeløpDto(årMånedFra = desember2022, årMånedTil = desember2022, Periode(desember2022, desember2022), 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(
@@ -351,13 +352,13 @@ class BeregningBarnetilsynServiceTest {
         val forventetBeløp2022 = 4250
 
         val utgiftsperiode =
-            UtgiftsperiodeDto(januar2021, desember2022, barn = listOf(UUID.randomUUID()), utgifter = 39000, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2021, desember2022, Periode(januar2021, desember2022), barn = listOf(UUID.randomUUID()), utgifter = 39000, erMidlertidigOpphør = false)
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(utgiftsperiode),
             kontantstøttePerioder = listOf(),
             tilleggsstønadsperioder = listOf()
         )
-            .sortedBy { it.periode.fradato }
+            .sortedBy { it.fellesperiode.fomDato }
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
         assertThat(beregnYtelseBarnetilsyn.first().beløp).isLessThan(beregnYtelseBarnetilsyn.last().beløp)
         assertThat(beregnYtelseBarnetilsyn.first().beløp).isEqualTo(forventetBeløp2021)
@@ -369,6 +370,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode21 = UtgiftsperiodeDto(
             januar2021,
             desember2021,
+            Periode(januar2021, desember2021),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 39000,
             erMidlertidigOpphør = false
@@ -376,6 +378,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
             desember2022,
+            Periode(januar2022, desember2022),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 39000,
             erMidlertidigOpphør = false
@@ -395,6 +398,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode21 = UtgiftsperiodeDto(
             januar2021,
             desember2021,
+            Periode(januar2021, desember2021),
             barn = listeAvBarn,
             utgifter = 1,
             erMidlertidigOpphør = false
@@ -402,6 +406,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
             desember2022,
+            Periode(januar2022, desember2022),
             barn = listeAvBarn,
             utgifter = 1,
             erMidlertidigOpphør = false
@@ -420,6 +425,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode21 = UtgiftsperiodeDto(
             januar2021,
             desember2021,
+            Periode(januar2021, desember2021),
             barn = listOf(UUID.randomUUID()),
             utgifter = 1,
             erMidlertidigOpphør = false
@@ -427,6 +433,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
             desember2022,
+            Periode(januar2022, desember2022),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 1,
             erMidlertidigOpphør = false
@@ -445,6 +452,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode21 = UtgiftsperiodeDto(
             januar2021,
             desember2021,
+            Periode(januar2021, desember2021),
             barn = listOf(UUID.randomUUID()),
             utgifter = 39000,
             erMidlertidigOpphør = false
@@ -452,6 +460,7 @@ class BeregningBarnetilsynServiceTest {
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
             desember2022,
+            Periode(januar2022, desember2022),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 1,
             erMidlertidigOpphør = false
@@ -468,7 +477,7 @@ class BeregningBarnetilsynServiceTest {
     @Test
     fun `split en utgiftsperiode som varer fra januar til desember i 12 mnd`() {
         val utgiftsperiodeDto =
-            UtgiftsperiodeDto(januar2022, desember2022, barn = listOf(), utgifter = 10, erMidlertidigOpphør = false)
+            UtgiftsperiodeDto(januar2022, desember2022, Periode(januar2022, desember2022), barn = listOf(), utgifter = 10, erMidlertidigOpphør = false)
         val resultat = utgiftsperiodeDto.split()
         assertThat(resultat).hasSize(12)
     }
@@ -486,8 +495,8 @@ class BeregningBarnetilsynServiceTest {
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(1)
-        assertThat(resultat.first().periode.fradato).isEqualTo(forventetFraDato)
-        assertThat(resultat.first().periode.tildato).isEqualTo(forventetTilDato)
+        assertThat(resultat.first().fellesperiode.fomDato).isEqualTo(forventetFraDato)
+        assertThat(resultat.first().fellesperiode.tomDato).isEqualTo(forventetTilDato)
     }
 
     @Test
@@ -511,12 +520,12 @@ class BeregningBarnetilsynServiceTest {
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(2)
-        assertThat(resultat.first().periode.fradato).isEqualTo(forventetFraDato)
-        assertThat(resultat.last().periode.tildato).isEqualTo(forventetTilDato)
+        assertThat(resultat.first().fellesperiode.fomDato).isEqualTo(forventetFraDato)
+        assertThat(resultat.last().fellesperiode.tomDato).isEqualTo(forventetTilDato)
     }
 
     @Test
-    fun `merge to påfølgende måneder med hull ifm fradatoer`() {
+    fun `merge to påfølgende måneder med hull ifm fomDatoer`() {
 
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = mars2000.atEndOfMonth()
@@ -562,7 +571,7 @@ class BeregningBarnetilsynServiceTest {
         beløp: BigDecimal = BigDecimal(100)
     ): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(
-            periode = Periode(fraDato, tilDato),
+            fellesperiode = Periode(fraDato, tilDato),
             beløp = beløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beløp.roundUp().toInt(),
             sats = 6284,
@@ -585,6 +594,7 @@ class BeregningBarnetilsynServiceTest {
             PeriodeMedBeløpDto(
                 årMånedFra = fra,
                 årMånedTil = til,
+                periode = Periode(fra, til),
                 beløp = beløp
             )
         )
@@ -595,6 +605,6 @@ class BeregningBarnetilsynServiceTest {
         til: YearMonth = februar2022,
         beløp: Int = 10
     ): List<UtgiftsperiodeDto> {
-        return listOf(UtgiftsperiodeDto(fra, til, listOf(UUID.randomUUID()), beløp, false))
+        return listOf(UtgiftsperiodeDto(fra, til, Periode(fra, til), listOf(UUID.randomUUID()), beløp, false))
     }
 }

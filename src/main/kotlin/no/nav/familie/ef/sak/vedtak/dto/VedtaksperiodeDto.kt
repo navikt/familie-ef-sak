@@ -1,47 +1,31 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
-import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.felles.util.erPåfølgende
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.kontrakter.felles.Periode
 import java.time.YearMonth
 
 data class VedtaksperiodeDto(
-    val årMånedFra: YearMonth,
-    val årMånedTil: YearMonth,
+    @Deprecated("Bruk periode", ReplaceWith("periode.fomMåned")) val årMånedFra: YearMonth? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tomMåned")) val årMånedTil: YearMonth? = null,
+    val periode: Periode = Periode(
+        årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
+        årMånedTil ?: error("periode eller årMånedTil må ha verdi")
+    ),
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType
-) {
-
-    fun tilPeriode() = Periode(
-        fradato = this.årMånedFra.atDay(1),
-        tildato = this.årMånedTil.atEndOfMonth()
-    )
-}
-
-fun List<VedtaksperiodeDto>.erSammenhengende(): Boolean = this.foldIndexed(true) { index, acc, periode ->
-    if (index == 0) {
-        acc
-    } else {
-        val forrigePeriode = this[index - 1]
-        when {
-            forrigePeriode.årMånedTil.erPåfølgende(periode.årMånedFra) -> acc
-            else -> false
-        }
-    }
-}
+)
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Periode> =
     this.map {
-        it.tilPeriode()
+        it.periode
     }
 
 fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
     this.map {
         Vedtaksperiode(
-            datoFra = it.årMånedFra.atDay(1),
-            datoTil = it.årMånedTil.atEndOfMonth(),
+            periode = it.periode,
             aktivitet = it.aktivitet,
             periodeType = it.periodeType,
         )
@@ -50,8 +34,9 @@ fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
 fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
     this.map {
         VedtaksperiodeDto(
-            årMånedFra = YearMonth.from(it.datoFra),
-            årMånedTil = YearMonth.from(it.datoTil),
+            årMånedFra = it.periode.fomMåned,
+            årMånedTil = it.periode.tomMåned,
+            periode = it.periode,
             aktivitet = it.aktivitet,
             periodeType = it.periodeType,
         )
@@ -60,5 +45,8 @@ fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
 fun Vedtaksperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
     SanksjonertPeriodeDto(
         årMånedFra = YearMonth.from(datoFra),
-        årMånedTil = YearMonth.from(datoTil)
+        årMånedTil = YearMonth.from(datoTil),
+        fomMåned = YearMonth.from(datoFra),
+        tomMåned = YearMonth.from(datoTil)
+
     )

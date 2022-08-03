@@ -11,11 +11,13 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.felles.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -45,8 +47,7 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
             inntekter = InntektWrapper(
                 listOf(
                     Inntektsperiode(
-                        LocalDate.now(),
-                        LocalDate.now(),
+                        Periode(YearMonth.now()),
                         inntekt = BigDecimal(100),
                         samordningsfradrag = BigDecimal(0)
                     )

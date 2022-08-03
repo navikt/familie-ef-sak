@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -25,6 +24,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.YearMonth
@@ -97,14 +97,13 @@ data class Sanksjonert(
 ) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 data class SanksjonertPeriodeDto(
-    val årMånedFra: YearMonth,
-    val årMånedTil: YearMonth
+    @Deprecated("Bruk fomMåned", ReplaceWith("fomMåned")) val årMånedFra: YearMonth,
+    @Deprecated("Bruk tomMåned", ReplaceWith("tomMåned")) val årMånedTil: YearMonth,
+    val fomMåned: YearMonth = årMånedFra,
+    val tomMåned: YearMonth = årMånedTil
 ) {
 
-    fun datoFra() = årMånedFra.atDay(1)
-    fun datoTil() = årMånedTil.atEndOfMonth()
-
-    fun tilPeriode() = Periode(fradato = datoFra(), tildato = datoTil())
+    fun tilPeriode() = Periode(fomMåned, tomMåned)
 }
 
 fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak = when (this) {
@@ -144,7 +143,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             resultatType = this.resultatType,
             behandlingId = behandlingId,
             skolepenger = SkolepengerWrapper(
-                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().datoFra },
+                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().periode },
                 begrunnelse = this.begrunnelse
             )
         )
@@ -173,8 +172,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
     when (stønadstype) {
         StønadType.OVERGANGSSTØNAD -> {
             val vedtaksperiode = Vedtaksperiode(
-                periode.datoFra(),
-                periode.datoTil(),
+                periode.tilPeriode(),
                 AktivitetType.IKKE_AKTIVITETSPLIKT,
                 VedtaksperiodeType.SANKSJON
             )
@@ -188,8 +186,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
         }
         StønadType.BARNETILSYN -> {
             val vedtaksperiode = Barnetilsynperiode(
-                datoFra = periode.datoFra(),
-                datoTil = periode.datoTil(),
+                periode = periode.tilPeriode(),
                 utgifter = 0,
                 barn = emptyList(),
                 erMidlertidigOpphør = true

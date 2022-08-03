@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TOM
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.values
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -328,8 +329,7 @@ object AndelHistorikkParser {
                     ?.let {
                         listOf(
                             Inntektsperiode(
-                                it.datoFra,
-                                it.datoTil,
+                                Periode(it.datoFra, it.datoTil),
                                 BigDecimal.ZERO,
                                 BigDecimal.ZERO
                             )

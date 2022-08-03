@@ -49,6 +49,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
@@ -240,6 +241,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.stønadFom).isEqualTo(sluttMåned)
         assertThat(migreringInfo.stønadTom).isEqualTo(sluttMåned)
+        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(sluttMåned)
+        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(sluttMåned)
     }
 
     @Test
@@ -290,8 +293,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isTrue
-        assertThat(migreringInfo.stønadFom).isEqualTo(YearMonth.now())
-        assertThat(migreringInfo.stønadTom).isEqualTo(YearMonth.now())
+        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(YearMonth.now())
+        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(YearMonth.now())
     }
 
     @Test
@@ -316,8 +319,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, kjøremåned)
 
         assertThat(migreringInfo.kanMigreres).isTrue
-        assertThat(migreringInfo.stønadFom).isEqualTo(månedenFør)
-        assertThat(migreringInfo.stønadTom).isEqualTo(månedenFør)
+        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(månedenFør)
+        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(månedenFør)
         assertThat(migreringInfo.beløpsperioder?.first()?.beløp?.toInt()).isEqualTo(19949)
     }
 
@@ -381,6 +384,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.årsak).isNull()
+        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(nå)
+        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.stønadFom).isEqualTo(nå)
         assertThat(migreringInfo.stønadTom).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.inntektsgrunnlag).isEqualTo(10)
@@ -389,8 +394,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val beløpsperiode = migreringInfo.beløpsperioder!![0]
         assertThat(beløpsperiode.beløp.toInt()).isEqualTo(18998)
-        assertThat(beløpsperiode.periode.fradato).isEqualTo(nå.atDay(1))
-        assertThat(beløpsperiode.periode.tildato).isEqualTo(stønadTom)
+        assertThat(beløpsperiode.fellesperiode.fomDato).isEqualTo(nå.atDay(1))
+        assertThat(beløpsperiode.fellesperiode.tomDato).isEqualTo(stønadTom)
     }
 
     @Test
@@ -689,6 +694,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val vedtaksperiode = VedtaksperiodeDto(
             årMånedFra = migrerFraDato,
             årMånedTil = til,
+            periode = Periode(migrerFraDato, til),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.HOVEDPERIODE
         )
@@ -737,8 +743,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
             migreringService.opprettMigrering(
                 fagsak,
-                migrerFraDato,
-                migrerTilDato,
+                Periode(migrerFraDato, migrerTilDato),
                 inntektsgrunnlag.toInt(),
                 samordningsfradrag.toInt(),
                 erReellArbeidssøker = erReellArbeidssøker

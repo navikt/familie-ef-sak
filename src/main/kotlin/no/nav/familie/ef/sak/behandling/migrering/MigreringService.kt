@@ -37,6 +37,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
@@ -84,15 +85,13 @@ class MigreringService(
         }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
 
-        val fra = fra(periode)
-        val til = til(periode)
-        val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker(periode))
+        val fra = periode.stønadsperiode.fomMåned
+        val vedtaksperioder = vedtaksperioder(periode.stønadsperiode, erReellArbeidssøker(periode))
         val inntekter = inntekter(fra, periode.inntektsgrunnlag, periode.samordningsfradrag)
         val beregnYtelse = beregningService.beregnYtelse(vedtaksperioder.tilPerioder(), inntekter.tilInntektsperioder())
         return MigreringInfo(
             kanMigreres = true,
-            stønadFom = fra,
-            stønadTom = til,
+            stønadsperiode = periode.stønadsperiode,
             inntektsgrunnlag = periode.inntektsgrunnlag,
             samordningsfradrag = periode.samordningsfradrag,
             beløpsperioder = beregnYtelse
@@ -125,14 +124,12 @@ class MigreringService(
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
-        val til = til(periode)
-        if (kunAktivStønad && YearMonth.now() > til) {
+        if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.fomMåned) {
             throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
         }
         return opprettMigrering(
             fagsak = fagsak,
-            fra = fra(periode),
-            til = til,
+            periode = periode.stønadsperiode,
             inntektsgrunnlag = periode.inntektsgrunnlag,
             samordningsfradrag = periode.samordningsfradrag,
             erReellArbeidssøker = erReellArbeidssøker(periode)
@@ -145,8 +142,7 @@ class MigreringService(
     @Transactional
     fun opprettMigrering(
         fagsak: Fagsak,
-        fra: YearMonth,
-        til: YearMonth,
+        periode: Periode,
         inntektsgrunnlag: Int,
         samordningsfradrag: Int,
         erReellArbeidssøker: Boolean = false
@@ -158,15 +154,15 @@ class MigreringService(
         val behandling = behandlingService.opprettMigrering(fagsak.id)
         logger.info(
             "Migrerer fagsakPerson=${fagsak.fagsakPersonId} fagsak=${fagsak.id} behandling=${behandling.id} " +
-                "fra=$fra til=$til"
+                "fra=${periode.fomMåned} til=${periode.tomMåned}"
         )
         iverksettService.startBehandling(behandling, fagsak)
 
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForMigrering(behandling)
 
-        val vedtaksperioder = vedtaksperioder(fra, til, erReellArbeidssøker)
-        val inntekter = inntekter(fra, inntektsgrunnlag, samordningsfradrag)
+        val vedtaksperioder = vedtaksperioder(periode, erReellArbeidssøker)
+        val inntekter = inntekter(periode.fomMåned, inntektsgrunnlag, samordningsfradrag)
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
         beregnYtelseSteg.utførSteg(
             saksbehandling,
@@ -187,11 +183,11 @@ class MigreringService(
         iverksettClient.iverksettUtenBrev(iverksettDto)
         taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
-        if (til >= YearMonth.now()) {
+        if (periode.tomMåned >= YearMonth.now()) {
             taskRepository.save(
                 SjekkMigrertStatusIInfotrygdTask.opprettTask(
                     behandling.id,
-                    fra.minusMonths(1),
+                    periode.fomMåned.minusMonths(1),
                     fagsak.hentAktivIdent()
                 )
             )
@@ -237,15 +233,15 @@ class MigreringService(
     fun erOpphørtIInfotrygd(behandlingId: UUID, opphørsmåned: YearMonth): Boolean {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
-        val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadTom }
+        val sisteSummertePerioden = perioder.summert.maxByOrNull { it.stønadsperiode.tomDato }
 
         if (sisteSummertePerioden == null ||
             sisteSummertePerioden.opphørsdato != null ||
-            sisteSummertePerioden.stønadTom <= opphørsmåned.atEndOfMonth()
+            sisteSummertePerioden.stønadsperiode.tomDato <= opphørsmåned.atEndOfMonth()
         ) {
             logger.info(
                 "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - " +
-                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadTom}"
+                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadsperiode?.tomDato}"
             )
             return true
         }
@@ -263,7 +259,7 @@ class MigreringService(
             perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
         val logMessage = "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=false - " +
             "sistePeriodenTom=$overførtNyLøsningOpphørsdato " +
-            "sisteSummertePeriodeTom=${sisteSummertePerioden.stønadTom} " +
+            "sisteSummertePeriodeTom=${sisteSummertePerioden.stønadsperiode.tomDato} " +
             "opphørsmåned=$opphørsmåned"
         logger.warn(logMessage)
         val periodeInformasjon = perioder.perioder
@@ -306,12 +302,6 @@ class MigreringService(
 
     private fun kjøremåned() = YearMonth.now()
 
-    private fun til(periode: SummertInfotrygdPeriodeDto): YearMonth =
-        YearMonth.of(periode.stønadTom.year, periode.stønadTom.month)
-
-    fun fra(periode: SummertInfotrygdPeriodeDto): YearMonth =
-        YearMonth.of(periode.stønadFom.year, periode.stønadFom.month)
-
     private fun inntekter(
         fra: YearMonth,
         inntektsgrunnlag: Int,
@@ -329,15 +319,15 @@ class MigreringService(
         periode.aktivitet == InfotrygdAktivitetstype.TILMELDT_SOM_REELL_ARBEIDSSØKER
 
     private fun vedtaksperioder(
-        fra: YearMonth,
-        til: YearMonth,
+        periode: Periode,
         erReellArbeidssøker: Boolean
     ): List<VedtaksperiodeDto> {
         val aktivitet = if (erReellArbeidssøker) AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER else AktivitetType.MIGRERING
         return listOf(
             VedtaksperiodeDto(
-                årMånedFra = fra,
-                årMånedTil = til,
+                årMånedFra = periode.fomMåned,
+                årMånedTil = periode.tomMåned,
+                periode = periode,
                 aktivitet = aktivitet,
                 periodeType = VedtaksperiodeType.MIGRERING
             )

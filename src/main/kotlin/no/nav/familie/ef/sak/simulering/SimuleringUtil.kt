@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.simulering
 
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
-import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import java.math.BigDecimal
 
 fun Simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling(): List<Periode> {
@@ -14,7 +14,7 @@ fun Simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling(): List<
         val gjeldendePeriode = akkumulatorListe.lastOrNull()
 
         if (gjeldendePeriode != null && erPerioderSammenhengende(gjeldendePeriode, nestePeriode)) {
-            val oppdatertGjeldendePeriode = Periode(fom = gjeldendePeriode.fom, tom = nestePeriode.tom)
+            val oppdatertGjeldendePeriode = gjeldendePeriode union nestePeriode
             akkumulatorListe.removeLast()
             akkumulatorListe.add(oppdatertGjeldendePeriode)
         } else {
@@ -24,4 +24,4 @@ fun Simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling(): List<
     }
 }
 private fun erPerioderSammenhengende(gjeldendePeriode: Periode, nestePeriode: Periode) =
-    gjeldendePeriode.tom.plusDays(1) == nestePeriode.fom
+    gjeldendePeriode påfølgesAv nestePeriode

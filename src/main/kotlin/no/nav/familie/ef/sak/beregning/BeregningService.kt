@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.dto.Periode
-import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.erSammenhengende
+import no.nav.familie.kontrakter.felles.harOverlappende
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -24,8 +24,7 @@ class BeregningService {
 
     private fun validerVedtaksperioder(vedtaksperioder: List<Periode>) {
         brukerfeilHvis(
-            vedtaksperioder.zipWithNext { a, b -> a.tildato.isEqualOrAfter(b.fradato) }
-                .any { it }
+            vedtaksperioder.harOverlappende()
         ) { "Vedtaksperioder $vedtaksperioder overlapper" }
     }
 
@@ -35,22 +34,18 @@ class BeregningService {
         }
 
         brukerfeilHvis(
-            inntektsperioder.zipWithNext { a, b -> a.startDato.isBefore(b.startDato) && a.sluttDato.isBefore(b.sluttDato) }
-                .any { !it }
+            inntektsperioder.zipWithNext { a, b -> a.periode < b.periode }.any { !it }
         ) { "Inntektsperioder må være sortert" }
 
-        brukerfeilHvis(vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.fradato.isAfter(vedtaksperiode.tildato) }) { "Fravedtaksdato må være etter vedtakstildato" }
-
         brukerfeilHvis(
-            vedtaksperioder.zipWithNext { a, b -> a.fradato.isBefore(b.fradato) && a.tildato.isBefore(b.tildato) }
-                .any { !it }
+            vedtaksperioder.zipWithNext { a, b -> a < b }.any { !it }
         ) { "Vedtaksperioder må være sortert" }
 
-        brukerfeilHvis(!inntektsperioder.first().startDato.isEqualOrBefore(vedtaksperioder.first().fradato)) {
+        brukerfeilHvis(inntektsperioder.first().periode.fomDato > vedtaksperioder.first().fomDato) {
             "Inntektsperioder $inntektsperioder begynner etter vedtaksperioder $vedtaksperioder"
         }
 
-        brukerfeilHvis(!inntektsperioder.last().sluttDato.isEqualOrAfter(vedtaksperioder.last().tildato)) {
+        brukerfeilHvis(inntektsperioder.last().periode.tomDato < vedtaksperioder.last().tomDato) {
             "Inntektsperioder $inntektsperioder slutter før vedtaksperioder $vedtaksperioder "
         }
 
@@ -62,8 +57,8 @@ class BeregningService {
         ) { "Samordningsfradraget kan ikke være negativt" }
 
         brukerfeilHvis(
-            inntektsperioder.zipWithNext { a, b -> a.sluttDato.isEqual(b.startDato.minusDays(1)) }
-                .any { !it }
+            inntektsperioder.map { it.periode }.harOverlappende() ||
+                !inntektsperioder.map { it.periode }.erSammenhengende()
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 }

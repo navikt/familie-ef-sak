@@ -1,11 +1,15 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
-import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.kontrakter.felles.Periode
 import java.math.BigDecimal
 import java.util.UUID
 
 data class BeløpsperiodeBarnetilsynDto(
-    val periode: Periode,
+    val fellesperiode: Periode,
+    val periode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
+        fellesperiode.fomDato,
+        fellesperiode.tomDato
+    ),
     val beløp: Int,
     val beløpFørFratrekkOgSatsjustering: Int,
     val sats: Int,

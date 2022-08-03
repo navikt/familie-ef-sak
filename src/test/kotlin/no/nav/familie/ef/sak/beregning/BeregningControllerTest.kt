@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -111,6 +112,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             hentBeløpsperioderForBehandling(behandling.id)
         val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
         assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.fomDato).isEqualTo(LocalDate.of(2022, 1, 1))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.tomDato).isEqualTo(LocalDate.of(2022, 4, 30))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(BigDecimal(10_000))
@@ -118,6 +121,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val responsRevurdering: ResponseEntity<Ressurs<List<Beløpsperiode>>> = hentBeløpsperioderForBehandling(revurdering.id)
         val beløpsperioderRevurdering = responsRevurdering.body.data
         assertThat(beløpsperioderRevurdering).hasSize(1)
+        assertThat(beløpsperioderRevurdering?.first()?.fellesperiode?.fomDato).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(beløpsperioderRevurdering?.first()?.fellesperiode?.tomDato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(beløpsperioderRevurdering?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
@@ -153,6 +158,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 VedtaksperiodeDto(
                     årMånedFra = YearMonth.of(2022, 1),
                     årMånedTil = YearMonth.of(2022, 4),
+                    periode = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
                     aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
                     periodeType = VedtaksperiodeType.HOVEDPERIODE
                 )
@@ -204,6 +210,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 VedtaksperiodeDto(
                     årMånedFra = YearMonth.of(2022, 3),
                     årMånedTil = YearMonth.of(2022, 6),
+                    periode = Periode(YearMonth.of(2022, 3), YearMonth.of(2022, 6)),
                     aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
                     periodeType = VedtaksperiodeType.HOVEDPERIODE
                 )

@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
@@ -64,16 +65,16 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             hentBeløpsperioderForBehandling(behandling.id)
         val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
         Assertions.assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
-        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
-        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
+        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.fomDato).isEqualTo(LocalDate.of(2022, 1, 1))
+        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.tomDato).isEqualTo(LocalDate.of(2022, 4, 30))
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(2000)
 
         val responsRevurdering: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
             hentBeløpsperioderForBehandling(revurdering.id)
         val beløpsperioderRevurdering = responsRevurdering.body.data
         Assertions.assertThat(beløpsperioderRevurdering).hasSize(1)
-        Assertions.assertThat(beløpsperioderRevurdering?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
-        Assertions.assertThat(beløpsperioderRevurdering?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
+        Assertions.assertThat(beløpsperioderRevurdering?.first()?.fellesperiode?.fomDato).isEqualTo(LocalDate.of(2022, 3, 1))
+        Assertions.assertThat(beløpsperioderRevurdering?.first()?.fellesperiode?.tomDato).isEqualTo(LocalDate.of(2022, 6, 30))
         Assertions.assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(3000)
     }
 
@@ -118,6 +119,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(
             årMånedFra = YearMonth.of(2022, 1),
             årMånedTil = YearMonth.of(2022, 4),
+            periode = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
             barn = listOf(barn.id),
             utgifter = 2500,
             erMidlertidigOpphør = false
@@ -181,6 +183,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(
             årMånedFra = YearMonth.of(2022, 3),
             årMånedTil = YearMonth.of(2022, 6),
+            periode = Periode(YearMonth.of(2022, 3), YearMonth.of(2022, 6)),
             barn = barn.map { it.id },
             utgifter = 3000,
             erMidlertidigOpphør = false

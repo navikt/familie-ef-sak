@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -38,8 +39,12 @@ fun AndelHistorikkDto.erIkkeFjernet() =
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,
-    val stønadFra: LocalDate,
-    val stønadTil: LocalDate,
+    @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato")) val stønadFra: LocalDate?,
+    @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato")) val stønadTil: LocalDate?,
+    val periode: Periode = Periode(
+        stønadFra ?: error("Periode eller stønadFra må ha verdi"),
+        stønadTil ?: error("Periode eller stønadTil må ha verdi")
+    ),
     val inntekt: Int,
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int,
@@ -59,6 +64,7 @@ data class AndelMedGrunnlagDto(
         beløp = andel.beløp,
         stønadFra = andel.stønadFom,
         stønadTil = andel.stønadTom,
+        periode = andel.periode,
         inntekt = andel.inntekt,
         inntektsreduksjon = andel.inntektsreduksjon,
         samordningsfradrag = andel.samordningsfradrag,

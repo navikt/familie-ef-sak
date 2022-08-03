@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.kontrakter.felles.Periode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -102,12 +103,12 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
         tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
     private fun opprettVedtaksperiode(fra: YearMonth, til: YearMonth) =
-        VedtaksperiodeDto(fra, til, AktivitetType.BARNET_ER_SYKT, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+        VedtaksperiodeDto(fra, til, Periode(fra, til), AktivitetType.BARNET_ER_SYKT, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
     private fun innvilg(
         saksbehandling: Saksbehandling,
         vedtaksperioder: List<VedtaksperiodeDto>,
-        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))
+        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fomMåned, null, null))
     ) {
         val vedtak = InnvilgelseOvergangsstønad(
             perioder = vedtaksperioder,

@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
@@ -69,8 +70,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             barnetilsyn = BarnetilsynWrapper(
                 perioder = listOf(
                     Barnetilsynperiode(
-                        datoFra = utgiftsperiode.årMånedFra.atDay(1),
-                        datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                        periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn
                     )
@@ -111,8 +111,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             barnetilsyn = BarnetilsynWrapper(
                 perioder = listOf(
                     Barnetilsynperiode(
-                        datoFra = utgiftsperiode.årMånedFra.atDay(1),
-                        datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                        periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn
                     )
@@ -122,8 +121,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             kontantstøtte = KontantstøtteWrapper(
                 listOf(
                     PeriodeMedBeløp(
-                        datoFra = kontantstøttePeriode.årMånedFra.atDay(1),
-                        datoTil = kontantstøttePeriode.årMånedTil.atEndOfMonth(),
+                        periode = kontantstøttePeriode.periode,
                         beløp = kontantstøttePeriode.beløp
 
                     )
@@ -190,6 +188,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagKontantstøttePeriode(beløp: Int): PeriodeMedBeløpDto = PeriodeMedBeløpDto(
         årMånedFra = YearMonth.of(2022, 1),
         årMånedTil = YearMonth.of(2022, 3),
+        periode = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
         beløp = beløp
     )
 
@@ -197,6 +196,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(
             årMånedFra = YearMonth.of(2022, 1),
             årMånedTil = YearMonth.of(2022, 3),
+            periode = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
             barn = listOf(barn.id),
             utgifter = 2500,
             erMidlertidigOpphør = false

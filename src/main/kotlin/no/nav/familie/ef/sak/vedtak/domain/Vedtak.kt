@@ -4,11 +4,11 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.kontrakter.felles.Periode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 data class Vedtak(
@@ -44,7 +44,20 @@ data class Vedtaksperiode(
     val datoTil: LocalDate,
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType
-)
+) {
+    constructor(
+        periode: Periode,
+        aktivitet: AktivitetType,
+        periodeType: VedtaksperiodeType
+    ) : this(
+        periode.fomDato,
+        periode.tomDato,
+        aktivitet,
+        periodeType
+    )
+
+    val periode = Periode(datoFra, datoTil)
+}
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
 data class Barnetilsynperiode(
@@ -53,7 +66,22 @@ data class Barnetilsynperiode(
     val utgifter: Int,
     val barn: List<UUID>,
     val erMidlertidigOpphør: Boolean? = false
-)
+) {
+    constructor(
+        periode: Periode,
+        utgifter: Int,
+        barn: List<UUID>,
+        erMidlertidigOpphør: Boolean? = false
+    ) : this(
+        periode.fomDato,
+        periode.tomDato,
+        utgifter,
+        barn,
+        erMidlertidigOpphør
+    )
+
+    val periode = Periode(datoFra, datoTil)
+}
 
 data class SkoleårsperiodeSkolepenger(
     val perioder: List<DelårsperiodeSkoleårSkolepenger>,
@@ -65,7 +93,21 @@ data class DelårsperiodeSkoleårSkolepenger(
     val datoFra: LocalDate,
     val datoTil: LocalDate,
     val studiebelastning: Int,
-)
+) {
+
+    constructor(
+        studietype: SkolepengerStudietype,
+        periode: Periode,
+        studiebelastning: Int
+    ) : this(
+        studietype,
+        periode.fomDato,
+        periode.tomDato,
+        studiebelastning
+    )
+
+    val periode get() = Periode(datoFra, datoTil)
+}
 
 data class SkolepengerUtgift(
     val id: UUID,
@@ -85,11 +127,16 @@ data class PeriodeMedBeløp(
     val beløp: Int
 ) {
 
+    constructor(periode: Periode, beløp: Int) : this(periode.fomDato, periode.tomDato, beløp)
+
     fun tilDto() = PeriodeMedBeløpDto(
-        årMånedFra = YearMonth.from(datoFra),
-        årMånedTil = YearMonth.from(datoTil),
+        årMånedFra = periode.fomMåned,
+        årMånedTil = periode.tomMåned,
+        periode = periode,
         beløp = beløp
     )
+
+    val periode get() = Periode(datoFra, datoTil)
 }
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)
