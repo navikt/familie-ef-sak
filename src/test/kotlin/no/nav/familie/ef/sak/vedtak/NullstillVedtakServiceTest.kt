@@ -1,0 +1,88 @@
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
+
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verifyAll
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.util.UUID
+
+class NullstillVedtakServiceTest {
+
+    private val vedtakRepository = mockk<VedtakRepository>()
+
+    private val stegService = mockk<StegService>(relaxed = true)
+    private val behandlingService = mockk<BehandlingService>()
+    private val simuleringService = mockk<SimuleringService>(relaxed = true)
+    private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
+    private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
+
+    private val nullstillVedtakService = NullstillVedtakService(
+        vedtakRepository,
+        stegService,
+        behandlingService,
+        simuleringService,
+        tilkjentYtelseService,
+        tilbakekrevingService
+    )
+    private val behandlingId = UUID.randomUUID()
+
+    @Test
+    fun `nullstill vedtak`() {
+
+        val saksbehandling = slot<Saksbehandling>()
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(id = behandlingId, steg = StegType.BEHANDLING_FERDIGSTILT)
+        every { vedtakRepository.deleteById(behandlingId) } just Runs
+
+        nullstillVedtakService.nullstillVedtak(behandlingId)
+
+        verifyAll {
+            simuleringService.slettSimuleringForBehandling(capture(saksbehandling))
+            tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
+            tilbakekrevingService.slettTilbakekreving(behandlingId)
+            stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+        }
+
+        Assertions.assertThat(saksbehandling.captured.id).isEqualTo(behandlingId)
+    }
+
+    @Test
+    fun `nullstill vedtak skal feile når behandling er ferdigstilt`() {
+
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(id = behandlingId, status = BehandlingStatus.FERDIGSTILT)
+
+        assertThrows<Feil> { nullstillVedtakService.nullstillVedtak(behandlingId) }
+    }
+
+    @Test
+    fun `nullstill vedtak skal feile når behandling er sendt til beslutter`() {
+
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(id = behandlingId, status = BehandlingStatus.FATTER_VEDTAK)
+
+        assertThrows<Feil> { nullstillVedtakService.nullstillVedtak(behandlingId) }
+    }
+
+    @Test
+    fun `nullstill vedtak skal feile når behanlding iverksettes`() {
+
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(id = behandlingId, status = BehandlingStatus.IVERKSETTER_VEDTAK)
+
+        assertThrows<Feil> { nullstillVedtakService.nullstillVedtak(behandlingId) }
+    }
+}
