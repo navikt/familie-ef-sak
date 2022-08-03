@@ -1,0 +1,38 @@
+package no.nav.familie.ef.sak.vedtak
+
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.simulering.SimuleringService
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
+
+@Service
+class NullstillVedtakService(
+    private val vedtakRepository: VedtakRepository,
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService,
+    private val simuleringService: SimuleringService,
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val tilbakekrevingService: TilbakekrevingService
+) {
+
+    @Transactional
+    fun nullstillVedtak(behandlingId: UUID) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            "Behandling er låst og vedtak kan ikke slettes"
+        }
+
+        simuleringService.slettSimuleringForBehandling(saksbehandling)
+        tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
+        tilbakekrevingService.slettTilbakekreving(behandlingId)
+        stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+        vedtakRepository.deleteById(behandlingId)
+    }
+}

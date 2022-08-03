@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -49,6 +50,7 @@ class VedtakController(
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
     private val featureToggleService: FeatureToggleService,
+    private val nullstillVedtakService: NullstillVedtakService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -107,6 +109,15 @@ class VedtakController(
             "Feature toggle for opphør av skolepenger er disabled"
         }
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
+    }
+
+    @DeleteMapping("/{behandlingId}")
+    fun nullstillVedtak(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.DELETE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        nullstillVedtakService.nullstillVedtak(behandlingId)
+        return Ressurs.success(behandlingId)
     }
 
     private fun validerAlleVilkårOppfyltDersomInvilgelse(vedtak: VedtakDto, behandlingId: UUID) {
