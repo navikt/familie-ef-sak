@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,11 +28,17 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun opprettOppgaverForAlleBarnSomHarFyltÅr() {
         val dagensDato = LocalDate.now()
         val alleBarnIGjeldendeBehandlinger =
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato) +
                 gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato)
+
+        logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
+        logger.info("Antall barn i gjeldende behandlinger uten fnr:" +
+                    alleBarnIGjeldendeBehandlinger.count { it.fødselsnummerBarn == null })
 
         val skalOpprettes = filtrerBarnSomHarFyltÅr(alleBarnIGjeldendeBehandlinger)
         opprettOppgaveForBarn(skalOpprettes)
@@ -43,10 +50,12 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         barnTilUtplukkForOppgave.forEach { barn ->
             val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
-            if (barnetsAlder != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
+            if (barnetsAlder != null && barn.fødselsnummerBarn != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
                 skalOpprettes.add(OpprettOppgaveForBarn(barn.fødselsnummerBarn, barn.fødselsnummerSøker, barnetsAlder))
             }
         }
+
+        logger.info("barn til utplukk for oppgave: ${skalOpprettes.size}")
         return skalOpprettes
     }
 
