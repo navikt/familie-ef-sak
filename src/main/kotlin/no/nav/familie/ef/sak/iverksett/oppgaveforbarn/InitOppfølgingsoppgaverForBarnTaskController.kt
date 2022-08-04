@@ -15,18 +15,18 @@ import java.time.LocalDate
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @Unprotected
-class InitForberedOppgaverForBarnTaskController(
+class InitOppfølgingsoppgaverForBarnTaskController(
     private val taskRepository: TaskRepository,
-    private val forberedOppgaverForBarnService: ForberedOppgaverForBarnService
+    private val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
 ) {
 
     @PostMapping("/initialiser")
     fun opprettTask() {
-        taskRepository.save(ForberedOppgaverForBarnTask.opprettTask(LocalDate.of(2022, 5, 20)))
+        taskRepository.save(OpprettOppfølgingsoppgaverForBarnFyltÅrTask.opprettTask(LocalDate.now().plusDays(1)))
     }
 
     @PostMapping("/dry-run")
     fun dryRun(@RequestParam referansedato: LocalDate) {
-        forberedOppgaverForBarnService.forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato, dryRun = true)
+        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
     }
 }

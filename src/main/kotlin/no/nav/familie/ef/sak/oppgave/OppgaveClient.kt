@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -31,6 +32,8 @@ class OppgaveClient(
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
+
+    private val EF_ENHETNUMMER = "4489"
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
         val uri = URI.create("$oppgaveUri/opprett")
@@ -79,6 +82,36 @@ class OppgaveClient(
         val uri = URI.create("$oppgaveUri/$oppgaveId/ferdigstill")
         val respons = patchForEntity<Ressurs<OppgaveResponse>>(uri, "")
         pakkUtRespons(respons, uri, "ferdigstillOppgave")
+    }
+
+    fun leggOppgaveIMappe(oppgaveId: Long) {
+
+        val oppgave = finnOppgaveMedId(oppgaveId)
+        if (oppgave.tildeltEnhetsnr == EF_ENHETNUMMER) { // Skjermede personer skal ikke puttes i mappe
+            val finnMappeRequest = FinnMappeRequest(
+                listOf(),
+                oppgave.tildeltEnhetsnr ?: error("Fikk ikke tildelt enhetsnummer for oppgave med id: $oppgaveId"),
+                null,
+                1000
+            )
+            val mapperResponse = finnMapper(finnMappeRequest)
+            val mappe = mapperResponse.mapper.find {
+                it.navn.contains("EF Sak", true) &&
+                    it.navn.contains("Hendelser") &&
+                    it.navn.contains("62")
+            }
+                ?: error("Fant ikke mappe for hendelser")
+            oppdaterOppgave(oppgave.copy(mappeId = mappe.id.toLong()))
+        }
+    }
+
+    fun oppdaterOppgave(oppgave: Oppgave): Long {
+        val response = patchForEntity<Ressurs<OppgaveResponse>>(
+            URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),
+            oppgave,
+            HttpHeaders().medContentTypeJsonUTF8()
+        )
+        return response.getDataOrThrow().oppgaveId
     }
 
     fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
