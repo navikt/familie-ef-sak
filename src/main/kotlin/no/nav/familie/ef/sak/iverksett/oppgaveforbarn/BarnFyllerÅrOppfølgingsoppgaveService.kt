@@ -46,8 +46,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         } else {
             logger.info("Ville opprettet oppgave for ${skalOpprettes.size} barn.")
             skalOpprettes.forEach {
-                secureLogger.info("Ville opprettet oppgave for barn med fødselsnummer: " +
-                                  "${it.fødselsnummer} med alder ${it.alder}")
+                secureLogger.info(
+                    "Ville opprettet oppgave for barn med fødselsnummer: " +
+                        "${it.fødselsnummer} med alder ${it.alder}"
+                )
             }
         }
     }

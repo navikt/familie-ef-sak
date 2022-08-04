@@ -53,7 +53,7 @@ interface GjeldendeBarnRepository :
 
     // language=PostgreSQL
     @Query(
-            """
+        """
         SELECT bb.person_ident barn_person_ident, b.id behandling_id, be.id ekstern_behandling_id, fe.id ekstern_fagsak_id
         FROM behandling b
             JOIN behandling_ekstern be ON b.id = be.behandling_id
