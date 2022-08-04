@@ -27,6 +27,6 @@ class InitOppfølgingsoppgaverForBarnTaskController(
 
     @PostMapping("/dry-run")
     fun dryRun(@RequestParam referansedato: LocalDate) {
-        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
+        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr(dryRun = true)
     }
 }

@@ -29,19 +29,27 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun opprettOppgaverForAlleBarnSomHarFyltÅr() {
+    fun opprettOppgaverForAlleBarnSomHarFyltÅr(dryRun: Boolean = false) {
         val dagensDato = LocalDate.now()
         val alleBarnIGjeldendeBehandlinger =
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato) +
                 gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato)
 
         logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
-        logger.info("Antall barn i gjeldende behandlinger uten fnr:" +
-                    alleBarnIGjeldendeBehandlinger.count { it.fødselsnummerBarn == null })
 
         val skalOpprettes = filtrerBarnSomHarFyltÅr(alleBarnIGjeldendeBehandlinger)
-        opprettOppgaveForBarn(skalOpprettes)
+
+        if (!dryRun) {
+            opprettOppgaveForBarn(skalOpprettes)
+        } else {
+            logger.info("Ville opprettet oppgave for ${skalOpprettes.size} barn.")
+            skalOpprettes.forEach {
+                secureLogger.info("Ville opprettet oppgave for barn med fødselsnummer: " +
+                                  "${it.fødselsnummer} med alder ${it.alder}")
+            }
+        }
     }
 
     private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
