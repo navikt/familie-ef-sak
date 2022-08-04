@@ -23,10 +23,6 @@ class OpprettOppfølgingsoppgaverForBarnFyltÅrTask(
     }
 
     override fun onCompletion(task: Task) {
-        opprettTaskForNesteDag()
-    }
-
-    fun opprettTaskForNesteDag() {
         taskRepository.save(opprettTask(LocalDate.now().plusDays(1)))
     }
 
