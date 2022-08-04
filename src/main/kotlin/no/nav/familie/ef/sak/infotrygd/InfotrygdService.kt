@@ -65,7 +65,7 @@ class InfotrygdService(
     ): List<InfotrygdPeriode> {
         val personIdenter = hentPersonIdenter(personIdent)
         val perioder = hentPerioderFraReplika(personIdenter, setOf(StønadType.BARNETILSYN))
-        return slåSammenPerioder(perioder.barnetilsyn)
+        return perioder.barnetilsyn
     }
 
     /**
@@ -74,16 +74,16 @@ class InfotrygdService(
     fun hentSammenslåttePerioderSomInternPerioder(personIdenter: Set<String>): InternePerioder {
         val perioder = hentPerioderFraReplika(personIdenter)
         return InternePerioder(
-            overgangsstønad = slåSammenPerioder(perioder.overgangsstønad).map { it.tilInternPeriode() },
-            barnetilsyn = slåSammenPerioder(perioder.barnetilsyn).map { it.tilInternPeriode() },
-            skolepenger = slåSammenPerioder(perioder.skolepenger).map { it.tilInternPeriode() }
+            overgangsstønad = perioder.overgangsstønad.map { it.tilInternPeriode() },
+            barnetilsyn = perioder.barnetilsyn.map { it.tilInternPeriode() },
+            skolepenger = perioder.skolepenger.map { it.tilInternPeriode() }
         )
     }
 
     private fun mapPerioder(perioder: List<InfotrygdPeriode>) =
         InfotrygdStønadPerioderDto(
             perioder.filter { it.kode != InfotrygdEndringKode.ANNULERT },
-            slåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() }
+            perioder.map { it.tilSummertInfotrygdperiodeDto() }
         )
 
     private fun hentPerioderFraReplika(
@@ -93,10 +93,6 @@ class InfotrygdService(
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentPerioder(request)
-    }
-
-    private fun slåSammenPerioder(perioder: List<InfotrygdPeriode>): List<InfotrygdPeriode> {
-        return InfotrygdPeriodeUtil.slåSammenInfotrygdperioder(perioder)
     }
 
     private fun hentPersonIdenter(personIdent: String): Set<String> {
