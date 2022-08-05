@@ -25,6 +25,9 @@ class InfotrygdReplikaClient(
     private val perioderUri: URI =
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
+    private val sammenslåttePerioderUri: URI =
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/sammenslåtte").build().toUri()
+
     private val finnSakerUri: URI =
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
 
@@ -40,6 +43,10 @@ class InfotrygdReplikaClient(
 
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
         return postForEntity(perioderUri, request)
+    }
+
+    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
+        return postForEntity(sammenslåttePerioderUri, request)
     }
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
