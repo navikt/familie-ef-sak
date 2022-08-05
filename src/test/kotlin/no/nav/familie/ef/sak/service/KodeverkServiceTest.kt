@@ -12,9 +12,12 @@ import java.time.LocalDate
 
 internal class KodeverkServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var kodeverkService: KodeverkService
-    @Autowired lateinit var familieIntegrasjonerConfig: IntegrasjonerConfig
-    @Autowired lateinit var wireMockServer: WireMockServer
+    @Autowired
+    lateinit var kodeverkService: KodeverkService
+    @Autowired
+    lateinit var familieIntegrasjonerConfig: IntegrasjonerConfig
+    @Autowired
+    lateinit var wireMockServer: WireMockServer
 
     @Test
     internal fun `skal cachea poststed og land`() {

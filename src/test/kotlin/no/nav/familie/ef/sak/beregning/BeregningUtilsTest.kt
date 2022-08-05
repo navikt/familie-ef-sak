@@ -31,7 +31,12 @@ internal class BeregningUtilsTest {
                     vedtaksperiode = vedtaksperiode.toMånedsperiode()
                 ).first()
             )
-                .isEqualTo(beløpsperiode.copy(fellesperiode = vedtaksperiode, periode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fom, vedtaksperiode.tom)))
+                .isEqualTo(
+                    beløpsperiode.copy(
+                        fellesperiode = vedtaksperiode,
+                        periode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fom, vedtaksperiode.tom)
+                    )
+                )
         }
 
         @Test

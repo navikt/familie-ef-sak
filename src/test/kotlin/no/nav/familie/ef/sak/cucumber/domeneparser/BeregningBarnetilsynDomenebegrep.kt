@@ -14,6 +14,7 @@ enum class BeregningBarnetilsynDomenebegrep(val nøkkel: String) : Domenenøkkel
     HAR_KONTANTSTØTTE("Har kontantstøtte"),
     HAR_TILLEGGSSTØNAD("Har tilleggsstønad")
     ;
+
     override fun nøkkel(): String {
         return nøkkel
     }

@@ -23,5 +23,6 @@ fun Simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling(): List<
         akkumulatorListe
     }
 }
+
 private fun erPerioderSammenhengende(gjeldendePeriode: Månedsperiode, nestePeriode: Månedsperiode) =
     gjeldendePeriode påfølgesAv nestePeriode

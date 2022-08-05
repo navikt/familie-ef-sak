@@ -39,9 +39,12 @@ import java.time.temporal.IsoFields
 
 class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var målerRepository: MålerRepository
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired
+    lateinit var målerRepository: MålerRepository
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
@@ -217,7 +220,14 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
                     if (status == BehandlingStatus.FERDIGSTILT) {
                         BehandlingResultat.values().forEach { resultat -> // per resultat for ferdigstilte
                             val henlagtÅrsak = if (resultat == HENLAGT) FEILREGISTRERT else null
-                            behandlingRepository.insert(behandling(fagsak = fagsak, status = status, resultat = resultat, henlagtÅrsak = henlagtÅrsak))
+                            behandlingRepository.insert(
+                                behandling(
+                                    fagsak = fagsak,
+                                    status = status,
+                                    resultat = resultat,
+                                    henlagtÅrsak = henlagtÅrsak
+                                )
+                            )
                         }
                     } else {
                         behandlingRepository.insert(behandling(fagsak = fagsak, status = status, henlagtÅrsak = null))

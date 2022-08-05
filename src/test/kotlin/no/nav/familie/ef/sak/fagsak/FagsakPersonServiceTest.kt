@@ -15,9 +15,12 @@ import java.util.UUID
 
 internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
-    @Autowired private lateinit var jdbcTemplate: JdbcTemplate
-    @Autowired private lateinit var fagsakPersonService: FagsakPersonService
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
+    @Autowired
+    private lateinit var fagsakPersonService: FagsakPersonService
 
     @Test
     internal fun `hentEllerOpprettPerson - skal kaste feil når man spør etter identer som matcher flere personer`() {
@@ -47,7 +50,8 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
     internal fun `oppdaterIdent - tidligere ident blir aktiv på nytt`() {
         val aktivIdent = "1"
         val annenIdent = "2"
-        val personId = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(aktivIdent), PersonIdent(annenIdent)))).id
+        val personId =
+            fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(aktivIdent), PersonIdent(annenIdent)))).id
         jdbcTemplate.update("UPDATE person_ident SET endret_tid=(endret_tid - INTERVAL '1 DAY') WHERE ident = '2'")
 
         val person = fagsakPersonRepository.findByIdOrThrow(personId)

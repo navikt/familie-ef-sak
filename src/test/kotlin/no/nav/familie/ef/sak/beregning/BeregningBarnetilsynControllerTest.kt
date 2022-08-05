@@ -43,13 +43,20 @@ import java.util.UUID
 
 internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var vilkårsvurderingService: VurderingService
-    @Autowired private lateinit var søknadService: SøknadService
-    @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var barnRepository: BarnRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+    @Autowired
+    private lateinit var vilkårsvurderingService: VurderingService
+    @Autowired
+    private lateinit var søknadService: SøknadService
+    @Autowired
+    private lateinit var grunnlagsdataService: GrunnlagsdataService
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
 
     @BeforeEach
     fun setUp() {
@@ -65,8 +72,10 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             hentBeløpsperioderForBehandling(behandling.id)
         val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body?.data
         Assertions.assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
-        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.fom).isEqualTo(LocalDate.of(2022, 1, 1))
-        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.tom).isEqualTo(LocalDate.of(2022, 4, 30))
+        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.fom)
+            .isEqualTo(LocalDate.of(2022, 1, 1))
+        Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.tom)
+            .isEqualTo(LocalDate.of(2022, 4, 30))
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(2000)
 
         val responsRevurdering: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =

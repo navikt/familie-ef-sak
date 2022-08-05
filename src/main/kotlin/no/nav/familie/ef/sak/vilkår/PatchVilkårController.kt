@@ -39,7 +39,7 @@ class PatchVilkårController(
             val eksisterendeVilkår = vilkårsvurderingRepository.findByBehandlingId(it.id)
 
             if (eksisterendeVilkår.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.flatMap { it.vurderinger.map { it.regelId } } }
-                .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)
+                    .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)
             ) {
                 logger.info("det finnes allerede et delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
             } else {
@@ -69,7 +69,8 @@ class PatchVilkårController(
     private fun lagNyDelvilkårsvurdering(behandlingId: UUID): Delvilkårsvurdering {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsak.fagsakPersonId)
-        val sisteIverksatteBehandling = fagsaker.overgangsstønad?.let { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
+        val sisteIverksatteBehandling =
+            fagsaker.overgangsstønad?.let { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
         val svar = utledSvar(sisteIverksatteBehandling)
 
         return Delvilkårsvurdering(

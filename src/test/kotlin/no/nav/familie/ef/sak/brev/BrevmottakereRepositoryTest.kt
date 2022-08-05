@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class BrevmottakereRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var brevmottakereRepository: BrevmottakereRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var brevmottakereRepository: BrevmottakereRepository
 
     @Test
     internal fun `skal lagre brevmottaker`() {

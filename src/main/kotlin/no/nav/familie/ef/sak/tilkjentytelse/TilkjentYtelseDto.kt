@@ -16,10 +16,11 @@ data class TilkjentYtelseDto(
 data class AndelTilkjentYtelseDto(
     val beløp: Int,
     val periode: Datoperiode,
-    @Deprecated("Bruk periode.", ReplaceWith("periode.fomDato"))val stønadFra: LocalDate = periode.fom,
-    @Deprecated("Bruk periode.", ReplaceWith("periode.tomDato"))val stønadTil: LocalDate = periode.tom,
+    @Deprecated("Bruk periode.", ReplaceWith("periode.fomDato")) val stønadFra: LocalDate = periode.fom,
+    @Deprecated("Bruk periode.", ReplaceWith("periode.tomDato")) val stønadTil: LocalDate = periode.tom,
     val inntekt: Int,
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int
 )
+
 data class BarnMedLøpendeStønad(val barn: List<UUID>, val dato: LocalDate)

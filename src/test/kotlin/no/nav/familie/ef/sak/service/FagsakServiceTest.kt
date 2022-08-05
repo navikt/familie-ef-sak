@@ -29,8 +29,10 @@ import java.util.UUID
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var fagsakService: FagsakService
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var fagsakService: FagsakService
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
     @AfterEach
     internal fun tearDown() {

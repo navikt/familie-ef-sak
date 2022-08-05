@@ -150,9 +150,21 @@ class OppgaveClientMock {
     private val oppgavePapirsøknad =
         lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "2345")
     private val oppgaveEttersending =
-        lagOppgave(6L, Oppgavetype.Journalføring, beskivelse = "Ettersending", behandlesAvApplikasjon = "familie-ef-sak", journalpostId = "2345")
+        lagOppgave(
+            6L,
+            Oppgavetype.Journalføring,
+            beskivelse = "Ettersending",
+            behandlesAvApplikasjon = "familie-ef-sak",
+            journalpostId = "2345"
+        )
     private val oppgaveEttersendingUtenBehandlesAvApplikasjon =
-        lagOppgave(7L, Oppgavetype.Journalføring, beskivelse = "Ettersending uten behandlesAvApplikasjon", behandlesAvApplikasjon = "", journalpostId = "2345")
+        lagOppgave(
+            7L,
+            Oppgavetype.Journalføring,
+            beskivelse = "Ettersending uten behandlesAvApplikasjon",
+            behandlesAvApplikasjon = "",
+            journalpostId = "2345"
+        )
     private val tilbakekreving1 = lagOppgave(
         4L,
         Oppgavetype.BehandleSak,

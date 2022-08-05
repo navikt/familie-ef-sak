@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     @Test
     internal fun `hente data går OK`() {

@@ -14,8 +14,10 @@ import org.springframework.data.relational.core.conversion.DbActionExecutionExce
 
 internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
 
     @Test
     internal fun `skal kaste exception hvis man bruker save eller saveAll`() {

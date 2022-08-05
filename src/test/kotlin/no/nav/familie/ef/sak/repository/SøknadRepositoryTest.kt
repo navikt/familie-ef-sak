@@ -16,8 +16,10 @@ import kotlin.random.Random.Default.nextInt
 
 internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var søknadRepository: SøknadRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var søknadRepository: SøknadRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     fun `finner søknad på behandlingId`() {

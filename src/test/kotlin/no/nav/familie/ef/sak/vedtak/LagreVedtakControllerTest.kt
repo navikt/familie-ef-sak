@@ -42,9 +42,12 @@ import java.util.UUID
 
 internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var barnRepository: BarnRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
 
     @BeforeEach
     fun setUp() {

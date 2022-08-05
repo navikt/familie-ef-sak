@@ -23,6 +23,7 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vedtakRepository: VedtakRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

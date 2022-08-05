@@ -30,8 +30,10 @@ import java.util.UUID
 
 internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
 
     @BeforeEach
     fun setUp() {

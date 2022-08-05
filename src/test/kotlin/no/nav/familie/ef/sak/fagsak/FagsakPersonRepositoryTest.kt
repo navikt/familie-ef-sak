@@ -16,7 +16,8 @@ import java.time.LocalDateTime
 
 internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
 
     @Test
     internal fun `skal ikke være mulig med 2 personer med samme ident`() {

@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class FagsakPersonControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakPersonController: FagsakPersonController
+    @Autowired
+    private lateinit var fagsakPersonController: FagsakPersonController
 
     @Test
     internal fun `skal finne fagsaker til person`() {

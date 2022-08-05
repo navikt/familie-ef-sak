@@ -78,13 +78,21 @@ abstract class OppslagSpringRunnerTest {
     protected val restTemplate = TestRestTemplate()
     protected val headers = HttpHeaders()
 
-    @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
-    @Autowired private lateinit var applicationContext: ApplicationContext
-    @Autowired private lateinit var cacheManager: CacheManager
-    @Autowired @Qualifier("kodeverkCache") private lateinit var cacheManagerKodeverk: CacheManager
-    @Autowired private lateinit var rolleConfig: RolleConfig
-    @Autowired private lateinit var mockOAuth2Server: MockOAuth2Server
-    @Autowired lateinit var testoppsettService: TestoppsettService
+    @Autowired
+    private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
+    @Autowired
+    private lateinit var applicationContext: ApplicationContext
+    @Autowired
+    private lateinit var cacheManager: CacheManager
+    @Autowired
+    @Qualifier("kodeverkCache")
+    private lateinit var cacheManagerKodeverk: CacheManager
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+    @Autowired
+    private lateinit var mockOAuth2Server: MockOAuth2Server
+    @Autowired
+    lateinit var testoppsettService: TestoppsettService
 
     @LocalServerPort
     private var port: Int? = 0
@@ -139,7 +147,7 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             Migreringsstatus::class,
 
-        ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
+            ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
     protected fun getPort(): String {

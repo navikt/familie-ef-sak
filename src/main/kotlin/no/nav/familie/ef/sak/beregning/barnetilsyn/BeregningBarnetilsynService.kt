@@ -93,7 +93,10 @@ class BeregningBarnetilsynService {
         }
     }
 
-    private fun harUrelevantReduksjonsPeriode(utgiftsperioder: List<Månedsperiode>, reduksjonsperioder: List<Månedsperiode>): Boolean {
+    private fun harUrelevantReduksjonsPeriode(
+        utgiftsperioder: List<Månedsperiode>,
+        reduksjonsperioder: List<Månedsperiode>
+    ): Boolean {
         return reduksjonsperioder.isNotEmpty() && !reduksjonsperioder.any {
             utgiftsperioder.any { ut ->
                 ut.overlapper(it)
@@ -147,7 +150,12 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
         val last = acc.lastOrNull()
         if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
             acc.removeLast()
-            acc.add(last.copy(periode = last.periode.copy(tildato = entry.periode.tildato), fellesperiode = last.fellesperiode union entry.fellesperiode))
+            acc.add(
+                last.copy(
+                    periode = last.periode.copy(tildato = entry.periode.tildato),
+                    fellesperiode = last.fellesperiode union entry.fellesperiode
+                )
+            )
         } else {
             acc.add(entry)
         }

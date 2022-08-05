@@ -72,25 +72,42 @@ import java.util.Queue
 
 internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakService: FagsakService
-    @Autowired private lateinit var behandlingService: BehandlingService
-    @Autowired private lateinit var revurderingService: RevurderingService
-    @Autowired private lateinit var migreringService: MigreringService
-    @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var tilkjentYtelseService: TilkjentYtelseService
-    @Autowired private lateinit var taskRepository: TaskRepository
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+    @Autowired
+    private lateinit var behandlingService: BehandlingService
+    @Autowired
+    private lateinit var revurderingService: RevurderingService
+    @Autowired
+    private lateinit var migreringService: MigreringService
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+    @Autowired
+    private lateinit var tilkjentYtelseService: TilkjentYtelseService
+    @Autowired
+    private lateinit var taskRepository: TaskRepository
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired private lateinit var taskWorker: TaskWorker
-    @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
-    @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
-    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-    @Autowired private lateinit var stegService: StegService
-    @Autowired private lateinit var tilbakekrevingService: TilbakekrevingService
-    @Autowired private lateinit var rolleConfig: RolleConfig
-    @Autowired private lateinit var iverksettClient: IverksettClient
-    @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
-    @Autowired private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+    @Autowired
+    private lateinit var taskWorker: TaskWorker
+    @Autowired
+    private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
+    @Autowired
+    private lateinit var vedtaksbrevService: VedtaksbrevService
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+    @Autowired
+    private lateinit var stegService: StegService
+    @Autowired
+    private lateinit var tilbakekrevingService: TilbakekrevingService
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+    @Autowired
+    private lateinit var iverksettClient: IverksettClient
+    @Autowired
+    private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+    @Autowired
+    private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
     private val opphørsmåned = YearMonth.now()

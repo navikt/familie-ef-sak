@@ -1466,7 +1466,15 @@ internal class BeregnYtelseStegTest {
         @BeforeEach
         internal fun setUp() {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(BeløpsperiodeBarnetilsynDto(fellesperiode = Datoperiode(LocalDate.now(), LocalDate.now()), beløp = 1, beløpFørFratrekkOgSatsjustering = 1, sats = 6284, beregningsgrunnlag = grunnlag()))
+                listOf(
+                    BeløpsperiodeBarnetilsynDto(
+                        fellesperiode = Datoperiode(LocalDate.now(), LocalDate.now()),
+                        beløp = 1,
+                        beløpFørFratrekkOgSatsjustering = 1,
+                        sats = 6284,
+                        beregningsgrunnlag = grunnlag()
+                    )
+                )
         }
 
         @Test
@@ -1489,7 +1497,15 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(BeløpsperiodeBarnetilsynDto(fellesperiode = Datoperiode(nyAndelFom, nyAndelTom), beløp = 1, beløpFørFratrekkOgSatsjustering = 1, sats = 6284, beregningsgrunnlag = grunnlag()))
+                listOf(
+                    BeløpsperiodeBarnetilsynDto(
+                        fellesperiode = Datoperiode(nyAndelFom, nyAndelTom),
+                        beløp = 1,
+                        beløpFørFratrekkOgSatsjustering = 1,
+                        sats = 6284,
+                        beregningsgrunnlag = grunnlag()
+                    )
+                )
 
             utførSteg(
                 saksbehandling(
@@ -1521,7 +1537,15 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(BeløpsperiodeBarnetilsynDto(fellesperiode = Datoperiode(nyAndelFom, nyAndelTom), beløp = 1, beløpFørFratrekkOgSatsjustering = 1, sats = 6284, beregningsgrunnlag = grunnlag()))
+                listOf(
+                    BeløpsperiodeBarnetilsynDto(
+                        fellesperiode = Datoperiode(nyAndelFom, nyAndelTom),
+                        beløp = 1,
+                        beløpFørFratrekkOgSatsjustering = 1,
+                        sats = 6284,
+                        beregningsgrunnlag = grunnlag()
+                    )
+                )
 
             utførSteg(
                 saksbehandling(
@@ -1815,7 +1839,12 @@ internal class BeregnYtelseStegTest {
         )
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
-        Beløpsperiode(fellesperiode = Datoperiode(fom, tom), beregningsgrunnlag = null, beløp = BigDecimal.ZERO, beløpFørSamordning = BigDecimal.ZERO)
+        Beløpsperiode(
+            fellesperiode = Datoperiode(fom, tom),
+            beregningsgrunnlag = null,
+            beløp = BigDecimal.ZERO,
+            beløpFørSamordning = BigDecimal.ZERO
+        )
 
     private fun opphørsperiode(opphørFom: YearMonth, opphørTom: YearMonth) =
         VedtaksperiodeDto(

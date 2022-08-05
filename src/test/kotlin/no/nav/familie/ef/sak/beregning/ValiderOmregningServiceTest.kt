@@ -139,7 +139,15 @@ class ValiderOmregningServiceTest {
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
 
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
-                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.MIGRERING, VedtaksperiodeType.MIGRERING))
+                innvilge(
+                    VedtaksperiodeDto(
+                        fra,
+                        til,
+                        Månedsperiode(fra, til),
+                        AktivitetType.MIGRERING,
+                        VedtaksperiodeType.MIGRERING
+                    )
+                )
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
             validerOmregningService.validerHarSammePerioderSomTidligereVedtak(vedtak, saksbehandling)
@@ -165,7 +173,15 @@ class ValiderOmregningServiceTest {
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
-                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.IKKE_AKTIVITETSPLIKT, VedtaksperiodeType.MIGRERING))
+                innvilge(
+                    VedtaksperiodeDto(
+                        fra,
+                        til,
+                        Månedsperiode(fra, til),
+                        AktivitetType.IKKE_AKTIVITETSPLIKT,
+                        VedtaksperiodeType.MIGRERING
+                    )
+                )
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
 
@@ -182,7 +198,15 @@ class ValiderOmregningServiceTest {
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
-                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.MIGRERING, VedtaksperiodeType.HOVEDPERIODE))
+                innvilge(
+                    VedtaksperiodeDto(
+                        fra,
+                        til,
+                        Månedsperiode(fra, til),
+                        AktivitetType.MIGRERING,
+                        VedtaksperiodeType.HOVEDPERIODE
+                    )
+                )
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
 
@@ -200,9 +224,18 @@ class ValiderOmregningServiceTest {
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
-                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.MIGRERING, VedtaksperiodeType.HOVEDPERIODE))
+                innvilge(
+                    VedtaksperiodeDto(
+                        fra,
+                        til,
+                        Månedsperiode(fra, til),
+                        AktivitetType.MIGRERING,
+                        VedtaksperiodeType.HOVEDPERIODE
+                    )
+                )
 
-            val vedtak = innvilge(VedtaksperiodeDto(fra, revurderingTil, Månedsperiode(fra, revurderingTil), aktivitet, periodeType))
+            val vedtak =
+                innvilge(VedtaksperiodeDto(fra, revurderingTil, Månedsperiode(fra, revurderingTil), aktivitet, periodeType))
 
             assertThatThrownBy { validerOmregningService.validerHarSammePerioderSomTidligereVedtak(vedtak, saksbehandling) }
                 .isInstanceOf(ApiFeil::class.java)
@@ -215,7 +248,15 @@ class ValiderOmregningServiceTest {
             val fra = YearMonth.of(år, 5)
             val til = fra
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
-                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.MIGRERING, VedtaksperiodeType.HOVEDPERIODE))
+                innvilge(
+                    VedtaksperiodeDto(
+                        fra,
+                        til,
+                        Månedsperiode(fra, til),
+                        AktivitetType.MIGRERING,
+                        VedtaksperiodeType.HOVEDPERIODE
+                    )
+                )
 
             val vedtak = InnvilgelseOvergangsstønad(null, null, listOf())
 
@@ -249,11 +290,18 @@ class ValiderOmregningServiceTest {
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
-                    VedtaksperiodeDto(fra, fra, Månedsperiode(fra, fra), AktivitetType.IKKE_AKTIVITETSPLIKT, VedtaksperiodeType.SANKSJON),
+                    VedtaksperiodeDto(
+                        fra,
+                        fra,
+                        Månedsperiode(fra, fra),
+                        AktivitetType.IKKE_AKTIVITETSPLIKT,
+                        VedtaksperiodeType.SANKSJON
+                    ),
                     VedtaksperiodeDto(andrePeriodeFra, til, Månedsperiode(andrePeriodeFra, til), aktivitet, periodeType)
                 )
 
-            val vedtak = innvilge(VedtaksperiodeDto(andrePeriodeFra, til, Månedsperiode(andrePeriodeFra, til), aktivitet, periodeType))
+            val vedtak =
+                innvilge(VedtaksperiodeDto(andrePeriodeFra, til, Månedsperiode(andrePeriodeFra, til), aktivitet, periodeType))
 
             validerOmregningService.validerHarSammePerioderSomTidligereVedtak(vedtak, saksbehandling)
         }
