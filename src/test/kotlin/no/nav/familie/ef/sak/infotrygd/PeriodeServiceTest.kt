@@ -25,6 +25,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class PeriodeServiceTest {
 
@@ -128,8 +129,8 @@ internal class PeriodeServiceTest {
     @Test
     internal fun `hvis en periode fra ef overlapper perioder fra infotrygd så er det perioden fra EF som har høyere presidens`() {
         mockBehandling()
-        val fom = LocalDate.now()
-        val tom = LocalDate.now().plusDays(9)
+        val fom = YearMonth.now().atDay(1)
+        val tom = YearMonth.now().atEndOfMonth()
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, fom, tom))
         mockReplika(listOf(lagInfotrygdPeriode(beløp = 2, stønadFom = fom, stønadTom = tom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)

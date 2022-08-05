@@ -181,7 +181,7 @@ object AndelHistorikkBeregner {
         andel: AndelTilkjentYtelse,
         vedtaksperioder: List<Vedtakshistorikkperiode>
     ): Vedtakshistorikkperiode {
-        return vedtaksperioder.first { it.periode.inneholder(andel.stønadFom) }
+        return vedtaksperioder.first { it.periode.inneholder(andel.periode.fom) }
     }
 
     private fun sorterTilkjentYtelser(tilkjentYtelser: List<TilkjentYtelse>): List<TilkjentYtelse> =

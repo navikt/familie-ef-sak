@@ -36,7 +36,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import org.springframework.stereotype.Service
@@ -429,12 +429,12 @@ class BeregnYtelseSteg(
     }
 
     private fun validerOpphørsperioder(
-        opphørsperioder: List<Periode>,
-        vedtaksperioder: List<Periode>,
+        opphørsperioder: List<Månedsperiode>,
+        vedtaksperioder: List<Månedsperiode>,
         forrigeTilkjenteYtelse: TilkjentYtelse?
     ) {
-        val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fomDato }
-        val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.tomDato }
+        val førsteOpphørsdato = opphørsperioder.minOfOrNull { it.fom }
+        val førsteVedtaksFradato = vedtaksperioder.minOfOrNull { it.tom }
         val harKunOpphørEllerOpphørFørInnvilgetPeriode =
             førsteOpphørsdato != null && (førsteVedtaksFradato == null || førsteOpphørsdato < førsteVedtaksFradato)
         feilHvis(forrigeTilkjenteYtelse == null && harKunOpphørEllerOpphørFørInnvilgetPeriode) {
@@ -445,7 +445,7 @@ class BeregnYtelseSteg(
     private fun beregnNyeAndelerForRevurdering(
         forrigeTilkjenteYtelse: TilkjentYtelse?,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        opphørsperioder: List<Periode>
+        opphørsperioder: List<Månedsperiode>
     ) =
         forrigeTilkjenteYtelse?.let {
             slåSammenAndelerSomSkalVidereføres(andelerTilkjentYtelse, forrigeTilkjenteYtelse, opphørsperioder)
@@ -453,7 +453,7 @@ class BeregnYtelseSteg(
 
     private fun nyttStartdato(
         behandlingId: UUID,
-        perioder: List<Periode>,
+        perioder: List<Månedsperiode>,
         forrigeStartdato: LocalDate?
     ): LocalDate {
         val startdato = min(perioder.minOfOrNull { it.fomDato }, forrigeStartdato)
@@ -503,7 +503,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp.toInt(),
-                    periode = it.fellesperiode,
+                    periode = it.fellesperiode.toMånedsperiode(),
                     kildeBehandlingId = saksbehandling.id,
                     personIdent = saksbehandling.ident,
                     samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
@@ -525,7 +525,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    periode = it.fellesperiode,
+                    periode = it.fellesperiode.toMånedsperiode(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
@@ -578,7 +578,7 @@ class BeregnYtelseSteg(
     fun slåSammenAndelerSomSkalVidereføres(
         beløpsperioder: List<AndelTilkjentYtelse>,
         forrigeTilkjentYtelse: TilkjentYtelse,
-        opphørsperioder: List<Periode>
+        opphørsperioder: List<Månedsperiode>
     ): List<AndelTilkjentYtelse> {
         val fomPerioder = beløpsperioder.firstOrNull()?.stønadFom ?: LocalDate.MAX
         val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fomDato ?: LocalDate.MAX
@@ -601,7 +601,7 @@ class BeregnYtelseSteg(
 
     fun vurderPeriodeForOpphør(
         andelTilkjentYtelser: List<AndelTilkjentYtelse>,
-        opphørsperioder: List<Periode>
+        opphørsperioder: List<Månedsperiode>
     ): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelser.map {
 

@@ -22,7 +22,7 @@ import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
@@ -87,7 +87,7 @@ object VedtakDtoUtil {
         UtgiftsperiodeDto(
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
-            Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
             listOf(barnId),
             500,
             false
@@ -97,7 +97,7 @@ object VedtakDtoUtil {
         PeriodeMedBeløpDto(
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
-            Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
             1000
         )
 
@@ -112,7 +112,7 @@ object VedtakDtoUtil {
         VedtaksperiodeDto(
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
-            Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
             AktivitetType.BARN_UNDER_ETT_ÅR,
             VedtaksperiodeType.HOVEDPERIODE
         )
@@ -135,7 +135,7 @@ object VedtakDtoUtil {
             SkolepengerStudietype.HØGSKOLE_UNIVERSITET,
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
-            Periode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
             50
         )
 

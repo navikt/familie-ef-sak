@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.YearMonth
 import java.util.UUID
 
@@ -51,7 +51,7 @@ data class DelårsperiodeSkoleårDto(
     val studietype: SkolepengerStudietype,
     @Deprecated("Bruke periode", ReplaceWith("periode.fomMåned")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruke periode", ReplaceWith("periode.tomMåned")) val årMånedTil: YearMonth? = null,
-    val periode: Periode = Periode(
+    val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")
     ),
@@ -120,7 +120,7 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
     studietype = this.studietype,
     årMånedFra = YearMonth.from(this.datoFra),
     årMånedTil = YearMonth.from(this.datoTil),
-    periode = Periode(this.datoFra, this.datoTil),
+    periode = Månedsperiode(this.datoFra, this.datoTil),
     studiebelastning = this.studiebelastning
 )
 

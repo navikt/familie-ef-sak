@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -145,7 +145,7 @@ internal class VedtakHistorikkBeregnerTest {
         )
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
-        Periode(this.datoFra, this.datoTil),
+        Månedsperiode(this.datoFra, this.datoTil),
         sanksjonsårsak = null,
         this.aktivitet,
         this.periodeType,

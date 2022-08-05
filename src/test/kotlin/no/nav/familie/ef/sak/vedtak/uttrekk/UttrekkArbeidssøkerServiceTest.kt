@@ -40,7 +40,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -545,13 +545,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         til: YearMonth,
         aktivitetType: AktivitetType = AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER
     ) =
-        VedtaksperiodeDto(fra, til, Periode(fra, til), aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+        VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
     private fun innvilg(
         fagsak: Fagsak,
         behandling: Behandling,
         vedtaksperioder: List<VedtaksperiodeDto>,
-        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fomMåned, null, null))
+        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fom, null, null))
     ) {
         val vedtak = InnvilgelseOvergangsstønad(
             perioder = vedtaksperioder,

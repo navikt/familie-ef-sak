@@ -32,7 +32,7 @@ import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -232,7 +232,7 @@ class TestSaksbehandlingController(
     private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
         return migreringService.opprettMigrering(
             fagsak = fagsak,
-            periode = Periode(YearMonth.now(), YearMonth.now().plusMonths(1)),
+            periode = Månedsperiode(YearMonth.now(), YearMonth.now().plusMonths(1)),
             inntektsgrunnlag = 0,
             samordningsfradrag = 0
         )

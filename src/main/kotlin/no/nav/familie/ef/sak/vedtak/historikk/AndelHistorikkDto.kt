@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Datoperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -41,7 +41,7 @@ data class AndelMedGrunnlagDto(
     val beløp: Int,
     @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato")) val stønadFra: LocalDate?,
     @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato")) val stønadTil: LocalDate?,
-    val periode: Periode = Periode(
+    val periode: Datoperiode = Datoperiode(
         stønadFra ?: error("Periode eller stønadFra må ha verdi"),
         stønadTil ?: error("Periode eller stønadTil må ha verdi")
     ),
@@ -64,7 +64,7 @@ data class AndelMedGrunnlagDto(
         beløp = andel.beløp,
         stønadFra = andel.stønadFom,
         stønadTil = andel.stønadTom,
-        periode = andel.periode,
+        periode = andel.periode.toDatoperiode(),
         inntekt = andel.inntekt,
         inntektsreduksjon = andel.inntektsreduksjon,
         samordningsfradrag = andel.samordningsfradrag,

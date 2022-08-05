@@ -33,7 +33,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vedtak.erVedtakAktivtForDato
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -229,7 +229,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         val inntektsperiodeToMånederTilbake =
             Inntektsperiode(
-                Periode(
+                Månedsperiode(
                     vedtakFraOgMedDato,
                     YearMonth.now().minusMonths(2).atEndOfMonth()
                 ),
@@ -237,7 +237,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
                 BigDecimal.ZERO
             )
         val inntektsperiodeForrigeMåned = Inntektsperiode(
-            Periode(
+            Månedsperiode(
                 YearMonth.now().minusMonths(1).atDay(1),
                 vedtakTilOgMedDato
             ),
@@ -275,7 +275,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         tilOgMedDato: LocalDate,
         inntektsperioder: List<Inntektsperiode> = listOf(
             Inntektsperiode(
-                Periode(
+                Månedsperiode(
                     fraOgMedDato,
                     tilOgMedDato
                 ),

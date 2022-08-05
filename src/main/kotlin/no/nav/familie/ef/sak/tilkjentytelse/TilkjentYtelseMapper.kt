@@ -27,7 +27,7 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
     return AndelTilkjentYtelseDto(
         beløp = this.beløp,
-        periode = this.periode,
+        periode = this.periode.toDatoperiode(),
         inntekt = this.inntekt,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag
@@ -38,7 +38,7 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
     return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
-            fellesperiode = andel.periode,
+            fellesperiode = andel.periode.toDatoperiode(),
             beregningsgrunnlag = Beregningsgrunnlag(
                 inntekt = andel.inntekt.toBigDecimal(),
                 samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
@@ -57,7 +57,7 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
         val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
         BeløpsperiodeBarnetilsynDto(
-            fellesperiode = it.periode,
+            fellesperiode = it.periode.toDatoperiode(),
             beløp = it.beløp,
             beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
                 beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,

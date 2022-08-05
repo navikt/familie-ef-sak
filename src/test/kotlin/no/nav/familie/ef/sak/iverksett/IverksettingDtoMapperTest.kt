@@ -295,7 +295,7 @@ internal class IverksettingDtoMapperTest {
 
         val tilbakekrevingMedVarsel = vedtak.tilbakekreving?.tilbakekrevingMedVarsel
         assertThat(tilbakekrevingMedVarsel?.perioder).hasSize(1)
-        assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(2022, 3, 30))
+        assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.tom).isEqualTo(LocalDate.of(2022, 3, 31))
         assertThat(tilbakekrevingMedVarsel?.varseltekst).isEqualTo("varseltekst")
         assertThat(tilbakekrevingMedVarsel?.sumFeilutbetaling).isEqualTo(BigDecimal("1000.0"))
@@ -343,21 +343,21 @@ internal class IverksettingDtoMapperTest {
     private fun assertVedtaksperiode(vedtak: VedtaksdetaljerBarnetilsynDto) {
         assertThat(vedtak.vedtaksperioder).hasSize(1)
         val vedtaksperiode = vedtak.vedtaksperioder[0]
-        assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
-        assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
+        assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 31))
         assertThat(vedtaksperiode.antallBarn).isEqualTo(1)
         assertThat(vedtaksperiode.utgifter).isEqualTo(10)
 
         assertThat(vedtak.kontantstøtte).hasSize(1)
         val kontantstøtte = vedtak.kontantstøtte[0]
-        assertThat(kontantstøtte.fraOgMed).isEqualTo(LocalDate.of(2021, 3, 27))
-        assertThat(kontantstøtte.tilOgMed).isEqualTo(LocalDate.of(2021, 3, 28))
+        assertThat(kontantstøtte.fraOgMed).isEqualTo(LocalDate.of(2021, 3, 1))
+        assertThat(kontantstøtte.tilOgMed).isEqualTo(LocalDate.of(2021, 3, 31))
         assertThat(kontantstøtte.beløp).isEqualTo(1)
         assertThat(vedtak.tilleggsstønad).hasSize(1)
 
         val tilleggsstønad = vedtak.tilleggsstønad[0]
-        assertThat(tilleggsstønad.fraOgMed).isEqualTo(LocalDate.of(2021, 4, 27))
-        assertThat(tilleggsstønad.tilOgMed).isEqualTo(LocalDate.of(2021, 4, 28))
+        assertThat(tilleggsstønad.fraOgMed).isEqualTo(LocalDate.of(2021, 4, 1))
+        assertThat(tilleggsstønad.tilOgMed).isEqualTo(LocalDate.of(2021, 4, 30))
         assertThat(tilleggsstønad.beløp).isEqualTo(2)
     }
 

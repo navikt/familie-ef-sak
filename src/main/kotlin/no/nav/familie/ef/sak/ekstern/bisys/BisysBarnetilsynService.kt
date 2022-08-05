@@ -58,7 +58,7 @@ class BisysBarnetilsynService(
 
         val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }
-            .filter { it.andel.beløp > 0 && it.andel.periode.tomDato >= fomDato }
+            .filter { it.andel.beløp > 0 && it.andel.periode.tom >= fomDato }
 
         val barnIdenter = historikk.flatMap { it.andel.barn }
             .distinct()
@@ -67,7 +67,7 @@ class BisysBarnetilsynService(
 
         val barnetilsynBisysPerioder = historikk.map { andel ->
             BarnetilsynBisysPeriode(
-                Periode(andel.andel.periode.fomDato, andel.andel.periode.tomDato),
+                Periode(andel.andel.periode.fom, andel.andel.periode.tom),
                 andel.andel.barn.map {
                     barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
                 },

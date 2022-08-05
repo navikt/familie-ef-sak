@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.vilkår.dto.MedlemskapRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.UtenlandsoppholdDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.springframework.stereotype.Component
 
@@ -43,7 +43,7 @@ class MedlemskapMapper(
                 UtenlandsoppholdDto(
                     it.fradato,
                     it.tildato,
-                    Periode(it.fradato, it.tildato),
+                    Datoperiode(it.fradato, it.tildato),
                     it.årsakUtenlandsopphold
                 )
             }

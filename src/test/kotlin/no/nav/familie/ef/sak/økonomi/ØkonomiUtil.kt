@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløp
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -17,7 +17,7 @@ fun lagTilkjentYtelse(
     vedtaksdato: LocalDate = LocalDate.now(),
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
-    grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato
+    grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fom
 ) =
     TilkjentYtelse(
         id = id,
@@ -43,7 +43,7 @@ fun lagAndelTilkjentYtelse(
 ) =
     AndelTilkjentYtelse(
         beløp = beløp,
-        periode = Periode(fraOgMed, tilOgMed),
+        periode = Månedsperiode(fraOgMed, tilOgMed),
         personIdent = personIdent,
         // periodetype = periodetype,
         inntekt = inntekt,

@@ -1,16 +1,18 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
+import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Periode
 import java.math.BigDecimal
 import java.time.LocalDate
 
 data class Beløpsperiode(
-    val fellesperiode: Periode,
+    val fellesperiode: Datoperiode,
     @Deprecated("Bruk fellesperiode", ReplaceWith("fellesperiode"))
     val periode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
-        fellesperiode.fomDato,
-        fellesperiode.tomDato
+        fellesperiode.fom,
+        fellesperiode.tom
     ),
     val beregningsgrunnlag: Beregningsgrunnlag? = null,
     val beløp: BigDecimal,
@@ -27,20 +29,20 @@ data class Beregningsgrunnlag(
 )
 
 data class Grunnbeløp(
-    val periode: Periode,
+    val periode: Datoperiode,
     val grunnbeløp: BigDecimal,
     val perMnd: BigDecimal,
     val gjennomsnittPerÅr: BigDecimal? = null
 )
 
-fun finnGrunnbeløpsPerioder(periode: Periode): List<Beløpsperiode> {
+fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
     return grunnbeløpsperioder
-        .filter { it.periode.overlapper(periode) }
+        .filter { it.periode.overlapper(periode.toDatoperiode()) }
         .map {
             Beløpsperiode(
-                fellesperiode = Periode(
-                    fomDato = maxOf(it.periode.fomDato, periode.fomDato),
-                    tomDato = minOf(it.periode.tomDato, periode.tomDato)
+                fellesperiode = Datoperiode(
+                    fom = maxOf(it.periode.fom, periode.fomDato),
+                    tom = minOf(it.periode.tom, periode.tomDato)
                 ),
                 beløp = it.grunnbeløp,
                 beløpFørSamordning = it.grunnbeløp
@@ -54,11 +56,11 @@ fun finnGrunnbeløp(dato: LocalDate) = grunnbeløpsperioder.find {
 } ?: error("Grunnbeløp finnes ikke for dato $dato")
 
 // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?
-// TODO: tomDato må være siste dag i måneden
+// TODO: tilDato må være siste dag i måneden
 val grunnbeløpsperioder: List<Grunnbeløp> =
     listOf(
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2022-05-01"),
                 LocalDate.MAX
             ),
@@ -67,7 +69,7 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             gjennomsnittPerÅr = 109_784.toBigDecimal()
         ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2021-05-01"),
                 LocalDate.parse("2022-04-30")
             ),
@@ -76,7 +78,7 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             gjennomsnittPerÅr = 104_716.toBigDecimal()
         ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2020-05-01"),
                 LocalDate.parse("2021-04-30")
             ),
@@ -85,7 +87,7 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             gjennomsnittPerÅr = 100_853.toBigDecimal()
         ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2019-05-01"),
                 LocalDate.parse("2020-04-30")
             ),
@@ -93,9 +95,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 8_322.toBigDecimal(),
             gjennomsnittPerÅr = 98_866.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2018-05-01"),
                 LocalDate.parse("2019-04-30")
             ),
@@ -104,7 +106,7 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             gjennomsnittPerÅr = 95_800.toBigDecimal(),
         ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2017-05-01"),
                 LocalDate.parse("2018-04-30")
             ),
@@ -112,9 +114,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 7_803.toBigDecimal(),
             gjennomsnittPerÅr = 93_281.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2016-05-01"),
                 LocalDate.parse("2017-04-30")
             ),
@@ -122,9 +124,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 7_715.toBigDecimal(),
             gjennomsnittPerÅr = 91_740.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2015-05-01"),
                 LocalDate.parse("2016-04-30")
             ),
@@ -132,9 +134,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 7_506.toBigDecimal(),
             gjennomsnittPerÅr = 89_502.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2014-05-01"),
                 LocalDate.parse("2015-04-30")
             ),
@@ -142,9 +144,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 7_364.toBigDecimal(),
             gjennomsnittPerÅr = 87_328.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2013-05-01"),
                 LocalDate.parse("2014-04-30")
             ),
@@ -152,9 +154,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 7_104.toBigDecimal(),
             gjennomsnittPerÅr = 84_204.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2012-05-01"),
                 LocalDate.parse("2013-04-30")
             ),
@@ -162,9 +164,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 6_844.toBigDecimal(),
             gjennomsnittPerÅr = 81_153.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2011-05-01"),
                 LocalDate.parse("2012-04-30")
             ),
@@ -172,9 +174,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 6_601.toBigDecimal(),
             gjennomsnittPerÅr = 78_024.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2010-05-01"),
                 LocalDate.parse("2011-04-30")
             ),
@@ -182,9 +184,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 6_303.toBigDecimal(),
             gjennomsnittPerÅr = 74_721.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2009-05-01"),
                 LocalDate.parse("2010-04-30")
             ),
@@ -192,9 +194,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 6_073.toBigDecimal(),
             gjennomsnittPerÅr = 72_006.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2008-05-01"),
                 LocalDate.parse("2009-04-30")
             ),
@@ -202,9 +204,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 5_855.toBigDecimal(),
             gjennomsnittPerÅr = 69_108.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2007-05-01"),
                 LocalDate.parse("2008-04-30")
             ),
@@ -212,9 +214,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 5_568.toBigDecimal(),
             gjennomsnittPerÅr = 65_505.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2006-05-01"),
                 LocalDate.parse("2007-04-30")
             ),
@@ -222,9 +224,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 5_241.toBigDecimal(),
             gjennomsnittPerÅr = 62_161.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2005-05-01"),
                 LocalDate.parse("2006-04-30")
             ),
@@ -232,9 +234,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 5_058.toBigDecimal(),
             gjennomsnittPerÅr = 60_059.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2004-05-01"),
                 LocalDate.parse("2005-04-30")
             ),
@@ -242,9 +244,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 4_898.toBigDecimal(),
             gjennomsnittPerÅr = 58_139.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2003-05-01"),
                 LocalDate.parse("2004-04-30")
             ),
@@ -252,9 +254,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 4_738.toBigDecimal(),
             gjennomsnittPerÅr = 55_964.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2002-05-01"),
                 LocalDate.parse("2003-04-30")
             ),
@@ -262,9 +264,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 4_514.toBigDecimal(),
             gjennomsnittPerÅr = 53_233.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2001-05-01"),
                 LocalDate.parse("2002-04-30")
             ),
@@ -272,9 +274,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 4_280.toBigDecimal(),
             gjennomsnittPerÅr = 50_603.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("2000-05-01"),
                 LocalDate.parse("2001-04-30")
             ),
@@ -282,9 +284,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 4_091.toBigDecimal(),
             gjennomsnittPerÅr = 48_377.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1999-05-01"),
                 LocalDate.parse("2000-04-30")
             ),
@@ -292,9 +294,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_913.toBigDecimal(),
             gjennomsnittPerÅr = 46_423.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1998-05-01"),
                 LocalDate.parse("1999-04-30")
             ),
@@ -302,9 +304,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_781.toBigDecimal(),
             gjennomsnittPerÅr = 44_413.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1997-05-01"),
                 LocalDate.parse("1998-04-30")
             ),
@@ -312,9 +314,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_542.toBigDecimal(),
             gjennomsnittPerÅr = 42_000.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1996-05-01"),
                 LocalDate.parse("1997-04-30")
             ),
@@ -322,9 +324,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_417.toBigDecimal(),
             gjennomsnittPerÅr = 40_410.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1995-05-01"),
                 LocalDate.parse("1996-04-30")
             ),
@@ -332,9 +334,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_269.toBigDecimal(),
             gjennomsnittPerÅr = 38_847.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1994-05-01"),
                 LocalDate.parse("1995-04-30")
             ),
@@ -342,9 +344,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_173.toBigDecimal(),
             gjennomsnittPerÅr = 37_820.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1993-05-01"),
                 LocalDate.parse("1994-04-30")
             ),
@@ -352,9 +354,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_108.toBigDecimal(),
             gjennomsnittPerÅr = 37_033.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1992-05-01"),
                 LocalDate.parse("1993-04-30")
             ),
@@ -362,9 +364,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 3_042.toBigDecimal(),
             gjennomsnittPerÅr = 36_167.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1991-05-01"),
                 LocalDate.parse("1992-04-30")
             ),
@@ -372,9 +374,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_958.toBigDecimal(),
             gjennomsnittPerÅr = 35_033.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1990-12-01"),
                 LocalDate.parse("1991-04-30")
             ),
@@ -382,18 +384,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_842.toBigDecimal(),
             gjennomsnittPerÅr = 33_575.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1990-05-01"),
                 LocalDate.parse("1990-11-30")
             ),
             grunnbeløp = 34_000.toBigDecimal(),
             perMnd = 2_833.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1989-04-01"),
                 LocalDate.parse("1990-04-30")
             ),
@@ -401,9 +403,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_725.toBigDecimal(),
             gjennomsnittPerÅr = 32_275.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1988-04-01"),
                 LocalDate.parse("1989-03-31")
             ),
@@ -411,18 +413,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_583.toBigDecimal(),
             gjennomsnittPerÅr = 30_850.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1988-01-01"),
                 LocalDate.parse("1988-03-31")
             ),
             grunnbeløp = 30_400.toBigDecimal(),
             perMnd = 2_533.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1987-05-01"),
                 LocalDate.parse("1987-12-31")
             ),
@@ -430,9 +432,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_492.toBigDecimal(),
             gjennomsnittPerÅr = 29_267.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1986-05-01"),
                 LocalDate.parse("1987-04-30")
             ),
@@ -440,18 +442,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_333.toBigDecimal(),
             gjennomsnittPerÅr = 27_433.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1986-01-01"),
                 LocalDate.parse("1986-04-30")
             ),
             grunnbeløp = 26_300.toBigDecimal(),
             perMnd = 2_192.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1985-05-01"),
                 LocalDate.parse("1985-12-31")
             ),
@@ -459,9 +461,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_158.toBigDecimal(),
             gjennomsnittPerÅr = 25_333.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1984-05-01"),
                 LocalDate.parse("1985-04-30")
             ),
@@ -469,9 +471,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 2_017.toBigDecimal(),
             gjennomsnittPerÅr = 23_667.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1983-05-01"),
                 LocalDate.parse("1984-04-30")
             ),
@@ -479,18 +481,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_883.toBigDecimal(),
             gjennomsnittPerÅr = 22_333.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1983-01-01"),
                 LocalDate.parse("1983-04-30")
             ),
             grunnbeløp = 21_800.toBigDecimal(),
             perMnd = 1_817.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1982-05-01"),
                 LocalDate.parse("1982-12-31")
             ),
@@ -498,9 +500,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_767.toBigDecimal(),
             gjennomsnittPerÅr = 20_667.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1981-10-01"),
                 LocalDate.parse("1982-04-30")
             ),
@@ -508,27 +510,27 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_633.toBigDecimal(),
             gjennomsnittPerÅr = 18_658.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1981-05-01"),
                 LocalDate.parse("1981-09-30")
             ),
             grunnbeløp = 19_100.toBigDecimal(),
             perMnd = 1_592.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1981-01-01"),
                 LocalDate.parse("1981-04-30")
             ),
             grunnbeløp = 17_400.toBigDecimal(),
             perMnd = 1_450.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1980-05-01"),
                 LocalDate.parse("1980-12-31")
             ),
@@ -536,18 +538,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_408.toBigDecimal(),
             gjennomsnittPerÅr = 16_633.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1980-01-01"),
                 LocalDate.parse("1980-04-30")
             ),
             grunnbeløp = 16_100.toBigDecimal(),
             perMnd = 1_342.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1979-01-01"),
                 LocalDate.parse("1979-12-31")
             ),
@@ -555,9 +557,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_267.toBigDecimal(),
             gjennomsnittPerÅr = 15_200.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1978-07-01"),
                 LocalDate.parse("1978-12-31")
             ),
@@ -565,9 +567,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_225.toBigDecimal(),
             gjennomsnittPerÅr = 14_550.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1977-12-01"),
                 LocalDate.parse("1978-06-30")
             ),
@@ -575,27 +577,27 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_200.toBigDecimal(),
             gjennomsnittPerÅr = 13_383.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1977-05-01"),
                 LocalDate.parse("1977-11-30")
             ),
             grunnbeløp = 13_400.toBigDecimal(),
             perMnd = 1_117.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1977-01-01"),
                 LocalDate.parse("1977-04-30")
             ),
             grunnbeløp = 13_100.toBigDecimal(),
             perMnd = 1_092.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1976-05-01"),
                 LocalDate.parse("1976-12-31")
             ),
@@ -603,18 +605,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 1_008.toBigDecimal(),
             gjennomsnittPerÅr = 12_000.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1976-01-01"),
                 LocalDate.parse("1976-04-30")
             ),
             grunnbeløp = 11_800.toBigDecimal(),
             perMnd = 983.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1975-05-01"),
                 LocalDate.parse("1975-12-31")
             ),
@@ -622,18 +624,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 917.toBigDecimal(),
             gjennomsnittPerÅr = 10_800.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1975-01-01"),
                 LocalDate.parse("1975-04-30")
             ),
             grunnbeløp = 10_400.toBigDecimal(),
             perMnd = 867.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1974-05-01"),
                 LocalDate.parse("1974-12-31")
             ),
@@ -641,18 +643,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 808.toBigDecimal(),
             gjennomsnittPerÅr = 9_533.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1974-01-01"),
                 LocalDate.parse("1974-04-30")
             ),
             grunnbeløp = 9_200.toBigDecimal(),
             perMnd = 767.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1973-01-01"),
                 LocalDate.parse("1973-12-31")
             ),
@@ -660,9 +662,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 708.toBigDecimal(),
             gjennomsnittPerÅr = 8_500.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1972-01-01"),
                 LocalDate.parse("1972-12-31")
             ),
@@ -670,9 +672,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 658.toBigDecimal(),
             gjennomsnittPerÅr = 7_900.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1971-05-01"),
                 LocalDate.parse("1971-12-31")
             ),
@@ -680,18 +682,18 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 625.toBigDecimal(),
             gjennomsnittPerÅr = 7_400.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1971-01-01"),
                 LocalDate.parse("1971-04-30")
             ),
             grunnbeløp = 7_200.toBigDecimal(),
             perMnd = 600.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1970-01-01"),
                 LocalDate.parse("1970-12-31")
             ),
@@ -699,9 +701,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 567.toBigDecimal(),
             gjennomsnittPerÅr = 6_800.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1969-01-01"),
                 LocalDate.parse("1969-12-31")
             ),
@@ -709,9 +711,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 533.toBigDecimal(),
             gjennomsnittPerÅr = 6_400.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1968-01-01"),
                 LocalDate.parse("1968-12-31")
             ),
@@ -719,9 +721,9 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
             perMnd = 492.toBigDecimal(),
             gjennomsnittPerÅr = 5_900.toBigDecimal(),
 
-            ),
+        ),
         Grunnbeløp(
-            Periode(
+            Datoperiode(
                 LocalDate.parse("1967-01-01"),
                 LocalDate.parse("1967-12-31")
             ),
@@ -733,4 +735,4 @@ val grunnbeløpsperioder: List<Grunnbeløp> =
 
 val nyesteGrunnbeløp = grunnbeløpsperioder.maxByOrNull { it.periode }!!
 
-val nyesteGrunnbeløpGyldigFraOgMed = nyesteGrunnbeløp.periode.fomDato
+val nyesteGrunnbeløpGyldigFraOgMed = nyesteGrunnbeløp.periode.fom

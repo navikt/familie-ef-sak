@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -17,24 +17,24 @@ data class Inntektsperiode(
 ) {
 
     constructor(
-        periode: Periode,
+        periode: Månedsperiode,
         inntekt: BigDecimal,
         samordningsfradrag: BigDecimal
     ) : this(
-        periode.fomDato,
-        periode.tomDato,
+        periode.fom.atDay(1),
+        periode.tom.atEndOfMonth(),
         inntekt,
         samordningsfradrag
     )
 
-    val periode get() = Periode(startDato, sluttDato)
+    val periode get() = Månedsperiode(startDato, sluttDato)
 }
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
     Inntektsperiode(
         inntekt = inntektsperiode.forventetInntekt ?: BigDecimal.ZERO,
         samordningsfradrag = inntektsperiode.samordningsfradrag ?: BigDecimal.ZERO,
-        periode = Periode(
+        periode = Månedsperiode(
             inntektsperiode.årMånedFra,
             if (index < this.lastIndex && this.size > 1)
                 this[index + 1].årMånedFra.minusMonths(1) else YearMonth.from(LocalDate.MAX)
@@ -46,6 +46,6 @@ fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
     Inntekt(
         forventetInntekt = inntektsperiode.inntekt,
         samordningsfradrag = inntektsperiode.samordningsfradrag,
-        årMånedFra = inntektsperiode.periode.fomMåned
+        årMånedFra = inntektsperiode.periode.fom
     )
 }

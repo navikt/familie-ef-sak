@@ -7,7 +7,7 @@ object AndelHistorikkUtil {
             val last = acc.lastOrNull()
             if (last != null && harSammeVerdi(last, entry)) {
                 acc.removeLast()
-                acc.add(last.copy(andel = last.andel.copy(stønadTil = entry.andel.stønadTil, periode = last.andel.periode.copy(tomDato = entry.andel.periode.tomDato))))
+                acc.add(last.copy(andel = last.andel.copy(stønadTil = entry.andel.stønadTil, periode = last.andel.periode.copy(tom = entry.andel.periode.tom))))
             } else {
                 acc.add(entry)
             }

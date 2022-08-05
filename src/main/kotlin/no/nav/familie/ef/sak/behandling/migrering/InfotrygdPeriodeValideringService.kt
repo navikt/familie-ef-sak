@@ -61,7 +61,7 @@ class InfotrygdPeriodeValideringService(
         kjøremåned: YearMonth
     ): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = perioder.summert
-        val perioderFremITiden = gjeldendePerioder.filter { it.stønadTom >= kjøremåned.atDay(1) }
+        val perioderFremITiden = gjeldendePerioder.filter { it.stønadsperiode.tom >= kjøremåned.atDay(1) }
         if (perioderFremITiden.isNotEmpty()) {
             return gjeldendePeriodeFremITiden(perioderFremITiden, kjøremåned)
         }
@@ -79,7 +79,7 @@ class InfotrygdPeriodeValideringService(
                 MigreringExceptionType.MANGLER_PERIODER_MED_BELØP
             )
         }
-        val sistePeriode = perioderMedBeløp.maxByOrNull { it.stønadFom } ?: error("Finner ikke noen perioder")
+        val sistePeriode = perioderMedBeløp.maxByOrNull { it.stønadsperiode.fom } ?: error("Finner ikke noen perioder")
 
         return sisteMånedenPåPeriodeBakITiden(sistePeriode)
     }
@@ -101,7 +101,7 @@ class InfotrygdPeriodeValideringService(
         val periode = gjeldendePerioder.single()
         validerFomDato(periode)
         validerTomDato(periode)
-        return periode.copy(stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom), stønadsperiode = periode.stønadsperiode.copy(fomDato = maxOf(kjøremåned.atDay(1), periode.stønadsperiode.fomDato)))
+        return periode.copy(stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom), stønadsperiode = periode.stønadsperiode.copy(fom = maxOf(kjøremåned.atDay(1), periode.stønadsperiode.fom)))
     }
 
     private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> {
@@ -145,7 +145,7 @@ class InfotrygdPeriodeValideringService(
      */
     private fun sisteMånedenPåPeriodeBakITiden(periode: SummertInfotrygdPeriodeDto): SummertInfotrygdPeriodeDto {
         val stønadTom = periode.stønadTom
-        val stønadFom = periode.stønadsperiode.fomDato
+        val stønadFom = periode.stønadsperiode.fom
         val tomMåned = periode.stønadsperiode.tomMåned
         val nyFomDato = tomMåned.atDay(1)
         validerTomDato(periode)
@@ -161,20 +161,20 @@ class InfotrygdPeriodeValideringService(
                 MigreringExceptionType.BELØP_0
             )
         }
-        return periode.copy(stønadFom = YearMonth.of(stønadTom.year, stønadTom.month).atDay(1), stønadsperiode = periode.stønadsperiode.copy(fomDato = nyFomDato))
+        return periode.copy(stønadFom = YearMonth.of(stønadTom.year, stønadTom.month).atDay(1), stønadsperiode = periode.stønadsperiode.copy(fom = nyFomDato))
     }
 
     private fun validerFomDato(periode: SummertInfotrygdPeriodeDto) {
-        if (periode.stønadsperiode.fomDato.dayOfMonth != 1) {
+        if (periode.stønadsperiode.fom.dayOfMonth != 1) {
             throw MigreringException(
-                "Startdato er annet enn første i måneden, dato=${periode.stønadFom}",
+                "Startdato er annet enn første i måneden, dato=${periode.stønadsperiode.fom}",
                 MigreringExceptionType.FEIL_FOM_DATO
             )
         }
     }
 
     private fun validerTomDato(periode: SummertInfotrygdPeriodeDto) {
-        val dato = periode.stønadsperiode.tomDato
+        val dato = periode.stønadsperiode.tom
         if (YearMonth.of(dato.year, dato.month).atEndOfMonth() != dato) {
             throw MigreringException(
                 "Sluttdato er annet enn siste i måneden, dato=$dato",

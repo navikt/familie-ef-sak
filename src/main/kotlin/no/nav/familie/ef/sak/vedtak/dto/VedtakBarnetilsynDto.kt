@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import java.time.YearMonth
 import java.util.UUID
@@ -27,7 +27,7 @@ data class TilleggsstønadDto(
 data class PeriodeMedBeløpDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode!", ReplaceWith("periode")) val årMånedTil: YearMonth? = null,
-    val periode: Periode = Periode(
+    val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")
     ),
@@ -37,7 +37,7 @@ data class PeriodeMedBeløpDto(
 data class UtgiftsperiodeDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.fomMåned")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode!", ReplaceWith("periode.tomMåned")) val årMånedTil: YearMonth? = null,
-    val periode: Periode = Periode(
+    val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")
     ),
@@ -46,7 +46,7 @@ data class UtgiftsperiodeDto(
     val erMidlertidigOpphør: Boolean
 )
 
-fun List<UtgiftsperiodeDto>.tilPerioder(): List<Periode> = this.map(UtgiftsperiodeDto::periode)
+fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
 
 fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = map(UtgiftsperiodeDto::periode).erSammenhengende()
 
@@ -99,6 +99,6 @@ fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
     SanksjonertPeriodeDto(
         årMånedFra = YearMonth.from(datoFra),
         årMånedTil = YearMonth.from(datoTil),
-        fomMåned = YearMonth.from(datoFra),
-        tomMåned = YearMonth.from(datoTil)
+        fom = YearMonth.from(datoFra),
+        tom = YearMonth.from(datoTil)
     )

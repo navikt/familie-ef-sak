@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -65,7 +66,7 @@ class VedtakService(
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
         if (vedtak?.erVedtakAktivtForDato(dato) == true) {
             return vedtak.inntekter?.inntekter?.firstOrNull {
-                it.periode.inneholder(dato)
+                it.periode.inneholder(YearMonth.from(dato))
             }?.inntekt?.toInt()
         }
 
@@ -85,12 +86,12 @@ class VedtakService(
     private fun createForventetInntektForBehandling(vedtak: Vedtak): ForventetInntektForBehandling {
         return ForventetInntektForBehandling(
             vedtak.behandlingId,
-            createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(1)),
-            createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(2))
+            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(1)),
+            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(2))
         )
     }
 
-    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: LocalDate): Int? {
+    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: YearMonth): Int? {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
         return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
             it.periode.inneholder(forventetInntektForDato)
@@ -120,5 +121,5 @@ data class ForventetInntektForPersonIdent(
 )
 
 fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
-    it.periode.inneholder(dato)
+    it.periode.inneholder(YearMonth.from(dato))
 } ?: false

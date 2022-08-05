@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.harOverlappende
 import org.springframework.stereotype.Service
 import java.time.Month
@@ -48,7 +48,7 @@ class BeregningBarnetilsynService {
         brukerfeilHvis(tilleggsstønadsperioder.any { it.beløp > 20000 }) { "Tilleggsstønad større enn 20000 støttes ikke" }
     }
 
-    fun List<PeriodeMedBeløpDto>.tilPerioder(): List<Periode> =
+    fun List<PeriodeMedBeløpDto>.tilPerioder(): List<Månedsperiode> =
         this.map {
             it.periode
         }
@@ -93,7 +93,7 @@ class BeregningBarnetilsynService {
         }
     }
 
-    private fun harUrelevantReduksjonsPeriode(utgiftsperioder: List<Periode>, reduksjonsperioder: List<Periode>): Boolean {
+    private fun harUrelevantReduksjonsPeriode(utgiftsperioder: List<Månedsperiode>, reduksjonsperioder: List<Månedsperiode>): Boolean {
         return reduksjonsperioder.isNotEmpty() && !reduksjonsperioder.any {
             utgiftsperioder.any { ut ->
                 ut.overlapper(it)
@@ -102,8 +102,8 @@ class BeregningBarnetilsynService {
     }
 }
 
-private fun List<Periode>.harPeriodeFør(årMåned: YearMonth): Boolean {
-    return this.any { it.fomMåned < årMåned }
+private fun List<Månedsperiode>.harPeriodeFør(årMåned: YearMonth): Boolean {
+    return this.any { it.fom < årMåned }
 }
 
 fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =

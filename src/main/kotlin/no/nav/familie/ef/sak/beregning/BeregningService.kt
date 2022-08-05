@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
 import no.nav.familie.kontrakter.felles.harOverlappende
 import org.springframework.stereotype.Service
@@ -10,7 +10,7 @@ import java.math.BigDecimal
 @Service
 class BeregningService {
 
-    fun beregnYtelse(vedtaksperioder: List<Periode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
+    fun beregnYtelse(vedtaksperioder: List<Månedsperiode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
 
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
@@ -22,13 +22,13 @@ class BeregningService {
         }
     }
 
-    private fun validerVedtaksperioder(vedtaksperioder: List<Periode>) {
+    private fun validerVedtaksperioder(vedtaksperioder: List<Månedsperiode>) {
         brukerfeilHvis(
             vedtaksperioder.harOverlappende()
         ) { "Vedtaksperioder $vedtaksperioder overlapper" }
     }
 
-    private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperioder: List<Periode>) {
+    private fun validerInnteksperioder(inntektsperioder: List<Inntektsperiode>, vedtaksperioder: List<Månedsperiode>) {
         brukerfeilHvis(inntektsperioder.isEmpty()) {
             "Inntektsperioder kan ikke være tom liste"
         }

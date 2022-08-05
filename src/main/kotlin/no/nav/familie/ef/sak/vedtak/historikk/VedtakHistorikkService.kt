@@ -53,7 +53,7 @@ class VedtakHistorikkService(
                 VedtaksperiodeDto(
                     it.andel.periode.fomMåned,
                     it.andel.periode.tomMåned,
-                    it.andel.periode,
+                    it.andel.periode.toMånedsperiode(),
                     it.aktivitet ?: error("Mangler aktivitet data=$it"),
                     it.periodeType ?: error("Mangler periodetype data=$it")
                 )
@@ -80,16 +80,16 @@ class VedtakHistorikkService(
     private fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
         return andelsHistorikkService.hentHistorikk(fagsakId, null)
             .filter { it.erIkkeFjernet() }
-            .sortedBy { it.andel.stønadFra }
+            .sortedBy { it.andel.periode.fom }
     }
 
     private fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
         val dato = fra.atDay(1)
         return this.mapNotNull {
-            if (it.andel.periode.fomDato >= dato) {
+            if (it.andel.periode.fom >= dato) {
                 it
-            } else if (it.andel.periode.tomDato > dato) {
-                it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fomDato = dato), stønadFra = dato))
+            } else if (it.andel.periode.tom > dato) {
+                it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fom = dato), stønadFra = dato))
             } else {
                 null
             }

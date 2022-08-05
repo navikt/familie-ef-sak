@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.infotrygd.InternPeriode
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde.EF
@@ -41,7 +41,7 @@ class PerioderForBarnetrygdService(
             .sortedByDescending { it.fomDato }
 }
 
-private fun PeriodeOvergangsstønad.tilPeriode(): Periode = Periode(this.fomDato, this.tomDato)
+private fun PeriodeOvergangsstønad.tilPeriode(): Datoperiode = Datoperiode(this.fomDato, this.tomDato)
 private fun PeriodeOvergangsstønad.omsluttesAv(annen: PeriodeOvergangsstønad): Boolean =
     this.tilPeriode().omsluttesAv(annen.tilPeriode())
 

@@ -49,7 +49,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
@@ -241,8 +241,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.stønadFom).isEqualTo(sluttMåned)
         assertThat(migreringInfo.stønadTom).isEqualTo(sluttMåned)
-        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(sluttMåned)
-        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(sluttMåned)
+        assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(sluttMåned)
+        assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(sluttMåned)
     }
 
     @Test
@@ -293,8 +293,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
         assertThat(migreringInfo.kanMigreres).isTrue
-        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(YearMonth.now())
-        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(YearMonth.now())
+        assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(YearMonth.now())
+        assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(YearMonth.now())
     }
 
     @Test
@@ -319,8 +319,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId, kjøremåned)
 
         assertThat(migreringInfo.kanMigreres).isTrue
-        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(månedenFør)
-        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(månedenFør)
+        assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(månedenFør)
+        assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(månedenFør)
         assertThat(migreringInfo.beløpsperioder?.first()?.beløp?.toInt()).isEqualTo(19949)
     }
 
@@ -368,8 +368,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentMigreringInfo - har perioder til og med neste måned i infotrygd`() {
         val nå = YearMonth.of(2021, 1)
         val stønadFom = nå.minusMonths(1).atDay(1)
-        val stønadTomMåned = nå.plusMonths(3)
-        val stønadTom = stønadTomMåned.atEndOfMonth()
+        val stønadtom = nå.plusMonths(3)
+        val stønadTom = stønadtom.atEndOfMonth()
         val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             stønadFom = stønadFom,
             stønadTom = stønadTom,
@@ -384,18 +384,18 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.årsak).isNull()
-        assertThat(migreringInfo.stønadsperiode?.fomMåned).isEqualTo(nå)
-        assertThat(migreringInfo.stønadsperiode?.tomMåned).isEqualTo(stønadTomMåned)
+        assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(nå)
+        assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(stønadtom)
         assertThat(migreringInfo.stønadFom).isEqualTo(nå)
-        assertThat(migreringInfo.stønadTom).isEqualTo(stønadTomMåned)
+        assertThat(migreringInfo.stønadTom).isEqualTo(stønadtom)
         assertThat(migreringInfo.inntektsgrunnlag).isEqualTo(10)
         assertThat(migreringInfo.samordningsfradrag).isEqualTo(5)
         assertThat(migreringInfo.beløpsperioder).hasSize(1)
 
         val beløpsperiode = migreringInfo.beløpsperioder!![0]
         assertThat(beløpsperiode.beløp.toInt()).isEqualTo(18998)
-        assertThat(beløpsperiode.fellesperiode.fomDato).isEqualTo(nå.atDay(1))
-        assertThat(beløpsperiode.fellesperiode.tomDato).isEqualTo(stønadTom)
+        assertThat(beløpsperiode.fellesperiode.fom).isEqualTo(nå.atDay(1))
+        assertThat(beløpsperiode.fellesperiode.tom).isEqualTo(stønadTom)
     }
 
     @Test
@@ -694,7 +694,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val vedtaksperiode = VedtaksperiodeDto(
             årMånedFra = migrerFraDato,
             årMånedTil = til,
-            periode = Periode(migrerFraDato, til),
+            periode = Månedsperiode(migrerFraDato, til),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.HOVEDPERIODE
         )
@@ -743,7 +743,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
             migreringService.opprettMigrering(
                 fagsak,
-                Periode(migrerFraDato, migrerTilDato),
+                Månedsperiode(migrerFraDato, migrerTilDato),
                 inntektsgrunnlag.toInt(),
                 samordningsfradrag.toInt(),
                 erReellArbeidssøker = erReellArbeidssøker

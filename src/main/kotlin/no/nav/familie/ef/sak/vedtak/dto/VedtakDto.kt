@@ -24,7 +24,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
-import no.nav.familie.kontrakter.felles.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.YearMonth
@@ -99,11 +99,11 @@ data class Sanksjonert(
 data class SanksjonertPeriodeDto(
     @Deprecated("Bruk fomMåned", ReplaceWith("fomMåned")) val årMånedFra: YearMonth,
     @Deprecated("Bruk tomMåned", ReplaceWith("tomMåned")) val årMånedTil: YearMonth,
-    val fomMåned: YearMonth = årMånedFra,
-    val tomMåned: YearMonth = årMånedTil
+    val fom: YearMonth = årMånedFra,
+    val tom: YearMonth = årMånedTil
 ) {
 
-    fun tilPeriode() = Periode(fomMåned, tomMåned)
+    fun tilPeriode() = Månedsperiode(fom, tom)
 }
 
 fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak = when (this) {

@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
-import no.nav.familie.kontrakter.felles.Periode
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -81,7 +80,7 @@ data class UnderUtdanningDto(
 
 data class UtdanningDto(
     val linjeKursGrad: String,
-    val nårVarSkalDuVæreElevStudent: Periode
+    val nårVarSkalDuVæreElevStudent: PeriodeDto
 )
 
 data class SituasjonDto(
