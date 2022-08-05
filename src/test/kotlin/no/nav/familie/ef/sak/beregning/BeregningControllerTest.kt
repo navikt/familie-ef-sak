@@ -83,7 +83,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         )
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
-        assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
+        assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
     }
 
     @Test
@@ -99,7 +99,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
-        assertThat(respons.body.frontendFeilmelding)
+        assertThat(respons.body?.frontendFeilmelding)
             .isEqualTo("Kan ikke fullføre en behandling med resultat innvilget hvis ikke alle vilkår er oppfylt")
     }
 
@@ -110,7 +110,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
         val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<Beløpsperiode>>> =
             hentBeløpsperioderForBehandling(behandling.id)
-        val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
+        val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body?.data
         assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.fom).isEqualTo(LocalDate.of(2022, 1, 1))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.fellesperiode?.tom).isEqualTo(LocalDate.of(2022, 4, 30))
@@ -119,7 +119,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(BigDecimal(10_000))
 
         val responsRevurdering: ResponseEntity<Ressurs<List<Beløpsperiode>>> = hentBeløpsperioderForBehandling(revurdering.id)
-        val beløpsperioderRevurdering = responsRevurdering.body.data
+        val beløpsperioderRevurdering = responsRevurdering.body?.data
         assertThat(beløpsperioderRevurdering).hasSize(1)
         assertThat(beløpsperioderRevurdering?.first()?.fellesperiode?.fom).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(beløpsperioderRevurdering?.first()?.fellesperiode?.tom).isEqualTo(LocalDate.of(2022, 6, 30))

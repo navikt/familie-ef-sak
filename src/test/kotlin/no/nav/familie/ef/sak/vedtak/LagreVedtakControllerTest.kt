@@ -83,11 +83,11 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(vedtakRespons.body.data).isNotNull
-        Assertions.assertThat(vedtakRespons.body.data?.resultatType).isEqualTo(ResultatType.INNVILGE)
-        Assertions.assertThat(vedtakRespons.body.data?._type).isEqualTo("InnvilgelseBarnetilsyn")
+        Assertions.assertThat(vedtakRespons.body?.data).isNotNull
+        Assertions.assertThat(vedtakRespons.body?.data?.resultatType).isEqualTo(ResultatType.INNVILGE)
+        Assertions.assertThat(vedtakRespons.body?.data?._type).isEqualTo("InnvilgelseBarnetilsyn")
     }
 
     @Test
@@ -132,11 +132,11 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(vedtakRespons.body.data).isNotNull
-        Assertions.assertThat(vedtakRespons.body.data?.resultatType).isEqualTo(ResultatType.INNVILGE_UTEN_UTBETALING)
-        Assertions.assertThat(vedtakRespons.body.data?._type).isEqualTo("InnvilgelseBarnetilsynUtenUtbetaling")
+        Assertions.assertThat(vedtakRespons.body?.data).isNotNull
+        Assertions.assertThat(vedtakRespons.body?.data?.resultatType).isEqualTo(ResultatType.INNVILGE_UTEN_UTBETALING)
+        Assertions.assertThat(vedtakRespons.body?.data?._type).isEqualTo("InnvilgelseBarnetilsynUtenUtbetaling")
     }
 
     @Test

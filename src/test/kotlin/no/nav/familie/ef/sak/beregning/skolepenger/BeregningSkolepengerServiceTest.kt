@@ -225,7 +225,7 @@ internal class BeregningSkolepengerServiceTest {
         }
 
         @Test
-        internal fun `studiebelastning må være 50-100%`() {
+        internal fun `studiebelastning må være 50-100 prosent`() {
             listOf(50, 51, 99, 100).forEach {
                 val perioder = listOf(delårsperiode(studiebelastning = it))
                 service.beregnYtelse(
@@ -236,7 +236,7 @@ internal class BeregningSkolepengerServiceTest {
         }
 
         @Test
-        internal fun `studiebelastning kan ikke være under 50%`() {
+        internal fun `studiebelastning kan ikke være under 50 prosent`() {
             val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(studiebelastning = 49)), listOf(utgift()))
             val skoleårsperioder = listOf(periode)
 
@@ -246,7 +246,7 @@ internal class BeregningSkolepengerServiceTest {
         }
 
         @Test
-        internal fun `studiebelastning må være under 101%`() {
+        internal fun `studiebelastning må være under 101 prosent`() {
             val periode = SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(studiebelastning = 101)), listOf(utgift()))
             val skoleårsperioder = listOf(periode)
 

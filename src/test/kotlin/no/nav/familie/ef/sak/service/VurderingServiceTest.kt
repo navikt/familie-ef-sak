@@ -139,7 +139,10 @@ internal class VurderingServiceTest {
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
-            { it.invocation.args.first() as List<Vilkårsvurdering> }
+            {
+                @Suppress("UNCHECKED_CAST")
+                it.invocation.args.first() as List<Vilkårsvurdering>
+            }
         val vilkår = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)

@@ -161,8 +161,8 @@ object VedtakDomeneParser {
         feilHvisIkke(perioder.size == 1) {
             "Antall rader for sanksjonering må være 1, per behandlingId"
         }
-        val periode = perioder.single()
-        /*feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
+        /*val periode = perioder.single()
+        feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
             "Sanksjon strekker seg ikke 1 måned: ${periode.datoFra} - ${periode.datoTil}"
         }*/
     }
