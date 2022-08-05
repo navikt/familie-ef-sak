@@ -27,7 +27,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.FEILET)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test
@@ -57,7 +57,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.FEILET)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
     @Test
@@ -100,6 +100,6 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
     }
 }

@@ -44,7 +44,7 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         val build = restTemplateBuilder.build()
         val customizers = RestTemplateBuilder::class.java.getDeclaredField("customizers")
         customizers.isAccessible = true
-        assertThat(customizers.get(restTemplateBuilder) as Set<Any>).isEmpty()
+        assertThat(customizers.get(restTemplateBuilder) as Set<*>).isEmpty()
         assertThat(catchThrowable { build.getForEntity<String>("http://microsoft") })
             .hasMessageContaining(
                 "I/O error on GET request for \"http://microsoft\": " +
