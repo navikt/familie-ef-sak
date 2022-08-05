@@ -142,37 +142,6 @@ internal class PeriodeServiceTest {
     }
 
     @Test
-    internal fun `skal filtrere vekk perioder som er annulert eller uaktuelle`() {
-        mockBehandling()
-        mockTilkjentYtelse(LocalDate.MAX)
-        mockReplika(
-            listOf(
-                lagInfotrygdPeriode(
-                    stønadFom = LocalDate.parse("2021-01-01"),
-                    stønadTom = LocalDate.parse("2021-01-02"),
-                    beløp = 1,
-                    kode = InfotrygdEndringKode.ANNULERT
-                ),
-                lagInfotrygdPeriode(
-                    stønadFom = LocalDate.parse("2021-02-01"),
-                    stønadTom = LocalDate.parse("2021-02-02"),
-                    beløp = 2
-                ),
-                lagInfotrygdPeriode(
-                    stønadFom = LocalDate.parse("2021-03-01"),
-                    stønadTom = LocalDate.parse("2021-03-02"),
-                    beløp = 3,
-                    kode = InfotrygdEndringKode.UAKTUELL
-                )
-            )
-        )
-        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
-
-        assertThat(perioder).hasSize(1)
-        assertThat(perioder[0].månedsbeløp).isEqualTo(2)
-    }
-
-    @Test
     internal fun `skal endre tom-datoer på overlappende perioder tvers fagsystem`() {
         val periode1fom = LocalDate.of(2021, 1, 1)
         val periode1tom = LocalDate.of(2021, 1, 31)

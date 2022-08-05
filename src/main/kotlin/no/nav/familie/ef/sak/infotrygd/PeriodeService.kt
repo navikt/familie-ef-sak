@@ -44,7 +44,8 @@ class PeriodeService(
 
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
         val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
-        val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad
+        val perioderFraReplika =
+            infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad.sortedByDescending { it.stønadFom }
         val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD)
 
         return slåSammenPerioder(perioderFraEf, perioderFraReplika)
