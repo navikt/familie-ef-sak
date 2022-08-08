@@ -27,7 +27,7 @@ class KonsistensavstemmingTask(
 
     override fun doTask(task: Task) {
         val payload = objectMapper.readValue<KonsistensavstemmingPayload>(task.payload)
-        avstemmingService.konsistensavstemOppdrag(payload.stønadstype, payload.datoForAvstemming)
+        avstemmingService.konsistensavstemOppdrag(payload.stønadstype, LocalDateTime.now())
     }
 
     companion object {

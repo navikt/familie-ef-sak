@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
@@ -122,6 +123,20 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
     )
     fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
 
+    @Query(
+        """
+        SELECT b.*, be.id AS eksternid_id
+        FROM behandling b
+        JOIN behandling_ekstern be ON b.id = be.behandling_id
+        JOIN fagsak f on b.fagsak_id = f.id 
+        WHERE f.fagsak_person_id = :fagsakPersonId
+         AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT')
+         AND b.status = 'FERDIGSTILT'
+        ORDER BY b.opprettet_tid DESC
+    """
+    )
+    fun finnBehandlingForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
+
     fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 
     // language=PostgreSQL
@@ -161,4 +176,17 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         personidenter: Collection<String>,
         stønadstype: StønadType = StønadType.OVERGANGSSTØNAD
     ): List<Pair<String, UUID>>
+
+    // language=PostgreSQL
+    @Query(
+        """
+        SELECT b.*, f.stonadstype
+        FROM behandling b
+        JOIN fagsak f ON f.id = b.fagsak_id
+        WHERE NOT b.status = 'FERDIGSTILT'
+        AND b.opprettet_tid < :opprettetTidFør
+        AND f.stonadstype=:stønadstype
+        """
+    )
+    fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
 }

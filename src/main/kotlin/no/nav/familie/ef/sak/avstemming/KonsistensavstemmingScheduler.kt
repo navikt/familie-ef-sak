@@ -56,11 +56,11 @@ class KonsistensavstemmingService(
                 listOf(
                     KonsistensavstemmingTask.opprettTask(
                         KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerdato),
-                        triggerdato.atTime(8, 0)
+                        triggerdato.atTime(22, 0)
                     ),
                     KonsistensavstemmingTask.opprettTask(
                         KonsistensavstemmingPayload(StønadType.BARNETILSYN, triggerdato),
-                        triggerdato.atTime(8, 20)
+                        triggerdato.atTime(22, 20)
                     )
                 )
             )

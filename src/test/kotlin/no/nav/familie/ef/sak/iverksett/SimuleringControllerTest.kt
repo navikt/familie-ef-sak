@@ -68,9 +68,9 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
         val respons: ResponseEntity<Ressurs<Simuleringsoppsummering>> = simulerForBehandling(behandling.id)
 
         Assertions.assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(respons.body.status).isEqualTo(Ressurs.Status.SUKSESS)
-        Assertions.assertThat(respons.body.data).isNotNull()
-        Assertions.assertThat(respons.body.data?.perioder).hasSize(8)
+        Assertions.assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
+        Assertions.assertThat(respons.body?.data).isNotNull()
+        Assertions.assertThat(respons.body?.data?.perioder).hasSize(8)
         val simuleringsresultat = simuleringsresultatRepository.findByIdOrThrow(behandling.id)
 
         // Verifiser at simuleringsresultatet er lagret

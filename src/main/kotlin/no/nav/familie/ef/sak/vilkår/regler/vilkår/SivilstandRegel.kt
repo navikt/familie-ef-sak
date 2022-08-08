@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import java.util.UUID
 
 class SivilstandRegel : Vilkårsregel(
     vilkårType = VilkårType.SIVILSTAND,
@@ -35,7 +36,7 @@ class SivilstandRegel : Vilkårsregel(
     )
 ) {
 
-    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat): List<Delvilkårsvurdering> {
+    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat, barnId: UUID?): List<Delvilkårsvurdering> {
         val (sivilstandSøknad: Sivilstand?, sivilstandstype: Sivilstandstype) = metadata
 
         val hovedregel: RegelId = when {

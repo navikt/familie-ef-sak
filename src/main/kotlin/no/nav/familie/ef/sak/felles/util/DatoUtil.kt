@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.felles.util
 
+import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_NORSK
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -9,7 +10,10 @@ object DatoFormat {
 
     val DATE_FORMAT_ISO_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
     val YEAR_MONTH_FORMAT_NORSK = DateTimeFormatter.ofPattern("MM.yyyy")
+    val DATE_FORMAT_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 }
+
+fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
 
 fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now()
 

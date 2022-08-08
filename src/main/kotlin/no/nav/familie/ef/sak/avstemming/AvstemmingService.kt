@@ -8,7 +8,7 @@ import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingTilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -19,9 +19,9 @@ class AvstemmingService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun konsistensavstemOppdrag(stønadstype: StønadType, datoForAvstemming: LocalDate) {
-        val avstemmingstidspunkt = datoForAvstemming.atStartOfDay()
+    fun konsistensavstemOppdrag(stønadstype: StønadType, avstemmingstidspunkt: LocalDateTime) {
         val emptyDto = KonsistensavstemmingDto(stønadstype, emptyList(), avstemmingstidspunkt)
+        val datoForAvstemming = avstemmingstidspunkt.toLocalDate()
         val tilkjenteYtelser = tilkjentYtelseService
             .finnTilkjentYtelserTilKonsistensavstemming(datoForAvstemming = datoForAvstemming, stønadstype = stønadstype)
         val transaksjonId = UUID.randomUUID()

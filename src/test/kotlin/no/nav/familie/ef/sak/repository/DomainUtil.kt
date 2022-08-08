@@ -156,9 +156,10 @@ fun fagsak(
     id: UUID = UUID.randomUUID(),
     eksternId: EksternFagsakId = EksternFagsakId(),
     sporbar: Sporbar = Sporbar(),
-    migrert: Boolean = false
+    migrert: Boolean = false,
+    fagsakPersonId: UUID = UUID.randomUUID()
 ): Fagsak {
-    return fagsak(stønadstype, id, FagsakPerson(identer = identer), eksternId, sporbar, migrert = migrert)
+    return fagsak(stønadstype, id, FagsakPerson(id = fagsakPersonId, identer = identer), eksternId, sporbar, migrert = migrert)
 }
 
 fun fagsak(

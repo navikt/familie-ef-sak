@@ -74,6 +74,12 @@ object VedtakDomeneParser {
         }
     }
 
+    fun opphørSkolepengerUtenPerioder(behandlingId: UUID) = Vedtak(
+        resultatType = ResultatType.OPPHØRT,
+        skolepenger = SkolepengerWrapper(emptyList(), null),
+        behandlingId = behandlingId
+    )
+
     fun mapVedtakForSkolepenger(dataTable: DataTable): List<Vedtak> {
         val gyldigeKolonner = listOf(
             Domenebegrep.BEHANDLING_ID,
@@ -89,6 +95,7 @@ object VedtakDomeneParser {
         )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
             val perioder = when (vedtak.resultatType) {
+                ResultatType.OPPHØRT,
                 ResultatType.INNVILGE -> mapPerioderForSkolepenger(rader)
                 ResultatType.SANKSJONERE -> {
                     val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
@@ -153,8 +160,8 @@ object VedtakDomeneParser {
         feilHvisIkke(perioder.size == 1) {
             "Antall rader for sanksjonering må være 1, per behandlingId"
         }
-        val periode = perioder.single()
-        /*feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
+        /*val periode = perioder.single()
+        feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
             "Sanksjon strekker seg ikke 1 måned: ${periode.datoFra} - ${periode.datoTil}"
         }*/
     }

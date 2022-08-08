@@ -31,7 +31,8 @@ abstract class Vilkårsregel(
 
     open fun initereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
-        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL
+        resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+        barnId: UUID? = null
     ): List<Delvilkårsvurdering> {
         return hovedregler.map {
             Delvilkårsvurdering(

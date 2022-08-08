@@ -17,4 +17,4 @@ data class PdlPersonFraSøk(
 
 data class FolkeregisteridentifikatorFraSøk(val identifikasjonsnummer: String)
 
-data class PersonSøk(val sokPerson: PersonSøkResultat)
+data class PersonSøk(val sokPerson: PersonSøkResultat?)

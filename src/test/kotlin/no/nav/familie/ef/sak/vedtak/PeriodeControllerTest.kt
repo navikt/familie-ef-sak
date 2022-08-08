@@ -38,7 +38,7 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
                 HttpEntity(null, headers)
             )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
     @Test
@@ -53,6 +53,6 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
                 HttpEntity(null, headers)
             )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 }

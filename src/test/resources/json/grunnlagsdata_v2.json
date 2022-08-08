@@ -354,6 +354,12 @@
             "name" : "navn",
             "type" : "String",
             "nullable" : true
+          },
+          "områder" : {
+            "name" : "områder",
+            "type" : "Collection",
+            "fields" : { },
+            "nullable" : true
           }
         },
         "nullable" : false
