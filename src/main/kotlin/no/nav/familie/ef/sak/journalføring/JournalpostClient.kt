@@ -32,7 +32,7 @@ class JournalpostClient(
     @Qualifier("azure") restOperations: RestOperations,
     integrasjonerConfig: IntegrasjonerConfig
 ) :
-    AbstractPingableRestClient(restOperations, "oppgave") {
+    AbstractPingableRestClient(restOperations, "journalpost") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
