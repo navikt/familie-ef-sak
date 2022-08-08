@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.annenForelderFnr
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
