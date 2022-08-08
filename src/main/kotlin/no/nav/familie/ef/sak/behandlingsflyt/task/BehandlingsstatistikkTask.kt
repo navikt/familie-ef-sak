@@ -145,7 +145,6 @@ class BehandlingsstatistikkTask(
         return when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> søknadService.finnDatoMottattForSøknad(saksbehandling.id) ?: saksbehandling.opprettetTid
             REVURDERING -> saksbehandling.opprettetTid
-            else -> error("Støtter ikke uthenting av henvendelsestidspunkt for sak med ${saksbehandling.type}")
         }
     }
 

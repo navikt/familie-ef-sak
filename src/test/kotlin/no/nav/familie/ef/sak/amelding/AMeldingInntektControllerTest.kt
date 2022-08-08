@@ -40,7 +40,7 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal generere url til a-inntekt`() {
         val response = kallGenererUrl()
-        assertThat(response.body!!.getDataOrThrow()).isEqualTo("https://ainntekt")
+        assertThat(response.body?.getDataOrThrow()).isEqualTo("https://ainntekt")
     }
 
     private fun kallGenererUrl(): ResponseEntity<Ressurs<String>> =

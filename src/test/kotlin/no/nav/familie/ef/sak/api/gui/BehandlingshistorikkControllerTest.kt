@@ -153,7 +153,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         )
 
         val respons = hentHistorikk(behandling.id)
-        assertThat(respons.body.data!!.first().metadata).isEqualTo(jsonMap)
+        assertThat(respons.body?.data?.first()?.metadata).isEqualTo(jsonMap)
     }
 
     private fun leggInnHistorikk(

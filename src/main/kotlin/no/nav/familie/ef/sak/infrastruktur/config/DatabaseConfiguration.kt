@@ -157,7 +157,7 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     @WritingConverter
     class DokumentTilStringConverter : Converter<Dokumentasjon, String> {
 
-        override fun convert(dokumentasjon: Dokumentasjon?): String? {
+        override fun convert(dokumentasjon: Dokumentasjon): String? {
             return objectMapper.writeValueAsString(dokumentasjon)
         }
     }
@@ -245,12 +245,12 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     }
 
     @WritingConverter
-    class JsonWrapperTilPGobjectConverter : Converter<JsonWrapper?, PGobject> {
+    class JsonWrapperTilPGobjectConverter : Converter<JsonWrapper, PGobject> {
 
-        override fun convert(jsonWrapper: JsonWrapper?): PGobject =
+        override fun convert(jsonWrapper: JsonWrapper): PGobject =
             PGobject().apply {
                 type = "json"
-                value = jsonWrapper?.json
+                value = jsonWrapper.json
             }
     }
 

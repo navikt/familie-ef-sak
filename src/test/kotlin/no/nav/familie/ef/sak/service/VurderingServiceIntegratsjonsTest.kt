@@ -111,7 +111,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN))
         val behandling = behandling(fagsak)
-        val førstegangsbehandling = behandlingRepository.insert(behandling)
+        behandlingRepository.insert(behandling)
         val vilkårsvurdering = vilkårsvurdering(
             behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
             listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))))

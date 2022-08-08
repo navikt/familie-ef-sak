@@ -22,8 +22,8 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal feile hvis personIdenten ikke finnes i pdl`() {
         val response = søkOppgave("19117313797")
-        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
-        assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
     }
 
     private fun søkOppgave(personIdent: String): ResponseEntity<Ressurs<OppgaveResponseDto>> {

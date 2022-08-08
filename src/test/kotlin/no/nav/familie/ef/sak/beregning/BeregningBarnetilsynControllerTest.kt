@@ -62,7 +62,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
 
         val responsFørstegangsbehandling: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
             hentBeløpsperioderForBehandling(behandling.id)
-        val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body.data
+        val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body?.data
         Assertions.assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
         Assertions.assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
@@ -70,7 +70,7 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
 
         val responsRevurdering: ResponseEntity<Ressurs<List<BeløpsperiodeBarnetilsynDto>>> =
             hentBeløpsperioderForBehandling(revurdering.id)
-        val beløpsperioderRevurdering = responsRevurdering.body.data
+        val beløpsperioderRevurdering = responsRevurdering.body?.data
         Assertions.assertThat(beløpsperioderRevurdering).hasSize(1)
         Assertions.assertThat(beløpsperioderRevurdering?.first()?.periode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
         Assertions.assertThat(beløpsperioderRevurdering?.first()?.periode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))

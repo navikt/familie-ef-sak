@@ -216,9 +216,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(
             fagsaker.forEach { fagsak ->
-                val person = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
-                assertThat(person.identer.size).isEqualTo(1)
-                assertThat(person.identer.map { it.ident }).contains(ident)
+                val fagsakperson = fagsakPersonRepository.findByIdOrThrow(fagsak.fagsakPersonId)
+                assertThat(fagsakperson.identer.size).isEqualTo(1)
+                assertThat(fagsakperson.identer.map { it.ident }).contains(ident)
             }
         )
 
