@@ -31,7 +31,8 @@ fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
         tilrettelagtKommunikasjon = emptyList(),
         innflyttingTilNorge = emptyList(),
         utflyttingFraNorge = emptyList(),
-        vergemaalEllerFremtidsfullmakt = emptyList()
+        vergemaalEllerFremtidsfullmakt = emptyList(),
+        folkeregisteridentifikator = emptyList()
     ),
     emptyList(),
     Medlemskapsinfo("", emptyList(), emptyList(), emptyList()),

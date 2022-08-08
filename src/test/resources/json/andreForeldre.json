@@ -57,6 +57,15 @@
               }
             }
           ],
+          "folkeregisteridentifikator": [
+            {
+              "identifikasjonsnummer": "11111111111",
+              "status": "I_BRUK",
+              "metadata":  {
+                "historisk": false
+              }
+            }
+          ],
           "navn": [
             {
               "fornavn": "BRÅKETE",

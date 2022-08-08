@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.annenForelderFnr
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
@@ -121,8 +122,11 @@ internal class GrunnlagsdataServiceTest {
         val personIdent = PdlClientConfig.søkerFnr
         val defaultTidligereInnvilgetVedtak = TidligereInnvilgetVedtak(true, true, false)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdent) } returns
+        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(setOf(personIdent))) } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak)
+
+        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr)) } returns
+            TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak, defaultTidligereInnvilgetVedtak)
 
         val grunnlagsdata = service.hentGrunnlagsdataFraRegister(personIdent, emptyList())
 
@@ -131,6 +135,9 @@ internal class GrunnlagsdataServiceTest {
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereBarnetilsyn).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereSkolepenger).isFalse
 
-        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdent) }
+        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(personIdent)) }
+        verify(exactly = 1) {
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr))
+        }
     }
 }
