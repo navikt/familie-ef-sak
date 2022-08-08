@@ -127,6 +127,14 @@ class OppgaveService(
         return oppgaveClient.finnOppgaveMedId(gsakOppgaveId)
     }
 
+    fun hentTilordnetRessursForBehandling(behandlingId: UUID): String? {
+        val oppgave =
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+                ?: return null
+        val oppgaveFraRegister = oppgaveClient.finnOppgaveMedId(oppgave.gsakOppgaveId)
+        return oppgaveFraRegister.tilordnetRessurs
+    }
+
     fun hentEfOppgave(gsakOppgaveId: Long): EfOppgave? {
         return oppgaveRepository.findByGsakOppgaveId(gsakOppgaveId)
     }

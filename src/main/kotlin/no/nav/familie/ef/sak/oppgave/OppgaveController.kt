@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/oppgave")
@@ -91,6 +92,11 @@ class OppgaveController(
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
         return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
+    }
+
+    @GetMapping("{behandlingId}/hentTilordnetRessurs")
+    fun hentTilordnetRessursForBehandlingId(behandling: UUID): Ressurs<String?> {
+        return Ressurs.success(oppgaveService.hentTilordnetRessursForBehandling(behandling))
     }
 }
 
