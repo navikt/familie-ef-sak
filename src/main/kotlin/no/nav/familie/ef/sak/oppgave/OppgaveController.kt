@@ -95,8 +95,8 @@ class OppgaveController(
     }
 
     @GetMapping("{behandlingId}/hentTilordnetRessurs")
-    fun hentTilordnetRessursForBehandlingId(behandling: UUID): Ressurs<String?> {
-        return Ressurs.success(oppgaveService.hentTilordnetRessursForBehandling(behandling))
+    fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
+        return Ressurs.success(oppgaveService.hentTilordnetRessursForBehandling(behandlingId))
     }
 }
 
