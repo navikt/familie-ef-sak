@@ -94,7 +94,7 @@ class OppgaveController(
         return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
     }
 
-    @GetMapping("{behandlingId}/hentTilordnetRessurs")
+    @GetMapping("{behandlingId}/tilordnet-ressurs")
     fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
         return Ressurs.success(oppgaveService.hentTilordnetRessursForBehandling(behandlingId))
     }
