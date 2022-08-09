@@ -142,6 +142,8 @@ class JournalføringService(
             "Kan ikke sende inn årsak når journalposten har strukturert søknad"
         }
 
+        validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
+
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
             fagsak = fagsak,
