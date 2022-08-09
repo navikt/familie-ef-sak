@@ -86,7 +86,10 @@ class InfotrygdService(
             slåSammenPerioder(perioder).map { it.tilSummertInfotrygdperiodeDto() }
         )
 
-    private fun hentPerioderFraReplika(
+    /**
+     * ! Denne må brukes med alle identer for en person, bruk [hentPerioderFraReplika] hvis man skal hente på en ident
+     */
+    fun hentPerioderFraReplika(
         identer: Set<String>,
         stønadstyper: Set<StønadType> = StønadType.values().toSet()
     ): InfotrygdPeriodeResponse {

@@ -380,5 +380,6 @@ fun søker(): Søker =
         listOf(),
         listOf(),
         listOf(),
+        listOf(),
         listOf()
     )
