@@ -61,7 +61,7 @@ class InfotrygdService(
         return hentPerioderFraReplika(personIdenter)
     }
 
-    fun hentSammenslåttePerioderFraReplika(personIdent: String): InfotrygdPeriodeResponse {
+    private fun hentSammenslåttePerioderFraReplika(personIdent: String): InfotrygdPeriodeResponse {
         val personIdenter = hentPersonIdenter(personIdent)
         return hentSammenslåttePerioderFraReplika(personIdenter)
     }
