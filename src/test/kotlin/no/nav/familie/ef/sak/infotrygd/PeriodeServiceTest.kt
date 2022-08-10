@@ -51,7 +51,7 @@ internal class PeriodeServiceTest {
         every {
             pdlClient.hentPersonidenter(personIdent, true)
         } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
-        every { replikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+        every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
     }
 
     @Test
@@ -172,7 +172,7 @@ internal class PeriodeServiceTest {
     }
 
     private fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {
-        every { replikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(overgangsstønad, emptyList(), emptyList())
+        every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(overgangsstønad, emptyList(), emptyList())
     }
 
     private fun mockFagsak(fagsak: Fagsak? = this.fagsak) {
