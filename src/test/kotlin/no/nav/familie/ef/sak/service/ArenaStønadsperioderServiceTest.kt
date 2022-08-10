@@ -54,7 +54,7 @@ internal class ArenaStønadsperioderServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),
             emptyList(),
             emptyList()
@@ -120,7 +120,7 @@ internal class ArenaStønadsperioderServiceTest {
     private fun mockInfotrygd(stønadFom: LocalDate, stønadTom: LocalDate) {
         val infotrygdPeriode = lagInfotrygdPeriode(stønadFom = stønadFom, stønadTom = stønadTom)
         val infotrygdPeriodeResponse = InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns infotrygdPeriodeResponse
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns infotrygdPeriodeResponse
     }
 
     private fun mockNyLøsning(stønadFom: LocalDate, stønadTom: LocalDate) {
