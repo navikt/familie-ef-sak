@@ -33,6 +33,9 @@ class InfotrygdReplikaMock {
             every { client.hentPerioder(any()) } answers {
                 hentPerioderDefaultResponse(firstArg())
             }
+            every { client.hentSammenslåttePerioder(any()) } answers {
+                hentPerioderDefaultResponse(firstArg())
+            }
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
             every { client.hentPersonerForMigrering(any()) } returns emptySet()

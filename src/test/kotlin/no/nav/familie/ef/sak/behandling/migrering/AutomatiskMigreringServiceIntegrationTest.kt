@@ -39,7 +39,7 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
             lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
             lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1))
         )
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
             InfotrygdPeriodeResponse(perioderOvergangsstønad, emptyList(), emptyList())
 
         automatiskMigreringService.migrerPersonAutomatisk(personIdent)

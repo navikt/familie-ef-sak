@@ -820,11 +820,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             kode = kodePeriode2,
             aktivitetstype = aktivitetstype
         )
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns
-            InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
-            InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
-            InfotrygdPeriodeResponse(listOf(periode), emptyList(), emptyList()) andThen
             InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
     }
 
