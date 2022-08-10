@@ -155,7 +155,7 @@ internal class PeriodeServiceTest {
             listOf(
                 lagInfotrygdPeriode(stønadFom = periode1fom, stønadTom = periode1tom, beløp = 1),
                 lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2)
-            )
+            ).sortedByDescending { it.stønadFom }
         )
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
