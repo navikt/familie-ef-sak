@@ -26,7 +26,7 @@ class InfotrygdReplikaClient(
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder").build().toUri()
 
     private val sammenslåttePerioderUri: URI =
-        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/sammenslåtte").build().toUri()
+        UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/perioder/sammenslatte").build().toUri()
 
     private val finnSakerUri: URI =
         UriComponentsBuilder.fromUri(infotrygdReplikaUri).pathSegment("api/saker/finn").build().toUri()
