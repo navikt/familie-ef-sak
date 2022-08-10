@@ -40,10 +40,11 @@ class ApplicationConfig {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Bean
-    fun kotlinModule(): KotlinModule = KotlinModule()
+    fun kotlinModule(): KotlinModule = KotlinModule.Builder().build()
 
     @Bean
-    @Primary fun objectMapper() = ObjectMapperProvider.objectMapper
+    @Primary
+    fun objectMapper() = ObjectMapperProvider.objectMapper
 
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {

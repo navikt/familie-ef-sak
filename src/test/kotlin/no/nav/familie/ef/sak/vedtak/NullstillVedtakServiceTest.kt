@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.brev.MellomlagringBrevService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
@@ -32,6 +33,7 @@ class NullstillVedtakServiceTest {
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
+    private val mellomlagringBrevService = mockk<MellomlagringBrevService>(relaxed = true)
 
     private val nullstillVedtakService = NullstillVedtakService(
         vedtakRepository,
@@ -39,7 +41,8 @@ class NullstillVedtakServiceTest {
         behandlingService,
         simuleringService,
         tilkjentYtelseService,
-        tilbakekrevingService
+        tilbakekrevingService,
+        mellomlagringBrevService
     )
     private val behandlingId = UUID.randomUUID()
 
@@ -53,6 +56,7 @@ class NullstillVedtakServiceTest {
         nullstillVedtakService.nullstillVedtak(behandlingId)
 
         verifyAll {
+            mellomlagringBrevService.slettMellomlagringHvisFinnes(behandlingId)
             simuleringService.slettSimuleringForBehandling(capture(saksbehandling))
             tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
             tilbakekrevingService.slettTilbakekreving(behandlingId)

@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
@@ -66,13 +67,15 @@ object PdlTestdataHelper {
         tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon> = emptyList(),
         innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
         utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList(),
-        vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt> = emptyList()
+        vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt> = emptyList(),
+        folkeregisteridentifikator: List<Folkeregisteridentifikator> = emptyList(),
     ) =
         PdlSøker(
             adressebeskyttelse,
             bostedsadresse,
             dødsfall,
             forelderBarnRelasjon,
+            folkeregisteridentifikator,
             fødsel,
             folkeregisterpersonstatus,
             fullmakt,

@@ -13,7 +13,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorStatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregistermetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
@@ -65,7 +67,7 @@ class PdlClientConfig {
     fun pdlSaksbehandlerClient(): PdlSaksbehandlerClient {
         val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
         val pdlPersonFraSøk = PdlPersonFraSøk(
-            listOf(element = Folkeregisteridentifikator(fnrPåAdresseSøk)),
+            listOf(element = FolkeregisteridentifikatorFraSøk(fnrPåAdresseSøk)),
             bostedsadresse(),
             listOf(lagNavn())
         )
@@ -81,7 +83,9 @@ class PdlClientConfig {
 
         every { pdlClient.ping() } just runs
 
-        every { pdlClient.hentPersonKortBolk(any()) } answers { firstArg<List<String>>().associate { it to lagPersonKort(it) } }
+        every { pdlClient.hentPersonKortBolk(any()) } answers {
+            firstArg<List<String>>().associate { it to lagPersonKort(it) }
+        }
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
 
@@ -156,6 +160,12 @@ class PdlClientConfig {
                 emptyList()
             )
 
+        val folkeregisteridentifikatorSøker = Folkeregisteridentifikator(
+            søkerFnr,
+            FolkeregisteridentifikatorStatus.I_BRUK,
+            metadataGjeldende
+        )
+
         fun opprettPdlSøker() =
             pdlSøker(
                 adressebeskyttelse = listOf(
@@ -167,6 +177,7 @@ class PdlClientConfig {
                 bostedsadresse = bostedsadresse(),
                 dødsfall = listOf(),
                 forelderBarnRelasjon = forelderBarnRelasjoner(),
+                folkeregisteridentifikator = listOf(folkeregisteridentifikatorSøker),
                 fødsel = listOf(fødsel()),
                 folkeregisterpersonstatus = listOf(
                     Folkeregisterpersonstatus(
@@ -225,6 +236,13 @@ class PdlClientConfig {
                 dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
                 fødsel = listOf(fødsel(1994, 11, 1)),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
+                folkeregisteridentifikator = listOf(
+                    Folkeregisteridentifikator(
+                        annenForelderFnr,
+                        FolkeregisteridentifikatorStatus.I_BRUK,
+                        metadataGjeldende
+                    )
+                )
             )
 
         private fun forelderBarnRelasjoner(): List<ForelderBarnRelasjon> =
