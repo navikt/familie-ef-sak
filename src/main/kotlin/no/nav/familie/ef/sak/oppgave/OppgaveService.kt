@@ -52,8 +52,7 @@ class OppgaveService(
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
-        val oppgaveFinnesFraFør =
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId

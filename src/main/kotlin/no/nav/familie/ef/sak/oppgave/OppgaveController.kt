@@ -53,8 +53,7 @@ class OppgaveController(
             ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
-        val oppgaveRepons: FinnOppgaveResponseDto =
-            oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
+        val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
