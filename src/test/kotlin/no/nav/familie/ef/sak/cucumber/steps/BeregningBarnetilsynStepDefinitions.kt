@@ -110,18 +110,18 @@ class BeregningBarnetilsynStepDefinitions {
             ForventetPeriode(beløp, fraÅrMåned, tilÅrMåned)
         }
         assertThat(beregnYtelseBarnetilsynResultat).size().isEqualTo(forventet.size)
-        val sortedResultat = beregnYtelseBarnetilsynResultat.sortedBy { it.fellesperiode.fom }
+        val sortedResultat = beregnYtelseBarnetilsynResultat.sortedBy { it.periode.fom }
         val sortetForventet = forventet.sortedBy { it.fraÅrMåned }
-        assertThat(sortedResultat.first().periode.fradato).isEqualTo(sortetForventet.first().fraÅrMåned.atDay(1))
-        assertThat(sortedResultat.last().periode.fradato).isEqualTo(sortetForventet.last().fraÅrMåned.atDay(1))
-        assertThat(sortedResultat.first().fellesperiode.fom).isEqualTo(sortetForventet.first().fraÅrMåned.atDay(1))
-        assertThat(sortedResultat.last().fellesperiode.fom).isEqualTo(sortetForventet.last().fraÅrMåned.atDay(1))
+        assertThat(sortedResultat.first().deprecatedPeriode.fradato).isEqualTo(sortetForventet.first().fraÅrMåned.atDay(1))
+        assertThat(sortedResultat.last().deprecatedPeriode.fradato).isEqualTo(sortetForventet.last().fraÅrMåned.atDay(1))
+        assertThat(sortedResultat.first().periode.fom).isEqualTo(sortetForventet.first().fraÅrMåned.atDay(1))
+        assertThat(sortedResultat.last().periode.fom).isEqualTo(sortetForventet.last().fraÅrMåned.atDay(1))
 
         sortedResultat.forEachIndexed { idx, it ->
-            assertThat(it.periode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
-            assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
-            assertThat(it.fellesperiode.fom).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
-            assertThat(it.fellesperiode.tom).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
+            assertThat(it.deprecatedPeriode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
+            assertThat(it.deprecatedPeriode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
+            assertThat(it.periode.fom).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
+            assertThat(it.periode.tom).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
             assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
         }
     }
@@ -139,7 +139,7 @@ class BeregningBarnetilsynStepDefinitions {
     }
 
     private fun sjekkAtAlleFelterErSomForventet(forventet: List<ForventetPeriodeMedGrunnlag>) {
-        val sortedResultat = beregnYtelseBarnetilsynResultat.sortedBy { it.fellesperiode.fom }
+        val sortedResultat = beregnYtelseBarnetilsynResultat.sortedBy { it.periode.fom }
         val sortetForventet = forventet.sortedBy { it.fraÅrMåned }
 
         sortedResultat.forEachIndexed { idx, it ->
@@ -162,10 +162,10 @@ class BeregningBarnetilsynStepDefinitions {
         sortetForventet: List<ForventetPeriodeMedGrunnlag>,
         idx: Int
     ) {
-        assertThat(it.periode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
-        assertThat(it.periode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
-        assertThat(it.fellesperiode.fom).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
-        assertThat(it.fellesperiode.tom).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
+        assertThat(it.deprecatedPeriode.fradato).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
+        assertThat(it.deprecatedPeriode.tildato).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
+        assertThat(it.periode.fom).isEqualTo(sortetForventet.get(idx).fraÅrMåned.atDay(1))
+        assertThat(it.periode.tom).isEqualTo(sortetForventet.get(idx).tilÅrMåned.atEndOfMonth())
         assertThat(it.beløp).isEqualTo(sortetForventet.get(idx).beløp)
         assertThat(it.beregningsgrunnlag.antallBarn).isEqualTo(sortetForventet.get(idx).antallBarn)
         when (sortetForventet.get(idx).harKontantstøtte) {

@@ -110,7 +110,7 @@ class BeregnYtelseSteg(
 
     private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
         innvilget.perioder.firstOrNull()?.let {
-            validerStartTidEtterSanksjon(it.periode.fomMåned, behandling)
+            validerStartTidEtterSanksjon(it.periode.fom, behandling)
         }
     }
 
@@ -120,7 +120,7 @@ class BeregnYtelseSteg(
         }
 
         innvilget.perioder.firstOrNull()?.let {
-            validerStartTidEtterSanksjon(it.periode.fomMåned, behandling)
+            validerStartTidEtterSanksjon(it.periode.fom, behandling)
         }
     }
 
@@ -503,7 +503,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp.toInt(),
-                    periode = it.fellesperiode.toMånedsperiode(),
+                    periode = it.periode.toMånedsperiode(),
                     kildeBehandlingId = saksbehandling.id,
                     personIdent = saksbehandling.ident,
                     samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
@@ -525,7 +525,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    periode = it.fellesperiode.toMånedsperiode(),
+                    periode = it.periode.toMånedsperiode(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
@@ -613,12 +613,12 @@ class BeregnYtelseSteg(
             } else {
                 val overlappendeOpphør = opphørsperioder.first { periode -> periode.overlapper(tilkjentPeriode) }
 
-                if (overlappendeOpphør.overlapperIStartenAv(tilkjentPeriode)) {
+                if (overlappendeOpphør.overlapperKunIStartenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(
                         listOf(it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1))),
                         opphørsperioder
                     )
-                } else if (overlappendeOpphør.overlapperISluttenAv(tilkjentPeriode)) {
+                } else if (overlappendeOpphør.overlapperKunISluttenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(
                         listOf(it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1))),
                         opphørsperioder

@@ -427,8 +427,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         val beløpsperiode = migreringInfo.beløpsperioder!![0]
         assertThat(beløpsperiode.beløp.toInt()).isEqualTo(18998)
-        assertThat(beløpsperiode.fellesperiode.fom).isEqualTo(nå.atDay(1))
-        assertThat(beløpsperiode.fellesperiode.tom).isEqualTo(stønadTom)
+        assertThat(beløpsperiode.periode.fom).isEqualTo(nå.atDay(1))
+        assertThat(beløpsperiode.periode.tom).isEqualTo(stønadTom)
     }
 
     @Test

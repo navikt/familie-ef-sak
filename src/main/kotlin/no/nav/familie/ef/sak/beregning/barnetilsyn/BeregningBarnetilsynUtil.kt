@@ -47,7 +47,7 @@ object BeregningBarnetilsynUtil {
             )
 
         return BeløpsperiodeBarnetilsynDto(
-            fellesperiode = Datoperiode(utgiftsperiode.årMåned, utgiftsperiode.årMåned),
+            periode = Datoperiode(utgiftsperiode.årMåned, utgiftsperiode.årMåned),
             beløp = beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beregnedeBeløp.beløpFørFratrekkOgSatsjustering.roundUp().toInt(),
             sats = beregnedeBeløp.makssats,

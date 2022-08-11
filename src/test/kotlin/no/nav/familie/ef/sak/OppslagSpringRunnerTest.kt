@@ -147,7 +147,7 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             Migreringsstatus::class,
 
-            ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
+        ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
     protected fun getPort(): String {

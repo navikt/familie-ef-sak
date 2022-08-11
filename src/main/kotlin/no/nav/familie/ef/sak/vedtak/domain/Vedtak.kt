@@ -130,8 +130,8 @@ data class PeriodeMedBeløp(
     constructor(periode: Månedsperiode, beløp: Int) : this(periode.fomDato, periode.tomDato, beløp)
 
     fun tilDto() = PeriodeMedBeløpDto(
-        årMånedFra = periode.fomMåned,
-        årMånedTil = periode.tomMåned,
+        årMånedFra = periode.fom,
+        årMånedTil = periode.tom,
         periode = periode,
         beløp = beløp
     )

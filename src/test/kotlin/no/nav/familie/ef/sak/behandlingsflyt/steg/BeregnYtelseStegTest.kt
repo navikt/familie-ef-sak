@@ -1468,7 +1468,7 @@ internal class BeregnYtelseStegTest {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
                 listOf(
                     BeløpsperiodeBarnetilsynDto(
-                        fellesperiode = Datoperiode(LocalDate.now(), LocalDate.now()),
+                        periode = Datoperiode(LocalDate.now(), LocalDate.now()),
                         beløp = 1,
                         beløpFørFratrekkOgSatsjustering = 1,
                         sats = 6284,
@@ -1499,7 +1499,7 @@ internal class BeregnYtelseStegTest {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
                 listOf(
                     BeløpsperiodeBarnetilsynDto(
-                        fellesperiode = Datoperiode(nyAndelFom, nyAndelTom),
+                        periode = Datoperiode(nyAndelFom, nyAndelTom),
                         beløp = 1,
                         beløpFørFratrekkOgSatsjustering = 1,
                         sats = 6284,
@@ -1539,7 +1539,7 @@ internal class BeregnYtelseStegTest {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
                 listOf(
                     BeløpsperiodeBarnetilsynDto(
-                        fellesperiode = Datoperiode(nyAndelFom, nyAndelTom),
+                        periode = Datoperiode(nyAndelFom, nyAndelTom),
                         beløp = 1,
                         beløpFørFratrekkOgSatsjustering = 1,
                         sats = 6284,
@@ -1575,7 +1575,7 @@ internal class BeregnYtelseStegTest {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
                 listOf(
                     BeløpsperiodeBarnetilsynDto(
-                        fellesperiode = Datoperiode(nyAndelFom, nyAndelTom),
+                        periode = Datoperiode(nyAndelFom, nyAndelTom),
                         beløp = 0,
                         beløpFørFratrekkOgSatsjustering = 0,
                         sats = 6284,
@@ -1840,7 +1840,7 @@ internal class BeregnYtelseStegTest {
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
         Beløpsperiode(
-            fellesperiode = Datoperiode(fom, tom),
+            periode = Datoperiode(fom, tom),
             beregningsgrunnlag = null,
             beløp = BigDecimal.ZERO,
             beløpFørSamordning = BigDecimal.ZERO

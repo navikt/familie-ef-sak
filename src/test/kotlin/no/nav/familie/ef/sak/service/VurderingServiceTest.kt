@@ -174,12 +174,16 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(4)
-        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }
-            .map { it.resultat }
-            .toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
-            .map { it.resultat }
-            .toSet()).containsOnly(Vilkårsresultat.OPPFYLT)
+        assertThat(
+            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }
+                .map { it.resultat }
+                .toSet()
+        ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(
+            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
+                .map { it.resultat }
+                .toSet()
+        ).containsOnly(Vilkårsresultat.OPPFYLT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
 

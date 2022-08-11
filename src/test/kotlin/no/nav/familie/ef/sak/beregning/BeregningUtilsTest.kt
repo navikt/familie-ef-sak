@@ -17,7 +17,7 @@ internal class BeregningUtilsTest {
         @Test
         fun `hvis vedtaksperiode omsluttes av beløpsperiode skal datoerne for vedtaksperiode returneres `() {
             val beløpsperiode = Beløpsperiode(
-                fellesperiode = Datoperiode(
+                periode = Datoperiode(
                     fom = LocalDate.parse("2020-05-01"),
                     tom = LocalDate.parse("2020-12-01")
                 ),
@@ -33,8 +33,8 @@ internal class BeregningUtilsTest {
             )
                 .isEqualTo(
                     beløpsperiode.copy(
-                        fellesperiode = vedtaksperiode,
-                        periode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fom, vedtaksperiode.tom)
+                        periode = vedtaksperiode,
+                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fom, vedtaksperiode.tom)
                     )
                 )
         }
@@ -43,7 +43,7 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode omsluttes av vedtaksperiode skal datoerne for beløpsperiode være uforandrede`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    fellesperiode = Datoperiode(
+                    periode = Datoperiode(
                         fom = LocalDate.parse("2020-07-01"),
                         tom = LocalDate.parse("2020-09-30")
                     ),
@@ -64,7 +64,7 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode overlapper i starten av vedtaksperiode skal startdatoen for vedtaksperiode returneres sammen med sluttdato for beløpsperiode`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    fellesperiode = Datoperiode(
+                    periode = Datoperiode(
                         fom = LocalDate.parse("2020-03-01"),
                         tom = LocalDate.parse("2020-06-30")
                     ),
@@ -83,11 +83,11 @@ internal class BeregningUtilsTest {
             )
                 .isEqualTo(
                     beløpsperiode.copy(
-                        fellesperiode = vedtaksperiode.copy(
+                        periode = vedtaksperiode.copy(
                             fom = LocalDate.parse("2020-05-01"),
                             tom = LocalDate.parse("2020-06-30")
                         ),
-                        periode = no.nav.familie.ef.sak.felles.dto.Periode(
+                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(
                             fradato = LocalDate.parse("2020-05-01"),
                             tildato = LocalDate.parse("2020-06-30")
                         )
@@ -99,7 +99,7 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode overlapper i slutten av vedtaksperiode skal startdatoen for beløpsperiode returneres sammen med sluttdato for vedtaksperiode`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    fellesperiode = Datoperiode(
+                    periode = Datoperiode(
                         fom = LocalDate.parse("2020-09-01"),
                         tom = LocalDate.parse("2021-02-28")
                     ),
@@ -118,11 +118,11 @@ internal class BeregningUtilsTest {
             )
                 .isEqualTo(
                     beløpsperiode.copy(
-                        periode = no.nav.familie.ef.sak.felles.dto.Periode(
+                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(
                             fradato = LocalDate.parse("2020-09-01"),
                             tildato = LocalDate.parse("2020-12-31")
                         ),
-                        fellesperiode = vedtaksperiode.copy(
+                        periode = vedtaksperiode.copy(
                             fom = LocalDate.parse("2020-09-01"),
                             tom = LocalDate.parse("2020-12-31")
                         )
@@ -134,7 +134,7 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode har ingen overlapp med vedtaksperiode skal tom liste returneres`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    fellesperiode = Datoperiode(
+                    periode = Datoperiode(
                         fom = LocalDate.parse("2020-01-01"),
                         tom = LocalDate.parse("2020-04-30")
                     ),

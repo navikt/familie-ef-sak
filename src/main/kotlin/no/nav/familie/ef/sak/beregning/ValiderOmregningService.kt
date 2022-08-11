@@ -58,12 +58,12 @@ class ValiderOmregningService(
             "Antall vedtaksperioder er ulikt fra tidligere vedtak, tidligerePerioder=$tidligereDatoer"
         }
         data.perioder.forEach {
-            val fra = it.periode.fomMåned
+            val fra = it.periode.fom
             val tidligerePeriode = tidligerePerioder[fra]
                 ?: throw ApiFeil("Finner ikke periode fra $fra", HttpStatus.BAD_REQUEST)
-            brukerfeilHvis(tidligerePeriode.periode.tomMåned != it.periode.tomMåned) {
-                "Perioden fra $fra har annet tom-dato(${it.periode.tomMåned} enn " +
-                    "tidligere periode (${tidligerePeriode.periode.tomMåned})"
+            brukerfeilHvis(tidligerePeriode.periode.tom != it.periode.tom) {
+                "Perioden fra $fra har annet tom-dato(${it.periode.tom} enn " +
+                    "tidligere periode (${tidligerePeriode.periode.tom})"
             }
             brukerfeilHvis(
                 tidligerePeriode.aktivitet != AktivitetType.MIGRERING &&
@@ -88,7 +88,7 @@ class ValiderOmregningService(
         )
             .perioder
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
-            .associateBy { it.periode.fomMåned }
+            .associateBy { it.periode.fom }
 
     fun validerHarGammelGOgKanLagres(saksbehandling: Saksbehandling) {
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) return

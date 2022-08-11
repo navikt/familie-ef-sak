@@ -499,7 +499,7 @@ class BeregningBarnetilsynServiceTest {
             kontantstøttePerioder = listOf(),
             tilleggsstønadsperioder = listOf()
         )
-            .sortedBy { it.fellesperiode.fom }
+            .sortedBy { it.periode.fom }
         assertThat(beregnYtelseBarnetilsyn).hasSize(2)
         assertThat(beregnYtelseBarnetilsyn.first().beløp).isLessThan(beregnYtelseBarnetilsyn.last().beløp)
         assertThat(beregnYtelseBarnetilsyn.first().beløp).isEqualTo(forventetBeløp2021)
@@ -643,8 +643,8 @@ class BeregningBarnetilsynServiceTest {
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(1)
-        assertThat(resultat.first().fellesperiode.fom).isEqualTo(forventetFraDato)
-        assertThat(resultat.first().fellesperiode.tom).isEqualTo(forventetTilDato)
+        assertThat(resultat.first().periode.fom).isEqualTo(forventetFraDato)
+        assertThat(resultat.first().periode.tom).isEqualTo(forventetTilDato)
     }
 
     @Test
@@ -668,8 +668,8 @@ class BeregningBarnetilsynServiceTest {
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(2)
-        assertThat(resultat.first().fellesperiode.fom).isEqualTo(forventetFraDato)
-        assertThat(resultat.last().fellesperiode.tom).isEqualTo(forventetTilDato)
+        assertThat(resultat.first().periode.fom).isEqualTo(forventetFraDato)
+        assertThat(resultat.last().periode.tom).isEqualTo(forventetTilDato)
     }
 
     @Test
@@ -719,7 +719,7 @@ class BeregningBarnetilsynServiceTest {
         beløp: BigDecimal = BigDecimal(100)
     ): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(
-            fellesperiode = Datoperiode(fraDato, tilDato),
+            periode = Datoperiode(fraDato, tilDato),
             beløp = beløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beløp.roundUp().toInt(),
             sats = 6284,

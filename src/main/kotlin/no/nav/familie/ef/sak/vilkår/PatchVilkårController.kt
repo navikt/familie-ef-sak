@@ -39,7 +39,7 @@ class PatchVilkårController(
             val eksisterendeVilkår = vilkårsvurderingRepository.findByBehandlingId(it.id)
 
             if (eksisterendeVilkår.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger.flatMap { it.vurderinger.map { it.regelId } } }
-                    .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)
+                .contains(RegelId.INNTEKT_SAMSVARER_MED_OS)
             ) {
                 logger.info("det finnes allerede et delvilkår for om inntekt samsvarer med OS på behandling med id=${it.id}")
             } else {

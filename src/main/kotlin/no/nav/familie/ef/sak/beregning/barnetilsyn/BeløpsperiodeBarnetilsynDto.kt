@@ -1,16 +1,18 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.kontrakter.felles.Datoperiode
-import no.nav.familie.kontrakter.felles.Periode
 import java.math.BigDecimal
 import java.util.UUID
 
 data class BeløpsperiodeBarnetilsynDto(
-    val fellesperiode: Datoperiode,
-    @Deprecated("Bruk fellesperiode", ReplaceWith("fellesperiode"))
-    val periode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
-        fellesperiode.fom,
-        fellesperiode.tom
+    @JsonProperty("fellesperiode")
+    val periode: Datoperiode,
+    @Deprecated("Bruk periode", ReplaceWith("periode"))
+    @JsonProperty("periode")
+    val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
+        periode.fom,
+        periode.tom
     ),
     val beløp: Int,
     val beløpFørFratrekkOgSatsjustering: Int,

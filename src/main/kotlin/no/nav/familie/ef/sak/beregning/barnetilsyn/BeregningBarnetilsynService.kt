@@ -133,8 +133,8 @@ fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
  */
 fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
-    var måned = this.periode.fomMåned
-    while (måned <= this.periode.tomMåned) {
+    var måned = this.periode.fom
+    while (måned <= this.periode.tom) {
         perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal()))
         måned = måned.plusMonths(1)
     }
@@ -145,15 +145,15 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  * Merger sammenhengende perioder hvor beløp og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
-    val sortertPåDatoListe = this.sortedBy { it.fellesperiode }
+    val sortertPåDatoListe = this.sortedBy { it.periode }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
             acc.removeLast()
             acc.add(
                 last.copy(
-                    periode = last.periode.copy(tildato = entry.periode.tildato),
-                    fellesperiode = last.fellesperiode union entry.fellesperiode
+                    deprecatedPeriode = last.deprecatedPeriode.copy(tildato = entry.deprecatedPeriode.tildato),
+                    periode = last.periode union entry.periode
                 )
             )
         } else {
@@ -164,7 +164,7 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
 }
 
 fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto): Boolean {
-    return this.fellesperiode påfølgesAv other.fellesperiode
+    return this.periode påfølgesAv other.periode
 }
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
