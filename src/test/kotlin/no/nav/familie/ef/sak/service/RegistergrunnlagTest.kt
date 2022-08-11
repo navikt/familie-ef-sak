@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.service
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
