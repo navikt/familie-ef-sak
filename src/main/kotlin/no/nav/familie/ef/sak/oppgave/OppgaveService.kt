@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -51,7 +52,8 @@ class OppgaveService(
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
-        val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        val oppgaveFinnesFraFør =
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
@@ -112,11 +114,14 @@ class OppgaveService(
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
-
         val gsakOppgave = hentOppgave(gsakOppgaveId)
         val tidligereSaksbehandler = gsakOppgave.tilordnetRessurs
         if (tidligereSaksbehandler != saksbehandler && tidligereSaksbehandler != null) {
-            logger.info("(Eier av behandling/oppgave) Fordeler OppgaveId: $gsakOppgaveId som hadde tidligere saksbehandler $tidligereSaksbehandler til $saksbehandler")
+            logger.info(
+                "(Eier av behandling/oppgave) Fordeler oppgave=$gsakOppgaveId " +
+                    "fra=$tidligereSaksbehandler til=$saksbehandler " +
+                    "sekunderSidenEndret=${sekunderSidenEndret(gsakOppgave)}"
+            )
         }
         return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
     }
@@ -164,12 +169,9 @@ class OppgaveService(
         return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
     }
 
-    fun hentTilordnetRessursForBehandling(behandlingId: UUID): String? {
-        val oppgave =
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
-                ?: return null
-        val oppgaveFraRegister = oppgaveClient.finnOppgaveMedId(oppgave.gsakOppgaveId)
-        return oppgaveFraRegister.tilordnetRessurs
+    fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
+        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
     fun lagOppgaveTekst(beskrivelse: String? = null): String {
