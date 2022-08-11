@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.ekstern
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infotrygd.InternPeriodeTestUtil.lagInternPeriode
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InternPeriodeTestUtil.lagInternPeriode
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.assertj.core.api.Assertions.assertThat

@@ -15,7 +15,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID

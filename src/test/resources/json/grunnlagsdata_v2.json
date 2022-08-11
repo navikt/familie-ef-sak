@@ -1094,6 +1094,29 @@
           }
         },
         "nullable" : false
+      },
+      "folkeregisteridentifikator" : {
+        "name" : "folkeregisteridentifikator",
+        "type" : "Collection",
+        "fields" : {
+          "personIdent" : {
+            "name" : "personIdent",
+            "type" : "String",
+            "nullable" : false
+          },
+          "status" : {
+            "name" : "status",
+            "type" : "Enum",
+            "values" : [ "I_BRUK", "OPPHOERT" ],
+            "nullable" : false
+          },
+          "historisk" : {
+            "name" : "historisk",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : true
       }
     },
     "nullable" : false
@@ -1415,6 +1438,80 @@
         "name" : "personIdent",
         "type" : "String",
         "nullable" : false
+      },
+      "folkeregisteridentifikator" : {
+        "name" : "folkeregisteridentifikator",
+        "type" : "Collection",
+        "fields" : {
+          "personIdent" : {
+            "name" : "personIdent",
+            "type" : "String",
+            "nullable" : false
+          },
+          "status" : {
+            "name" : "status",
+            "type" : "Enum",
+            "values" : [ "I_BRUK", "OPPHOERT" ],
+            "nullable" : false
+          },
+          "historisk" : {
+            "name" : "historisk",
+            "type" : "Boolean",
+            "nullable" : false
+          }
+        },
+        "nullable" : true
+      },
+      "tidligereVedtaksperioder" : {
+        "name" : "tidligereVedtaksperioder",
+        "type" : "Object",
+        "fields" : {
+          "infotrygd" : {
+            "name" : "infotrygd",
+            "type" : "Object",
+            "fields" : {
+              "harTidligereOvergangsstønad" : {
+                "name" : "harTidligereOvergangsstønad",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereBarnetilsyn" : {
+                "name" : "harTidligereBarnetilsyn",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereSkolepenger" : {
+                "name" : "harTidligereSkolepenger",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : false
+          },
+          "sak" : {
+            "name" : "sak",
+            "type" : "Object",
+            "fields" : {
+              "harTidligereOvergangsstønad" : {
+                "name" : "harTidligereOvergangsstønad",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereBarnetilsyn" : {
+                "name" : "harTidligereBarnetilsyn",
+                "type" : "Boolean",
+                "nullable" : false
+              },
+              "harTidligereSkolepenger" : {
+                "name" : "harTidligereSkolepenger",
+                "type" : "Boolean",
+                "nullable" : false
+              }
+            },
+            "nullable" : true
+          }
+        },
+        "nullable" : true
       }
     },
     "nullable" : false

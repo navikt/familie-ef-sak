@@ -2,92 +2,27 @@ package no.nav.familie.ef.sak.ekstern
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
 
-    private val pdlClient = mockk<PdlClient>()
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService)
-    private val eksternBehandlingController = EksternBehandlingController(pdlClient, eksternBehandlingService)
-
-    private val ident1 = "11111111111"
-    private val ident2 = "22222222222"
-
-    @BeforeEach
-    internal fun setUp() {
-        every { pdlClient.hentPersonidenter(ident1, true) }
-            .returns(PdlIdenter(listOf(PdlIdent(ident1, true), PdlIdent(ident2, false))))
-    }
-
-    @Test
-    internal fun `skal returnere false når det ikke finnes fagsak på personen`() {
-        every {
-            fagsakService.finnFagsak(setOf(ident1, ident2), StønadType.OVERGANGSSTØNAD)
-        } returns null
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-            .isEqualTo(false)
-    }
-
-    @Test
-    internal fun `skal returnere false når det ikke finnes en behandling`() {
-        every {
-            fagsakService.finnFagsak(setOf(ident1, ident2), StønadType.OVERGANGSSTØNAD)
-        } returns fagsak()
-        every {
-            behandlingService.finnesBehandlingForFagsak(any())
-        } returns false
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-            .isEqualTo(false)
-    }
-
-    @Test
-    internal fun `skal returnere true når behandling finnes`() {
-        every {
-            fagsakService.finnFagsak(setOf(ident1, ident2), StønadType.OVERGANGSSTØNAD)
-        } returns fagsak()
-        every {
-            behandlingService.finnesBehandlingForFagsak(any())
-        } returns true
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(StønadType.OVERGANGSSTØNAD, PersonIdent(ident1)).data)
-            .isEqualTo(true)
-    }
-
-    @Test
-    internal fun `uten stønadstype - skal returnere false når det ikke finnes noen behandling`() {
-        every { fagsakService.finnFagsak(setOf(ident1, ident2), any()) } returns fagsak()
-        every {
-            behandlingService.finnesBehandlingForFagsak(any())
-        } returns false
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
-            .isEqualTo(false)
-        verify(exactly = 1) {
-            fagsakService.finnFagsak(any(), StønadType.OVERGANGSSTØNAD)
-            fagsakService.finnFagsak(any(), StønadType.BARNETILSYN)
-            fagsakService.finnFagsak(any(), StønadType.SKOLEPENGER)
-        }
-    }
+    private val eksternBehandlingController = EksternBehandlingController(eksternBehandlingService)
 
     @Test
     internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {
@@ -115,18 +50,6 @@ internal class EksternBehandlingControllerTest {
             lagTilkjentYtelse(andelerTilkjentYtelse = emptyList())
         )
         assertThat(eksternBehandlingController.harAktivStønad(setOf("12345678910")).data).isEqualTo(false)
-    }
-
-    @Test
-    internal fun `uten stønadstype - skal returnere true når det minimum en behandling`() {
-        var counter = 0
-        every { fagsakService.finnFagsak(setOf(ident1, ident2), any()) } returns fagsak()
-        every { behandlingService.finnesBehandlingForFagsak(any()) } answers {
-            counter++ == 1
-        }
-        assertThat(eksternBehandlingController.finnesBehandlingForPerson(null, PersonIdent(ident1)).data)
-            .isEqualTo(true)
-        verify(exactly = 2) { behandlingService.finnesBehandlingForFagsak(any()) }
     }
 
     private fun opprettIkkeUtdatertTilkjentYtelse(): TilkjentYtelse {

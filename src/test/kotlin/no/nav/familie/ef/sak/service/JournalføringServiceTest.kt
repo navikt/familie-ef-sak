@@ -158,7 +158,11 @@ internal class JournalføringServiceTest {
 
         every {
             fagsakService.hentFagsak(any())
-        } returns fagsak(identer = fagsakpersoner(setOf("1")), id = fagsakId, eksternId = EksternFagsakId(fagsakEksternId))
+        } returns fagsak(
+            identer = fagsakpersoner(setOf("1")),
+            id = fagsakId,
+            eksternId = EksternFagsakId(fagsakEksternId)
+        )
 
         every { behandlingService.opprettBehandling(any(), any(), behandlingsårsak = any()) }
             .returns(
@@ -268,9 +272,44 @@ internal class JournalføringServiceTest {
         assertThat(slot.captured.sak?.sakstype).isEqualTo("FAGSAK")
         assertThat(slot.captured.sak?.fagsaksystem).isEqualTo(Fagsystem.EF)
         dokumentTitler.forEach { (dokumentId, nyTittel) ->
-            val oppdatertDokument = slot.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
+            val oppdatertDokument =
+                slot.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
+    }
+
+    @Test
+    internal fun `manuell journalføring på ny behandling kaster feil hvis personen finnes i infotrygd`() {
+        every { fagsakService.hentFagsak(fagsakId) } returns fagsak(
+            id = fagsakId,
+            eksternId = EksternFagsakId(id = fagsakEksternId),
+            stønadstype = StønadType.OVERGANGSSTØNAD
+        )
+
+        val slot = slot<OppdaterJournalpostRequest>()
+
+        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId, any()) }
+            .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
+
+        every {
+            journalpostClient.hentOvergangsstønadSøknad(any(), any())
+        } returns Testsøknad.søknadOvergangsstønad
+
+        mockFeilerValideringAvInfotrygdperioder()
+
+        assertThatThrownBy {
+            journalføringService.fullførJournalpost(
+                journalpostId = journalpostId,
+                journalføringRequest =
+                JournalføringRequest(
+                    dokumentTitler,
+                    fagsakId,
+                    oppgaveId,
+                    JournalføringBehandling(behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING),
+                    "1234"
+                )
+            )
+        }.isInstanceOf(ApiFeil::class.java)
     }
 
     @Test
@@ -324,11 +363,7 @@ internal class JournalføringServiceTest {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
 
-        every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
-        every { infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(any(), any()) } throws ApiFeil(
-            "feil",
-            BAD_REQUEST
-        )
+        mockFeilerValideringAvInfotrygdperioder()
 
         assertThatThrownBy {
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
@@ -339,6 +374,13 @@ internal class JournalføringServiceTest {
                 )
             )
         }.isInstanceOf(ApiFeil::class.java)
+    }
+
+    private fun mockFeilerValideringAvInfotrygdperioder() {
+        every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
+        every {
+            infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(any(), any())
+        } throws ApiFeil("feil", BAD_REQUEST)
     }
 
     // Test barnetilsyn!!!

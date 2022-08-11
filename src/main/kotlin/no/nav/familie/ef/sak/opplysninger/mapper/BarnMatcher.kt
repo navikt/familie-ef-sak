@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.mapper
 
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import java.time.LocalDate
 import kotlin.math.abs
 

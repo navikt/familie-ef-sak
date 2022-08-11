@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
+import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
@@ -25,19 +27,32 @@ class GrunnlagsdataRegisterService(
         val pdlSøker = pdlClient.hentSøker(personIdent)
         val pdlBarn = hentPdlBarn(pdlSøker)
         val barneForeldre = hentPdlBarneForeldre(pdlBarn, personIdent, barneforeldreFraSøknad)
+        val tidligereVedtasksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(barneForeldre)
         val dataTilAndreIdenter = hentDataTilAndreIdenter(pdlSøker)
 
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
-        val tidligereVedtaksperioder = tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdent)
+        val tidligereVedtaksperioder =
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(pdlSøker.alleIdenter())
 
         return GrunnlagsdataDomene(
             søker = mapSøker(pdlSøker, dataTilAndreIdenter),
-            annenForelder = mapAnnenForelder(barneForeldre),
+            annenForelder = mapAnnenForelder(barneForeldre, tidligereVedtasksperioderAnnenForelder),
             medlUnntak = medlUnntak,
             barn = mapBarn(pdlBarn),
             tidligereVedtaksperioder = tidligereVedtaksperioder
         )
+    }
+
+    private fun hentTidligereVedtaksperioderAnnenForelder(
+        barneForeldre: Map<String, PdlAnnenForelder>
+    ): Map<String, TidligereVedtaksperioder> {
+        return loggTid("antall=${barneForeldre.size}") {
+            barneForeldre.entries.associate { (key, value) ->
+                val personIdenter = value.folkeregisteridentifikator.map { it.ident }.toSet()
+                key to tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdenter)
+            }
+        }
     }
 
     private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {

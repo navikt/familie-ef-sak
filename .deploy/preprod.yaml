@@ -55,19 +55,13 @@ spec:
         - application: familie-ef-personhendelse
         - application: familie-prosessering-lokal
         - application: familie-ef-sak-frontend-lokal
-        - application: familie-ef-mottak
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: dev-fss
         - application: familie-ef-proxy-test
           namespace: teamfamilie
           cluster: dev-fss
-        - application: familie-ef-mottak
-          namespace: teamfamilie
-          cluster: dev-fss
         - application: familie-ba-sak
-          namespace: teamfamilie
-          cluster: dev-gcp
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: dev-gcp
