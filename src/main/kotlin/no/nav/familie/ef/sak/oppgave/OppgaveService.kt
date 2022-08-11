@@ -112,6 +112,12 @@ class OppgaveService(
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
+
+        val gsakOppgave = hentOppgave(gsakOppgaveId)
+        val tidligereSaksbehandler = gsakOppgave.tilordnetRessurs
+        if (tidligereSaksbehandler != saksbehandler && tidligereSaksbehandler != null) {
+            logger.info("(Eier av behandling/oppgave) Fordeler OppgaveId: $gsakOppgaveId som hadde tidligere saksbehandler $tidligereSaksbehandler til $saksbehandler")
+        }
         return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
     }
 
@@ -156,6 +162,14 @@ class OppgaveService(
 
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? {
         return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
+    }
+
+    fun hentTilordnetRessursForBehandling(behandlingId: UUID): String? {
+        val oppgave =
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+                ?: return null
+        val oppgaveFraRegister = oppgaveClient.finnOppgaveMedId(oppgave.gsakOppgaveId)
+        return oppgaveFraRegister.tilordnetRessurs
     }
 
     fun lagOppgaveTekst(beskrivelse: String? = null): String {
