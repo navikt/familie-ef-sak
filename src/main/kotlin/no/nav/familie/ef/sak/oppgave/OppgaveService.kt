@@ -166,7 +166,7 @@ class OppgaveService(
 
     fun hentTilordnetRessursForBehandling(behandlingId: UUID): String? {
         val oppgave =
-                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
                 ?: return null
         val oppgaveFraRegister = oppgaveClient.finnOppgaveMedId(oppgave.gsakOppgaveId)
         return oppgaveFraRegister.tilordnetRessurs
