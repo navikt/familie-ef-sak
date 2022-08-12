@@ -20,12 +20,15 @@ class TidligereVedaksperioderService(
     private val infotrygdService: InfotrygdService,
 ) {
 
-    // TODO endre om til å bruke identer fra pdlSøker, då dette blir et ekstra kall for å hente identer
-    fun hentTidligereVedtaksperioder(personIdent: String): TidligereVedtaksperioder {
-        val tidligereInnvilgetVedtak = mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(personIdent))
+    /**
+     * @param personIdenter for 1 person
+     */
+    fun hentTidligereVedtaksperioder(personIdenter: Set<String>): TidligereVedtaksperioder {
+        val tidligereInnvilgetVedtak =
+            mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(personIdenter))
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
-            sak = harTidligereMottattStønadEf(setOf(personIdent))
+            sak = harTidligereMottattStønadEf(personIdenter)
         )
     }
 

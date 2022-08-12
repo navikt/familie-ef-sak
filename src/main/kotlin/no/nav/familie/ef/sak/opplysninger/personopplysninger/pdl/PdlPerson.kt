@@ -92,6 +92,7 @@ data class PdlSøker(
     override val bostedsadresse: List<Bostedsadresse>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
     val fullmakt: List<Fullmakt>,
@@ -107,7 +108,10 @@ data class PdlSøker(
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
     val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>
-) : PdlPerson
+) : PdlPerson {
+
+    fun alleIdenter(): Set<String> = folkeregisteridentifikator.map { it.ident }.toSet()
+}
 
 data class PdlBarn(
     val adressebeskyttelse: List<Adressebeskyttelse>,
@@ -124,6 +128,7 @@ data class PdlAnnenForelder(
     override val bostedsadresse: List<Bostedsadresse>,
     @JsonProperty("doedsfall") val dødsfall: List<Dødsfall>,
     @JsonProperty("foedsel") override val fødsel: List<Fødsel>,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>,
     val navn: List<Navn>
 ) : PdlPerson
 
@@ -141,6 +146,18 @@ data class Folkeregistermetadata(
     val gyldighetstidspunkt: LocalDateTime?,
     @JsonProperty("opphoerstidspunkt") val opphørstidspunkt: LocalDateTime?
 )
+
+data class Folkeregisteridentifikator(
+    @JsonProperty("identifikasjonsnummer")
+    val ident: String,
+    val status: FolkeregisteridentifikatorStatus,
+    val metadata: Metadata
+)
+
+enum class FolkeregisteridentifikatorStatus {
+    I_BRUK,
+    OPPHOERT
+}
 
 data class Bostedsadresse(
     val angittFlyttedato: LocalDate?,
@@ -184,8 +201,10 @@ data class Kontaktadresse(
 @Suppress("unused")
 enum class KontaktadresseType {
 
-    @JsonProperty("Innland") INNLAND,
-    @JsonProperty("Utland") UTLAND
+    @JsonProperty("Innland")
+    INNLAND,
+    @JsonProperty("Utland")
+    UTLAND
 }
 
 data class Postboksadresse(

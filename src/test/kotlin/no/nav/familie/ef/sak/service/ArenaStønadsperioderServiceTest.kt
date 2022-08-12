@@ -5,10 +5,10 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.ekstern.arena.ArenaStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
@@ -54,7 +54,7 @@ internal class ArenaStønadsperioderServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),
             emptyList(),
             emptyList()
@@ -120,7 +120,7 @@ internal class ArenaStønadsperioderServiceTest {
     private fun mockInfotrygd(stønadFom: LocalDate, stønadTom: LocalDate) {
         val infotrygdPeriode = lagInfotrygdPeriode(stønadFom = stønadFom, stønadTom = stønadTom)
         val infotrygdPeriodeResponse = InfotrygdPeriodeResponse(listOf(infotrygdPeriode), emptyList(), emptyList())
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns infotrygdPeriodeResponse
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns infotrygdPeriodeResponse
     }
 
     private fun mockNyLøsning(stønadFom: LocalDate, stønadTom: LocalDate) {

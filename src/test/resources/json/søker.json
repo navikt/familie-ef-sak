@@ -33,6 +33,15 @@
       ],
       "doedsfall": [],
       "forelderBarnRelasjon": [],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "11111111111",
+          "status": "I_BRUK",
+          "metadata":  {
+            "historisk": false
+          }
+        }
+      ],
       "foedsel": [
         {
           "foedselsaar": null,

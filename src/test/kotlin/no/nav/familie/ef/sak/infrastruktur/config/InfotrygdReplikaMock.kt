@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.infrastruktur.config
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
@@ -31,6 +31,9 @@ class InfotrygdReplikaMock {
         fun resetMock(client: InfotrygdReplikaClient) {
             clearMocks(client)
             every { client.hentPerioder(any()) } answers {
+                hentPerioderDefaultResponse(firstArg())
+            }
+            every { client.hentSammenslåttePerioder(any()) } answers {
                 hentPerioderDefaultResponse(firstArg())
             }
             every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
