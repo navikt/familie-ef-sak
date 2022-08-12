@@ -30,10 +30,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_SKOLEPENGER_REVURDERING("familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-skolepenger"),
     FRONTEND_GJENBRUKE_VILKÅR("familie.ef.sak.frontend-skal-vise-alertboks-gjenbruk-vilkar"),
 
-    FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder"),
-
-    FRONTEND_VIS_NULLSTILL_VEDTAK_KNAPP("familie.ef.sak.frontend-skal-vise-nullstill-vedtak-knapp")
-    ;
+    FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }
