@@ -8,7 +8,8 @@ import java.util.UUID
 data class OpprettOppgaveForBarn(
     val fødselsnummer: String?,
     val fødselsnummerSøker: String,
-    val alder: Alder
+    val alder: Alder,
+    val behandlingId: UUID
 )
 
 data class OpprettetOppfølgingsoppgave(
@@ -32,4 +33,4 @@ enum class Alder(val oppgavebeskrivelse: String) {
     }
 }
 
-data class BarnEksternIder(val barnPersonIdent: String, val behandlingId: UUID, val eksternBehandlingId: Long, val eksternFagsakId: Long)
+data class BarnTilOppgave(val barnPersonIdent: String, val behandlingId: UUID, val eksternBehandlingId: Long, val eksternFagsakId: Long)

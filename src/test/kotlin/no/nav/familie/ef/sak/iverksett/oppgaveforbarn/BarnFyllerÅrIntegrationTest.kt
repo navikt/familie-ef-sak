@@ -1,0 +1,75 @@
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.iverksett.oppgaveforbarn
+
+import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.barn.BarnRepository
+import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
+import no.nav.familie.ef.sak.oppgave.OppgaveRepository
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
+import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
+import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.util.FnrGenerator
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
+
+class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
+
+    @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var barnRepository: BarnRepository
+    @Autowired private lateinit var oppgaveRepository: OppgaveRepository
+    @Autowired private lateinit var vedtakRepository: VedtakRepository
+    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Test
+    fun `barn har blitt mer enn 6 mnd, skal opprette og lagre oppgave`() {
+        val fødselsdato = LocalDate.now().minusDays(183)
+
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET))
+
+        val barnPersonIdent = FnrGenerator.generer(fødselsdato)
+        barnRepository.insert(BehandlingBarn(behandlingId = behandling.id, personIdent = barnPersonIdent))
+
+        vedtakRepository.insert(vedtak(behandling.id))
+        lagreFremtidligAndel(behandling, 4000)
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
+
+        val findByTypeAndAlderIsNotNull = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
+        assertThat(findByTypeAndAlderIsNotNull.size).isEqualTo(1)
+        assertThat(findByTypeAndAlderIsNotNull.first().alder).isEqualTo(Alder.SEKS_MND)
+        assertThat(findByTypeAndAlderIsNotNull.first().barnPersonIdent).isEqualTo(barnPersonIdent)
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
+        assertThat(findByTypeAndAlderIsNotNull.size).isEqualTo(1)
+    }
+
+    private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
+        val andel = lagAndelTilkjentYtelse(
+            beløp = beløp,
+            kildeBehandlingId = behandling.id,
+            fraOgMed = LocalDate.now().minusMonths(1),
+            tilOgMed = LocalDate.now().plusMonths(1)
+        )
+        return tilkjentYtelseRepository.insert(
+            lagTilkjentYtelse(
+                behandlingId = behandling.id,
+                andelerTilkjentYtelse = listOf(andel)
+            )
+        )
+    }
+}

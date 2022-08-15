@@ -5,8 +5,8 @@ import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -55,13 +55,20 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
-        val opprettedeOppgaver = listOf<OpprettetOppfølgingsoppgave>()
+        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
         val skalOpprettes = mutableListOf<OpprettOppgaveForBarn>()
 
         barnTilUtplukkForOppgave.forEach { barn ->
             val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
             if (barnetsAlder != null && barn.fødselsnummerBarn != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
-                skalOpprettes.add(OpprettOppgaveForBarn(barn.fødselsnummerBarn, barn.fødselsnummerSøker, barnetsAlder))
+                skalOpprettes.add(
+                    OpprettOppgaveForBarn(
+                        barn.fødselsnummerBarn,
+                        barn.fødselsnummerSøker,
+                        barnetsAlder,
+                        barn.behandlingId
+                    )
+                )
             }
         }
 
@@ -70,19 +77,25 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun opprettOppgaveForBarn(opprettOppgaverForBarn: List<OpprettOppgaveForBarn>) {
-
-        val eksternIds = gjeldendeBarnRepository.finnEksternIderForBarn(opprettOppgaverForBarn.mapNotNull { it.fødselsnummer }.toSet())
-        eksternIds.forEach { barnEksternId ->
-            val opprettOppgaveForEksternId = opprettOppgaverForBarn.firstOrNull { it.fødselsnummer == barnEksternId.barnPersonIdent }
-            val finnesOppgave = oppgaveRepository.findByBehandlingIdAndBarnPersonIdentAndAlder(barnEksternId.behandlingId, barnEksternId.barnPersonIdent, opprettOppgaveForEksternId?.alder) != null
+        if (opprettOppgaverForBarn.isEmpty()) return
+        val gjeldendeBarnList =
+            gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId }).toSet()
+        gjeldendeBarnList.forEach { gjeldendeBarn ->
+            val opprettOppgaveForEksternId =
+                opprettOppgaverForBarn.firstOrNull { it.fødselsnummer == gjeldendeBarn.barnPersonIdent }
+            val finnesOppgave = oppgaveRepository.findByBehandlingIdAndBarnPersonIdentAndAlder(
+                gjeldendeBarn.behandlingId,
+                gjeldendeBarn.barnPersonIdent,
+                opprettOppgaveForEksternId?.alder
+            ) != null
             if (!finnesOppgave && opprettOppgaveForEksternId != null) {
-                val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, barnEksternId)
+                val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
                 val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgaveRequest)
                 oppgaveClient.leggOppgaveIMappe(opprettetOppgaveId)
                 val oppgave = Oppgave(
                     gsakOppgaveId = opprettetOppgaveId,
-                    behandlingId = barnEksternId.behandlingId,
-                    barnPersonIdent = barnEksternId.barnPersonIdent,
+                    behandlingId = gjeldendeBarn.behandlingId,
+                    barnPersonIdent = gjeldendeBarn.barnPersonIdent,
                     type = Oppgavetype.InnhentDokumentasjon,
                     alder = opprettOppgaveForEksternId.alder
                 )
@@ -93,14 +106,14 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
     private fun lagOppgaveRequestForOppfølgingAvBarnFyltÅr(
         opprettOppgaveForEksternId: OpprettOppgaveForBarn,
-        barnEksternId: BarnEksternIder
+        barnTilOppgave: BarnTilOppgave
     ) =
         OpprettOppgaveRequest(
             ident = OppgaveIdentV2(
                 ident = opprettOppgaveForEksternId.fødselsnummer,
                 gruppe = IdentGruppe.FOLKEREGISTERIDENT
             ),
-            saksId = barnEksternId.eksternFagsakId.toString(),
+            saksId = barnTilOppgave.eksternFagsakId.toString(),
             tema = Tema.ENF,
             oppgavetype = Oppgavetype.InnhentDokumentasjon,
             fristFerdigstillelse = oppgaveService.lagFristForOppgave(LocalDateTime.now()),

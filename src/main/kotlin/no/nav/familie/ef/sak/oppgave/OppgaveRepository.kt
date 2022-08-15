@@ -12,7 +12,7 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
 
     fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId: UUID, oppgavetype: Oppgavetype): Oppgave?
     fun findByBehandlingIdAndBarnPersonIdentAndAlder(behandlingId: UUID, barnPersonIdent: String, alder: Alder?): Oppgave?
-
+    fun findByTypeAndAlderIsNotNull(oppgavetype: Oppgavetype): List<Oppgave>
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?
     fun findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId: UUID): Oppgave?
 }

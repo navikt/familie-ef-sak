@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -140,6 +142,8 @@ class OppgaveClientMock {
         every { oppgaveClient.ferdigstillOppgave(any()) } answers {
             oppgaver.remove(firstArg())
         }
+
+        every { oppgaveClient.leggOppgaveIMappe(any()) } just runs
 
         return oppgaveClient
     }
