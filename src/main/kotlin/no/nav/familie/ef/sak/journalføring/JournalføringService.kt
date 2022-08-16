@@ -141,8 +141,8 @@ class JournalføringService(
         feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak != null) {
             "Kan ikke sende inn årsak når journalposten har strukturert søknad"
         }
-        feilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
-            "Kan ikke journalføre ettersending på ny behandling akkurat nå"
+        brukerfeilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
+            "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
         }
 
         validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
