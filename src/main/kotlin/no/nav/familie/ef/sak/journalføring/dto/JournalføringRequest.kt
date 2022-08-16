@@ -39,8 +39,12 @@ fun JournalføringRequest.valider() {
     feilHvis(this.behandling.behandlingsId != null && this.behandling.årsak != null) {
         "Kan ikke sende inn årsak på en eksisterende behandling"
     }
-    feilHvis(this.behandling.årsak != null && this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD) {
-        "Har ikke støtte for andre årsaker enn papirsøknad"
+    feilHvis(
+        this.behandling.årsak != null &&
+            this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD &&
+            this.behandling.årsak != BehandlingÅrsak.NYE_OPPLYSNINGER
+    ) {
+        "Har ikke støtte for andre årsaker enn papirsøknad og nye opplysninger"
     }
     feilHvis(this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD && barnSomSkalFødes.isNotEmpty()) {
         "Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes"
