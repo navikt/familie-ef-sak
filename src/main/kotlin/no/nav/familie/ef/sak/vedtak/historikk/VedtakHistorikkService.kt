@@ -88,7 +88,7 @@ class VedtakHistorikkService(
         return this.mapNotNull {
             if (it.andel.periode.fom >= fra) {
                 it
-            } else if (it.andel.periode.tom > fra) {
+            } else if (it.andel.periode.tom >= fra) {
                 it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fom = fra), stønadFra = dato))
             } else {
                 null

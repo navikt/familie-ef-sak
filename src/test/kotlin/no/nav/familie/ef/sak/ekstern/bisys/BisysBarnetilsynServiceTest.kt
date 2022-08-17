@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class BisysBarnetilsynServiceTest {
@@ -304,8 +305,8 @@ internal class BisysBarnetilsynServiceTest {
     fun `en infotrygdperiode med tom dato som overskyter startdato, forvent avkortning av inf-tom dato`() {
         val startdato = LocalDate.MIN.plusDays(2)
         mockTilkjentYtelse(startdato)
-        val efFom = LocalDate.now()
-        val efTom = LocalDate.MAX.minusDays(10)
+        val efFom = YearMonth.now().atDay(1)
+        val efTom = LocalDate.MAX
         val andelhistorikkDto =
             lagAndelHistorikkDto(fraOgMed = efFom, tilOgMed = efTom, behandlingBarn = behandlingBarn)
         every {

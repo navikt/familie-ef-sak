@@ -215,7 +215,7 @@ class ValiderOmregningServiceTest {
             val fra = YearMonth.of(år, 5)
             val til = fra
             every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
-                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.MIGRERING,VedtaksperiodeType.HOVEDPERIODE))
+                innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.MIGRERING, VedtaksperiodeType.HOVEDPERIODE))
 
             val vedtak = InnvilgelseOvergangsstønad(null, null, listOf())
 

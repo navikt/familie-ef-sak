@@ -296,9 +296,9 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtak.saksbehandlerId).isEqualTo("opprettetAv")
 
         val tilbakekrevingMedVarsel = vedtak.tilbakekreving?.tilbakekrevingMedVarsel
-        assertThat(tilbakekrevingMedVarsel?.perioder).hasSize(1)
-        assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.fom).isEqualTo(LocalDate.of(2022, 3, 1))
-        assertThat(tilbakekrevingMedVarsel?.perioder?.first()?.tom).isEqualTo(LocalDate.of(2022, 3, 31))
+        assertThat(tilbakekrevingMedVarsel?.fellesperioder).hasSize(1)
+        assertThat(tilbakekrevingMedVarsel?.fellesperioder?.first()?.fom).isEqualTo(YearMonth.of(2022, 3))
+        assertThat(tilbakekrevingMedVarsel?.fellesperioder?.first()?.tom).isEqualTo(YearMonth.of(2022, 3))
         assertThat(tilbakekrevingMedVarsel?.varseltekst).isEqualTo("varseltekst")
         assertThat(tilbakekrevingMedVarsel?.sumFeilutbetaling).isEqualTo(BigDecimal("1000.0"))
         assertThat(vedtak.tilbakekreving?.tilbakekrevingsvalg)
