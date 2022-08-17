@@ -52,8 +52,7 @@ class NyeBarnServiceTest {
     val fnrForVoksentBarn = "22100188701"
     val fødselsdatoVoksentBarn: LocalDate = LocalDate.of(2001, 10, 22)
 
-    @BeforeEach
-    fun init() {
+    @BeforeEach fun init() {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene

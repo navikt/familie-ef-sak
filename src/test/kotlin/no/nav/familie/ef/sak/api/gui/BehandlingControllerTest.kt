@@ -24,8 +24,7 @@ import java.util.UUID
 
 internal class BehandlingControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired
-    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @BeforeEach
     fun setUp() {

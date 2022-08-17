@@ -112,8 +112,7 @@ class TilbakekrevingService(
     private fun lagFeilutbetaltePerioderDto(saksbehandling: Saksbehandling): FeilutbetaltePerioderDto {
         val simulering = simuleringService.simuler(saksbehandling)
 
-        val perioderMedFeilutbetaling =
-            simulering.hentSammenhengendePerioderMedFeilutbetaling().map { Periode(it.fomDato, it.tomDato) }
+        val perioderMedFeilutbetaling = simulering.hentSammenhengendePerioderMedFeilutbetaling().map { Periode(it.fomDato, it.tomDato) }
 
         return FeilutbetaltePerioderDto(
             sumFeilutbetaling = simulering.feilutbetaling.toLong(),

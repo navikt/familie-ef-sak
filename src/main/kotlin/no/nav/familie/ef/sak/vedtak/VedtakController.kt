@@ -157,8 +157,7 @@ class VedtakController(
         personIdenter: List<String>
     ): Ressurs<List<ForventetInntektForPersonIdent>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
-        val personIdentToBehandlingIds =
-            behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
+        val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
 
         val personIdentMedForventetInntektList = mutableListOf<PersonIdentMedForventetInntekt>()

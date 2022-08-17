@@ -13,6 +13,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -60,7 +61,7 @@ class InfotrygdPeriodeValideringService(
         kjøremåned: YearMonth
     ): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = perioder.summert
-        val perioderFremITiden = gjeldendePerioder.filter { it.stønadsperiode.tom >= kjøremåned }
+        val perioderFremITiden = gjeldendePerioder.filter { it.stønadsperiode.tomDato >= kjøremåned.atDay(1) }
         if (perioderFremITiden.isNotEmpty()) {
             return gjeldendePeriodeFremITiden(perioderFremITiden, kjøremåned)
         }
@@ -98,11 +99,9 @@ class InfotrygdPeriodeValideringService(
             )
         }
         val periode = gjeldendePerioder.single()
+        validerFomDato(periode)
         validerTomDato(periode)
-        return periode.copy(
-            stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom),
-            stønadsperiode = periode.stønadsperiode.copy(fom = maxOf(kjøremåned, periode.stønadsperiode.fom))
-        )
+        return periode.copy(stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom), stønadsperiode = periode.stønadsperiode.copy(fom = maxOf(kjøremåned, periode.stønadsperiode.fom)))
     }
 
     private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> {
@@ -112,12 +111,7 @@ class InfotrygdPeriodeValideringService(
                 if (last == null) {
                     acc.add(periode)
                 } else if (perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(last, periode)) {
-                    acc.add(
-                        last.copy(
-                            stønadTom = periode.stønadTom,
-                            stønadsperiode = last.stønadsperiode union periode.stønadsperiode
-                        )
-                    )
+                    acc.add(last.copy(stønadTom = periode.stønadTom, stønadsperiode = last.stønadsperiode union periode.stønadsperiode))
                 } else {
                     acc.add(last)
                     acc.add(periode)
@@ -150,26 +144,46 @@ class InfotrygdPeriodeValideringService(
      * Hvis det kun er 1 måned, så valideres det att fom-dato ikke er annet enn 1 i måneden
      */
     private fun sisteMånedenPåPeriodeBakITiden(periode: SummertInfotrygdPeriodeDto): SummertInfotrygdPeriodeDto {
-        val stønadFom = periode.stønadsperiode.fom
-        val tomMåned = periode.stønadsperiode.tom
+        val stønadTom = periode.stønadTom
+        val stønadFom = periode.stønadFom
+        val tomMåned = YearMonth.of(stønadTom.year, stønadTom.month)
+        val nyFomDato = tomMåned.atDay(1)
         validerTomDato(periode)
+        if (stønadFom > nyFomDato) {
+            throw MigreringException(
+                "Startdato er annet enn første i måneden, dato=$stønadFom",
+                MigreringExceptionType.FEIL_FOM_DATO
+            )
+        }
         if (periode.månedsbeløp == 0) {
             throw MigreringException(
                 "Beløp er 0 på siste perioden, har ikke støtte for det ennå. fom=$stønadFom",
                 MigreringExceptionType.BELØP_0
             )
         }
-        return periode.copy(
-            stønadFom = tomMåned.atDay(1),
-            stønadsperiode = periode.stønadsperiode.copy(fom = tomMåned)
-        )
+        return periode.copy(stønadFom = YearMonth.of(stønadTom.year, stønadTom.month).atDay(1), stønadsperiode = periode.stønadsperiode.copy(fom = tomMåned))
+    }
+
+    private fun validerFomDato(periode: SummertInfotrygdPeriodeDto) {
+        if (periode.stønadFom.dayOfMonth != 1) {
+            throw MigreringException(
+                "Startdato er annet enn første i måneden, dato=${periode.stønadFom}",
+                MigreringExceptionType.FEIL_FOM_DATO
+            )
+        }
     }
 
     private fun validerTomDato(periode: SummertInfotrygdPeriodeDto) {
-        val måned = periode.stønadsperiode.tom
-        if (måned < YearMonth.now().minusYears(3)) {
+        val dato = periode.stønadTom
+        if (YearMonth.of(dato.year, dato.month).atEndOfMonth() != dato) {
             throw MigreringException(
-                "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid, måned=$måned",
+                "Sluttdato er annet enn siste i måneden, dato=$dato",
+                MigreringExceptionType.FEIL_TOM_DATO
+            )
+        }
+        if (dato.isBefore(LocalDate.now().minusYears(3))) {
+            throw MigreringException(
+                "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid, dato=$dato",
                 MigreringExceptionType.ELDRE_PERIODER
             )
         }

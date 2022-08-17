@@ -53,8 +53,8 @@ fun finnGrunnbeløpsPerioder(periode: Månedsperiode): List<Beløpsperiode> {
         .sortedBy { it.periode }
 }
 
-fun finnGrunnbeløp(dato: YearMonth) = grunnbeløpsperioder.find {
-    it.periode.inneholder(dato)
+fun finnGrunnbeløp(dato: LocalDate) = grunnbeløpsperioder.find {
+    it.periode.inneholder(YearMonth.from(dato))
 } ?: error("Grunnbeløp finnes ikke for dato $dato")
 
 // TODO: Kopiert inn fra https://github.com/navikt/g - kan kanskje kalle tjenesten på sikt hvis den er tenkt å være oppdatert?

@@ -13,8 +13,7 @@ object BeregningUtils {
 
     fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
         val (_, _, inntekt, samordningsfradrag) = inntektsperiode
-        val periode = inntektsperiode.periode
-        return finnGrunnbeløpsPerioder(periode).map {
+        return finnGrunnbeløpsPerioder(inntektsperiode.periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, inntekt).divide(BigDecimal(12))
                 .setScale(0, RoundingMode.HALF_DOWN)
 
@@ -57,7 +56,7 @@ object BeregningUtils {
         inntekter: List<Inntektsperiode> = emptyList()
     ): List<Inntektsperiode> {
 
-        val sistBrukteGrunnbeløp = finnGrunnbeløp(YearMonth.from(sisteBrukteGrunnbeløpsdato))
+        val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
             return inntekter
         }
@@ -70,8 +69,7 @@ object BeregningUtils {
         sistBrukteGrunnbeløp: Grunnbeløp
     ): List<Inntektsperiode> {
         val (_, _, inntekt, samordningsfradrag) = inntektsperiode
-        val periode = inntektsperiode.periode
-        return finnGrunnbeløpsPerioder(periode).map { grunnbeløp ->
+        return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
             ) {
@@ -99,22 +97,13 @@ object BeregningUtils {
                     it
                 }
                 it.periode.overlapperKunIStartenAv(vedtaksperiode) -> {
-                    it.copy(
-                        deprecatedPeriode = it.deprecatedPeriode.copy(fradato = vedtaksperiode.fomDato),
-                        periode = (it.periode snitt vedtaksperiode)!!
-                    )
+                    it.copy(deprecatedPeriode = it.deprecatedPeriode.copy(fradato = vedtaksperiode.fomDato), periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 vedtaksperiode.overlapperKunIStartenAv(it.periode) -> {
-                    it.copy(
-                        deprecatedPeriode = it.deprecatedPeriode.copy(tildato = vedtaksperiode.tomDato),
-                        periode = (it.periode snitt vedtaksperiode)!!
-                    )
+                    it.copy(deprecatedPeriode = it.deprecatedPeriode.copy(tildato = vedtaksperiode.tomDato), periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 vedtaksperiode.omsluttesAv(it.periode) -> {
-                    it.copy(
-                        deprecatedPeriode = it.deprecatedPeriode.copy(fradato = vedtaksperiode.fomDato, tildato = vedtaksperiode.tomDato),
-                        periode = (it.periode snitt vedtaksperiode)!!
-                    )
+                    it.copy(deprecatedPeriode = it.deprecatedPeriode.copy(fradato = vedtaksperiode.fomDato, tildato = vedtaksperiode.tomDato), periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 else -> {
                     null

@@ -17,10 +17,8 @@ import java.util.UUID
 
 class BarnRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired
-    private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired
-    private lateinit var barnRepository: BarnRepository
+    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired private lateinit var barnRepository: BarnRepository
 
     private val personIdent = "12345678901"
     private val navn = "Test Barnesen"

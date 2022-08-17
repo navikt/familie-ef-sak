@@ -69,8 +69,7 @@ class PatchVilkårController(
     private fun lagNyDelvilkårsvurdering(behandlingId: UUID): Delvilkårsvurdering {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsak.fagsakPersonId)
-        val sisteIverksatteBehandling =
-            fagsaker.overgangsstønad?.let { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
+        val sisteIverksatteBehandling = fagsaker.overgangsstønad?.let { behandlingRepository.finnSisteIverksatteBehandling(it.id) }
         val svar = utledSvar(sisteIverksatteBehandling)
 
         return Delvilkårsvurdering(

@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 internal class BisysBarnetilsynServiceTest {
@@ -122,7 +121,7 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `personident med andelhistorikk som har tilOgMedDato før fom, forvent tom liste med barntilsynBisysPerioder`() {
+    fun `personident med andelhistorikk som har tilOgMedDato før fomDato, forvent tom liste med barntilsynBisysPerioder`() {
         mockTilkjentYtelse()
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusYears(1), behandlingBarn = behandlingBarn)
@@ -145,10 +144,10 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         val bisysPeriode = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
-            fom
+            fomDato
         ).barnetilsynBisysPerioder.first()
         assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.stønadFra)
         assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.stønadTil)
@@ -158,7 +157,7 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `personident med to andelshistorikker der den ene er før fom, forvent en andelshistorikk`() {
+    fun `personident med to andelshistorikker der den ene er før fomDato, forvent en andelshistorikk`() {
         mockTilkjentYtelse()
         val andelhistorikkDto =
             lagAndelHistorikkDto(tilOgMed = LocalDate.now(), behandlingBarn = behandlingBarn)
@@ -168,11 +167,11 @@ internal class BisysBarnetilsynServiceTest {
         every {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto, gammelAndelhistorikkDto)
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         ).hasSize(1)
     }
@@ -200,11 +199,11 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         ).hasSize(2)
     }
@@ -227,11 +226,11 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
         assertThat(perioder.first().datakilde).isEqualTo(Datakilde.EF)
@@ -248,13 +247,13 @@ internal class BisysBarnetilsynServiceTest {
     fun `en infotrygdperiode etter, og en andelshistorikk før fraOgMedDato i oppslag, forvent kun infotrygdperiode`() {
         mockTilkjentYtelse()
         val andelhistorikkDto =
-            lagAndelHistorikkDto(tilOgMed = YearMonth.now().minusMonths(1).atEndOfMonth(), behandlingBarn = behandlingBarn)
+            lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusMonths(1), behandlingBarn = behandlingBarn)
         every {
             infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
-                stønadTom = YearMonth.now().minusMonths(1).atEndOfMonth(),
+                stønadTom = LocalDate.now().minusMonths(1),
                 beløp = 10
             )
         )
@@ -262,11 +261,11 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
         assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
@@ -283,7 +282,7 @@ internal class BisysBarnetilsynServiceTest {
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
-                stønadTom = YearMonth.now().plusMonths(1).atEndOfMonth(),
+                stønadTom = LocalDate.now().plusMonths(1),
                 beløp = 10
             )
         )
@@ -291,11 +290,11 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns emptyList()
 
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
         assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
@@ -305,8 +304,8 @@ internal class BisysBarnetilsynServiceTest {
     fun `en infotrygdperiode med tom dato som overskyter startdato, forvent avkortning av inf-tom dato`() {
         val startdato = LocalDate.MIN.plusDays(2)
         mockTilkjentYtelse(startdato)
-        val efFom = YearMonth.now().atDay(1)
-        val efTom = LocalDate.MAX.minusMonths(1)
+        val efFom = LocalDate.now()
+        val efTom = LocalDate.MAX.minusDays(10)
         val andelhistorikkDto =
             lagAndelHistorikkDto(fraOgMed = efFom, tilOgMed = efTom, behandlingBarn = behandlingBarn)
         every {
@@ -323,11 +322,11 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fom = LocalDate.now()
+        val fomDato = LocalDate.now()
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         val infotrygdPeriode = perioder.first()
         val efPeriode = perioder.get(1)
@@ -363,11 +362,11 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fom = LocalDate.MIN
+        val fomDato = LocalDate.MIN
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fom
+                fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
         assertThat(perioder.first().datakilde).isEqualTo(Datakilde.EF)

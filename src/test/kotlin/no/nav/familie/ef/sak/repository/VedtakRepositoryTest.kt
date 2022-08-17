@@ -50,7 +50,7 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
             inntekter = InntektWrapper(
                 listOf(
                     Inntektsperiode(
-                        Månedsperiode(YearMonth.now(), YearMonth.now()),
+                        Månedsperiode(YearMonth.now()),
                         inntekt = BigDecimal(100),
                         samordningsfradrag = BigDecimal(0)
                     )

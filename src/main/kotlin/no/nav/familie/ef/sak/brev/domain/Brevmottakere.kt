@@ -17,7 +17,6 @@ enum class MottakerRolle {
     VERGE,
     FULLMAKT
 }
-
 data class BrevmottakerPerson(val personIdent: String, val navn: String, val mottakerRolle: MottakerRolle)
 data class BrevmottakerOrganisasjon(
     val organisasjonsnummer: String,

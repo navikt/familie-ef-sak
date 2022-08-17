@@ -94,15 +94,7 @@ class FagsakService(
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
         val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(fagsak.id)
-        return fagsak.tilDto(
-            behandlinger = behandlinger.map {
-                it.tilDto(
-                    fagsak.stønadstype,
-                    vedtaksdatoPåBehandlingId.get(it.id)
-                )
-            },
-            erLøpende = erLøpende
-        )
+        return fagsak.tilDto(behandlinger = behandlinger.map { it.tilDto(fagsak.stønadstype, vedtaksdatoPåBehandlingId.get(it.id)) }, erLøpende = erLøpende)
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {

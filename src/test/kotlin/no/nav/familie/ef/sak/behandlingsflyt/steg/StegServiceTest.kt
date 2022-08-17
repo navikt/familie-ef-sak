@@ -25,14 +25,10 @@ import java.time.YearMonth
 
 internal class StegServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired
-    lateinit var stegService: StegService
-    @Autowired
-    lateinit var fagsakRepository: FagsakRepository
-    @Autowired
-    lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
-    @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
+    @Autowired lateinit var stegService: StegService
+    @Autowired lateinit var fagsakRepository: FagsakRepository
+    @Autowired lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
+    @Autowired lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `skal håndtere en ny søknad`() {

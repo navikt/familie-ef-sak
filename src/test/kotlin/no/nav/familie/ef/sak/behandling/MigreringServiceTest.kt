@@ -401,8 +401,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     internal fun `hentMigreringInfo - har perioder til og med neste måned i infotrygd`() {
         val nå = YearMonth.of(2021, 1)
         val stønadFom = nå.minusMonths(1).atDay(1)
-        val stønadtom = nå.plusMonths(3)
-        val stønadTom = stønadtom.atEndOfMonth()
+        val stønadTomMåned = nå.plusMonths(3)
+        val stønadTom = stønadTomMåned.atEndOfMonth()
         val infotrygdPeriode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             stønadFom = stønadFom,
             stønadTom = stønadTom,
@@ -418,9 +418,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.kanMigreres).isTrue
         assertThat(migreringInfo.årsak).isNull()
         assertThat(migreringInfo.stønadsperiode?.fom).isEqualTo(nå)
-        assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(stønadtom)
+        assertThat(migreringInfo.stønadsperiode?.tom).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.stønadFom).isEqualTo(nå)
-        assertThat(migreringInfo.stønadTom).isEqualTo(stønadtom)
+        assertThat(migreringInfo.stønadTom).isEqualTo(stønadTomMåned)
         assertThat(migreringInfo.inntektsgrunnlag).isEqualTo(10)
         assertThat(migreringInfo.samordningsfradrag).isEqualTo(5)
         assertThat(migreringInfo.beløpsperioder).hasSize(1)

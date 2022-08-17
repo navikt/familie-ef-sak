@@ -36,11 +36,7 @@ class SivilstandRegel : Vilkårsregel(
     )
 ) {
 
-    override fun initereDelvilkårsvurdering(
-        metadata: HovedregelMetadata,
-        resultat: Vilkårsresultat,
-        barnId: UUID?
-    ): List<Delvilkårsvurdering> {
+    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat, barnId: UUID?): List<Delvilkårsvurdering> {
         val (sivilstandSøknad: Sivilstand?, sivilstandstype: Sivilstandstype) = metadata
 
         val hovedregel: RegelId = when {

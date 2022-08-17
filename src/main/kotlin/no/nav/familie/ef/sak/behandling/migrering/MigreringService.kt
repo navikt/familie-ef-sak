@@ -154,7 +154,7 @@ class MigreringService(
         val behandling = behandlingService.opprettMigrering(fagsak.id)
         logger.info(
             "Migrerer fagsakPerson=${fagsak.fagsakPersonId} fagsak=${fagsak.id} behandling=${behandling.id} " +
-                "fra=${periode.fom} til=${periode.tom}"
+                "fra=${periode.fomDato} til=${periode.tomDato}"
         )
         iverksettService.startBehandling(behandling, fagsak)
 

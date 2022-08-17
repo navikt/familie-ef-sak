@@ -191,13 +191,11 @@ class IverksettingDtoMapper(
     ): TilbakekrevingMedVarselDto? {
         if (tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL) {
             val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsoppsummering(behandlingId)
-            val fellesperioder = lagretSimuleringsresultat.hentSammenhengendePerioderMedFeilutbetaling()
-            val perioder = fellesperioder.map { Periode(fom = it.fomDato, tom = it.tomDato) }
+            val perioder = lagretSimuleringsresultat.hentSammenhengendePerioderMedFeilutbetaling()
             return TilbakekrevingMedVarselDto(
                 varseltekst = tilbakekreving.varseltekst ?: "",
                 sumFeilutbetaling = lagretSimuleringsresultat.feilutbetaling,
-                perioder = perioder,
-                fellesperioder = fellesperioder
+                fellesperioder = perioder
             )
         }
         return null

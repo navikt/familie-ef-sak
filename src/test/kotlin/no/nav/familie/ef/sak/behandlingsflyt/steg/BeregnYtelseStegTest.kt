@@ -1465,15 +1465,7 @@ internal class BeregnYtelseStegTest {
         @BeforeEach
         internal fun setUp() {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(
-                    BeløpsperiodeBarnetilsynDto(
-                        periode = Månedsperiode(YearMonth.now()),
-                        beløp = 1,
-                        beløpFørFratrekkOgSatsjustering = 1,
-                        sats = 6284,
-                        beregningsgrunnlag = grunnlag()
-                    )
-                )
+                listOf(BeløpsperiodeBarnetilsynDto(periode = Månedsperiode(YearMonth.now()), beløp = 1, beløpFørFratrekkOgSatsjustering = 1, sats = 6284, beregningsgrunnlag = grunnlag()))
         }
 
         @Test
@@ -1496,15 +1488,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(
-                    BeløpsperiodeBarnetilsynDto(
-                        periode = Månedsperiode(nyAndelFom, nyAndelTom),
-                        beløp = 1,
-                        beløpFørFratrekkOgSatsjustering = 1,
-                        sats = 6284,
-                        beregningsgrunnlag = grunnlag()
-                    )
-                )
+                listOf(BeløpsperiodeBarnetilsynDto(periode = Månedsperiode(nyAndelFom, nyAndelTom), beløp = 1, beløpFørFratrekkOgSatsjustering = 1, sats = 6284, beregningsgrunnlag = grunnlag()))
 
             utførSteg(
                 saksbehandling(
@@ -1536,15 +1520,7 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(
-                    BeløpsperiodeBarnetilsynDto(
-                        periode = Månedsperiode(nyAndelFom, nyAndelTom),
-                        beløp = 1,
-                        beløpFørFratrekkOgSatsjustering = 1,
-                        sats = 6284,
-                        beregningsgrunnlag = grunnlag()
-                    )
-                )
+                listOf(BeløpsperiodeBarnetilsynDto(periode = Månedsperiode(nyAndelFom, nyAndelTom), beløp = 1, beløpFørFratrekkOgSatsjustering = 1, sats = 6284, beregningsgrunnlag = grunnlag()))
 
             utførSteg(
                 saksbehandling(

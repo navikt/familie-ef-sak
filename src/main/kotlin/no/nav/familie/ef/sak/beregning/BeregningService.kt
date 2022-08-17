@@ -41,11 +41,11 @@ class BeregningService {
             vedtaksperioder.zipWithNext { a, b -> a < b }.any { !it }
         ) { "Vedtaksperioder må være sortert" }
 
-        brukerfeilHvis(inntektsperioder.first().periode.fomDato > vedtaksperioder.first().fomDato) {
+        brukerfeilHvis(inntektsperioder.first().periode.fom > vedtaksperioder.first().fom) {
             "Inntektsperioder $inntektsperioder begynner etter vedtaksperioder $vedtaksperioder"
         }
 
-        brukerfeilHvis(inntektsperioder.last().periode.tomDato < vedtaksperioder.last().tomDato) {
+        brukerfeilHvis(inntektsperioder.last().periode.tom < vedtaksperioder.last().tom) {
             "Inntektsperioder $inntektsperioder slutter før vedtaksperioder $vedtaksperioder "
         }
 

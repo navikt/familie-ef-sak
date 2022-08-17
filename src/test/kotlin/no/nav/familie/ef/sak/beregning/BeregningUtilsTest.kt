@@ -31,12 +31,7 @@ internal class BeregningUtilsTest {
                     vedtaksperiode = vedtaksperiode
                 ).first()
             )
-                .isEqualTo(
-                    beløpsperiode.copy(
-                        periode = vedtaksperiode,
-                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fomDato, vedtaksperiode.tomDato)
-                    )
-                )
+                .isEqualTo(beløpsperiode.copy(periode = vedtaksperiode, deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fomDato, vedtaksperiode.tomDato)))
         }
 
         @Test

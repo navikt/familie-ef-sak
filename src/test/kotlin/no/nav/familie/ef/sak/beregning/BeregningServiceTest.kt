@@ -50,7 +50,7 @@ internal class BeregningServiceTest {
             inntektsperioder = listOf(
                 Inntektsperiode(
                     Månedsperiode(
-                        LocalDate.parse("2019-04-01"),
+                        LocalDate.parse("2019-04-30"),
                         LocalDate.parse("2022-04-30")
                     ),
                     BigDecimal(0),
@@ -59,7 +59,7 @@ internal class BeregningServiceTest {
             ),
             vedtaksperioder = listOf(
                 Månedsperiode(
-                    LocalDate.parse("2019-04-01"),
+                    LocalDate.parse("2019-04-30"),
                     LocalDate.parse("2022-04-30")
                 )
             )
@@ -69,7 +69,7 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse[0]).isEqualTo(
             Beløpsperiode(
                 Månedsperiode(
-                    LocalDate.parse("2019-04-01"),
+                    LocalDate.parse("2019-04-30"),
                     LocalDate.parse("2019-04-30")
                 ),
                 beregningsgrunnlag = beregningsgrunnlagG2018,
