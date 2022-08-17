@@ -39,8 +39,14 @@ class InntektController(
     }
 
     @GetMapping("fagsak/{fagsakId}/generer-url")
-    fun genererAInntektUrl(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
+    fun genererAInntektUrlFagsak(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<String> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        return success(inntektService.genererAInntektUrl(fagsakId))
+        return success(inntektService.genererAInntektUrlFagsak(fagsakId))
+    }
+
+    @GetMapping("fagsak-person/{fagsakPersonId}/generer-url")
+    fun genererAInntektUrl(@PathVariable("fagsakPersonId") fagsakPersonId: UUID): Ressurs<String> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        return success(inntektService.genererAInntektUrl(fagsakPersonId))
     }
 }
