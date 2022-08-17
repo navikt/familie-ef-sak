@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.erPåfølgende
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
@@ -57,6 +59,7 @@ class VedtakHistorikkService(
                     it.periodeType ?: error("Mangler periodetype data=$it")
                 )
             }
+            .fyllHullMedMidlertideligOpphør()
     }
 
     private fun mapInntekter(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<Inntekt> {
@@ -94,4 +97,24 @@ class VedtakHistorikkService(
             }
         }
     }
+
+    private fun List<VedtaksperiodeDto>.fyllHullMedMidlertideligOpphør() =
+        this.fold(emptyList<VedtaksperiodeDto>()) { acc, periode ->
+            val lastOrNull = acc.lastOrNull()
+            if (lastOrNull == null || lastOrNull.årMånedTil.erPåfølgende(periode.årMånedFra)) {
+                acc + periode
+            } else {
+                acc + lagPeriodeForHull(lastOrNull, periode) + periode
+            }
+        }
+
+    private fun lagPeriodeForHull(
+        forrigePeriode: VedtaksperiodeDto,
+        periode: VedtaksperiodeDto
+    ): VedtaksperiodeDto = VedtaksperiodeDto(
+        forrigePeriode.årMånedTil.plusMonths(1),
+        periode.årMånedFra.minusMonths(1),
+        AktivitetType.IKKE_AKTIVITETSPLIKT,
+        VedtaksperiodeType.MIDLERTIDIG_OPPHØR
+    )
 }
