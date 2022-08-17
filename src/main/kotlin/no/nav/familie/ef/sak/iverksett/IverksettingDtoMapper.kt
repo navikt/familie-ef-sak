@@ -68,6 +68,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
@@ -347,7 +348,7 @@ class IverksettingDtoMapper(
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
     andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
-    startdato = startdato
+    startmåned = YearMonth.from(startdato)
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(

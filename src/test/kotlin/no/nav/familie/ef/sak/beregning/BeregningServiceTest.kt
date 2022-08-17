@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -69,7 +68,7 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse.size).isEqualTo(4)
         assertThat(fullYtelse[0]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2019-04-01"),
                     LocalDate.parse("2019-04-30")
                 ),
@@ -80,7 +79,7 @@ internal class BeregningServiceTest {
         )
         assertThat(fullYtelse[1]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2019-05-01"),
                     LocalDate.parse("2020-04-30")
                 ),
@@ -91,7 +90,7 @@ internal class BeregningServiceTest {
         )
         assertThat(fullYtelse[2]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2020-05-01"),
                     LocalDate.parse("2021-04-30")
                 ),
@@ -102,7 +101,7 @@ internal class BeregningServiceTest {
         )
         assertThat(fullYtelse[3]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2021-05-01"),
                     LocalDate.parse("2022-04-30")
                 ),
@@ -159,7 +158,7 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse.size).isEqualTo(1)
         assertThat(fullYtelse[0]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2019-06-01"),
                     LocalDate.parse("2020-04-30")
                 ),
@@ -239,7 +238,7 @@ internal class BeregningServiceTest {
         assertThat(fullYtelse.size).isEqualTo(2)
         assertThat(fullYtelse[0]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2019-01-01"),
                     LocalDate.parse("2019-02-28")
                 ),
@@ -251,7 +250,7 @@ internal class BeregningServiceTest {
 
         assertThat(fullYtelse[1]).isEqualTo(
             Beløpsperiode(
-                Datoperiode(
+                Månedsperiode(
                     LocalDate.parse("2019-06-01"),
                     LocalDate.parse("2020-04-30")
                 ),

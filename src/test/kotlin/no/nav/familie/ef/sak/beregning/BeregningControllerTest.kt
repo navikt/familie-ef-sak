@@ -117,8 +117,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             hentBeløpsperioderForBehandling(behandling.id)
         val beløpsperioderFørstegangsbehandling = responsFørstegangsbehandling.body?.data
         assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
-        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fom).isEqualTo(LocalDate.of(2022, 1, 1))
-        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tom).isEqualTo(LocalDate.of(2022, 4, 30))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fomDato).isEqualTo(LocalDate.of(2022, 1, 1))
+        assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tomDato).isEqualTo(LocalDate.of(2022, 4, 30))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.deprecatedPeriode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.deprecatedPeriode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(BigDecimal(10_000))
@@ -126,8 +126,8 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         val responsRevurdering: ResponseEntity<Ressurs<List<Beløpsperiode>>> = hentBeløpsperioderForBehandling(revurdering.id)
         val beløpsperioderRevurdering = responsRevurdering.body?.data
         assertThat(beløpsperioderRevurdering).hasSize(1)
-        assertThat(beløpsperioderRevurdering?.first()?.periode?.fom).isEqualTo(LocalDate.of(2022, 3, 1))
-        assertThat(beløpsperioderRevurdering?.first()?.periode?.tom).isEqualTo(LocalDate.of(2022, 6, 30))
+        assertThat(beløpsperioderRevurdering?.first()?.periode?.fomDato).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(beløpsperioderRevurdering?.first()?.periode?.tomDato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))

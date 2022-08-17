@@ -49,8 +49,8 @@ data class SkoleårsperiodeSkolepengerDto(
 
 data class DelårsperiodeSkoleårDto(
     val studietype: SkolepengerStudietype,
-    @Deprecated("Bruke periode", ReplaceWith("periode.fomMåned")) val årMånedFra: YearMonth? = null,
-    @Deprecated("Bruke periode", ReplaceWith("periode.tomMåned")) val årMånedTil: YearMonth? = null,
+    @Deprecated("Bruke periode", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
+    @Deprecated("Bruke periode", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")

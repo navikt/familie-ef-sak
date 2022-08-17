@@ -14,7 +14,7 @@ internal class GrunnbeløpstestTest {
         assertThat(perioder.size).isEqualTo(22)
         perioder.forEachIndexed { index, beløpsperiode ->
             if (perioder.size > index + 1) {
-                assertThat(beløpsperiode.periode.tom).isBefore(perioder[index + 1].periode.fom)
+                assertThat(beløpsperiode.periode.tom).isLessThan(perioder[index + 1].periode.fom)
             }
         }
     }
@@ -23,26 +23,26 @@ internal class GrunnbeløpstestTest {
     internal fun `skal sette riktig startdato og sluttdato når beløpsperioder stanser på en g-endringsperiode`() {
         val perioder = finnGrunnbeløpsPerioder(Månedsperiode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 5, 1)))
         assertThat(perioder.size).isEqualTo(2)
-        assertThat(perioder.first().periode.tom).isEqualTo(LocalDate.of(2021, 4, 30))
-        assertThat(perioder.last().periode.fom).isEqualTo(LocalDate.of(2021, 5, 1))
-        assertThat(perioder.last().periode.tom).isEqualTo(LocalDate.of(2021, 5, 31))
+        assertThat(perioder.first().periode.tomDato).isEqualTo(LocalDate.of(2021, 4, 30))
+        assertThat(perioder.last().periode.fomDato).isEqualTo(LocalDate.of(2021, 5, 1))
+        assertThat(perioder.last().periode.tomDato).isEqualTo(LocalDate.of(2021, 5, 31))
     }
 
     @Test
     internal fun `skal sette riktig startdato og sluttdato når beløpsperioder starter på en g-endringsperiode`() {
         val perioder = finnGrunnbeløpsPerioder(Månedsperiode(LocalDate.of(2021, 5, 1), LocalDate.of(2021, 8, 31)))
         assertThat(perioder.size).isEqualTo(1)
-        assertThat(perioder.first().periode.fom).isEqualTo(LocalDate.of(2021, 5, 1))
-        assertThat(perioder.first().periode.tom).isEqualTo(LocalDate.of(2021, 8, 31))
+        assertThat(perioder.first().periode.fomDato).isEqualTo(LocalDate.of(2021, 5, 1))
+        assertThat(perioder.first().periode.tomDato).isEqualTo(LocalDate.of(2021, 8, 31))
     }
 
     @Test
     internal fun `skal sette riktig startdato og sluttdato når beløpsperioder starter dagen før en en g-endringsperiode`() {
         val perioder = finnGrunnbeløpsPerioder(Månedsperiode(LocalDate.of(2021, 4, 30), LocalDate.of(2021, 8, 1)))
         assertThat(perioder.size).isEqualTo(2)
-        assertThat(perioder.first().periode.fom).isEqualTo(LocalDate.of(2021, 4, 1))
-        assertThat(perioder.first().periode.tom).isEqualTo(LocalDate.of(2021, 4, 30))
-        assertThat(perioder.last().periode.fom).isEqualTo(LocalDate.of(2021, 5, 1))
-        assertThat(perioder.last().periode.tom).isEqualTo(LocalDate.of(2021, 8, 31))
+        assertThat(perioder.first().periode.fomDato).isEqualTo(LocalDate.of(2021, 4, 1))
+        assertThat(perioder.first().periode.tomDato).isEqualTo(LocalDate.of(2021, 4, 30))
+        assertThat(perioder.last().periode.fomDato).isEqualTo(LocalDate.of(2021, 5, 1))
+        assertThat(perioder.last().periode.tomDato).isEqualTo(LocalDate.of(2021, 8, 31))
     }
 }

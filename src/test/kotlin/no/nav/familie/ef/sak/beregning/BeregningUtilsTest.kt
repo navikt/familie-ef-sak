@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.beregning.BeregningUtils.finnStartDatoOgSluttDatoForBeløpsperiode
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class BeregningUtilsTest {
 
@@ -17,24 +17,24 @@ internal class BeregningUtilsTest {
         @Test
         fun `hvis vedtaksperiode omsluttes av beløpsperiode skal datoerne for vedtaksperiode returneres `() {
             val beløpsperiode = Beløpsperiode(
-                periode = Datoperiode(
+                periode = Månedsperiode(
                     fom = LocalDate.parse("2020-05-01"),
                     tom = LocalDate.parse("2020-12-01")
                 ),
                 beløp = 10_000.toBigDecimal(),
                 beløpFørSamordning = 12_000.toBigDecimal()
             )
-            val vedtaksperiode = Datoperiode(fom = LocalDate.parse("2020-07-01"), tom = LocalDate.parse("2020-10-31"))
+            val vedtaksperiode = Månedsperiode(fom = LocalDate.parse("2020-07-01"), tom = LocalDate.parse("2020-10-31"))
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode.toMånedsperiode()
+                    vedtaksperiode = vedtaksperiode
                 ).first()
             )
                 .isEqualTo(
                     beløpsperiode.copy(
                         periode = vedtaksperiode,
-                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fom, vedtaksperiode.tom)
+                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fomDato, vedtaksperiode.tomDato)
                     )
                 )
         }
@@ -43,7 +43,7 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode omsluttes av vedtaksperiode skal datoerne for beløpsperiode være uforandrede`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    periode = Datoperiode(
+                    periode = Månedsperiode(
                         fom = LocalDate.parse("2020-07-01"),
                         tom = LocalDate.parse("2020-09-30")
                     ),
@@ -64,28 +64,28 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode overlapper i starten av vedtaksperiode skal startdatoen for vedtaksperiode returneres sammen med sluttdato for beløpsperiode`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    periode = Datoperiode(
+                    periode = Månedsperiode(
                         fom = LocalDate.parse("2020-03-01"),
                         tom = LocalDate.parse("2020-06-30")
                     ),
                     beløp = 10_000.toBigDecimal(),
                     beløpFørSamordning = 12_000.toBigDecimal()
                 )
-            val vedtaksperiode = Datoperiode(
+            val vedtaksperiode = Månedsperiode(
                 fom = LocalDate.parse("2020-05-01"),
                 tom = LocalDate.parse("2020-12-31")
             )
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode.toMånedsperiode()
+                    vedtaksperiode = vedtaksperiode
                 ).first()
             )
                 .isEqualTo(
                     beløpsperiode.copy(
                         periode = vedtaksperiode.copy(
-                            fom = LocalDate.parse("2020-05-01"),
-                            tom = LocalDate.parse("2020-06-30")
+                            fom = YearMonth.parse("2020-05"),
+                            tom = YearMonth.parse("2020-06")
                         ),
                         deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(
                             fradato = LocalDate.parse("2020-05-01"),
@@ -99,21 +99,21 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode overlapper i slutten av vedtaksperiode skal startdatoen for beløpsperiode returneres sammen med sluttdato for vedtaksperiode`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    periode = Datoperiode(
+                    periode = Månedsperiode(
                         fom = LocalDate.parse("2020-09-01"),
                         tom = LocalDate.parse("2021-02-28")
                     ),
                     beløp = 10_000.toBigDecimal(),
                     beløpFørSamordning = 12_000.toBigDecimal()
                 )
-            val vedtaksperiode = Datoperiode(
+            val vedtaksperiode = Månedsperiode(
                 fom = LocalDate.parse("2020-05-01"),
                 tom = LocalDate.parse("2020-12-31")
             )
             assertThat(
                 finnStartDatoOgSluttDatoForBeløpsperiode(
                     beløpForInnteksperioder = listOf(beløpsperiode),
-                    vedtaksperiode = vedtaksperiode.toMånedsperiode()
+                    vedtaksperiode = vedtaksperiode
                 ).first()
             )
                 .isEqualTo(
@@ -123,8 +123,8 @@ internal class BeregningUtilsTest {
                             tildato = LocalDate.parse("2020-12-31")
                         ),
                         periode = vedtaksperiode.copy(
-                            fom = LocalDate.parse("2020-09-01"),
-                            tom = LocalDate.parse("2020-12-31")
+                            fom = YearMonth.parse("2020-09"),
+                            tom = YearMonth.parse("2020-12")
                         )
                     )
                 )
@@ -134,7 +134,7 @@ internal class BeregningUtilsTest {
         fun `hvis beløpsperiode har ingen overlapp med vedtaksperiode skal tom liste returneres`() {
             val beløpsperiode =
                 Beløpsperiode(
-                    periode = Datoperiode(
+                    periode = Månedsperiode(
                         fom = LocalDate.parse("2020-01-01"),
                         tom = LocalDate.parse("2020-04-30")
                     ),
@@ -211,7 +211,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                nyesteGrunnbeløp.periode.fom,
+                nyesteGrunnbeløp.periode.fomDato,
                 inntektsperioder
             )
 

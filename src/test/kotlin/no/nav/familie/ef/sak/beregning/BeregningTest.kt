@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
@@ -54,7 +53,7 @@ internal class BeregningTest {
                         .isEqualTo(
                             fasit.map {
                                 Beløpsperiode(
-                                    Datoperiode(
+                                    Månedsperiode(
                                         LocalDate.parse(it.first),
                                         LocalDate.parse(it.second)
                                     ),

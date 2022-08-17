@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
-import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -643,8 +642,8 @@ class BeregningBarnetilsynServiceTest {
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(1)
-        assertThat(resultat.first().periode.fom).isEqualTo(forventetFraDato)
-        assertThat(resultat.first().periode.tom).isEqualTo(forventetTilDato)
+        assertThat(resultat.first().periode.fomDato).isEqualTo(forventetFraDato)
+        assertThat(resultat.first().periode.tomDato).isEqualTo(forventetTilDato)
     }
 
     @Test
@@ -668,8 +667,8 @@ class BeregningBarnetilsynServiceTest {
         val resultat = beløpsperioder.mergeSammenhengendePerioder()
 
         assertThat(resultat).hasSize(2)
-        assertThat(resultat.first().periode.fom).isEqualTo(forventetFraDato)
-        assertThat(resultat.last().periode.tom).isEqualTo(forventetTilDato)
+        assertThat(resultat.first().periode.fomDato).isEqualTo(forventetFraDato)
+        assertThat(resultat.last().periode.tomDato).isEqualTo(forventetTilDato)
     }
 
     @Test
@@ -719,7 +718,7 @@ class BeregningBarnetilsynServiceTest {
         beløp: BigDecimal = BigDecimal(100)
     ): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(
-            periode = Datoperiode(fraDato, tilDato),
+            periode = Månedsperiode(fraDato, tilDato),
             beløp = beløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beløp.roundUp().toInt(),
             sats = 6284,

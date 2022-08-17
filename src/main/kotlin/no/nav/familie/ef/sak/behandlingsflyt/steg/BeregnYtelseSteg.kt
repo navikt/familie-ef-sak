@@ -503,7 +503,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp.toInt(),
-                    periode = it.periode.toMånedsperiode(),
+                    periode = it.periode,
                     kildeBehandlingId = saksbehandling.id,
                     personIdent = saksbehandling.ident,
                     samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
@@ -525,7 +525,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    periode = it.periode.toMånedsperiode(),
+                    periode = it.periode,
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,

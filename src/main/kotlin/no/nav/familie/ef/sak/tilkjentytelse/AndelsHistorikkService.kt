@@ -56,7 +56,7 @@ class AndelsHistorikkService(
             val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
                 .filter { it.endring?.type != EndringType.FJERNET }
                 .filter { it.endring?.type != EndringType.ERSTATTET }
-                .filter { it.andel.beløp > 0 && it.andel.periode.inneholder(vedtaksdatoEllerDagensdato) }
+                .filter { it.andel.beløp > 0 && it.andel.periode.toDatoperiode().inneholder(vedtaksdatoEllerDagensdato) }
                 .map { it.andel.barn }
                 .flatten()
             val behandlingsbarn = barnService.hentBehandlingBarnForBarnIder(barnIdForAlleAktuelleBehandlinger)

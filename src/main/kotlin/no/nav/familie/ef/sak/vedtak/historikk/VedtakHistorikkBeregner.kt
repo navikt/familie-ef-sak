@@ -68,7 +68,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
         this(
-            periode = periode.periode.toMånedsperiode(),
+            periode = periode.periode,
             erSanksjon = false,
             kontantstøtte = periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
             tilleggsstønad = periode.beregningsgrunnlag.tilleggsstønadsbeløp.toInt(),

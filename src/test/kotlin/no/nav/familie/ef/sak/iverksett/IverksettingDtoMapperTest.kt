@@ -28,6 +28,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.søker
+import no.nav.familie.ef.sak.repository.tilkjentYtelse
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
@@ -70,6 +71,7 @@ import org.springframework.data.repository.findByIdOrNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.BehandlingType as BehandlingTypeIverksett
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
@@ -165,7 +167,7 @@ internal class IverksettingDtoMapperTest {
             false,
             LocalDateTime.now()
         )
-        every { tilkjentYtelseService.hentForBehandling(any()) } returns mockk(relaxed = true)
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(UUID.randomUUID(), personIdent = "132")
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
 
@@ -302,7 +304,7 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtak.tilbakekreving?.tilbakekrevingsvalg)
             .isEqualTo(no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL)
 
-        assertThat(vedtak.tilkjentYtelse?.startdato).isEqualTo(LocalDate.of(2022, 4, 7))
+        assertThat(vedtak.tilkjentYtelse?.startmåned).isEqualTo(YearMonth.of(2022, 4))
         // opphørsdato ikke i bruk?
 
         assertThat(vedtak.tilkjentYtelse?.andelerTilkjentYtelse).hasSize(1)

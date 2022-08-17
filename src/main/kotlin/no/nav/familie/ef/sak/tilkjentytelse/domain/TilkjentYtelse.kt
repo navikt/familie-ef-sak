@@ -38,7 +38,7 @@ data class TilkjentYtelse(
     val samordningsfradragType: SamordningsfradragType? = null,
     val startdato: LocalDate,
     @Column("grunnbelopsdato")
-    val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fom,
+    val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
 ) {

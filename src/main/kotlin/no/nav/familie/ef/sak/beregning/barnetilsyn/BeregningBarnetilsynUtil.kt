@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.math.RoundingMode
@@ -47,7 +48,7 @@ object BeregningBarnetilsynUtil {
             )
 
         return BeløpsperiodeBarnetilsynDto(
-            periode = Datoperiode(utgiftsperiode.årMåned, utgiftsperiode.årMåned),
+            periode = Månedsperiode(utgiftsperiode.årMåned, utgiftsperiode.årMåned),
             beløp = beregnedeBeløp.utbetaltBeløp.roundUp().toInt(),
             beløpFørFratrekkOgSatsjustering = beregnedeBeløp.beløpFørFratrekkOgSatsjustering.roundUp().toInt(),
             sats = beregnedeBeløp.makssats,

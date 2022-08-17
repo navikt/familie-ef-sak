@@ -17,7 +17,7 @@ fun lagTilkjentYtelse(
     vedtaksdato: LocalDate = LocalDate.now(),
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
-    grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fom
+    grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato
 ) =
     TilkjentYtelse(
         id = id,

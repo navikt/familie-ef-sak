@@ -85,13 +85,13 @@ class MigreringService(
         }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
 
-        val fra = periode.stønadsperiode.fomMåned
-        val vedtaksperioder = vedtaksperioder(periode.stønadsperiode.toMånedsperiode(), erReellArbeidssøker(periode))
+        val fra = periode.stønadsperiode.fom
+        val vedtaksperioder = vedtaksperioder(periode.stønadsperiode, erReellArbeidssøker(periode))
         val inntekter = inntekter(fra, periode.inntektsgrunnlag, periode.samordningsfradrag)
         val beregnYtelse = beregningService.beregnYtelse(vedtaksperioder.tilPerioder(), inntekter.tilInntektsperioder())
         return MigreringInfo(
             kanMigreres = true,
-            stønadsperiode = periode.stønadsperiode.toMånedsperiode(),
+            stønadsperiode = periode.stønadsperiode,
             inntektsgrunnlag = periode.inntektsgrunnlag,
             samordningsfradrag = periode.samordningsfradrag,
             beløpsperioder = beregnYtelse
@@ -124,12 +124,12 @@ class MigreringService(
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
-        if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.fomMåned) {
+        if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.fom) {
             throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
         }
         return opprettMigrering(
             fagsak = fagsak,
-            periode = periode.stønadsperiode.toMånedsperiode(),
+            periode = periode.stønadsperiode,
             inntektsgrunnlag = periode.inntektsgrunnlag,
             samordningsfradrag = periode.samordningsfradrag,
             erReellArbeidssøker = erReellArbeidssøker(periode)
@@ -237,7 +237,7 @@ class MigreringService(
 
         if (sisteSummertePerioden == null ||
             sisteSummertePerioden.opphørsdato != null ||
-            sisteSummertePerioden.stønadsperiode.tom <= opphørsmåned.atEndOfMonth()
+            sisteSummertePerioden.stønadsperiode.tom <= opphørsmåned
         ) {
             logger.info(
                 "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - " +

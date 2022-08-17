@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
-import no.nav.familie.kontrakter.felles.Datoperiode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 
 data class InfotrygdPerioderDto(
@@ -17,9 +17,9 @@ data class InfotrygdStønadPerioderDto(
 )
 
 data class SummertInfotrygdPeriodeDto(
-    @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.fomDato")) val stønadFom: LocalDate,
-    @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.tomDato")) val stønadTom: LocalDate,
-    val stønadsperiode: Datoperiode,
+    val stønadsperiode: Månedsperiode,
+    @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.fom")) val stønadFom: LocalDate = stønadsperiode.fomDato,
+    @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.tom")) val stønadTom: LocalDate = stønadsperiode.tomDato,
     val opphørsdato: LocalDate?,
     val inntektsgrunnlag: Int,
     val inntektsreduksjon: Int,
@@ -34,7 +34,7 @@ fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto
     SummertInfotrygdPeriodeDto(
         stønadFom = this.stønadFom,
         stønadTom = this.stønadTom,
-        stønadsperiode = Datoperiode(this.stønadFom, this.stønadTom),
+        stønadsperiode = Månedsperiode(this.stønadFom, this.stønadTom),
         opphørsdato = this.opphørsdato,
         inntektsgrunnlag = this.inntektsgrunnlag,
         inntektsreduksjon = this.inntektsreduksjon,

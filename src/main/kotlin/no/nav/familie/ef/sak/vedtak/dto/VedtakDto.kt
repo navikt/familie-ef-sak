@@ -97,8 +97,8 @@ data class Sanksjonert(
 ) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 data class SanksjonertPeriodeDto(
-    @Deprecated("Bruk fomMåned", ReplaceWith("fomMåned")) val årMånedFra: YearMonth,
-    @Deprecated("Bruk tomMåned", ReplaceWith("tomMåned")) val årMånedTil: YearMonth,
+    @Deprecated("Bruk fomMåned", ReplaceWith("fom")) val årMånedFra: YearMonth,
+    @Deprecated("Bruk tomMåned", ReplaceWith("tom")) val årMånedTil: YearMonth,
     val fom: YearMonth = årMånedFra,
     val tom: YearMonth = årMånedTil
 ) {
