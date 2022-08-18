@@ -16,6 +16,7 @@ internal class BehandlingsjournalpostRepositoryTest : OppslagSpringRunnerTest() 
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var behandlingsjournalpostRepository: BehandlingsjournalpostRepository
 

@@ -80,17 +80,23 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
+
     @Autowired
     private lateinit var applicationContext: ApplicationContext
+
     @Autowired
     private lateinit var cacheManager: CacheManager
+
     @Autowired
     @Qualifier("kodeverkCache")
     private lateinit var cacheManagerKodeverk: CacheManager
+
     @Autowired
     private lateinit var rolleConfig: RolleConfig
+
     @Autowired
     private lateinit var mockOAuth2Server: MockOAuth2Server
+
     @Autowired
     lateinit var testoppsettService: TestoppsettService
 
@@ -147,7 +153,7 @@ abstract class OppslagSpringRunnerTest {
             Task::class,
             Migreringsstatus::class,
 
-        ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
+            ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
     protected fun getPort(): String {

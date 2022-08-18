@@ -118,7 +118,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     )
                 ),
 
-        )
+            )
 
     private fun lagIkkeTilgangResponse() = Tilgang(
         false,

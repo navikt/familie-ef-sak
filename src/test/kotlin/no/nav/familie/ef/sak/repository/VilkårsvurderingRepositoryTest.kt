@@ -19,6 +19,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

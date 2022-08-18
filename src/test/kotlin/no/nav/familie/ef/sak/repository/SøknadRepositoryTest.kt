@@ -18,6 +18,7 @@ internal class SøknadRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var søknadRepository: SøknadRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

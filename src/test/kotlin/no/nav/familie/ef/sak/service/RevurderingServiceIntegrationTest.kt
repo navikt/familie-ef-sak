@@ -42,14 +42,19 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var revurderingService: RevurderingService
+
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
     @Autowired
     lateinit var søknadService: SøknadService
+
     @Autowired
     lateinit var barnRepository: BarnRepository
+
     @Autowired
     lateinit var søknadRepository: SøknadRepository
 

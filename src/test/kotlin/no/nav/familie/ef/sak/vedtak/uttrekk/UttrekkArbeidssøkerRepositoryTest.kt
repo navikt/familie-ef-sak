@@ -14,6 +14,7 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var repository: UttrekkArbeidssøkerRepository
 

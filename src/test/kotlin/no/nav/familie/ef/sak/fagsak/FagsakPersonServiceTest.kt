@@ -17,8 +17,10 @@ internal class FagsakPersonServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
     @Autowired
     private lateinit var jdbcTemplate: JdbcTemplate
+
     @Autowired
     private lateinit var fagsakPersonService: FagsakPersonService
 

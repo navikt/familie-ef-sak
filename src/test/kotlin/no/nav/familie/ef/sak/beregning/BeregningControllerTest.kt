@@ -47,14 +47,19 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var vedtakService: VedtakService
+
     @Autowired
     private lateinit var vilkårsvurderingService: VurderingService
+
     @Autowired
     private lateinit var søknadService: SøknadService
+
     @Autowired
     private lateinit var grunnlagsdataService: GrunnlagsdataService
+
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 

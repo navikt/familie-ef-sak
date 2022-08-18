@@ -35,12 +35,16 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
     @Autowired
     private lateinit var barnRepository: BarnRepository
+
     @Autowired
     private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 

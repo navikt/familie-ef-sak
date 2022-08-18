@@ -25,6 +25,7 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingService: BehandlingService
+
     @Autowired
     lateinit var fagsakService: FagsakService
 

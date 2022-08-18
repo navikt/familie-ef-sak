@@ -41,8 +41,10 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var målerRepository: MålerRepository
+
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 

@@ -14,8 +14,10 @@ internal class KodeverkServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var kodeverkService: KodeverkService
+
     @Autowired
     lateinit var familieIntegrasjonerConfig: IntegrasjonerConfig
+
     @Autowired
     lateinit var wireMockServer: WireMockServer
 

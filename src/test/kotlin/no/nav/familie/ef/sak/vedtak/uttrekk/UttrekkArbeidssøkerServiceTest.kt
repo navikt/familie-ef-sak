@@ -59,18 +59,25 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakService: FagsakService
+
     @Autowired
     private lateinit var tilgangService: TilgangService
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository
+
     @Autowired
     private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
     @Autowired
     private lateinit var rolleConfig: RolleConfig
+
     @Autowired
     private lateinit var opprettUttrekkArbeidssøkerTask: OpprettUttrekkArbeidssøkerTask
 

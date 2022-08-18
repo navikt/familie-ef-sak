@@ -29,9 +29,12 @@ import java.util.UUID
 
 internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
-    @Autowired private lateinit var tilkjentytelseRepository: TilkjentYtelseRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+    @Autowired
+    private lateinit var tilkjentytelseRepository: TilkjentYtelseRepository
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)

@@ -25,8 +25,10 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingshistorikkService: BehandlingshistorikkService
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
 

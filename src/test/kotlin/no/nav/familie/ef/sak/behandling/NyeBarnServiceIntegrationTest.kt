@@ -15,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var nyeBarnService: NyeBarnService
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var taskRepository: TaskRepository
+    @Autowired
+    lateinit var nyeBarnService: NyeBarnService
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var taskRepository: TaskRepository
 
     val ident = "123"
 

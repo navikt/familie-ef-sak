@@ -17,6 +17,7 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
     @Autowired
     private lateinit var mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository
 

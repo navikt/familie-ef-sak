@@ -31,6 +31,7 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var fagsakService: FagsakService
+
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 

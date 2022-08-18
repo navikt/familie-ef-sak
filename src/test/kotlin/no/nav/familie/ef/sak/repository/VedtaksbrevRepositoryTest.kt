@@ -12,6 +12,7 @@ internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

@@ -13,6 +13,7 @@ internal class GrunnlagsdataRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 

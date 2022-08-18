@@ -13,6 +13,7 @@ internal class MellomlagringBrevRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var mellomlagerBrevRepository: MellomlagerBrevRepository
 

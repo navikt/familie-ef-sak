@@ -16,6 +16,7 @@ internal class MellomlagerFritekstbrevRepositoryTest : OppslagSpringRunnerTest()
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository
 

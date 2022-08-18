@@ -16,6 +16,7 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
 

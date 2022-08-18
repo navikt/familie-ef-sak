@@ -27,9 +27,12 @@ import org.springframework.http.ResponseEntity
 
 internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
-    @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+    @Autowired
+    private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
     @BeforeEach
     fun setUp() {

@@ -19,8 +19,10 @@ internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     lateinit var søknadRepository: SøknadRepository
+
     @Autowired
     lateinit var søknadService: SøknadService
 

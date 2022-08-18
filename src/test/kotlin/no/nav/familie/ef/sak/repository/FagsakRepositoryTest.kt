@@ -28,10 +28,13 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 

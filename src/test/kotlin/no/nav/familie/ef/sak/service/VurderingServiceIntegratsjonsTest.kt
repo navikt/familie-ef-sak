@@ -37,12 +37,16 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     lateinit var vurderingService: VurderingService
+
     @Autowired
     lateinit var søknadService: SøknadService
+
     @Autowired
     lateinit var barnRepository: BarnRepository
 

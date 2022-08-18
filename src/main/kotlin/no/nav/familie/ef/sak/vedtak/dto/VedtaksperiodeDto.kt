@@ -49,4 +49,4 @@ fun Vedtaksperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
         fom = periode.fom,
         tom = periode.tom,
 
-    )
+        )
