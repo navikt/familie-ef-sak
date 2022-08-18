@@ -8,17 +8,17 @@ import java.util.UUID
 data class BeløpsperiodeBarnetilsynDto(
     @JsonProperty("fellesperiode")
     val periode: Månedsperiode,
-    @Deprecated("Bruk periode", ReplaceWith("periode"))
-    @JsonProperty("periode")
-    val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
-        periode.fomDato,
-        periode.tomDato
-    ),
     val beløp: Int,
     val beløpFørFratrekkOgSatsjustering: Int,
     val sats: Int,
     val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
-)
+) {
+    @Deprecated("Bruk periode", ReplaceWith("periode"))
+    @get:JsonProperty("periode")
+    val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode
+        get() =
+            no.nav.familie.ef.sak.felles.dto.Periode(periode.fomDato, periode.tomDato)
+}
 
 data class BeregningsgrunnlagBarnetilsynDto(
     val utgifter: BigDecimal,

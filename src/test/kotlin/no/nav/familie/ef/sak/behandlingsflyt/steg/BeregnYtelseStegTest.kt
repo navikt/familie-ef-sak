@@ -1799,8 +1799,7 @@ internal class BeregnYtelseStegTest {
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
         AndelMedGrunnlagDto(
             beløp = beløp,
-            stønadFra = fom.atDay(1),
-            stønadTil = tom.atEndOfMonth(),
+            periode = Månedsperiode(fom, tom),
             inntekt = 0,
             inntektsreduksjon = 0,
             samordningsfradrag = 0,

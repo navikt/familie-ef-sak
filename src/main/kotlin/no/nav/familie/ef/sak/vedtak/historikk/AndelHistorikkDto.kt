@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -39,12 +40,7 @@ fun AndelHistorikkDto.erIkkeFjernet() =
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,
-    @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato")) val stønadFra: LocalDate?,
-    @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato")) val stønadTil: LocalDate?,
-    val periode: Månedsperiode = Månedsperiode(
-        stønadFra ?: error("Periode eller stønadFra må ha verdi"),
-        stønadTil ?: error("Periode eller stønadTil må ha verdi")
-    ),
+    val periode: Månedsperiode,
     val inntekt: Int,
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int,
@@ -62,8 +58,6 @@ data class AndelMedGrunnlagDto(
         vedtaksinformasjon: VedtakshistorikkperiodeBarnetilsyn?
     ) : this(
         beløp = andel.beløp,
-        stønadFra = andel.stønadFom,
-        stønadTil = andel.stønadTom,
         periode = andel.periode,
         inntekt = andel.inntekt,
         inntektsreduksjon = andel.inntektsreduksjon,
@@ -76,6 +70,14 @@ data class AndelMedGrunnlagDto(
         sats = vedtaksinformasjon?.sats ?: 0,
         beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0,
     )
+
+    @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato"))
+    @get:JsonProperty
+    val stønadFra: LocalDate get() = periode.fomDato
+
+    @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato"))
+    @get:JsonProperty
+    val stønadTil: LocalDate get() = periode.tomDato
 }
 
 data class HistorikkEndring(

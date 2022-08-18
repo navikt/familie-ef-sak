@@ -10,16 +10,17 @@ import java.time.YearMonth
 data class Beløpsperiode(
     @JsonProperty("fellesperiode")
     val periode: Månedsperiode,
-    @Deprecated("Bruk periode", ReplaceWith("periode"))
-    @JsonProperty("periode")
-    val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode = no.nav.familie.ef.sak.felles.dto.Periode(
-        periode.fomDato,
-        periode.tomDato
-    ),
     val beregningsgrunnlag: Beregningsgrunnlag? = null,
     val beløp: BigDecimal,
     val beløpFørSamordning: BigDecimal
-)
+) {
+
+    @Deprecated("Bruk periode", ReplaceWith("periode"))
+    @get:JsonProperty("periode")
+    val deprecatedPeriode: no.nav.familie.ef.sak.felles.dto.Periode
+        get() =
+            no.nav.familie.ef.sak.felles.dto.Periode(periode.fomDato, periode.tomDato)
+}
 
 data class Beregningsgrunnlag(
     val inntekt: BigDecimal,

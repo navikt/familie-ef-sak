@@ -150,8 +150,8 @@ internal class BisysBarnetilsynServiceTest {
             personident,
             fomDato
         ).barnetilsynBisysPerioder.first()
-        assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.stønadFra)
-        assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.stønadTil)
+        assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.periode.fomDato)
+        assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.periode.tomDato)
         assertThat(bisysPeriode.barnIdenter.first()).isEqualTo(behandlingBarn.first().personIdent)
         assertThat(bisysPeriode.månedsbeløp).isEqualTo(andelhistorikkDto.andel.beløp)
         assertThat(bisysPeriode.datakilde).isEqualTo(Datakilde.EF)

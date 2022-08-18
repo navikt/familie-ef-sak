@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.tilkjentytelse
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
@@ -16,10 +17,17 @@ data class TilkjentYtelseDto(
 data class AndelTilkjentYtelseDto(
     val beløp: Int,
     val periode: Månedsperiode,
-    @Deprecated("Bruk periode.", ReplaceWith("periode.fomDato")) val stønadFra: LocalDate = periode.fomDato,
-    @Deprecated("Bruk periode.", ReplaceWith("periode.tomDato")) val stønadTil: LocalDate = periode.tomDato,
     val inntekt: Int,
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int
-)
+) {
+    @Deprecated("Bruk periode.", ReplaceWith("periode.fomDato"))
+    @get:JsonProperty
+    val stønadFra: LocalDate get() = periode.fomDato
+
+    @Deprecated("Bruk periode.", ReplaceWith("periode.tomDato"))
+    @get:JsonProperty
+    val stønadTil: LocalDate get() = periode.tomDato
+}
+
 data class BarnMedLøpendeStønad(val barn: List<UUID>, val dato: LocalDate)

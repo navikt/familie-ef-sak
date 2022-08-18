@@ -31,7 +31,7 @@ internal class BeregningUtilsTest {
                     vedtaksperiode = vedtaksperiode
                 ).first()
             )
-                .isEqualTo(beløpsperiode.copy(periode = vedtaksperiode, deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(vedtaksperiode.fomDato, vedtaksperiode.tomDato)))
+                .isEqualTo(beløpsperiode.copy(periode = vedtaksperiode))
         }
 
         @Test
@@ -81,10 +81,6 @@ internal class BeregningUtilsTest {
                         periode = vedtaksperiode.copy(
                             fom = YearMonth.parse("2020-05"),
                             tom = YearMonth.parse("2020-06")
-                        ),
-                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(
-                            fradato = LocalDate.parse("2020-05-01"),
-                            tildato = LocalDate.parse("2020-06-30")
                         )
                     )
                 )
@@ -113,10 +109,6 @@ internal class BeregningUtilsTest {
             )
                 .isEqualTo(
                     beløpsperiode.copy(
-                        deprecatedPeriode = no.nav.familie.ef.sak.felles.dto.Periode(
-                            fradato = LocalDate.parse("2020-09-01"),
-                            tildato = LocalDate.parse("2020-12-31")
-                        ),
                         periode = vedtaksperiode.copy(
                             fom = YearMonth.parse("2020-09"),
                             tom = YearMonth.parse("2020-12")

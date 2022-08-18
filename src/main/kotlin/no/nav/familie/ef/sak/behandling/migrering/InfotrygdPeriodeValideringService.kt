@@ -101,7 +101,7 @@ class InfotrygdPeriodeValideringService(
         val periode = gjeldendePerioder.single()
         validerFomDato(periode)
         validerTomDato(periode)
-        return periode.copy(stønadFom = maxOf(kjøremåned.atDay(1), periode.stønadFom), stønadsperiode = periode.stønadsperiode.copy(fom = maxOf(kjøremåned, periode.stønadsperiode.fom)))
+        return periode.copy(stønadsperiode = periode.stønadsperiode.copy(fom = maxOf(kjøremåned, periode.stønadsperiode.fom)))
     }
 
     private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> {
@@ -111,7 +111,7 @@ class InfotrygdPeriodeValideringService(
                 if (last == null) {
                     acc.add(periode)
                 } else if (perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(last, periode)) {
-                    acc.add(last.copy(stønadTom = periode.stønadTom, stønadsperiode = last.stønadsperiode union periode.stønadsperiode))
+                    acc.add(last.copy(stønadsperiode = last.stønadsperiode union periode.stønadsperiode))
                 } else {
                     acc.add(last)
                     acc.add(periode)
@@ -161,7 +161,7 @@ class InfotrygdPeriodeValideringService(
                 MigreringExceptionType.BELØP_0
             )
         }
-        return periode.copy(stønadFom = YearMonth.of(stønadTom.year, stønadTom.month).atDay(1), stønadsperiode = periode.stønadsperiode.copy(fom = tomMåned))
+        return periode.copy(stønadsperiode = periode.stønadsperiode.copy(fom = tomMåned))
     }
 
     private fun validerFomDato(periode: SummertInfotrygdPeriodeDto) {

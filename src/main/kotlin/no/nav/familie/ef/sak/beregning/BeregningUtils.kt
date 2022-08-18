@@ -96,13 +96,13 @@ object BeregningUtils {
                     it
                 }
                 it.periode.overlapperKunIStartenAv(vedtaksperiode) -> {
-                    it.copy(deprecatedPeriode = it.deprecatedPeriode.copy(fradato = vedtaksperiode.fomDato), periode = (it.periode snitt vedtaksperiode)!!)
+                    it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 vedtaksperiode.overlapperKunIStartenAv(it.periode) -> {
-                    it.copy(deprecatedPeriode = it.deprecatedPeriode.copy(tildato = vedtaksperiode.tomDato), periode = (it.periode snitt vedtaksperiode)!!)
+                    it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 vedtaksperiode.omsluttesAv(it.periode) -> {
-                    it.copy(deprecatedPeriode = it.deprecatedPeriode.copy(fradato = vedtaksperiode.fomDato, tildato = vedtaksperiode.tomDato), periode = (it.periode snitt vedtaksperiode)!!)
+                    it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 else -> {
                     null

@@ -89,7 +89,7 @@ class VedtakHistorikkService(
             if (it.andel.periode.fom >= fra) {
                 it
             } else if (it.andel.periode.tom >= fra) {
-                it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fom = fra), stønadFra = dato))
+                it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fom = fra)))
             } else {
                 null
             }

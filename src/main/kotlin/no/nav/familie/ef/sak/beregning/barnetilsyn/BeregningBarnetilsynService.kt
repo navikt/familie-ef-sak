@@ -152,7 +152,6 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
             acc.removeLast()
             acc.add(
                 last.copy(
-                    deprecatedPeriode = last.deprecatedPeriode.copy(tildato = entry.deprecatedPeriode.tildato),
                     periode = last.periode union entry.periode
                 )
             )
