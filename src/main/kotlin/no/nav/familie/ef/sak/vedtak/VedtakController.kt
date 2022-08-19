@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -94,6 +95,9 @@ class VedtakController(
         @PathVariable fra: YearMonth
     ): Ressurs<VedtakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        feilHvisIkke(featureToggleService.isEnabled(Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER)) {
+            "Revurder fra er ikke tilgjengelig, prøv å relaste nettsiden hvis du får denne feilen"
+        }
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
     }
 
