@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -56,7 +57,8 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.BARNETILSYN
+            StønadType.BARNETILSYN,
+            BehandlingÅrsak.SØKNAD
         )
 
         assertThat(barnSlot.captured).hasSize(4)
@@ -79,7 +81,8 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD,
+            BehandlingÅrsak.SØKNAD
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -102,7 +105,8 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.SKOLEPENGER
+            StønadType.SKOLEPENGER,
+            BehandlingÅrsak.SØKNAD
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -239,21 +243,30 @@ internal class BarnServiceTest {
     inner class TerminbarnFraPapirsøknad {
 
         @Test
-        internal fun `skal opprette terminbarn når det ikke finnes match i PDL`() {
+        internal fun `skal ikke kunne sende inn terminbarn på annen behandling enn papirsøknad`() {
             val termindato = LocalDate.of(2021, 1, 1)
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
                 fagsakId,
                 emptyList(),
                 StønadType.OVERGANGSSTØNAD,
+                BehandlingÅrsak.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
-            assertThat(barnSlot.captured).hasSize(1)
-            assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(termindato)
-            assertThat(barnSlot.captured[0].behandlingId).isEqualTo(behandlingId)
-            assertThat(barnSlot.captured[0].personIdent).isNull()
-            assertThat(barnSlot.captured[0].navn).isNull()
-            assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal opprette terminbarn når det ikke finnes match i PDL`() {
+            val termindato = LocalDate.of(2021, 1, 1)
+            assertThatThrownBy {  barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                emptyList(),
+                StønadType.OVERGANGSSTØNAD,
+                BehandlingÅrsak.SØKNAD,
+                listOf(BarnSomSkalFødes(termindato))
+            )
+            }.hasMessage("Kan ikke legge til terminbarn med behandlingsårsak=SØKNAD")
         }
 
         @Test
@@ -267,6 +280,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 listOf(barnMedIdent),
                 StønadType.OVERGANGSSTØNAD,
+                BehandlingÅrsak.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
             assertThat(barnSlot.captured).hasSize(1)
@@ -275,6 +289,36 @@ internal class BarnServiceTest {
             assertThat(barnSlot.captured[0].personIdent).isEqualTo(fnr)
             assertThat(barnSlot.captured[0].navn).isEqualTo("Barn D")
             assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal legge til terminbarn og andre terminbarn for papirsøknader`() {
+            val termindato = LocalDate.of(2021, 4, 16)
+            val fnr = FnrGenerator.generer(termindato)
+            val fnr2 = FnrGenerator.generer(termindato)
+            val barnMedIdent = barnMedIdent(fnr, "Terminbarn A").copy(fødsel = listOf(PdlTestdataHelper.fødsel(termindato)))
+            val barnMedIdent2 = barnMedIdent(fnr2, "Barn D")
+
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                listOf(barnMedIdent, barnMedIdent2),
+                StønadType.OVERGANGSSTØNAD,
+                BehandlingÅrsak.PAPIRSØKNAD,
+                listOf(BarnSomSkalFødes(termindato))
+            )
+            assertThat(barnSlot.captured).hasSize(2)
+            assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(termindato)
+            assertThat(barnSlot.captured[0].behandlingId).isEqualTo(behandlingId)
+            assertThat(barnSlot.captured[0].personIdent).isEqualTo(fnr)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("Terminbarn A")
+            assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+
+            assertThat(barnSlot.captured[1].fødselTermindato).isNull()
+            assertThat(barnSlot.captured[1].behandlingId).isEqualTo(behandlingId)
+            assertThat(barnSlot.captured[1].personIdent).isEqualTo(fnr2)
+            assertThat(barnSlot.captured[1].navn).isEqualTo("Barn D")
+            assertThat(barnSlot.captured[1].søknadBarnId).isNull()
         }
     }
 
