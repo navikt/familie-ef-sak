@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
@@ -26,6 +27,8 @@ class BarnService(
      * [StønadType.OVERGANGSSTØNAD], [StønadType.SKOLEPENGER]:
      *  Hvis papirsøknad: Innsendte terminbarn plus barn fra registeret
      *  Ellers: Barn/terminbarn fra søknaden
+     *
+     *  Kun barn under 18 er med
      */
     fun opprettBarnPåBehandlingMedSøknadsdata(
         behandlingId: UUID,
@@ -35,13 +38,14 @@ class BarnService(
         behandlingsårsak: BehandlingÅrsak,
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
     ) {
+        val barnUnder18 = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
-            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
+            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, barnUnder18)
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
                 kobleBarnForOvergangsstønadOgSkolepenger(
                     behandlingId,
                     behandlingsårsak,
-                    grunnlagsdataBarn,
+                    barnUnder18,
                     barnSomSkalFødes
                 )
         }

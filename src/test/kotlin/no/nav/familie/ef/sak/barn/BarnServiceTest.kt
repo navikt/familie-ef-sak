@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.Year
 import java.util.UUID
 
 internal class BarnServiceTest {
@@ -319,6 +321,25 @@ internal class BarnServiceTest {
             assertThat(barnSlot.captured[1].personIdent).isEqualTo(fnr2)
             assertThat(barnSlot.captured[1].navn).isEqualTo("Barn D")
             assertThat(barnSlot.captured[1].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal kun ha med barn under 18 år`() {
+            val fnr = FnrGenerator.generer(Year.now().minusYears(1).value)
+            val fnr2 = FnrGenerator.generer(Year.now().minusYears(19).value)
+            val barnMedIdent = barnMedIdent(fnr, "Barn under 18")
+            val barnMedIdent2 = barnMedIdent(fnr2, "Barn over 18", fødsel(Year.now().minusYears(19).value))
+
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                listOf(barnMedIdent, barnMedIdent2),
+                StønadType.OVERGANGSSTØNAD,
+                BehandlingÅrsak.PAPIRSØKNAD
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("Barn under 18")
         }
     }
 
