@@ -326,8 +326,8 @@ internal class BarnServiceTest {
         internal fun `skal kun ha med barn under 18 år`() {
             val årOver18år = Year.now().minusYears(19).value
             val grunnlagsdataBarn = listOf(
-                barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "Barn under 18"),
-                barnMedIdent(FnrGenerator.generer(årOver18år), "Barn over 18", fødsel(årOver18år))
+                barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "Under 18"),
+                barnMedIdent(FnrGenerator.generer(årOver18år), "Over 18", fødsel(årOver18år))
             )
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
@@ -338,7 +338,7 @@ internal class BarnServiceTest {
             )
 
             assertThat(barnSlot.captured).hasSize(1)
-            assertThat(barnSlot.captured[0].navn).isEqualTo("Barn under 18")
+            assertThat(barnSlot.captured[0].navn).isEqualTo("Under 18")
         }
     }
 
