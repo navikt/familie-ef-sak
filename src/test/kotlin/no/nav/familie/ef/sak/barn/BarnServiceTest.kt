@@ -275,7 +275,7 @@ internal class BarnServiceTest {
         internal fun `skal opprette barn med ident når terminbarn finnes med match i PDL`() {
             val termindato = LocalDate.of(2021, 4, 16)
             val fnr = FnrGenerator.generer(termindato)
-            val barnMedIdent = barnMedIdent(fnr, "Barn D").copy(fødsel = listOf(PdlTestdataHelper.fødsel(termindato)))
+            val barnMedIdent = barnMedIdent(fnr, "Barn D").copy(fødsel = listOf(fødsel(termindato)))
 
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
@@ -298,7 +298,7 @@ internal class BarnServiceTest {
             val termindato = LocalDate.of(2021, 4, 16)
             val fnr = FnrGenerator.generer(termindato)
             val fnr2 = FnrGenerator.generer(termindato)
-            val barnMedIdent = barnMedIdent(fnr, "Terminbarn A").copy(fødsel = listOf(PdlTestdataHelper.fødsel(termindato)))
+            val barnMedIdent = barnMedIdent(fnr, "Terminbarn A").copy(fødsel = listOf(fødsel(termindato)))
             val barnMedIdent2 = barnMedIdent(fnr2, "Barn D")
 
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
