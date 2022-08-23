@@ -49,9 +49,9 @@ class ApiExceptionHandler {
         secureLogger.info("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.feil}", feil)
         logger.info(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
-                rootCause(
-                    feil
-                )
+            rootCause(
+                feil
+            )
             }: ${feil.message} "
         )
         return ResponseEntity.status(feil.httpStatus).body(
@@ -68,9 +68,9 @@ class ApiExceptionHandler {
         secureLogger.error("En håndtert feil har oppstått(${feil.httpStatus}): ${feil.frontendFeilmelding}", feil)
         logger.error(
             "En håndtert feil har oppstått(${feil.httpStatus}) metode=$metodeSomFeiler exception=${
-                rootCause(
-                    feil
-                )
+            rootCause(
+                feil
+            )
             }: ${feil.message} "
         )
         return ResponseEntity.status(feil.httpStatus)

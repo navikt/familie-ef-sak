@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface MellomlagerFritekstbrevRepository : RepositoryInterface<MellomlagretFritekstbrev, UUID>,
+interface MellomlagerFritekstbrevRepository :
+    RepositoryInterface<MellomlagretFritekstbrev, UUID>,
     InsertUpdateRepository<MellomlagretFritekstbrev>
