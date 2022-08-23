@@ -94,6 +94,9 @@ class VedtakController(
         @PathVariable fra: YearMonth
     ): Ressurs<VedtakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER)) {
+            "Feil vid henting av vedtakshistorikk. Det virker som at du sitter med en eldre versjon av saksbehandling, prøv å laste siden på nytt"
+        }
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
     }
 

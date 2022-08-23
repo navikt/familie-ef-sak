@@ -20,9 +20,12 @@ class ForberedOppgaverForBarnService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato: LocalDate, dryRun: Boolean = false) {
+    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato: LocalDate) {
         val gjeldendeBarn =
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, referansedato) +
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
+                StønadType.OVERGANGSSTØNAD,
+                referansedato
+            ) +
                 gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, referansedato)
         logger.info(
             "Fant totalt ${gjeldendeBarn.size} barn, " +
@@ -35,11 +38,7 @@ class ForberedOppgaverForBarnService(
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
         if (oppgaver.isNotEmpty()) {
-            if (dryRun) {
-                oppgaver.forEach { logger.info("Dryrun - oppretter oppgave for ${it.behandlingId}") }
-            } else {
-                sendOppgaverTilIverksett(oppgaver)
-            }
+            sendOppgaverTilIverksett(oppgaver)
         }
     }
 

@@ -135,9 +135,6 @@ class JournalføringService(
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
-        brukerfeilHvis(!journalpost.harStrukturertSøknad() && fagsak.stønadstype == StønadType.SKOLEPENGER) {
-            "Journalposten inneholder ikke en digital søknad"
-        }
         feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak != null) {
             "Kan ikke sende inn årsak når journalposten har strukturert søknad"
         }
@@ -199,10 +196,11 @@ class JournalføringService(
         årsak: BehandlingÅrsak? = null
     ): Behandling {
 
+        val behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
             behandlingType = behandlingstype,
             fagsakId = fagsak.id,
-            behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
+            behandlingsårsak = behandlingsårsak
         )
         iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {
@@ -215,6 +213,7 @@ class JournalføringService(
             fagsakId = fagsak.id,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
+            behandlingsårsak = behandlingsårsak,
             barnSomSkalFødes = barnSomSkalFødes
         )
         return behandling
