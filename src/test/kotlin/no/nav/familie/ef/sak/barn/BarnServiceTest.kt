@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
-import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -325,15 +324,15 @@ internal class BarnServiceTest {
 
         @Test
         internal fun `skal kun ha med barn under 18 år`() {
-            val fnr = FnrGenerator.generer(Year.now().minusYears(1).value)
-            val fnr2 = FnrGenerator.generer(Year.now().minusYears(19).value)
-            val barnMedIdent = barnMedIdent(fnr, "Barn under 18")
-            val barnMedIdent2 = barnMedIdent(fnr2, "Barn over 18", fødsel(Year.now().minusYears(19).value))
-
+            val årOver18år = Year.now().minusYears(19).value
+            val grunnlagsdataBarn = listOf(
+                barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "Barn under 18"),
+                barnMedIdent(FnrGenerator.generer(årOver18år), "Barn over 18", fødsel(årOver18år))
+            )
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
                 fagsakId,
-                listOf(barnMedIdent, barnMedIdent2),
+                grunnlagsdataBarn,
                 StønadType.OVERGANGSSTØNAD,
                 BehandlingÅrsak.PAPIRSØKNAD
             )
