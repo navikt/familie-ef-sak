@@ -50,8 +50,8 @@ class AlderPåBarnRegel :
                         svar = harFullførtFjerdetrinn,
                         begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI)
                             "Automatisk vurdert: Ut ifra barnets alder er det ${
-                                LocalDate.now()
-                                    .norskFormat()
+                            LocalDate.now()
+                                .norskFormat()
                             } automatisk vurdert at barnet ikke har fullført 4. skoleår."
                         else null
                     )

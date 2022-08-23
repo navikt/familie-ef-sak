@@ -40,7 +40,7 @@ fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
 
-    )
+)
 
 fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
     aktivitet = this.aktivitet,
