@@ -16,7 +16,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
@@ -40,10 +39,9 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
             perioder = PeriodeWrapper(
                 listOf(
                     Vedtaksperiode(
-                        LocalDate.now(),
-                        LocalDate.now(),
-                        AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
-                        VedtaksperiodeType.HOVEDPERIODE
+                        periode = Månedsperiode(YearMonth.now()),
+                        aktivitet = AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
+                        periodeType = VedtaksperiodeType.HOVEDPERIODE
                     )
                 )
             ),

@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.assertj.core.api.Assertions
@@ -24,6 +25,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
@@ -54,12 +56,11 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                     personident = personIdent,
                     vedtakstidspunkt = LocalDate.of(2020, 5, 5).atStartOfDay(),
                     type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
-                    startdato = LocalDate.of(2021, 1, 1),
+                    startmåned = YearMonth.of(2021, 1),
                     andelerTilkjentYtelse = listOf(
                         AndelTilkjentYtelse(
                             15000,
-                            LocalDate.of(2021, 1, 1),
-                            LocalDate.of(2021, 12, 31),
+                            periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
                             personIdent,
                             inntekt = 0,
                             inntektsreduksjon = 0,

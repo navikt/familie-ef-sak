@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -74,7 +75,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
 
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
+        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.periode.fomDato }
 
         repository.insert(tilkjentYtelse)
 
@@ -114,8 +115,8 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val andelerTilkjentYtelse = listOf(
             lagAndelTilkjentYtelse(
                 beløp = beløp,
-                fraOgMed = LocalDate.now(),
-                tilOgMed = LocalDate.now().plusDays(1),
+                fraOgMed = YearMonth.now(),
+                tilOgMed = YearMonth.now(),
                 kildeBehandlingId = behandling.id
             )
         )

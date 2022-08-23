@@ -103,7 +103,7 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> =
-        tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+        tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.periode }
 
     private fun opprettVedtaksperiode(fra: YearMonth, til: YearMonth) =
         VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), AktivitetType.BARNET_ER_SYKT, VedtaksperiodeType.PERIODE_FØR_FØDSEL)

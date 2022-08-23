@@ -156,8 +156,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
         with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
             assertThat(this).hasSize(1)
-            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
-            assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
+            assertThat(this[0].periode.fomDato).isEqualTo(migrerFraDato.atDay(1))
+            assertThat(this[0].periode.tomDato).isEqualTo(til.atEndOfMonth())
         }
         with(behandlingService.hentBehandling(migrering.id)) {
             assertThat(this.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
@@ -235,8 +235,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         verifiserBehandlingErFerdigstilt(migrering)
         with(tilkjentYtelseService.hentForBehandling(migrering.id).andelerTilkjentYtelse) {
             assertThat(this).hasSize(1)
-            assertThat(this[0].stønadFom).isEqualTo(migrerFraDato.atDay(1))
-            assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
+            assertThat(this[0].periode.fomDato).isEqualTo(migrerFraDato.atDay(1))
+            assertThat(this[0].periode.tomDato).isEqualTo(til.atEndOfMonth())
             assertThat(this[0].beløp).isEqualTo(0)
         }
     }
@@ -554,6 +554,16 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Nested
     inner class BarnFinnesMedPåUttrekkTilOppretteOppgaver {
+
+        @Test
+        fun parse() {
+
+            val ym = YearMonth.from(LocalDate.MAX).toString()
+            val ld = LocalDate.MAX.toString()
+
+            LocalDate.parse(ld)
+            YearMonth.parse("+$ym")
+        }
 
         @Test
         internal fun `skal finne barn på uttrekk til oppgaver etter migrering`() {

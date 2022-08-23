@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
@@ -45,7 +46,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         justRun { iverksettClient.sendOppgaverForBarn(capture(oppgaverSlot)) }
         every { behandlingService.hentAktivIdent(any()) } returns "1"
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling(fagsak())
-        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(LocalDate.now().plusYears(2))
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(YearMonth.now().plusYears(2))
         every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns opprettGrunnlagsdata(null)
     }
 
@@ -68,7 +69,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
     @Test
     internal fun `skal ikke opprette hvis siste utbetalingsperioden er før barnet fyller 1 år`() {
-        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(LocalDate.now().plusMonths(10))
+        every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(YearMonth.now().plusMonths(10))
 
         service.doTask(opprettOppgave(LocalDate.now()))
 
@@ -90,9 +91,9 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         assertThat(oppgaver.single { it.aktivFra in etÅr.minusWeeks(1)..etÅr.plusWeeks(2) })
     }
 
-    private fun tilkjentYtelse(tilOgMed: LocalDate) = lagTilkjentYtelse(
+    private fun tilkjentYtelse(tilOgMed: YearMonth) = lagTilkjentYtelse(
         listOf(
-            lagAndelTilkjentYtelse(1, fraOgMed = LocalDate.now(), tilOgMed = tilOgMed)
+            lagAndelTilkjentYtelse(1, fraOgMed = YearMonth.now(), tilOgMed = tilOgMed)
         )
     )
 

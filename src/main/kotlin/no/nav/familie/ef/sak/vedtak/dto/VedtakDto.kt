@@ -160,7 +160,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             behandlingId = behandlingId,
             avslåBegrunnelse = begrunnelse,
             resultatType = ResultatType.OPPHØRT,
-            opphørFom = opphørFom.atDay(1)
+            opphørFom = opphørFom
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
@@ -172,9 +172,9 @@ private fun Sanksjonert.sanksjonertTilVedtak(
     when (stønadstype) {
         StønadType.OVERGANGSSTØNAD -> {
             val vedtaksperiode = Vedtaksperiode(
-                periode.tilPeriode(),
-                AktivitetType.IKKE_AKTIVITETSPLIKT,
-                VedtaksperiodeType.SANKSJON
+                periode = periode.tilPeriode(),
+                aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+                periodeType = VedtaksperiodeType.SANKSJON
             )
             Vedtak(
                 behandlingId = behandlingId,

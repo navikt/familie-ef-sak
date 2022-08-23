@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -90,7 +89,7 @@ class UttrekkArbeidssøkerService(
         val sluttdato = årMåned.atEndOfMonth()
         val arbeidssøkere =
             uttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(startdato, sluttdato)
-        return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, startdato, sluttdato) }
+        return arbeidssøkere.filter { harPeriodeSomArbeidssøker(it, årMåned) }
     }
 
     fun uttrekkFinnes(årMåned: YearMonth, fagsakId: UUID): Boolean {
@@ -147,12 +146,10 @@ class UttrekkArbeidssøkerService(
 
     private fun harPeriodeSomArbeidssøker(
         it: VedtaksperioderForUttrekk,
-        startdato: LocalDate,
-        sluttdato: LocalDate
+        måned: YearMonth
     ) =
         it.perioder.perioder.any {
-            it.datoFra <= startdato &&
-                it.datoTil >= sluttdato &&
+            it.periode.inneholder(måned) &&
                 erArbeidssøker(it)
         }
 

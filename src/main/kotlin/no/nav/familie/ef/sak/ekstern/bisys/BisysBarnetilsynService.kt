@@ -54,7 +54,7 @@ class BisysBarnetilsynService(
         val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN) ?: return null
         val sisteGjeldendeBehandling =
             behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return null
-        val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
+        val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startmåned.atDay(1)
 
         val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }

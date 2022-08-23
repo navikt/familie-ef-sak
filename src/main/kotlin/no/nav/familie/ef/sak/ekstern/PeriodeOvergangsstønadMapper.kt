@@ -6,7 +6,7 @@ import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 fun AndelTilkjentYtelse.tilEksternPeriodeOvergangsstønad() =
     PeriodeOvergangsstønad(
         personIdent = this.personIdent,
-        fomDato = this.stønadFom,
-        tomDato = this.stønadTom,
+        fomDato = this.periode.fomDato,
+        tomDato = this.periode.tomDato,
         datakilde = PeriodeOvergangsstønad.Datakilde.EF
     )

@@ -9,11 +9,11 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.TemporalAdjusters
+import java.time.YearMonth
 import java.util.UUID
 
 /**
- * @param startdato dato for når vi tidligst er ansvarlige for nye perioder.
+ * @param startmåned dato for når vi tidligst er ansvarlige for nye perioder.
  * Når denne er satt kan den aldri flyttes fremover i tid, ettersom vi må ta ansvar for det tidspunktet vi behandlet saken fra.
  *  Den kan endres tilbake i tid hvis vi gjør vedtak med en dato før forrige startdato.
  * I en førstegangsbehandling så settes startdato til den første andelens startdato
@@ -36,18 +36,19 @@ data class TilkjentYtelse(
     val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     val samordningsfradragType: SamordningsfradragType? = null,
-    val startdato: LocalDate,
+    @Column("startdato")
+    val startmåned: YearMonth,
     @Column("grunnbelopsdato")
     val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
 ) {
 
-    fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
-        .filter { andel -> andel.stønadTom < fom || andel.stønadFom < fom }
+    fun taMedAndelerFremTilDato(fom: YearMonth): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
+        .filter { andel -> andel.periode.fom < fom }
         .map { andel ->
-            if (andel.erStønadOverlappende(fom)) {
-                andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))
+            if (andel.periode.inneholder(fom)) {
+                andel.copy(periode = andel.periode.copy(tom = fom.minusMonths(1)))
             } else {
                 andel
             }

@@ -9,8 +9,8 @@ fun AndelTilkjentYtelse.tilIverksettDto() =
         inntekt = this.inntekt,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag,
-        fraOgMed = this.stønadFom,
-        tilOgMed = this.stønadTom,
+        fraOgMed = this.periode.fomDato,
+        tilOgMed = this.periode.tomDato,
         periode = this.periode,
         kildeBehandlingId = this.kildeBehandlingId
     )

@@ -246,17 +246,17 @@ class BeregnYtelseSteg(
         vedtak: Opphør
     ) {
         brukerfeilHvis(saksbehandling.type != REVURDERING) { "Kan kun opphøre ved revurdering" }
-        val opphørsdato = vedtak.opphørFom.atDay(1)
+        val opphørsmåned = vedtak.opphørFom
         val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(saksbehandling)
-        val nyeAndeler = andelerForOpphør(forrigeTilkjenteYtelse, opphørsdato)
-        val nyStartdato = beregnNyttStartdatoForRevurdering(nyeAndeler, opphørsdato, forrigeTilkjenteYtelse)
+        val nyeAndeler = andelerForOpphør(forrigeTilkjenteYtelse, opphørsmåned)
+        val nyStartdato = beregnNyttStartdatoForRevurdering(nyeAndeler, opphørsmåned, forrigeTilkjenteYtelse)
         tilkjentYtelseService.opprettTilkjentYtelse(
             TilkjentYtelse(
                 personident = saksbehandling.ident,
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = nyeAndeler,
                 samordningsfradragType = null,
-                startdato = nyStartdato,
+                startmåned = nyStartdato,
                 grunnbeløpsdato = forrigeTilkjenteYtelse.grunnbeløpsdato
             )
         )
@@ -264,14 +264,14 @@ class BeregnYtelseSteg(
 
     private fun beregnNyttStartdatoForRevurdering(
         nyeAndeler: List<AndelTilkjentYtelse>,
-        opphørsdato: LocalDate,
+        opphørsmåned: YearMonth,
         forrigeTilkjenteYtelse: TilkjentYtelse
-    ): LocalDate {
-        val opphørsdatoHvisFørTidligereAndeler = if (nyeAndeler.isEmpty()) opphørsdato else null
+    ): YearMonth {
+        val opphørsdatoHvisFørTidligereAndeler = if (nyeAndeler.isEmpty()) opphørsmåned else null
         @Suppress("FoldInitializerAndIfToElvis")
-        if (opphørsdatoHvisFørTidligereAndeler == null) return forrigeTilkjenteYtelse.startdato
+        if (opphørsdatoHvisFørTidligereAndeler == null) return forrigeTilkjenteYtelse.startmåned
 
-        return minOf(opphørsdatoHvisFørTidligereAndeler, forrigeTilkjenteYtelse.startdato)
+        return minOf(opphørsdatoHvisFørTidligereAndeler, forrigeTilkjenteYtelse.startmåned)
     }
 
     private fun opprettTilkjentYtelseForInnvilgetOvergangsstønad(
@@ -302,7 +302,7 @@ class BeregnYtelseSteg(
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = nyeAndeler,
                 samordningsfradragType = vedtak.samordningsfradragType,
-                startdato = startdato
+                startmåned = startdato
             )
         )
     }
@@ -331,7 +331,7 @@ class BeregnYtelseSteg(
                 personident = saksbehandling.ident,
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = nyeAndeler,
-                startdato = startdato
+                startmåned = startdato
             )
         )
     }
@@ -349,8 +349,8 @@ class BeregnYtelseSteg(
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
             // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
             REVURDERING -> {
-                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-                val nyttStartdato = min(forrigeTilkjentYtelse?.startdato, startdatoNyeAndeler)
+                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
+                val nyttStartdato = min(forrigeTilkjentYtelse?.startmåned, startdatoNyeAndeler)
                     ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
                 andelerTilkjentYtelse to nyttStartdato
             }
@@ -361,7 +361,7 @@ class BeregnYtelseSteg(
                 personident = saksbehandling.ident,
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = nyeAndeler,
-                startdato = startdato
+                startmåned = startdato
             )
         )
     }
@@ -387,8 +387,8 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDate {
-        return andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
+    private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): YearMonth {
+        return andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
             ?: error("Må ha med en periode i førstegangsbehandling")
     }
 
@@ -396,7 +396,7 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling,
         vedtak: InnvilgelseOvergangsstønad,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-    ): Pair<List<AndelTilkjentYtelse>, LocalDate> {
+    ): Pair<List<AndelTilkjentYtelse>, YearMonth> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse =
@@ -405,7 +405,7 @@ class BeregnYtelseSteg(
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
-        val forrigeStartdato = forrigeTilkjenteYtelse?.startdato
+        val forrigeStartdato = forrigeTilkjenteYtelse?.startmåned
         val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeStartdato)
         return nyeAndeler to startdato
     }
@@ -414,7 +414,7 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling,
         vedtak: InnvilgelseBarnetilsyn,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-    ): Pair<List<AndelTilkjentYtelse>, LocalDate> {
+    ): Pair<List<AndelTilkjentYtelse>, YearMonth> {
         val opphørsperioder = finnOpphørsperioder(vedtak)
 
         val forrigeTilkjenteYtelse =
@@ -423,9 +423,9 @@ class BeregnYtelseSteg(
 
         val nyeAndeler = beregnNyeAndelerForRevurdering(forrigeTilkjenteYtelse, andelerTilkjentYtelse, opphørsperioder)
 
-        val forrigeStartdato = forrigeTilkjenteYtelse?.startdato
-        val startdato = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeStartdato)
-        return nyeAndeler to startdato
+        val forrigeStartdato = forrigeTilkjenteYtelse?.startmåned
+        val startmåned = nyttStartdato(saksbehandling.id, vedtak.perioder.tilPerioder(), forrigeStartdato)
+        return nyeAndeler to startmåned
     }
 
     private fun validerOpphørsperioder(
@@ -454,13 +454,13 @@ class BeregnYtelseSteg(
     private fun nyttStartdato(
         behandlingId: UUID,
         perioder: List<Månedsperiode>,
-        forrigeStartdato: LocalDate?
-    ): LocalDate {
-        val startdato = min(perioder.minOfOrNull { it.fomDato }, forrigeStartdato)
-        feilHvis(startdato == null) {
+        forrigeStartdato: YearMonth?
+    ): YearMonth {
+        val startmåned = min(perioder.minOfOrNull { it.fom }, forrigeStartdato)
+        feilHvis(startmåned == null) {
             "Klarer ikke å beregne startdato for behandling=$behandlingId"
         }
-        return startdato
+        return startmåned
     }
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(
@@ -478,7 +478,7 @@ class BeregnYtelseSteg(
                 personident = saksbehandling.ident,
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                startdato = forrigeTilkjenteYtelse.startdato
+                startmåned = forrigeTilkjenteYtelse.startmåned
             )
         )
     }
@@ -548,8 +548,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    stønadFom = it.årMånedFra.atDay(1),
-                    stønadTom = it.årMånedFra.atEndOfMonth(),
+                    periode = Månedsperiode(it.årMånedFra, it.årMånedFra),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
@@ -580,8 +579,8 @@ class BeregnYtelseSteg(
         forrigeTilkjentYtelse: TilkjentYtelse,
         opphørsperioder: List<Månedsperiode>
     ): List<AndelTilkjentYtelse> {
-        val fomPerioder = beløpsperioder.firstOrNull()?.stønadFom ?: LocalDate.MAX
-        val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fomDato ?: LocalDate.MAX
+        val fomPerioder = beløpsperioder.firstOrNull()?.periode?.fom ?: YearMonth.from(LocalDate.MAX)
+        val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fom ?: YearMonth.from(LocalDate.MAX)
         val nyePerioderUtenOpphør =
             forrigeTilkjentYtelse.taMedAndelerFremTilDato(minOf(fomPerioder, fomOpphørPerioder)) + beløpsperioder
         return vurderPeriodeForOpphør(nyePerioderUtenOpphør, opphørsperioder)
@@ -615,19 +614,19 @@ class BeregnYtelseSteg(
 
                 if (overlappendeOpphør.overlapperKunIStartenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(
-                        listOf(it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1))),
+                        listOf(it.copy(periode = tilkjentPeriode.copy(fom = overlappendeOpphør.tom.plusMonths(1)))),
                         opphørsperioder
                     )
                 } else if (overlappendeOpphør.overlapperKunISluttenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(
-                        listOf(it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1))),
+                        listOf(it.copy(periode = tilkjentPeriode.copy(tom = overlappendeOpphør.fom.minusMonths(1)))),
                         opphørsperioder
                     )
                 } else { // periode blir delt i to av opphold.
                     vurderPeriodeForOpphør(
                         listOf(
-                            it.copy(stønadTom = overlappendeOpphør.fomDato.minusDays(1)),
-                            it.copy(stønadFom = overlappendeOpphør.tomDato.plusDays(1))
+                            it.copy(periode = tilkjentPeriode.copy(tom = overlappendeOpphør.fom.minusMonths(1))),
+                            it.copy(periode = tilkjentPeriode.copy(fom = overlappendeOpphør.tom.plusMonths(1)))
                         ),
                         opphørsperioder
                     )
@@ -638,19 +637,19 @@ class BeregnYtelseSteg(
 
     private fun andelerForOpphør(
         forrigeTilkjentYtelse: TilkjentYtelse,
-        opphørFom: LocalDate
+        opphørFom: YearMonth
     ): List<AndelTilkjentYtelse> {
         brukerfeilHvis(
-            forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }?.isBefore(opphørFom) ?: false
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.periode.tom }?.isBefore(opphørFom) ?: false
         ) {
             "Kan ikke opphøre frem i tiden"
         }
 
         brukerfeilHvis(
             forrigeTilkjentYtelse.andelerTilkjentYtelse.isEmpty() &&
-                forrigeTilkjentYtelse.startdato <= opphørFom
+                forrigeTilkjentYtelse.startmåned <= opphørFom
         ) {
-            "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startdato}"
+            "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startmåned}"
         }
 
         return forrigeTilkjentYtelse.taMedAndelerFremTilDato(opphørFom)

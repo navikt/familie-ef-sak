@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 data class Vedtak(
@@ -26,7 +27,7 @@ data class Vedtak(
     val samordningsfradragType: SamordningsfradragType? = null,
     val saksbehandlerIdent: String? = null,
     @Column("opphor_fom")
-    val opphørFom: LocalDate? = null,
+    val opphørFom: YearMonth? = null,
     val barnetilsyn: BarnetilsynWrapper? = null,
     @Column("kontantstotte")
     val kontantstøtte: KontantstøtteWrapper? = null,
@@ -40,48 +41,30 @@ data class Vedtak(
 )
 
 data class Vedtaksperiode(
-    val datoFra: LocalDate,
-    val datoTil: LocalDate,
+    @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val datoFra: LocalDate? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val datoTil: LocalDate? = null,
+    val periode: Månedsperiode =
+        Månedsperiode(
+            datoFra ?: error("periode eller årMånedFra må ha verdi"),
+            datoTil ?: error("periode eller årMånedTil må ha verdi")
+        ),
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType
-) {
-    constructor(
-        periode: Månedsperiode,
-        aktivitet: AktivitetType,
-        periodeType: VedtaksperiodeType
-    ) : this(
-        periode.fomDato,
-        periode.tomDato,
-        aktivitet,
-        periodeType
-    )
-
-    val periode get() = Månedsperiode(datoFra, datoTil)
-}
+)
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
 data class Barnetilsynperiode(
-    val datoFra: LocalDate,
-    val datoTil: LocalDate,
+    @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val datoFra: LocalDate? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val datoTil: LocalDate? = null,
+    val periode: Månedsperiode =
+        Månedsperiode(
+            datoFra ?: error("periode eller årMånedFra må ha verdi"),
+            datoTil ?: error("periode eller årMånedTil må ha verdi")
+        ),
     val utgifter: Int,
     val barn: List<UUID>,
     val erMidlertidigOpphør: Boolean? = false
-) {
-    constructor(
-        periode: Månedsperiode,
-        utgifter: Int,
-        barn: List<UUID>,
-        erMidlertidigOpphør: Boolean? = false
-    ) : this(
-        periode.fomDato,
-        periode.tomDato,
-        utgifter,
-        barn,
-        erMidlertidigOpphør
-    )
-
-    val periode get() = Månedsperiode(datoFra, datoTil)
-}
+)
 
 data class SkoleårsperiodeSkolepenger(
     val perioder: List<DelårsperiodeSkoleårSkolepenger>,
@@ -90,24 +73,15 @@ data class SkoleårsperiodeSkolepenger(
 
 data class DelårsperiodeSkoleårSkolepenger(
     val studietype: SkolepengerStudietype,
-    val datoFra: LocalDate,
-    val datoTil: LocalDate,
+    @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val datoFra: LocalDate? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val datoTil: LocalDate? = null,
+    val periode: Månedsperiode =
+        Månedsperiode(
+            datoFra ?: error("periode eller årMånedFra må ha verdi"),
+            datoTil ?: error("periode eller årMånedTil må ha verdi")
+        ),
     val studiebelastning: Int,
-) {
-
-    constructor(
-        studietype: SkolepengerStudietype,
-        periode: Månedsperiode,
-        studiebelastning: Int
-    ) : this(
-        studietype,
-        periode.fomDato,
-        periode.tomDato,
-        studiebelastning
-    )
-
-    val periode get() = Månedsperiode(datoFra, datoTil)
-}
+)
 
 data class SkolepengerUtgift(
     val id: UUID,
@@ -122,12 +96,15 @@ enum class SkolepengerStudietype {
 }
 
 data class PeriodeMedBeløp(
-    val datoFra: LocalDate,
-    val datoTil: LocalDate,
+    @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val datoFra: LocalDate? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val datoTil: LocalDate? = null,
+    val periode: Månedsperiode =
+        Månedsperiode(
+            datoFra ?: error("periode eller årMånedFra må ha verdi"),
+            datoTil ?: error("periode eller årMånedTil må ha verdi")
+        ),
     val beløp: Int
 ) {
-
-    constructor(periode: Månedsperiode, beløp: Int) : this(periode.fomDato, periode.tomDato, beløp)
 
     fun tilDto() = PeriodeMedBeløpDto(
         årMånedFra = periode.fom,
@@ -135,8 +112,6 @@ data class PeriodeMedBeløp(
         periode = periode,
         beløp = beløp
     )
-
-    val periode get() = Månedsperiode(datoFra, datoTil)
 }
 
 data class PeriodeWrapper(val perioder: List<Vedtaksperiode>)

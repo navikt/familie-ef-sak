@@ -10,25 +10,10 @@ data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: Lis
 
 data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal?, val samordningsfradrag: BigDecimal?)
 data class Inntektsperiode(
-    val startDato: LocalDate,
-    val sluttDato: LocalDate,
+    val periode: Månedsperiode,
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
-) {
-
-    constructor(
-        periode: Månedsperiode,
-        inntekt: BigDecimal,
-        samordningsfradrag: BigDecimal
-    ) : this(
-        periode.fom.atDay(1),
-        periode.tom.atEndOfMonth(),
-        inntekt,
-        samordningsfradrag
-    )
-
-    val periode get() = Månedsperiode(startDato, sluttDato)
-}
+)
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
     Inntektsperiode(

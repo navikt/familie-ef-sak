@@ -142,7 +142,7 @@ object VedtakDomeneParser {
         Vedtak(
             behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
             resultatType = resultatType,
-            opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad)?.atDay(1),
+            opphørFom = parseValgfriÅrMåned(VedtakDomenebegrep.OPPHØRSDATO, rad),
             sanksjonsårsak = if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null,
             internBegrunnelse = if (resultatType == ResultatType.SANKSJONERE) "Ok" else null
         )
@@ -152,8 +152,8 @@ object VedtakDomeneParser {
             "Antall rader for sanksjonering må være 1, per behandlingId"
         }
         val periode = perioder.single()
-        feilHvis(YearMonth.from(periode.datoFra) != YearMonth.from(periode.datoTil)) {
-            "Sanksjon strekker seg ikke 1 måned: ${periode.datoFra} - ${periode.datoTil}"
+        feilHvis(periode.periode.fom != periode.periode.tom) {
+            "Sanksjon strekker seg ikke 1 måned: ${periode.periode.fom} - ${periode.periode}"
         }
     }
 
@@ -170,8 +170,7 @@ object VedtakDomeneParser {
     private fun mapPerioderForOvergangsstønad(rader: List<Map<String, String>>): List<Vedtaksperiode> {
         return rader.map { rad ->
             Vedtaksperiode(
-                datoFra = parseFraOgMed(rad),
-                datoTil = parseTilOgMed(rad),
+                periode = Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
                 aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
                 periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE
             )
@@ -181,8 +180,7 @@ object VedtakDomeneParser {
     private fun mapPerioderForBarnetilsyn(rader: List<Map<String, String>>): List<Barnetilsynperiode> {
         return rader.map { rad ->
             Barnetilsynperiode(
-                datoFra = parseFraOgMed(rad),
-                datoTil = parseTilOgMed(rad),
+                periode = Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                 barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
                     IntRange(1, it).map { UUID.randomUUID() }
@@ -241,7 +239,7 @@ object VedtakDomeneParser {
         val beløpsperioder = dataTable.forHverBehandling { behandlingId, rader ->
             behandlingId to rader.map { rad ->
                 PeriodeMedBeløp(
-                    Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
+                    periode = Månedsperiode(parseFraOgMed(rad), parseTilOgMed(rad)),
                     beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad) ?: 0
                 )
             }
@@ -256,7 +254,7 @@ object VedtakDomeneParser {
         perioder.firstOrNull()?.let {
             listOf(
                 Inntektsperiode(
-                    Månedsperiode(it.datoFra, LocalDate.MAX),
+                    Månedsperiode(it.periode.fom, YearMonth.from(LocalDate.MAX)),
                     BigDecimal.ZERO,
                     BigDecimal.ZERO
                 )
@@ -267,7 +265,9 @@ object VedtakDomeneParser {
         return dataTable.forHverBehandling { behandlingId, rader ->
             val inntektsperioder = rader.fold(mutableListOf<Inntektsperiode>()) { acc, rad ->
                 val datoFra = parseFraOgMed(rad)
-                acc.removeLastOrNull()?.copy(sluttDato = datoFra.minusDays(1))?.let { acc.add(it) }
+                val lastOrNull = acc.removeLastOrNull()
+                lastOrNull?.copy(periode = lastOrNull.periode.copy(tom = YearMonth.from(datoFra.minusDays(1))))
+                    ?.let { acc.add(it) }
                 acc.add(
                     Inntektsperiode(
                         Månedsperiode(datoFra, LocalDate.MAX),
