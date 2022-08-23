@@ -135,12 +135,7 @@ class JournalføringService(
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
-        feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak != null) {
-            "Kan ikke sende inn årsak når journalposten har strukturert søknad"
-        }
-        brukerfeilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
-            "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
-        }
+        validerJournalføringNyBehandling(journalpost, journalføringRequest)
 
         validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
 
@@ -161,6 +156,25 @@ class JournalføringService(
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
         return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
+    }
+
+    private fun validerJournalføringNyBehandling(
+        journalpost: Journalpost,
+        journalføringRequest: JournalføringRequest
+    ) {
+        feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak != null) {
+            "Kan ikke sende inn årsak når journalposten har strukturert søknad"
+        }
+        brukerfeilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
+            "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
+        }
+        brukerfeilHvis(
+            !journalpost.harStrukturertSøknad() &&
+                journalføringRequest.behandling.årsak == BehandlingÅrsak.PAPIRSØKNAD &&
+                journalpost.avsenderMottaker == null
+        ) {
+            "Avsender på papirsøknad må settes i gosys før videre journalføring i EF Sak"
+        }
     }
 
     @Transactional
