@@ -131,6 +131,7 @@ internal class VurderingStegServiceTest {
             mockk(relaxed = true),
             mockk(relaxed = true),
             false,
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
 
