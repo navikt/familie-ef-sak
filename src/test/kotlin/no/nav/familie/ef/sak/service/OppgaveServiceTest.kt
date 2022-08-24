@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -90,7 +91,12 @@ internal class OppgaveServiceTest {
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = aktørIdentFraPdl,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -131,7 +137,12 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.mappeId).isNotNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = aktørIdentFraPdl,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -160,7 +171,12 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
         assertThat(slot.captured.mappeId).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = aktørIdentFraPdl,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -205,7 +221,12 @@ internal class OppgaveServiceTest {
         } returns null
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
 
-        Assertions.assertThatThrownBy { oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
+        Assertions.assertThatThrownBy {
+            oppgaveService.ferdigstillBehandleOppgave(
+                BEHANDLING_ID,
+                Oppgavetype.BehandleSak
+            )
+        }
             .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
             .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
@@ -253,6 +274,38 @@ internal class OppgaveServiceTest {
 
         assertThat(GSAK_OPPGAVE_ID).isEqualTo(oppgaveSlot.captured)
         verify(exactly = 1) { oppgaveClient.fordelOppgave(any(), null) }
+    }
+
+    @Test
+    fun `sett gOppgave til feilregistrert, forvent at ferdigstilling av oppgave bare ferdigstiller ef-oppgave`() {
+        val gOppgave = mockk<no.nav.familie.kontrakter.felles.oppgave.Oppgave>()
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns lagTestOppgave()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
+        every { oppgaveClient.finnOppgaveMedId(any()) } returns gOppgave
+        every { oppgaveClient.ferdigstillOppgave(any()) } just runs
+        every { gOppgave.status } returns StatusEnum.FEILREGISTRERT
+
+        oppgaveService.ferdigstillBehandleOppgave(UUID.randomUUID(), Oppgavetype.BehandleSak)
+
+        verify(exactly = 0) { oppgaveClient.ferdigstillOppgave(any()) }
+    }
+
+    @Test
+    fun `sett gOppgave under_behandling, forvent at ferdigstilling av oppgave oppdateres i oppgavesystemet`() {
+        val gOppgave = mockk<no.nav.familie.kontrakter.felles.oppgave.Oppgave>()
+        every {
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+        } returns lagTestOppgave()
+        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
+        every { oppgaveClient.finnOppgaveMedId(any()) } returns gOppgave
+        every { oppgaveClient.ferdigstillOppgave(any()) } just runs
+        every { gOppgave.status } returns StatusEnum.UNDER_BEHANDLING
+
+        oppgaveService.ferdigstillBehandleOppgave(UUID.randomUUID(), Oppgavetype.BehandleSak)
+
+        verify { oppgaveClient.ferdigstillOppgave(any()) }
     }
 
     @Test

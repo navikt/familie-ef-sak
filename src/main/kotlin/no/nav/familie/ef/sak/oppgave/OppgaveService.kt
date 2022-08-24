@@ -18,6 +18,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
@@ -52,7 +53,8 @@ class OppgaveService(
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
-        val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        val oppgaveFinnesFraFør =
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
@@ -101,7 +103,8 @@ class OppgaveService(
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
         if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
-            val mappeIdForGodkjenneVedtak = mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
+            val mappeIdForGodkjenneVedtak =
+                mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
@@ -155,7 +158,11 @@ class OppgaveService(
     }
 
     private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
-        ferdigstillOppgave(oppgave.gsakOppgaveId)
+        val gsakOppgave = oppgaveClient.finnOppgaveMedId(oppgaveId = oppgave.gsakOppgaveId)
+        val gsakOppgaveStatus = gsakOppgave.status ?: error("Kunne ikke finne status for gsak oppgave")
+        if (!gsakOppgaveStatus.equals(StatusEnum.FEILREGISTRERT)) {
+            ferdigstillOppgave(oppgave.gsakOppgaveId)
+        }
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
     }
