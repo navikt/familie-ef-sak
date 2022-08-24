@@ -22,9 +22,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -343,14 +345,14 @@ fun behandlingBarn(
     )
 }
 
-fun barnMedIdent(fnr: String, navn: String): BarnMedIdent =
+fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate.now())): BarnMedIdent =
     BarnMedIdent(
         adressebeskyttelse = emptyList(),
         bostedsadresse = emptyList(),
         deltBosted = emptyList(),
         dødsfall = emptyList(),
         forelderBarnRelasjon = emptyList(),
-        fødsel = emptyList(),
+        fødsel = listOf(fødsel),
         navn = Navn(
             fornavn = navn.split(" ")[0],
             mellomnavn = null,

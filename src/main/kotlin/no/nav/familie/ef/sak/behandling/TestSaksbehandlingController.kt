@@ -93,7 +93,8 @@ class TestSaksbehandlingController(
                 behandling.id,
                 fagsak.id,
                 grunnlagsdata.grunnlagsdata.barn,
-                fagsak.stønadstype
+                fagsak.stønadstype,
+                behandling.årsak
             )
             behandlingshistorikkService.opprettHistorikkInnslag(
                 Behandlingshistorikk(

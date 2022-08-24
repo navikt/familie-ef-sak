@@ -139,7 +139,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
-        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any()) } just Runs
+        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any()) } just Runs
 
         every { behandlingService.hentBehandling(behandlingId) }
             .returns(
