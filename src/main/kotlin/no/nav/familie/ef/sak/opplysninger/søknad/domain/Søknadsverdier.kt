@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.domain
 
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.DokumentasjonMapper
 import no.nav.familie.ef.sak.vilkår.dto.DokumentasjonDto
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -59,7 +60,7 @@ fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
     bosituasjon = this.bosituasjon,
     situasjon = null,
     datoMottatt = this.datoMottatt,
-    dokumentasjon = tilDokumentasjon(this)
+    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
 )
 
 fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
@@ -73,7 +74,7 @@ fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
     situasjon = null,
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
-    dokumentasjon = tilDokumentasjon(this)
+    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
 
 )
 
@@ -88,68 +89,5 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
     situasjon = this.situasjon,
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
-    dokumentasjon = tilDokumentasjon(this)
+    dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
 )
-
-fun tilDokumentasjon(søknadsskjema: SøknadsskjemaBarnetilsyn): DokumentasjonFraSøknadDto =
-    DokumentasjonFraSøknadDto(
-        erIArbeid = søknadsskjema.aktivitet.erIArbeidDokumentasjon?.tilDto(),
-        virksomhet = søknadsskjema.aktivitet.virksomhet?.dokumentasjon?.tilDto(),
-        ikkeVilligTilÅTaImotTilbudOmArbeid = søknadsskjema.aktivitet.arbeidssøker?.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.tilDto(),
-        tidligereSamboerFortsattRegistrertPåAdresse = søknadsskjema.bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.tilDto(),
-        uformeltGift = søknadsskjema.sivilstand.erUformeltGiftDokumentasjon?.tilDto(),
-        uformeltSeparertEllerSkilt = søknadsskjema.sivilstand.erUformeltSeparertEllerSkiltDokumentasjon?.tilDto(),
-        separasjonsbekreftelse = søknadsskjema.sivilstand.separasjonsbekreftelse?.tilDto(),
-        samlivsbrudd = søknadsskjema.sivilstand.samlivsbruddsdokumentasjon?.tilDto(),
-        avtaleOmDeltBosted = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.avtaleOmDeltBosted }?.tilDto(),
-        samværsavtale = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.samværsavtale }?.tilDto(),
-        skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }?.tilDto(),
-        erklæringOmSamlivsbrudd = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.erklæringOmSamlivsbrudd }?.tilDto(),
-        terminbekreftelse = søknadsskjema.barn.firstNotNullOfOrNull { it.terminbekreftelse }?.tilDto(),
-        barnepassordningFaktura = søknadsskjema.dokumentasjon.barnepassordningFaktura?.tilDto(),
-        avtaleBarnepasser = søknadsskjema.dokumentasjon.avtaleBarnepasser?.tilDto(),
-        arbeidstid = søknadsskjema.dokumentasjon.arbeidstid?.tilDto(),
-        roterendeArbeidstid = søknadsskjema.dokumentasjon.roterendeArbeidstid?.tilDto(),
-        spesielleBehov = søknadsskjema.dokumentasjon.spesielleBehov?.tilDto(),
-    )
-
-fun tilDokumentasjon(søknadsskjema: SøknadsskjemaOvergangsstønad): DokumentasjonFraSøknadDto =
-    DokumentasjonFraSøknadDto(
-        erIArbeid = søknadsskjema.aktivitet.erIArbeidDokumentasjon?.tilDto(),
-        virksomhet = søknadsskjema.aktivitet.virksomhet?.dokumentasjon?.tilDto(),
-        ikkeVilligTilÅTaImotTilbudOmArbeid = søknadsskjema.aktivitet.arbeidssøker?.ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon?.tilDto(),
-        tidligereSamboerFortsattRegistrertPåAdresse = søknadsskjema.bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.tilDto(),
-        uformeltGift = søknadsskjema.sivilstand.erUformeltGiftDokumentasjon?.tilDto(),
-        uformeltSeparertEllerSkilt = søknadsskjema.sivilstand.erUformeltSeparertEllerSkiltDokumentasjon?.tilDto(),
-        separasjonsbekreftelse = søknadsskjema.sivilstand.separasjonsbekreftelse?.tilDto(),
-        samlivsbrudd = søknadsskjema.sivilstand.samlivsbruddsdokumentasjon?.tilDto(),
-        avtaleOmDeltBosted = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.avtaleOmDeltBosted }?.tilDto(),
-        samværsavtale = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.samværsavtale }?.tilDto(),
-        skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }?.tilDto(),
-        erklæringOmSamlivsbrudd = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.erklæringOmSamlivsbrudd }?.tilDto(),
-        terminbekreftelse = søknadsskjema.barn.firstNotNullOfOrNull { it.terminbekreftelse }?.tilDto(),
-        sykdom = søknadsskjema.situasjon.sykdom?.tilDto(),
-        barnsSykdom = søknadsskjema.situasjon.barnsSykdom?.tilDto(),
-        manglendeBarnepass = søknadsskjema.situasjon.manglendeBarnepass?.tilDto(),
-        barnMedSærligeBehov = søknadsskjema.situasjon.barnMedSærligeBehov?.tilDto(),
-        arbeidskontrakt = søknadsskjema.situasjon.arbeidskontrakt?.tilDto(),
-        lærlingkontrakt = søknadsskjema.situasjon.lærlingkontrakt?.tilDto(),
-        utdanningstilbud = søknadsskjema.situasjon.utdanningstilbud?.tilDto(),
-        reduksjonAvArbeidsforhold = søknadsskjema.situasjon.reduksjonAvArbeidsforholdDokumentasjon?.tilDto(),
-        oppsigelse = søknadsskjema.situasjon.oppsigelseDokumentasjon?.tilDto(),
-    )
-
-fun tilDokumentasjon(søknadsskjema: SøknadsskjemaSkolepenger): DokumentasjonFraSøknadDto =
-    DokumentasjonFraSøknadDto(
-        tidligereSamboerFortsattRegistrertPåAdresse = søknadsskjema.bosituasjon.tidligereSamboerFortsattRegistrertPåAdresse?.tilDto(),
-        uformeltGift = søknadsskjema.sivilstand.erUformeltGiftDokumentasjon?.tilDto(),
-        uformeltSeparertEllerSkilt = søknadsskjema.sivilstand.erUformeltSeparertEllerSkiltDokumentasjon?.tilDto(),
-        separasjonsbekreftelse = søknadsskjema.sivilstand.separasjonsbekreftelse?.tilDto(),
-        samlivsbrudd = søknadsskjema.sivilstand.samlivsbruddsdokumentasjon?.tilDto(),
-        avtaleOmDeltBosted = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.avtaleOmDeltBosted }?.tilDto(),
-        samværsavtale = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.samværsavtale }?.tilDto(),
-        skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke }?.tilDto(),
-        erklæringOmSamlivsbrudd = søknadsskjema.barn.firstNotNullOfOrNull { it.samvær?.erklæringOmSamlivsbrudd }?.tilDto(),
-        terminbekreftelse = søknadsskjema.barn.firstNotNullOfOrNull { it.terminbekreftelse }?.tilDto(),
-        utdanningsutgifter = søknadsskjema.utdanningsutgifter?.tilDto()
-    )
