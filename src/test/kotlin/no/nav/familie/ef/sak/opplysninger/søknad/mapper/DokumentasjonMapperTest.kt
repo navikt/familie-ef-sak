@@ -29,173 +29,92 @@ internal class DokumentasjonMapperTest {
     private val dokumentasjonSendtInnTidligere = Dokumentasjon(true, emptyList())
     private val dokument = Dokument("1234", "Dokumentnavn")
     private val dokumentasjonMedVedlegg = Dokumentasjon(false, listOf(dokument))
-    private val søknadOvergangsstønad = SøknadsskjemaOvergangsstønad(
-        type = SøknadType.OVERGANGSSTØNAD, fødselsnummer = "1", navn = "",
-        datoMottatt = LocalDateTime.now(),
-        sivilstand = Sivilstand(
-            erUformeltGiftDokumentasjon = dokumentasjonSendtInnTidligere,
-            erUformeltSeparertEllerSkiltDokumentasjon = dokumentasjonMedVedlegg,
-            separasjonsbekreftelse = dokumentasjonSendtInnTidligere,
-            samlivsbruddsdokumentasjon = dokumentasjonSendtInnTidligere
-        ),
-        medlemskap = Medlemskap(
-            oppholderDuDegINorge = false,
-            bosattNorgeSisteÅrene = false
-        ),
-        bosituasjon = Bosituasjon(
-            tidligereSamboerFortsattRegistrertPåAdresse = dokumentasjonMedVedlegg
-        ),
-        sivilstandsplaner = Sivilstandsplaner(),
-        barn = setOf(
-            SøknadBarn(
-                harSkalHaSammeAdresse = false,
-                erBarnetFødt = false,
-                terminbekreftelse = dokumentasjonMedVedlegg,
-                samvær = Samvær(
-                    avtaleOmDeltBosted = dokumentasjonSendtInnTidligere,
-                    samværsavtale = dokumentasjonMedVedlegg,
-                    skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = dokumentasjonSendtInnTidligere,
-                    erklæringOmSamlivsbrudd = dokumentasjonMedVedlegg
-                ),
-                ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-                lagtTilManuelt = false
-            )
-        ),
-        aktivitet = Aktivitet(
-            virksomhet = Virksomhet(virksomhetsbeskrivelse = "", dokumentasjon = dokumentasjonSendtInnTidligere),
-            arbeidssøker = Arbeidssøker(
-                registrertSomArbeidssøkerNav = false,
-                villigTilÅTaImotTilbudOmArbeid = false,
-                kanDuBegynneInnenEnUke = false,
-                kanDuSkaffeBarnepassInnenEnUke = null,
-                hvorØnskerDuArbeid = "",
-                ønskerDuMinst50ProsentStilling = false,
-                ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentasjonSendtInnTidligere
-            ),
-            erIArbeidDokumentasjon = dokumentasjonSendtInnTidligere
-        ),
-        situasjon = Situasjon(
-            sykdom = dokumentasjonMedVedlegg,
-            barnsSykdom = dokumentasjonSendtInnTidligere,
-            manglendeBarnepass = dokumentasjonMedVedlegg,
-            barnMedSærligeBehov = dokumentasjonSendtInnTidligere,
-            arbeidskontrakt = dokumentasjonSendtInnTidligere,
-            lærlingkontrakt = dokumentasjonSendtInnTidligere,
-            utdanningstilbud = dokumentasjonMedVedlegg,
-            reduksjonAvArbeidsforholdDokumentasjon = dokumentasjonSendtInnTidligere,
-            oppsigelseDokumentasjon = dokumentasjonMedVedlegg
-        ),
-        søkerFra = null, søkerFraBestemtMåned = false
+
+    private val sivilstand = Sivilstand(
+        erUformeltGiftDokumentasjon = dokumentasjonSendtInnTidligere,
+        erUformeltSeparertEllerSkiltDokumentasjon = dokumentasjonMedVedlegg,
+        separasjonsbekreftelse = dokumentasjonSendtInnTidligere,
+        samlivsbruddsdokumentasjon = dokumentasjonSendtInnTidligere
     )
 
-    private val søknadBarnetilsyn = SøknadsskjemaBarnetilsyn(
-        type = SøknadType.BARNETILSYN, fødselsnummer = "1", navn = "",
-        datoMottatt = LocalDateTime.now(),
-        sivilstand = Sivilstand(
-            erUformeltGiftDokumentasjon = dokumentasjonSendtInnTidligere,
-            erUformeltSeparertEllerSkiltDokumentasjon = dokumentasjonMedVedlegg,
-            separasjonsbekreftelse = dokumentasjonSendtInnTidligere,
-            samlivsbruddsdokumentasjon = dokumentasjonSendtInnTidligere
-        ),
-        medlemskap = Medlemskap(
-            oppholderDuDegINorge = false,
-            bosattNorgeSisteÅrene = false
-        ),
-        bosituasjon = Bosituasjon(
-            tidligereSamboerFortsattRegistrertPåAdresse = dokumentasjonMedVedlegg
-        ),
-        sivilstandsplaner = Sivilstandsplaner(),
-        barn = setOf(
-            SøknadBarn(
-                harSkalHaSammeAdresse = false,
-                erBarnetFødt = false,
-                terminbekreftelse = dokumentasjonMedVedlegg,
-                samvær = Samvær(
-                    avtaleOmDeltBosted = dokumentasjonSendtInnTidligere,
-                    samværsavtale = dokumentasjonMedVedlegg,
-                    skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = dokumentasjonSendtInnTidligere,
-                    erklæringOmSamlivsbrudd = dokumentasjonMedVedlegg
-                ),
-                ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-                lagtTilManuelt = false
-            )
-        ),
-        aktivitet = Aktivitet(
-            virksomhet = Virksomhet(virksomhetsbeskrivelse = "", dokumentasjon = dokumentasjonSendtInnTidligere),
-            arbeidssøker = Arbeidssøker(
-                registrertSomArbeidssøkerNav = false,
-                villigTilÅTaImotTilbudOmArbeid = false,
-                kanDuBegynneInnenEnUke = false,
-                kanDuSkaffeBarnepassInnenEnUke = null,
-                hvorØnskerDuArbeid = "",
-                ønskerDuMinst50ProsentStilling = false,
-                ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentasjonSendtInnTidligere
-            ),
-            erIArbeidDokumentasjon = dokumentasjonSendtInnTidligere
-        ),
-        dokumentasjon = BarnetilsynDokumentasjon(
-            barnepassordningFaktura = dokumentasjonSendtInnTidligere,
-            avtaleBarnepasser = dokumentasjonSendtInnTidligere,
-            arbeidstid = dokumentasjonSendtInnTidligere,
-            roterendeArbeidstid = dokumentasjonMedVedlegg,
-            spesielleBehov = dokumentasjonMedVedlegg
-
-        ),
-        søkerFra = null, søkerFraBestemtMåned = false
+    private val medlemskap = Medlemskap(
+        oppholderDuDegINorge = false,
+        bosattNorgeSisteÅrene = false
     )
 
-    private val søknadSkolepenger = SøknadsskjemaSkolepenger(
-        type = SøknadType.SKOLEPENGER, fødselsnummer = "1", navn = "",
-        datoMottatt = LocalDateTime.now(),
-        sivilstand = Sivilstand(
-            erUformeltGiftDokumentasjon = dokumentasjonSendtInnTidligere,
-            erUformeltSeparertEllerSkiltDokumentasjon = dokumentasjonMedVedlegg,
-            separasjonsbekreftelse = dokumentasjonSendtInnTidligere,
-            samlivsbruddsdokumentasjon = dokumentasjonSendtInnTidligere
+    private val bosituasjon = Bosituasjon(
+        tidligereSamboerFortsattRegistrertPåAdresse = dokumentasjonMedVedlegg
+    )
+
+    private val søknadBarn = SøknadBarn(
+        harSkalHaSammeAdresse = false,
+        erBarnetFødt = false,
+        terminbekreftelse = dokumentasjonMedVedlegg,
+        samvær = Samvær(
+            avtaleOmDeltBosted = dokumentasjonSendtInnTidligere,
+            samværsavtale = dokumentasjonMedVedlegg,
+            skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = dokumentasjonSendtInnTidligere,
+            erklæringOmSamlivsbrudd = dokumentasjonMedVedlegg
         ),
-        medlemskap = Medlemskap(
-            oppholderDuDegINorge = false,
-            bosattNorgeSisteÅrene = false
+        ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+        lagtTilManuelt = false
+    )
+
+    private val aktivitet = Aktivitet(
+        virksomhet = Virksomhet(virksomhetsbeskrivelse = "", dokumentasjon = dokumentasjonSendtInnTidligere),
+        arbeidssøker = Arbeidssøker(
+            registrertSomArbeidssøkerNav = false,
+            villigTilÅTaImotTilbudOmArbeid = false,
+            kanDuBegynneInnenEnUke = false,
+            kanDuSkaffeBarnepassInnenEnUke = null,
+            hvorØnskerDuArbeid = "",
+            ønskerDuMinst50ProsentStilling = false,
+            ikkeVilligTilÅTaImotTilbudOmArbeidDokumentasjon = dokumentasjonSendtInnTidligere
         ),
-        bosituasjon = Bosituasjon(
-            tidligereSamboerFortsattRegistrertPåAdresse = dokumentasjonMedVedlegg
-        ),
-        sivilstandsplaner = Sivilstandsplaner(),
-        barn = setOf(
-            SøknadBarn(
-                harSkalHaSammeAdresse = false,
-                erBarnetFødt = false,
-                terminbekreftelse = dokumentasjonMedVedlegg,
-                samvær = Samvær(
-                    avtaleOmDeltBosted = dokumentasjonSendtInnTidligere,
-                    samværsavtale = dokumentasjonMedVedlegg,
-                    skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke = dokumentasjonSendtInnTidligere,
-                    erklæringOmSamlivsbrudd = dokumentasjonMedVedlegg
-                ),
-                ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
-                lagtTilManuelt = false
-            )
-        ),
-        utdanning = UnderUtdanning(
-            skoleUtdanningssted = "",
-            linjeKursGrad = "",
-            fra = LocalDate.now(),
-            til = LocalDate.now(),
-            offentligEllerPrivat = null,
-            heltidEllerDeltid = null,
-            hvorMyeSkalDuStudere = null,
-            hvaErMåletMedUtdanningen = null,
-            utdanningEtterGrunnskolen = false,
-            semesteravgift = null,
-            studieavgift = null,
-            eksamensgebyr = null
-        ),
-        utdanningsutgifter = dokumentasjonSendtInnTidligere,
-        tidligereUtdanninger = setOf()
+        erIArbeidDokumentasjon = dokumentasjonSendtInnTidligere
+    )
+    private val situasjon = Situasjon(
+        sykdom = dokumentasjonMedVedlegg,
+        barnsSykdom = dokumentasjonSendtInnTidligere,
+        manglendeBarnepass = dokumentasjonMedVedlegg,
+        barnMedSærligeBehov = dokumentasjonSendtInnTidligere,
+        arbeidskontrakt = dokumentasjonSendtInnTidligere,
+        lærlingkontrakt = dokumentasjonSendtInnTidligere,
+        utdanningstilbud = dokumentasjonMedVedlegg,
+        reduksjonAvArbeidsforholdDokumentasjon = dokumentasjonSendtInnTidligere,
+        oppsigelseDokumentasjon = dokumentasjonMedVedlegg
+    )
+
+    private val utdanning = UnderUtdanning(
+        skoleUtdanningssted = "",
+        linjeKursGrad = "",
+        fra = LocalDate.now(),
+        til = LocalDate.now(),
+        offentligEllerPrivat = null,
+        heltidEllerDeltid = null,
+        hvorMyeSkalDuStudere = null,
+        hvaErMåletMedUtdanningen = null,
+        utdanningEtterGrunnskolen = false,
+        semesteravgift = null,
+        studieavgift = null,
+        eksamensgebyr = null
     )
 
     @Test
     internal fun `skal mappe dokumentasjonsbehov for overgangsstønad`() {
+        val søknadOvergangsstønad = SøknadsskjemaOvergangsstønad(
+            type = SøknadType.OVERGANGSSTØNAD, fødselsnummer = "1", navn = "",
+            datoMottatt = LocalDateTime.now(),
+            sivilstand = sivilstand,
+            medlemskap = medlemskap,
+            bosituasjon = bosituasjon,
+            sivilstandsplaner = Sivilstandsplaner(),
+            barn = setOf(søknadBarn),
+            aktivitet = aktivitet,
+            situasjon = situasjon,
+            søkerFra = null, søkerFraBestemtMåned = false
+        )
+
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadOvergangsstønad)
 
         assertThat(dokumentasjon.erIArbeid).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
@@ -230,6 +149,26 @@ internal class DokumentasjonMapperTest {
 
     @Test
     internal fun `skal mappe dokumentasjonsbehov for barnetilsyn`() {
+        val søknadBarnetilsyn = SøknadsskjemaBarnetilsyn(
+            type = SøknadType.BARNETILSYN, fødselsnummer = "1", navn = "",
+            datoMottatt = LocalDateTime.now(),
+            sivilstand = sivilstand,
+            medlemskap = medlemskap,
+            bosituasjon = bosituasjon,
+            sivilstandsplaner = Sivilstandsplaner(),
+            barn = setOf(søknadBarn),
+            aktivitet = aktivitet,
+            dokumentasjon = BarnetilsynDokumentasjon(
+                barnepassordningFaktura = dokumentasjonSendtInnTidligere,
+                avtaleBarnepasser = dokumentasjonSendtInnTidligere,
+                arbeidstid = dokumentasjonSendtInnTidligere,
+                roterendeArbeidstid = dokumentasjonMedVedlegg,
+                spesielleBehov = dokumentasjonMedVedlegg
+
+            ),
+            søkerFra = null, søkerFraBestemtMåned = false
+        )
+
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadBarnetilsyn)
 
         assertThat(dokumentasjon.erIArbeid).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
@@ -264,6 +203,20 @@ internal class DokumentasjonMapperTest {
 
     @Test
     internal fun `skal mappe dokumentasjonsbehov for skolepenger`() {
+        val søknadSkolepenger = SøknadsskjemaSkolepenger(
+            type = SøknadType.SKOLEPENGER, fødselsnummer = "1", navn = "",
+            datoMottatt = LocalDateTime.now(),
+            sivilstand = sivilstand,
+            medlemskap = medlemskap,
+            bosituasjon = bosituasjon,
+            sivilstandsplaner = Sivilstandsplaner(),
+            barn = setOf(
+                søknadBarn
+            ),
+            utdanning = utdanning,
+            utdanningsutgifter = dokumentasjonSendtInnTidligere,
+            tidligereUtdanninger = setOf()
+        )
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadSkolepenger)
 
         assertThat(dokumentasjon.erIArbeid).isEqualTo(null)
