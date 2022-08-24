@@ -164,11 +164,11 @@ object AndelHistorikkBeregner {
 
             return if (endringType == EndringType.SPLITTET) {
                 andelFraHistorikk.andel = andelHistorikk.copy(
-                    stønadTom = andel.stønadTom,
+                    periode = andelHistorikk.periode.copy(tom = andel.periode.tom),
                     kildeBehandlingId = andel.kildeBehandlingId
                 )
                 andelFraHistorikk.copy(
-                    andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
+                    andel = andelHistorikk.copy(periode = andelHistorikk.periode.copy(fom = andel.periode.tom.plusMonths(1))),
                     endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
                 )
             } else {
@@ -186,7 +186,7 @@ object AndelHistorikkBeregner {
 
     private fun sorterTilkjentYtelser(tilkjentYtelser: List<TilkjentYtelse>): List<TilkjentYtelse> =
         tilkjentYtelser.sortedBy { it.sporbar.opprettetTid }
-            .map { it.copy(andelerTilkjentYtelse = it.andelerTilkjentYtelse.sortedBy(AndelTilkjentYtelse::stønadFom)) }
+            .map { it.copy(andelerTilkjentYtelse = it.andelerTilkjentYtelse.sortedBy(AndelTilkjentYtelse::periode)) }
 
     private fun lagNyAndel(
         tilkjentYtelse: TilkjentYtelse,
@@ -213,8 +213,8 @@ object AndelHistorikkBeregner {
             this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
             this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
             erEndringerForBarnetilsyn(this.vedtaksperiode, tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
-            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
+            this.andel.periode.tom < tidligereAndel.periode.tom -> EndringType.ERSTATTET
+            this.andel.periode.tom > tidligereAndel.periode.tom -> EndringType.SPLITTET
             this.andel.kildeBehandlingId != tidligereAndel.kildeBehandlingId -> EndringType.FJERNET
             else -> null // Uendret
         }
@@ -278,7 +278,7 @@ object AndelHistorikkBeregner {
         historikk: List<AndelHistorikkHolder>,
         andel: AndelTilkjentYtelse
     ): Int {
-        val index = historikk.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
+        val index = historikk.indexOfFirst { it.andel.periode.fom > andel.periode.tom }
         return if (index == -1) historikk.size else index
     }
 
@@ -289,7 +289,7 @@ object AndelHistorikkBeregner {
         historikk.findLast {
             it.endring?.type != EndringType.FJERNET &&
                 it.endring?.type != EndringType.ERSTATTET &&
-                it.andel.stønadFom == andel.stønadFom
+                it.andel.periode.fom == andel.periode.fom
         }
 
     /**

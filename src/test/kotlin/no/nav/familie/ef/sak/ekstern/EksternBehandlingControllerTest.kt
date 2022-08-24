@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
@@ -57,13 +57,13 @@ internal class EksternBehandlingControllerTest {
             andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse(
                     beløp = 1,
-                    fraOgMed = LocalDate.of(2019, 1, 1),
-                    tilOgMed = LocalDate.of(2019, 2, 1)
+                    fraOgMed = YearMonth.of(2019, 1),
+                    tilOgMed = YearMonth.of(2019, 2)
                 ),
                 lagAndelTilkjentYtelse(
                     beløp = 1,
-                    fraOgMed = LocalDate.of(2020, 1, 1),
-                    tilOgMed = LocalDate.now().plusMonths(11)
+                    fraOgMed = YearMonth.of(2020, 1),
+                    tilOgMed = YearMonth.now().plusMonths(11)
                 )
             )
         )
@@ -74,13 +74,13 @@ internal class EksternBehandlingControllerTest {
             andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse(
                     beløp = 1,
-                    fraOgMed = LocalDate.of(2019, 1, 1),
-                    tilOgMed = LocalDate.of(2019, 2, 1)
+                    fraOgMed = YearMonth.of(2019, 1),
+                    tilOgMed = YearMonth.of(2019, 2)
                 ),
                 lagAndelTilkjentYtelse(
                     beløp = 1,
-                    fraOgMed = LocalDate.now().minusMonths(14),
-                    tilOgMed = LocalDate.now().minusYears(1).minusMonths(1)
+                    fraOgMed = YearMonth.now().minusMonths(14),
+                    tilOgMed = YearMonth.now().minusYears(1).minusMonths(1)
                 )
             )
         )

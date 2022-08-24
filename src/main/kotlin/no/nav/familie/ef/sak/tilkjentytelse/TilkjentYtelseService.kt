@@ -31,7 +31,7 @@ class TilkjentYtelseService(
 
     fun harLøpendeUtbetaling(behandlingId: UUID): Boolean {
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
-            ?.let { it.andelerTilkjentYtelse.any { andel -> andel.stønadTom.isAfter(LocalDate.now()) } } ?: false
+            ?.let { it.andelerTilkjentYtelse.any { andel -> andel.periode.tomDato.isAfter(LocalDate.now()) } } ?: false
     }
 
     fun finnTilkjentYtelserTilKonsistensavstemming(
@@ -59,7 +59,7 @@ class TilkjentYtelseService(
             val behandling = behandlinger[tilkjentYtelse.behandlingId]
                 ?: error("Finner ikke behandling for behandlingId=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
-                .filter { it.stønadTom.isEqualOrAfter(datoForAvstemming) }
+                .filter { it.periode.tomDato.isEqualOrAfter(datoForAvstemming) }
                 .filter { it.beløp > 0 }
                 .map { it.tilIverksettDto() }
 

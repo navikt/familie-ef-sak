@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.felles.util.DatoFormat.DATE_FORMAT_NORSK
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -17,15 +16,7 @@ fun LocalDate.norskFormat() = this.format(DATE_FORMAT_NORSK)
 
 fun datoEllerIdag(localDate: LocalDate?): LocalDate = localDate ?: LocalDate.now()
 
-fun min(first: LocalDateTime?, second: LocalDateTime?): LocalDateTime? {
-    return when {
-        first == null -> second
-        second == null -> first
-        else -> minOf(first, second)
-    }
-}
-
-fun min(first: LocalDate?, second: LocalDate?): LocalDate? {
+fun <T : Comparable<T>> min(first: T?, second: T?): T? {
     return when {
         first == null -> second
         second == null -> first

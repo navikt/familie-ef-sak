@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.ekstern
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -20,7 +19,7 @@ class EksternBehandlingService(
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
         val sisteStønadsdato = behandlingIDer
             .map(tilkjentYtelseService::hentForBehandling)
-            .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull(AndelTilkjentYtelse::stønadTom) }
+            .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull { ytelse -> ytelse.periode.tomDato } }
             .maxOfOrNull { it } ?: LocalDate.MIN
         return sisteStønadsdato >= LocalDate.now()
     }

@@ -87,7 +87,7 @@ internal class ArenaStønadsperioderServiceTest {
         val fom = YearMonth.of(2021, 1)
         val tom = YearMonth.of(2021, 3)
         mockPdl()
-        mockNyLøsning(fom.atDay(1), tom.atEndOfMonth())
+        mockNyLøsning(fom, tom)
         val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
@@ -99,7 +99,7 @@ internal class ArenaStønadsperioderServiceTest {
         val tom = YearMonth.of(2021, 3)
         mockPdl()
         mockInfotrygd(of(2021, 1, 1), of(2021, 1, 31))
-        mockNyLøsning(of(2021, 2, 1), of(2021, 3, 31))
+        mockNyLøsning(YearMonth.of(2021, 2), YearMonth.of(2021, 3))
         val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
@@ -111,7 +111,7 @@ internal class ArenaStønadsperioderServiceTest {
         val tom = YearMonth.of(2021, 3)
         mockPdl()
         mockInfotrygd(fom.atDay(1), tom.atEndOfMonth())
-        mockNyLøsning(fom.atDay(1), tom.atEndOfMonth())
+        mockNyLøsning(fom, tom)
         val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
@@ -123,7 +123,7 @@ internal class ArenaStønadsperioderServiceTest {
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns infotrygdPeriodeResponse
     }
 
-    private fun mockNyLøsning(stønadFom: LocalDate, stønadTom: LocalDate) {
+    private fun mockNyLøsning(stønadFom: YearMonth, stønadTom: YearMonth) {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
             lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, stønadFom, stønadTom, ident)))

@@ -13,9 +13,10 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class BeregningControllerUnitTest {
@@ -41,8 +42,7 @@ internal class BeregningControllerUnitTest {
                 PeriodeWrapper(
                     perioder = listOf(
                         Vedtaksperiode(
-                            LocalDate.of(2022, 1, 1),
-                            datoTil = LocalDate.of(2022, 4, 30),
+                            periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
                             aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
                             periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR
                         )
@@ -53,9 +53,9 @@ internal class BeregningControllerUnitTest {
             lagTilkjentYtelse(
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 1, 1),
+                        fraOgMed = YearMonth.of(2022, 1),
                         beløp = 10_000,
-                        tilOgMed = LocalDate.of(2022, 4, 30),
+                        tilOgMed = YearMonth.of(2022, 4),
                     )
                 )
             )

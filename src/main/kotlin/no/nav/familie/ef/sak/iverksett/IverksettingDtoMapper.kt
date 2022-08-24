@@ -345,7 +345,7 @@ class IverksettingDtoMapper(
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
     andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
-    startmåned = YearMonth.from(startdato)
+    startmåned = YearMonth.from(startmåned)
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
@@ -372,8 +372,8 @@ fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto>
     .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
     .map {
         VedtaksperiodeOvergangsstønadDto(
-            fraOgMed = it.datoFra,
-            tilOgMed = it.datoTil,
+            fraOgMed = it.periode.fomDato,
+            tilOgMed = it.periode.tomDato,
             periode = it.periode,
             aktivitet = AktivitetType.valueOf(it.aktivitet.name),
             periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)

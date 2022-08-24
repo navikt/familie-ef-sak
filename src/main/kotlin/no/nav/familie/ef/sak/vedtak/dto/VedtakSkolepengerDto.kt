@@ -118,9 +118,9 @@ fun SkoleårsperiodeSkolepenger.tilDto() =
 
 fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
     studietype = this.studietype,
-    årMånedFra = YearMonth.from(this.datoFra),
-    årMånedTil = YearMonth.from(this.datoTil),
-    periode = Månedsperiode(this.datoFra, this.datoTil),
+    årMånedFra = this.periode.fom,
+    årMånedTil = this.periode.tom,
+    periode = this.periode,
     studiebelastning = this.studiebelastning
 )
 

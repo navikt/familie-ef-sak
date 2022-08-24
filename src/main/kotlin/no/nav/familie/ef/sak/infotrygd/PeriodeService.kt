@@ -57,7 +57,7 @@ class PeriodeService(
             ?.let { behandling ->
                 val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandling.id)
                 val internperioder = tilInternPeriode(tilkjentYtelse)
-                val startdato = tilkjentYtelse.startdato
+                val startdato = tilkjentYtelse.startmåned.atDay(1)
                 EfInternPerioder(startdato, internperioder)
             }
     }
@@ -76,8 +76,8 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriod
     utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
     månedsbeløp = this.beløp,
     engangsbeløp = this.beløp,
-    stønadFom = this.stønadFom,
-    stønadTom = this.stønadTom,
+    stønadFom = this.periode.fomDato,
+    stønadTom = this.periode.tomDato,
     opphørsdato = null,
     datakilde = PeriodeOvergangsstønad.Datakilde.EF
 )

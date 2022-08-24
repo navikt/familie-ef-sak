@@ -76,8 +76,8 @@ class ValiderOmregningServiceTest {
             lagTilkjentYtelse(
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 4, 1),
-                        tilOgMed = LocalDate.of(2022, 8, 30),
+                        fraOgMed = YearMonth.of(2022, 4),
+                        tilOgMed = YearMonth.of(2022, 8),
                         samordningsfradrag = 5000,
                         beløp = 0
                     )
@@ -317,14 +317,14 @@ class ValiderOmregningServiceTest {
             lagTilkjentYtelse(
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 4, 1),
-                        tilOgMed = LocalDate.of(2022, 4, 30),
+                        fraOgMed = YearMonth.of(2022, 4),
+                        tilOgMed = YearMonth.of(2022, 4),
                         samordningsfradrag = 5000,
                         beløp = 14950
                     ),
                     lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 5, 1),
-                        tilOgMed = LocalDate.of(2022, 8, 30),
+                        fraOgMed = YearMonth.of(2022, 5),
+                        tilOgMed = YearMonth.of(2022, 8),
                         samordningsfradrag = 5000,
                         beløp = if (medRiktigBeløp) 15902 else 0
                     )

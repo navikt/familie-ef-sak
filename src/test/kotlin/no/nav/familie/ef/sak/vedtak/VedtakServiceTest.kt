@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class VedtakServiceTest {
@@ -34,12 +35,12 @@ class VedtakServiceTest {
     private val inntektWrapper = InntektWrapper(listOf(inntektsperiodeUtenInntekt, inntektsperiodeMedInntekt))
 
     private val periodeUtenInntekt = vedtaksperiode(
-        startDato = LocalDate.of(2021, 1, 1),
-        sluttDato = LocalDate.of(2021, 12, 31)
+        startDato = YearMonth.of(2021, 1),
+        sluttDato = YearMonth.of(2021, 12)
     )
     private val periodeMedInntekt = vedtaksperiode(
-        startDato = LocalDate.of(2022, 1, 1),
-        sluttDato = LocalDate.of(2024, 12, 31)
+        startDato = YearMonth.of(2022, 1),
+        sluttDato = YearMonth.of(2024, 12)
     )
     private val periodeWrapper = PeriodeWrapper(listOf(periodeUtenInntekt, periodeMedInntekt))
 

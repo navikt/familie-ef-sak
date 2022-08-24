@@ -16,19 +16,20 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtakHistorikkBeregnerTest {
 
-    private val førsteFra = LocalDate.of(2021, 1, 1)
-    private val førsteTil = LocalDate.of(2021, 3, 31)
+    private val førsteFra = YearMonth.of(2021, 1)
+    private val førsteTil = YearMonth.of(2021, 3)
 
     private val førstePeriode = lagVedtaksperiode(førsteFra, førsteTil)
     private val førsteVedtak = lagVedtak(perioder = listOf(førstePeriode))
 
     @Test
     internal fun `opphør har ikke periodeWrapper inne på vedtak`() {
-        val andreVedtak = lagVedtak(perioder = null, opphørFom = LocalDate.of(2021, 2, 1))
+        val andreVedtak = lagVedtak(perioder = null, opphørFom = YearMonth.of(2021, 2))
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -36,7 +37,7 @@ internal class VedtakHistorikkBeregnerTest {
         validerPeriode(
             vedtaksperioderPerBehandling,
             andreVedtak.behandlingId,
-            listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk())
+            listOf(førstePeriode.copy(periode = førstePeriode.periode.copy(tom = YearMonth.of(2021, 1))).tilHistorikk())
         )
     }
 
@@ -48,7 +49,7 @@ internal class VedtakHistorikkBeregnerTest {
 
     @Test
     internal fun `revurdering frem i tiden skal kun legge på tidligere perioder`() {
-        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(LocalDate.of(2021, 4, 1), LocalDate.of(2021, 4, 30))))
+        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(YearMonth.of(2021, 4), YearMonth.of(2021, 4))))
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -58,7 +59,7 @@ internal class VedtakHistorikkBeregnerTest {
 
     @Test
     internal fun `revurdering bak i tiden skal overskreve alle tidligere perioder`() {
-        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30))))
+        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(YearMonth.of(2020, 4), YearMonth.of(2020, 4))))
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -80,7 +81,7 @@ internal class VedtakHistorikkBeregnerTest {
 
     @Test
     internal fun `revurdering før tidligere perioder skal overskreve alle tidligere perioder`() {
-        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30))))
+        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(YearMonth.of(2020, 4), YearMonth.of(2020, 4))))
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -90,7 +91,7 @@ internal class VedtakHistorikkBeregnerTest {
 
     @Test
     internal fun `revurdering midt i tidligere periode skal overskreve overlappende perioder`() {
-        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 4, 30))))
+        val andreVedtak = lagVedtak(perioder = listOf(lagVedtaksperiode(YearMonth.of(2021, 2), YearMonth.of(2021, 4))))
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -98,8 +99,7 @@ internal class VedtakHistorikkBeregnerTest {
         validerPeriode(
             vedtaksperioderPerBehandling, andreVedtak.behandlingId,
             listOf(
-                førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
-                    .tilHistorikk()
+                førstePeriode.copy(periode = førstePeriode.periode.copy(tom = YearMonth.of(2021, 1))).tilHistorikk()
             ) + andreVedtak.vedtaksperioder()
         )
     }
@@ -136,16 +136,15 @@ internal class VedtakHistorikkBeregnerTest {
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData)
     }
 
-    private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
+    private fun lagVedtaksperiode(fra: YearMonth, til: YearMonth): Vedtaksperiode =
         Vedtaksperiode(
-            datoFra = fra,
-            datoTil = til,
+            periode = Månedsperiode(fra, til),
             aktivitet = AktivitetType.BARNET_ER_SYKT,
             periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
         )
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
-        Månedsperiode(this.datoFra, this.datoTil),
+        this.periode,
         sanksjonsårsak = null,
         this.aktivitet,
         this.periodeType,
@@ -154,7 +153,7 @@ internal class VedtakHistorikkBeregnerTest {
     private fun lagVedtak(
         behandlingId: UUID = UUID.randomUUID(),
         perioder: List<Vedtaksperiode>?,
-        opphørFom: LocalDate? = null
+        opphørFom: YearMonth? = null
     ): Vedtak {
         require((perioder == null) xor (opphørFom == null)) { "Må definiere perioder eller opphørFom" }
         return Vedtak(

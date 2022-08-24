@@ -88,10 +88,8 @@ internal class SimuleringServiceTest {
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.behandlingId).isEqualTo(tilkjentYtelse.behandlingId)
         assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
             .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().beløp)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().fraOgMed)
-            .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadFom)
-        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().tilOgMed)
-            .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().stønadTom)
+        assertThat(simulerSlot.captured.nyTilkjentYtelseMedMetaData.tilkjentYtelse.andelerTilkjentYtelse.first().periode)
+            .isEqualTo(tilkjentYtelse.andelerTilkjentYtelse.first().periode)
         assertThat(simulerSlot.captured.forrigeBehandlingId).isEqualTo(forrigeBehandlingId)
     }
 

@@ -148,8 +148,8 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             behandling1,
             lagAndelTilkjentYtelse(
                 10_000,
-                fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
+                fraOgMed = now,
+                tilOgMed = now
             )
         )
 
@@ -157,34 +157,34 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             behandling1,
             lagAndelTilkjentYtelse(
                 10_000,
-                fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
+                fraOgMed = now,
+                tilOgMed = now
             )
         )
         lagreTilkjentYtelse(
             behandling2,
             lagAndelTilkjentYtelse(
                 2_000,
-                fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
+                fraOgMed = now,
+                tilOgMed = now
             )
         )
         lagreTilkjentYtelse(
             behandling1Fagsak2,
             lagAndelTilkjentYtelse(
                 3_000,
-                fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
+                fraOgMed = now,
+                tilOgMed = now
             ),
             lagAndelTilkjentYtelse(
                 3_000,
-                fraOgMed = now.plusMonths(1).atDay(1),
-                tilOgMed = now.plusMonths(1).atEndOfMonth()
+                fraOgMed = now.plusMonths(1),
+                tilOgMed = now.plusMonths(1)
             ),
             lagAndelTilkjentYtelse(
                 20_000,
-                fraOgMed = now.plusMonths(3).atDay(1),
-                tilOgMed = now.plusMonths(3).atEndOfMonth()
+                fraOgMed = now.plusMonths(3),
+                tilOgMed = now.plusMonths(3)
             )
         )
 

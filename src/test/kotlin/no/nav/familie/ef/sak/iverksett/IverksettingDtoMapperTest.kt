@@ -336,8 +336,8 @@ internal class IverksettingDtoMapperTest {
     private fun assertVedtaksperiode(vedtak: VedtaksdetaljerOvergangsstønadDto) {
         assertThat(vedtak.vedtaksperioder).hasSize(1)
         val vedtaksperiode = vedtak.vedtaksperioder[0]
-        assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
-        assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
+        assertThat(vedtaksperiode.periode.fom).isEqualTo(YearMonth.of(2022, 3))
+        assertThat(vedtaksperiode.periode.tom).isEqualTo(YearMonth.of(2022, 3))
         assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
         assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
     }
@@ -555,7 +555,7 @@ internal class IverksettingDtoMapperTest {
             "skolepenger": $vedtakSkolepengerJson,
             "samordningsfradragType": "UFØRETRYGD",
             "saksbehandlerIdent": "saksbehandlerIdent",
-            "opphørFom": "2022-03-27",
+            "opphørFom": "2022-03",
             "beslutterIdent": "beslutter",
             "sanksjonsårsak": "SAGT_OPP_STILLING",
             "internBegrunnelse": "internBegrunnelse"
@@ -593,11 +593,13 @@ internal class IverksettingDtoMapperTest {
             "id": "73144d90-d238-41d2-833b-fc719dae23cf",
             "behandlingId": "73144d90-d238-41d2-833b-fc719dae23cb",
             "personident": "personIdent",
-            "startdato": "2022-04-07",
+            "startmåned": "2022-04",
             "andelerTilkjentYtelse": [{
                 "beløp": 200,
-                "stønadFom": "2022-04-02",
-                "stønadTom": "2022-04-03",
+                "periode": { 
+                    "fom": "2022-04",
+                    "tom": "2022-04"
+                },
                 "personIdent": "personIdent",
                 "inntekt": 300000,
                 "inntektsreduksjon": "3000",

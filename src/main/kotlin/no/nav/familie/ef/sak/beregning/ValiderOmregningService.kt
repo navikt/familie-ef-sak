@@ -101,7 +101,7 @@ class ValiderOmregningService(
         if (tilkjentYtelse.grunnbeløpsdato < nyesteGrunnbeløpGyldigFraOgMed) return
 
         tilkjentYtelse.andelerTilkjentYtelse
-            .filter { it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed }
+            .filter { it.periode.tomDato > nyesteGrunnbeløpGyldigFraOgMed }
             .forEach { andel ->
                 val inntektsperiodeForAndel = Inntektsperiode(
                     periode = andel.periode,

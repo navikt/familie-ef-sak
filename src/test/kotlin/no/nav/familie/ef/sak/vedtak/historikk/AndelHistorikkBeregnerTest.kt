@@ -146,14 +146,11 @@ object AndelHistorikkRunner {
 
     private fun validerVedtaksperioderIkkeOverlapper(grupper: ParsetAndelHistorikkData) {
         grupper.vedtaksliste.forEach { vedtak ->
-            vedtak.perioder?.perioder?.fold(LocalDate.MIN) { acc, periode ->
-                require(periode.datoFra > acc) {
-                    "Fra-dato for ${hentBehandlingId(vedtak.behandlingId)} (${periode.datoFra}) må være etter $acc"
+            vedtak.perioder?.perioder?.fold(YearMonth.from(LocalDate.MIN)) { acc, periode ->
+                require(periode.periode.fom > acc) {
+                    "Fra-dato for ${hentBehandlingId(vedtak.behandlingId)} (${periode.periode.fom}) må være etter $acc"
                 }
-                require(periode.datoFra < periode.datoTil) {
-                    "Fra-dato for ${hentBehandlingId(vedtak.behandlingId)} (${periode.datoFra}) må være før $${periode.datoTil}"
-                }
-                periode.datoTil
+                periode.periode.tom
             }
         }
     }
@@ -274,8 +271,7 @@ object AndelHistorikkParser {
     private fun mapAndel(andel: AndelHistorikkData): AndelTilkjentYtelse =
         AndelTilkjentYtelse(
             beløp = andel.beløp!!,
-            stønadFom = andel.stønadFom!!,
-            stønadTom = andel.stønadTom!!,
+            periode = Månedsperiode(andel.stønadFom!!, andel.stønadTom!!),
             personIdent = PERSON_IDENT,
             inntekt = andel.inntekt!!,
             inntektsreduksjon = andel.inntektsreduksjon!!,
@@ -309,7 +305,7 @@ object AndelHistorikkParser {
             .map { (behandlingId, vedtaksperioder) ->
                 val resultat: ResultatType
                 var periodeWrapper: PeriodeWrapper? = null
-                var opphørFom: LocalDate? = null
+                var opphørFom: YearMonth? = null
                 var sanksjonsårsak: Sanksjonsårsak? = null
                 if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
                     resultat = ResultatType.SANKSJONERE
@@ -323,13 +319,14 @@ object AndelHistorikkParser {
                         "Kan kun være en vedtaksperiode som er av typen opphør"
                     }
                     resultat = ResultatType.OPPHØRT
-                    opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
+                    opphørFom =
+                        vedtaksperioder.single().stønadFom?.let { YearMonth.from(it) } ?: error("Mangler stønadFom i opphør")
                 }
                 val inntekter = periodeWrapper?.perioder?.firstOrNull()
                     ?.let {
                         listOf(
                             Inntektsperiode(
-                                Månedsperiode(it.datoFra, it.datoTil),
+                                it.periode,
                                 BigDecimal.ZERO,
                                 BigDecimal.ZERO
                             )
@@ -356,8 +353,7 @@ object AndelHistorikkParser {
         PeriodeWrapper(
             vedtaksperioder.map {
                 Vedtaksperiode(
-                    datoFra = it.stønadFom!!,
-                    datoTil = it.stønadTom!!,
+                    periode = Månedsperiode(it.stønadFom!!, it.stønadTom!!),
                     aktivitet = it.aktivitet!!,
                     periodeType = it.periodeType!!
                 )
@@ -418,7 +414,7 @@ object AndelHistorikkParser {
                     vedtakstidspunkt = LocalDateTime.now(),
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                     personident = PERSON_IDENT,
-                    startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now()
+                    startmåned = andelerTilkjentYtelse.minOfOrNull { it.periode.fom } ?: YearMonth.now()
                 )
             }
     }

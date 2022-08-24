@@ -288,10 +288,9 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val behandlingId = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT)).id
 
         val vedtaksperiode = Vedtaksperiode(
-            fraOgMedDato,
-            tilOgMedDato,
-            AktivitetType.BARN_UNDER_ETT_ÅR,
-            VedtaksperiodeType.HOVEDPERIODE
+            periode = Månedsperiode(fraOgMedDato, tilOgMedDato),
+            aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
+            periodeType = VedtaksperiodeType.HOVEDPERIODE
         )
         vedtakRepository.insert(
             vedtak(
@@ -316,7 +315,7 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID
     ): List<AndelTilkjentYtelse> = inntektsperioder.map {
         lagAndelTilkjentYtelse(
-            5000, it.startDato, it.sluttDato, inntekt = it.inntekt.toInt(),
+            5000, it.periode.fom, it.periode.tom, inntekt = it.inntekt.toInt(),
             kildeBehandlingId = behandlingId
         )
     }

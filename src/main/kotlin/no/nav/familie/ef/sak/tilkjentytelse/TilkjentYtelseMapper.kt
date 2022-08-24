@@ -13,7 +13,6 @@ import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.kontrakter.ef.iverksett.TilkjentYtelseMedMetadata
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDate
-import java.time.YearMonth
 
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(
@@ -54,8 +53,8 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
     val startDato = vedtak.perioder.first().periode.fomDato
     val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
 
-    return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
-        val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
+    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map {
+        val beløpsperiodeBarnetilsynDto = perioder.getValue(it.periode.fom)
         BeløpsperiodeBarnetilsynDto(
             periode = it.periode,
             beløp = it.beløp,

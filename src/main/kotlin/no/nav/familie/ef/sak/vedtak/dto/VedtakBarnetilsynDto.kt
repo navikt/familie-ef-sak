@@ -72,8 +72,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
         begrunnelse = barnetilsyn.begrunnelse,
         perioder = barnetilsyn.perioder.map {
             UtgiftsperiodeDto(
-                årMånedFra = YearMonth.from(it.datoFra),
-                årMånedTil = YearMonth.from(it.datoTil),
+                årMånedFra = it.periode.fom,
+                årMånedTil = it.periode.tom,
                 periode = it.periode,
                 utgifter = it.utgifter,
                 barn = it.barn,
@@ -97,8 +97,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
 
 fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
     SanksjonertPeriodeDto(
-        årMånedFra = YearMonth.from(datoFra),
-        årMånedTil = YearMonth.from(datoTil),
-        fom = YearMonth.from(datoFra),
-        tom = YearMonth.from(datoTil)
+        årMånedFra = periode.fom,
+        årMånedTil = periode.tom,
+        fom = periode.fom,
+        tom = periode.tom
     )

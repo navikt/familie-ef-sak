@@ -237,7 +237,7 @@ fun tilkjentYtelse(
     behandlingId: UUID,
     personIdent: String,
     stønadsår: Int = 2021,
-    startdato: LocalDate? = null,
+    startmåned: YearMonth? = null,
     grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår - 1, 5, 1),
     samordningsfradrag: Int = 0,
     beløp: Int = 11554
@@ -245,8 +245,7 @@ fun tilkjentYtelse(
     val andeler = listOf(
         AndelTilkjentYtelse(
             beløp = beløp,
-            stønadFom = LocalDate.of(stønadsår, 1, 1),
-            stønadTom = LocalDate.of(stønadsår, 12, 31),
+            periode = Månedsperiode(YearMonth.of(stønadsår, 1), YearMonth.of(stønadsår, 12)),
             personIdent = personIdent,
             inntektsreduksjon = 8396,
             inntekt = 277100,
@@ -258,7 +257,7 @@ fun tilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
         vedtakstidspunkt = LocalDateTime.now(),
-        startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
+        startmåned = min(startmåned, andeler.minOfOrNull { it.periode.fom }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
         grunnbeløpsdato = grunnbeløpsdato
     )
@@ -292,12 +291,12 @@ fun inntektsperiode(
 
 fun vedtaksperiode(
     år: Int = 2021,
-    startDato: LocalDate = LocalDate.of(år, 1, 1),
-    sluttDato: LocalDate = LocalDate.of(år, 12, 1),
+    startDato: YearMonth = YearMonth.of(år, 1),
+    sluttDato: YearMonth = YearMonth.of(år, 12),
     aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
     vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
 ) =
-    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)
+    Vedtaksperiode(periode = Månedsperiode(startDato, sluttDato), aktivitet = aktivitetstype, periodeType = vedtaksperiodeType)
 
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),

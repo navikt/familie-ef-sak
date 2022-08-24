@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
@@ -133,8 +134,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         val tidligereAndel = lagAndelTilkjentYtelse(
             beløp = 1,
             kildeBehandlingId = behandlingMedTidligereAndel.id,
-            fraOgMed = LocalDate.now().minusMonths(2),
-            tilOgMed = LocalDate.now().minusMonths(1)
+            fraOgMed = YearMonth.now().minusMonths(2),
+            tilOgMed = YearMonth.now().minusMonths(1)
         )
 
         tilkjentYtelseRepository.insert(
@@ -248,8 +249,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         val andel = lagAndelTilkjentYtelse(
             beløp = beløp,
             kildeBehandlingId = behandling.id,
-            fraOgMed = LocalDate.now().minusMonths(2),
-            tilOgMed = LocalDate.now().minusMonths(1)
+            fraOgMed = YearMonth.now().minusMonths(2),
+            tilOgMed = YearMonth.now().minusMonths(1)
         )
         return tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(
@@ -263,8 +264,8 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         val andel = lagAndelTilkjentYtelse(
             beløp = beløp,
             kildeBehandlingId = behandling.id,
-            fraOgMed = LocalDate.now().minusMonths(1),
-            tilOgMed = LocalDate.now().plusMonths(1)
+            fraOgMed = YearMonth.now().minusMonths(1),
+            tilOgMed = YearMonth.now().plusMonths(1)
         )
         return tilkjentYtelseRepository.insert(
             lagTilkjentYtelse(

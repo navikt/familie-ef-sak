@@ -50,7 +50,7 @@ class BeregningController(
         if (vedtakForBehandling.resultatType === ResultatType.OPPHØRT) {
             throw Feil("Kan ikke vise fremtidige beløpsperioder for opphørt vedtak med id=$behandlingId")
         }
-        val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
+        val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minOfOrNull { it.periode.fomDato }
             ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
     }

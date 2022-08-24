@@ -149,10 +149,10 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             behandlingId = førstegangsbehandling.id,
             andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse(
-                    fraOgMed = LocalDate.of(2022, 1, 1),
+                    fraOgMed = YearMonth.of(2022, 1),
                     kildeBehandlingId = førstegangsbehandling.id,
                     beløp = 10_000,
-                    tilOgMed = LocalDate.of(2022, 4, 30),
+                    tilOgMed = YearMonth.of(2022, 4),
                 )
             )
         )
@@ -194,16 +194,16 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 andelerTilkjentYtelse =
                 listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 1, 1),
+                        fraOgMed = YearMonth.of(2022, 1),
                         beløp = 10_000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 2, 28)
+                        tilOgMed = YearMonth.of(2022, 2)
                     ),
                     lagAndelTilkjentYtelse(
-                        fraOgMed = LocalDate.of(2022, 3, 1),
+                        fraOgMed = YearMonth.of(2022, 3),
                         beløp = 12_000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = LocalDate.of(2022, 6, 30)
+                        tilOgMed = YearMonth.of(2022, 6)
                     )
                 )
             )
