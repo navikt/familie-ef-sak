@@ -290,6 +290,7 @@ internal class OppgaveServiceTest {
         oppgaveService.ferdigstillBehandleOppgave(UUID.randomUUID(), Oppgavetype.BehandleSak)
 
         verify(exactly = 0) { oppgaveClient.ferdigstillOppgave(any()) }
+        verify { oppgaveRepository.update(any()) }
     }
 
     @Test
@@ -306,6 +307,7 @@ internal class OppgaveServiceTest {
         oppgaveService.ferdigstillBehandleOppgave(UUID.randomUUID(), Oppgavetype.BehandleSak)
 
         verify { oppgaveClient.ferdigstillOppgave(any()) }
+        verify { oppgaveRepository.update(any()) }
     }
 
     @Test
