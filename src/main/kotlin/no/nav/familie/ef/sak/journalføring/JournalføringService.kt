@@ -168,12 +168,9 @@ class JournalføringService(
         brukerfeilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
             "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
         }
-        brukerfeilHvis(
-            !journalpost.harStrukturertSøknad() &&
-                journalføringRequest.behandling.årsak == BehandlingÅrsak.PAPIRSØKNAD &&
-                journalpost.avsenderMottaker == null
-        ) {
-            "Avsender på papirsøknad må settes i gosys før videre journalføring i EF Sak"
+        brukerfeilHvis(journalpost.avsenderMottaker == null) {
+            "Avsender mangler og må settes på journalposten i gosys. " +
+                "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
         }
     }
 
