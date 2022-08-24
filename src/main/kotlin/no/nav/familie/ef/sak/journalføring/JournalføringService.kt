@@ -196,10 +196,11 @@ class JournalføringService(
         årsak: BehandlingÅrsak? = null
     ): Behandling {
 
+        val behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
             behandlingType = behandlingstype,
             fagsakId = fagsak.id,
-            behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
+            behandlingsårsak = behandlingsårsak
         )
         iverksettService.startBehandling(behandling, fagsak)
         if (journalpost.harStrukturertSøknad()) {
@@ -212,6 +213,7 @@ class JournalføringService(
             fagsakId = fagsak.id,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
+            behandlingsårsak = behandlingsårsak,
             barnSomSkalFødes = barnSomSkalFødes
         )
         return behandling
