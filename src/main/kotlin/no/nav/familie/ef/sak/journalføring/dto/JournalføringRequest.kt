@@ -13,7 +13,8 @@ data class JournalføringRequest(
     val oppgaveId: String,
     val behandling: JournalføringBehandling,
     val journalførendeEnhet: String,
-    val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
+    val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
+    val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
 )
 
 data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
@@ -25,6 +26,12 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
         navn = null,
         fødselTermindato = this.fødselTerminDato
     )
+}
+
+enum class VilkårsbehandleNyeBarn {
+    VILKÅRSBEHANDLE,
+    IKKE_VILKÅRSBEHANDLE,
+    IKKE_VALGT
 }
 
 data class JournalføringTilNyBehandlingRequest(
@@ -39,6 +46,9 @@ fun JournalføringRequest.valider() {
     feilHvis(this.behandling.behandlingsId != null && this.behandling.årsak != null) {
         "Kan ikke sende inn årsak på en eksisterende behandling"
     }
+    feilHvis(this.behandling.behandlingsId != null && vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+        "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
+    }
     feilHvis(
         this.behandling.årsak != null &&
             this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD &&
@@ -48,6 +58,23 @@ fun JournalføringRequest.valider() {
     }
     feilHvis(this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD && barnSomSkalFødes.isNotEmpty()) {
         "Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes"
+    }
+
+    validerEttersending()
+}
+
+private fun JournalføringRequest.validerEttersending() {
+    feilHvis(
+        behandling.årsak != BehandlingÅrsak.NYE_OPPLYSNINGER &&
+            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT
+    ) {
+        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når årsak=${behandling.årsak}"
+    }
+    feilHvis(
+        behandling.årsak == BehandlingÅrsak.NYE_OPPLYSNINGER &&
+            vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
+    ) {
+        "Må velge om man skal vilkårsbehandle nye barn når årsak=${behandling.årsak}"
     }
 }
 

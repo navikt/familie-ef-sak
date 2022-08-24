@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -144,7 +145,8 @@ class JournalføringService(
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
-            årsak = journalføringRequest.behandling.årsak
+            årsak = journalføringRequest.behandling.årsak,
+            vilkårsbehandleNyeBarn = journalføringRequest.vilkårsbehandleNyeBarn
         )
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
@@ -167,6 +169,9 @@ class JournalføringService(
         }
         brukerfeilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
             "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
+        }
+        feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+            "Kan ikke velge å vilkårsbehandle nye barn når man har strukturert søknad"
         }
         brukerfeilHvis(journalpost.avsenderMottaker == null) {
             "Avsender mangler og må settes på journalposten i gosys. " +
@@ -204,7 +209,8 @@ class JournalføringService(
         fagsak: Fagsak,
         journalpost: Journalpost,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
-        årsak: BehandlingÅrsak? = null
+        årsak: BehandlingÅrsak? = null,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ): Behandling {
 
         val behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
@@ -225,7 +231,8 @@ class JournalføringService(
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
             behandlingsårsak = behandlingsårsak,
-            barnSomSkalFødes = barnSomSkalFødes
+            barnSomSkalFødes = barnSomSkalFødes,
+            vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn
         )
         return behandling
     }
