@@ -84,8 +84,8 @@ internal class PeriodeServiceTest {
 
         assertThat(perioder).hasSize(2)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[0].stønadFom).isEqualTo(efFom)
-        assertThat(perioder[0].stønadTom).isEqualTo(efTom)
+        assertThat(perioder[0].stønadFom).isEqualTo(efFom.atDay(1))
+        assertThat(perioder[0].stønadTom).isEqualTo(efTom.atEndOfMonth())
 
         assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
@@ -105,8 +105,8 @@ internal class PeriodeServiceTest {
 
         assertThat(perioder).hasSize(2)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[0].stønadFom).isEqualTo(efFom)
-        assertThat(perioder[0].stønadTom).isEqualTo(efTom)
+        assertThat(perioder[0].stønadFom).isEqualTo(efFom.atDay(1))
+        assertThat(perioder[0].stønadTom).isEqualTo(efTom.atEndOfMonth())
 
         assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
@@ -140,8 +140,8 @@ internal class PeriodeServiceTest {
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[0].stønadFom).isEqualTo(fom)
-        assertThat(perioder[0].stønadTom).isEqualTo(tom)
+        assertThat(perioder[0].stønadFom).isEqualTo(fom.atDay(1))
+        assertThat(perioder[0].stønadTom).isEqualTo(tom.atEndOfMonth())
         assertThat(perioder[0].månedsbeløp).isEqualTo(1)
     }
 
@@ -165,8 +165,8 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(3)
-        assertThat(perioder[0].stønadFom).isEqualTo(efFra)
-        assertThat(perioder[0].stønadTom).isEqualTo(efTil)
+        assertThat(perioder[0].stønadFom).isEqualTo(efFra.atDay(1))
+        assertThat(perioder[0].stønadTom).isEqualTo(efTil.atEndOfMonth())
 
         assertThat(perioder[1].stønadFom).isEqualTo(periode2fom)
         assertThat(perioder[1].stønadTom).isNotEqualTo(periode2tom)

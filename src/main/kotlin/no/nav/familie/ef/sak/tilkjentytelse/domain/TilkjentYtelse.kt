@@ -36,7 +36,7 @@ data class TilkjentYtelse(
     val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     val samordningsfradragType: SamordningsfradragType? = null,
-    @Column("startdato")
+    @Column("startmaned")
     val startmåned: YearMonth,
     @Column("grunnbelopsdato")
     val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato,

@@ -72,7 +72,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     }
 
     private fun finnSisteUtbetalingsdato(behandlingId: UUID): LocalDate? {
-        return tilkjentYtelseService.hentForBehandling(behandlingId).andelerTilkjentYtelse.maxOfOrNull { it.periode.fomDato }
+        return tilkjentYtelseService.hentForBehandling(behandlingId).andelerTilkjentYtelse.maxOfOrNull { it.periode.tomDato }
     }
 
     private fun lagOppgaver(

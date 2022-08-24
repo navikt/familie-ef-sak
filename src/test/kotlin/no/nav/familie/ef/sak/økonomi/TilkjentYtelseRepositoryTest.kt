@@ -85,7 +85,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom))
             .hasSize(1)
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom.plusDays(1)))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom.plusMonths(1)))
             .isEmpty()
     }
 

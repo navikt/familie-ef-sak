@@ -333,10 +333,10 @@ internal class BisysBarnetilsynServiceTest {
         val efPeriode = perioder.get(1)
         assertThat(infotrygdPeriode.datakilde).isEqualTo(Datakilde.INFOTRYGD)
         assertThat(infotrygdPeriode.periode.fom).isEqualTo(LocalDate.MIN)
-        assertThat(infotrygdPeriode.periode.tom).isEqualTo(startdato.minusMonths(1))
+        assertThat(infotrygdPeriode.periode.tom).isEqualTo(startdato.minusMonths(1).atEndOfMonth())
         assertThat(efPeriode.datakilde).isEqualTo(Datakilde.EF)
-        assertThat(efPeriode.periode.fom).isEqualTo(efFom)
-        assertThat(efPeriode.periode.tom).isEqualTo(efTom)
+        assertThat(efPeriode.periode.fom).isEqualTo(efFom.atDay(1))
+        assertThat(efPeriode.periode.tom).isEqualTo(efTom.atEndOfMonth())
     }
 
     @Test
