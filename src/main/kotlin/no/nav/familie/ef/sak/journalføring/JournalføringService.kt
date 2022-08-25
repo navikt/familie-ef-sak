@@ -145,17 +145,12 @@ class JournalføringService(
 
         validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
 
-        val årsak = if (journalpost.harStrukturertSøknad()) {
-            BehandlingÅrsak.SØKNAD
-        } else {
-            journalføringRequest.behandling.ustrukturertDokumentasjonType.behandlingÅrsak()
-        }
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
-            årsak = årsak,
+            ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType,
             vilkårsbehandleNyeBarn = journalføringRequest.vilkårsbehandleNyeBarn
         )
 
@@ -226,11 +221,15 @@ class JournalføringService(
         fagsak: Fagsak,
         journalpost: Journalpost,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
-        årsak: BehandlingÅrsak? = null,
+        ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ): Behandling {
 
-        val behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
+        val behandlingsårsak = if (journalpost.harStrukturertSøknad()) {
+            BehandlingÅrsak.SØKNAD
+        } else {
+            ustrukturertDokumentasjonType.behandlingÅrsak()
+        }
         val behandling = behandlingService.opprettBehandling(
             behandlingType = behandlingstype,
             fagsakId = fagsak.id,
@@ -247,7 +246,7 @@ class JournalføringService(
             fagsakId = fagsak.id,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
-            behandlingsårsak = behandlingsårsak,
+            ustrukturertDokumentasjonType = ustrukturertDokumentasjonType,
             barnSomSkalFødes = barnSomSkalFødes,
             vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn
         )

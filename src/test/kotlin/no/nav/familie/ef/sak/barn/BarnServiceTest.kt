@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
@@ -58,8 +59,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.BARNETILSYN,
-            BehandlingÅrsak.SØKNAD
+            StønadType.BARNETILSYN
         )
 
         assertThat(barnSlot.captured).hasSize(4)
@@ -82,8 +82,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.OVERGANGSSTØNAD,
-            BehandlingÅrsak.SØKNAD
+            StønadType.OVERGANGSSTØNAD
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -106,8 +105,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.SKOLEPENGER,
-            BehandlingÅrsak.SØKNAD
+            StønadType.SKOLEPENGER
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -251,7 +249,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 emptyList(),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
         }
@@ -264,10 +262,10 @@ internal class BarnServiceTest {
                 fagsakId,
                 emptyList(),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.SØKNAD,
+                UstrukturertDokumentasjonType.IKKE_VALGT,
                 listOf(BarnSomSkalFødes(termindato))
             )
-            }.hasMessage("Kan ikke legge til terminbarn med behandlingsårsak=SØKNAD")
+            }.hasMessage("Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=IKKE_VALGT")
         }
 
         @Test
@@ -281,7 +279,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 listOf(barnMedIdent),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
             assertThat(barnSlot.captured).hasSize(1)
@@ -305,7 +303,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 listOf(barnMedIdent, barnMedIdent2),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
             assertThat(barnSlot.captured).hasSize(2)
@@ -334,7 +332,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 grunnlagsdataBarn,
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD
+                UstrukturertDokumentasjonType.PAPIRSØKNAD
             )
 
             assertThat(barnSlot.captured).hasSize(1)
