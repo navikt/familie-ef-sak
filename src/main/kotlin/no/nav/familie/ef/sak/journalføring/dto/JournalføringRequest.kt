@@ -60,6 +60,12 @@ fun JournalføringRequest.valider() {
     } else {
         feilHvis(
             ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
+                behandling.behandlingstype != BehandlingType.REVURDERING
+        ) {
+            "Må journalføre ettersending på ny behandling som revurdering"
+        }
+        feilHvis(
+            ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
                 vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
         ) {
             "Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending"

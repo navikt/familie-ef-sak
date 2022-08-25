@@ -24,9 +24,12 @@ import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
+import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -50,9 +53,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import java.time.LocalDate
 import java.util.UUID
 
 internal class JournalføringServiceTest {
@@ -134,6 +139,10 @@ internal class JournalføringServiceTest {
         tittel = "Søknad om overgangsstønad"
     )
 
+    private val ustrukturertJournalpost = journalpost.copy(dokumenter = emptyList())
+
+    private val slotJournalpost = slot<OppdaterJournalpostRequest>()
+
     @BeforeEach
     fun setupMocks() {
         every { journalpostClient.hentJournalpost(journalpostId) } returns (journalpost)
@@ -141,7 +150,17 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
-        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any()) } just Runs
+        every {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } just Runs
 
         every { behandlingService.hentBehandling(behandlingId) }
             .returns(
@@ -190,6 +209,11 @@ internal class JournalføringServiceTest {
 
         every { taskRepository.save(any()) } answers { firstArg() }
 
+        slotJournalpost.clear()
+        every {
+            journalpostClient.oppdaterJournalpost(capture(slotJournalpost), journalpostId, any())
+        } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
+
         BrukerContextUtil.mockBrukerContext("saksbehandlernavn")
     }
 
@@ -200,16 +224,6 @@ internal class JournalføringServiceTest {
 
     @Test
     internal fun `skal fullføre manuell journalføring på eksisterende behandling`() {
-        val slotJournalpost = slot<OppdaterJournalpostRequest>()
-
-        every {
-            journalpostClient.oppdaterJournalpost(
-                capture(slotJournalpost),
-                journalpostId,
-                any()
-            )
-        } returns OppdaterJournalpostResponse(journalpostId = journalpostId)
-
         val journalførtOppgaveId =
             journalføringService.fullførJournalpost(
                 journalpostId = journalpostId,
@@ -247,11 +261,6 @@ internal class JournalføringServiceTest {
             stønadstype = StønadType.OVERGANGSSTØNAD
         )
 
-        val slot = slot<OppdaterJournalpostRequest>()
-
-        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId, any()) }
-            .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
-
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
@@ -270,12 +279,12 @@ internal class JournalføringServiceTest {
             )
 
         assertThat(behandleSakOppgaveId).isEqualTo(nyOppgaveId)
-        assertThat(slot.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
-        assertThat(slot.captured.sak?.sakstype).isEqualTo("FAGSAK")
-        assertThat(slot.captured.sak?.fagsaksystem).isEqualTo(Fagsystem.EF)
+        assertThat(slotJournalpost.captured.sak?.fagsakId).isEqualTo(fagsakEksternId.toString())
+        assertThat(slotJournalpost.captured.sak?.sakstype).isEqualTo("FAGSAK")
+        assertThat(slotJournalpost.captured.sak?.fagsaksystem).isEqualTo(Fagsystem.EF)
         dokumentTitler.forEach { (dokumentId, nyTittel) ->
             val oppdatertDokument =
-                slot.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
+                slotJournalpost.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
     }
@@ -287,11 +296,6 @@ internal class JournalføringServiceTest {
             eksternId = EksternFagsakId(id = fagsakEksternId),
             stønadstype = StønadType.OVERGANGSSTØNAD
         )
-
-        val slot = slot<OppdaterJournalpostRequest>()
-
-        every { journalpostClient.oppdaterJournalpost(capture(slot), journalpostId, any()) }
-            .returns(OppdaterJournalpostResponse(journalpostId = journalpostId))
 
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
@@ -376,6 +380,142 @@ internal class JournalføringServiceTest {
                 )
             )
         }.isInstanceOf(ApiFeil::class.java)
+    }
+
+    @Nested
+    inner class validerJournalføringNyBehandling {
+
+        @Test
+        internal fun `strukturert søknad - kan ikke sende inn dokumentasjonstype`() {
+            assertThatThrownBy {
+                fullførJournalpost(
+                    JournalføringBehandling(
+                        ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                        behandlingstype = BehandlingType.REVURDERING
+                    ),
+                    VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+                )
+            }.hasMessage("Kan ikke sende inn dokumentasjonstype når journalposten har strukturert søknad")
+        }
+
+        @Test
+        internal fun `ustrukturert søknad - må sende inn dokumentasjonstype`() {
+            every { journalpostClient.hentJournalpost(journalpostId) } returns (ustrukturertJournalpost)
+
+            assertThatThrownBy {
+                fullførJournalpost(
+                    JournalføringBehandling(
+                        ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
+                        behandlingstype = BehandlingType.REVURDERING
+                    ),
+                    VilkårsbehandleNyeBarn.IKKE_VALGT
+                )
+            }.hasMessage("Må sende inn dokumentasjonstype når journalposten mangler digital søknad")
+        }
+    }
+
+    @Nested
+    inner class Ettersending {
+
+        @BeforeEach
+        internal fun setUp() {
+            every { journalpostClient.hentJournalpost(journalpostId) } returns (ustrukturertJournalpost)
+        }
+
+        @Test
+        internal fun `kan velge å ta med eller ikke ta med barn på ny behandling`() {
+            listOf(VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE).forEach {
+                fullførJournalpost(
+                    JournalføringBehandling(
+                        ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                        behandlingstype = BehandlingType.REVURDERING
+                    ),
+                    it
+                )
+            }
+        }
+
+        @Test
+        internal fun `kan ikke journalføres på ny førstegangsbehandling`() {
+            assertThatThrownBy {
+                fullførJournalpost(
+                    JournalføringBehandling(
+                        ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                        behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING
+                    ),
+                    VilkårsbehandleNyeBarn.IKKE_VALGT
+                )
+            }.hasMessage("Må journalføre ettersending på ny behandling som revurdering")
+        }
+
+        @Test
+        internal fun `ny behandling må ha valgt vilkårsbehandle nye barn`() {
+            assertThatThrownBy {
+                fullførJournalpost(
+                    JournalføringBehandling(
+                        ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                        behandlingstype = BehandlingType.REVURDERING
+                    ),
+                    VilkårsbehandleNyeBarn.IKKE_VALGT
+                )
+            }.hasMessage("Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending")
+        }
+
+        @Test
+        internal fun `kan ikke sende inn barn som skal fødes`() {
+            assertThatThrownBy {
+                fullførJournalpost(
+                    JournalføringBehandling(
+                        ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                        behandlingstype = BehandlingType.REVURDERING
+                    ),
+                    VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
+                    listOf(BarnSomSkalFødes(LocalDate.now()))
+                )
+            }.hasMessage("Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes")
+        }
+
+        @Test
+        internal fun `kan ikke sende inn vilkårsbehandleNyeBarn på eksisterende behandling`() {
+            listOf(VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE).forEach {
+                assertThatThrownBy {
+                    fullførJournalpost(
+                        JournalføringBehandling(
+                            ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                            behandlingsId = UUID.randomUUID()
+                        ),
+                        it
+                    )
+                }.hasMessage("Kan ikke vilkårsbehandle nye barn på en eksisterende behandling")
+            }
+        }
+    }
+
+    private fun fullførJournalpost(
+        journalføringBehandling: JournalføringBehandling,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
+        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
+    ) {
+        journalføringService.fullførJournalpost(
+            lagRequest(journalføringBehandling, vilkårsbehandleNyeBarn, barnSomSkalFødes),
+            journalpostId
+        )
+    }
+
+    private fun lagRequest(
+        journalføringBehandling: JournalføringBehandling,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
+        barnSomSkalFødes: List<BarnSomSkalFødes>
+    ): JournalføringRequest {
+        return JournalføringRequest(
+            dokumentTitler,
+            fagsakId,
+            oppgaveId,
+            journalføringBehandling,
+            "1234",
+            barnSomSkalFødes,
+            vilkårsbehandleNyeBarn
+        )
     }
 
     private fun mockFeilerValideringAvInfotrygdperioder() {
