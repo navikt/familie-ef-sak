@@ -28,6 +28,12 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
     )
 }
 
+enum class UstrukturertDokumentasjonType(val behandlingÅrsak: () -> BehandlingÅrsak) {
+    PAPIRSØKNAD({ BehandlingÅrsak.PAPIRSØKNAD }),
+    ETTERSENDING({ BehandlingÅrsak.NYE_OPPLYSNINGER }),
+    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") })
+}
+
 enum class VilkårsbehandleNyeBarn {
     VILKÅRSBEHANDLE,
     IKKE_VILKÅRSBEHANDLE,
@@ -83,5 +89,6 @@ fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean =
 data class JournalføringBehandling(
     val behandlingsId: UUID? = null,
     val behandlingstype: BehandlingType? = null,
-    val årsak: BehandlingÅrsak? = null
+    val årsak: UstrukturertDokumentasjonType? = null,
+    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = årsak ?: UstrukturertDokumentasjonType.IKKE_VALGT
 )
