@@ -170,26 +170,23 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest
     ) {
         val ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType
-        feilHvis(
-            journalpost.harStrukturertSøknad() &&
-                ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT
-        ) {
-            "Kan ikke sende inn ustrukturertDokumentasjonType når journalposten har strukturert søknad"
-        }
-        brukerfeilHvis(
-            !journalpost.harStrukturertSøknad() &&
-                ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT
-        ) {
-            "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
-        }
-        feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
-            "Kan ikke velge å vilkårsbehandle nye barn når man har strukturert søknad"
-        }
-        brukerfeilHvis(
-            ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
-                journalføringRequest.behandling.behandlingstype != BehandlingType.REVURDERING
-        ) {
-            "Kan ikke journalføre ettersending på ny førstegangsbehandling"
+        if(journalpost.harStrukturertSøknad()) {
+            feilHvis(ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
+                "Kan ikke sende inn ustrukturertDokumentasjonType når journalposten har strukturert søknad"
+            }
+            feilHvis(journalføringRequest.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+                "Kan ikke velge å vilkårsbehandle nye barn når man har strukturert søknad"
+            }
+        } else {
+            brukerfeilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT) {
+                "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
+            }
+            brukerfeilHvis(
+                ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
+                    journalføringRequest.behandling.behandlingstype != BehandlingType.REVURDERING
+            ) {
+                "Kan ikke journalføre ettersending på ny førstegangsbehandling"
+            }
         }
     }
 

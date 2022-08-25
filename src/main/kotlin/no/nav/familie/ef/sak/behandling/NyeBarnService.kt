@@ -113,7 +113,7 @@ class NyeBarnService(
 
     private data class NyeBarnData(
         val pdlBarnUnder18år: List<BarnMedIdent>,
-        val kobledeBarn: List<MatchetBehandlingBarn>,
+        val kobledeBarn: List<MatchetBehandlingBarn>
     )
 
     private fun filtrerNyeBarn(data: NyeBarnData) =
