@@ -170,8 +170,10 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest
     ) {
         val ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType
-        feilHvis(journalpost.harStrukturertSøknad() &&
-            ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
+        feilHvis(
+            journalpost.harStrukturertSøknad() &&
+                ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT
+        ) {
             "Kan ikke sende inn ustrukturertDokumentasjonType når journalposten har strukturert søknad"
         }
         brukerfeilHvis(
@@ -323,7 +325,11 @@ class JournalføringService(
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(
+            journalpost.journalpostId,
+            journalpost.journalposttype,
+            behandling.id
+        )
     }
 
     private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId: UUID) {
