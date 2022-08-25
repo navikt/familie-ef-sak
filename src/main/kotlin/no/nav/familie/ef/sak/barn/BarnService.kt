@@ -105,7 +105,7 @@ class BarnService(
             UstrukturertDokumentasjonType.IKKE_VALGT -> kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
                 finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
                 grunnlagsdataBarn,
-                behandlingId,
+                behandlingId
             )
         }
     }
