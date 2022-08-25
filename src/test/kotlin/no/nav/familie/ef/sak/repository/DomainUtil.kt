@@ -238,7 +238,7 @@ fun tilkjentYtelse(
     personIdent: String,
     stønadsår: Int = 2021,
     startmåned: YearMonth? = null,
-    grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår - 1, 5, 1),
+    grunnbeløpsmåned: YearMonth = YearMonth.of(stønadsår - 1, 5),
     samordningsfradrag: Int = 0,
     beløp: Int = 11554
 ): TilkjentYtelse {
@@ -259,7 +259,7 @@ fun tilkjentYtelse(
         vedtakstidspunkt = LocalDateTime.now(),
         startmåned = min(startmåned, andeler.minOfOrNull { it.periode.fom }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
-        grunnbeløpsdato = grunnbeløpsdato
+        grunnbeløpsmåned = grunnbeløpsmåned
     )
 }
 

@@ -556,16 +556,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     inner class BarnFinnesMedPåUttrekkTilOppretteOppgaver {
 
         @Test
-        fun parse() {
-
-            val ym = YearMonth.from(LocalDate.MAX).toString()
-            val ld = LocalDate.MAX.toString()
-
-            LocalDate.parse(ld)
-            YearMonth.parse("+$ym")
-        }
-
-        @Test
         internal fun `skal finne barn på uttrekk til oppgaver etter migrering`() {
             opprettOgIverksettMigrering()
             assertThat(

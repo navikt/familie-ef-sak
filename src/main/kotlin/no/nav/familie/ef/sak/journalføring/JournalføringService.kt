@@ -172,10 +172,8 @@ class JournalføringService(
         journalpost: Journalpost,
         journalføringRequest: JournalføringRequest
     ) {
-        feilHvis(
-            journalpost.harStrukturertSøknad() &&
-                journalføringRequest.behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT
-        ) {
+        feilHvis(journalpost.harStrukturertSøknad() &&
+            journalføringRequest.behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
             "Kan ikke sende inn ustrukturertDokumentasjonType når journalposten har strukturert søknad"
         }
         brukerfeilHvis(

@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -31,7 +30,7 @@ class TilkjentYtelseService(
 
     fun harLøpendeUtbetaling(behandlingId: UUID): Boolean {
         return tilkjentYtelseRepository.findByBehandlingId(behandlingId)
-            ?.let { it.andelerTilkjentYtelse.any { andel -> andel.periode.tomDato.isAfter(LocalDate.now()) } } ?: false
+            ?.let { it.andelerTilkjentYtelse.any { andel -> andel.periode.tomDato > LocalDate.now() } } ?: false
     }
 
     fun finnTilkjentYtelserTilKonsistensavstemming(
@@ -59,7 +58,7 @@ class TilkjentYtelseService(
             val behandling = behandlinger[tilkjentYtelse.behandlingId]
                 ?: error("Finner ikke behandling for behandlingId=${tilkjentYtelse.behandlingId}")
             val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
-                .filter { it.periode.tomDato.isEqualOrAfter(datoForAvstemming) }
+                .filter { it.periode.tomDato >= datoForAvstemming }
                 .filter { it.beløp > 0 }
                 .map { it.tilIverksettDto() }
 

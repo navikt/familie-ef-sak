@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -36,10 +35,10 @@ data class TilkjentYtelse(
     val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     val samordningsfradragType: SamordningsfradragType? = null,
-    @Column("startmaned")
+    @Column("startdato")
     val startmåned: YearMonth,
     @Column("grunnbelopsdato")
-    val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato,
+    val grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
 ) {

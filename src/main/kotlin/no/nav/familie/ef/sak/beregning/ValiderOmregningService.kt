@@ -95,13 +95,13 @@ class ValiderOmregningService(
         if (vedtakService.hentVedtak(saksbehandling.id).resultatType != ResultatType.INNVILGE) return
         if (saksbehandling.forrigeBehandlingId == null) return
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(saksbehandling.forrigeBehandlingId) ?: return
-        if (forrigeTilkjentYtelse.grunnbeløpsdato >= nyesteGrunnbeløpGyldigFraOgMed) return
+        if (forrigeTilkjentYtelse.grunnbeløpsmåned >= nyesteGrunnbeløpGyldigFraOgMed) return
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(saksbehandling.id) ?: return
-        if (tilkjentYtelse.grunnbeløpsdato < nyesteGrunnbeløpGyldigFraOgMed) return
+        if (tilkjentYtelse.grunnbeløpsmåned < nyesteGrunnbeløpGyldigFraOgMed) return
 
         tilkjentYtelse.andelerTilkjentYtelse
-            .filter { it.periode.tomDato > nyesteGrunnbeløpGyldigFraOgMed }
+            .filter { it.periode.tom >= nyesteGrunnbeløpGyldigFraOgMed }
             .forEach { andel ->
                 val inntektsperiodeForAndel = Inntektsperiode(
                     periode = andel.periode,
@@ -117,5 +117,5 @@ class ValiderOmregningService(
 
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
         "Kan ikke fullføre behandling: Det må revurderes fra " +
-            "${maxOf(andel.periode.fomDato, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
+            "${maxOf(andel.periode.fom, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
 }

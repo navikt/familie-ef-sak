@@ -82,7 +82,7 @@ class ValiderOmregningServiceTest {
                         beløp = 0
                     )
                 ),
-                grunnbeløpsdato = LocalDate.of(2021, 5, 1)
+                grunnbeløpsmåned = YearMonth.of(2021, 5)
             )
 
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
@@ -334,7 +334,7 @@ class ValiderOmregningServiceTest {
 
     private fun mockVedtakOgForrigeTilkjentYtelse(saksbehandling: Saksbehandling) {
         every { tilkjentYtelseRepository.findByBehandlingId(saksbehandling.forrigeBehandlingId!!) } returns
-            lagTilkjentYtelse(emptyList(), grunnbeløpsdato = LocalDate.of(2021, 5, 1))
+            lagTilkjentYtelse(emptyList(), grunnbeløpsmåned = YearMonth.of(2021, 5))
         every { vedtakService.hentVedtak(saksbehandling.id) } returns vedtak(saksbehandling.id)
     }
 }

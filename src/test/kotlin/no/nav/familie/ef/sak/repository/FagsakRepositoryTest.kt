@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -63,7 +64,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             tilkjentYtelseRepository.insert(
                 tilkjentYtelse(
                     behandling.id, fagsak.personIdenter.first().ident, 2022,
-                    grunnbeløpsdato = LocalDate.of(2021, 5, 1)
+                    grunnbeløpsmåned = YearMonth.of(2021, 5)
                 )
             )
             assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1)))

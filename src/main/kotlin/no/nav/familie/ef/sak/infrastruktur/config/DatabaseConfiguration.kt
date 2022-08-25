@@ -174,7 +174,6 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class YearMonthTilLocalDateConverter : Converter<YearMonth, LocalDate> {
 
         override fun convert(yearMonth: YearMonth): LocalDate {
-
             return yearMonth.atDay(1)
         }
     }
