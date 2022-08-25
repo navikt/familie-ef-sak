@@ -46,23 +46,22 @@ data class JournalføringTilNyBehandlingRequest(
 )
 
 fun JournalføringRequest.valider() {
-    feilHvis(this.behandling.behandlingsId != null && barnSomSkalFødes.isNotEmpty()) {
-        "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
+    if (skalJournalførePåEksisterendeBehandling()) {
+        feilHvis(barnSomSkalFødes.isNotEmpty()) {
+            "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
+        }
+        feilHvis(behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
+            "Kan ikke sende inn ustrukturertDokumentasjonType på en eksisterende behandling"
+        }
+        feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+            "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
+        }
     }
-    feilHvis(this.behandling.behandlingsId != null && this.behandling.årsak != null) {
-        "Kan ikke sende inn årsak på en eksisterende behandling"
-    }
-    feilHvis(this.behandling.behandlingsId != null && vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
-        "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
-    }
+
     feilHvis(
-        this.behandling.årsak != null &&
-            this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD &&
-            this.behandling.årsak != BehandlingÅrsak.NYE_OPPLYSNINGER
+        behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.PAPIRSØKNAD
+            && barnSomSkalFødes.isNotEmpty()
     ) {
-        "Har ikke støtte for andre årsaker enn papirsøknad og nye opplysninger"
-    }
-    feilHvis(this.behandling.årsak != BehandlingÅrsak.PAPIRSØKNAD && barnSomSkalFødes.isNotEmpty()) {
         "Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes"
     }
 
@@ -70,17 +69,18 @@ fun JournalføringRequest.valider() {
 }
 
 private fun JournalføringRequest.validerEttersending() {
+    val ustrukturertDokumentasjonType = behandling.ustrukturertDokumentasjonType
     feilHvis(
-        behandling.årsak != BehandlingÅrsak.NYE_OPPLYSNINGER &&
+        ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.ETTERSENDING &&
             vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT
     ) {
-        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når årsak=${behandling.årsak}"
+        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
     }
     feilHvis(
-        behandling.årsak == BehandlingÅrsak.NYE_OPPLYSNINGER &&
+        ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
             vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
     ) {
-        "Må velge om man skal vilkårsbehandle nye barn når årsak=${behandling.årsak}"
+        "Må velge om man skal vilkårsbehandle nye barn når ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
     }
 }
 
@@ -89,6 +89,7 @@ fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean =
 data class JournalføringBehandling(
     val behandlingsId: UUID? = null,
     val behandlingstype: BehandlingType? = null,
+    @Deprecated("Bruk ustrukturertDokumentasjonType - kan slettes etter at frontend tatt i bruk ny ")
     val årsak: UstrukturertDokumentasjonType? = null,
     val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = årsak ?: UstrukturertDokumentasjonType.IKKE_VALGT
 )
