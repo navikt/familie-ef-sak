@@ -322,11 +322,7 @@ class JournalføringService(
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandlingService.leggTilBehandlingsjournalpost(
-            journalpost.journalpostId,
-            journalpost.journalposttype,
-            behandling.id
-        )
+        behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
     }
 
     private fun settSøknadPåBehandling(journalpostId: String, fagsak: Fagsak, behandlingId: UUID) {
