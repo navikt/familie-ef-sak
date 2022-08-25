@@ -46,16 +46,31 @@ data class JournalføringTilNyBehandlingRequest(
 )
 
 fun JournalføringRequest.valider() {
+    val ustrukturertDokumentasjonType = behandling.ustrukturertDokumentasjonType
     if (skalJournalførePåEksisterendeBehandling()) {
         feilHvis(barnSomSkalFødes.isNotEmpty()) {
             "Kan ikke sende inn barn når man journalfører på en eksisterende behandling"
         }
-        feilHvis(behandling.ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.PAPIRSØKNAD) {
+        feilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.PAPIRSØKNAD) {
             "Kan ikke journalføre papirsøknad på eksisterende behandling"
         }
         feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
             "Kan ikke vilkårsbehandle nye barn på en eksisterende behandling"
         }
+    } else {
+        feilHvis(
+            ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
+                vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
+        ) {
+            "Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending"
+        }
+    }
+
+    feilHvis(
+        ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.ETTERSENDING &&
+            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT
+    ) {
+        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når dokumentasjonstype=$ustrukturertDokumentasjonType"
     }
 
     feilHvis(
@@ -63,24 +78,6 @@ fun JournalføringRequest.valider() {
             && barnSomSkalFødes.isNotEmpty()
     ) {
         "Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes"
-    }
-
-    validerEttersending()
-}
-
-private fun JournalføringRequest.validerEttersending() {
-    val ustrukturertDokumentasjonType = behandling.ustrukturertDokumentasjonType
-    feilHvis(
-        ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.ETTERSENDING &&
-            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT
-    ) {
-        "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
-    }
-    feilHvis(
-        ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
-            vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
-    ) {
-        "Må velge om man skal vilkårsbehandle nye barn når ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
     }
 }
 
