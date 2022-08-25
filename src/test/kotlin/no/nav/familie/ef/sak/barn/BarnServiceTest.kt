@@ -6,13 +6,13 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -337,6 +337,56 @@ internal class BarnServiceTest {
 
             assertThat(barnSlot.captured).hasSize(1)
             assertThat(barnSlot.captured[0].navn).isEqualTo("Under 18")
+        }
+    }
+
+    @Nested
+    inner class Ettersending {
+
+        private val grunnlagsdataBarn = listOf(
+            barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B"),
+        )
+
+        @Test
+        internal fun `skal legge til registerbarn på behandling hvis man skal vilkårsbehandle nye barn`() {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("J B")
+        }
+
+        @Test
+        internal fun `skal ikke legge til registerbarn på behandling hvis man ikke skal vilkårsbehandle nye barn`() {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).isEmpty()
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis vilkårsbehandleNyeBarn ikke er valgt`() {
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    grunnlagsdataBarn,
+                    StønadType.OVERGANGSSTØNAD,
+                    UstrukturertDokumentasjonType.ETTERSENDING,
+                )
+            }.hasMessage("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
         }
     }
 
