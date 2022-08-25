@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -139,12 +140,17 @@ class JournalføringService(
 
         validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
 
+        val årsak = if (journalpost.harStrukturertSøknad()) {
+            BehandlingÅrsak.SØKNAD
+        } else {
+            journalføringRequest.behandling.ustrukturertDokumentasjonType.behandlingÅrsak()
+        }
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
-            årsak = journalføringRequest.behandling.årsak
+            årsak = årsak
         )
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
@@ -162,10 +168,14 @@ class JournalføringService(
         journalpost: Journalpost,
         journalføringRequest: JournalføringRequest
     ) {
-        feilHvis(journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak != null) {
-            "Kan ikke sende inn årsak når journalposten har strukturert søknad"
+        feilHvis(journalpost.harStrukturertSøknad() &&
+            journalføringRequest.behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
+            "Kan ikke sende inn ustrukturertDokumentasjonType når journalposten har strukturert søknad"
         }
-        brukerfeilHvis(!journalpost.harStrukturertSøknad() && journalføringRequest.behandling.årsak == null) {
+        brukerfeilHvis(
+            !journalpost.harStrukturertSøknad() &&
+                journalføringRequest.behandling.ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT
+        ) {
             "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
         }
         brukerfeilHvis(journalpost.avsenderMottaker == null) {
