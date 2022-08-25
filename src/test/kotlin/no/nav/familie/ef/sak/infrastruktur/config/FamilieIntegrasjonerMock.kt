@@ -15,6 +15,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
+import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil.avsenderMottaker
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -197,6 +198,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
         private val arkiverDokumentResponse = Ressurs.success(ArkiverDokumentResponse(journalpostId = "1234", ferdigstilt = true))
         private val journalpostFraIntegrasjoner =
             Journalpost(
+                avsenderMottaker = avsenderMottaker,
                 journalpostId = "1234",
                 journalposttype = Journalposttype.I,
                 journalstatus = Journalstatus.MOTTATT,
@@ -275,6 +277,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
             )
         private val journalpostPapirsøknadFraIntegrasjoner =
             Journalpost(
+                avsenderMottaker = avsenderMottaker,
                 journalpostId = "1234",
                 journalposttype = Journalposttype.I,
                 journalstatus = Journalstatus.MOTTATT,
@@ -292,7 +295,11 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         tittel = "Søknad om overgangsstønad - dokument 1",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
+                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
+                        logiskeVedlegg = listOf(
+                            LogiskVedlegg("1", "Tittel logisk vedlegg"),
+                            LogiskVedlegg("2", "Annet logiskt vedlegg")
+                        )
                     )
                 )
             )
