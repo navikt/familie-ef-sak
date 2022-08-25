@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class VedtaksbrevRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var vedtaksbrevRepository: VedtaksbrevRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingId() {

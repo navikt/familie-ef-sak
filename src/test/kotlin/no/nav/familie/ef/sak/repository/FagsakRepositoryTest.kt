@@ -26,10 +26,17 @@ import java.time.LocalDateTime
 
 internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Nested
     inner class FinnFagsakerMedUtdatertGBelop {
@@ -94,6 +101,7 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             assertThat(fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(LocalDate.of(2022, 5, 1))).isEmpty()
         }
     }
+
     @Test
     fun `harLøpendeUtbetaling returnerer true for fagsak med ferdigstilt behandling med aktiv utbetaling`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("321"))))

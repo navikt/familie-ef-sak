@@ -14,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class MellomlagerFritekstbrevRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var mellomlagerFritekstbrevRepository: MellomlagerFritekstbrevRepository
 
     @Test
     internal fun `skal lagre mellomlagret brev`() {

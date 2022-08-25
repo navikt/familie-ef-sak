@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -529,6 +530,7 @@ internal class BeregningSkolepengerServiceTest {
         studietype = studietype,
         årMånedFra = fra,
         årMånedTil = til,
+        periode = Månedsperiode(fra, til),
         studiebelastning = studiebelastning
     )
 }

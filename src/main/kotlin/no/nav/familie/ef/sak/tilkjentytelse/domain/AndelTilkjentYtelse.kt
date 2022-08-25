@@ -1,17 +1,18 @@
 package no.nav.familie.ef.sak.tilkjentytelse.domain
 
-import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
-import java.util.*
+import java.time.YearMonth
+import java.util.UUID
 
 data class AndelTilkjentYtelse(
     @Column("belop")
     val beløp: Int,
     @Column("stonad_fom")
-    val stønadFom: LocalDate, // / TODO  Gjør nullable
+    val stønadFom: LocalDate,
     @Column("stonad_tom")
-    val stønadTom: LocalDate, // / TODO  Gjør nullable
+    val stønadTom: LocalDate,
     val personIdent: String,
     val inntekt: Int,
     val inntektsreduksjon: Int,
@@ -19,7 +20,26 @@ data class AndelTilkjentYtelse(
     val kildeBehandlingId: UUID
 ) {
 
-    fun erStønadOverlappende(fom: LocalDate): Boolean = this.stønadFom < fom && this.stønadTom >= fom
+    constructor(
+        beløp: Int,
+        periode: Månedsperiode,
+        personIdent: String,
+        inntekt: Int,
+        inntektsreduksjon: Int,
+        samordningsfradrag: Int,
+        kildeBehandlingId: UUID
+    ) : this(
+        beløp,
+        periode.fom.atDay(1),
+        periode.tom.atEndOfMonth(),
+        personIdent,
+        inntekt,
+        inntektsreduksjon,
+        samordningsfradrag,
+        kildeBehandlingId
+    )
 
-    val periode get() = Periode(stønadFom, stønadTom)
+    fun erStønadOverlappende(fom: LocalDate): Boolean = this.periode.inneholder(YearMonth.from(fom))
+
+    val periode get() = Månedsperiode(stønadFom, stønadTom)
 }

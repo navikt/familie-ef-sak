@@ -19,7 +19,8 @@ import org.springframework.http.ResponseEntity
 
 internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
     @BeforeEach
     fun setUp() {

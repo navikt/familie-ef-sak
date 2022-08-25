@@ -34,7 +34,5 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
 }
 
 private fun List<PeriodeMedBeløpDto>.finnPeriodeBeløp(utgiftsMåned: UtgiftsMåned): Int {
-    return this.find { utgiftsMåned.omsluttesAv(it) }?.beløp ?: 0
+    return this.find { it.periode.inneholder(utgiftsMåned.årMåned) }?.beløp ?: 0
 }
-
-private fun UtgiftsMåned.omsluttesAv(it: PeriodeMedBeløpDto) = this.årMåned.omsluttesAv(it.årMånedFra, it.årMånedTil)

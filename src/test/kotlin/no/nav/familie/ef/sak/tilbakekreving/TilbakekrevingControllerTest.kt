@@ -23,8 +23,11 @@ import java.util.UUID
 
 internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingService: BehandlingService
-    @Autowired lateinit var fagsakService: FagsakService
+    @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
 
     @BeforeEach
     fun setUp() {

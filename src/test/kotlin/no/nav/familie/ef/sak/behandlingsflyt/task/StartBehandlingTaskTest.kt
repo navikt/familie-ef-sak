@@ -26,8 +26,10 @@ import java.util.Properties
 
 class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var fagsakService: FagsakService
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var fagsakService: FagsakService
 
     private val iverksettClient = mockk<IverksettClient>()
     private val pdlClient = mockk<PdlClient>()

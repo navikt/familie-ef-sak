@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Språkkode
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -111,7 +112,8 @@ class TilbakekrevingService(
     private fun lagFeilutbetaltePerioderDto(saksbehandling: Saksbehandling): FeilutbetaltePerioderDto {
         val simulering = simuleringService.simuler(saksbehandling)
 
-        val perioderMedFeilutbetaling = simulering.hentSammenhengendePerioderMedFeilutbetaling()
+        val perioderMedFeilutbetaling =
+            simulering.hentSammenhengendePerioderMedFeilutbetaling().map { Periode(it.fomDato, it.tomDato) }
 
         return FeilutbetaltePerioderDto(
             sumFeilutbetaling = simulering.feilutbetaling.toLong(),

@@ -20,7 +20,8 @@ import java.util.UUID
 
 internal class ArbeidsforholdControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var arbeidsforholdClient: ArbeidsforholdClient
+    @Autowired
+    private lateinit var arbeidsforholdClient: ArbeidsforholdClient
 
     private val fagsak = fagsak(identer = fagsakpersoner(setOf("1")))
 
