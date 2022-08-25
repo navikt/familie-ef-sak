@@ -103,25 +103,30 @@ class JournalføringService(
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         journalføringRequest.valider()
+        val journalpost = hentJournalpost(journalpostId)
+        brukerfeilHvis(journalpost.avsenderMottaker == null) {
+            "Avsender mangler og må settes på journalposten i gosys. " +
+                "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
+        }
+
         return if (journalføringRequest.skalJournalførePåEksisterendeBehandling()) {
-            journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpostId)
+            journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpost)
         } else {
-            journalførSøknadTilNyBehandling(journalføringRequest, journalpostId)
+            journalførSøknadTilNyBehandling(journalføringRequest, journalpost)
         }
     }
 
     private fun journalførSøknadTilEksisterendeBehandling(
         journalføringRequest: JournalføringRequest,
-        journalpostId: String
+        journalpost: Journalpost
     ): Long {
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandling: Behandling = hentBehandling(journalføringRequest)
-        val journalpost = hentJournalpost(journalpostId)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         knyttJournalpostTilBehandling(journalpost, behandling)
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
-            ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+            ferdigstillJournalføring(journalpost.journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
         }
         ferdigstillJournalføringsoppgave(journalføringRequest)
         return journalføringRequest.oppgaveId.toLong()
@@ -129,10 +134,9 @@ class JournalføringService(
 
     private fun journalførSøknadTilNyBehandling(
         journalføringRequest: JournalføringRequest,
-        journalpostId: String
+        journalpost: Journalpost
     ): Long {
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
-        val journalpost = hentJournalpost(journalpostId)
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
@@ -155,7 +159,7 @@ class JournalføringService(
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpost(journalpost, journalføringRequest.dokumentTitler, fagsak.eksternId.id, saksbehandler)
-            ferdigstillJournalføring(journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
+            ferdigstillJournalføring(journalpost.journalpostId, journalføringRequest.journalførendeEnhet, saksbehandler)
         }
 
         ferdigstillJournalføringsoppgave(journalføringRequest)
@@ -177,10 +181,6 @@ class JournalføringService(
                 journalføringRequest.behandling.ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT
         ) {
             "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
-        }
-        brukerfeilHvis(journalpost.avsenderMottaker == null) {
-            "Avsender mangler og må settes på journalposten i gosys. " +
-                "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
         }
     }
 
@@ -271,16 +271,6 @@ class JournalføringService(
     fun hentSøknadFraJournalpostForSkolepenger(journalpostId: String): SøknadSkolepenger {
         val dokumentinfo = hentOriginaldokument(journalpostId, DokumentBrevkode.SKOLEPENGER)
         return journalpostClient.hentSkolepengerSøknad(journalpostId, dokumentinfo.dokumentInfoId)
-    }
-
-    fun hentIdentForJournalpost(journalpost: Journalpost): String {
-        return journalpost.bruker?.let {
-            when (it.type) {
-                BrukerIdType.FNR -> it.id
-                BrukerIdType.AKTOERID -> pdlClient.hentPersonidenter(it.id).identer.first().ident
-                BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=${journalpost.journalpostId} for orgnr")
-            }
-        } ?: error("Kan ikke hente journalpost=${journalpost.journalpostId} uten bruker")
     }
 
     private fun hentOriginaldokument(
