@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
@@ -99,7 +100,9 @@ data class Sanksjonert(
 data class SanksjonertPeriodeDto(
     @Deprecated("Bruk fomMåned", ReplaceWith("fom")) val årMånedFra: YearMonth,
     @Deprecated("Bruk tomMåned", ReplaceWith("tom")) val årMånedTil: YearMonth,
+    @JsonIgnore
     val fom: YearMonth = årMånedFra,
+    @JsonIgnore
     val tom: YearMonth = årMånedTil
 ) {
 
