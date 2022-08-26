@@ -104,15 +104,25 @@ class JournalføringService(
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         journalføringRequest.valider()
         val journalpost = hentJournalpost(journalpostId)
-        brukerfeilHvis(journalpost.avsenderMottaker == null) {
-            "Avsender mangler og må settes på journalposten i gosys. " +
-                "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
-        }
+        validerMottakerFinnes(journalpost)
 
         return if (journalføringRequest.skalJournalførePåEksisterendeBehandling()) {
             journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpost)
         } else {
             journalførSøknadTilNyBehandling(journalføringRequest, journalpost)
+        }
+    }
+
+    /**
+     * [Journalposttype.N] brukes for innskannede dokumentm, samme validering finnes i dokarkiv
+     */
+    private fun validerMottakerFinnes(journalpost: Journalpost) {
+        brukerfeilHvis(
+            journalpost.journalposttype != Journalposttype.N &&
+                !journalpost.avsenderMottaker?.navn.isNullOrBlank()
+        ) {
+            "Avsender mangler og må settes på journalposten i gosys. " +
+                "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
         }
     }
 
