@@ -27,6 +27,7 @@ data class ÅrMånedEllerDato(val dato: Any) {
             error("Typen er feil - ${dato::class.java.simpleName}")
         }
     }
+
     fun asYearMonth(): YearMonth {
         if (dato is YearMonth) return dato
         else if (dato is LocalDate) return YearMonth.of(dato.year, dato.month)

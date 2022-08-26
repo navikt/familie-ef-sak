@@ -40,6 +40,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -56,14 +57,29 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskytte
 
 internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakService: FagsakService
-    @Autowired private lateinit var tilgangService: TilgangService
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository
-    @Autowired private lateinit var beregnYtelseSteg: BeregnYtelseSteg
-    @Autowired private lateinit var rolleConfig: RolleConfig
-    @Autowired private lateinit var opprettUttrekkArbeidssøkerTask: OpprettUttrekkArbeidssøkerTask
+    @Autowired
+    private lateinit var fagsakService: FagsakService
+
+    @Autowired
+    private lateinit var tilgangService: TilgangService
+
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var uttrekkArbeidssøkerRepository: UttrekkArbeidssøkerRepository
+
+    @Autowired
+    private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
+    @Autowired
+    private lateinit var opprettUttrekkArbeidssøkerTask: OpprettUttrekkArbeidssøkerTask
 
     private lateinit var service: UttrekkArbeidssøkerService
     private val arbeidssøkerClient = mockk<ArbeidssøkerClient>()
@@ -282,7 +298,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         val opprettUttrekkArbeidssøkerTask =
             OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskRepository)
 
-        val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.tilPeriode().fradato, vedtaksperiode.tilPeriode().tildato)
+        val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.periode.fomDato, vedtaksperiode.periode.tomDato)
         val periodeForUttrekk = VedtaksperioderForUttrekk(
             UUID.randomUUID(),
             UUID.randomUUID(),
@@ -544,13 +560,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         til: YearMonth,
         aktivitetType: AktivitetType = AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER
     ) =
-        VedtaksperiodeDto(fra, til, aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
+        VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitetType, VedtaksperiodeType.PERIODE_FØR_FØDSEL)
 
     private fun innvilg(
         fagsak: Fagsak,
         behandling: Behandling,
         vedtaksperioder: List<VedtaksperiodeDto>,
-        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().årMånedFra, null, null))
+        inntekter: List<Inntekt> = listOf(Inntekt(vedtaksperioder.first().periode.fom, null, null))
     ) {
         val vedtak = InnvilgelseOvergangsstønad(
             perioder = vedtaksperioder,

@@ -13,7 +13,8 @@ import java.time.LocalDateTime
 
 internal class RepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var fagsakRepository: FagsakRepository
+    @Autowired
+    lateinit var fagsakRepository: FagsakRepository
 
     @AfterEach
     internal fun tearDown() {

@@ -35,11 +35,20 @@ import java.util.UUID
 
 internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var vurderingService: VurderingService
-    @Autowired lateinit var søknadService: SøknadService
-    @Autowired lateinit var barnRepository: BarnRepository
+    @Autowired
+    lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var vurderingService: VurderingService
+
+    @Autowired
+    lateinit var søknadService: SøknadService
+
+    @Autowired
+    lateinit var barnRepository: BarnRepository
 
     @Test
     internal fun `kopierVurderingerTilNyBehandling - skal kopiere vurderinger til ny behandling`() {
@@ -114,7 +123,12 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         val vilkårsvurdering = vilkårsvurdering(
             behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
-            listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))))
+            listOf(
+                Delvilkårsvurdering(
+                    Vilkårsresultat.OPPFYLT,
+                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
+                )
+            )
         )
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 

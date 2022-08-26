@@ -28,9 +28,14 @@ import java.util.UUID
 
 internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var simuleringsresultatRepository: SimuleringsresultatRepository
 
     @BeforeEach
     fun setUp() {

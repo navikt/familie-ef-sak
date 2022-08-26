@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.beregning.skolepenger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp.maksbeløp
-import no.nav.familie.ef.sak.felles.dto.harOverlappende
 import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -14,6 +13,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDto
+import no.nav.familie.kontrakter.felles.harOverlappende
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -140,7 +140,7 @@ class BeregningSkolepengerService(
             brukerfeilHvisIkke(tidligereSkoleår.add(skoleår)) {
                 "Skoleåret $skoleår kan ikke legges inn flere ganger"
             }
-            brukerfeilHvis(skoleårsperiode.perioder.map { it.tilPeriode() }.harOverlappende()) {
+            brukerfeilHvis(skoleårsperiode.perioder.map { it.periode }.harOverlappende()) {
                 "Skoleår $skoleår inneholder overlappende perioder"
             }
             val studietype = skoleårsperiode.perioder.first().studietype

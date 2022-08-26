@@ -30,7 +30,11 @@ class AlderPåBarnRegel :
     @JsonIgnore
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    override fun initereDelvilkårsvurdering(metadata: HovedregelMetadata, resultat: Vilkårsresultat, barnId: UUID?): List<Delvilkårsvurdering> {
+    override fun initereDelvilkårsvurdering(
+        metadata: HovedregelMetadata,
+        resultat: Vilkårsresultat,
+        barnId: UUID?
+    ): List<Delvilkårsvurdering> {
         val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
         val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
             harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
@@ -45,7 +49,10 @@ class AlderPåBarnRegel :
                         regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
                         svar = harFullførtFjerdetrinn,
                         begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI)
-                            "Automatisk vurdert: Ut ifra barnets alder er det ${LocalDate.now().norskFormat()} automatisk vurdert at barnet ikke har fullført 4. skoleår."
+                            "Automatisk vurdert: Ut ifra barnets alder er det ${
+                            LocalDate.now()
+                                .norskFormat()
+                            } automatisk vurdert at barnet ikke har fullført 4. skoleår."
                         else null
                     )
                 )

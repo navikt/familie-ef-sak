@@ -22,7 +22,8 @@ import java.time.LocalDate
 @Disabled
 internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var restTemplateBuilder: RestTemplateBuilder
+    @Autowired
+    private lateinit var restTemplateBuilder: RestTemplateBuilder
 
     data class TestDto(val dato: LocalDate = LocalDate.of(2020, 1, 1))
 

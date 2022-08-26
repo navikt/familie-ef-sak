@@ -93,7 +93,7 @@ class VedtakDtoMapperTest {
 
     private fun assertErLik(vedtakDto: VedtakDto, vedtakJson: String) {
         val serialisertVedtak = objectMapper.writeValueAsString(vedtakDto)
-        assertThat(objectMapper.readTree(serialisertVedtak)).isEqualTo(objectMapper.readTree(vedtakJson))
+        assertThat(objectMapper.readValue<VedtakDto>(serialisertVedtak)).isEqualTo(objectMapper.readValue<VedtakDto>(vedtakJson))
         assertThat(objectMapper.readValue<VedtakDto>(vedtakJson)).isEqualTo(vedtakDto)
     }
 

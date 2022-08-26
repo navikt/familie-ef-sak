@@ -12,8 +12,11 @@ import java.time.YearMonth
 
 internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var repository: UttrekkArbeidssøkerRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var repository: UttrekkArbeidssøkerRepository
 
     private val årMåned = YearMonth.of(2021, 1)
 

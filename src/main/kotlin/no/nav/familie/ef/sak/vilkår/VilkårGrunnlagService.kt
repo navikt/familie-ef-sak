@@ -66,7 +66,8 @@ class VilkårGrunnlagService(
             aktivitet = aktivitet,
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling,
-            registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt
+            registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt,
+            dokumentasjon = søknad?.dokumentasjon
         )
     }
 

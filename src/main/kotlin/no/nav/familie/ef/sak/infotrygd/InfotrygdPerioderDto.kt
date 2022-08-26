@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdAktivitetstype
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
 
 data class InfotrygdPerioderDto(
@@ -16,8 +18,7 @@ data class InfotrygdStønadPerioderDto(
 )
 
 data class SummertInfotrygdPeriodeDto(
-    val stønadFom: LocalDate,
-    val stønadTom: LocalDate,
+    val stønadsperiode: Månedsperiode,
     val opphørsdato: LocalDate?,
     val inntektsgrunnlag: Int,
     val inntektsreduksjon: Int,
@@ -26,12 +27,20 @@ data class SummertInfotrygdPeriodeDto(
     val månedsbeløp: Int,
     val engangsbeløp: Int,
     val aktivitet: InfotrygdAktivitetstype?
-)
+) {
+
+    @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.fom"))
+    @get:JsonProperty
+    val stønadFom: LocalDate get() = stønadsperiode.fomDato
+
+    @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.tom"))
+    @get:JsonProperty
+    val stønadTom: LocalDate get() = stønadsperiode.tomDato
+}
 
 fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto =
     SummertInfotrygdPeriodeDto(
-        stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom,
+        stønadsperiode = Månedsperiode(this.stønadFom, this.stønadTom),
         opphørsdato = this.opphørsdato,
         inntektsgrunnlag = this.inntektsgrunnlag,
         inntektsreduksjon = this.inntektsreduksjon,

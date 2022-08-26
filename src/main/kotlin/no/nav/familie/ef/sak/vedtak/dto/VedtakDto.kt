@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
@@ -8,7 +9,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.YearMonth
@@ -97,14 +98,15 @@ data class Sanksjonert(
 ) : VedtakDto(ResultatType.SANKSJONERE, "Sanksjonering")
 
 data class SanksjonertPeriodeDto(
-    val årMånedFra: YearMonth,
-    val årMånedTil: YearMonth
+    @Deprecated("Bruk fomMåned", ReplaceWith("fom")) val årMånedFra: YearMonth,
+    @Deprecated("Bruk tomMåned", ReplaceWith("tom")) val årMånedTil: YearMonth,
+    @JsonIgnore
+    val fom: YearMonth = årMånedFra,
+    @JsonIgnore
+    val tom: YearMonth = årMånedTil
 ) {
 
-    fun datoFra() = årMånedFra.atDay(1)
-    fun datoTil() = årMånedTil.atEndOfMonth()
-
-    fun tilPeriode() = Periode(fradato = datoFra(), tildato = datoTil())
+    fun tilPeriode() = Månedsperiode(fom, tom)
 }
 
 fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak = when (this) {
@@ -144,7 +146,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             resultatType = this.resultatType,
             behandlingId = behandlingId,
             skolepenger = SkolepengerWrapper(
-                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().datoFra },
+                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().periode },
                 begrunnelse = this.begrunnelse
             )
         )
@@ -173,8 +175,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
     when (stønadstype) {
         StønadType.OVERGANGSSTØNAD -> {
             val vedtaksperiode = Vedtaksperiode(
-                periode.datoFra(),
-                periode.datoTil(),
+                periode.tilPeriode(),
                 AktivitetType.IKKE_AKTIVITETSPLIKT,
                 VedtaksperiodeType.SANKSJON
             )
@@ -188,8 +189,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
         }
         StønadType.BARNETILSYN -> {
             val vedtaksperiode = Barnetilsynperiode(
-                datoFra = periode.datoFra(),
-                datoTil = periode.datoTil(),
+                periode = periode.tilPeriode(),
                 utgifter = 0,
                 barn = emptyList(),
                 erMidlertidigOpphør = true

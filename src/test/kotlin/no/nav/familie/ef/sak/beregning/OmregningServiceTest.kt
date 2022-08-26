@@ -136,10 +136,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         val iverksettDto = iverksettDtoSlot.captured
         val expectedIverksettDto = iverksettMedOppdaterteIder(fagsak, behandling, iverksettDto.vedtak.vedtakstidspunkt)
         assertThat(iverksettDto).usingRecursiveComparison()
-            .ignoringFields("behandling.vilkårsvurderinger")
+            .ignoringCollectionOrder()
             .isEqualTo(expectedIverksettDto)
-        assertThat(iverksettDto.behandling.vilkårsvurderinger)
-            .hasSameElementsAs(expectedIverksettDto.behandling.vilkårsvurderinger)
         assertThat(søknadService.hentSøknadsgrunnlag(nyBehandling.id)).isNotNull
         assertThat(barnRepository.findByBehandlingId(nyBehandling.id).single().personIdent).isEqualTo(barn.personIdent)
         assertThat(
@@ -248,7 +246,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
 
         val andelerTilkjentYtelse = expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
-            if (it.fraOgMed >= nyesteGrunnbeløpGyldigFraOgMed) {
+            if (it.periode.fomDato >= nyesteGrunnbeløpGyldigFraOgMed) {
                 it.copy(kildeBehandlingId = forrigeBehandling.id)
             } else {
                 it.copy(kildeBehandlingId = behandling.id)

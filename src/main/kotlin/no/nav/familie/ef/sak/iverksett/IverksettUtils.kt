@@ -11,5 +11,6 @@ fun AndelTilkjentYtelse.tilIverksettDto() =
         samordningsfradrag = this.samordningsfradrag,
         fraOgMed = this.stønadFom,
         tilOgMed = this.stønadTom,
+        periode = this.periode,
         kildeBehandlingId = this.kildeBehandlingId
     )
