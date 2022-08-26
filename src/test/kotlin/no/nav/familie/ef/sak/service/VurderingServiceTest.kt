@@ -117,7 +117,8 @@ internal class VurderingServiceTest {
             aktivitet = mockk(relaxed = true),
             sagtOppEllerRedusertStilling = mockk(relaxed = true),
             lagtTilEtterFerdigstilling = false,
-            registeropplysningerOpprettetTid = mockk(relaxed = true)
+            registeropplysningerOpprettetTid = mockk(relaxed = true),
+            dokumentasjon = mockk(relaxed = true)
         )
     }
 

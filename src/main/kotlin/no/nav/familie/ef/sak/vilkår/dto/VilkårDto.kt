@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.DokumentasjonFraSøknadDto
 import java.time.LocalDateTime
 
 data class VilkårDto(
@@ -17,5 +18,6 @@ data class VilkårGrunnlagDto(
     val aktivitet: AktivitetDto?,
     val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
     val lagtTilEtterFerdigstilling: Boolean,
-    val registeropplysningerOpprettetTid: LocalDateTime
+    val registeropplysningerOpprettetTid: LocalDateTime,
+    val dokumentasjon: DokumentasjonFraSøknadDto?
 )
