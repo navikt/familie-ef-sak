@@ -259,14 +259,15 @@ internal class BarnServiceTest {
         @Test
         internal fun `skal opprette terminbarn når det ikke finnes match i PDL`() {
             val termindato = LocalDate.of(2021, 1, 1)
-            assertThatThrownBy {  barnService.opprettBarnPåBehandlingMedSøknadsdata(
-                behandlingId,
-                fagsakId,
-                emptyList(),
-                StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.SØKNAD,
-                listOf(BarnSomSkalFødes(termindato))
-            )
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    emptyList(),
+                    StønadType.OVERGANGSSTØNAD,
+                    BehandlingÅrsak.SØKNAD,
+                    listOf(BarnSomSkalFødes(termindato))
+                )
             }.hasMessage("Kan ikke legge til terminbarn med behandlingsårsak=SØKNAD")
         }
 
