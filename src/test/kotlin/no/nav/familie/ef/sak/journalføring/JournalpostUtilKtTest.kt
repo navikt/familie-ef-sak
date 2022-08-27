@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.journalføring
 
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
@@ -11,6 +13,87 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class JournalpostUtilKtTest {
+
+    @Test
+    internal fun `journalpost - avsendermottaker mangler for inngående journalpost`() {
+        val journalpostUtenAvsenderMottaker = lagjournalpost(
+            behandlingstemaOvergangsstønad,
+            emptyList(),
+            journalposttype = Journalposttype.I
+        )
+        assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue
+    }
+
+    @Test
+    internal fun `journalpost - avsendermottaker mangler for utgående journalpost`() {
+        val journalpostUtenAvsenderMottaker = lagjournalpost(
+            behandlingstemaOvergangsstønad,
+            emptyList(),
+            journalposttype = Journalposttype.U
+        )
+        assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue
+    }
+
+    @Test
+    internal fun `journalpost - avsendermottaker mangler for notat-journalpost - skal ikke bety noe`() {
+        val journalpostUtenAvsenderMottaker = lagjournalpost(
+            behandlingstemaOvergangsstønad,
+            emptyList(),
+            journalposttype = Journalposttype.N
+        )
+        assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isFalse
+    }
+
+    @Test
+    internal fun `journalpost - avsendermottaker finnes for inngående journalpost`() {
+        val journalpostUtenAvsenderMottaker = lagjournalpost(
+            behandlingstemaOvergangsstønad,
+            emptyList(),
+            journalposttype = Journalposttype.I,
+            avsenderMottaker = AvsenderMottaker(
+                id = "a",
+                type = AvsenderMottakerIdType.FNR,
+                navn = "Ola",
+                land = "Norge",
+                erLikBruker = true
+            )
+        )
+        assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isFalse
+    }
+
+    @Test
+    internal fun `journalpost - avsendermottaker finnes for inngående journalpost, men navn er tom streng`() {
+        val journalpostUtenAvsenderMottaker = lagjournalpost(
+            behandlingstemaOvergangsstønad,
+            emptyList(),
+            journalposttype = Journalposttype.I,
+            avsenderMottaker = AvsenderMottaker(
+                id = "a",
+                type = AvsenderMottakerIdType.FNR,
+                navn = "",
+                land = "Norge",
+                erLikBruker = true
+            )
+        )
+        assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue()
+    }
+
+    @Test
+    internal fun `journalpost - avsendermottaker finnes for inngående journalpost, men mangler navn`() {
+        val journalpostUtenAvsenderMottaker = lagjournalpost(
+            behandlingstemaOvergangsstønad,
+            emptyList(),
+            journalposttype = Journalposttype.I,
+            avsenderMottaker = AvsenderMottaker(
+                id = "a",
+                type = AvsenderMottakerIdType.FNR,
+                navn = "",
+                land = "Norge",
+                erLikBruker = true
+            )
+        )
+        assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue()
+    }
 
     @Test
     internal fun `harStrukturertSøknad - overgangsstønad med søknad skal returnere true`() {
@@ -128,10 +211,16 @@ internal class JournalpostUtilKtTest {
         brevkode = "XYZ"
     )
 
-    fun lagjournalpost(behandlingstema: String?, dokumenter: List<DokumentInfo>) =
+    fun lagjournalpost(
+        behandlingstema: String?,
+        dokumenter: List<DokumentInfo>,
+        journalposttype: Journalposttype = Journalposttype.I,
+        avsenderMottaker: AvsenderMottaker? = null
+    ) =
         Journalpost(
             journalpostId = journalpostId,
-            journalposttype = Journalposttype.I,
+            journalposttype = journalposttype,
+            avsenderMottaker = avsenderMottaker,
             journalstatus = Journalstatus.MOTTATT,
             tema = "ENF",
             behandlingstema = behandlingstema,
