@@ -47,7 +47,6 @@ class AndelsHistorikkService(
         val behandling = behandlingService.hentBehandling(behandlingId)
 
         return behandling.forrigeBehandlingId?.let {
-
             val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
             val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
             val vedtaksdatoEllerDagensdato =

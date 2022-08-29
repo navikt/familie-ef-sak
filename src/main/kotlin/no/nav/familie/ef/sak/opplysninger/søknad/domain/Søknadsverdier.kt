@@ -16,7 +16,7 @@ data class Søknadsverdier(
     val situasjon: Situasjon? = null, // Gjelder: OS
     val datoMottatt: LocalDateTime,
     val søkerFra: YearMonth? = null,
-    val dokumentasjon: DokumentasjonFraSøknadDto,
+    val dokumentasjon: DokumentasjonFraSøknadDto
 )
 
 data class DokumentasjonFraSøknadDto(

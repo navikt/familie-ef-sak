@@ -326,7 +326,7 @@ internal class BeregningServiceTest {
             Inntektsperiode(
                 periode = Månedsperiode(
                     LocalDate.parse("2019-01-01"),
-                    LocalDate.parse("2019-02-28"),
+                    LocalDate.parse("2019-02-28")
                 ),
                 inntekt = inntekt,
                 samordningsfradrag = 0.toBigDecimal()

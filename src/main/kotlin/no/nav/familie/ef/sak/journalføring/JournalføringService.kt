@@ -178,7 +178,7 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest
     ) {
         val ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType
-        if(journalpost.harStrukturertSøknad()) {
+        if (journalpost.harStrukturertSøknad()) {
             feilHvis(ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
                 "Kan ikke sende inn dokumentasjonstype når journalposten har strukturert søknad"
             }
@@ -231,7 +231,6 @@ class JournalføringService(
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ): Behandling {
-
         val behandlingsårsak = if (journalpost.harStrukturertSøknad()) {
             BehandlingÅrsak.SØKNAD
         } else {

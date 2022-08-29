@@ -62,7 +62,9 @@ internal class FagsakRepositoryTest : OppslagSpringRunnerTest() {
             )
             tilkjentYtelseRepository.insert(
                 tilkjentYtelse(
-                    behandling.id, fagsak.personIdenter.first().ident, 2022,
+                    behandling.id,
+                    fagsak.personIdenter.first().ident,
+                    2022,
                     grunnbeløpsdato = LocalDate.of(2021, 5, 1)
                 )
             )

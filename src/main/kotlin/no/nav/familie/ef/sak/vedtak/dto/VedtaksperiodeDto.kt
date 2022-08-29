@@ -40,7 +40,7 @@ fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
         Vedtaksperiode(
             periode = it.periode,
             aktivitet = it.aktivitet,
-            periodeType = it.periodeType,
+            periodeType = it.periodeType
         )
     }
 
@@ -51,7 +51,7 @@ fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
             årMånedTil = it.periode.tom,
             periode = it.periode,
             aktivitet = it.aktivitet,
-            periodeType = it.periodeType,
+            periodeType = it.periodeType
         )
     }
 
@@ -60,6 +60,6 @@ fun Vedtaksperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
         årMånedFra = periode.fom,
         årMånedTil = periode.tom,
         fom = periode.fom,
-        tom = periode.tom,
+        tom = periode.tom
 
     )

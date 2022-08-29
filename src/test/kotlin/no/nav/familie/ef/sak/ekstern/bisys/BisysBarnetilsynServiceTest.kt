@@ -386,7 +386,7 @@ fun lagAndelHistorikkDto(
     tilOgMed: LocalDate,
     behandlingBarn: List<BehandlingBarn>,
     beløp: Int = 1,
-    endring: HistorikkEndring? = null,
+    endring: HistorikkEndring? = null
 ): AndelHistorikkDto {
     return AndelHistorikkDto(
         behandlingId = UUID.randomUUID(),

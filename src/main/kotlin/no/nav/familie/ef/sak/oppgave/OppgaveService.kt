@@ -57,7 +57,6 @@ class OppgaveService(
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
-
             val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
             val opprettOppgave =

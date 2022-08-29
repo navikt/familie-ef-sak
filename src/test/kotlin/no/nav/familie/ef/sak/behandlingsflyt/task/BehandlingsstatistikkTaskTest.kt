@@ -89,7 +89,6 @@ internal class BehandlingsstatistikkTaskTest {
 
     @BeforeEach
     internal fun setUp() {
-
         every { behandlingService.hentSaksbehandling(behandling.id) } returns saksbehandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { oppgaveService.hentOppgave(oppgaveId) } returns oppgaveMock
@@ -110,7 +109,6 @@ internal class BehandlingsstatistikkTaskTest {
 
     @Test
     internal fun `skal sende behandlingsstatistikk`() {
-
         val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
 
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
@@ -139,7 +137,6 @@ internal class BehandlingsstatistikkTaskTest {
 
     @Test
     internal fun `skal bruke opprettetDato for behandlingen dersom søknad ikke foreligger`() {
-
         val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
         every { søknadService.finnDatoMottattForSøknad(any()) } returns null
         every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs

@@ -88,7 +88,7 @@ internal class AktivitetMapperTest {
             linjeKursGrad = "Kurs",
             semesteravgift = 30000,
             studieavgift = 0,
-            eksamensgebyr = 1500,
+            eksamensgebyr = 1500
         )
 
     private fun tidligereUtdanning(): Set<TidligereUtdanning> =

@@ -80,8 +80,8 @@ fun JournalføringRequest.valider() {
     }
 
     feilHvis(
-        behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.PAPIRSØKNAD
-            && barnSomSkalFødes.isNotEmpty()
+        behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.PAPIRSØKNAD &&
+            barnSomSkalFødes.isNotEmpty()
     ) {
         "Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes"
     }

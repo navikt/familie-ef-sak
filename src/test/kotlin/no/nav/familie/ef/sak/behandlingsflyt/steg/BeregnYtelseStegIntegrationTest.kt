@@ -31,8 +31,10 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
     @Autowired
     private lateinit var tilkjentytelseRepository: TilkjentYtelseRepository
 
@@ -78,7 +80,8 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
 
         behandlingRepository.insert(behandling2)
         innvilg(
-            saksbehandling2, listOf(vedtaksperiode),
+            saksbehandling2,
+            listOf(vedtaksperiode),
             listOf(
                 Inntekt(årMånedFra, BigDecimal.ZERO, BigDecimal.ZERO),
                 Inntekt(årMånedTil, BigDecimal.ZERO, BigDecimal(10_000))

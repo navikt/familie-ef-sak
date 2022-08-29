@@ -21,7 +21,6 @@ internal class BrevmottakereServiceTest {
 
     @Test
     fun `skal feile hvis brevmottakere settes til ingen mottakere`() {
-
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
         val brevmottakereDto = BrevmottakereDto(personer = emptyList(), organisasjoner = emptyList())
@@ -33,7 +32,6 @@ internal class BrevmottakereServiceTest {
 
     @Test
     fun `skal feile hvis mer enn 2 brevmottakere`() {
-
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
         assertThrows<ApiFeil> {
@@ -46,7 +44,6 @@ internal class BrevmottakereServiceTest {
 
     @Test
     fun `skal feile hvis samme mottaker legges til flere ganger`() {
-
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
         val brevmottakereDto = BrevmottakereDto(
@@ -75,7 +72,6 @@ internal class BrevmottakereServiceTest {
 
     @Test
     fun `skal hvis samme organisasjon legges til flere ganger`() {
-
         every { brevmottakereRepository.findByIdOrNull(behandling.id) } returns mockk()
 
         val brevmottakereDto = BrevmottakereDto(
