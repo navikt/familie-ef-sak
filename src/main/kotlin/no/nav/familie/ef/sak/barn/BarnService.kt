@@ -115,7 +115,7 @@ class BarnService(
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
         grunnlagsdataBarn: List<BarnMedIdent>
     ): List<BehandlingBarn> = when (vilkårsbehandleNyeBarn) {
-        VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> mapBarnUstrukturertSøknad(behandlingId, grunnlagsdataBarn)
+        VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> mapBarnTilBehandlingBarn(behandlingId, grunnlagsdataBarn)
         VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
         VilkårsbehandleNyeBarn.IKKE_VALGT ->
             throw Feil("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
@@ -168,10 +168,10 @@ class BarnService(
     ): List<BehandlingBarn> {
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }.toSet()
         val ukobledeBarn = grunnlagsdataBarn.filterNot { kobledeBarnIdenter.contains(it.personIdent) }
-        return kobledeBarn + mapBarnUstrukturertSøknad(behandlingId, ukobledeBarn)
+        return kobledeBarn + mapBarnTilBehandlingBarn(behandlingId, ukobledeBarn)
     }
 
-    private fun mapBarnUstrukturertSøknad(
+    private fun mapBarnTilBehandlingBarn(
         behandlingId: UUID,
         grunnlagsdataBarn: List<BarnMedIdent>
     ) = grunnlagsdataBarn.map {
