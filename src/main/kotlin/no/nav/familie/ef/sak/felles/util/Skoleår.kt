@@ -1,13 +1,14 @@
 package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.Month
 import java.time.Year
 import java.time.YearMonth
 
 data class Skoleår(val år: Year) {
 
-    constructor(fra: YearMonth, til: YearMonth) : this(utledSkoleår(fra, til))
+    constructor(periode: Månedsperiode) : this(utledSkoleår(periode.fom, periode.tom))
 
     // ty = Year formatted with 2 digits
     override fun toString(): String {

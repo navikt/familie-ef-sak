@@ -94,6 +94,9 @@ class VedtakController(
         @PathVariable fra: YearMonth
     ): Ressurs<VedtakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.FRONTEND_PREFYLL_VEDTAKSPERIODER)) {
+            "Feil vid henting av vedtakshistorikk. Det virker som at du sitter med en eldre versjon av saksbehandling, prøv å laste siden på nytt"
+        }
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
     }
 
@@ -157,7 +160,8 @@ class VedtakController(
         personIdenter: List<String>
     ): Ressurs<List<ForventetInntektForPersonIdent>> {
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt start")
-        val personIdentToBehandlingIds = behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
+        val personIdentToBehandlingIds =
+            behandlingRepository.finnSisteIverksatteBehandlingerForPersonIdenter(personIdenter).toMap()
         logger.info("hentPersonerMedAktivStonadOgForventetInntekt hentet behandlinger")
 
         val personIdentMedForventetInntektList = mutableListOf<PersonIdentMedForventetInntekt>()

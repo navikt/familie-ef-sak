@@ -64,7 +64,6 @@ import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -192,11 +191,10 @@ class IverksettingDtoMapper(
         if (tilbakekreving.valg == Tilbakekrevingsvalg.OPPRETT_MED_VARSEL) {
             val lagretSimuleringsresultat = simuleringService.hentLagretSimuleringsoppsummering(behandlingId)
             val perioder = lagretSimuleringsresultat.hentSammenhengendePerioderMedFeilutbetaling()
-                .map { Periode(fom = it.fom, tom = it.tom) }
             return TilbakekrevingMedVarselDto(
                 varseltekst = tilbakekreving.varseltekst ?: "",
                 sumFeilutbetaling = lagretSimuleringsresultat.feilutbetaling,
-                perioder = perioder
+                fellesperioder = perioder
             )
         }
         return null
@@ -347,7 +345,7 @@ class IverksettingDtoMapper(
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
     andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
-    startdato = startdato
+    startmåned = YearMonth.from(startdato)
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
@@ -376,6 +374,7 @@ fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto>
         VedtaksperiodeOvergangsstønadDto(
             fraOgMed = it.datoFra,
             tilOgMed = it.datoTil,
+            periode = it.periode,
             aktivitet = AktivitetType.valueOf(it.aktivitet.name),
             periodeType = VedtaksperiodeType.valueOf(it.periodeType.name)
         )
@@ -384,8 +383,9 @@ fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto>
 fun BarnetilsynWrapper.tilVedtaksperioder(): List<VedtaksperiodeBarnetilsynDto> = this.perioder
     .map {
         VedtaksperiodeBarnetilsynDto(
-            fraOgMed = it.datoFra,
-            tilOgMed = it.datoTil,
+            fraOgMed = it.periode.fomDato,
+            tilOgMed = it.periode.tomDato,
+            periode = it.periode,
             utgifter = it.utgifter,
             antallBarn = it.barn.size
         )
@@ -401,12 +401,13 @@ fun SkolepengerWrapper.tilVedtaksperioder(): List<VedtaksperiodeSkolepengerDto> 
 
 fun DelårsperiodeSkoleårSkolepenger.tilIverksettDto() = DelårsperiodeSkoleårSkolepengerDto(
     studietype = SkolepengerStudietype.valueOf(this.studietype.name),
-    fraOgMed = this.datoFra,
-    tilOgMed = this.datoTil,
+    fraOgMed = this.periode.fomDato,
+    tilOgMed = this.periode.tomDato,
+    periode = this.periode,
     studiebelastning = this.studiebelastning,
     maksSatsForSkoleår = SkolepengerMaksbeløp.maksbeløp(
         this.studietype,
-        Skoleår(YearMonth.from(this.datoFra), YearMonth.from(this.datoTil))
+        Skoleår(this.periode)
     )
 
 )
@@ -422,8 +423,9 @@ private fun mapPerioderMedBeløp(perioder: List<PeriodeMedBeløp>?) =
 
 fun PeriodeMedBeløp.tilPeriodeMedBeløpDto(): PeriodeMedBeløpDto =
     PeriodeMedBeløpDto(
-        fraOgMed = this.datoFra,
-        tilOgMed = this.datoTil,
+        fraOgMed = this.periode.fomDato,
+        tilOgMed = this.periode.tomDato,
+        periode = this.periode,
         beløp = this.beløp
     )
 

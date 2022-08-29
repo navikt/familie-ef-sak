@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class BehandlingStegSpringTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingSteg: List<BehandlingSteg<*>>
+    @Autowired
+    lateinit var behandlingSteg: List<BehandlingSteg<*>>
 
     @Test
     internal fun `skal ikke finnes fler enn ett BehandlingSteg per StegType`() {

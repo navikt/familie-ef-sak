@@ -34,7 +34,8 @@ internal class TotrinnskontrollServiceTest {
     private val tilgangService = mockk<TilgangService>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
-    private val totrinnskontrollService = TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService, validerOmregningService)
+    private val totrinnskontrollService =
+        TotrinnskontrollService(behandlingshistorikkService, behandlingService, tilgangService, validerOmregningService)
 
     @BeforeEach
     internal fun setUp() {

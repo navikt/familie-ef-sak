@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
+import no.nav.familie.ef.sak.journalføring.JournalføringTestUtil
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
@@ -94,6 +95,7 @@ internal class JournalføringServiceTest {
     private val dokumentTitler = hashMapOf("12345" to "Asbjørns skilsmissepapirer", "23456" to "Eiriks samværsdokument")
     private val dokumentInfoIdMedJsonVerdi = "12345"
     private val journalpost = Journalpost(
+        avsenderMottaker = JournalføringTestUtil.avsenderMottaker,
         journalpostId = journalpostId,
         journalposttype = Journalposttype.I,
         journalstatus = Journalstatus.MOTTATT,
@@ -139,7 +141,7 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
-        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any()) } just Runs
+        every { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any()) } just Runs
 
         every { behandlingService.hentBehandling(behandlingId) }
             .returns(

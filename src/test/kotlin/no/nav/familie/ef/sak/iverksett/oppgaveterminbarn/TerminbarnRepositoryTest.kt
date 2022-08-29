@@ -23,9 +23,14 @@ import java.util.UUID
 
 class TerminbarnRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var terminbarnRepository: TerminbarnRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var barnRepository: BarnRepository
+    @Autowired
+    private lateinit var terminbarnRepository: TerminbarnRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
 
     @Test
     internal fun `to av tre utgåtte terminbarn, forvent to treff`() {

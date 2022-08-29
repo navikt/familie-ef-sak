@@ -46,14 +46,14 @@ class SimuleringUtilTest {
 
         val sammenhengendePerioderMedFeilutbetaling = simuleringsoppsummering.hentSammenhengendePerioderMedFeilutbetaling()
         Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling).hasSize(3)
-        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.first().fom).isEqualTo(januarStart)
-        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.first().tom).isEqualTo(aprilSlutt)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.first().fomDato).isEqualTo(januarStart)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.first().tomDato).isEqualTo(aprilSlutt)
 
-        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.second().fom).isEqualTo(juniStart)
-        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.second().tom).isEqualTo(augustSlutt)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.second().fomDato).isEqualTo(juniStart)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.second().tomDato).isEqualTo(augustSlutt)
 
-        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.last().fom).isEqualTo(oktoberStart)
-        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.last().tom).isEqualTo(oktoberSlutt)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.last().fomDato).isEqualTo(oktoberStart)
+        Assertions.assertThat(sammenhengendePerioderMedFeilutbetaling.last().tomDato).isEqualTo(oktoberSlutt)
     }
 
     fun lagSimuleringsperiode(mnd: YearMonth, nyttBeløp: Int, tidligereUtbetalt: Int): Simuleringsperiode {

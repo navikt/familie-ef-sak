@@ -38,13 +38,13 @@ data class TilkjentYtelse(
     val samordningsfradragType: SamordningsfradragType? = null,
     val startdato: LocalDate,
     @Column("grunnbelopsdato")
-    val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.fraOgMedDato,
+    val grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
 ) {
 
     fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
-        .filter { andel -> andel.stønadTom < fom || (andel.erStønadOverlappende(fom)) }
+        .filter { andel -> andel.stønadTom < fom || andel.stønadFom < fom }
         .map { andel ->
             if (andel.erStønadOverlappende(fom)) {
                 andel.copy(stønadTom = fom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))

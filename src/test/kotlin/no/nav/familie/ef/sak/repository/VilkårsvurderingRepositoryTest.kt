@@ -17,8 +17,11 @@ import java.util.UUID
 
 internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingId() {

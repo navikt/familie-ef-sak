@@ -11,8 +11,11 @@ import java.time.LocalDate
 
 internal class MellomlagringBrevRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var mellomlagerBrevRepository: MellomlagerBrevRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var mellomlagerBrevRepository: MellomlagerBrevRepository
 
     @Test
     internal fun `skal lagre mellomlagret brev`() {

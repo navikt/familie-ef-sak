@@ -148,7 +148,7 @@ class TilkjentYtelseServiceTest {
 
         @Test
         internal fun `skal returnere false hvis det finnes andel mer sluttdato før idag`() {
-            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusDays(1))
+            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusMonths(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse

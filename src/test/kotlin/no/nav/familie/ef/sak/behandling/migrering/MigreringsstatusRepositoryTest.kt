@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class MigreringsstatusRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var migreringsstatusRepository: MigreringsstatusRepository
+    @Autowired
+    lateinit var migreringsstatusRepository: MigreringsstatusRepository
 
     @Test
     internal fun `skal finne status for identene man sender inn`() {

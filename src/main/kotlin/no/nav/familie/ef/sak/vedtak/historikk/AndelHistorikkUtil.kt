@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
-import no.nav.familie.ef.sak.felles.util.harPåfølgendeMåned
-
 object AndelHistorikkUtil {
 
     fun List<AndelHistorikkDto>.slåSammen(harSammeVerdi: (AndelHistorikkDto, AndelHistorikkDto) -> Boolean): List<AndelHistorikkDto> {
@@ -9,7 +7,7 @@ object AndelHistorikkUtil {
             val last = acc.lastOrNull()
             if (last != null && harSammeVerdi(last, entry)) {
                 acc.removeLast()
-                acc.add(last.copy(andel = last.andel.copy(stønadTil = entry.andel.stønadTil)))
+                acc.add(last.copy(andel = last.andel.copy(periode = last.andel.periode.copy(tom = entry.andel.periode.tom))))
             } else {
                 acc.add(entry)
             }
@@ -21,5 +19,5 @@ object AndelHistorikkUtil {
         first: AndelHistorikkDto,
         second: AndelHistorikkDto
     ) =
-        first.andel.stønadTil.harPåfølgendeMåned(second.andel.stønadFra)
+        first.andel.periode.påfølgesAv(second.andel.periode)
 }

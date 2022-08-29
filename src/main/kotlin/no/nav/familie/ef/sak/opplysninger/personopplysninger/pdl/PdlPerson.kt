@@ -203,6 +203,7 @@ enum class KontaktadresseType {
 
     @JsonProperty("Innland")
     INNLAND,
+
     @JsonProperty("Utland")
     UTLAND
 }

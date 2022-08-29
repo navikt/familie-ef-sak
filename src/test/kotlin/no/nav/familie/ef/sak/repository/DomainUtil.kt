@@ -22,9 +22,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -41,6 +43,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.math.BigDecimal
@@ -285,7 +288,7 @@ fun inntektsperiode(
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)
 ) =
-    Inntektsperiode(startDato, sluttDato, inntekt, samordningsfradrag)
+    Inntektsperiode(Månedsperiode(startDato, sluttDato), inntekt, samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
@@ -318,6 +321,7 @@ fun vedtaksperiodeDto(
     VedtaksperiodeDto(
         årMånedFra = årMånedFra,
         årMånedTil = årMånedTil,
+        periode = Månedsperiode(årMånedFra, årMånedTil),
         aktivitet = aktivitet,
         periodeType = periodeType
     )
@@ -341,14 +345,14 @@ fun behandlingBarn(
     )
 }
 
-fun barnMedIdent(fnr: String, navn: String): BarnMedIdent =
+fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate.now())): BarnMedIdent =
     BarnMedIdent(
         adressebeskyttelse = emptyList(),
         bostedsadresse = emptyList(),
         deltBosted = emptyList(),
         dødsfall = emptyList(),
         forelderBarnRelasjon = emptyList(),
-        fødsel = emptyList(),
+        fødsel = listOf(fødsel),
         navn = Navn(
             fornavn = navn.split(" ")[0],
             mellomnavn = null,
