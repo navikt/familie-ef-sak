@@ -72,7 +72,7 @@ class NyeBarnService(
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): BehandlingBarnDto {
         val kobledeBarn = finnKobledeBarnSidenGjeldendeBehandling(fagsakId)
         val nyeBarn = filtrerNyeBarn(kobledeBarn)
-        return BehandlingBarnDto(nyeBarn, kobledeBarn.kobledeBarn.isNotEmpty()) // TODO koblede barn her kan være at man har et terminbarn fra før som nå er et født barn
+        return BehandlingBarnDto(nyeBarn, kobledeBarn.kobledeBarn.isNotEmpty())
     }
 
     private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData {
