@@ -19,7 +19,6 @@ class BeregningBarnetilsynService {
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
         tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
     ): List<BeløpsperiodeBarnetilsynDto> {
-
         validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
@@ -37,7 +36,6 @@ class BeregningBarnetilsynService {
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
         tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
     ) {
-
         brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
         brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000 }) { "Utgifter på mer enn 40000 støttes ikke" }
 
@@ -58,7 +56,6 @@ class BeregningBarnetilsynService {
         kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
         tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>
     ) {
-
         val utgiftsperioder = utgiftsperioderDto.tilPerioder()
         val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
         val tilleggsstønadsperioder = tilleggsstønadsperioderDto.tilPerioder()

@@ -27,7 +27,7 @@ class TilkjentYtelseServiceTest {
     private val tilkjentYtelseService = TilkjentYtelseService(
         behandlingService,
         tilkjentYtelseRepository,
-        fagsakService,
+        fagsakService
     )
 
     private val fagsak = fagsak(setOf(PersonIdent("321")))
@@ -46,7 +46,6 @@ class TilkjentYtelseServiceTest {
 
         @Test
         internal fun `deler opp kall mot service i bolker`() {
-
             val fagsaker = (1..PdlClient.MAKS_ANTALL_IDENTER + 10)
                 .map { fagsak(setOf(PersonIdent("$it"))) }
             val behandlinger = fagsaker.map { behandling(fagsak = it) }

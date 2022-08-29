@@ -90,7 +90,6 @@ class IverksettingDtoMapper(
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
-
         val saksbehandler =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(
                 saksbehandling.id,

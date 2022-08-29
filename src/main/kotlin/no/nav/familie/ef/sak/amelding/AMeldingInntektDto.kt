@@ -37,7 +37,7 @@ data class InntektDto(
     val kategori: String?,
     val opptjeningsland: String? = null,
     val opptjeningsperiodeFom: LocalDate? = null,
-    val opptjeningsperiodeTom: LocalDate? = null,
+    val opptjeningsperiodeTom: LocalDate? = null
 )
 
 enum class InntektType {

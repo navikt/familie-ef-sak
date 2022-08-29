@@ -68,7 +68,7 @@ object PdlTestdataHelper {
         innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
         utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList(),
         vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt> = emptyList(),
-        folkeregisteridentifikator: List<Folkeregisteridentifikator> = emptyList(),
+        folkeregisteridentifikator: List<Folkeregisteridentifikator> = emptyList()
     ) =
         PdlSøker(
             adressebeskyttelse,

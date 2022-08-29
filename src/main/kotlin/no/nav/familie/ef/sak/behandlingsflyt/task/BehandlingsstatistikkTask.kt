@@ -40,7 +40,6 @@ import java.util.UUID
     taskStepType = BehandlingsstatistikkTask.TYPE,
     beskrivelse = "Sender behandlingsstatistikk til iverksett"
 )
-
 class BehandlingsstatistikkTask(
     private val iverksettClient: IverksettClient,
     private val behandlingService: BehandlingService,
@@ -72,10 +71,16 @@ class BehandlingsstatistikkTask(
             behandlingId = behandlingId,
             eksternBehandlingId = saksbehandling.eksternId,
             personIdent = saksbehandling.ident,
-            gjeldendeSaksbehandlerId = if (erAutomatiskGOmregning) "VL"
-            else finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler),
-            beslutterId = if (hendelse.erBesluttetEllerFerdig()) vedtak?.beslutterIdent
-            else null,
+            gjeldendeSaksbehandlerId = if (erAutomatiskGOmregning) {
+                "VL"
+            } else {
+                finnSaksbehandler(hendelse, vedtak, gjeldendeSaksbehandler)
+            },
+            beslutterId = if (hendelse.erBesluttetEllerFerdig()) {
+                vedtak?.beslutterIdent
+            } else {
+                null
+            },
             eksternFagsakId = saksbehandling.eksternFagsakId,
             hendelseTidspunkt = hendelseTidspunkt.atZone(zoneIdOslo),
             behandlingOpprettetTidspunkt = saksbehandling.opprettetTid.atZone(zoneIdOslo),

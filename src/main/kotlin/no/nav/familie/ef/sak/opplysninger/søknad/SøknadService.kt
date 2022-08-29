@@ -25,7 +25,7 @@ class SøknadService(
     private val søknadRepository: SøknadRepository,
     private val søknadOvergangsstønadRepository: SøknadOvergangsstønadRepository,
     private val søknadSkolepengerRepository: SøknadSkolepengerRepository,
-    private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository,
+    private val søknadBarnetilsynRepository: SøknadBarnetilsynRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)

@@ -13,7 +13,6 @@ import java.util.UUID
     taskStepType = PubliserVedtakshendelseTask.TYPE,
     beskrivelse = "Sender hendelse om vedtak"
 )
-
 class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

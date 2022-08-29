@@ -216,7 +216,6 @@ object SøknadsskjemaMapper {
     }?.toSet() ?: emptySet()
 
     private fun tilDomene(datoperiode: KontraktDatoperiode?): Datoperiode? {
-
         return datoperiode?.let {
             Datoperiode(it.fra, it.til)
         }

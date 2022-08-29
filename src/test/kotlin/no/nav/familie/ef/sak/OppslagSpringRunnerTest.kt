@@ -151,7 +151,7 @@ abstract class OppslagSpringRunnerTest {
             FagsakPerson::class,
             TaskLogg::class,
             Task::class,
-            Migreringsstatus::class,
+            Migreringsstatus::class
 
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }

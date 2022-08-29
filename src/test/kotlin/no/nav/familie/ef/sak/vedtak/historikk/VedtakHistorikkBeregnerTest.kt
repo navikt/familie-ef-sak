@@ -96,7 +96,8 @@ internal class VedtakHistorikkBeregnerTest {
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(
-            vedtaksperioderPerBehandling, andreVedtak.behandlingId,
+            vedtaksperioderPerBehandling,
+            andreVedtak.behandlingId,
             listOf(
                 førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
                     .tilHistorikk()
@@ -148,7 +149,7 @@ internal class VedtakHistorikkBeregnerTest {
         Månedsperiode(this.datoFra, this.datoTil),
         sanksjonsårsak = null,
         this.aktivitet,
-        this.periodeType,
+        this.periodeType
     )
 
     private fun lagVedtak(

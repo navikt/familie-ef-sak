@@ -167,7 +167,6 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `skal lage brev med innlogget beslutterident beslutterident `() {
-
         val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterident = "tilfeldigvisFeilIdent")
         val brevSlot = slot<Vedtaksbrev>()
@@ -269,7 +268,6 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     fun `Skal lage pdf gitt html fra familie-brev`() {
-
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
 
         val html = "html"

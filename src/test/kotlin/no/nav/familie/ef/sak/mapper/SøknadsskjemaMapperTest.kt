@@ -32,7 +32,6 @@ internal class SøknadsskjemaMapperTest {
 
     @Test
     internal fun `skal mappe samboer fødselsdato`() {
-
         val nyPerson = TestsøknadBuilder.Builder().defaultPersonMinimum(fødselsdato = LocalDate.now())
         val søknad = TestsøknadBuilder.Builder().setBosituasjon(samboerdetaljer = nyPerson).build().søknadOvergangsstønad
 
@@ -46,7 +45,7 @@ internal class SøknadsskjemaMapperTest {
         val barn = TestsøknadBuilder.Builder()
             .defaultBarn()
             .copy(
-                skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker),
+                skalBarnetBoHosSøker = Søknadsfelt("", "", null, svarSkalBarnetBoHosSøker)
             )
         val søknad = TestsøknadBuilder.Builder()
             .build().søknadOvergangsstønad.copy(barn = Søknadsfelt("", listOf(barn)))

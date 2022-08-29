@@ -25,7 +25,6 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 120L,
     beskrivelse = "Sjekker status for migrert sak"
 )
-
 class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

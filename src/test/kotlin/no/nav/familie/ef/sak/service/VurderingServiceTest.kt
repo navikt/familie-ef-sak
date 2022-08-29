@@ -291,7 +291,6 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `Skal returnere aktivitet i historikk`() {
-
         val vilkårsvurderingList = VilkårType.hentVilkårForStønad(BARNETILSYN).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,

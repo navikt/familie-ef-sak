@@ -61,7 +61,8 @@ internal class GrunnlagsdataServiceTest {
         grunnlagsdataRepository = grunnlagsdataRepository,
         søknadService = søknadService,
         grunnlagsdataRegisterService = grunnlagsdataRegisterService,
-        behandlingService = behandlingService, mockk()
+        behandlingService = behandlingService,
+        mockk()
     )
 
     @BeforeEach

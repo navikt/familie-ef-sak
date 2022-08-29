@@ -27,10 +27,13 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var stegService: StegService
+
     @Autowired
     lateinit var fagsakRepository: FagsakRepository
+
     @Autowired
     lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
+
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 

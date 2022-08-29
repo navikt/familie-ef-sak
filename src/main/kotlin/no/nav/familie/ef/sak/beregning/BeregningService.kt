@@ -11,7 +11,6 @@ import java.math.BigDecimal
 class BeregningService {
 
     fun beregnYtelse(vedtaksperioder: List<Månedsperiode>, inntektsperioder: List<Inntektsperiode>): List<Beløpsperiode> {
-
         validerInnteksperioder(inntektsperioder, vedtaksperioder)
         validerVedtaksperioder(vedtaksperioder)
 

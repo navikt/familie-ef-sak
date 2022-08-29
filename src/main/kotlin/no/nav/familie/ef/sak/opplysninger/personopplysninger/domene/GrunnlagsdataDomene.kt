@@ -64,7 +64,7 @@ data class Søker(
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
     val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>,
-    val folkeregisteridentifikator: List<Folkeregisteridentifikator>?,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>?
 )
 
 data class AnnenForelderMedIdent(
@@ -86,7 +86,7 @@ data class BarnMedIdent(
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val fødsel: List<Fødsel>,
     val navn: Navn,
-    val personIdent: String,
+    val personIdent: String
 )
 
 data class ForelderBarnRelasjon(

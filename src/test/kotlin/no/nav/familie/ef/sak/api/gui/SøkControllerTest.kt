@@ -29,8 +29,10 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var fagsakRepository: FagsakRepository
+
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
     @Autowired
     private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 

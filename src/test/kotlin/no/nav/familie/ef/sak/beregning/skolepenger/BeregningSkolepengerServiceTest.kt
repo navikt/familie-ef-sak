@@ -130,7 +130,7 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `overlappende skoleår er ikke gyldig`() {
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift())),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift()))
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -142,7 +142,7 @@ internal class BeregningSkolepengerServiceTest {
         internal fun `utgifter med samme ider er ikke gyldig`() {
             val utgift = utgift()
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift)),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift))
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -156,7 +156,7 @@ internal class BeregningSkolepengerServiceTest {
             val delårsperiode2 =
                 delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift()))
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -300,7 +300,7 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(revurderingsperioder, revurdering.id) }
                 .isInstanceOf(Feil::class.java) // denne skal ikke være brukerfeil (ApiFeil)
                 .hasMessageContaining(
-                    "Utgiftsperiode er endret for skoleår=21/22 id=${utgift.id} er endret",
+                    "Utgiftsperiode er endret for skoleår=21/22 id=${utgift.id} er endret"
                 )
         }
     }
