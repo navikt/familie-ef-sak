@@ -20,6 +20,7 @@ data class FinnOppgaveRequestDto(
     val fristTom: LocalDate? = null,
     val enhetsmappe: Long? = null,
     val mappeId: Long? = null,
+    val erUtenMappe : Boolean? = null,
     val ident: String?
 ) {
 
@@ -30,6 +31,7 @@ data class FinnOppgaveRequestDto(
                 .find { it.value == this.behandlingstema } else null,
             oppgavetype = if (this.oppgavetype != null) Oppgavetype.values()
                 .find { it.value == this.oppgavetype } else null,
+            erUtenMappe = this.erUtenMappe,
             enhet = this.enhet,
             saksbehandler = this.saksbehandler,
             aktørId = aktørid,
