@@ -26,8 +26,8 @@ import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeB
 import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -62,7 +62,7 @@ class JournalføringService(
     private val behandlingService: BehandlingService,
     private val søknadService: SøknadService,
     private val fagsakService: FagsakService,
-    private val pdlClient: PdlClient,
+    private val vurderingService: VurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val iverksettService: IverksettService,
     private val taskRepository: TaskRepository,
@@ -257,7 +257,25 @@ class JournalføringService(
             barnSomSkalFødes = barnSomSkalFødes,
             vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn
         )
+        kopierVurderingerForEttersendingPåNyBehandling(ustrukturertDokumentasjonType, behandling, fagsak)
         return behandling
+    }
+
+    private fun kopierVurderingerForEttersendingPåNyBehandling(
+        ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
+        behandling: Behandling,
+        fagsak: Fagsak
+    ) {
+        val erEttersending = ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING
+        if (erEttersending && behandling.forrigeBehandlingId != null) {
+            val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
+            vurderingService.kopierVurderingerTilNyBehandling(
+                behandling.forrigeBehandlingId,
+                behandling.id,
+                metadata,
+                fagsak.stønadstype
+            )
+        }
     }
 
     private fun validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak: Fagsak) {
