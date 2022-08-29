@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandling.dto.BehandlingBarnDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
@@ -35,11 +36,21 @@ class BarnController(
         return Ressurs.success(nyeBarnService.finnNyeEllerTidligereFødteBarn(personIdent))
     }
 
+    @Deprecated("Bruk endepunkt uten nye-barn for å få mer metadata til nye barn", ReplaceWith("barnForFagsak"))
     @GetMapping("fagsak/{fagsakId}/nye-barn")
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(
         @PathVariable("fagsakId")
         fagsakId: UUID
     ): Ressurs<List<BarnMinimumDto>> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId).nyeBarn)
+    }
+
+    @GetMapping("fagsak/{fagsakId}")
+    fun nyeBarnSidenForrigeBehandling(
+        @PathVariable("fagsakId")
+        fagsakId: UUID
+    ): Ressurs<BehandlingBarnDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId))
     }
