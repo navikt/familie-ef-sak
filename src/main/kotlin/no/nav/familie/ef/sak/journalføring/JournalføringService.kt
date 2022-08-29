@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
@@ -190,6 +191,12 @@ class JournalføringService(
         } else {
             brukerfeilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT) {
                 "Må sende inn dokumentasjonstype når journalposten mangler digital søknad"
+            }
+            feilHvis(
+                ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
+                    !featureToggleService.isEnabled(Toggle.FRONTEND_JOURNALFØRING_ETTERSENDING_NY_BEHANDLING)
+            ) {
+                "Featuretoggle for ettersending på ny behandling er ikke aktivert"
             }
         }
     }
