@@ -58,6 +58,29 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(findByTypeAndAlderIsNotNull.size).isEqualTo(1)
     }
 
+    @Test
+    fun `barn har blitt mer enn 6 mnd, skal ikke opprette og lagre oppgave fordi behandling er ikke iverksatt`() {
+        val fødselsdato = LocalDate.now().minusDays(183)
+
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, BehandlingStatus.OPPRETTET, resultat = BehandlingResultat.INNVILGET))
+
+        val barnPersonIdent = FnrGenerator.generer(fødselsdato)
+        barnRepository.insert(BehandlingBarn(behandlingId = behandling.id, personIdent = barnPersonIdent))
+
+        vedtakRepository.insert(vedtak(behandling.id))
+        lagreFremtidligAndel(behandling, 4000)
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
+
+        val findByTypeAndAlderIsNotNull = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
+        assertThat(findByTypeAndAlderIsNotNull.isEmpty()).isTrue
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
+        assertThat(findByTypeAndAlderIsNotNull.isEmpty()).isTrue
+    }
+
+
     private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
         val andel = lagAndelTilkjentYtelse(
             beløp = beløp,
