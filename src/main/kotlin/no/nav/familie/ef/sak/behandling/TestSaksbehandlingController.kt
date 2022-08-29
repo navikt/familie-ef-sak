@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -93,8 +94,7 @@ class TestSaksbehandlingController(
                 behandling.id,
                 fagsak.id,
                 grunnlagsdata.grunnlagsdata.barn,
-                fagsak.stønadstype,
-                behandling.årsak
+                fagsak.stønadstype
             )
             behandlingshistorikkService.opprettHistorikkInnslag(
                 Behandlingshistorikk(

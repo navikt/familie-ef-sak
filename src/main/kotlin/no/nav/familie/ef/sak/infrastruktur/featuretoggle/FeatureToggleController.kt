@@ -19,6 +19,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.MIGRERING,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN,
+        Toggle.FRONTEND_JOURNALFØRING_ETTERSENDING_NY_BEHANDLING,
         Toggle.SKOLEPENGER,
         Toggle.SKOLEPENGER_OPPHØR,
         Toggle.FRONTEND_SKOLEPENGER_REVURDERING,
