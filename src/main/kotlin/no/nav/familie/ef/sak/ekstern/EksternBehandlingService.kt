@@ -19,7 +19,7 @@ class EksternBehandlingService(
     val behandlingService: BehandlingService,
     val fagsakService: FagsakService,
     val personService: PersonService,
-    val infotrygdService: InfotrygdService,
+    val infotrygdService: InfotrygdService
 ) {
 
     fun harLøpendeStønad(personidenter: Set<String>): Boolean {
@@ -42,16 +42,17 @@ class EksternBehandlingService(
         val allePersonIdenter = personService.hentPersonIdenter(ident).identer.map { it.ident }.toSet()
         val fagsak = fagsakService.finnFagsak(allePersonIdenter, type)
 
-        val harIngenReelleBehandlinger = fagsak?.let { harIngenReelleBehandlinger(it) } ?: true
-        val harIngenInnslagIInfotrygd = !infotrygdService.eksisterer(ident, setOf(type))
-
-        return harIngenReelleBehandlinger && harIngenInnslagIInfotrygd
+        return harIngenReelleBehandlinger(fagsak) && harIngenInnslagIInfotrygd(ident, type)
     }
 
-    fun harIngenReelleBehandlinger(fagsak: Fagsak): Boolean {
-        val reelleBehandlinger = behandlingService.hentBehandlinger(fagsak.id)
-            .filter { it.resultat != BehandlingResultat.HENLAGT }
+    private fun harIngenInnslagIInfotrygd(
+        ident: String,
+        type: StønadType
+    ) = !infotrygdService.eksisterer(ident, setOf(type))
 
-        return reelleBehandlinger.isEmpty()
+    private fun harIngenReelleBehandlinger(fagsak: Fagsak?): Boolean {
+        return fagsak?.let {
+            behandlingService.hentBehandlinger(fagsak.id).none { it.resultat != BehandlingResultat.HENLAGT }
+        } ?: true
     }
 }

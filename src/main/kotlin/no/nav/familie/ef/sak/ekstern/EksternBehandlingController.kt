@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.ekstern
 
+import no.nav.familie.ef.sak.felles.util.FnrUtil
+import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -53,12 +55,7 @@ class EksternBehandlingController(
         if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
             throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
         }
-        if (personIdent.ident.isEmpty()) {
-            return Ressurs.failure("Mangler personident")
-        }
-        if (personIdent.ident.length != 11) {
-            return Ressurs.failure("Ugyldig antall tegn på personIdent")
-        }
+        validerIdent(personIdent.ident)
         return Ressurs.success(eksternBehandlingService.kanOppretteFørstegangsbehandling(personIdent.ident, type))
     }
 }
