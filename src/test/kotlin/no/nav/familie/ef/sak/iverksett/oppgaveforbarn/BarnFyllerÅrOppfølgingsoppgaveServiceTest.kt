@@ -1,10 +1,8 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
@@ -54,7 +52,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(any()) } returns listOf(
             Arbeidsfordelingsenhet("enhetId", "enhetNavn")
         )
-        every { oppgaveClient.leggOppgaveIMappe(any()) } just runs
+        every { oppgaveService.finnHendelseMappeId(any()) } returns 1
         every { oppgaveClient.opprettOppgave(any()) } returns 1
         every { oppgaveRepository.insert(capture(oppgaveSlot)) } returns oppgaveMock
         every { oppgaveRepository.findByTypeAndAlderIsNotNull(any()) } returns emptyList()

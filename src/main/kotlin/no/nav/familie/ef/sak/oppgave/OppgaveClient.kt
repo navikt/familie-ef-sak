@@ -84,27 +84,6 @@ class OppgaveClient(
         pakkUtRespons(respons, uri, "ferdigstillOppgave")
     }
 
-    fun leggOppgaveIMappe(oppgaveId: Long) {
-
-        val oppgave = finnOppgaveMedId(oppgaveId)
-        if (oppgave.tildeltEnhetsnr == EF_ENHETNUMMER) { // Skjermede personer skal ikke puttes i mappe
-            val finnMappeRequest = FinnMappeRequest(
-                listOf(),
-                oppgave.tildeltEnhetsnr ?: error("Fikk ikke tildelt enhetsnummer for oppgave med id: $oppgaveId"),
-                null,
-                1000
-            )
-            val mapperResponse = finnMapper(finnMappeRequest)
-            val mappe = mapperResponse.mapper.find {
-                it.navn.contains("EF Sak", true) &&
-                    it.navn.contains("Hendelser") &&
-                    it.navn.contains("62")
-            }
-                ?: error("Fant ikke mappe for hendelser")
-            oppdaterOppgave(oppgave.copy(mappeId = mappe.id.toLong()))
-        }
-    }
-
     fun oppdaterOppgave(oppgave: Oppgave): Long {
         val response = patchForEntity<Ressurs<OppgaveResponse>>(
             URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),

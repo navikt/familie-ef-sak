@@ -90,7 +90,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             if (!finnesOppgave && opprettOppgaveForEksternId != null) {
                 val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
                 val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgaveRequest)
-                oppgaveClient.leggOppgaveIMappe(opprettetOppgaveId)
                 val oppgave = Oppgave(
                     gsakOppgaveId = opprettetOppgaveId,
                     behandlingId = gjeldendeBarn.behandlingId,
@@ -106,8 +105,11 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private fun lagOppgaveRequestForOppfølgingAvBarnFyltÅr(
         opprettOppgaveForEksternId: OpprettOppgaveForBarn,
         barnTilOppgave: BarnTilOppgave
-    ) =
-        OpprettOppgaveRequest(
+    ): OpprettOppgaveRequest {
+        val enhetsnummer = personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(
+            opprettOppgaveForEksternId.fødselsnummerSøker
+        ).first().enhetId
+        return OpprettOppgaveRequest(
             ident = OppgaveIdentV2(
                 ident = opprettOppgaveForEksternId.fødselsnummerSøker,
                 gruppe = IdentGruppe.FOLKEREGISTERIDENT
@@ -117,13 +119,13 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             oppgavetype = Oppgavetype.InnhentDokumentasjon,
             fristFerdigstillelse = oppgaveService.lagFristForOppgave(LocalDateTime.now()),
             beskrivelse = opprettOppgaveForEksternId.alder.oppgavebeskrivelse,
-            enhetsnummer = personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(
-                opprettOppgaveForEksternId.fødselsnummerSøker
-            ).first().enhetId,
+            enhetsnummer = enhetsnummer,
             behandlingstema = Behandlingstema.Overgangsstønad.value,
             tilordnetRessurs = null,
-            behandlesAvApplikasjon = "familie-ef-sak"
+            behandlesAvApplikasjon = "familie-ef-sak",
+            mappeId = oppgaveService.finnHendelseMappeId(enhetsnummer)
         )
+    }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? {
         return barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
