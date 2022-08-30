@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Locale
 
 @Service
 class BarnFyllerÅrOppfølgingsoppgaveService(
@@ -121,18 +120,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             enhetsnummer = personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(
                 opprettOppgaveForEksternId.fødselsnummerSøker
             ).first().enhetId,
-            behandlingstema = opprettBehandlingstema(StønadType.OVERGANGSSTØNAD).value,
+            behandlingstema = Behandlingstema.Overgangsstønad.value,
             tilordnetRessurs = null,
             behandlesAvApplikasjon = "familie-ef-sak"
         )
-
-    fun opprettBehandlingstema(stønadstype: StønadType): Behandlingstema {
-        return Behandlingstema
-            .fromValue(
-                stønadstype.name.lowercase(Locale.getDefault())
-                    .replaceFirstChar { it.uppercase() }
-            )
-    }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? {
         return barnTilUtplukkForOppgave.fødselsnummerBarn?.let {
