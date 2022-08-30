@@ -109,7 +109,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     ) =
         OpprettOppgaveRequest(
             ident = OppgaveIdentV2(
-                ident = opprettOppgaveForEksternId.fødselsnummer,
+                ident = opprettOppgaveForEksternId.fødselsnummerSøker,
                 gruppe = IdentGruppe.FOLKEREGISTERIDENT
             ),
             saksId = barnTilOppgave.eksternFagsakId.toString(),
