@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.dto.BehandlingBarnDto
 import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtBarnTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -68,9 +69,10 @@ class NyeBarnService(
         }
     }
 
-    fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): List<BarnMinimumDto> {
+    fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): BehandlingBarnDto {
         val kobledeBarn = finnKobledeBarnSidenGjeldendeBehandling(fagsakId)
-        return filtrerNyeBarn(kobledeBarn)
+        val nyeBarn = filtrerNyeBarn(kobledeBarn)
+        return BehandlingBarnDto(nyeBarn, kobledeBarn.kobledeBarn.isNotEmpty())
     }
 
     private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData {

@@ -1817,7 +1817,7 @@ internal class BeregnYtelseStegTest {
             endring = null,
             aktivitetArbeid = null,
             erSanksjon = true,
-            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
         )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =

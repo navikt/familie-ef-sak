@@ -73,7 +73,6 @@ class TestSaksbehandlingController(
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
-
         val personIdent = testFagsakRequest.personIdent
         val søknadBuilder = lagSøknad(personIdent)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
@@ -93,8 +92,7 @@ class TestSaksbehandlingController(
                 behandling.id,
                 fagsak.id,
                 grunnlagsdata.grunnlagsdata.barn,
-                fagsak.stønadstype,
-                behandling.årsak
+                fagsak.stønadstype
             )
             behandlingshistorikkService.opprettHistorikkInnslag(
                 Behandlingshistorikk(
@@ -122,7 +120,6 @@ class TestSaksbehandlingController(
     }
 
     private fun lagBarnetilsynBehandling(søknadBarnetilsyn: SøknadBarnetilsyn, fagsak: Fagsak): Behandling {
-
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
@@ -139,7 +136,6 @@ class TestSaksbehandlingController(
     }
 
     private fun lagSkolepengerBehandling(søknadSkolepenger: SøknadSkolepenger, fagsak: Fagsak): Behandling {
-
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
@@ -175,7 +171,7 @@ class TestSaksbehandlingController(
                     .defaultPersonMinimum(
                         navn = "Fyren som skal bli min samboer",
                         fødselsdato = LocalDate.of(1979, 9, 17)
-                    ),
+                    )
             )
             .build()
     }
@@ -194,7 +190,7 @@ class TestSaksbehandlingController(
                     bosattINorge = false,
                     land = "Sverige",
                     personMinimum = TestsøknadBuilder.Builder()
-                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17))
                 ),
                 samvær = TestsøknadBuilder.Builder().defaultSamvær(
                     beskrivSamværUtenBarn = "Har sjelden sett noe til han",
@@ -246,7 +242,9 @@ class TestSaksbehandlingController(
             listOf(
                 Dokument(
                     "TEST".toByteArray(),
-                    Filtype.PDFA, null, null,
+                    Filtype.PDFA,
+                    null,
+                    null,
                     Dokumenttype.OVERGANGSSTØNAD_SØKNAD
                 )
             ),

@@ -276,7 +276,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 HovedregelMetadata(
                     søknad.sivilstand,
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
-                    barn = barn, søktOmBarnetilsyn = emptyList()
+                    barn = barn,
+                    søktOmBarnetilsyn = emptyList()
                 )
             )
         vilkårsvurderingRepository.insertAll(

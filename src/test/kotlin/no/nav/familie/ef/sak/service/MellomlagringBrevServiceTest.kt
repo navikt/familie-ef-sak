@@ -47,7 +47,6 @@ internal class MellomlagringBrevServiceTest {
 
     @Test
     fun `hentOgValiderMellomlagretBrev skal returnere mellomlagret brev`() {
-
         every { mellomlagerBrevRepository.findByIdOrNull(behandlingId) } returns mellomlagretBrev
 
         assertThat(

@@ -21,7 +21,7 @@ import java.util.UUID
 class SimuleringController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
-    private val simuleringService: SimuleringService,
+    private val simuleringService: SimuleringService
 ) {
 
     @GetMapping("/{behandlingId}")

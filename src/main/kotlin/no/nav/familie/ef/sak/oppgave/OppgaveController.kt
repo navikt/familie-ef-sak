@@ -116,7 +116,6 @@ class OppgaveController(
 
 private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
     val oppgaver = oppgaver.map {
-
         it.tilDto()
     }
     return OppgaveResponseDto(antallTreffTotalt, oppgaver)

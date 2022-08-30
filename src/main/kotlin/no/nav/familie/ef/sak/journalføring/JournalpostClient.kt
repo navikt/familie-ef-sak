@@ -110,7 +110,8 @@ class JournalpostClient(
     fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest, saksbehandler: String?): ArkiverDokumentResponse {
         return postForEntity<Ressurs<ArkiverDokumentResponse>>(
             URI.create("$dokarkivUri/v4/"),
-            arkiverDokumentRequest, headerMedSaksbehandler(saksbehandler)
+            arkiverDokumentRequest,
+            headerMedSaksbehandler(saksbehandler)
         ).data
             ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
     }
@@ -118,7 +119,8 @@ class JournalpostClient(
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String, saksbehandler: String?) {
         val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
             URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
-            "", headerMedSaksbehandler(saksbehandler)
+            "",
+            headerMedSaksbehandler(saksbehandler)
         )
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {

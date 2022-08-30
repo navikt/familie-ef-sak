@@ -9,7 +9,6 @@ internal class GrunnbeløpstestTest {
 
     @Test
     internal fun `skal sette riktig startdato og sluttdato når beløpsperioder går over flere grunnbeløpsperioder`() {
-
         val perioder = finnGrunnbeløpsPerioder(Månedsperiode(LocalDate.of(2001, 1, 1), LocalDate.of(2021, 8, 31)))
         assertThat(perioder.size).isEqualTo(22)
         perioder.forEachIndexed { index, beløpsperiode ->

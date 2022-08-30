@@ -33,10 +33,13 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingService: BehandlingService
+
     @Autowired
     lateinit var fagsakService: FagsakService
+
     @Autowired
     lateinit var grunnlagsdataService: GrunnlagsdataService
+
     @Autowired
     lateinit var søknadService: SøknadService
 

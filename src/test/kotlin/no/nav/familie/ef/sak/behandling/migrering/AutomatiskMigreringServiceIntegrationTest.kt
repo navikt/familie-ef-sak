@@ -19,12 +19,16 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
 
     @Autowired
     private lateinit var iverksettClient: IverksettClient
+
     @Autowired
     private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+
     @Autowired
     private lateinit var migreringsstatusRepository: MigreringsstatusRepository
+
     @Autowired
     private lateinit var automatiskMigreringService: AutomatiskMigreringService
+
     @Autowired
     private lateinit var fagsakPersonRepository: FagsakPersonRepository
 

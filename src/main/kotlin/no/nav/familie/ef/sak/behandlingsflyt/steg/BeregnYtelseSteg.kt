@@ -209,16 +209,27 @@ class BeregnYtelseSteg(
     private fun validerStønadstype(saksbehandling: Saksbehandling, data: VedtakDto) {
         when (saksbehandling.stønadstype) {
             StønadType.OVERGANGSSTØNAD -> validerGyldigeVedtakstyper(
-                saksbehandling.stønadstype, data,
-                InnvilgelseOvergangsstønad::class, Avslå::class, Opphør::class, Sanksjonert::class
+                saksbehandling.stønadstype,
+                data,
+                InnvilgelseOvergangsstønad::class,
+                Avslå::class,
+                Opphør::class,
+                Sanksjonert::class
             )
             StønadType.BARNETILSYN -> validerGyldigeVedtakstyper(
-                saksbehandling.stønadstype, data,
-                InnvilgelseBarnetilsyn::class, Avslå::class, Opphør::class, Sanksjonert::class
+                saksbehandling.stønadstype,
+                data,
+                InnvilgelseBarnetilsyn::class,
+                Avslå::class,
+                Opphør::class,
+                Sanksjonert::class
             )
             StønadType.SKOLEPENGER -> validerGyldigeVedtakstyper(
-                saksbehandling.stønadstype, data,
-                InnvilgelseSkolepenger::class, Avslå::class, OpphørSkolepenger::class
+                saksbehandling.stønadstype,
+                data,
+                InnvilgelseSkolepenger::class,
+                Avslå::class,
+                OpphørSkolepenger::class
             )
         }
     }
@@ -278,7 +289,6 @@ class BeregnYtelseSteg(
         vedtak: InnvilgelseOvergangsstønad,
         saksbehandling: Saksbehandling
     ) {
-
         brukerfeilHvis(!saksbehandling.erOmregning && !vedtak.perioder.map { it.periode }.erSammenhengende()) {
             "Periodene må være sammenhengende"
         }
@@ -518,7 +528,8 @@ class BeregnYtelseSteg(
     ): List<AndelTilkjentYtelse> {
         val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
             vedtak.perioder.filterNot { it.erMidlertidigOpphør },
-            vedtak.perioderKontantstøtte, vedtak.tilleggsstønad.perioder
+            vedtak.perioderKontantstøtte,
+            vedtak.tilleggsstønad.perioder
         )
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
         return beløpsperioder
@@ -563,7 +574,6 @@ class BeregnYtelseSteg(
         beløpsperioder: List<BeløpsperiodeBarnetilsynDto>,
         vedtak: InnvilgelseBarnetilsyn
     ) {
-
         if (beløpsperioder.all { it.beregningsgrunnlag.kontantstøttebeløp >= it.beregningsgrunnlag.utgifter }) {
             brukerfeilHvis(vedtak.resultatType == ResultatType.INNVILGE) {
                 "Kontantstøttebeløp overstiger utgiftsbeløp for alle perioder - kan ikke innvilge. Husk å trykk Beregn før du lagrer vedtaket."
@@ -604,7 +614,6 @@ class BeregnYtelseSteg(
         opphørsperioder: List<Månedsperiode>
     ): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelser.map {
-
             val tilkjentPeriode = it.periode
             if (opphørsperioder.none { periode -> periode.overlapper(tilkjentPeriode) }) {
                 listOf(it)

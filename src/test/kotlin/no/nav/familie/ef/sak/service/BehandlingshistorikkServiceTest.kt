@@ -34,7 +34,6 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagre behandling og hent historikk`() {
-
         /** Lagre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
@@ -58,7 +57,6 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Finn hendelseshistorikk på behandling uten historikk`() {
-
         /** Lagre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))

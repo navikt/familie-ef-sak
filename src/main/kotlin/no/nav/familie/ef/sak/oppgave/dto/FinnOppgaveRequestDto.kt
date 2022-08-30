@@ -27,12 +27,18 @@ data class FinnOppgaveRequestDto(
     fun tilFinnOppgaveRequest(aktørid: String? = null): FinnOppgaveRequest =
         FinnOppgaveRequest(
             tema = Tema.ENF,
-            behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
-                .find { it.value == this.behandlingstema } else null,
-            oppgavetype = if (this.oppgavetype != null) Oppgavetype.values()
-                .find { it.value == this.oppgavetype } else null,
-            erUtenMappe = this.erUtenMappe,
+            behandlingstema = if (this.behandlingstema != null) {
+                Behandlingstema.values().find { it.value == this.behandlingstema }
+            } else {
+                null
+            },
+            oppgavetype = if (this.oppgavetype != null) {
+                Oppgavetype.values().find { it.value == this.oppgavetype }
+            } else {
+                null
+            },
             enhet = this.enhet,
+            erUtenMappe = this.erUtenMappe,
             saksbehandler = this.saksbehandler,
             aktørId = aktørid,
             journalpostId = this.journalpostId,

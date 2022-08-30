@@ -48,7 +48,6 @@ class NullstillVedtakServiceTest {
 
     @Test
     fun `nullstill vedtak`() {
-
         val saksbehandling = slot<Saksbehandling>()
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
@@ -71,7 +70,6 @@ class NullstillVedtakServiceTest {
 
     @Test
     fun `nullstill vedtak skal feile når behandling er ferdigstilt`() {
-
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
             status = BehandlingStatus.FERDIGSTILT
@@ -82,7 +80,6 @@ class NullstillVedtakServiceTest {
 
     @Test
     fun `nullstill vedtak skal feile når behandling er sendt til beslutter`() {
-
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
             status = BehandlingStatus.FATTER_VEDTAK
@@ -93,7 +90,6 @@ class NullstillVedtakServiceTest {
 
     @Test
     fun `nullstill vedtak skal feile når behanlding iverksettes`() {
-
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             id = behandlingId,
             status = BehandlingStatus.IVERKSETTER_VEDTAK

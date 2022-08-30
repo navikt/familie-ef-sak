@@ -54,7 +54,6 @@ class VedtakServiceTest {
 
     @Test
     fun `finn inntekt for tidspunkt`() {
-
         val ingenAndelInnenGittTidspunkt =
             vedtakService.hentForventetInntektForBehandlingIds(behandlingId, LocalDate.of(2020, 1, 26))
         Assertions.assertThat(ingenAndelInnenGittTidspunkt).isNull()

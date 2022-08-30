@@ -81,8 +81,14 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                 .withQueryParam("journalpostId", equalTo("1234"))
                 .willReturn(okJson(objectMapper.writeValueAsString(journalpost))),
             get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
-                .withQueryParam("journalpostId", equalTo("2345"))
-                .willReturn(okJson(objectMapper.writeValueAsString(journalpostPapirsøknad))),
+                .withQueryParam("journalpostId", equalTo("23456"))
+                .willReturn(okJson(objectMapper.writeValueAsString(journalpostPapirsøknad("23456")))),
+            get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                .withQueryParam("journalpostId", equalTo("23457"))
+                .willReturn(okJson(objectMapper.writeValueAsString(journalpostPapirsøknad("23457")))),
+            get(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
+                .withQueryParam("journalpostId", equalTo("23458"))
+                .willReturn(okJson(objectMapper.writeValueAsString(journalpostPapirsøknad("23458")))),
             post(urlPathEqualTo(integrasjonerConfig.journalPostUri.path))
                 .willReturn(okJson(objectMapper.writeValueAsString(journalposter))),
             get(urlPathMatching("${integrasjonerConfig.journalPostUri.path}/hentdokument/([0-9]*)/([0-9]*)"))
@@ -117,7 +123,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                             )
                         )
                     )
-                ),
+                )
 
         )
 
@@ -275,37 +281,38 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     )
                 )
             )
-        private val journalpostPapirsøknadFraIntegrasjoner =
-            Journalpost(
-                avsenderMottaker = avsenderMottaker,
-                journalpostId = "1234",
-                journalposttype = Journalposttype.I,
-                journalstatus = Journalstatus.MOTTATT,
-                tema = "ENF",
-                behandlingstema = "ab0071",
-                tittel = "abrakadabra",
-                bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
-                journalforendeEnhet = "4817",
-                kanal = "SKAN_IM",
-                relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
-                dokumenter =
-                listOf(
-                    DokumentInfo(
-                        dokumentInfoId = "12345",
-                        tittel = "Søknad om overgangsstønad - dokument 1",
-                        brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
-                        dokumentvarianter =
-                        listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
-                        logiskeVedlegg = listOf(
-                            LogiskVedlegg("1", "Tittel logisk vedlegg"),
-                            LogiskVedlegg("2", "Annet logiskt vedlegg")
+        private fun journalpostPapirsøknad(id: String) =
+            Ressurs.success(
+                Journalpost(
+                    avsenderMottaker = avsenderMottaker,
+                    journalpostId = id,
+                    journalposttype = Journalposttype.I,
+                    journalstatus = Journalstatus.MOTTATT,
+                    tema = "ENF",
+                    behandlingstema = "ab0071",
+                    tittel = "abrakadabra",
+                    bruker = Bruker(type = BrukerIdType.FNR, id = fnr),
+                    journalforendeEnhet = "4817",
+                    kanal = "SKAN_IM",
+                    relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
+                    dokumenter =
+                    listOf(
+                        DokumentInfo(
+                            dokumentInfoId = "12345",
+                            tittel = "Søknad om overgangsstønad - dokument 1",
+                            brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
+                            dokumentvarianter =
+                            listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV)),
+                            logiskeVedlegg = listOf(
+                                LogiskVedlegg("1", "Tittel logisk vedlegg"),
+                                LogiskVedlegg("2", "Annet logiskt vedlegg")
+                            )
                         )
                     )
                 )
             )
 
         private val journalpost = Ressurs.success(journalpostFraIntegrasjoner)
-        private val journalpostPapirsøknad = Ressurs.success(journalpostPapirsøknadFraIntegrasjoner)
         private val journalposter = Ressurs.success(listOf(journalpostFraIntegrasjoner))
         private val navKontorEnhet = Ressurs.success(
             NavKontorEnhet(

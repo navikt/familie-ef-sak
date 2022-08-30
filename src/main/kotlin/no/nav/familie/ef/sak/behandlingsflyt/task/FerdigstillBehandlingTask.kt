@@ -18,7 +18,6 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Ferdigstill behandling."
 )
-
 class FerdigstillBehandlingTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService

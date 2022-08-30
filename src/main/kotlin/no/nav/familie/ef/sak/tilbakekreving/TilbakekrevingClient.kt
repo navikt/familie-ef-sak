@@ -92,7 +92,6 @@ class TilbakekrevingClient(
         kravgrunnlagsreferanse: String,
         stønadstype: StønadType
     ) {
-
         return postForEntity(
             opprettManueltTilbakekrevingUri,
             OpprettManueltTilbakekrevingRequest(

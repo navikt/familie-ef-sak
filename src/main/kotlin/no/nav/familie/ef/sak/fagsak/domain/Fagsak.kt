@@ -12,7 +12,7 @@ import java.util.UUID
 data class Fagsaker(
     val overgangsstønad: Fagsak?,
     val barnetilsyn: Fagsak?,
-    val skolepenger: Fagsak?,
+    val skolepenger: Fagsak?
 )
 
 data class Fagsak(

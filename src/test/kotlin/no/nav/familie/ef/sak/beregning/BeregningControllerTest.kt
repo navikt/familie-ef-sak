@@ -152,7 +152,7 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                     fraOgMed = LocalDate.of(2022, 1, 1),
                     kildeBehandlingId = førstegangsbehandling.id,
                     beløp = 10_000,
-                    tilOgMed = LocalDate.of(2022, 4, 30),
+                    tilOgMed = LocalDate.of(2022, 4, 30)
                 )
             )
         )

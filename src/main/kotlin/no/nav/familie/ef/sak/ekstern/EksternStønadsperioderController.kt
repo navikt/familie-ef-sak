@@ -48,7 +48,6 @@ class EksternStønadsperioderController(
      */
     @PostMapping("full-overgangsstonad")
     fun hentPerioderForOvergangsstonad(@RequestBody request: PersonIdent): Ressurs<PerioderOvergangsstønadResponse> {
-
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             tilgangService.validerTilgangTilPerson(request.ident, AuditLoggerEvent.ACCESS)
         }

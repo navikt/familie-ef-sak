@@ -38,8 +38,11 @@ class AlderPåBarnRegel :
         val finnPersonIdentForGjeldendeBarn = metadata.barn.firstOrNull { it.id == barnId }?.personIdent
         val harFullførtFjerdetrinn = if (finnPersonIdentForGjeldendeBarn == null ||
             harFullførtFjerdetrinn(Fødselsnummer(finnPersonIdentForGjeldendeBarn).fødselsdato)
-        ) null
-        else SvarId.NEI
+        ) {
+            null
+        } else {
+            SvarId.NEI
+        }
         secureLogger.info("BarnId: $barnId harFullførtFjerdetrinn: $harFullførtFjerdetrinn fødselsdato")
         return listOf(
             Delvilkårsvurdering(
@@ -48,12 +51,14 @@ class AlderPåBarnRegel :
                     Vurdering(
                         regelId = RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI,
                         svar = harFullførtFjerdetrinn,
-                        begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI)
+                        begrunnelse = if (harFullførtFjerdetrinn == SvarId.NEI) {
                             "Automatisk vurdert: Ut ifra barnets alder er det ${
                             LocalDate.now()
                                 .norskFormat()
                             } automatisk vurdert at barnet ikke har fullført 4. skoleår."
-                        else null
+                        } else {
+                            null
+                        }
                     )
                 )
             )
@@ -88,7 +93,6 @@ class AlderPåBarnRegel :
     }
 
     fun harFullførtFjerdetrinn(fødselsdato: LocalDate, datoForBeregning: LocalDate = LocalDate.now()): Boolean {
-
         val alder = datoForBeregning.year - fødselsdato.year
         var skoletrinn = alder - 5 // Begynner på skolen i det året de fyller 6
         if (datoForBeregning.month.plus(1).value < 6) { // Legger til en sikkerhetsmargin på 1 mnd tilfelle de fyller år mens saken behandles

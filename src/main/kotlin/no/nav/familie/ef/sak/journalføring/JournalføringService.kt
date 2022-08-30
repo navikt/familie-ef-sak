@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
@@ -20,6 +21,7 @@ import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.journalføring.dto.valider
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -117,10 +119,7 @@ class JournalføringService(
      * [Journalposttype.N] brukes for innskannede dokumentm, samme validering finnes i dokarkiv
      */
     private fun validerMottakerFinnes(journalpost: Journalpost) {
-        brukerfeilHvis(
-            journalpost.journalposttype != Journalposttype.N &&
-                !journalpost.avsenderMottaker?.navn.isNullOrBlank()
-        ) {
+        brukerfeilHvis(journalpost.harUgyldigAvsenderMottaker()) {
             "Avsender mangler og må settes på journalposten i gosys. " +
                 "Når endringene er gjort, trykker du på \"Lagre utkast\" før du går tilbake til EF Sak og journalfører."
         }
@@ -154,17 +153,13 @@ class JournalføringService(
 
         validerStateIInfotrygdHvisManIkkeHarBehandlingFraFør(fagsak)
 
-        val årsak = if (journalpost.harStrukturertSøknad()) {
-            BehandlingÅrsak.SØKNAD
-        } else {
-            journalføringRequest.behandling.ustrukturertDokumentasjonType.behandlingÅrsak()
-        }
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = journalføringRequest.barnSomSkalFødes,
-            årsak = årsak
+            ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType,
+            vilkårsbehandleNyeBarn = journalføringRequest.vilkårsbehandleNyeBarn
         )
 
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
@@ -182,15 +177,24 @@ class JournalføringService(
         journalpost: Journalpost,
         journalføringRequest: JournalføringRequest
     ) {
-        feilHvis(journalpost.harStrukturertSøknad() &&
-            journalføringRequest.behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
-            "Kan ikke sende inn ustrukturertDokumentasjonType når journalposten har strukturert søknad"
-        }
-        brukerfeilHvis(
-            !journalpost.harStrukturertSøknad() &&
-                journalføringRequest.behandling.ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT
-        ) {
-            "Må sende inn behandlingsårsak når journalposten mangler digital søknad"
+        val ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType
+        if (journalpost.harStrukturertSøknad()) {
+            feilHvis(ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.IKKE_VALGT) {
+                "Kan ikke sende inn dokumentasjonstype når journalposten har strukturert søknad"
+            }
+            feilHvis(journalføringRequest.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT) {
+                "Kan ikke velge å vilkårsbehandle nye barn når man har strukturert søknad"
+            }
+        } else {
+            brukerfeilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT) {
+                "Må sende inn dokumentasjonstype når journalposten mangler digital søknad"
+            }
+            feilHvis(
+                ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
+                    !featureToggleService.isEnabled(Toggle.FRONTEND_JOURNALFØRING_ETTERSENDING_NY_BEHANDLING)
+            ) {
+                "Featuretoggle for ettersending på ny behandling er ikke aktivert"
+            }
         }
     }
 
@@ -224,10 +228,14 @@ class JournalføringService(
         fagsak: Fagsak,
         journalpost: Journalpost,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
-        årsak: BehandlingÅrsak? = null
+        ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ): Behandling {
-
-        val behandlingsårsak = årsak ?: BehandlingÅrsak.SØKNAD
+        val behandlingsårsak = if (journalpost.harStrukturertSøknad()) {
+            BehandlingÅrsak.SØKNAD
+        } else {
+            ustrukturertDokumentasjonType.behandlingÅrsak()
+        }
         val behandling = behandlingService.opprettBehandling(
             behandlingType = behandlingstype,
             fagsakId = fagsak.id,
@@ -244,8 +252,9 @@ class JournalføringService(
             fagsakId = fagsak.id,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype,
-            behandlingsårsak = behandlingsårsak,
-            barnSomSkalFødes = barnSomSkalFødes
+            ustrukturertDokumentasjonType = ustrukturertDokumentasjonType,
+            barnSomSkalFødes = barnSomSkalFødes,
+            vilkårsbehandleNyeBarn = vilkårsbehandleNyeBarn
         )
         return behandling
     }
