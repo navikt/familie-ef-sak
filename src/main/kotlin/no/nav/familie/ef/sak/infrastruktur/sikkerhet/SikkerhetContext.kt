@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.infrastruktur.sikkerhet
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
+import org.slf4j.LoggerFactory
 
 object SikkerhetContext {
 
@@ -11,11 +12,20 @@ object SikkerhetContext {
 
     val NAVIDENT_REGEX = """^[a-zA-Z]\d{6}$""".toRegex()
 
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun erMaskinTilMaskinToken(): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         return claims.get("oid") != null &&
             claims.get("oid") == claims.get("sub") &&
             claims.getAsList("roles").contains("access_as_application")
+    }
+
+    fun kallKommerFraFamilieEfMottak(): Boolean {
+        val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+        val applikasjonsnavn = claims.get("azp_name")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
+        secureLogger.info("Applikasjonsnavn: $applikasjonsnavn")
+        return applikasjonsnavn.endsWith("teamfamilie:familie-ef-mottak")
     }
 
     /**
