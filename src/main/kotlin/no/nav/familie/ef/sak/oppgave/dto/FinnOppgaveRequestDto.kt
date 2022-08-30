@@ -51,7 +51,7 @@ data class FinnOppgaveRequestDto(
             aktivFomDato = null,
             aktivTomDato = null,
             mappeId = this.mappeId?.let {
-                if (it.equals(-1)) {
+                if (it.equals(-1L)) {
                     null
                 }
                 else {
