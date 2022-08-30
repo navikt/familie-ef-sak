@@ -92,7 +92,7 @@ object VedtakDomeneParser {
             VedtakDomenebegrep.STUDIEBELASTNING,
             VedtakDomenebegrep.DATO_FAKTURA,
             VedtakDomenebegrep.UTGIFTER,
-            VedtakDomenebegrep.BELØP,
+            VedtakDomenebegrep.BELØP
         )
         return mapVedtak(dataTable, gyldigeKolonner) { vedtak, rader ->
             val perioder = when (vedtak.resultatType) {
@@ -217,7 +217,7 @@ object VedtakDomeneParser {
         return DelårsperiodeSkoleårSkolepenger(
             studietype = parseEnum(VedtakDomenebegrep.STUDIETYPE, rad),
             periode = Månedsperiode(datoFra, parseTilOgMed(rad)),
-            studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100,
+            studiebelastning = parseValgfriInt(VedtakDomenebegrep.STUDIEBELASTNING, rad) ?: 100
         )
     }
 
@@ -301,7 +301,7 @@ object VedtakDomeneParser {
         val utgifter: Int?,
         val arbeidAktivitet: SvarId?,
         val erSanksjon: Boolean?,
-        val sanksjonsårsak: Sanksjonsårsak?,
+        val sanksjonsårsak: Sanksjonsårsak?
     )
 
     class BehandlingForHistorikkEndringMapper {
@@ -361,7 +361,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIETYPE("Studietype"),
     DATO_FAKTURA("Dato faktura"),
     STUDIEBELASTNING("Studiebelastning"),
-    ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
+    ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør")
     ;
 
     override fun nøkkel(): String {

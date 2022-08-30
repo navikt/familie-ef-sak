@@ -32,7 +32,8 @@ data class InnvilgelseSkolepenger(
     override val begrunnelse: String?,
     override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
 ) : VedtakSkolepengerDto(
-    resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger"
+    resultatType = ResultatType.INNVILGE,
+    _type = "InnvilgelseSkolepenger"
 )
 
 const val VEDTAK_SKOLEPENGER_OPPHØR_TYPE = "OpphørSkolepenger"
@@ -56,7 +57,7 @@ data class DelårsperiodeSkoleårDto(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")
     ),
-    val studiebelastning: Int,
+    val studiebelastning: Int
 ) {
 
     // Brukes for å ikke være en del av json som blir serialisert
@@ -70,7 +71,7 @@ data class SkolepengerUtgiftDto(
     val id: UUID,
     val årMånedFra: YearMonth,
     val utgifter: Int,
-    val stønad: Int,
+    val stønad: Int
 )
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
@@ -129,5 +130,5 @@ fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
     årMånedFra = YearMonth.from(this.utgiftsdato),
     utgifter = this.utgifter,
-    stønad = this.stønad,
+    stønad = this.stønad
 )

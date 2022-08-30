@@ -181,7 +181,6 @@ internal class TilbakekrevingServiceTest {
         }
 
         private fun mockHentDataForGenereringAvVarselbrev(): CapturingSlot<ForhåndsvisVarselbrevRequest> {
-
             val fagsak = fagsak(identer = setOf(PersonIdent("12345678901")))
             every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak
             every { behandlingService.hentBehandling(any()) } returns behandling(fagsak = fagsak)

@@ -28,6 +28,7 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var fagsakService: FagsakService
 

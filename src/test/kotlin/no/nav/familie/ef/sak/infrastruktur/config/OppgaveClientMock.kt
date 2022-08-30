@@ -55,7 +55,6 @@ class OppgaveClientMock {
         every { oppgaveClient.finnMapper(any()) } answers {
             val mappeRequest: FinnMappeRequest = firstArg()
             if (mappeRequest.enhetsnr == "4489") {
-
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
                     mapper = listOf(

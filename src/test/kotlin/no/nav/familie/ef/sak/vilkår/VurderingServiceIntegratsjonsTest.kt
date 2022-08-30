@@ -108,7 +108,8 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                 vurderingService.kopierVurderingerTilNyBehandling(
                     tidligereBehandlingId,
                     revurdering.id,
-                    metadata, StønadType.OVERGANGSSTØNAD
+                    metadata,
+                    StønadType.OVERGANGSSTØNAD
                 )
             }
         )
@@ -117,12 +118,13 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `aktivitet arbeid for behandlingIds`() {
-
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN))
         val behandling = behandling(fagsak)
         behandlingRepository.insert(behandling)
         val vilkårsvurdering = vilkårsvurdering(
-            behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
+            behandling.id,
+            Vilkårsresultat.OPPFYLT,
+            VilkårType.AKTIVITET_ARBEID,
             listOf(
                 Delvilkårsvurdering(
                     Vilkårsresultat.OPPFYLT,

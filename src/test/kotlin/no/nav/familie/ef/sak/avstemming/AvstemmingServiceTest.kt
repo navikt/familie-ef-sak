@@ -26,7 +26,8 @@ internal class AvstemmingServiceTest {
                     UUID.randomUUID(),
                     1,
                     1L,
-                    "1", listOf()
+                    "1",
+                    listOf()
                 )
             )
         service.konsistensavstemOppdrag(StønadType.OVERGANGSSTØNAD, LocalDateTime.now())

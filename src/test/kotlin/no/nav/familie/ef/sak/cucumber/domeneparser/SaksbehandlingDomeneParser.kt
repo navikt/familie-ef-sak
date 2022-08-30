@@ -33,7 +33,7 @@ object SaksbehandlingDomeneParser {
                 fagsak = fagsak,
                 id = behandlingId,
                 forrigeBehandlingId = forrigeBehandlingIdFraRad,
-                type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING
             )
             behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))
         }.toMap()

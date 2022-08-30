@@ -22,5 +22,5 @@ enum class MigreringExceptionType(val kanGåVidereTilJournalføring: Boolean = f
     SIMULERING_FEILUTBETALING,
     SIMULERING_ETTERBETALING,
     SIMULERING_DEBET_TREKK,
-    BELØP_0,
+    BELØP_0
 }

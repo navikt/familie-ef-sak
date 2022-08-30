@@ -100,11 +100,13 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     private val vedtaksperiode = opprettVedtaksperiode(januar2021, mars2021)
     private val vedtaksperiode2 = opprettVedtaksperiode(
-        februar2021, februar2021,
+        februar2021,
+        februar2021,
         aktivitetType = BARNET_ER_SYKT
     )
     private val vedtaksperiode3 = opprettVedtaksperiode(
-        mars2021, mars2021,
+        mars2021,
+        mars2021,
         aktivitetType = FORLENGELSE_STØNAD_PÅVENTE_ARBEID_REELL_ARBEIDSSØKER
     )
     private val navn = Navn("fornavn", "", "", Metadata(false))
@@ -326,7 +328,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         every {
             mockUttrekkArbeidssøkerRepository.hentVedtaksperioderForSisteFerdigstilteBehandlinger(any(), any())
         } returns listOf(
-            periodeForUttrekk, periodeForUttrekk2
+            periodeForUttrekk,
+            periodeForUttrekk2
         )
 
         every {

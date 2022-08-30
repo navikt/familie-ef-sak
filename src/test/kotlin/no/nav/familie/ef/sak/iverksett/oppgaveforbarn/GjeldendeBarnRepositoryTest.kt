@@ -95,10 +95,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 identer = fagsakpersonerAvPersonIdenter(
                     setOf(
                         PersonIdent(
-                            nyesteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now())
+                            nyesteFnrSøker,
+                            Sporbar(opprettetTid = LocalDateTime.now())
                         ),
                         PersonIdent(
-                            eldsteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
+                            eldsteFnrSøker,
+                            Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
                         )
                     )
                 )

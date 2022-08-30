@@ -30,10 +30,13 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     lateinit var behandlingService: BehandlingService
+
     @Autowired
     lateinit var fagsakService: FagsakService
+
     @Autowired
     lateinit var søknadService: SøknadService
 
@@ -77,7 +80,6 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> {
-
         return restTemplate.exchange(
             localhost("/api/soknad/$behandlingId/datoer"),
             HttpMethod.GET,

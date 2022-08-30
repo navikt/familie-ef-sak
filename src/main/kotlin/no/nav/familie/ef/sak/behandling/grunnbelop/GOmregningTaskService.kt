@@ -19,7 +19,6 @@ class GOmregningTaskService(
 
     @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
-
         logger.info("Starter opprettelse av tasker for G-omregning.")
         val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
         try {

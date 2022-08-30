@@ -51,7 +51,6 @@ class OmregningService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun utførGOmregning(fagsakId: UUID) {
-
         val forrigeTilkjentYtelse = validerBehandlingOgHentSisteTilkjentYtelse(fagsakId)
         val innvilgelseOvergangsstønad = hentInnvilgelseForOvergangsstønad(fagsakId) ?: return
 
@@ -101,9 +100,8 @@ class OmregningService(
     private fun utførGOmregning(
         fagsakId: UUID,
         forrigeTilkjentYtelse: TilkjentYtelse,
-        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
+        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad
     ) {
-
         logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         val behandling = behandlingService.opprettBehandling(

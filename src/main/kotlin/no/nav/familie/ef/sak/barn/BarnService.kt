@@ -20,7 +20,7 @@ import java.util.UUID
 @Service
 class BarnService(
     private val barnRepository: BarnRepository,
-    private val søknadService: SøknadService,
+    private val søknadService: SøknadService
 ) {
 
     /**
@@ -73,7 +73,7 @@ class BarnService(
                 behandlingId = behandlingId,
                 søknadBarnId = barnFraSøknad[barn.personIdent],
                 personIdent = barn.personIdent,
-                navn = barn.navn.visningsnavn(),
+                navn = barn.navn.visningsnavn()
             )
         }
     }
@@ -178,7 +178,7 @@ class BarnService(
         BehandlingBarn(
             behandlingId = behandlingId,
             personIdent = it.personIdent,
-            navn = it.navn.visningsnavn(),
+            navn = it.navn.visningsnavn()
         )
     }
 

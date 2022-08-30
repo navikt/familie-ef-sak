@@ -27,5 +27,5 @@ enum class Tilbakekrevingsvalg {
 fun Tilbakekreving.tilDto() = TilbakekrevingDto(
     valg = this.valg,
     varseltekst = this.varseltekst,
-    begrunnelse = this.begrunnelse,
+    begrunnelse = this.begrunnelse
 )

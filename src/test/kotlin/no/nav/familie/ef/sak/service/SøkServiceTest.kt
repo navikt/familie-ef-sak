@@ -56,7 +56,6 @@ internal class SøkServiceTest {
 
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {
-
         val vegadresse = Vegadresse(
             "23",
             "A",

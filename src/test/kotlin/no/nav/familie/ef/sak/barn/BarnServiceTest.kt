@@ -257,14 +257,15 @@ internal class BarnServiceTest {
         @Test
         internal fun `skal opprette terminbarn når det ikke finnes match i PDL`() {
             val termindato = LocalDate.of(2021, 1, 1)
-            assertThatThrownBy {  barnService.opprettBarnPåBehandlingMedSøknadsdata(
-                behandlingId,
-                fagsakId,
-                emptyList(),
-                StønadType.OVERGANGSSTØNAD,
-                UstrukturertDokumentasjonType.IKKE_VALGT,
-                listOf(BarnSomSkalFødes(termindato))
-            )
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    emptyList(),
+                    StønadType.OVERGANGSSTØNAD,
+                    UstrukturertDokumentasjonType.IKKE_VALGT,
+                    listOf(BarnSomSkalFødes(termindato))
+                )
             }.hasMessage("Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=IKKE_VALGT")
         }
 
@@ -344,7 +345,7 @@ internal class BarnServiceTest {
     inner class Ettersending {
 
         private val grunnlagsdataBarn = listOf(
-            barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B"),
+            barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B")
         )
 
         @Test
@@ -384,7 +385,7 @@ internal class BarnServiceTest {
                     fagsakId,
                     grunnlagsdataBarn,
                     StønadType.OVERGANGSSTØNAD,
-                    UstrukturertDokumentasjonType.ETTERSENDING,
+                    UstrukturertDokumentasjonType.ETTERSENDING
                 )
             }.hasMessage("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
         }
