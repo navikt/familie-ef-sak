@@ -80,7 +80,6 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(findByTypeAndAlderIsNotNull.isEmpty()).isTrue
     }
 
-
     private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
         val andel = lagAndelTilkjentYtelse(
             beløp = beløp,
