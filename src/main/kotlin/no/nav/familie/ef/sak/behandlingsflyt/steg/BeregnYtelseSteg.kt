@@ -38,6 +38,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -136,6 +137,7 @@ class BeregnYtelseSteg(
             return
         }
         val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+            .filter { it.erIkkeFjernet() }
             .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
         nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
             feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
