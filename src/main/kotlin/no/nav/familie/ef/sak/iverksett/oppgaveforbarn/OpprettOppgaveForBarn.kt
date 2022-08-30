@@ -12,11 +12,6 @@ data class OpprettOppgaveForBarn(
     val behandlingId: UUID
 )
 
-data class OpprettetOppfølgingsoppgave(
-    val barnPersonIdent: String,
-    val alder: Alder
-)
-
 enum class Alder(val oppgavebeskrivelse: String) {
     SEKS_MND("Barn 1/2 år. Send varsel om aktivitetsplikt."),
     ETT_ÅR("Barn 1 år. Vurder aktivitetsplikten.");
