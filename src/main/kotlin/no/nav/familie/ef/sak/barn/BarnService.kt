@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.barn
 
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
@@ -10,7 +13,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -18,7 +20,7 @@ import java.util.UUID
 @Service
 class BarnService(
     private val barnRepository: BarnRepository,
-    private val søknadService: SøknadService,
+    private val søknadService: SøknadService
 ) {
 
     /**
@@ -35,8 +37,9 @@ class BarnService(
         fagsakId: UUID,
         grunnlagsdataBarn: List<BarnMedIdent>,
         stønadstype: StønadType,
-        behandlingsårsak: BehandlingÅrsak,
-        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList()
+        ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
+        barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ) {
         val barnUnder18 = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
@@ -44,9 +47,10 @@ class BarnService(
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
                 kobleBarnForOvergangsstønadOgSkolepenger(
                     behandlingId,
-                    behandlingsårsak,
+                    ustrukturertDokumentasjonType,
                     barnUnder18,
-                    barnSomSkalFødes
+                    barnSomSkalFødes,
+                    vilkårsbehandleNyeBarn
                 )
         }
         barnRepository.insertAll(barnPåBehandlingen)
@@ -69,24 +73,36 @@ class BarnService(
                 behandlingId = behandlingId,
                 søknadBarnId = barnFraSøknad[barn.personIdent],
                 personIdent = barn.personIdent,
-                navn = barn.navn.visningsnavn(),
+                navn = barn.navn.visningsnavn()
             )
         }
     }
 
     private fun kobleBarnForOvergangsstønadOgSkolepenger(
         behandlingId: UUID,
-        behandlingsårsak: BehandlingÅrsak,
+        ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        barnSomSkalFødes: List<BarnSomSkalFødes>
+        barnSomSkalFødes: List<BarnSomSkalFødes>,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn
     ): List<BehandlingBarn> {
-        feilHvis(behandlingsårsak != BehandlingÅrsak.PAPIRSØKNAD && barnSomSkalFødes.isNotEmpty()) {
-            "Kan ikke legge til terminbarn med behandlingsårsak=$behandlingsårsak"
+        feilHvis(
+            ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.PAPIRSØKNAD &&
+                barnSomSkalFødes.isNotEmpty()
+        ) {
+            "Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
         }
-        return if (behandlingsårsak == BehandlingÅrsak.PAPIRSØKNAD) {
-            barnForPapirsøknad(behandlingId, barnSomSkalFødes, grunnlagsdataBarn)
-        } else {
-            kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
+        return when (ustrukturertDokumentasjonType) {
+            UstrukturertDokumentasjonType.PAPIRSØKNAD -> kobleBarnSomSkalFødesPlusAlleRegisterbarn(
+                behandlingId,
+                barnSomSkalFødes,
+                grunnlagsdataBarn
+            )
+            UstrukturertDokumentasjonType.ETTERSENDING -> barnForEttersending(
+                behandlingId,
+                vilkårsbehandleNyeBarn,
+                grunnlagsdataBarn
+            )
+            UstrukturertDokumentasjonType.IKKE_VALGT -> kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
                 finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
                 grunnlagsdataBarn,
                 behandlingId
@@ -94,11 +110,22 @@ class BarnService(
         }
     }
 
+    private fun barnForEttersending(
+        behandlingId: UUID,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
+        grunnlagsdataBarn: List<BarnMedIdent>
+    ): List<BehandlingBarn> = when (vilkårsbehandleNyeBarn) {
+        VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> mapBarnTilBehandlingBarn(behandlingId, grunnlagsdataBarn)
+        VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
+        VilkårsbehandleNyeBarn.IKKE_VALGT ->
+            throw Feil("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
+    }
+
     /**
      * Papirsøknad kobler [barnSomSkalFødes] til [grunnlagsdataBarn]
      * Samt legger til de barn fra grunnlagsdata som mangler, sånn at alle registerbarn blir med
      */
-    private fun barnForPapirsøknad(
+    private fun kobleBarnSomSkalFødesPlusAlleRegisterbarn(
         behandlingId: UUID,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
         grunnlagsdataBarn: List<BarnMedIdent>
@@ -109,9 +136,7 @@ class BarnService(
             grunnlagsdataBarn,
             behandlingId
         )
-        val barnFraRegisterSomIkkeBlittKoblede =
-            barnFraRegisterSomIkkeBlittKoblede(kobledeBarn, grunnlagsdataBarn, behandlingId)
-        return kobledeBarn + barnFraRegisterSomIkkeBlittKoblede
+        return kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
     }
 
     private fun kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
@@ -132,19 +157,29 @@ class BarnService(
             }
     }
 
-    private fun barnFraRegisterSomIkkeBlittKoblede(
-        kobledeBarn: List<BehandlingBarn>,
+    /**
+     * Legger sammen koblede barn plus de fra registeret som mangler
+     * Sånn at man får journalført en papirsøknad med terminbarn, som kobles sammen med fødte barn. Plus alle andre barn
+     */
+    private fun kobledeBarnPlusRegisterbarn(
+        behandlingId: UUID,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        behandlingId: UUID
+        kobledeBarn: List<BehandlingBarn>
     ): List<BehandlingBarn> {
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }.toSet()
-        return grunnlagsdataBarn.filterNot { kobledeBarnIdenter.contains(it.personIdent) }.map {
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                personIdent = it.personIdent,
-                navn = it.navn.visningsnavn(),
-            )
-        }
+        val ukobledeBarn = grunnlagsdataBarn.filterNot { kobledeBarnIdenter.contains(it.personIdent) }
+        return kobledeBarn + mapBarnTilBehandlingBarn(behandlingId, ukobledeBarn)
+    }
+
+    private fun mapBarnTilBehandlingBarn(
+        behandlingId: UUID,
+        grunnlagsdataBarn: List<BarnMedIdent>
+    ) = grunnlagsdataBarn.map {
+        BehandlingBarn(
+            behandlingId = behandlingId,
+            personIdent = it.personIdent,
+            navn = it.navn.visningsnavn()
+        )
     }
 
     fun opprettBarnForRevurdering(

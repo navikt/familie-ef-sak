@@ -101,7 +101,6 @@ object BarnMedSamværMapper {
         søknadsbarn: Collection<SøknadBarn>,
         søkerAdresse: List<Bostedsadresse>
     ): List<BarnMedSamværRegistergrunnlagDto> {
-
         val alleBarn: List<MatchetBehandlingBarn> = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
         val forelderMap = barneforeldre.associateBy { it.personIdent }
 

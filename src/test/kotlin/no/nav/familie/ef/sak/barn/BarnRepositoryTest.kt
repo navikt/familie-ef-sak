@@ -19,6 +19,7 @@ class BarnRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var barnRepository: BarnRepository
 

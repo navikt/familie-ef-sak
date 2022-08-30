@@ -17,7 +17,7 @@ class TidligereVedaksperioderService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val infotrygdService: InfotrygdService,
+    private val infotrygdService: InfotrygdService
 ) {
 
     /**
@@ -36,7 +36,7 @@ class TidligereVedaksperioderService(
         TidligereInnvilgetVedtak(
             harTidligereOvergangsstønad = periodeResponse.overgangsstønad.isNotEmpty(),
             harTidligereBarnetilsyn = periodeResponse.barnetilsyn.isNotEmpty(),
-            harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty(),
+            harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty()
         )
 
     private fun harTidligereMottattStønadEf(identer: Set<String>): TidligereInnvilgetVedtak {

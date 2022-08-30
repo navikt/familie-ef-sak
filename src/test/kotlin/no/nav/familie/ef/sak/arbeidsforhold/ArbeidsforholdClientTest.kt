@@ -46,7 +46,6 @@ class ArbeidsforholdClientTest {
 
     @Test
     fun `hent arbeidsforhold response`() {
-
         WireMock.stubFor(
             queryMappingForHentOrganisasjon.willReturn(
                 WireMock.aResponse()

@@ -156,7 +156,11 @@ class BeregningBarnetilsynServiceTest {
                 erMidlertidigOpphør = false
             )
             val utgiftsperiode2 = UtgiftsperiodeDto(
-                mars2022, juli2022, Månedsperiode(mars2000, juli2022), barn = listOf(UUID.randomUUID()), utgifter = 10,
+                mars2022,
+                juli2022,
+                Månedsperiode(mars2000, juli2022),
+                barn = listOf(UUID.randomUUID()),
+                utgifter = 10,
                 erMidlertidigOpphør = false
             )
             val feil = assertThrows<ApiFeil> {
@@ -313,7 +317,6 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal lage fire perioder med to utgiftsperioder og med en overlappende kontantstøtteperiode`() {
-
         val barnUUID = UUID.randomUUID()
 
         val utgiftsperiode1 =
@@ -352,7 +355,6 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal lage seks perioder med to utgiftsperioder og en overlappende kontantstøtte og tilleggsstønadsperiodemed`() {
-
         val barnUUID = UUID.randomUUID()
 
         val utgiftsperiode1 =
@@ -631,7 +633,6 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `merge to påfølgende måneder med like beløp, forvent én periode`() {
-
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = februar2000.atEndOfMonth()
         val beløpsperioder = listOf(
@@ -648,7 +649,6 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `merge to påfølgende måneder med forskjellige beløp, forvent to perioder`() {
-
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = februar2000.atEndOfMonth()
         val beløpsperioder = listOf(
@@ -673,7 +673,6 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `merge to påfølgende måneder med hull ifm fradatoer`() {
-
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = mars2000.atEndOfMonth()
         val beløpsperioder = listOf(
@@ -693,7 +692,6 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `merge to påfølgende måneder med hull ifm fradatoer og forskjellige beløp`() {
-
         val forventetFraDato = januar2000.atDay(1)
         val forventetTilDato = mars2000.atEndOfMonth()
         val beløpsperioder = listOf(

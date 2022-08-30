@@ -18,6 +18,8 @@ object OppgaveUtil {
                 logger.warn("Feilet parsing av endretTidspunkt=$endretTidspunkt for opgave=$oppgave")
                 null
             }
-        } else null
+        } else {
+            null
+        }
     }
 }

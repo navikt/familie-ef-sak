@@ -38,7 +38,6 @@ object BarnMatcher {
         barn: MatchetBehandlingBarn,
         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>
     ): MatchetBehandlingBarn {
-
         val fødselTermindato = barn.behandlingBarn.fødselTermindato ?: return barn
         val nærmesteMatch = nærmesteMatch(pdlBarnIkkeISøknad, fødselTermindato) ?: return barn
 

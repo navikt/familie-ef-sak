@@ -54,7 +54,8 @@ internal class FrittståendeBrevServiceTest {
                 "innhold"
             )
         ),
-        fagsak.id, FrittståendeBrevKategori.INFORMASJONSBREV
+        fagsak.id,
+        FrittståendeBrevKategori.INFORMASJONSBREV
     )
 
     private val brevtyperTestData = listOf(

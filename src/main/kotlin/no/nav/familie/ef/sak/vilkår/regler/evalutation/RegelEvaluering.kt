@@ -58,7 +58,6 @@ object RegelEvaluering {
         vilkårsregel: Vilkårsregel,
         vurdering: DelvilkårsvurderingDto
     ): Vilkårsresultat {
-
         vurdering.vurderinger.forEach { svar ->
             val regel = vilkårsregel.regel(svar.regelId)
             val svarId = svar.svar ?: return Vilkårsresultat.IKKE_TATT_STILLING_TIL
