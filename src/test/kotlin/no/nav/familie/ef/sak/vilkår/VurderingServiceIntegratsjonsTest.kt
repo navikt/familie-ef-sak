@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.service
+package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository

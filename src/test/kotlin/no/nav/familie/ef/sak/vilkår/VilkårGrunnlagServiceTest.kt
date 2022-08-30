@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.service
+package no.nav.familie.ef.sak.vilkår
 
 import io.mockk.every
 import io.mockk.mockk
