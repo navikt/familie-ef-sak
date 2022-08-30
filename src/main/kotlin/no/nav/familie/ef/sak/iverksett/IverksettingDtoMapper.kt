@@ -345,7 +345,7 @@ class IverksettingDtoMapper(
 
 fun TilkjentYtelse.tilIverksettDto(): TilkjentYtelseDto = TilkjentYtelseDto(
     andelerTilkjentYtelse = andelerTilkjentYtelse.map { andel -> andel.tilIverksettDto() },
-    startmåned = YearMonth.from(startmåned)
+    startmåned = startmåned
 )
 
 fun Vurdering.tilIverksettDto(): VurderingDto = VurderingDto(
