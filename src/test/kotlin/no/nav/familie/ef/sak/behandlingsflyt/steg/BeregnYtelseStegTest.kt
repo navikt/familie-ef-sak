@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
@@ -83,6 +84,7 @@ internal class BeregnYtelseStegTest {
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(
         tilkjentYtelseService,
@@ -95,13 +97,15 @@ internal class BeregnYtelseStegTest {
         tilbakekrevingService,
         barnService,
         fagsakService,
-        validerOmregningService
+        validerOmregningService,
+        featureToggleService
     )
 
     private val slot = slot<TilkjentYtelse>()
 
     @BeforeEach
     internal fun setUp() {
+        every { featureToggleService.isEnabled(any()) } returns true
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
             .returns(
@@ -1413,6 +1417,7 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `skal ikke kunne opphøre før forrige sanksjonsbehandling`() {
+            every { featureToggleService.isEnabled(any()) } returns false
             val startMåned = YearMonth.of(2021, 6)
             val sluttMåned = YearMonth.of(2021, 12)
             val opphørFom = YearMonth.of(2021, 6)
@@ -1437,6 +1442,7 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `skal ikke kunne innvilge med periode før forrige sanksjonsbehandling`() {
+            every { featureToggleService.isEnabled(any()) } returns false
             val startMåned = YearMonth.of(2021, 6)
             val sluttMåned = YearMonth.of(2021, 12)
             val sankskjonsMåned = YearMonth.of(2021, 8)
