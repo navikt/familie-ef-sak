@@ -317,8 +317,8 @@ internal class BeregningSkolepengerServiceTest {
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
-                .isInstanceOf(Feil::class.java)
-                .hasMessageContaining("Finner ikke noe som er endret mellom")
+                .isInstanceOf(ApiFeil::class.java)
+                .hasMessageContaining("Periodene er uendrede")
         }
 
         @Test
