@@ -33,7 +33,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `forelder og barn bor på samme adresse`() {
-
             val barnAdresser = listOf(
                 lagAdresse(adresseBergen(), now().minusDays(100), null, null, metadataHistorisk),
                 lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende),
@@ -60,9 +59,8 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `forelder og barn med samme vegadresse med matrikkelId`() {
-
             val barnAdresser = listOf(
-                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1)),
+                lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
             )
             val forelderAdresser = listOf(
                 lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
@@ -83,7 +81,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `forelder og barn med samme matrikkeladresse`() {
-
             val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
 
@@ -102,7 +99,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `returnere false for matrikkeladresser med samme matrikkelId men forskjellig bruksenhetsnummer`() {
-
             val barnAdresser = listOf(
                 lagAdresse(
                     adresseBergen(),
@@ -128,7 +124,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `returnere false for vegadresser med samme matrikkelId men forskjellig bruksenhetsnummer`() {
-
             val barnAdresser = listOf(lagAdresse(adresseBergen().copy(matrikkelId = 123, bruksenhetsnummer = "H0103")))
             val forelderAdresser = listOf(lagAdresse(adresseBergen().copy(matrikkelId = 123, bruksenhetsnummer = "H1701")))
 
@@ -147,7 +142,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `forelder og barn med ulik matrikkeladresse`() {
-
             val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
 
@@ -166,7 +160,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `forelder og barn bor ikke på samme adresse`() {
-
             val barn1Adresser = listOf(
                 lagAdresse(adresseBergen(), now().minusDays(1)),
                 lagAdresse(adresseTromsø(), now().minusDays(100))
@@ -237,7 +230,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `barn har delt bosted`() {
-
             val barnMedDeltBosted = BarnMedIdent(
                 listOf(),
                 emptyList(),
@@ -255,7 +247,6 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `forelder og barn bor på samme adresse selv om det ikke finnes gyldighetsdato`() {
-
             val barnAdresser = listOf(
                 lagAdresse(vegadresse = adresseTromsø(), metadata = metadataGjeldende),
                 lagAdresse(vegadresse = adresseOslo(), metadata = metadataHistorisk)
@@ -285,14 +276,17 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `sortering av adresser skal sortere de per type først, og sen per startdato`() {
-
             val aktivBostedsadresse = lagAdresseDto(AdresseType.BOSTEDADRESSE, now().minusDays(5))
             val historiskBostedsadresse = lagAdresseDto(
-                AdresseType.BOSTEDADRESSE, now().minusYears(1), now().minusDays(5)
+                AdresseType.BOSTEDADRESSE,
+                now().minusYears(1),
+                now().minusDays(5)
             )
             val aktivOppholdsadresse = lagAdresseDto(AdresseType.OPPHOLDSADRESSE, now())
             val historiskKontaktadresse = lagAdresseDto(
-                AdresseType.KONTAKTADRESSE, now().minusDays(15), now().minusDays(14)
+                AdresseType.KONTAKTADRESSE,
+                now().minusDays(15),
+                now().minusDays(14)
             )
             val historiskKontaktadresseUtland = lagAdresseDto(AdresseType.KONTAKTADRESSE_UTLAND, now(), now())
 

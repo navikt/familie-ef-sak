@@ -73,8 +73,13 @@ internal class VurderingStegServiceTest {
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
     private val vurderingService = VurderingService(
-        behandlingService, søknadService, vilkårsvurderingRepository, barnService,
-        vilkårGrunnlagService, grunnlagsdataService, fagsakService
+        behandlingService,
+        søknadService,
+        vilkårsvurderingRepository,
+        barnService,
+        vilkårGrunnlagService,
+        grunnlagsdataService,
+        fagsakService
     )
     private val vurderingStegService = VurderingStegService(
         behandlingService = behandlingService,
@@ -131,6 +136,7 @@ internal class VurderingStegServiceTest {
             mockk(relaxed = true),
             mockk(relaxed = true),
             false,
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
 
@@ -275,7 +281,6 @@ internal class VurderingStegServiceTest {
 
     @Test
     internal fun `skal ikke oppdatere status til UTREDES hvis den allerede er dette `() {
-
         val fagsak = fagsak()
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             fagsak,
@@ -342,7 +347,9 @@ internal class VurderingStegServiceTest {
             opprettNyeVilkårsvurderinger(
                 behandlingId,
                 HovedregelMetadata(
-                    søknad.sivilstand, Sivilstandstype.UGIFT, barn = barn,
+                    søknad.sivilstand,
+                    Sivilstandstype.UGIFT,
+                    barn = barn,
                     søktOmBarnetilsyn = emptyList()
                 ),
                 OVERGANGSSTØNAD

@@ -17,7 +17,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class BrevmottakereController(
     private val tilgangService: TilgangService,
-    private val brevmottakereService: BrevmottakereService,
+    private val brevmottakereService: BrevmottakereService
 ) {
 
     @GetMapping("/{behandlingId}")

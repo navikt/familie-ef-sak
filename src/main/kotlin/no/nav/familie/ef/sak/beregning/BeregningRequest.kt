@@ -21,8 +21,11 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
         samordningsfradrag = inntektsperiode.samordningsfradrag ?: BigDecimal.ZERO,
         periode = Månedsperiode(
             fom = inntektsperiode.årMånedFra,
-            tom = if (index < this.lastIndex && this.size > 1) this[index + 1].årMånedFra
-                .minusMonths(1) else YearMonth.from(LocalDate.MAX)
+            tom = if (index < this.lastIndex && this.size > 1) {
+                this[index + 1].årMånedFra.minusMonths(1)
+            } else {
+                YearMonth.from(LocalDate.MAX)
+            }
         )
     )
 }

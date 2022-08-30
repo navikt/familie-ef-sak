@@ -16,7 +16,7 @@ import java.util.UUID
 class TilkjentYtelseService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val fagsakService: FagsakService,
+    private val fagsakService: FagsakService
 ) {
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
@@ -37,7 +37,6 @@ class TilkjentYtelseService(
         stønadstype: StønadType,
         datoForAvstemming: LocalDate
     ): List<KonsistensavstemmingTilkjentYtelseDto> {
-
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
 
         return tilkjentYtelser.chunked(PdlClient.MAKS_ANTALL_IDENTER).map { mapTilDto(it, datoForAvstemming) }.flatten()

@@ -61,7 +61,6 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagre og hent vedtak, lagre igjen - da skal første slettes`() {
-
         /** Pre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
@@ -76,7 +75,9 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val tomBegrunnelse = ""
         val vedtakRequest = InnvilgelseOvergangsstønad(
             tomBegrunnelse,
-            tomBegrunnelse, emptyList(), emptyList()
+            tomBegrunnelse,
+            emptyList(),
+            emptyList()
         )
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
@@ -315,7 +316,10 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID
     ): List<AndelTilkjentYtelse> = inntektsperioder.map {
         lagAndelTilkjentYtelse(
-            5000, it.periode.fom, it.periode.tom, inntekt = it.inntekt.toInt(),
+            5000,
+            it.periode.fom,
+            it.periode.tom,
+            inntekt = it.inntekt.toInt(),
             kildeBehandlingId = behandlingId
         )
     }

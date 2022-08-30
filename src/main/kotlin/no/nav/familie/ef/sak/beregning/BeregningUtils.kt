@@ -4,7 +4,6 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
-import java.time.LocalDate
 import java.time.YearMonth
 
 object BeregningUtils {
@@ -47,15 +46,17 @@ object BeregningUtils {
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
-        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO)
-            inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN) else BigDecimal.ZERO
+        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO) {
+            inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN)
+        } else {
+            BigDecimal.ZERO
+        }
     }
 
     fun indeksjusterInntekt(
         sisteBrukteGrunnbeløpsdato: YearMonth,
         inntekter: List<Inntektsperiode> = emptyList()
     ): List<Inntektsperiode> {
-
         val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
             return inntekter

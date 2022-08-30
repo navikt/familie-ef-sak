@@ -37,10 +37,13 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired
     private lateinit var beregnYtelseSteg: BeregnYtelseSteg
+
     @Autowired
     private lateinit var barnRepository: BarnRepository
+
     @Autowired
     private lateinit var tilkjentytelseRepository: TilkjentYtelseRepository
 
@@ -144,7 +147,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
                 harTilleggsstønad = false,
                 perioder = listOf(),
                 begrunnelse = null
-            ),
+            )
         )
         beregnYtelseSteg.utførSteg(saksbehandling, vedtak)
     }

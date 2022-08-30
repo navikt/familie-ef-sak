@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
@@ -27,6 +28,7 @@ data class TilleggsstønadDto(
 data class PeriodeMedBeløpDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode!", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
+    @JsonIgnore
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")
@@ -37,6 +39,7 @@ data class PeriodeMedBeløpDto(
 data class UtgiftsperiodeDto(
     @Deprecated("Bruk periode!", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
     @Deprecated("Bruk periode!", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
+    @JsonIgnore
     val periode: Månedsperiode = Månedsperiode(
         årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")

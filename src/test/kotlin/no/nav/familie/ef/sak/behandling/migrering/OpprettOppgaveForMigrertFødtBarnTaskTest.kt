@@ -35,7 +35,9 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
     val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
     val service = OpprettOppgaveForMigrertFødtBarnTask(
-        iverksettClient, behandlingService, tilkjentYtelseService,
+        iverksettClient,
+        behandlingService,
+        tilkjentYtelseService,
         grunnlagsdataService
     )
 

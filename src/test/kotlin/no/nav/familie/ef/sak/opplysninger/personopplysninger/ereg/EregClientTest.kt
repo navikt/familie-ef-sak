@@ -44,7 +44,6 @@ class EregClientTest {
 
     @Test
     fun `hent organisasjon response`() {
-
         WireMock.stubFor(
             queryMappingForHentOrganisasjon.willReturn(
                 WireMock.aResponse()

@@ -43,7 +43,6 @@ class InntektMapper(
     }
 
     private fun mapInntektresponseTilInntektPerVirksomhetOgPeriode(response: HentInntektListeResponse): MutableMap<Aktør, MutableMap<YearMonth, MutableList<AMeldingInntekt>>> {
-
         val map: MutableMap<Aktør, MutableMap<YearMonth, MutableList<AMeldingInntekt>>> = mutableMapOf()
         response.arbeidsinntektMåned?.forEach { arbeidsInntektMaaned ->
             arbeidsInntektMaaned.arbeidsInntektInformasjon?.inntektListe?.forEach { inntekt ->

@@ -67,7 +67,6 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.familie.kontrakter.ef.felles.RegelId as RegelIdIverksett
 import no.nav.familie.kontrakter.ef.felles.VilkårType as VilkårTypeIverksett
@@ -90,7 +89,6 @@ class IverksettingDtoMapper(
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
-
         val saksbehandler =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(
                 saksbehandling.id,

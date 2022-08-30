@@ -83,7 +83,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = ""
             ),
             kontantstøtte = KontantstøtteWrapper(emptyList()),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
@@ -132,7 +132,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     )
                 )
             ),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)

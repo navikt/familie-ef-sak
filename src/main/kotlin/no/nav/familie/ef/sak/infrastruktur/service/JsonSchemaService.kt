@@ -49,10 +49,9 @@ class JsonSchemaService(
     beskrivelse = "Oppdaterer Json-data."
 )
 class JsonUpdateVedtakTask(
-    private val vedtakRepository: VedtakRepository,
+    private val vedtakRepository: VedtakRepository
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-
         val vedtak = vedtakRepository.findByIdOrThrow(UUID.fromString(task.payload))
         vedtakRepository.update(vedtak)
     }

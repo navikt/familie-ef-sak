@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class InternePerioder(
     val overgangsstønad: List<InternPeriode>,
     val barnetilsyn: List<InternPeriode>,
-    val skolepenger: List<InternPeriode>,
+    val skolepenger: List<InternPeriode>
 )
 
 /**

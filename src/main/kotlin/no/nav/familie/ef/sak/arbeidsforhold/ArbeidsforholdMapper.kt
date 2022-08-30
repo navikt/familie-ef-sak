@@ -9,7 +9,7 @@ fun List<Arbeidsforhold>.tilDto() = this.map {
         arbeidstaker = ArbeidstakerDto(
             it.arbeidstaker?.type,
             it.arbeidstaker?.offentligIdent,
-            it.arbeidstaker?.aktoerId,
+            it.arbeidstaker?.aktoerId
         ),
         arbeidsgiver = ArbeidsgiverDto(
             it.arbeidsgiver?.type,

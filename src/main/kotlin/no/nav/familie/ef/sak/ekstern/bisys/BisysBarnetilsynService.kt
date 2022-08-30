@@ -37,12 +37,11 @@ class BisysBarnetilsynService(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
-
         val infotrygdperioder = hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato)
         val perioderBarnetilsyn = hentPerioderBarnetilsyn(personIdent, fomDato)
         return slåSammenPerioder(
             infotrygdPerioder = infotrygdperioder,
-            efPerioder = perioderBarnetilsyn,
+            efPerioder = perioderBarnetilsyn
         )
     }
 

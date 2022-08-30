@@ -117,7 +117,8 @@ internal class VurderingServiceTest {
             aktivitet = mockk(relaxed = true),
             sagtOppEllerRedusertStilling = mockk(relaxed = true),
             lagtTilEtterFerdigstilling = false,
-            registeropplysningerOpprettetTid = mockk(relaxed = true)
+            registeropplysningerOpprettetTid = mockk(relaxed = true),
+            dokumentasjon = mockk(relaxed = true)
         )
     }
 
@@ -290,7 +291,6 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `Skal returnere aktivitet i historikk`() {
-
         val vilkårsvurderingList = VilkårType.hentVilkårForStønad(BARNETILSYN).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,

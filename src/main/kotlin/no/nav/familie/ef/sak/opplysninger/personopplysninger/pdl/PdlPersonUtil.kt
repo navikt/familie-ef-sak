@@ -3,13 +3,19 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 
 fun Navn.visningsnavn(): String {
-    return if (mellomnavn == null) "$fornavn $etternavn"
-    else "$fornavn $mellomnavn $etternavn"
+    return if (mellomnavn == null) {
+        "$fornavn $etternavn"
+    } else {
+        "$fornavn $mellomnavn $etternavn"
+    }
 }
 
 fun Personnavn.visningsnavn(): String {
-    return if (mellomnavn == null) "$fornavn $etternavn"
-    else "$fornavn $mellomnavn $etternavn"
+    return if (mellomnavn == null) {
+        "$fornavn $etternavn"
+    } else {
+        "$fornavn $mellomnavn $etternavn"
+    }
 }
 
 fun List<Navn>.gjeldende(): Navn = this.single()

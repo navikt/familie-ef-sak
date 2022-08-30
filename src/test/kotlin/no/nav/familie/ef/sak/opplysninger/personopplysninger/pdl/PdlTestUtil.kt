@@ -14,7 +14,6 @@ object PdlTestUtil {
     }
 
     fun finnFeltStruktur(entitet: Any?): Map<String, *>? {
-
         if (entitet == null) {
             return null
         }
@@ -61,7 +60,6 @@ object PdlTestUtil {
     }
 
     private fun parseToLabel(line: String): String {
-
         if (line.trim().startsWith("query")) {
             return "data"
         }

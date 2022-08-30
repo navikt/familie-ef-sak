@@ -236,7 +236,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         behandling: Behandling,
         vedtakstidspunkt: LocalDateTime
     ): IverksettOvergangsstønadDto {
-
         val personidenter = fagsak.personIdenter.map { it.ident }.toSet()
         val forrigeBehandling = fagsakService.finnFagsak(personidenter, StønadType.OVERGANGSSTØNAD)?.let {
             behandlingRepository.findByFagsakId(it.id).maxByOrNull { it.sporbar.opprettetTid }

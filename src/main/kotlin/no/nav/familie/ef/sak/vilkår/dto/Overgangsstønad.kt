@@ -75,7 +75,7 @@ data class UnderUtdanningDto(
     val utdanningEtterGrunnskolen: Boolean,
     val semesteravgift: Int?,
     val studieavgift: Int?,
-    val eksamensgebyr: Int?,
+    val eksamensgebyr: Int?
 )
 
 data class UtdanningDto(

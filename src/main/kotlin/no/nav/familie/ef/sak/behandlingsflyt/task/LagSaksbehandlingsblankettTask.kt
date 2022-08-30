@@ -17,7 +17,6 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 15 * 60L,
     beskrivelse = "Lag blankett for å dokumentere saksbehandling (fallback)."
 )
-
 class LagSaksbehandlingsblankettTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService
