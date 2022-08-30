@@ -293,7 +293,6 @@ class StepDefinitions {
                 ?: error("Fant ingen andel med startdato $fraOgMed, forventer: $gjeldendeAndelerTilkjentYtelse")
 
             try {
-
                 assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
                 assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
                 beløpMellom?.let {

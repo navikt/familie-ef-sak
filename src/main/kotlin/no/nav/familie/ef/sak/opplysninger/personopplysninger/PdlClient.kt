@@ -157,7 +157,6 @@ class PdlClient(
     }
 
     private fun httpHeaders(): HttpHeaders {
-
         return HttpHeaders().apply {
             add("Tema", "ENF")
         }

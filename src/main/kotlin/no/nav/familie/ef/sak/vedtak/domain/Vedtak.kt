@@ -92,7 +92,7 @@ data class DelårsperiodeSkoleårSkolepenger(
     val studietype: SkolepengerStudietype,
     val datoFra: LocalDate,
     val datoTil: LocalDate,
-    val studiebelastning: Int,
+    val studiebelastning: Int
 ) {
 
     constructor(
@@ -118,7 +118,7 @@ data class SkolepengerUtgift(
 
 enum class SkolepengerStudietype {
     HØGSKOLE_UNIVERSITET,
-    VIDEREGÅENDE,
+    VIDEREGÅENDE
 }
 
 data class PeriodeMedBeløp(
@@ -190,17 +190,17 @@ enum class AktivitetType {
     FORLENGELSE_STØNAD_PÅVENTE_OPPSTART_KVALIFISERINGSPROGRAM,
     FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING,
     FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
-    FORLENGELSE_STØNAD_UT_SKOLEÅRET,
+    FORLENGELSE_STØNAD_UT_SKOLEÅRET
 }
 
 enum class AvslagÅrsak {
     VILKÅR_IKKE_OPPFYLT,
     BARN_OVER_ÅTTE_ÅR,
     STØNADSTID_OPPBRUKT,
-    MANGLENDE_OPPLYSNINGER,
+    MANGLENDE_OPPLYSNINGER
 }
 
 enum class SamordningsfradragType {
     GJENLEVENDEPENSJON,
-    UFØRETRYGD,
+    UFØRETRYGD
 }

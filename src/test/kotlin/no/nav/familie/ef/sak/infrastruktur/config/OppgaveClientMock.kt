@@ -55,7 +55,6 @@ class OppgaveClientMock {
         every { oppgaveClient.finnMapper(any()) } answers {
             val mappeRequest: FinnMappeRequest = firstArg()
             if (mappeRequest.enhetsnr == "4489") {
-
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
                     mapper = listOf(
@@ -153,14 +152,14 @@ class OppgaveClientMock {
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
-        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "2345")
+        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "23456")
     private val oppgaveEttersending =
         lagOppgave(
             6L,
             Oppgavetype.Journalføring,
             beskivelse = "Ettersending",
             behandlesAvApplikasjon = "familie-ef-sak",
-            journalpostId = "2345"
+            journalpostId = "23457"
         )
     private val oppgaveEttersendingUtenBehandlesAvApplikasjon =
         lagOppgave(
@@ -168,7 +167,7 @@ class OppgaveClientMock {
             Oppgavetype.Journalføring,
             beskivelse = "Ettersending uten behandlesAvApplikasjon",
             behandlesAvApplikasjon = "",
-            journalpostId = "2345"
+            journalpostId = "23458"
         )
     private val tilbakekreving1 = lagOppgave(
         4L,

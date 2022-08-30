@@ -17,7 +17,7 @@ import java.util.UUID
 enum class EndringType {
     FJERNET,
     ERSTATTET,
-    SPLITTET,
+    SPLITTET
 }
 
 data class AndelHistorikkDto(
@@ -50,7 +50,7 @@ data class AndelMedGrunnlagDto(
     val utgifter: BigDecimal = BigDecimal.ZERO,
     val barn: List<UUID>,
     val sats: Int,
-    val beløpFørFratrekkOgSatsJustering: Int,
+    val beløpFørFratrekkOgSatsJustering: Int
 ) {
 
     constructor(
@@ -68,7 +68,7 @@ data class AndelMedGrunnlagDto(
         antallBarn = vedtaksinformasjon?.antallBarn ?: 0,
         barn = vedtaksinformasjon?.barn ?: emptyList(),
         sats = vedtaksinformasjon?.sats ?: 0,
-        beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0,
+        beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0
     )
 
     @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato"))

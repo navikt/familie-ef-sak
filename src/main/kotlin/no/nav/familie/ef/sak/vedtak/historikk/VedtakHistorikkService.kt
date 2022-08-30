@@ -18,7 +18,7 @@ import java.util.UUID
 @Service
 class VedtakHistorikkService(
     private val fagsakService: FagsakService,
-    private val andelsHistorikkService: AndelsHistorikkService,
+    private val andelsHistorikkService: AndelsHistorikkService
 ) {
 
     /**

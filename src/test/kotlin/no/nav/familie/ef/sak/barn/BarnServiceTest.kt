@@ -5,13 +5,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -58,8 +59,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.BARNETILSYN,
-            BehandlingÅrsak.SØKNAD
+            StønadType.BARNETILSYN
         )
 
         assertThat(barnSlot.captured).hasSize(4)
@@ -82,8 +82,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.OVERGANGSSTØNAD,
-            BehandlingÅrsak.SØKNAD
+            StønadType.OVERGANGSSTØNAD
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -106,8 +105,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.SKOLEPENGER,
-            BehandlingÅrsak.SØKNAD
+            StønadType.SKOLEPENGER
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -251,7 +249,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 emptyList(),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
         }
@@ -265,10 +263,10 @@ internal class BarnServiceTest {
                     fagsakId,
                     emptyList(),
                     StønadType.OVERGANGSSTØNAD,
-                    BehandlingÅrsak.SØKNAD,
+                    UstrukturertDokumentasjonType.IKKE_VALGT,
                     listOf(BarnSomSkalFødes(termindato))
                 )
-            }.hasMessage("Kan ikke legge til terminbarn med behandlingsårsak=SØKNAD")
+            }.hasMessage("Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=IKKE_VALGT")
         }
 
         @Test
@@ -282,7 +280,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 listOf(barnMedIdent),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
             assertThat(barnSlot.captured).hasSize(1)
@@ -306,7 +304,7 @@ internal class BarnServiceTest {
                 fagsakId,
                 listOf(barnMedIdent, barnMedIdent2),
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
             assertThat(barnSlot.captured).hasSize(2)
@@ -335,11 +333,61 @@ internal class BarnServiceTest {
                 fagsakId,
                 grunnlagsdataBarn,
                 StønadType.OVERGANGSSTØNAD,
-                BehandlingÅrsak.PAPIRSØKNAD
+                UstrukturertDokumentasjonType.PAPIRSØKNAD
             )
 
             assertThat(barnSlot.captured).hasSize(1)
             assertThat(barnSlot.captured[0].navn).isEqualTo("Under 18")
+        }
+    }
+
+    @Nested
+    inner class Ettersending {
+
+        private val grunnlagsdataBarn = listOf(
+            barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B")
+        )
+
+        @Test
+        internal fun `skal legge til registerbarn på behandling hvis man skal vilkårsbehandle nye barn`() {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("J B")
+        }
+
+        @Test
+        internal fun `skal ikke legge til registerbarn på behandling hvis man ikke skal vilkårsbehandle nye barn`() {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).isEmpty()
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis vilkårsbehandleNyeBarn ikke er valgt`() {
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    grunnlagsdataBarn,
+                    StønadType.OVERGANGSSTØNAD,
+                    UstrukturertDokumentasjonType.ETTERSENDING
+                )
+            }.hasMessage("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
         }
     }
 

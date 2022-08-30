@@ -31,7 +31,7 @@ data class VedtakshistorikkperiodeOvergangsstønad(
     override val periode: Månedsperiode,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
     val aktivitet: AktivitetType,
-    val periodeType: VedtaksperiodeType,
+    val periodeType: VedtaksperiodeType
 ) : Vedtakshistorikkperiode() {
 
     override val erSanksjon = periodeType == VedtaksperiodeType.SANKSJON
@@ -63,7 +63,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
     val aktivitetArbeid: SvarId?,
     val barn: List<UUID>,
     val sats: Int,
-    val beløpFørFratrekkOgSatsjustering: Int,
+    val beløpFørFratrekkOgSatsjustering: Int
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
@@ -77,7 +77,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
             aktivitetArbeid = aktivitetArbeid,
             barn = periode.beregningsgrunnlag.barn,
             sats = periode.sats,
-            beløpFørFratrekkOgSatsjustering = periode.beløpFørFratrekkOgSatsjustering,
+            beløpFørFratrekkOgSatsjustering = periode.beløpFørFratrekkOgSatsjustering
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -106,7 +106,6 @@ object VedtakHistorikkBeregner {
         data: BehandlingHistorikkData,
         acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>
     ): List<Vedtakshistorikkperiode> {
-
         val vedtak = data.vedtakDto
         return when (vedtak) {
             is InnvilgelseOvergangsstønad -> {
@@ -179,7 +178,7 @@ object VedtakHistorikkBeregner {
                     barn = emptyList(),
                     sats = 0,
                     beløpFørFratrekkOgSatsjustering = 0,
-                    sanksjonsårsak = vedtak.sanksjonsårsak,
+                    sanksjonsårsak = vedtak.sanksjonsårsak
                 )
         }
 

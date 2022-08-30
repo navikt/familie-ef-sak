@@ -26,7 +26,6 @@ class ForberedOppgaverTerminbarnService(
 
     @Transactional
     fun forberedOppgaverForUfødteTerminbarn() {
-
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
             .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
             .groupBy { it.behandlingId }
@@ -54,7 +53,6 @@ class ForberedOppgaverTerminbarnService(
         barnTilUtplukkForOppgave: List<TerminbarnTilUtplukkForOppgave>,
         fødselsnummerSøker: String
     ): List<OppgaveForBarn> {
-
         return barnTilUtplukkForOppgave
             .map {
                 terminbarnRepository.insert(it.tilTerminbarnOppgave())

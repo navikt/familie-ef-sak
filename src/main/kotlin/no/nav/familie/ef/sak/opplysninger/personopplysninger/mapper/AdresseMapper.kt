@@ -57,7 +57,9 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
     private fun angittFlyttedato(localDate: LocalDate?): LocalDate? {
         return if (localDate == LocalDate.of(1, 1, 1)) {
             null
-        } else localDate
+        } else {
+            localDate
+        }
     }
 
     private fun tilFormatertAdresse(bostedsadresse: Bostedsadresse, gjeldendeDato: LocalDate): String? {
@@ -179,6 +181,8 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
         val filterNotNull = args.filterNotNull().filterNot(String::isEmpty)
         return if (filterNotNull.isEmpty()) {
             null
-        } else filterNotNull.joinToString(separator)
+        } else {
+            filterNotNull.joinToString(separator)
+        }
     }
 }

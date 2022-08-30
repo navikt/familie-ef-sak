@@ -102,7 +102,7 @@ enum class AdresseType(val rekkefølge: Int) {
     BOSTEDADRESSE(1),
     OPPHOLDSADRESSE(2),
     KONTAKTADRESSE(3),
-    KONTAKTADRESSE_UTLAND(4),
+    KONTAKTADRESSE_UTLAND(4)
 }
 
 data class FullmaktDto(

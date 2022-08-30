@@ -59,10 +59,11 @@ class OppgaveClient(
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): Long {
         val baseUri = URI.create("$oppgaveUri/$oppgaveId/fordel")
-        val uri = if (saksbehandler == null)
+        val uri = if (saksbehandler == null) {
             baseUri
-        else
+        } else {
             UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+        }
 
         try {
             val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())

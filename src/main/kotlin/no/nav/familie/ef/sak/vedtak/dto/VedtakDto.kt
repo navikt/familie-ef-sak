@@ -39,7 +39,7 @@ enum class ResultatType {
     AVSLÅ,
     HENLEGGE,
     OPPHØRT,
-    SANKSJONERE,
+    SANKSJONERE
 }
 
 enum class Sanksjonsårsak {
@@ -47,7 +47,7 @@ enum class Sanksjonsårsak {
     NEKTET_TILBUDT_ARBEID,
     SAGT_OPP_STILLING,
     UNNLATT_GJENOPPTAGELSE_ARBEIDSFORHOLD,
-    UNNLATT_MØTE_INNKALLING,
+    UNNLATT_MØTE_INNKALLING
 }
 
 fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
@@ -217,7 +217,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
         }
         ResultatType.AVSLÅ -> Avslå(
             avslåBegrunnelse = this.avslåBegrunnelse,
-            avslåÅrsak = this.avslåÅrsak,
+            avslåÅrsak = this.avslåÅrsak
         )
         ResultatType.OPPHØRT -> {
             if (this.skolepenger != null) {
@@ -234,7 +234,7 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
                 ?: this.barnetilsyn?.perioder?.single()?.fraDomeneForSanksjon()
                 ?: error("Mangler perioder for sanksjon"),
-            internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse."),
+            internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
         )
         else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
     }
