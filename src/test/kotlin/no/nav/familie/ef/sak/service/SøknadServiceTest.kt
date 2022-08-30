@@ -17,9 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class SøknadServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var søknadRepository: SøknadRepository
-    @Autowired lateinit var søknadService: SøknadService
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var søknadRepository: SøknadRepository
+
+    @Autowired
+    lateinit var søknadService: SøknadService
 
     @Test
     internal fun `skal kopiere søknadskjema til ny behandling`() {

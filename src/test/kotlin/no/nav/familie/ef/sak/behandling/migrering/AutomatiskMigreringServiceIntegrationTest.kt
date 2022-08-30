@@ -3,10 +3,10 @@ package no.nav.familie.ef.sak.behandling.migrering
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.fagsak.FagsakPersonRepository
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -17,11 +17,20 @@ import java.time.LocalDate
 
 internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var iverksettClient: IverksettClient
-    @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
-    @Autowired private lateinit var migreringsstatusRepository: MigreringsstatusRepository
-    @Autowired private lateinit var automatiskMigreringService: AutomatiskMigreringService
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
+    @Autowired
+    private lateinit var iverksettClient: IverksettClient
+
+    @Autowired
+    private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+
+    @Autowired
+    private lateinit var migreringsstatusRepository: MigreringsstatusRepository
+
+    @Autowired
+    private lateinit var automatiskMigreringService: AutomatiskMigreringService
+
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
 
     private val periode1dato = LocalDate.now().plusYears(1)
     private val periode2dato = LocalDate.now().plusYears(2)
@@ -39,7 +48,7 @@ internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTe
             lagInfotrygdPeriode(vedtakId = 1, stønadFom = periode1dato, stønadTom = periode1dato.plusDays(1)),
             lagInfotrygdPeriode(vedtakId = 2, stønadFom = periode2dato, stønadTom = periode2dato.plusDays(1))
         )
-        every { infotrygdReplikaClient.hentPerioder(any()) } returns
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
             InfotrygdPeriodeResponse(perioderOvergangsstønad, emptyList(), emptyList())
 
         automatiskMigreringService.migrerPersonAutomatisk(personIdent)

@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -20,9 +20,12 @@ class ForberedOppgaverForBarnService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato: LocalDate, dryRun: Boolean = false) {
+    fun forberedOppgaverForAlleBarnSomFyllerAarNesteUke(referansedato: LocalDate) {
         val gjeldendeBarn =
-            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, referansedato) +
+            gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(
+                StønadType.OVERGANGSSTØNAD,
+                referansedato
+            ) +
                 gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, referansedato)
         logger.info(
             "Fant totalt ${gjeldendeBarn.size} barn, " +
@@ -35,11 +38,7 @@ class ForberedOppgaverForBarnService(
         val oppgaver = lagOppgaverForBarn(barnSomFyllerAar)
         logger.info("Fant ${oppgaver.size} oppgaver som skal opprettes ved forbereding av oppgaver for barn som fyller år")
         if (oppgaver.isNotEmpty()) {
-            if (dryRun) {
-                oppgaver.forEach { logger.info("Dryrun - oppretter oppgave for ${it.behandlingId}") }
-            } else {
-                sendOppgaverTilIverksett(oppgaver)
-            }
+            sendOppgaverTilIverksett(oppgaver)
         }
     }
 

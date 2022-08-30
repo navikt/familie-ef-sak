@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import java.util.UUID
 
 class TidligareVedtaksperioderRegel : Vilkårsregel(
     vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
@@ -27,16 +28,17 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
 
     override fun initereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
-        resultat: Vilkårsresultat
+        resultat: Vilkårsresultat,
+        barnId: UUID?
     ): List<Delvilkårsvurdering> {
-        val harTidligereMotattOvergangsstønad = if (metadata.erMigrering) null else SvarId.NEI
+        val harTidligereMottattOvergangsstønad = if (metadata.erMigrering) null else SvarId.NEI
         return listOf(
             Delvilkårsvurdering(
                 resultat = Vilkårsresultat.OPPFYLT,
                 listOf(
                     Vurdering(
                         regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-                        svar = harTidligereMotattOvergangsstønad
+                        svar = harTidligereMottattOvergangsstønad
                     )
                 )
             ),

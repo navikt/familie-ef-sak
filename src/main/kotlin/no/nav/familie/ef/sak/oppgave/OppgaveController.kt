@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api/oppgave")
@@ -35,6 +38,7 @@ class OppgaveController(
     private val pdlClient: PdlClient
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @PostMapping(
@@ -49,7 +53,7 @@ class OppgaveController(
             ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
-        val oppgaveRepons: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
+        val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
         return Ressurs.success(oppgaveRepons.tilDto())
     }
 
@@ -88,6 +92,22 @@ class OppgaveController(
         return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
     }
 
+    @GetMapping("{behandlingId}/tilordnet-ressurs")
+    fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
+        val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
+        if (oppgave != null && saksbehandlerIdentIOppgaveSystemet != saksbehandlerIdent) {
+            logger.info(
+                "(Eier av behandling/oppgave) " +
+                    "Saksbehandler $saksbehandlerIdent er inne i behandling=$behandlingId " +
+                    "mens oppgaven=${oppgave.id} er tilordnet $saksbehandlerIdentIOppgaveSystemet " +
+                    "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}"
+            )
+        }
+        return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
+    }
+
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
         return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
@@ -96,7 +116,6 @@ class OppgaveController(
 
 private fun FinnOppgaveResponseDto.tilDto(): OppgaveResponseDto {
     val oppgaver = oppgaver.map {
-
         it.tilDto()
     }
     return OppgaveResponseDto(antallTreffTotalt, oppgaver)

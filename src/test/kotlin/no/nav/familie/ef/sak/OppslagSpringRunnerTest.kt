@@ -42,7 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
@@ -78,13 +78,27 @@ abstract class OppslagSpringRunnerTest {
     protected val restTemplate = TestRestTemplate()
     protected val headers = HttpHeaders()
 
-    @Autowired private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
-    @Autowired private lateinit var applicationContext: ApplicationContext
-    @Autowired private lateinit var cacheManager: CacheManager
-    @Autowired @Qualifier("kodeverkCache") private lateinit var cacheManagerKodeverk: CacheManager
-    @Autowired private lateinit var rolleConfig: RolleConfig
-    @Autowired private lateinit var mockOAuth2Server: MockOAuth2Server
-    @Autowired lateinit var testoppsettService: TestoppsettService
+    @Autowired
+    private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
+
+    @Autowired
+    private lateinit var applicationContext: ApplicationContext
+
+    @Autowired
+    private lateinit var cacheManager: CacheManager
+
+    @Autowired
+    @Qualifier("kodeverkCache")
+    private lateinit var cacheManagerKodeverk: CacheManager
+
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
+    @Autowired
+    private lateinit var mockOAuth2Server: MockOAuth2Server
+
+    @Autowired
+    lateinit var testoppsettService: TestoppsettService
 
     @LocalServerPort
     private var port: Int? = 0
@@ -137,7 +151,7 @@ abstract class OppslagSpringRunnerTest {
             FagsakPerson::class,
             TaskLogg::class,
             Task::class,
-            Migreringsstatus::class,
+            Migreringsstatus::class
 
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }

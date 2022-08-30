@@ -64,10 +64,10 @@ internal class TidligereVedaksperioderServiceTest {
     }
 
     @Test
-    internal fun `skal sjekke om personIdent har historikk i ef-sak og infotrygd`() {
+    internal fun `skal sjekke om annen forelder har historikk i ef-sak og infotrygd`() {
         mockTidligereVedtakEfSak(harAndeler = true)
 
-        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(personIdent)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(setOf(personIdent))
 
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereOvergangsstønad).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereBarnetilsyn).isTrue
@@ -88,7 +88,7 @@ internal class TidligereVedaksperioderServiceTest {
     internal fun `hvis en person ikke har noen aktive andeler så har man ikke tidligere vedtaksperioder i ef`() {
         mockTidligereVedtakEfSak(harAndeler = false)
 
-        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(personIdent)
+        val tidligereVedtaksperioder = service.hentTidligereVedtaksperioder(setOf(personIdent))
 
         val sak = tidligereVedtaksperioder.sak ?: error("Forventet at sak ikke er null")
         assertThat(sak.harTidligereOvergangsstønad).isFalse

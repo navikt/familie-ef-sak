@@ -35,11 +35,20 @@ import java.util.UUID
 
 internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var vurderingService: VurderingService
-    @Autowired lateinit var søknadService: SøknadService
-    @Autowired lateinit var barnRepository: BarnRepository
+    @Autowired
+    lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var vurderingService: VurderingService
+
+    @Autowired
+    lateinit var søknadService: SøknadService
+
+    @Autowired
+    lateinit var barnRepository: BarnRepository
 
     @Test
     internal fun `kopierVurderingerTilNyBehandling - skal kopiere vurderinger til ny behandling`() {
@@ -99,7 +108,8 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                 vurderingService.kopierVurderingerTilNyBehandling(
                     tidligereBehandlingId,
                     revurdering.id,
-                    metadata, StønadType.OVERGANGSSTØNAD
+                    metadata,
+                    StønadType.OVERGANGSSTØNAD
                 )
             }
         )
@@ -108,13 +118,19 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `aktivitet arbeid for behandlingIds`() {
-
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.BARNETILSYN))
         val behandling = behandling(fagsak)
-        val førstegangsbehandling = behandlingRepository.insert(behandling)
+        behandlingRepository.insert(behandling)
         val vilkårsvurdering = vilkårsvurdering(
-            behandling.id, Vilkårsresultat.OPPFYLT, VilkårType.AKTIVITET_ARBEID,
-            listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))))
+            behandling.id,
+            Vilkårsresultat.OPPFYLT,
+            VilkårType.AKTIVITET_ARBEID,
+            listOf(
+                Delvilkårsvurdering(
+                    Vilkårsresultat.OPPFYLT,
+                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
+                )
+            )
         )
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 

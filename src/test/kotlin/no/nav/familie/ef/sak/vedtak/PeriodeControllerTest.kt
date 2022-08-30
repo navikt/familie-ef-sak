@@ -19,7 +19,8 @@ import org.springframework.http.ResponseEntity
 
 internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
     @BeforeEach
     fun setUp() {
@@ -38,7 +39,7 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
                 HttpEntity(null, headers)
             )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
     @Test
@@ -53,6 +54,6 @@ internal class PeriodeControllerTest : OppslagSpringRunnerTest() {
                 HttpEntity(null, headers)
             )
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 }

@@ -22,7 +22,8 @@ import java.time.LocalDate
 @Disabled
 internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var restTemplateBuilder: RestTemplateBuilder
+    @Autowired
+    private lateinit var restTemplateBuilder: RestTemplateBuilder
 
     data class TestDto(val dato: LocalDate = LocalDate.of(2020, 1, 1))
 
@@ -44,7 +45,7 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         val build = restTemplateBuilder.build()
         val customizers = RestTemplateBuilder::class.java.getDeclaredField("customizers")
         customizers.isAccessible = true
-        assertThat(customizers.get(restTemplateBuilder) as Set<Any>).isEmpty()
+        assertThat(customizers.get(restTemplateBuilder) as Set<*>).isEmpty()
         assertThat(catchThrowable { build.getForEntity<String>("http://microsoft") })
             .hasMessageContaining(
                 "I/O error on GET request for \"http://microsoft\": " +

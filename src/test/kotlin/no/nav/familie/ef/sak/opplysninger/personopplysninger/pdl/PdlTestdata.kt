@@ -34,13 +34,15 @@ object PdlTestdata {
     private val pdlSøkerKortBolk = PersonBolk(
         listOf(
             PersonDataBolk(
-                "11111122222", "ok",
+                "11111122222",
+                "ok",
                 PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn)
             )
         )
     )
 
-    private val adressebeskyttelse = listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
+    private val adressebeskyttelse =
+        listOf(Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadataGjeldende))
 
     private val bostedsadresse = listOf(
         Bostedsadresse(
@@ -58,7 +60,8 @@ object PdlTestdata {
 
     private val dødsfall = listOf(Dødsfall(LocalDate.now()))
 
-    private val familierelasjon = listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
+    private val familierelasjon =
+        listOf(ForelderBarnRelasjon("", Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR))
 
     private val fødsel = listOf(Fødsel(1, LocalDate.now(), "", "", "", metadataGjeldende))
 
@@ -66,9 +69,13 @@ object PdlTestdata {
 
     private val oppholdsadresse = listOf(
         Oppholdsadresse(
-            LocalDate.now(), null, "",
+            LocalDate.now(),
+            null,
+            "",
             utenlandskAdresse,
-            vegadresse, "", metadataGjeldende
+            vegadresse,
+            "",
+            metadataGjeldende
         )
     )
 
@@ -78,6 +85,16 @@ object PdlTestdata {
 
     private val utflyttingFraNorge = listOf(UtflyttingFraNorge("", "", LocalDate.now(), folkeregistermetadata))
 
+    val søkerIdentifikator = "1"
+
+    val folkeregisteridentifikatorSøker = listOf(
+        Folkeregisteridentifikator(
+            søkerIdentifikator,
+            FolkeregisteridentifikatorStatus.I_BRUK,
+            metadataGjeldende
+        )
+    )
+
     val pdlSøkerData =
         PdlSøkerData(
             PdlSøker(
@@ -85,6 +102,7 @@ object PdlTestdata {
                 bostedsadresse,
                 dødsfall,
                 familierelasjon,
+                folkeregisteridentifikatorSøker,
                 fødsel,
                 listOf(Folkeregisterpersonstatus("", "", metadataGjeldende)),
                 listOf(
@@ -147,7 +165,8 @@ object PdlTestdata {
         PersonBolk(
             listOf(
                 PersonDataBolk(
-                    "11111122222", "ok",
+                    "11111122222",
+                    "ok",
                     PdlBarn(
                         adressebeskyttelse,
                         bostedsadresse,
@@ -156,7 +175,8 @@ object PdlTestdata {
                                 LocalDate.now(),
                                 LocalDate.now(),
                                 vegadresse,
-                                UkjentBosted(""), metadataGjeldende
+                                UkjentBosted(""),
+                                metadataGjeldende
                             )
                         ),
                         dødsfall,
@@ -168,16 +188,28 @@ object PdlTestdata {
             )
         )
 
+    val ennenForelderIdentifikator = "2"
+
+    val folkeregisteridentifikatorAnnenForelder = listOf(
+        Folkeregisteridentifikator(
+            ennenForelderIdentifikator,
+            FolkeregisteridentifikatorStatus.I_BRUK,
+            metadataGjeldende
+        )
+    )
+
     val pdlAnnenForelderData =
         PersonBolk(
             listOf(
                 PersonDataBolk(
-                    "11111122222", "ok",
+                    "11111122222",
+                    "ok",
                     PdlAnnenForelder(
                         adressebeskyttelse,
                         bostedsadresse,
                         dødsfall,
                         fødsel,
+                        folkeregisteridentifikatorAnnenForelder,
                         navn
                     )
                 )
@@ -187,7 +219,8 @@ object PdlTestdata {
     val pdlPersonKortBolk = PersonBolk(
         listOf(
             PersonDataBolk(
-                "11111122222", "ok",
+                "11111122222",
+                "ok",
                 PdlPersonKort(
                     adressebeskyttelse,
                     navn,
@@ -202,7 +235,7 @@ object PdlTestdata {
             hits = listOf(
                 PersonSøkTreff(
                     PdlPersonFraSøk(
-                        listOf(Folkeregisteridentifikator("123456789")),
+                        listOf(FolkeregisteridentifikatorFraSøk("123456789")),
                         bostedsadresse,
                         navn
                     )

@@ -33,11 +33,20 @@ import java.util.UUID
 
 class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var barnRepository: BarnRepository
-    @Autowired private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
+    @Autowired
+    private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
+
+    @Autowired
+    private lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     @Test
     internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel, forvent barn fra behandling med fremtidig andel `() {
@@ -86,10 +95,12 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
                 identer = fagsakpersonerAvPersonIdenter(
                     setOf(
                         PersonIdent(
-                            nyesteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now())
+                            nyesteFnrSøker,
+                            Sporbar(opprettetTid = LocalDateTime.now())
                         ),
                         PersonIdent(
-                            eldsteFnrSøker, Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
+                            eldsteFnrSøker,
+                            Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
                         )
                     )
                 )

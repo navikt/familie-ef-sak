@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -95,7 +96,8 @@ internal class VedtakHistorikkBeregnerTest {
 
         validerFørsteVedtakErUendret(vedtaksperioderPerBehandling)
         validerPeriode(
-            vedtaksperioderPerBehandling, andreVedtak.behandlingId,
+            vedtaksperioderPerBehandling,
+            andreVedtak.behandlingId,
             listOf(
                 førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31))
                     .tilHistorikk()
@@ -144,11 +146,10 @@ internal class VedtakHistorikkBeregnerTest {
         )
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
-        this.datoFra,
-        this.datoTil,
+        Månedsperiode(this.datoFra, this.datoTil),
         sanksjonsårsak = null,
         this.aktivitet,
-        this.periodeType,
+        this.periodeType
     )
 
     private fun lagVedtak(
@@ -170,8 +171,7 @@ internal class VedtakHistorikkBeregnerTest {
                         it.firstOrNull()
                             ?.let {
                                 Inntektsperiode(
-                                    it.datoFra,
-                                    it.datoTil,
+                                    it.periode,
                                     BigDecimal.ZERO,
                                     BigDecimal.ZERO
                                 )

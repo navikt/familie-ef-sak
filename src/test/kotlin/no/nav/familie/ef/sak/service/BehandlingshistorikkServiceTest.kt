@@ -23,13 +23,17 @@ import java.time.LocalDateTime
 
 internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingshistorikkService: BehandlingshistorikkService
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
+    @Autowired
+    private lateinit var behandlingshistorikkService: BehandlingshistorikkService
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
 
     @Test
     fun `lagre behandling og hent historikk`() {
-
         /** Lagre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
@@ -53,7 +57,6 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `Finn hendelseshistorikk på behandling uten historikk`() {
-
         /** Lagre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
@@ -100,7 +103,8 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
 
         val fagsak1 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("16"))))
 
-        val behandling1 = behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType, status = BehandlingStatus.FERDIGSTILT))
+        val behandling1 =
+            behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType, status = BehandlingStatus.FERDIGSTILT))
         val behandling2 = behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType))
 
         val tidspunkt = SporbarUtils.now()

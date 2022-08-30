@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerCli
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
@@ -56,7 +56,6 @@ internal class SøkServiceTest {
 
     @Test
     fun `skal finne personIdent, navn og adresse gitt bostedsadresse`() {
-
         val vegadresse = Vegadresse(
             "23",
             "A",
@@ -89,7 +88,7 @@ internal class SøkServiceTest {
             hits = listOf(
                 PersonSøkTreff(
                     person = PdlPersonFraSøk(
-                        listOf(Folkeregisteridentifikator("123456789")),
+                        listOf(FolkeregisteridentifikatorFraSøk("123456789")),
                         bostedsadresseFraPdl,
                         navnFraPdl
                     )

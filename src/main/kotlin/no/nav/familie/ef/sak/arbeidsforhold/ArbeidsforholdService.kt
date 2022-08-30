@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 @Service
 class ArbeidsforholdService(

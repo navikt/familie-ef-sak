@@ -47,15 +47,32 @@ import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var behandlingService: BehandlingService
-    @Autowired private lateinit var rolleConfig: RolleConfig
-    @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
-    @Autowired private lateinit var vedtakRepository: VedtakRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var søknadService: SøknadService
-    @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
-    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
+    @Autowired
+    private lateinit var vedtaksbrevService: VedtaksbrevService
+
+    @Autowired
+    private lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var søknadService: SøknadService
+
+    @Autowired
+    private lateinit var grunnlagsdataService: GrunnlagsdataService
+
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
@@ -91,7 +108,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, ikkeLag = 1)
         sendTilBeslutter(SAKSBEHANDLER) { response ->
-            assertThat(response.body.frontendFeilmelding)
+            assertThat(response.body?.frontendFeilmelding)
                 .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
         }
     }
@@ -101,7 +118,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         val behandlingId = opprettBehandling(vedtakResultatType = ResultatType.INNVILGE)
         lagVilkårsvurderinger(behandlingId, Vilkårsresultat.IKKE_OPPFYLT)
         sendTilBeslutter(SAKSBEHANDLER) { response ->
-            assertThat(response.body.frontendFeilmelding)
+            assertThat(response.body?.frontendFeilmelding)
                 .isEqualTo("Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: $behandlingId")
         }
     }
@@ -227,7 +244,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
         assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(it.body.status).isEqualTo(Ressurs.Status.SUKSESS)
+        assertThat(it.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
     }
 
     private fun <T> responseServerError(): (ResponseEntity<Ressurs<T>>) -> Unit = {
@@ -289,7 +306,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
                 HttpEntity<Any>(headers)
             )
         responseOK<TotrinnskontrollStatusDto>().invoke(response)
-        return response.body.data!!
+        return response.body?.data!!
     }
 
     private fun validerBehandlingUtredes() = validerBehandling(BehandlingStatus.UTREDES, StegType.SEND_TIL_BESLUTTER)

@@ -49,6 +49,7 @@ class PersonopplysningerMapper(
                 ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
                 ?.let { Folkeregisterpersonstatus.fraPdl(it) },
+            fødselsdato = søker.fødsel.gjeldende().fødselsdato,
             dødsdato = søker.dødsfall?.dødsdato,
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
@@ -71,7 +72,8 @@ class PersonopplysningerMapper(
                     gyldigFraOgMed = it.gyldigFraOgMed,
                     gyldigTilOgMed = it.gyldigTilOgMed,
                     motpartsPersonident = it.motpartsPersonident,
-                    navn = it.navn
+                    navn = it.navn,
+                    områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList()
                 )
             }.sortedByDescending { it.gyldigFraOgMed },
             egenAnsatt = egenAnsatt,
@@ -90,6 +92,13 @@ class PersonopplysningerMapper(
             oppholdstillatelse = OppholdstillatelseMapper.map(søker.opphold),
             vergemål = mapVergemål(søker)
         )
+    }
+
+    private fun mapOmråde(område: String): String {
+        return when (område) {
+            "*" -> "ALLE"
+            else -> område
+        }
     }
 
     private fun mapVergemål(søker: Søker) =
@@ -118,7 +127,6 @@ class PersonopplysningerMapper(
         bostedsadresserForelder: List<Bostedsadresse>,
         annenForelderMap: Map<String, AnnenForelderMedIdent>
     ): BarnDto {
-
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent

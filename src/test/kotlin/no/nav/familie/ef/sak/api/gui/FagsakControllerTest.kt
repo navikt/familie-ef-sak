@@ -24,7 +24,8 @@ import java.util.UUID
 
 internal class FagsakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @BeforeEach
     fun setUp() {
@@ -57,12 +58,12 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling(fagsak))
 
         val fagsakForId = hentFagsakForId(fagsak.id)
-        Assertions.assertThat(fagsakForId.data?.id).isEqualTo(fagsak.id)
-        Assertions.assertThat(fagsakForId.data?.behandlinger?.size).isEqualTo(2)
-        Assertions.assertThat(fagsakForId.data?.behandlinger!!.all { it.resultat == BehandlingResultat.IKKE_SATT })
+        Assertions.assertThat(fagsakForId?.data?.id).isEqualTo(fagsak.id)
+        Assertions.assertThat(fagsakForId?.data?.behandlinger?.size).isEqualTo(2)
+        Assertions.assertThat(fagsakForId?.data?.behandlinger!!.all { it.resultat == BehandlingResultat.IKKE_SATT })
     }
 
-    private fun hentFagsakForId(fagsakId: UUID): Ressurs<FagsakDto> {
+    private fun hentFagsakForId(fagsakId: UUID): Ressurs<FagsakDto>? {
         val response = restTemplate.exchange<Ressurs<FagsakDto>>(
             localhost("/api/fagsak/$fagsakId"),
             HttpMethod.GET,
@@ -70,7 +71,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
         )
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        Assertions.assertThat(response.body.status).isEqualTo(Ressurs.Status.SUKSESS)
+        Assertions.assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         return response.body
     }
 }

@@ -4,7 +4,13 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.AVSLÅTT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.OPPHØRT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.metrics.domain.BehandlingerPerStatus
@@ -20,6 +26,9 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,9 +39,14 @@ import java.time.temporal.IsoFields
 
 class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var målerRepository: MålerRepository
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    @Autowired
+    lateinit var målerRepository: MålerRepository
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     private val år = LocalDate.now().get(IsoFields.WEEK_BASED_YEAR)
     private val uke = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
@@ -40,7 +54,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `finnAntallBehandlingerAvÅrsak - finner riktig antall`() {
         assertThat(målerRepository.finnAntallBehandlingerAvÅrsak(BehandlingÅrsak.MIGRERING)).isEqualTo(0)
-        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("4")), stønadstype = StønadType.OVERGANGSSTØNAD)
+        val fagsakBarneTilsyn = fagsak(setOf(PersonIdent("4")), stønadstype = OVERGANGSSTØNAD)
 
         testoppsettService.lagreFagsak(fagsakBarneTilsyn)
 
@@ -55,9 +69,9 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(finnÅpneBehandlinger.size).isEqualTo(3)
         assertThat(finnÅpneBehandlinger).containsExactlyInAnyOrder(
-            ForekomsterPerUke(år, uke, StønadType.SKOLEPENGER, 15),
-            ForekomsterPerUke(år, uke, StønadType.OVERGANGSSTØNAD, 15),
-            ForekomsterPerUke(år, uke, StønadType.BARNETILSYN, 15)
+            ForekomsterPerUke(år, uke, SKOLEPENGER, 15),
+            ForekomsterPerUke(år, uke, OVERGANGSSTØNAD, 15),
+            ForekomsterPerUke(år, uke, BARNETILSYN, 15)
         )
     }
 
@@ -68,21 +82,21 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(finnKlarTilBehandling.size).isEqualTo(15)
         assertThat(finnKlarTilBehandling).containsExactlyInAnyOrder(
-            BehandlingerPerStatus(StønadType.SKOLEPENGER, BehandlingStatus.UTREDES, 3),
-            BehandlingerPerStatus(StønadType.OVERGANGSSTØNAD, BehandlingStatus.UTREDES, 3),
-            BehandlingerPerStatus(StønadType.BARNETILSYN, BehandlingStatus.UTREDES, 3),
-            BehandlingerPerStatus(StønadType.OVERGANGSSTØNAD, BehandlingStatus.OPPRETTET, 3),
-            BehandlingerPerStatus(StønadType.BARNETILSYN, BehandlingStatus.OPPRETTET, 3),
-            BehandlingerPerStatus(StønadType.SKOLEPENGER, BehandlingStatus.OPPRETTET, 3),
-            BehandlingerPerStatus(StønadType.OVERGANGSSTØNAD, BehandlingStatus.FATTER_VEDTAK, 3),
-            BehandlingerPerStatus(StønadType.BARNETILSYN, BehandlingStatus.FATTER_VEDTAK, 3),
-            BehandlingerPerStatus(StønadType.SKOLEPENGER, BehandlingStatus.FATTER_VEDTAK, 3),
-            BehandlingerPerStatus(StønadType.OVERGANGSSTØNAD, BehandlingStatus.SATT_PÅ_VENT, 3),
-            BehandlingerPerStatus(StønadType.BARNETILSYN, BehandlingStatus.SATT_PÅ_VENT, 3),
-            BehandlingerPerStatus(StønadType.SKOLEPENGER, BehandlingStatus.SATT_PÅ_VENT, 3),
-            BehandlingerPerStatus(StønadType.OVERGANGSSTØNAD, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
-            BehandlingerPerStatus(StønadType.BARNETILSYN, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
-            BehandlingerPerStatus(StønadType.SKOLEPENGER, BehandlingStatus.IVERKSETTER_VEDTAK, 3)
+            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.UTREDES, 3),
+            BehandlingerPerStatus(OVERGANGSSTØNAD, BehandlingStatus.UTREDES, 3),
+            BehandlingerPerStatus(BARNETILSYN, BehandlingStatus.UTREDES, 3),
+            BehandlingerPerStatus(OVERGANGSSTØNAD, BehandlingStatus.OPPRETTET, 3),
+            BehandlingerPerStatus(BARNETILSYN, BehandlingStatus.OPPRETTET, 3),
+            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.OPPRETTET, 3),
+            BehandlingerPerStatus(OVERGANGSSTØNAD, BehandlingStatus.FATTER_VEDTAK, 3),
+            BehandlingerPerStatus(BARNETILSYN, BehandlingStatus.FATTER_VEDTAK, 3),
+            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.FATTER_VEDTAK, 3),
+            BehandlingerPerStatus(OVERGANGSSTØNAD, BehandlingStatus.SATT_PÅ_VENT, 3),
+            BehandlingerPerStatus(BARNETILSYN, BehandlingStatus.SATT_PÅ_VENT, 3),
+            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.SATT_PÅ_VENT, 3),
+            BehandlingerPerStatus(OVERGANGSSTØNAD, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
+            BehandlingerPerStatus(BARNETILSYN, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
+            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.IVERKSETTER_VEDTAK, 3)
         )
     }
 
@@ -93,21 +107,21 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(finnVedtak.size).isEqualTo(15)
         assertThat(finnVedtak).containsExactlyInAnyOrder(
-            VedtakPerUke(år, uke, StønadType.SKOLEPENGER, BehandlingResultat.AVSLÅTT, 3),
-            VedtakPerUke(år, uke, StønadType.OVERGANGSSTØNAD, BehandlingResultat.AVSLÅTT, 3),
-            VedtakPerUke(år, uke, StønadType.BARNETILSYN, BehandlingResultat.AVSLÅTT, 3),
-            VedtakPerUke(år, uke, StønadType.OVERGANGSSTØNAD, BehandlingResultat.HENLAGT, 3),
-            VedtakPerUke(år, uke, StønadType.BARNETILSYN, BehandlingResultat.HENLAGT, 3),
-            VedtakPerUke(år, uke, StønadType.SKOLEPENGER, BehandlingResultat.HENLAGT, 3),
-            VedtakPerUke(år, uke, StønadType.OVERGANGSSTØNAD, BehandlingResultat.INNVILGET, 3),
-            VedtakPerUke(år, uke, StønadType.BARNETILSYN, BehandlingResultat.INNVILGET, 3),
-            VedtakPerUke(år, uke, StønadType.SKOLEPENGER, BehandlingResultat.INNVILGET, 3),
-            VedtakPerUke(år, uke, StønadType.OVERGANGSSTØNAD, BehandlingResultat.OPPHØRT, 3),
-            VedtakPerUke(år, uke, StønadType.BARNETILSYN, BehandlingResultat.OPPHØRT, 3),
-            VedtakPerUke(år, uke, StønadType.SKOLEPENGER, BehandlingResultat.OPPHØRT, 3),
-            VedtakPerUke(år, uke, StønadType.OVERGANGSSTØNAD, BehandlingResultat.IKKE_SATT, 3),
-            VedtakPerUke(år, uke, StønadType.BARNETILSYN, BehandlingResultat.IKKE_SATT, 3),
-            VedtakPerUke(år, uke, StønadType.SKOLEPENGER, BehandlingResultat.IKKE_SATT, 3)
+            VedtakPerUke(år, uke, SKOLEPENGER, AVSLÅTT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, OVERGANGSSTØNAD, AVSLÅTT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, BARNETILSYN, AVSLÅTT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, OVERGANGSSTØNAD, HENLAGT, BehandlingÅrsak.SØKNAD, FEILREGISTRERT, 3),
+            VedtakPerUke(år, uke, BARNETILSYN, HENLAGT, BehandlingÅrsak.SØKNAD, FEILREGISTRERT, 3),
+            VedtakPerUke(år, uke, SKOLEPENGER, HENLAGT, BehandlingÅrsak.SØKNAD, FEILREGISTRERT, 3),
+            VedtakPerUke(år, uke, OVERGANGSSTØNAD, INNVILGET, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, BARNETILSYN, INNVILGET, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, SKOLEPENGER, INNVILGET, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, OVERGANGSSTØNAD, OPPHØRT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, BARNETILSYN, OPPHØRT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, SKOLEPENGER, OPPHØRT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, OVERGANGSSTØNAD, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, BARNETILSYN, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3),
+            VedtakPerUke(år, uke, SKOLEPENGER, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3)
         )
     }
 
@@ -123,8 +137,8 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `skal finne løpende behandlinger`() {
         opprettBehandlingerTestdata()
         val now = YearMonth.now()
-        val fagsak1 = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
-        val fagsak2 = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("4")), StønadType.OVERGANGSSTØNAD))
+        val fagsak1 = testoppsettService.lagreFagsak(fagsak(stønadstype = OVERGANGSSTØNAD))
+        val fagsak2 = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("4")), OVERGANGSSTØNAD))
         val behandling1 = opprettFerdigstiltBehandling(fagsak1, LocalDateTime.now().minusDays(1))
         // behandling 2 er gjeldende på fagsak 1 då den er opprettet etter 1
         val behandling2 = opprettFerdigstiltBehandling(fagsak1)
@@ -189,7 +203,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             behandling(
                 fagsak,
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET,
+                resultat = INNVILGET,
                 opprettetTid = opprettetTid
             )
         )
@@ -207,10 +221,18 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
                     val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("${++fnr}"), stønadstype = stønadType))
                     if (status == BehandlingStatus.FERDIGSTILT) {
                         BehandlingResultat.values().forEach { resultat -> // per resultat for ferdigstilte
-                            behandlingRepository.insert(behandling(fagsak = fagsak, status = status, resultat = resultat))
+                            val henlagtÅrsak = if (resultat == HENLAGT) FEILREGISTRERT else null
+                            behandlingRepository.insert(
+                                behandling(
+                                    fagsak = fagsak,
+                                    status = status,
+                                    resultat = resultat,
+                                    henlagtÅrsak = henlagtÅrsak
+                                )
+                            )
                         }
                     } else {
-                        behandlingRepository.insert(behandling(fagsak = fagsak, status = status))
+                        behandlingRepository.insert(behandling(fagsak = fagsak, status = status, henlagtÅrsak = null))
                     }
                 }
             }

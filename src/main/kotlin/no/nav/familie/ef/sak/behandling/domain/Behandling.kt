@@ -53,7 +53,7 @@ data class Behandling(
 
 enum class BehandlingType(val visningsnavn: String) {
     FØRSTEGANGSBEHANDLING("Førstegangsbehandling"),
-    REVURDERING("Revurdering"),
+    REVURDERING("Revurdering")
 }
 
 enum class BehandlingResultat(val displayName: String) {
@@ -61,7 +61,7 @@ enum class BehandlingResultat(val displayName: String) {
     OPPHØRT(displayName = "Opphørt"),
     AVSLÅTT(displayName = "Avslått"),
     IKKE_SATT(displayName = "Ikke satt"),
-    HENLAGT(displayName = "Henlagt"),
+    HENLAGT(displayName = "Henlagt")
 }
 
 enum class BehandlingStatus {
@@ -70,7 +70,7 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     FERDIGSTILT,
-    SATT_PÅ_VENT,
+    SATT_PÅ_VENT
     ;
 
     fun behandlingErLåstForVidereRedigering(): Boolean =

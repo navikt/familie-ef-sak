@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.ekstern
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infotrygd.InternPeriodeTestUtil.lagInternPeriode
 import no.nav.familie.ef.sak.infotrygd.PeriodeService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InternPeriodeTestUtil.lagInternPeriode
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.assertj.core.api.Assertions.assertThat
@@ -39,7 +39,7 @@ internal class PerioderForBarnetrygdServiceTest {
             lagInternPeriode(beløp = 1, stønadFom = LocalDate.of(2008, 12, 1), stønadTom = LocalDate.of(2009, 3, 31))
         every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns listOf(
             periode1,
-            periode2,
+            periode2
         )
         val perioder = service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder
         assertThat(perioder).hasSize(2)
@@ -66,9 +66,19 @@ internal class PerioderForBarnetrygdServiceTest {
     @Test
     internal fun `skal ikke endre på perioder som kommer fra EF`() {
         val periode1 =
-            lagInternPeriode(beløp = 1, stønadFom = LocalDate.of(2008, 12, 1), stønadTom = LocalDate.of(2009, 3, 31), datakilde = PeriodeOvergangsstønad.Datakilde.EF)
+            lagInternPeriode(
+                beløp = 1,
+                stønadFom = LocalDate.of(2008, 12, 1),
+                stønadTom = LocalDate.of(2009, 3, 31),
+                datakilde = PeriodeOvergangsstønad.Datakilde.EF
+            )
         val periode2 =
-            lagInternPeriode(beløp = 1, stønadFom = LocalDate.of(2008, 10, 1), stønadTom = LocalDate.of(2009, 3, 31), datakilde = PeriodeOvergangsstønad.Datakilde.EF)
+            lagInternPeriode(
+                beløp = 1,
+                stønadFom = LocalDate.of(2008, 10, 1),
+                stønadTom = LocalDate.of(2009, 3, 31),
+                datakilde = PeriodeOvergangsstønad.Datakilde.EF
+            )
         every { periodeService.hentPerioderForOvergangsstønadFraEfOgInfotrygd(any()) } returns
             listOf(periode1, periode2).sortedByDescending { it.stønadFom }
         val perioder = service.hentPerioderMedFullOvergangsstønad(PersonIdent(personIdent)).perioder

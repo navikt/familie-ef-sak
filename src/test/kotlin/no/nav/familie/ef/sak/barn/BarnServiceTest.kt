@@ -5,11 +5,13 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
-import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.util.FnrGenerator
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.Year
 import java.util.UUID
 
 internal class BarnServiceTest {
@@ -239,34 +242,45 @@ internal class BarnServiceTest {
     inner class TerminbarnFraPapirsøknad {
 
         @Test
-        internal fun `skal opprette terminbarn når det ikke finnes match i PDL`() {
+        internal fun `skal ikke kunne sende inn terminbarn på annen behandling enn papirsøknad`() {
             val termindato = LocalDate.of(2021, 1, 1)
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
                 fagsakId,
                 emptyList(),
                 StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
-            assertThat(barnSlot.captured).hasSize(1)
-            assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(termindato)
-            assertThat(barnSlot.captured[0].behandlingId).isEqualTo(behandlingId)
-            assertThat(barnSlot.captured[0].personIdent).isNull()
-            assertThat(barnSlot.captured[0].navn).isNull()
-            assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal opprette terminbarn når det ikke finnes match i PDL`() {
+            val termindato = LocalDate.of(2021, 1, 1)
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    emptyList(),
+                    StønadType.OVERGANGSSTØNAD,
+                    UstrukturertDokumentasjonType.IKKE_VALGT,
+                    listOf(BarnSomSkalFødes(termindato))
+                )
+            }.hasMessage("Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=IKKE_VALGT")
         }
 
         @Test
         internal fun `skal opprette barn med ident når terminbarn finnes med match i PDL`() {
             val termindato = LocalDate.of(2021, 4, 16)
             val fnr = FnrGenerator.generer(termindato)
-            val barnMedIdent = barnMedIdent(fnr, "Barn D").copy(fødsel = listOf(PdlTestdataHelper.fødsel(termindato)))
+            val barnMedIdent = barnMedIdent(fnr, "Barn D").copy(fødsel = listOf(fødsel(termindato)))
 
             barnService.opprettBarnPåBehandlingMedSøknadsdata(
                 behandlingId,
                 fagsakId,
                 listOf(barnMedIdent),
                 StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
             assertThat(barnSlot.captured).hasSize(1)
@@ -275,6 +289,105 @@ internal class BarnServiceTest {
             assertThat(barnSlot.captured[0].personIdent).isEqualTo(fnr)
             assertThat(barnSlot.captured[0].navn).isEqualTo("Barn D")
             assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal legge til terminbarn og andre terminbarn for papirsøknader`() {
+            val termindato = LocalDate.of(2021, 4, 16)
+            val fnr = FnrGenerator.generer(termindato)
+            val fnr2 = FnrGenerator.generer(termindato)
+            val barnMedIdent = barnMedIdent(fnr, "Terminbarn A").copy(fødsel = listOf(fødsel(termindato)))
+            val barnMedIdent2 = barnMedIdent(fnr2, "Barn D")
+
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                listOf(barnMedIdent, barnMedIdent2),
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD,
+                listOf(BarnSomSkalFødes(termindato))
+            )
+            assertThat(barnSlot.captured).hasSize(2)
+            assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(termindato)
+            assertThat(barnSlot.captured[0].behandlingId).isEqualTo(behandlingId)
+            assertThat(barnSlot.captured[0].personIdent).isEqualTo(fnr)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("Terminbarn A")
+            assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+
+            assertThat(barnSlot.captured[1].fødselTermindato).isNull()
+            assertThat(barnSlot.captured[1].behandlingId).isEqualTo(behandlingId)
+            assertThat(barnSlot.captured[1].personIdent).isEqualTo(fnr2)
+            assertThat(barnSlot.captured[1].navn).isEqualTo("Barn D")
+            assertThat(barnSlot.captured[1].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal kun ha med barn under 18 år`() {
+            val årOver18år = Year.now().minusYears(19).value
+            val grunnlagsdataBarn = listOf(
+                barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "Under 18"),
+                barnMedIdent(FnrGenerator.generer(årOver18år), "Over 18", fødsel(årOver18år))
+            )
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.PAPIRSØKNAD
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("Under 18")
+        }
+    }
+
+    @Nested
+    inner class Ettersending {
+
+        private val grunnlagsdataBarn = listOf(
+            barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B")
+        )
+
+        @Test
+        internal fun `skal legge til registerbarn på behandling hvis man skal vilkårsbehandle nye barn`() {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].navn).isEqualTo("J B")
+        }
+
+        @Test
+        internal fun `skal ikke legge til registerbarn på behandling hvis man ikke skal vilkårsbehandle nye barn`() {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).isEmpty()
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis vilkårsbehandleNyeBarn ikke er valgt`() {
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    grunnlagsdataBarn,
+                    StønadType.OVERGANGSSTØNAD,
+                    UstrukturertDokumentasjonType.ETTERSENDING
+                )
+            }.hasMessage("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
         }
     }
 

@@ -23,8 +23,11 @@ import java.util.UUID
 
 internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var behandlingService: BehandlingService
-    @Autowired lateinit var fagsakService: FagsakService
+    @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
 
     @BeforeEach
     fun setUp() {
@@ -49,7 +52,7 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
         lagreTilbakekreving(behandling, oppdatertTilbakekrevingsDto)
         val andreLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
 
-        assertThat(andreLagredeTilbakekrevingDto.body.getDataOrThrow()).isEqualTo(oppdatertTilbakekrevingsDto)
+        assertThat(andreLagredeTilbakekrevingDto.body?.getDataOrThrow()).isEqualTo(oppdatertTilbakekrevingsDto)
     }
 
     private fun lagInitiellTilbakekreving(behandling: Behandling) {
@@ -60,7 +63,7 @@ internal class TilbakekrevingControllerTest : OppslagSpringRunnerTest() {
         )
         lagreTilbakekreving(behandling, initiellTilbakekrevingDto)
         val førsteLagredeTilbakekrevingDto = hentTilbakekreving(behandling)
-        assertThat(førsteLagredeTilbakekrevingDto.body.getDataOrThrow()).isEqualTo(initiellTilbakekrevingDto)
+        assertThat(førsteLagredeTilbakekrevingDto.body?.getDataOrThrow()).isEqualTo(initiellTilbakekrevingDto)
     }
 
     private fun hentTilbakekreving(behandling: Behandling) =

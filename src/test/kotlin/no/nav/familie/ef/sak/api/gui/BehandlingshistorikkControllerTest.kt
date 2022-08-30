@@ -30,8 +30,11 @@ import java.util.UUID
 
 internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
 
     @BeforeEach
     fun setUp() {
@@ -153,7 +156,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         )
 
         val respons = hentHistorikk(behandling.id)
-        assertThat(respons.body.data!!.first().metadata).isEqualTo(jsonMap)
+        assertThat(respons.body?.data?.first()?.metadata).isEqualTo(jsonMap)
     }
 
     private fun leggInnHistorikk(

@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vedtak.erVedtakAktivtForDato
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -60,7 +61,6 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `lagre og hent vedtak, lagre igjen - da skal første slettes`() {
-
         /** Pre */
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
@@ -75,7 +75,9 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         val tomBegrunnelse = ""
         val vedtakRequest = InnvilgelseOvergangsstønad(
             tomBegrunnelse,
-            tomBegrunnelse, emptyList(), emptyList()
+            tomBegrunnelse,
+            emptyList(),
+            emptyList()
         )
 
         /** Skal ikke gjøre noe når den ikke er opprettet **/
@@ -228,14 +230,18 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         val inntektsperiodeToMånederTilbake =
             Inntektsperiode(
-                vedtakFraOgMedDato,
-                YearMonth.now().minusMonths(2).atEndOfMonth(),
+                Månedsperiode(
+                    vedtakFraOgMedDato,
+                    YearMonth.now().minusMonths(2).atEndOfMonth()
+                ),
                 BigDecimal(500_000),
                 BigDecimal.ZERO
             )
         val inntektsperiodeForrigeMåned = Inntektsperiode(
-            YearMonth.now().minusMonths(1).atDay(1),
-            vedtakTilOgMedDato,
+            Månedsperiode(
+                YearMonth.now().minusMonths(1).atDay(1),
+                vedtakTilOgMedDato
+            ),
             BigDecimal(400_000),
             BigDecimal.ZERO
         )
@@ -270,8 +276,10 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         tilOgMedDato: LocalDate,
         inntektsperioder: List<Inntektsperiode> = listOf(
             Inntektsperiode(
-                fraOgMedDato,
-                tilOgMedDato,
+                Månedsperiode(
+                    fraOgMedDato,
+                    tilOgMedDato
+                ),
                 BigDecimal(500_000),
                 BigDecimal.ZERO
             )
@@ -309,7 +317,10 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID
     ): List<AndelTilkjentYtelse> = inntektsperioder.map {
         lagAndelTilkjentYtelse(
-            5000, it.startDato, it.sluttDato, inntekt = it.inntekt.toInt(),
+            5000,
+            it.startDato,
+            it.sluttDato,
+            inntekt = it.inntekt.toInt(),
             kildeBehandlingId = behandlingId
         )
     }

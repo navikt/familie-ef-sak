@@ -24,7 +24,7 @@ import java.util.UUID
 class PeriodeController(
     private val tilgangService: TilgangService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val andelsHistorikkService: AndelsHistorikkService,
+    private val andelsHistorikkService: AndelsHistorikkService
 ) {
 
     @GetMapping("/{behandlingId}")

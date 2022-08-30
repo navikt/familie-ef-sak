@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
@@ -16,7 +16,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -25,6 +24,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class PeriodeServiceTest {
 
@@ -52,7 +52,11 @@ internal class PeriodeServiceTest {
         every {
             pdlClient.hentPersonidenter(personIdent, true)
         } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
-        every { replikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+        every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
     }
 
     @Test
@@ -128,8 +132,8 @@ internal class PeriodeServiceTest {
     @Test
     internal fun `hvis en periode fra ef overlapper perioder fra infotrygd så er det perioden fra EF som har høyere presidens`() {
         mockBehandling()
-        val fom = LocalDate.now()
-        val tom = LocalDate.now().plusDays(9)
+        val fom = YearMonth.now().atDay(1)
+        val tom = YearMonth.now().atEndOfMonth()
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, fom, tom))
         mockReplika(listOf(lagInfotrygdPeriode(beløp = 2, stønadFom = fom, stønadTom = tom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
@@ -139,37 +143,6 @@ internal class PeriodeServiceTest {
         assertThat(perioder[0].stønadFom).isEqualTo(fom)
         assertThat(perioder[0].stønadTom).isEqualTo(tom)
         assertThat(perioder[0].månedsbeløp).isEqualTo(1)
-    }
-
-    @Test
-    internal fun `skal filtrere vekk perioder som er annulert eller uaktuelle`() {
-        mockBehandling()
-        mockTilkjentYtelse(LocalDate.MAX)
-        mockReplika(
-            listOf(
-                lagInfotrygdPeriode(
-                    stønadFom = LocalDate.parse("2021-01-01"),
-                    stønadTom = LocalDate.parse("2021-01-02"),
-                    beløp = 1,
-                    kode = InfotrygdEndringKode.ANNULERT
-                ),
-                lagInfotrygdPeriode(
-                    stønadFom = LocalDate.parse("2021-02-01"),
-                    stønadTom = LocalDate.parse("2021-02-02"),
-                    beløp = 2
-                ),
-                lagInfotrygdPeriode(
-                    stønadFom = LocalDate.parse("2021-03-01"),
-                    stønadTom = LocalDate.parse("2021-03-02"),
-                    beløp = 3,
-                    kode = InfotrygdEndringKode.UAKTUELL
-                )
-            )
-        )
-        val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
-
-        assertThat(perioder).hasSize(1)
-        assertThat(perioder[0].månedsbeløp).isEqualTo(2)
     }
 
     @Test
@@ -187,7 +160,7 @@ internal class PeriodeServiceTest {
             listOf(
                 lagInfotrygdPeriode(stønadFom = periode1fom, stønadTom = periode1tom, beløp = 1),
                 lagInfotrygdPeriode(stønadFom = periode2fom, stønadTom = periode2tom, beløp = 2)
-            )
+            ).sortedByDescending { it.stønadFom }
         )
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
@@ -204,7 +177,11 @@ internal class PeriodeServiceTest {
     }
 
     private fun mockReplika(overgangsstønad: List<InfotrygdPeriode>) {
-        every { replikaClient.hentPerioder(any()) } returns InfotrygdPeriodeResponse(overgangsstønad, emptyList(), emptyList())
+        every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
+            overgangsstønad,
+            emptyList(),
+            emptyList()
+        )
     }
 
     private fun mockFagsak(fagsak: Fagsak? = this.fagsak) {

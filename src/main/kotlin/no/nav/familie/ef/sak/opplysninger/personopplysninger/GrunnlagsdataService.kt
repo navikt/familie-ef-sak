@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -62,7 +63,6 @@ class GrunnlagsdataService(
     }
 
     private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
-
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val søknad = when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
@@ -83,6 +83,11 @@ class GrunnlagsdataService(
         personIdent: String,
         barneforeldreFraSøknad: List<String>
     ): GrunnlagsdataDomene {
-        return grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
+        return loggTid {
+            grunnlagsdataRegisterService.hentGrunnlagsdataFraRegister(
+                personIdent,
+                barneforeldreFraSøknad
+            )
+        }
     }
 }

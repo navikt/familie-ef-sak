@@ -19,7 +19,6 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
@@ -55,6 +54,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -255,7 +255,7 @@ internal class BeregnYtelseStegTest {
 //            every { tilkjentYtelseService.hentForBehandling(any()) } returns
 //                    lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
@@ -294,7 +294,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
@@ -325,7 +325,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørTom)
@@ -367,7 +367,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val innvilgetPeriode1 = innvilgetPeriode(innvilgetFom1, innvilgetTom1)
@@ -678,7 +678,7 @@ internal class BeregnYtelseStegTest {
             val nyAndelFom = LocalDate.of(2021, 12, 1)
             val nyAndelTom = LocalDate.of(2021, 12, 31)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
-            val opphørsperioder = listOf(Periode(LocalDate.of(2021, 11, 1), LocalDate.of(2021, 11, 30)))
+            val opphørsperioder = listOf(Månedsperiode(LocalDate.of(2021, 11, 1), LocalDate.of(2021, 11, 30)))
             val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom, nyAndelTom))
 
             val nyeAndeler =
@@ -693,9 +693,9 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelTom = LocalDate.of(2021, 10, 31)
             val nyAndelFom = LocalDate.of(2021, 11, 1)
             val nyAndelTom = LocalDate.of(2022, 12, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 12, 1), LocalDate.of(2021, 12, 31))
-            val opphør2 = Periode(LocalDate.of(2022, 2, 1), LocalDate.of(2022, 3, 31))
-            val opphør3 = Periode(LocalDate.of(2022, 6, 1), LocalDate.of(2022, 8, 31))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 12, 1), LocalDate.of(2021, 12, 31))
+            val opphør2 = Månedsperiode(LocalDate.of(2022, 2, 1), LocalDate.of(2022, 3, 31))
+            val opphør3 = Månedsperiode(LocalDate.of(2022, 6, 1), LocalDate.of(2022, 8, 31))
             val opphørsperioder = listOf(opphør1, opphør2, opphør3)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
             val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom, nyAndelTom))
@@ -709,18 +709,18 @@ internal class BeregnYtelseStegTest {
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom)
-            assertThat(nyeAndeler[1].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[1].stønadTom).isEqualTo(opphør1.fomDato.minusDays(1))
             assertThat(nyeAndeler[1].beløp).isEqualTo(100)
             assertThat(nyeAndeler[1].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
-            assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør1.tildato.plusDays(1))
-            assertThat(nyeAndeler[2].stønadTom).isEqualTo(opphør2.fradato.minusDays(1))
+            assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør1.tomDato.plusDays(1))
+            assertThat(nyeAndeler[2].stønadTom).isEqualTo(opphør2.fomDato.minusDays(1))
             assertThat(nyeAndeler[2].beløp).isEqualTo(100)
             assertThat(nyeAndeler[2].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
-            assertThat(nyeAndeler[3].stønadFom).isEqualTo(opphør2.tildato.plusDays(1))
-            assertThat(nyeAndeler[3].stønadTom).isEqualTo(opphør3.fradato.minusDays(1))
+            assertThat(nyeAndeler[3].stønadFom).isEqualTo(opphør2.tomDato.plusDays(1))
+            assertThat(nyeAndeler[3].stønadTom).isEqualTo(opphør3.fomDato.minusDays(1))
             assertThat(nyeAndeler[3].beløp).isEqualTo(100)
             assertThat(nyeAndeler[3].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
-            assertThat(nyeAndeler[4].stønadFom).isEqualTo(opphør3.tildato.plusDays(1))
+            assertThat(nyeAndeler[4].stønadFom).isEqualTo(opphør3.tomDato.plusDays(1))
             assertThat(nyeAndeler[4].stønadTom).isEqualTo(nyAndelTom)
             assertThat(nyeAndeler[4].beløp).isEqualTo(100)
             assertThat(nyeAndeler[4].kildeBehandlingId).isEqualTo(beløpsperioder[0].kildeBehandlingId)
@@ -731,10 +731,10 @@ internal class BeregnYtelseStegTest {
         internal fun `lager opphold i eksisterende andel, ny beløpsperiode med nytt opphold`() {
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom = LocalDate.of(2025, 10, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 12, 1), LocalDate.of(2021, 12, 31))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 12, 1), LocalDate.of(2021, 12, 31))
             val nyAndelFom1 = LocalDate.of(2022, 1, 1)
             val nyAndelTom1 = LocalDate.of(2022, 3, 31)
-            val opphør2 = Periode(LocalDate.of(2022, 4, 1), LocalDate.of(2022, 8, 31))
+            val opphør2 = Månedsperiode(LocalDate.of(2022, 4, 1), LocalDate.of(2022, 8, 31))
             val nyAndelFom2 = LocalDate.of(2022, 9, 1)
             val nyAndelTom2 = LocalDate.of(2022, 9, 30)
             val opphørsperioder = listOf(opphør1, opphør2)
@@ -749,7 +749,7 @@ internal class BeregnYtelseStegTest {
 
             assertThat(nyeAndeler).hasSize(3)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
-            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fomDato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom1)
@@ -768,7 +768,7 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelTom = LocalDate.of(2021, 10, 31)
             val nyAndelFom = LocalDate.of(2021, 10, 1)
             val nyAndelTom = LocalDate.of(2022, 12, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 30))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 30))
             val opphørsperioder = listOf(opphør1)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
             val beløpsperioder = listOf(lagAndelTilkjentYtelse(100, nyAndelFom, nyAndelTom))
@@ -778,7 +778,7 @@ internal class BeregnYtelseStegTest {
 
             assertThat(nyeAndeler).hasSize(2)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
-            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fomDato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom)
@@ -795,8 +795,8 @@ internal class BeregnYtelseStegTest {
             val nyAndelTom1 = LocalDate.of(2021, 9, 30)
             val nyAndelFom2 = LocalDate.of(2021, 10, 1)
             val nyAndelTom2 = LocalDate.of(2022, 12, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 7, 31))
-            val opphør2 = Periode(LocalDate.of(2021, 10, 1), LocalDate.of(2021, 10, 31))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 7, 31))
+            val opphør2 = Månedsperiode(LocalDate.of(2021, 10, 1), LocalDate.of(2021, 10, 31))
             val opphørsperioder = listOf(opphør1, opphør2)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(50, forrigeAndelFom, forrigeAndelTom))
             val beløpsperioder = listOf(
@@ -809,14 +809,14 @@ internal class BeregnYtelseStegTest {
 
             assertThat(nyeAndeler).hasSize(3)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom)
-            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fomDato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(50)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
             assertThat(nyeAndeler[1].stønadFom).isEqualTo(nyAndelFom1)
             assertThat(nyeAndeler[1].stønadTom).isEqualTo(nyAndelTom1)
             assertThat(nyeAndeler[1].beløp).isEqualTo(200)
             assertThat(nyeAndeler[1].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
-            assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør2.tildato.plusDays(1))
+            assertThat(nyeAndeler[2].stønadFom).isEqualTo(opphør2.tomDato.plusDays(1))
             assertThat(nyeAndeler[2].stønadTom).isEqualTo(nyAndelTom2)
             assertThat(nyeAndeler[2].beløp).isEqualTo(100)
             assertThat(nyeAndeler[2].kildeBehandlingId).isNotEqualTo(forrigeAndeler[0].kildeBehandlingId)
@@ -828,7 +828,7 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelTom1 = LocalDate.of(2021, 10, 31)
             val forrigeAndelFom2 = LocalDate.of(2021, 12, 1)
             val forrigeAndelTom2 = LocalDate.of(2021, 12, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 12, 31))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 12, 31))
             val opphørsperioder = listOf(opphør1)
             val forrigeAndeler = listOf(
                 lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1),
@@ -839,7 +839,7 @@ internal class BeregnYtelseStegTest {
 
             assertThat(nyeAndeler).hasSize(1)
             assertThat(nyeAndeler[0].stønadFom).isEqualTo(forrigeAndelFom1)
-            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fradato.minusDays(1))
+            assertThat(nyeAndeler[0].stønadTom).isEqualTo(opphør1.fomDato.minusDays(1))
             assertThat(nyeAndeler[0].beløp).isEqualTo(200)
             assertThat(nyeAndeler[0].kildeBehandlingId).isEqualTo(forrigeAndeler[0].kildeBehandlingId)
         }
@@ -848,8 +848,8 @@ internal class BeregnYtelseStegTest {
         fun `takler opphold som dekker flere perioder`() {
             val forrigeAndelFom1 = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom1 = LocalDate.of(2021, 12, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 6, 30))
-            val opphør2 = Periode(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 11, 30))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 6, 30))
+            val opphør2 = Månedsperiode(LocalDate.of(2021, 8, 1), LocalDate.of(2021, 11, 30))
             val opphørsperioder = listOf(opphør1, opphør2)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1))
 
@@ -864,8 +864,8 @@ internal class BeregnYtelseStegTest {
         fun `takler to opphørsperioder som i praksis omslutter hele andelen`() {
             val forrigeAndelFom1 = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom1 = LocalDate.of(2021, 12, 31)
-            val opphør1 = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 30))
-            val opphør2 = Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 12, 31))
+            val opphør1 = Månedsperiode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 6, 30))
+            val opphør2 = Månedsperiode(LocalDate.of(2021, 7, 1), LocalDate.of(2021, 12, 31))
             val opphørsperioder = listOf(opphør1, opphør2)
             val forrigeAndeler = listOf(lagAndelTilkjentYtelse(200, forrigeAndelFom1, forrigeAndelTom1))
 
@@ -889,7 +889,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørFom)
@@ -923,7 +923,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørFom)
@@ -958,7 +958,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             val opphørsperiode = opphørsperiode(opphørFom, opphørFom)
@@ -1003,7 +1003,7 @@ internal class BeregnYtelseStegTest {
             val innvilgetMåned = opphørFom.plusMonths(1)
 
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             assertThatThrownBy {
@@ -1030,7 +1030,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, andelFom, andelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1060,7 +1060,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, andelFom, andelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1088,7 +1088,7 @@ internal class BeregnYtelseStegTest {
                     startdato = opphørFom.atDay(1)
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1116,7 +1116,7 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom, andelTom)))
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1151,7 +1151,7 @@ internal class BeregnYtelseStegTest {
                     startdato = tidligereOpphør
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1186,7 +1186,7 @@ internal class BeregnYtelseStegTest {
                     startdato = tidligereOpphør
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1390,7 +1390,7 @@ internal class BeregnYtelseStegTest {
                     startdato = andelFom
                 )
             every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Periode>>().map { lagBeløpsperiode(it.fradato, it.tildato) }
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
             }
 
             utførSteg(
@@ -1465,7 +1465,15 @@ internal class BeregnYtelseStegTest {
         @BeforeEach
         internal fun setUp() {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(BeløpsperiodeBarnetilsynDto(Periode(LocalDate.now(), LocalDate.now()), 1, 1, 6284, grunnlag()))
+                listOf(
+                    BeløpsperiodeBarnetilsynDto(
+                        periode = Månedsperiode(YearMonth.now()),
+                        beløp = 1,
+                        beløpFørFratrekkOgSatsjustering = 1,
+                        sats = 6284,
+                        beregningsgrunnlag = grunnlag()
+                    )
+                )
         }
 
         @Test
@@ -1488,7 +1496,15 @@ internal class BeregnYtelseStegTest {
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, 6284, grunnlag()))
+                listOf(
+                    BeløpsperiodeBarnetilsynDto(
+                        periode = Månedsperiode(nyAndelFom, nyAndelTom),
+                        beløp = 1,
+                        beløpFørFratrekkOgSatsjustering = 1,
+                        sats = 6284,
+                        beregningsgrunnlag = grunnlag()
+                    )
+                )
 
             utførSteg(
                 saksbehandling(
@@ -1520,7 +1536,15 @@ internal class BeregnYtelseStegTest {
 
             every { tilkjentYtelseService.hentForBehandling(any()) } throws IllegalArgumentException("Hjelp")
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
-                listOf(BeløpsperiodeBarnetilsynDto(Periode(nyAndelFom, nyAndelTom), 1, 1, 6284, grunnlag()))
+                listOf(
+                    BeløpsperiodeBarnetilsynDto(
+                        periode = Månedsperiode(nyAndelFom, nyAndelTom),
+                        beløp = 1,
+                        beløpFørFratrekkOgSatsjustering = 1,
+                        sats = 6284,
+                        beregningsgrunnlag = grunnlag()
+                    )
+                )
 
             utførSteg(
                 saksbehandling(
@@ -1550,11 +1574,11 @@ internal class BeregnYtelseStegTest {
             every { beregningBarnetilsynService.beregnYtelseBarnetilsyn(any(), any(), any()) } returns
                 listOf(
                     BeløpsperiodeBarnetilsynDto(
-                        Periode(nyAndelFom, nyAndelTom),
-                        0,
-                        0,
-                        6284,
-                        BeregningsgrunnlagBarnetilsynDto(
+                        periode = Månedsperiode(nyAndelFom, nyAndelTom),
+                        beløp = 0,
+                        beløpFørFratrekkOgSatsjustering = 0,
+                        sats = 6284,
+                        beregningsgrunnlag = BeregningsgrunnlagBarnetilsynDto(
                             utgifter = BigDecimal.TEN,
                             kontantstøttebeløp = BigDecimal.TEN,
                             tilleggsstønadsbeløp = BigDecimal.ZERO,
@@ -1719,6 +1743,7 @@ internal class BeregnYtelseStegTest {
                 UtgiftsperiodeDto(
                     årMånedFra = YearMonth.from(startDato),
                     årMånedTil = YearMonth.from(sluttDato),
+                    periode = Månedsperiode(YearMonth.from(startDato), YearMonth.from(sluttDato)),
                     barn = barn ?: emptyList(),
                     utgifter = utgifter ?: 2500,
                     erMidlertidigOpphør = erMidlertidigOpphør ?: false
@@ -1736,6 +1761,7 @@ internal class BeregnYtelseStegTest {
             UtgiftsperiodeDto(
                 årMånedFra = YearMonth.from(it.andelFom),
                 årMånedTil = YearMonth.from(it.andelTom),
+                periode = Månedsperiode(YearMonth.from(it.andelFom), YearMonth.from(it.andelTom)),
                 barn = if (it.utgifter > 0) it.barn else emptyList(),
                 utgifter = it.utgifter,
                 erMidlertidigOpphør = if (it.utgifter > 0) false else true
@@ -1755,7 +1781,9 @@ internal class BeregnYtelseStegTest {
             sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
             periode = SanksjonertPeriodeDto(
                 årMånedFra = årMåned,
-                årMånedTil = årMåned
+                årMånedTil = årMåned,
+                fom = årMåned,
+                tom = årMåned
             ),
             internBegrunnelse = ""
         )
@@ -1789,14 +1817,13 @@ internal class BeregnYtelseStegTest {
             endring = null,
             aktivitetArbeid = null,
             erSanksjon = true,
-            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
         )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =
         AndelMedGrunnlagDto(
             beløp = beløp,
-            stønadFra = fom.atDay(1),
-            stønadTil = tom.atEndOfMonth(),
+            periode = Månedsperiode(fom, tom),
             inntekt = 0,
             inntektsreduksjon = 0,
             samordningsfradrag = 0,
@@ -1810,12 +1837,18 @@ internal class BeregnYtelseStegTest {
         )
 
     private fun lagBeløpsperiode(fom: LocalDate, tom: LocalDate) =
-        Beløpsperiode(Periode(fom, tom), null, BigDecimal.ZERO, BigDecimal.ZERO)
+        Beløpsperiode(
+            periode = Månedsperiode(fom, tom),
+            beregningsgrunnlag = null,
+            beløp = BigDecimal.ZERO,
+            beløpFørSamordning = BigDecimal.ZERO
+        )
 
     private fun opphørsperiode(opphørFom: YearMonth, opphørTom: YearMonth) =
         VedtaksperiodeDto(
             årMånedFra = opphørFom,
             årMånedTil = opphørTom,
+            periode = Månedsperiode(opphørFom, opphørTom),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.MIDLERTIDIG_OPPHØR
         )
@@ -1824,6 +1857,7 @@ internal class BeregnYtelseStegTest {
         VedtaksperiodeDto(
             årMånedFra = andelFom,
             årMånedTil = andelTom,
+            periode = Månedsperiode(andelFom, andelTom),
             aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
             periodeType = VedtaksperiodeType.HOVEDPERIODE
         )

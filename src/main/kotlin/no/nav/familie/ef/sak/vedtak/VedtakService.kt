@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.vedtak
 
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
@@ -13,6 +12,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -66,7 +66,7 @@ class VedtakService(
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
         if (vedtak?.erVedtakAktivtForDato(dato) == true) {
             return vedtak.inntekter?.inntekter?.firstOrNull {
-                dato.isEqualOrAfter(it.startDato) && dato.isEqualOrBefore(it.sluttDato)
+                it.periode.inneholder(YearMonth.from(dato))
             }?.inntekt?.toInt()
         }
 
@@ -86,23 +86,20 @@ class VedtakService(
     private fun createForventetInntektForBehandling(vedtak: Vedtak): ForventetInntektForBehandling {
         return ForventetInntektForBehandling(
             vedtak.behandlingId,
-            createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(1)),
-            createForventetInntektForMåned(vedtak, LocalDate.now().minusMonths(2))
+            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(1)),
+            createForventetInntektForMåned(vedtak, YearMonth.now().minusMonths(2))
         )
     }
 
-    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: LocalDate): Int? {
+    private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: YearMonth): Int? {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
         return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
-            forventetInntektForDato.isEqualOrAfter(it.stønadFom) &&
-                forventetInntektForDato.isEqualOrBefore(it.stønadTom)
+            it.periode.inneholder(forventetInntektForDato)
         }?.inntekt
     }
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
-        return hentVedtak(behandlingId).perioder?.perioder?.any {
-            it.datoFra.isEqualOrBefore(localDate) && it.datoTil.isEqualOrAfter(localDate)
-        } ?: false
+        return hentVedtak(behandlingId).erVedtakAktivtForDato(localDate)
     }
 }
 
@@ -123,11 +120,6 @@ data class ForventetInntektForPersonIdent(
     val forventetInntektToMånederTilbake: Int?
 )
 
-fun LocalDate.isEqualOrAfter(dato: LocalDate) = this.equals(dato) || this.isAfter(dato)
-fun LocalDate.isEqualOrBefore(dato: LocalDate) = this.equals(dato) || this.isBefore(dato)
 fun Vedtak.erVedtakAktivtForDato(dato: LocalDate) = this.perioder?.perioder?.any {
-    Periode(
-        it.datoFra,
-        it.datoTil
-    ).omslutter(dato)
+    it.periode.inneholder(YearMonth.from(dato))
 } ?: false

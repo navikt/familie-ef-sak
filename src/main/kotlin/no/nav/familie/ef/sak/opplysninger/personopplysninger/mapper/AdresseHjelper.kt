@@ -16,7 +16,6 @@ object AdresseHjelper {
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
-
         if (harDeltBosted(barn)) {
             return false
         }

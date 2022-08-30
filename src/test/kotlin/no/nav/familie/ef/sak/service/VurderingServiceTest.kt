@@ -117,7 +117,8 @@ internal class VurderingServiceTest {
             aktivitet = mockk(relaxed = true),
             sagtOppEllerRedusertStilling = mockk(relaxed = true),
             lagtTilEtterFerdigstilling = false,
-            registeropplysningerOpprettetTid = mockk(relaxed = true)
+            registeropplysningerOpprettetTid = mockk(relaxed = true),
+            dokumentasjon = mockk(relaxed = true)
         )
     }
 
@@ -139,7 +140,10 @@ internal class VurderingServiceTest {
 
         val nyeVilkårsvurderinger = slot<List<Vilkårsvurdering>>()
         every { vilkårsvurderingRepository.insertAll(capture(nyeVilkårsvurderinger)) } answers
-            { it.invocation.args.first() as List<Vilkårsvurdering> }
+            {
+                @Suppress("UNCHECKED_CAST")
+                it.invocation.args.first() as List<Vilkårsvurdering>
+            }
         val vilkår = VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD)
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)
@@ -172,9 +176,15 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(4)
         assertThat(
-            nyeVilkårsvurderinger.captured.map { it.resultat }
+            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }
+                .map { it.resultat }
                 .toSet()
         ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(
+            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
+                .map { it.resultat }
+                .toSet()
+        ).containsOnly(Vilkårsresultat.OPPFYLT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
 
@@ -281,17 +291,26 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `Skal returnere aktivitet i historikk`() {
-
         val vilkårsvurderingList = VilkårType.hentVilkårForStønad(BARNETILSYN).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,
                 resultat = OPPFYLT,
                 type = VilkårType.AKTIVITET_ARBEID,
-                delvilkårsvurdering = listOf(Delvilkårsvurdering(OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))))
+                delvilkårsvurdering = listOf(
+                    Delvilkårsvurdering(
+                        OPPFYLT,
+                        listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
+                    )
+                )
             )
         }
 
-        every { vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, listOf(behandlingId)) } returns vilkårsvurderingList
+        every {
+            vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(
+                VilkårType.AKTIVITET_ARBEID,
+                listOf(behandlingId)
+            )
+        } returns vilkårsvurderingList
 
         val behandlingIdToSvarID = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandlingId))
 

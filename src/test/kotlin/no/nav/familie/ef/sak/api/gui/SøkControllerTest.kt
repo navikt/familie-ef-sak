@@ -27,9 +27,14 @@ import org.springframework.http.ResponseEntity
 
 internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
-    @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
+
+    @Autowired
+    private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
 
     @BeforeEach
     fun setUp() {
@@ -55,8 +60,8 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Gitt person uten fagsak når søk på personensident kallas skal det returneres RessursFeilet`() {
         val response = søkPerson("01010166666")
-        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
-        assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
     }
 
     @Test
@@ -66,9 +71,9 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
             InfotrygdFinnesResponse(emptyList(), listOf(Saktreff(personIdent, StønadType.OVERGANGSSTØNAD)))
         val response = søkPerson(personIdent)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        val data = response.body!!.data!!
-        assertThat(data.personIdent).isEqualTo(personIdent)
-        assertThat(data.fagsaker).hasSize(0)
+        val data = response.body?.data
+        assertThat(data?.personIdent).isEqualTo(personIdent)
+        assertThat(data?.fagsaker).hasSize(0)
         assertThat(fagsakRepository.findBySøkerIdent(setOf(personIdent))).hasSize(0)
         assertThat(fagsakPersonRepository.findByIdent(setOf(personIdent))).isNotNull
     }
@@ -76,22 +81,22 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal feile hvis personIdenten ikke finnes i pdl`() {
         val response = søkPerson("19117313797")
-        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
-        assertThat(response.body.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
     }
 
     @Test
     internal fun `Skal feile hvis personIdenten har feil lengde`() {
         val response = søkPerson("010101999990")
-        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
-        assertThat(response.body.frontendFeilmelding).isEqualTo("Ugyldig personident. Det må være 11 sifre")
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.frontendFeilmelding).isEqualTo("Ugyldig personident. Det må være 11 sifre")
     }
 
     @Test
     internal fun `Skal feile hvis personIdenten inneholder noe annet enn tall`() {
         val response = søkPerson("010et1ord02")
-        assertThat(response.body.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
-        assertThat(response.body.frontendFeilmelding).isEqualTo("Ugyldig personident. Det kan kun inneholde tall")
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.frontendFeilmelding).isEqualTo("Ugyldig personident. Det kan kun inneholde tall")
     }
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {

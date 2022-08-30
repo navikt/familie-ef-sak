@@ -25,7 +25,8 @@ import java.util.UUID
 
 internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     private val ident = "123"
 
@@ -47,14 +48,16 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
     @Test
     fun `hentUferdigeBehandlingerFørDato skal bare hente behandlinger før en gitt dato`() {
-        val enMånedSiden = LocalDateTime.now().minusMonths(1);
+        val enMånedSiden = LocalDateTime.now().minusMonths(1)
 
         val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2)))
-        val annenFagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.OVERGANGSSTØNAD))
+        val annenFagsak =
+            testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
 
-        assertThat(behandlingRepository.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden)).size().isEqualTo(1)
+        assertThat(behandlingRepository.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden)).size()
+            .isEqualTo(1)
     }
 
     @Test

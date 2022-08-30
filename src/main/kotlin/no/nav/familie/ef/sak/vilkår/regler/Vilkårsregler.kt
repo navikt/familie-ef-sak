@@ -61,7 +61,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
             AktivitetArbeidRegel(),
             InntektRegel(),
             AlderPåBarnRegel(),
-            DokumentasjonTilsynsutgifterRegel(),
+            DokumentasjonTilsynsutgifterRegel()
         )
 
         SKOLEPENGER -> listOf(

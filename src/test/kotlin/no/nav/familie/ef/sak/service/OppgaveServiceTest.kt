@@ -77,6 +77,7 @@ internal class OppgaveServiceTest {
             )
         )
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
+        every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
     }
 
     @Test
@@ -234,6 +235,7 @@ internal class OppgaveServiceTest {
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
+
         every { oppgaveClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns GSAK_OPPGAVE_ID
 
         oppgaveService.fordelOppgave(GSAK_OPPGAVE_ID, SAKSBEHANDLER_ID)
@@ -265,7 +267,7 @@ internal class OppgaveServiceTest {
             Pair(søndag.morgen(), tirsdagFrist),
             Pair(søndag.kveld(), tirsdagFrist),
             Pair(mandag.morgen(), tirsdagFrist),
-            Pair(mandag.kveld(), onsdagFrist),
+            Pair(mandag.kveld(), onsdagFrist)
         )
 
         frister.forEach {

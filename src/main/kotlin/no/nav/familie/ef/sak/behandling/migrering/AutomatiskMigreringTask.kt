@@ -36,7 +36,8 @@ class AutomatiskMigreringTask(private val automatiskMigreringService: Automatisk
 
         fun opprettTask(ident: String): Task {
             return Task(
-                TYPE, objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
+                TYPE,
+                objectMapper.writeValueAsString(AutomatiskMigreringTaskData(ident)),
                 Properties().apply {
                     this["personIdent"] = ident
                 }

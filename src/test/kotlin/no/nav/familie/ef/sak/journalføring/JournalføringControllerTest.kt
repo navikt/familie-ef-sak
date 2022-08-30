@@ -49,7 +49,6 @@ internal class JournalføringControllerTest {
 
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {
-
         every {
             pdlClient.hentPersonidenter(aktørId)
         } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
@@ -65,7 +64,6 @@ internal class JournalføringControllerTest {
 
     @Test
     internal fun `skal hente journalpost med personident fra journalposten`() {
-
         every {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
@@ -77,7 +75,6 @@ internal class JournalføringControllerTest {
 
     @Test
     internal fun `skal feile med ManglerTilgang hvis behandler ikke har tilgang person`() {
-
         every {
             journalføringService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer

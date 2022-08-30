@@ -34,7 +34,10 @@ object DataGenerator {
             personIdent = personIdent
         )
 
-    fun tilfeldigTilkjentYtelse(behandling: Behandling = behandling(fagsak()), antallAndelerTilkjentYtelse: Int = 1): TilkjentYtelse {
+    fun tilfeldigTilkjentYtelse(
+        behandling: Behandling = behandling(fagsak()),
+        antallAndelerTilkjentYtelse: Int = 1
+    ): TilkjentYtelse {
         val andelerTilkjentYtelse = flereTilfeldigeAndelerTilkjentYtelse(antallAndelerTilkjentYtelse, behandling.id)
         return TilkjentYtelse(
             personident = tilfeldigFødselsnummer(),

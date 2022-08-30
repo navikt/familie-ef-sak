@@ -27,11 +27,12 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
-import no.nav.familie.kontrakter.ef.søknad.Fødselsnummer
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
 import no.nav.familie.kontrakter.ef.søknad.SøknadSkolepenger
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.Fødselsnummer
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -72,7 +73,6 @@ class TestSaksbehandlingController(
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
-
         val personIdent = testFagsakRequest.personIdent
         val søknadBuilder = lagSøknad(personIdent)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
@@ -120,7 +120,6 @@ class TestSaksbehandlingController(
     }
 
     private fun lagBarnetilsynBehandling(søknadBarnetilsyn: SøknadBarnetilsyn, fagsak: Fagsak): Behandling {
-
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
@@ -137,7 +136,6 @@ class TestSaksbehandlingController(
     }
 
     private fun lagSkolepengerBehandling(søknadSkolepenger: SøknadSkolepenger, fagsak: Fagsak): Behandling {
-
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
@@ -173,7 +171,7 @@ class TestSaksbehandlingController(
                     .defaultPersonMinimum(
                         navn = "Fyren som skal bli min samboer",
                         fødselsdato = LocalDate.of(1979, 9, 17)
-                    ),
+                    )
             )
             .build()
     }
@@ -192,7 +190,7 @@ class TestSaksbehandlingController(
                     bosattINorge = false,
                     land = "Sverige",
                     personMinimum = TestsøknadBuilder.Builder()
-                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17)),
+                        .defaultPersonMinimum("Bob Burger", LocalDate.of(1979, 9, 17))
                 ),
                 samvær = TestsøknadBuilder.Builder().defaultSamvær(
                     beskrivSamværUtenBarn = "Har sjelden sett noe til han",
@@ -231,8 +229,7 @@ class TestSaksbehandlingController(
     private fun lagMigreringBehandling(fagsak: Fagsak): Behandling {
         return migreringService.opprettMigrering(
             fagsak = fagsak,
-            fra = YearMonth.now(),
-            til = YearMonth.now().plusMonths(1),
+            periode = Månedsperiode(YearMonth.now(), YearMonth.now().plusMonths(1)),
             inntektsgrunnlag = 0,
             samordningsfradrag = 0
         )
@@ -245,7 +242,9 @@ class TestSaksbehandlingController(
             listOf(
                 Dokument(
                     "TEST".toByteArray(),
-                    Filtype.PDFA, null, null,
+                    Filtype.PDFA,
+                    null,
+                    null,
                     Dokumenttype.OVERGANGSSTØNAD_SØKNAD
                 )
             ),

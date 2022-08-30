@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -56,7 +57,6 @@ class OppgaveService(
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
-
             val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
             val opprettOppgave =
@@ -112,6 +112,15 @@ class OppgaveService(
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
+        val gsakOppgave = hentOppgave(gsakOppgaveId)
+        val tidligereSaksbehandler = gsakOppgave.tilordnetRessurs
+        if (tidligereSaksbehandler != saksbehandler && tidligereSaksbehandler != null) {
+            logger.info(
+                "(Eier av behandling/oppgave) Fordeler oppgave=$gsakOppgaveId " +
+                    "fra=$tidligereSaksbehandler til=$saksbehandler " +
+                    "sekunderSidenEndret=${sekunderSidenEndret(gsakOppgave)}"
+            )
+        }
         return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
     }
 
@@ -156,6 +165,11 @@ class OppgaveService(
 
     fun finnSisteOppgaveForBehandling(behandlingId: UUID): EfOppgave? {
         return oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandlingId)
+    }
+
+    fun hentIkkeFerdigstiltOppgaveForBehandling(behandlingId: UUID): Oppgave? {
+        return oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, Oppgavetype.BehandleSak)
+            ?.let { oppgaveClient.finnOppgaveMedId(it.gsakOppgaveId) }
     }
 
     fun lagOppgaveTekst(beskrivelse: String? = null): String {

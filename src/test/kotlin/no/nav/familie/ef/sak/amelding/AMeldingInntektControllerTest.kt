@@ -20,7 +20,8 @@ import java.util.UUID
 
 internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var aMeldingInntektClient: AMeldingInntektClient
+    @Autowired
+    private lateinit var aMeldingInntektClient: AMeldingInntektClient
 
     private val fagsak = fagsak(identer = fagsakpersoner(setOf("1")))
 
@@ -40,7 +41,7 @@ internal class AMeldingInntektControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `skal generere url til a-inntekt`() {
         val response = kallGenererUrl()
-        assertThat(response.body!!.getDataOrThrow()).isEqualTo("https://ainntekt")
+        assertThat(response.body?.getDataOrThrow()).isEqualTo("https://ainntekt")
     }
 
     private fun kallGenererUrl(): ResponseEntity<Ressurs<String>> =

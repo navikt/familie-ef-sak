@@ -23,17 +23,18 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledRes
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class OppdaterVilkårTest {
 
     @Test
     fun `Skal lage ALDER_PÅ_BARN-vurderinger for barn det er søkt om OG de andre barna som finnes - barnetilsyn`() {
-
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
             id = UUID.randomUUID(),
@@ -41,7 +42,7 @@ internal class OppdaterVilkårTest {
             søknadBarnId = null,
             personIdent = null,
             navn = null,
-            fødselTermindato = null,
+            fødselTermindato = null
         )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata = HovedregelMetadata(
@@ -64,8 +65,45 @@ internal class OppdaterVilkårTest {
     }
 
     @Test
-    fun `Skal lage ALENEOMSORG-vurderinger for barn det er søkt om OG barn det ikke er søkt om - barnetilsyn`() {
+    fun `ALDER_PÅ_BARN-vurderinger skal automatisk vurderes ved opprettelse - barnetilsyn`() {
+        val behandlingId = UUID.randomUUID()
+        val barn = BehandlingBarn(
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            søknadBarnId = null,
+            personIdent = FnrGenerator.generer(LocalDate.now().minusYears(5)),
+            navn = null,
+            fødselTermindato = null
+        )
+        val barnUtenSøknad = barn.copy(
+            id = UUID.randomUUID(),
+            personIdent = FnrGenerator.generer(LocalDate.now().minusYears(4))
+        )
+        val metadata = HovedregelMetadata(
+            sivilstandSøknad = null,
+            sivilstandstype = GIFT,
+            erMigrering = false,
+            barn = listOf(barn, barnUtenSøknad),
+            søktOmBarnetilsyn = listOf(barn.id)
+        )
 
+        val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
+            behandlingId,
+            metadata,
+            StønadType.BARNETILSYN
+        )
+
+        val alderPåBarnVilkår = nyeVilkårsvurderinger.filter { it.type === VilkårType.ALDER_PÅ_BARN }
+        assertThat(alderPåBarnVilkår).hasSize(2)
+        for (vilkårsvurdering in alderPåBarnVilkår) {
+            val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
+            assertThat(delvilkårsvurderinger.size).isEqualTo(1)
+            assertThat(delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+        }
+    }
+
+    @Test
+    fun `Skal lage ALENEOMSORG-vurderinger for barn det er søkt om OG barn det ikke er søkt om - barnetilsyn`() {
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
             id = UUID.randomUUID(),
@@ -73,7 +111,7 @@ internal class OppdaterVilkårTest {
             søknadBarnId = null,
             personIdent = null,
             navn = null,
-            fødselTermindato = null,
+            fødselTermindato = null
         )
         val barnUtenSøknad = barn.copy(id = UUID.randomUUID())
         val metadata = HovedregelMetadata(
@@ -97,7 +135,6 @@ internal class OppdaterVilkårTest {
 
     @Test
     fun `Skal lage null ALDER_PÅ_BARN vurderinger når type er overgangsstønad`() {
-
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
             id = UUID.randomUUID(),
@@ -105,7 +142,7 @@ internal class OppdaterVilkårTest {
             søknadBarnId = null,
             personIdent = null,
             navn = null,
-            fødselTermindato = null,
+            fødselTermindato = null
         )
         val metadata = HovedregelMetadata(
             sivilstandSøknad = null,
@@ -126,7 +163,6 @@ internal class OppdaterVilkårTest {
 
     @Test
     fun `Skal lage ALENEOMSORG-vurderinger for alle barn når type er overgangsstønad`() {
-
         val behandlingId = UUID.randomUUID()
         val barn = BehandlingBarn(
             id = UUID.randomUUID(),
@@ -134,7 +170,7 @@ internal class OppdaterVilkårTest {
             søknadBarnId = null,
             personIdent = null,
             navn = null,
-            fødselTermindato = null,
+            fødselTermindato = null
         )
         val metadata = HovedregelMetadata(
             sivilstandSøknad = null,
@@ -158,7 +194,8 @@ internal class OppdaterVilkårTest {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(
-            vilkårsvurdering, regel,
+            vilkårsvurdering,
+            regel,
             VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)
         )
 
@@ -171,7 +208,8 @@ internal class OppdaterVilkårTest {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(
-            vilkårsvurdering, regel,
+            vilkårsvurdering,
+            regel,
             VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
             VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA)
         )
@@ -189,7 +227,8 @@ internal class OppdaterVilkårTest {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(
-            vilkårsvurdering, regel,
+            vilkårsvurdering,
+            regel,
             VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI),
             VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.JA)
         )
@@ -203,7 +242,8 @@ internal class OppdaterVilkårTest {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(
-            vilkårsvurdering, regel,
+            vilkårsvurdering,
+            regel,
             VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
             VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI)
         )
@@ -217,7 +257,8 @@ internal class OppdaterVilkårTest {
         val regel = VilkårsregelToHovedregler()
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(
-            vilkårsvurdering, regel,
+            vilkårsvurdering,
+            regel,
             delvilkårsvurderingDto(VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.JA)),
             delvilkårsvurderingDto(
                 VurderingDto(
@@ -242,7 +283,8 @@ internal class OppdaterVilkårTest {
         val regel = VilkårsregelToHovedregler()
         val vilkårsvurdering = opprettVurdering(regel)
         val resultat = validerOgOppdater(
-            vilkårsvurdering, regel,
+            vilkårsvurdering,
+            regel,
             delvilkårsvurderingDto(
                 VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "")
             ),

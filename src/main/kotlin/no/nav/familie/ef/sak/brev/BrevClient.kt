@@ -53,7 +53,6 @@ class BrevClient(
         enhet: String?,
         skjulBeslutterSignatur: Boolean
     ): String {
-
         feilHvis(brevmal === FRITEKST) {
             "HTML-generering av fritekstbrev er ikke implementert"
         }

@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,10 +25,17 @@ import java.time.YearMonth
 
 internal class StegServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var stegService: StegService
-    @Autowired lateinit var fagsakRepository: FagsakRepository
-    @Autowired lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var stegService: StegService
+
+    @Autowired
+    lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    lateinit var behandlingshistorikkRepository: BehandlingshistorikkRepository
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `skal håndtere en ny søknad`() {
@@ -51,6 +59,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         val vedtaksperiode = VedtaksperiodeDto(
             årMånedFra = YearMonth.of(2021, 1),
             årMånedTil = YearMonth.of(2021, 6),
+            periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 6)),
             aktivitet = AktivitetType.BARN_UNDER_ETT_ÅR,
             periodeType = VedtaksperiodeType.HOVEDPERIODE
         )

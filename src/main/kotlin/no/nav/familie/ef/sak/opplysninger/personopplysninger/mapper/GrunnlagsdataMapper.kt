@@ -2,10 +2,12 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Folkeregisteridentifikator
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.FullmaktMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
@@ -15,6 +17,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator as FolkeregisteridentifikatorPdl
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon as ForelderBarnRelasjonPdl
 
 object GrunnlagsdataMapper {
@@ -35,7 +38,10 @@ object GrunnlagsdataMapper {
             personIdent = personIdent
         )
 
-    fun mapAnnenForelder(barneForeldre: Map<String, PdlAnnenForelder>) =
+    fun mapAnnenForelder(
+        barneForeldre: Map<String, PdlAnnenForelder>,
+        tidligereVedtaksperioderAnnenForelder: Map<String, TidligereVedtaksperioder>
+    ) =
         barneForeldre.map {
             AnnenForelderMedIdent(
                 adressebeskyttelse = it.value.adressebeskyttelse,
@@ -43,7 +49,9 @@ object GrunnlagsdataMapper {
                 fødsel = it.value.fødsel,
                 bostedsadresse = it.value.bostedsadresse,
                 dødsfall = it.value.dødsfall,
-                navn = it.value.navn.gjeldende()
+                navn = it.value.navn.gjeldende(),
+                folkeregisteridentifikator = mapFolkeregisteridentifikator(it.value.folkeregisteridentifikator),
+                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.key)
             )
         }
 
@@ -66,8 +74,12 @@ object GrunnlagsdataMapper {
         telefonnummer = pdlSøker.telefonnummer,
         tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
         utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
-        vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner)
+        vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner),
+        folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator)
     )
+
+    private fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) =
+        list.map { Folkeregisteridentifikator(it.ident, it.status, it.metadata.historisk) }
 
     private fun List<ForelderBarnRelasjonPdl>.mapForelderBarnRelasjon() =
         this.mapNotNull {
@@ -92,8 +104,10 @@ object GrunnlagsdataMapper {
                 ?: vergemaal
         }
 
-    private fun mapSivivilstand(pdlSøker: PdlSøker, andrePersoner: Map<String, PdlPersonKort>): List<SivilstandMedNavn> {
-
+    private fun mapSivivilstand(
+        pdlSøker: PdlSøker,
+        andrePersoner: Map<String, PdlPersonKort>
+    ): List<SivilstandMedNavn> {
         return pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]
             SivilstandMedNavn(
@@ -114,7 +128,8 @@ object GrunnlagsdataMapper {
                 gyldigFraOgMed = it.gyldigFraOgMed,
                 gyldigTilOgMed = it.gyldigTilOgMed,
                 motpartsPersonident = it.motpartsPersonident,
-                navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn()
+                navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn(),
+                områder = it.omraader
             )
         }
     }

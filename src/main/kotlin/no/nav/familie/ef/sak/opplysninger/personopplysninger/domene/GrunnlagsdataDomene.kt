@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorStatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
@@ -62,7 +63,8 @@ data class Søker(
     val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
-    val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>
+    val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>?
 )
 
 data class AnnenForelderMedIdent(
@@ -71,7 +73,9 @@ data class AnnenForelderMedIdent(
     val dødsfall: List<Dødsfall>,
     val fødsel: List<Fødsel>,
     val navn: Navn,
-    val personIdent: String
+    val personIdent: String,
+    val folkeregisteridentifikator: List<Folkeregisteridentifikator>?,
+    val tidligereVedtaksperioder: TidligereVedtaksperioder?
 )
 
 data class BarnMedIdent(
@@ -82,13 +86,19 @@ data class BarnMedIdent(
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val fødsel: List<Fødsel>,
     val navn: Navn,
-    val personIdent: String,
+    val personIdent: String
 )
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
     val relatertPersonsRolle: Familierelasjonsrolle,
     val minRolleForPerson: Familierelasjonsrolle?
+)
+
+data class Folkeregisteridentifikator(
+    val personIdent: String,
+    val status: FolkeregisteridentifikatorStatus,
+    val historisk: Boolean
 )
 
 data class SivilstandMedNavn(
@@ -105,7 +115,8 @@ data class FullmaktMedNavn(
     val gyldigFraOgMed: LocalDate,
     val gyldigTilOgMed: LocalDate,
     val motpartsPersonident: String,
-    val navn: String?
+    val navn: String?,
+    val områder: List<String>?
 )
 
 data class TidligereVedtaksperioder(
@@ -114,7 +125,7 @@ data class TidligereVedtaksperioder(
 )
 
 data class TidligereInnvilgetVedtak(
-    val harTidligereOvergangsstønad: Boolean,
-    val harTidligereBarnetilsyn: Boolean,
-    val harTidligereSkolepenger: Boolean
+    val harTidligereOvergangsstønad: Boolean = false,
+    val harTidligereBarnetilsyn: Boolean = false,
+    val harTidligereSkolepenger: Boolean = false
 )
