@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
@@ -51,6 +52,8 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
+import no.nav.familie.ef.sak.vedtak.historikk.EndringType
+import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -83,6 +86,7 @@ internal class BeregnYtelseStegTest {
     private val barnService = mockk<BarnService>(relaxed = true)
     private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val featureToggleService = mockFeatureToggleService()
 
     private val steg = BeregnYtelseSteg(
         tilkjentYtelseService,
@@ -95,13 +99,15 @@ internal class BeregnYtelseStegTest {
         tilbakekrevingService,
         barnService,
         fagsakService,
-        validerOmregningService
+        validerOmregningService,
+        featureToggleService
     )
 
     private val slot = slot<TilkjentYtelse>()
 
     @BeforeEach
     internal fun setUp() {
+        every { featureToggleService.isEnabled(any()) } returns true
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
             .returns(
@@ -229,8 +235,6 @@ internal class BeregnYtelseStegTest {
             val forrigeAndelFom = LocalDate.of(2021, 1, 1)
             val forrigeAndelTom = LocalDate.of(2021, 12, 31)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, forrigeAndelFom, forrigeAndelTom)))
 
@@ -884,8 +888,6 @@ internal class BeregnYtelseStegTest {
             val andelFom = YearMonth.of(2021, 6)
             val andelTom = YearMonth.of(2022, 6)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -918,8 +920,6 @@ internal class BeregnYtelseStegTest {
             val innvilgetFom = opphørFom.plusMonths(1)
             val innvilgetTom = andelTom
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -953,8 +953,6 @@ internal class BeregnYtelseStegTest {
             val andelFom = YearMonth.of(2021, 6)
             val andelTom = YearMonth.of(2022, 6)
 
-            val slot = slot<TilkjentYtelse>()
-            every { tilkjentYtelseService.opprettTilkjentYtelse(capture(slot)) } answers { firstArg() }
             every { tilkjentYtelseService.hentForBehandling(any()) } returns
                 lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(100, andelFom.atDay(1), andelTom.atEndOfMonth())))
             every { beregningService.beregnYtelse(any(), any()) } answers {
@@ -1413,6 +1411,7 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `skal ikke kunne opphøre før forrige sanksjonsbehandling`() {
+            every { featureToggleService.isEnabled(any()) } returns false
             val startMåned = YearMonth.of(2021, 6)
             val sluttMåned = YearMonth.of(2021, 12)
             val opphørFom = YearMonth.of(2021, 6)
@@ -1433,10 +1432,12 @@ internal class BeregnYtelseStegTest {
                     forrigeBehandlingId = UUID.randomUUID()
                 )
             }
+            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
         }
 
         @Test
         internal fun `skal ikke kunne innvilge med periode før forrige sanksjonsbehandling`() {
+            every { featureToggleService.isEnabled(any()) } returns false
             val startMåned = YearMonth.of(2021, 6)
             val sluttMåned = YearMonth.of(2021, 12)
             val sankskjonsMåned = YearMonth.of(2021, 8)
@@ -1456,6 +1457,41 @@ internal class BeregnYtelseStegTest {
                     forrigeBehandlingId = UUID.randomUUID()
                 )
             }
+            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
+        }
+
+        @Test
+        internal fun `tidligere sanksjon er fjernet, skal få revurdere som vanlig`() {
+            every { featureToggleService.isEnabled(any()) } returns false
+            val startMåned = YearMonth.of(2021, 6)
+            val sluttMåned = YearMonth.of(2021, 12)
+            val sankskjonsMåned = YearMonth.of(2021, 8)
+
+            every {
+                andelsHistorikkService.hentHistorikk(any(), any())
+            } returns listOf(
+                andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
+                andelhistorikkSanksjon(sankskjonsMåned, fjernetHistorikkEndring),
+                andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
+            )
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
+                listOf(
+                    lagAndelTilkjentYtelse(100, startMåned.plusMonths(1).atDay(1), sluttMåned.atEndOfMonth())
+                )
+            )
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
+            }
+
+            utførSteg(
+                BehandlingType.REVURDERING,
+                innvilget(listOf(innvilgetPeriode(startMåned, sluttMåned)), listOf(inntekt(startMåned))),
+                forrigeBehandlingId = UUID.randomUUID()
+            )
+
+            assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
+            verify { tilkjentYtelseService.opprettTilkjentYtelse(any()) }
+            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
         }
     }
 
@@ -1804,7 +1840,9 @@ internal class BeregnYtelseStegTest {
             sanksjonsårsak = null
         )
 
-    private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth) =
+    private val fjernetHistorikkEndring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
+
+    private fun andelhistorikkSanksjon(sanksjonMåned: YearMonth, endring: HistorikkEndring? = null) =
         AndelHistorikkDto(
             behandlingId = UUID.randomUUID(),
             behandlingType = BehandlingType.REVURDERING,
@@ -1814,7 +1852,7 @@ internal class BeregnYtelseStegTest {
             andel = andelDto(0, sanksjonMåned, sanksjonMåned),
             aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
             periodeType = VedtaksperiodeType.SANKSJON,
-            endring = null,
+            endring = endring,
             aktivitetArbeid = null,
             erSanksjon = true,
             sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
