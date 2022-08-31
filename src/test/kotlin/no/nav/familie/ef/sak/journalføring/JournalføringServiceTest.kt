@@ -75,11 +75,11 @@ internal class JournalføringServiceTest {
     private val barnService = mockk<BarnService>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
     private val featureToggleService = mockFeatureToggleService()
+    private val journalpostService = JournalpostService(journalpostClient = journalpostClient)
     private val infotrygdPeriodeValideringService = mockk<InfotrygdPeriodeValideringService>()
 
     private val journalføringService =
         JournalføringService(
-            journalpostClient = journalpostClient,
             behandlingService = behandlingService,
             søknadService = søknadService,
             fagsakService = fagsakService,
@@ -90,6 +90,7 @@ internal class JournalføringServiceTest {
             taskRepository = taskRepository,
             barnService = barnService,
             featureToggleService = featureToggleService,
+            journalpostService = journalpostService,
             infotrygdPeriodeValideringService = infotrygdPeriodeValideringService
         )
 
@@ -237,6 +238,7 @@ internal class JournalføringServiceTest {
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
+        every { infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(any()) } just Runs
 
         val behandleSakOppgaveId =
             journalføringService.fullførJournalpost(
@@ -288,6 +290,7 @@ internal class JournalføringServiceTest {
         every {
             journalpostClient.hentOvergangsstønadSøknad(any(), any())
         } returns Testsøknad.søknadOvergangsstønad
+        every { infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(any()) } just Runs
 
         val behandleSakOppgaveId =
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
@@ -385,6 +388,7 @@ internal class JournalføringServiceTest {
         internal fun `ny behandling - skal ikke kopiere vurderinger fra forrige behandling`() {
             val forrigeBehandlingId = UUID.randomUUID()
             mockOpprettBehandling(behandlingId, forrigeBehandlingId)
+            every { infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(any()) } just Runs
 
             fullførJournalpost(
                 JournalføringBehandling(
@@ -395,7 +399,6 @@ internal class JournalføringServiceTest {
             )
             verify(exactly = 0) { vurderingService.kopierVurderingerTilNyBehandling(any(), any(), any(), any()) }
         }
-
     }
 
     @Nested
@@ -408,6 +411,7 @@ internal class JournalføringServiceTest {
 
         @Test
         internal fun `kan velge å ta med eller ikke ta med barn på ny behandling`() {
+            every { infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(any()) } just Runs
             listOf(VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE).forEach {
                 fullførJournalpost(
                     JournalføringBehandling(
@@ -440,6 +444,7 @@ internal class JournalføringServiceTest {
             justRun {
                 vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
             }
+            every { infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(any()) } just Runs
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
@@ -557,9 +562,8 @@ internal class JournalføringServiceTest {
     }
 
     private fun mockFeilerValideringAvInfotrygdperioder() {
-        every { behandlingService.finnesBehandlingForFagsak(any()) } returns false
         every {
-            infotrygdPeriodeValideringService.validerKanJournalføreUtenÅMigrereOvergangsstønad(any(), any())
+            infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(any())
         } throws ApiFeil("feil", BAD_REQUEST)
     }
 

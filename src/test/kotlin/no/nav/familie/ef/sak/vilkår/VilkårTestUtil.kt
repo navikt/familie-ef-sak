@@ -41,5 +41,4 @@ object VilkårTestUtil {
             registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
             dokumentasjon = dokumentasjon
         )
-
 }
