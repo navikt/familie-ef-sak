@@ -50,14 +50,7 @@ data class FinnOppgaveRequestDto(
             fristTomDato = this.fristTom,
             aktivFomDato = null,
             aktivTomDato = null,
-            mappeId = this.mappeId?.let {
-                if (it.equals(-1L)) {
-                    null
-                }
-                else {
-                    it
-                } ?: null
-            },
+            mappeId = this.mappeId,
             limit = 150,
             offset = 0
         )
