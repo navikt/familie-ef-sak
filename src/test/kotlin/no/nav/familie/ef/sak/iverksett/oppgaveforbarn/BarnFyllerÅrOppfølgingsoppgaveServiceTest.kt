@@ -137,7 +137,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
     @Test
     fun `barn fra vanlige behandlinger og migrerte fagsaker blir med i listen over oppgaver`() {
-
         val fødselsdato = LocalDate.now().minusDays(182).minusDays(4)
 
         val behandlingId = UUID.randomUUID()

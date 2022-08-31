@@ -28,10 +28,15 @@ import java.time.LocalDate
 class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
+
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
+
     @Autowired private lateinit var barnRepository: BarnRepository
+
     @Autowired private lateinit var oppgaveRepository: OppgaveRepository
+
     @Autowired private lateinit var vedtakRepository: VedtakRepository
+
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Test

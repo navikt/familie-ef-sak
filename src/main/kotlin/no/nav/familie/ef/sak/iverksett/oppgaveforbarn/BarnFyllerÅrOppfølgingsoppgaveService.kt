@@ -39,11 +39,11 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
 
         val skalOpprettes = filtrerBarnSomHarFyltÅr(alleBarnIGjeldendeBehandlinger)
+        logger.info("Ville opprettet oppgave for ${skalOpprettes.size} barn.")
 
         if (!dryRun) {
             opprettOppgaveForBarn(skalOpprettes)
         } else {
-            logger.info("Ville opprettet oppgave for ${skalOpprettes.size} barn.")
             skalOpprettes.forEach {
                 secureLogger.info(
                     "Ville opprettet oppgave for barn med fødselsnummer: " +
@@ -55,38 +55,37 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
     private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
         val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
-        val skalOpprettes = mutableListOf<OpprettOppgaveForBarn>()
 
-        barnTilUtplukkForOppgave.forEach { barn ->
+        return barnTilUtplukkForOppgave.mapNotNull { barn ->
             val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
             if (barnetsAlder != null && barn.fødselsnummerBarn != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
-                skalOpprettes.add(
-                    OpprettOppgaveForBarn(
-                        barn.fødselsnummerBarn,
-                        barn.fødselsnummerSøker,
-                        barnetsAlder,
-                        barn.behandlingId
-                    )
+                OpprettOppgaveForBarn(
+                    barn.fødselsnummerBarn,
+                    barn.fødselsnummerSøker,
+                    barnetsAlder,
+                    barn.behandlingId
                 )
+            } else {
+                null
             }
         }
-
-        logger.info("barn til utplukk for oppgave: ${skalOpprettes.size}")
-        return skalOpprettes
     }
 
     private fun opprettOppgaveForBarn(opprettOppgaverForBarn: List<OpprettOppgaveForBarn>) {
         if (opprettOppgaverForBarn.isEmpty()) return
         val gjeldendeBarnList =
             gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId }).toSet()
+
         gjeldendeBarnList.forEach { gjeldendeBarn ->
             val opprettOppgaveForEksternId =
                 opprettOppgaverForBarn.firstOrNull { it.fødselsnummer == gjeldendeBarn.barnPersonIdent }
+
             val finnesOppgave = oppgaveRepository.findByBehandlingIdAndBarnPersonIdentAndAlder(
                 gjeldendeBarn.behandlingId,
                 gjeldendeBarn.barnPersonIdent,
                 opprettOppgaveForEksternId?.alder
             ) != null
+
             if (!finnesOppgave && opprettOppgaveForEksternId != null) {
                 val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
                 val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgaveRequest)
