@@ -183,14 +183,14 @@ class VurderingService(
             nåværendeBehandlingId,
             tidligereBehandlingId
         )
-        val barnPåBeggeBehandlingerMap =
+        val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(nåværendeBehandlingId, tidligereBehandlingId)
         val sivilstandErLik =
             hentGrunnlagsdataOgValiderSivilstand(nåværendeBehandlingId, tidligereBehandlingId)
         val tidligereVurderinger = hentVurderingerSomSkalGjenbrukes(
             sivilstandErLik,
             tidligereBehandlingId,
-            barnPåBeggeBehandlingerMap
+            forrigeBarnIdTilNåværendeBarnMap
         )
         val nåværendeVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(nåværendeBehandlingId)
@@ -198,7 +198,7 @@ class VurderingService(
             nåværendeBehandlingId,
             nåværendeVurderinger,
             tidligereVurderinger,
-            barnPåBeggeBehandlingerMap
+            forrigeBarnIdTilNåværendeBarnMap
         )
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandler()} gjenbruker vurderinger fra behandling $tidligereBehandlingId " +
@@ -234,7 +234,7 @@ class VurderingService(
 
         return barnPåForrigeBehandling.mapNotNull { forrige ->
             val barnPåBeggeBehandlinger = behandlingBarn[forrige.personIdent] ?: return@mapNotNull null
-            barnPåBeggeBehandlinger.id to barnPåBeggeBehandlinger
+            forrige.id to barnPåBeggeBehandlinger
         }.toMap()
     }
 
