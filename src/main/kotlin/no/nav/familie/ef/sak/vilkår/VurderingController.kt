@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
-import no.nav.familie.ef.sak.vilkår.dto.tilVurderingerForInngangsvilkår
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregler
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper

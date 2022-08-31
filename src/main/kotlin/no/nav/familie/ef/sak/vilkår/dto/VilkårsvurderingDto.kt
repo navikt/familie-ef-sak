@@ -66,14 +66,5 @@ fun Vilkårsvurdering.tilDto() =
             .map { it.tilDto() }
     )
 
-fun List<VilkårsvurderingDto>.tilVurderingerForInngangsvilkår(behandlingId: UUID, vurderinger: List<VilkårsvurderingDto>) =
-    this.filter { it.vilkårType.erInngangsvilkår() }.map {
-        SvarPåVurderingerDto(
-            id = vurderinger.filter { a -> a.vilkårType === it.vilkårType }[0].id,
-            behandlingId = behandlingId,
-            delvilkårsvurderinger = it.delvilkårsvurderinger
-        )
-    }
-
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }
 fun VurderingDto.tilDomene() = Vurdering(this.regelId, this.svar, this.begrunnelse)

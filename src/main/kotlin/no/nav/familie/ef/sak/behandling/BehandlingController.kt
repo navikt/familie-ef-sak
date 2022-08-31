@@ -101,6 +101,7 @@ class BehandlingController(
         tilgangService.validerHarSaksbehandlerrolle()
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandlingerForGjenbruk: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
-        return Ressurs.success(behandlingerForGjenbruk.map { it.tilDto(fagsakService.hentFagsak(it.fagsakId).stønadstype) })
+        val fagsaker: Map<UUID, Fagsak> = behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
+        return Ressurs.success(behandlingerForGjenbruk.map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) })
     }
 }
