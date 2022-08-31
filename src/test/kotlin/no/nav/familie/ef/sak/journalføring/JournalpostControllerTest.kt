@@ -31,15 +31,15 @@ import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 import kotlin.test.assertFailsWith
 
-internal class JournalføringControllerTest {
+internal class JournalpostControllerTest {
 
     private val journalføringService = mockk<JournalføringService>()
     private val journalpostService = mockk<JournalpostService>()
     private val pdlClient = mockk<PdlClient>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
-    private val journalføringController =
-        JournalføringController(journalføringService, journalpostService, pdlClient, tilgangService, featureToggleService)
+    private val journalpostController =
+        JournalpostController(journalføringService, journalpostService, pdlClient, tilgangService, featureToggleService)
 
     @BeforeEach
     internal fun setUp() {
@@ -58,7 +58,7 @@ internal class JournalføringControllerTest {
             journalpostService.hentJournalpost(any())
         } returns journalpostMedAktørId
 
-        val journalpostResponse = journalføringController.hentJournalPost(journalpostId)
+        val journalpostResponse = journalpostController.hentJournalPost(journalpostId)
         assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
     }
@@ -69,7 +69,7 @@ internal class JournalføringControllerTest {
             journalpostService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
 
-        val journalpostResponse = journalføringController.hentJournalPost(journalpostId)
+        val journalpostResponse = journalpostController.hentJournalPost(journalpostId)
         assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
     }
@@ -85,7 +85,7 @@ internal class JournalføringControllerTest {
         } throws ManglerTilgang("Ingen tilgang", "Mangler tilgang til bruker")
 
         assertFailsWith<ManglerTilgang> {
-            journalføringController.hentJournalPost(journalpostId)
+            journalpostController.hentJournalPost(journalpostId)
         }
     }
 
@@ -95,7 +95,7 @@ internal class JournalføringControllerTest {
             journalpostService.hentJournalpost(any())
         } returns journalpostUtenBruker
 
-        assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
+        assertThrows<IllegalStateException> { journalpostController.hentJournalPost(journalpostId) }
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class JournalføringControllerTest {
             journalpostService.hentJournalpost(any())
         } returns journalpostMedOrgnr
 
-        assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
+        assertThrows<IllegalStateException> { journalpostController.hentJournalPost(journalpostId) }
     }
 
     @Test
@@ -118,7 +118,7 @@ internal class JournalføringControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang til bruker")
 
         assertThrows<ManglerTilgang> {
-            journalføringController.fullførJournalpost(
+            journalpostController.fullførJournalpost(
                 journalpostMedFødselsnummer.journalpostId,
                 JournalføringRequest(
                     null,
@@ -144,7 +144,7 @@ internal class JournalføringControllerTest {
                 }
             )
 
-            assertThrows<ApiFeil> { journalføringController.hentDokument(journalpostId, dokumentInfoId) }
+            assertThrows<ApiFeil> { journalpostController.hentDokument(journalpostId, dokumentInfoId) }
         }
 
         @Test
@@ -164,7 +164,7 @@ internal class JournalføringControllerTest {
 
             every { journalpostService.hentDokument(any(), any()) } returns byteArrayOf()
 
-            journalføringController.hentDokument(journalpostId, dokumentInfoId)
+            journalpostController.hentDokument(journalpostId, dokumentInfoId)
 
             verify(exactly = 1) { journalpostService.hentDokument(journalpostId, dokumentInfoId) }
         }

@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/journalpost")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class JournalføringController(
+class JournalpostController(
     private val journalføringService: JournalføringService,
     private val journalpostService: JournalpostService,
     private val pdlClient: PdlClient,
