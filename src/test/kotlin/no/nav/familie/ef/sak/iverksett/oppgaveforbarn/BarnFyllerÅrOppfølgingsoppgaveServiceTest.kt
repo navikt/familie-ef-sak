@@ -55,7 +55,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveService.finnHendelseMappeId(any()) } returns 1
         every { oppgaveClient.opprettOppgave(any()) } returns 1
         every { oppgaveRepository.insert(capture(oppgaveSlot)) } returns oppgaveMock
-        every { oppgaveRepository.findByTypeAndAlderIsNotNull(any()) } returns emptyList()
+        every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
     }
 
     @AfterEach

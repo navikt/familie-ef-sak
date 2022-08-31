@@ -54,7 +54,9 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
-        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
+        val barnPersonIdenter = barnTilUtplukkForOppgave.mapNotNull { it.fødselsnummerBarn }
+        if (barnPersonIdenter.isEmpty()) return listOf()
+        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, barnPersonIdenter)
 
         return barnTilUtplukkForOppgave.mapNotNull { barn ->
             val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))

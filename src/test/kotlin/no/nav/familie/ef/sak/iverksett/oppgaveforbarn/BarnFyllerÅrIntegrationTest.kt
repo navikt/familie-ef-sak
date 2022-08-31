@@ -54,13 +54,13 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
 
-        val findByTypeAndAlderIsNotNull = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
-        assertThat(findByTypeAndAlderIsNotNull.size).isEqualTo(1)
-        assertThat(findByTypeAndAlderIsNotNull.first().alder).isEqualTo(Alder.SEKS_MND)
-        assertThat(findByTypeAndAlderIsNotNull.first().barnPersonIdent).isEqualTo(barnPersonIdent)
+        val finnOppgaverForBarnPersonIdenter = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf(barnPersonIdent))
+        assertThat(finnOppgaverForBarnPersonIdenter.size).isEqualTo(1)
+        assertThat(finnOppgaverForBarnPersonIdenter.first().alder).isEqualTo(Alder.SEKS_MND)
+        assertThat(finnOppgaverForBarnPersonIdenter.first().barnPersonIdent).isEqualTo(barnPersonIdent)
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        assertThat(findByTypeAndAlderIsNotNull.size).isEqualTo(1)
+        assertThat(finnOppgaverForBarnPersonIdenter.size).isEqualTo(1)
     }
 
     @Test
@@ -74,15 +74,16 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         barnRepository.insert(BehandlingBarn(behandlingId = behandling.id, personIdent = barnPersonIdent))
 
         vedtakRepository.insert(vedtak(behandling.id))
-        lagreFremtidligAndel(behandling, 4000)
+        lagreFremtidligAndel(behandling, 3000)
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
 
-        val findByTypeAndAlderIsNotNull = oppgaveRepository.findByTypeAndAlderIsNotNull(Oppgavetype.InnhentDokumentasjon)
-        assertThat(findByTypeAndAlderIsNotNull.isEmpty()).isTrue
+        var finnOppgaverForBarnPersonIdenter = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf(barnPersonIdent))
+        assertThat(finnOppgaverForBarnPersonIdenter.isEmpty()).isTrue
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        assertThat(findByTypeAndAlderIsNotNull.isEmpty()).isTrue
+        finnOppgaverForBarnPersonIdenter = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf(barnPersonIdent))
+        assertThat(finnOppgaverForBarnPersonIdenter.isEmpty()).isTrue
     }
 
     private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
