@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalføringController(
     private val journalføringService: JournalføringService,
+    private val journalpostService: JournalpostService,
     private val pdlClient: PdlClient,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService
@@ -48,7 +49,7 @@ class JournalføringController(
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
-        return Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId))
+        return Ressurs.success(journalpostService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @GetMapping("/{journalpostId}/dokument-pdf/{dokumentInfoId}", produces = [MediaType.APPLICATION_PDF_VALUE])
@@ -56,7 +57,7 @@ class JournalføringController(
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
         validerDokumentKanHentes(journalpost, dokumentInfoId, journalpostId)
-        return journalføringService.hentDokument(journalpostId, dokumentInfoId)
+        return journalpostService.hentDokument(journalpostId, dokumentInfoId)
     }
 
     @PostMapping("/{journalpostId}/fullfor")
@@ -105,7 +106,7 @@ class JournalføringController(
     }
 
     private fun finnJournalpostOgPersonIdent(journalpostId: String): Pair<Journalpost, String> {
-        val journalpost = journalføringService.hentJournalpost(journalpostId)
+        val journalpost = journalpostService.hentJournalpost(journalpostId)
         val personIdent = journalpost.bruker?.let {
             when (it.type) {
                 BrukerIdType.FNR -> it.id

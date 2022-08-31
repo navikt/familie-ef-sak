@@ -34,11 +34,12 @@ import kotlin.test.assertFailsWith
 internal class JournalføringControllerTest {
 
     private val journalføringService = mockk<JournalføringService>()
+    private val journalpostService = mockk<JournalpostService>()
     private val pdlClient = mockk<PdlClient>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val journalføringController =
-        JournalføringController(journalføringService, pdlClient, tilgangService, featureToggleService)
+        JournalføringController(journalføringService, journalpostService, pdlClient, tilgangService, featureToggleService)
 
     @BeforeEach
     internal fun setUp() {
@@ -54,7 +55,7 @@ internal class JournalføringControllerTest {
         } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
 
         every {
-            journalføringService.hentJournalpost(any())
+            journalpostService.hentJournalpost(any())
         } returns journalpostMedAktørId
 
         val journalpostResponse = journalføringController.hentJournalPost(journalpostId)
@@ -65,7 +66,7 @@ internal class JournalføringControllerTest {
     @Test
     internal fun `skal hente journalpost med personident fra journalposten`() {
         every {
-            journalføringService.hentJournalpost(any())
+            journalpostService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
 
         val journalpostResponse = journalføringController.hentJournalPost(journalpostId)
@@ -76,7 +77,7 @@ internal class JournalføringControllerTest {
     @Test
     internal fun `skal feile med ManglerTilgang hvis behandler ikke har tilgang person`() {
         every {
-            journalføringService.hentJournalpost(any())
+            journalpostService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
 
         every {
@@ -91,7 +92,7 @@ internal class JournalføringControllerTest {
     @Test
     internal fun `skal feile hvis journalpost mangler bruker`() {
         every {
-            journalføringService.hentJournalpost(any())
+            journalpostService.hentJournalpost(any())
         } returns journalpostUtenBruker
 
         assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
@@ -100,7 +101,7 @@ internal class JournalføringControllerTest {
     @Test
     internal fun `skal feile hvis journalpost har orgnr`() {
         every {
-            journalføringService.hentJournalpost(any())
+            journalpostService.hentJournalpost(any())
         } returns journalpostMedOrgnr
 
         assertThrows<IllegalStateException> { journalføringController.hentJournalPost(journalpostId) }
@@ -109,7 +110,7 @@ internal class JournalføringControllerTest {
     @Test
     internal fun `skal feile hvis bruker er veileder`() {
         every {
-            journalføringService.hentJournalpost(any())
+            journalpostService.hentJournalpost(any())
         } returns journalpostMedFødselsnummer
 
         every {
@@ -136,7 +137,7 @@ internal class JournalføringControllerTest {
         @Test
         internal fun `skal kaste ApiFeil hvis vedlegget ikke inneholder dokumentvariant ARKIV`() {
             every {
-                journalføringService.hentJournalpost(any())
+                journalpostService.hentJournalpost(any())
             } returns journalpostMedFødselsnummer.copy(
                 dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
                     it.copy(dokumentvarianter = listOf(Dokumentvariant(Dokumentvariantformat.PRODUKSJON_DLF)))
@@ -149,7 +150,7 @@ internal class JournalføringControllerTest {
         @Test
         internal fun `skal kunne hente dokument med dokumentvariant ARKIV`() {
             every {
-                journalføringService.hentJournalpost(any())
+                journalpostService.hentJournalpost(any())
             } returns journalpostMedFødselsnummer.copy(
                 dokumenter = journalpostMedFødselsnummer.dokumenter!!.map {
                     it.copy(
@@ -161,11 +162,11 @@ internal class JournalføringControllerTest {
                 }
             )
 
-            every { journalføringService.hentDokument(any(), any()) } returns byteArrayOf()
+            every { journalpostService.hentDokument(any(), any()) } returns byteArrayOf()
 
             journalføringController.hentDokument(journalpostId, dokumentInfoId)
 
-            verify(exactly = 1) { journalføringService.hentDokument(journalpostId, dokumentInfoId) }
+            verify(exactly = 1) { journalpostService.hentDokument(journalpostId, dokumentInfoId) }
         }
     }
 

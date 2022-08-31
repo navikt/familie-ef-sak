@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPerioderDto
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
@@ -25,7 +26,9 @@ import java.time.YearMonth
 internal class InfotrygdPeriodeValideringServiceTest {
 
     private val infotrygdService = mockk<InfotrygdService>()
-    private val service = InfotrygdPeriodeValideringService(infotrygdService)
+    private val behandlingService = mockk<BehandlingService>()
+
+    private val service = InfotrygdPeriodeValideringService(infotrygdService, behandlingService)
 
     private val personIdent = "1"
 

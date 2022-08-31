@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.ekstern
 
-import no.nav.familie.ef.sak.felles.util.FnrUtil
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
