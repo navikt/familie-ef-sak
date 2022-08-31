@@ -3,8 +3,8 @@ package no.nav.familie.ef.sak.vedlegg
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
-import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostDatoUtil.mestRelevanteDato
+import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
@@ -15,7 +15,7 @@ import java.util.UUID
 class VedleggService(
     private val behandlingService: BehandlingService,
     private val fagsakPersonService: FagsakPersonService,
-    private val journalføringService: JournalføringService
+    private val journalpostService: JournalpostService
 ) {
 
     fun finnJournalposter(behandlingId: UUID): JournalposterDto {
@@ -41,7 +41,7 @@ class VedleggService(
         behandlingsjournalposter: List<Behandlingsjournalpost>
     ): List<Journalpost> {
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
-        val sistejournalposter = journalføringService.finnJournalposter(personIdent)
+        val sistejournalposter = journalpostService.finnJournalposter(personIdent)
 
         return sistejournalposter + hentJournalposterTilBehandlingSomIkkeErFunnet(sistejournalposter, behandlingsjournalposter)
     }
@@ -52,7 +52,7 @@ class VedleggService(
     }
 
     fun finnVedleggForPerson(personIdent: String): List<DokumentinfoDto> {
-        val journalposter = journalføringService.finnJournalposter(personIdent, antall = 200)
+        val journalposter = journalpostService.finnJournalposter(personIdent, antall = 200)
 
         return journalposter
             .flatMap { journalpost -> journalpost.dokumenter?.map { tilDokumentInfoDto(it, journalpost) } ?: emptyList() }
@@ -65,7 +65,7 @@ class VedleggService(
         val journalpostIderFraFunnetJournalposter = sistejournalposter.map { it.journalpostId }
         val behandlingsjournalposterIkkeFunnet =
             behandlingsjournalposter.filterNot { journalpostIderFraFunnetJournalposter.contains(it.journalpostId) }
-        return behandlingsjournalposterIkkeFunnet.map { journalføringService.hentJournalpost(it.journalpostId) }
+        return behandlingsjournalposterIkkeFunnet.map { journalpostService.hentJournalpost(it.journalpostId) }
     }
 
     private fun tilDokumentInfoDto(

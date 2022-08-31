@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
-import no.nav.familie.ef.sak.journalføring.JournalføringService
+import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.vedlegg.VedleggService
@@ -25,22 +25,22 @@ import java.util.UUID
 internal class VedleggServiceTest {
 
     private val behandlingService = mockk<BehandlingService>()
-    private val journalføringService = mockk<JournalføringService>()
+    private val journalpostService = mockk<JournalpostService>()
     private val fagsakPersonService = mockk<FagsakPersonService>()
 
-    private val vedleggService = VedleggService(behandlingService, fagsakPersonService, journalføringService)
+    private val vedleggService = VedleggService(behandlingService, fagsakPersonService, journalpostService)
 
     @BeforeEach
     internal fun setUp() {
         val behandling = behandling(fagsak())
         every {
-            journalføringService.finnJournalposter(any())
+            journalpostService.finnJournalposter(any())
         } returns listOf(journalpostSøknad, journalpostEttersendelse)
         every {
-            journalføringService.hentJournalpost(journalpostSøknad.journalpostId)
+            journalpostService.hentJournalpost(journalpostSøknad.journalpostId)
         } returns journalpostSøknad
         every {
-            journalføringService.hentJournalpost(journalpostEttersendelse.journalpostId)
+            journalpostService.hentJournalpost(journalpostEttersendelse.journalpostId)
         } returns journalpostEttersendelse
 
         every {
@@ -74,17 +74,17 @@ internal class VedleggServiceTest {
     @Test
     internal fun `skal ikke hente journalposter 2 ganger hvis de allerede finnes i finnJournalposter`() {
         vedleggService.finnJournalposter(UUID.randomUUID())
-        verify(exactly = 1) { journalføringService.finnJournalposter(any()) }
-        verify(exactly = 0) { journalføringService.hentJournalpost(any()) }
+        verify(exactly = 1) { journalpostService.finnJournalposter(any()) }
+        verify(exactly = 0) { journalpostService.hentJournalpost(any()) }
     }
 
     @Test
     internal fun `skal hente journalpost direke hvis den ikke finnes blant de siste funnet journalpostene`() {
-        every { journalføringService.finnJournalposter(any()) } returns emptyList()
+        every { journalpostService.finnJournalposter(any()) } returns emptyList()
         vedleggService.finnJournalposter(UUID.randomUUID())
 
-        verify(exactly = 1) { journalføringService.finnJournalposter(any()) }
-        verify(exactly = 2) { journalføringService.hentJournalpost(any()) }
+        verify(exactly = 1) { journalpostService.finnJournalposter(any()) }
+        verify(exactly = 2) { journalpostService.hentJournalpost(any()) }
     }
 
     @Test

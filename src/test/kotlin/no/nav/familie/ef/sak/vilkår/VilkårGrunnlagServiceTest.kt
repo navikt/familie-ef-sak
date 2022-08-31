@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.service
+package no.nav.familie.ef.sak.vilkår
 
 import io.mockk.every
 import io.mockk.mockk
@@ -19,8 +19,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
-import no.nav.familie.ef.sak.vilkår.MedlemskapMapper
-import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
