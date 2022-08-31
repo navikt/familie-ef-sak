@@ -32,3 +32,4 @@ spec:
       - id: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
     extra:
       - "NAVident"
+      - "azp_name"
