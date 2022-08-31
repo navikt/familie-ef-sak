@@ -71,7 +71,7 @@ internal class OppgaveServiceTest {
             mapper = listOf(
                 MappeDto(
                     123,
-                    "70 Godkjenne vedtak",
+                    "70 Godkjennevedtak",
                     enhetsnr = "4489"
                 )
             )

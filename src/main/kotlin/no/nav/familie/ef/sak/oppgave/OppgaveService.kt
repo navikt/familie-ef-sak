@@ -102,7 +102,7 @@ class OppgaveService(
         if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
-                it.navn.contains("70 Godkjenne vedtak") &&
+                (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak"))  &&
                     !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
