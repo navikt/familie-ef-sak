@@ -108,7 +108,7 @@ class OppgaveService(
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
-                logger.error("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak")
+                logger.error("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak for enhetsnummer=$enhetsnummer")
             }
             return mappeIdForGodkjenneVedtak
         }
