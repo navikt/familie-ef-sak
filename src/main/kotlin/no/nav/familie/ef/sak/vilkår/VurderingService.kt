@@ -279,18 +279,23 @@ class VurderingService(
     }
 
     private fun validerBehandlingForGjenbruk(
-        nåværendeBehandlingId: UUID,
+        behandlingId: UUID,
         tidligereBehandlingId: UUID,
     ) {
-        val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(nåværendeBehandlingId)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=${behandlingId}"
+        }
+
+        val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandlingerForGjenbruk: List<Behandling> =
             behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
 
         if (behandlingerForGjenbruk.isEmpty()) {
-            throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=${nåværendeBehandlingId}")
+            throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=${behandlingId}")
         }
         if (!behandlingerForGjenbruk.map { it.id }.contains(tidligereBehandlingId)) {
-            throw Feil("Behandling med id=${tidligereBehandlingId} kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=${nåværendeBehandlingId}")
+            throw Feil("Behandling med id=${tidligereBehandlingId} kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=${behandlingId}")
         }
     }
 
