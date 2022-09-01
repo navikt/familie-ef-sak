@@ -230,20 +230,20 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
 
         val inntektsperiodeToMånederTilbake =
             Inntektsperiode(
-                Månedsperiode(
+                periode = Månedsperiode(
                     vedtakFraOgMedDato,
                     YearMonth.now().minusMonths(2).atEndOfMonth()
                 ),
-                BigDecimal(500_000),
-                BigDecimal.ZERO
+                inntekt = BigDecimal(500_000),
+                samordningsfradrag = BigDecimal.ZERO
             )
         val inntektsperiodeForrigeMåned = Inntektsperiode(
-            Månedsperiode(
+            periode = Månedsperiode(
                 YearMonth.now().minusMonths(1).atDay(1),
                 vedtakTilOgMedDato
             ),
-            BigDecimal(400_000),
-            BigDecimal.ZERO
+            inntekt = BigDecimal(400_000),
+            samordningsfradrag = BigDecimal.ZERO
         )
         val behandlingIdMedForskjelligInntektsperioder =
             insertVedtakMedPeriode(
@@ -276,12 +276,12 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
         tilOgMedDato: LocalDate,
         inntektsperioder: List<Inntektsperiode> = listOf(
             Inntektsperiode(
-                Månedsperiode(
+                periode = Månedsperiode(
                     fraOgMedDato,
                     tilOgMedDato
                 ),
-                BigDecimal(500_000),
-                BigDecimal.ZERO
+                inntekt = BigDecimal(500_000),
+                samordningsfradrag = BigDecimal.ZERO
             )
         )
     ): UUID {

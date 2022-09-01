@@ -326,9 +326,9 @@ object AndelHistorikkParser {
                     ?.let {
                         listOf(
                             Inntektsperiode(
-                                it.periode,
-                                BigDecimal.ZERO,
-                                BigDecimal.ZERO
+                                periode = it.periode,
+                                inntekt = BigDecimal.ZERO,
+                                samordningsfradrag = BigDecimal.ZERO
                             )
                         )
                     } ?: emptyList()

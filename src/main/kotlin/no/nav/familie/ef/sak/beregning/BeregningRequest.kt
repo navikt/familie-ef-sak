@@ -9,8 +9,16 @@ import java.time.YearMonth
 data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<VedtaksperiodeDto>)
 
 data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal?, val samordningsfradrag: BigDecimal?)
+
+// TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(
-    val periode: Månedsperiode,
+    @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val startDato: LocalDate? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val sluttDato: LocalDate? = null,
+    val periode: Månedsperiode =
+        Månedsperiode(
+            startDato ?: error("periode eller startDato må ha verdi"),
+            sluttDato ?: error("periode eller sluttDato må ha verdi")
+        ),
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
 )
