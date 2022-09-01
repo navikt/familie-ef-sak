@@ -56,6 +56,16 @@ data class Vurdering(
     val begrunnelse: String? = null
 )
 
+val inngangsvilkår = listOf(
+    VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+    VilkårType.LOVLIG_OPPHOLD,
+    VilkårType.MOR_ELLER_FAR,
+    VilkårType.SIVILSTAND,
+    VilkårType.SAMLIV,
+    VilkårType.ALENEOMSORG,
+    VilkårType.NYTT_BARN_SAMME_PARTNER,
+)
+
 enum class Vilkårsresultat(val beskrivelse: String) {
     OPPFYLT("Vilkåret er oppfylt når alle delvilkår er oppfylte"),
     AUTOMATISK_OPPFYLT("Delvilkår er oppfylt med automatisk beregning"),
@@ -92,6 +102,8 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     ;
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN
+
+    fun erInngangsvilkår(): Boolean = inngangsvilkår.contains(this)
 
     companion object {
 
