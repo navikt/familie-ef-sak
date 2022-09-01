@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.ekstern
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping(
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 class EksternBehandlingController(
+    private val jounalføringService: JournalføringService,
     private val eksternBehandlingService: EksternBehandlingService
 ) {
 
@@ -57,4 +60,41 @@ class EksternBehandlingController(
         validerIdent(personIdent.ident)
         return Ressurs.success(eksternBehandlingService.kanOppretteFørstegangsbehandling(personIdent.ident, type))
     }
+
+    /**
+     * Skal bare brukes av familie-ef-mottak for å automatisk journalføre
+     */
+    @PostMapping("automatisk-journalfor")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun automatiskJournalfør(
+        @RequestBody automatiskJournalføringRequest: AutomatiskJournalføringRequest
+    ): Ressurs<AutomatiskJournalføringResponse> {
+        if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
+            throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
+        }
+        validerIdent(automatiskJournalføringRequest.personIdent)
+        return Ressurs.success(
+            jounalføringService.automatiskJournalførTilFørstegangsbehandling(
+                journalpostId = automatiskJournalføringRequest.journalpostId,
+                personIdent = automatiskJournalføringRequest.personIdent,
+                stønadstype = automatiskJournalføringRequest.stønadstype
+            )
+        )
+    }
+
+
+
 }
+
+// TODO: SKal ligger i kontrakter
+data class AutomatiskJournalføringRequest(
+    val personIdent: String,
+    val journalpostId: String,
+    val stønadstype: StønadType
+)
+// TODO: SKal ligger i kontrakter
+data class AutomatiskJournalføringResponse (
+    val fagsakId: UUID,
+    val behandlingId: UUID,
+    val behandleSakOppgaveId: Long
+)
