@@ -20,6 +20,7 @@ data class FinnOppgaveRequestDto(
     val fristTom: LocalDate? = null,
     val enhetsmappe: Long? = null,
     val mappeId: Long? = null,
+    val erUtenMappe: Boolean? = null,
     val ident: String?
 ) {
 
@@ -37,6 +38,7 @@ data class FinnOppgaveRequestDto(
                 null
             },
             enhet = this.enhet,
+            erUtenMappe = this.erUtenMappe,
             saksbehandler = this.saksbehandler,
             aktørId = aktørid,
             journalpostId = this.journalpostId,
@@ -48,7 +50,7 @@ data class FinnOppgaveRequestDto(
             fristTomDato = this.fristTom,
             aktivFomDato = null,
             aktivTomDato = null,
-            mappeId = mappeId,
+            mappeId = this.mappeId,
             limit = 150,
             offset = 0
         )
