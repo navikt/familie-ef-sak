@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.service
+package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
@@ -14,13 +14,6 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
-import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
-import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.vilkår.Vurdering
-import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId

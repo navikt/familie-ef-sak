@@ -135,7 +135,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         ORDER BY b.opprettet_tid DESC
     """
     )
-    fun finnBehandlingForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
+    fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>
 
     fun existsByFagsakIdAndStatusIsNot(fagsakId: UUID, behandlingStatus: BehandlingStatus): Boolean
 

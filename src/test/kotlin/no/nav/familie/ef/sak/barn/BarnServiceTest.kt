@@ -13,7 +13,9 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.tilBehandlingBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -59,7 +61,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.BARNETILSYN
+            BARNETILSYN
         )
 
         assertThat(barnSlot.captured).hasSize(4)
@@ -186,7 +188,7 @@ internal class BarnServiceTest {
                 forrigeBehandlingId,
                 nyeBarnPåRevurdering,
                 grunnlagsdatabarn,
-                StønadType.BARNETILSYN
+                BARNETILSYN
             )
         }
 
@@ -230,7 +232,7 @@ internal class BarnServiceTest {
             forrigeBehandlingId,
             nyeBarnPåRevurdering,
             grunnlagsdatabarn,
-            StønadType.BARNETILSYN
+            BARNETILSYN
         )
 
         assertThat(barnSlot.captured).hasSize(4)
@@ -289,6 +291,55 @@ internal class BarnServiceTest {
             assertThat(barnSlot.captured[0].personIdent).isEqualTo(fnr)
             assertThat(barnSlot.captured[0].navn).isEqualTo("Barn D")
             assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+        }
+
+        @Test
+        internal fun `skal ta med barn fra forrige behandling som var under 18`() {
+            val eksisterendeBarn = barnMedIdent(fnrBarnA, "Barn A")
+            val barnOver18 = barnMedIdent(fnrBarnOver18, "Barn Over 18", fødsel(år = 1986, 1, 1))
+            val grunnlagsdatabarn = listOf(
+                barnOver18,
+                eksisterendeBarn
+            )
+
+            val forrigeBehandlingId = UUID.randomUUID()
+            val barnPåForrigeBehandling =
+                listOf(barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId), barnOver18.tilBehandlingBarn(forrigeBehandlingId))
+
+            every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns barnPåForrigeBehandling
+            barnService.opprettBarnForRevurdering(
+                behandlingId = behandlingId,
+                forrigeBehandlingId = forrigeBehandlingId,
+                emptyList(),
+                grunnlagsdataBarn = grunnlagsdatabarn,
+                stønadstype = BARNETILSYN
+            )
+
+            assertThat(barnSlot.captured).hasSize(2)
+        }
+
+        @Test
+        internal fun `skal filtrere vekk barn over 18 som ikke har innslag i forrige revurdering`() {
+            val eksisterendeBarn = barnMedIdent(fnrBarnA, "Barn A")
+            val barnOver18 = barnMedIdent(fnrBarnOver18, "Barn Over 18", fødsel(år = 1986, 1, 1))
+            val grunnlagsdatabarn = listOf(
+                barnOver18,
+                eksisterendeBarn
+            )
+
+            val forrigeBehandlingId = UUID.randomUUID()
+            val søknadsBarnTilBehandlingBarn = listOf(barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId))
+
+            every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns søknadsBarnTilBehandlingBarn
+            barnService.opprettBarnForRevurdering(
+                behandlingId = behandlingId,
+                forrigeBehandlingId = forrigeBehandlingId,
+                emptyList(),
+                grunnlagsdataBarn = grunnlagsdatabarn,
+                stønadstype = BARNETILSYN
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
         }
 
         @Test
@@ -434,6 +485,7 @@ internal class BarnServiceTest {
     }
 
     val fnrBarnA = "11111111111"
+    val fnrBarnOver18 = "23118612345"
     val fnrBarnB = "22222222222"
     val fnrBarnC = "33333333333"
     val fnrBarnD = "44444444444"

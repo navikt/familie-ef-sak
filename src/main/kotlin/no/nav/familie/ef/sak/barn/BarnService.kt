@@ -212,7 +212,7 @@ class BarnService(
         kobledeBarn: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>
     ) {
-        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.map { it.personIdent }
+        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }.map { it.personIdent }
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
 
         feilHvisIkke(kobledeBarnIdenter.containsAll(grunnlagsdataBarnIdenter)) {
