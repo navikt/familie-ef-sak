@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.testutil
 
 import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.kontrakter.ef.søknad.Aktivitet
 import no.nav.familie.kontrakter.ef.søknad.Barn
@@ -43,11 +45,21 @@ fun søknad(
     )
 
 fun søknadsBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
-    BehandlingBarn(
-        behandlingId = behandlingId,
-        søknadBarnId = it.id,
-        personIdent = it.fødselsnummer,
-        navn = it.navn,
-        fødselTermindato = it.fødselTermindato
-    )
+    it.tilBehandlingBarn(behandlingId)
 }
+
+fun SøknadBarn.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
+    behandlingId = behandlingId,
+    søknadBarnId = this.id,
+    personIdent = this.fødselsnummer,
+    navn = this.navn,
+    fødselTermindato = this.fødselTermindato
+)
+
+fun BarnMedIdent.tilBehandlingBarn(behandlingId: UUID) = BehandlingBarn(
+    behandlingId = behandlingId,
+    søknadBarnId = null,
+    personIdent = this.personIdent,
+    navn = this.navn.visningsnavn(),
+    fødselTermindato = null
+)
