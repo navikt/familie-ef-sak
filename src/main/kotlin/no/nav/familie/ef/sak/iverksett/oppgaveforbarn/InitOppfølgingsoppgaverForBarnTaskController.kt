@@ -22,11 +22,11 @@ class InitOppfølgingsoppgaverForBarnTaskController(
 
     @PostMapping("/initialiser")
     fun opprettTask() {
-        taskRepository.save(OpprettOppfølgingsoppgaverForBarnFyltÅrTask.opprettTask(LocalDate.now().plusDays(1)))
+        taskRepository.save(OpprettTasksForBarnFyltÅrTask.opprettTask(LocalDate.now().plusDays(1)))
     }
 
     @PostMapping("/dry-run")
     fun dryRun(@RequestParam referansedato: LocalDate) {
-        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr(dryRun = true)
+        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr(dryRun = true)
     }
 }

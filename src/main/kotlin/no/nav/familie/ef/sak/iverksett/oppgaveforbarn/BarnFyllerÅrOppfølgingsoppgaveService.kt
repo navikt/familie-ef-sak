@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -13,7 +11,10 @@ import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -21,16 +22,16 @@ import java.time.LocalDateTime
 @Service
 class BarnFyllerÅrOppfølgingsoppgaveService(
     private val gjeldendeBarnRepository: GjeldendeBarnRepository,
-    private val oppgaveClient: OppgaveClient,
     private val oppgaveService: OppgaveService,
     private val oppgaveRepository: OppgaveRepository,
-    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient
+    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
+    private val taskRepository: TaskRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    fun opprettOppgaverForAlleBarnSomHarFyltÅr(dryRun: Boolean = false) {
+    fun opprettTasksForAlleBarnSomHarFyltÅr(dryRun: Boolean = false) {
         val dagensDato = LocalDate.now()
         val alleBarnIGjeldendeBehandlinger =
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, dagensDato) +
@@ -42,7 +43,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         logger.info("Ville opprettet oppgave for ${skalOpprettes.size} barn.")
 
         if (!dryRun) {
-            opprettOppgaveForBarn(skalOpprettes)
+            opprettOppgaveTasksForBarn(skalOpprettes)
         } else {
             skalOpprettes.forEach {
                 secureLogger.info(
@@ -51,6 +52,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 )
             }
         }
+        logger.info("Oppretting av oppfølgingsoppgave-tasks ferdig")
     }
 
     private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
@@ -73,7 +75,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         }
     }
 
-    private fun opprettOppgaveForBarn(opprettOppgaverForBarn: List<OpprettOppgaveForBarn>) {
+    private fun opprettOppgaveTasksForBarn(opprettOppgaverForBarn: List<OpprettOppgaveForBarn>) {
         if (opprettOppgaverForBarn.isEmpty()) return
         val gjeldendeBarnList =
             gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId }).toSet()
@@ -90,15 +92,25 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
             if (!finnesOppgave && opprettOppgaveForEksternId != null) {
                 val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
-                val opprettetOppgaveId = oppgaveClient.opprettOppgave(opprettOppgaveRequest)
-                val oppgave = Oppgave(
-                    gsakOppgaveId = opprettetOppgaveId,
-                    behandlingId = gjeldendeBarn.behandlingId,
-                    barnPersonIdent = gjeldendeBarn.barnPersonIdent,
-                    type = Oppgavetype.InnhentDokumentasjon,
-                    alder = opprettOppgaveForEksternId.alder
-                )
-                oppgaveRepository.insert(oppgave)
+                try {
+                    taskRepository.save(
+                        OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(
+                            OpprettOppgavePayload(
+                                gjeldendeBarn.behandlingId,
+                                gjeldendeBarn.barnPersonIdent,
+                                opprettOppgaveForEksternId.alder,
+                                opprettOppgaveRequest
+                            )
+                        )
+                    )
+                } catch (e: DbActionExecutionException) {
+                    if (e.cause is DuplicateKeyException) {
+                        logger.info("Oppgave finnes allerede for barn fylt ${opprettOppgaveForEksternId.alder} " +
+                                    "på behandling ${gjeldendeBarn.behandlingId}. Oppretter ikke task.")
+                    } else {
+                        throw e
+                    }
+                }
             }
         }
     }

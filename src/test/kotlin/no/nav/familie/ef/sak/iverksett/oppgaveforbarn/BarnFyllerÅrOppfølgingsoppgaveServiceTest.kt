@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.FnrGenerator
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -29,9 +30,10 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val oppgaveClient = mockk<OppgaveClient>()
     private val oppgaveService = mockk<OppgaveService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
+    private val taskRepository = mockk<TaskRepository>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val opprettOppgaveForBarnService =
-        BarnFyllerÅrOppfølgingsoppgaveService(gjeldendeBarnRepository, oppgaveClient, oppgaveService, oppgaveRepository, personopplysningerIntegrasjonerClient)
+        BarnFyllerÅrOppfølgingsoppgaveService(gjeldendeBarnRepository, oppgaveClient, oppgaveService, oppgaveRepository, personopplysningerIntegrasjonerClient, taskRepository)
 
     private val oppgaveSlot = slot<Oppgave>()
     private val oppgaveMock = mockk<Oppgave>()
@@ -56,6 +58,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveClient.opprettOppgave(any()) } returns 1
         every { oppgaveRepository.insert(capture(oppgaveSlot)) } returns oppgaveMock
         every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
+        every { taskRepository.save(any()) } returns mockk()
     }
 
     @AfterEach
@@ -71,8 +74,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
         every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(BarnTilOppgave(barnTilUtplukkForOppgave.fødselsnummerBarn!!, barnTilUtplukkForOppgave.behandlingId, 1, 1))
-        opprettOppgaveForBarnService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        verify { oppgaveRepository.insert(any()) }
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify { taskRepository.save(any()) }
     }
 
     @Test
@@ -84,8 +87,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         } returns listOf(barnTilUtplukkForOppgave)
         every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(BarnTilOppgave(barnTilUtplukkForOppgave.fødselsnummerBarn!!, barnTilUtplukkForOppgave.behandlingId, 1, 1))
 
-        opprettOppgaveForBarnService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        verify { oppgaveRepository.insert(any()) }
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify { taskRepository.save(any()) }
     }
 
     @Test
@@ -96,8 +99,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
         every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(BarnTilOppgave(barnTilUtplukkForOppgave.fødselsnummerBarn!!, barnTilUtplukkForOppgave.behandlingId, 1, 1))
-        opprettOppgaveForBarnService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        verify(exactly = 0) { oppgaveRepository.insert(any()) }
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
@@ -112,8 +115,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val opprettBarnTilOppgave = opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
         every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns opprettBarnTilOppgave
 
-        opprettOppgaveForBarnService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        verify(exactly = 5) { oppgaveRepository.insert(any()) }
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify(exactly = 5) { taskRepository.save(any()) }
     }
 
     @Test
@@ -131,8 +134,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val opprettBarnTilOppgave = opprettBarnForFødselsdato.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
         every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns opprettBarnTilOppgave
 
-        opprettOppgaveForBarnService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        verify(exactly = 2) { oppgaveRepository.insert(any()) }
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify(exactly = 2) { taskRepository.save(any()) }
     }
 
     @Test
@@ -159,8 +162,8 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         val opprettBarnTilOppgave = listOpprettedeBarn.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
         every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns opprettBarnTilOppgave
 
-        opprettOppgaveForBarnService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        verify(exactly = 2) { oppgaveRepository.insert(any()) }
+        opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
+        verify(exactly = 2) { taskRepository.save(any()) }
     }
 
     private fun opprettBarn(

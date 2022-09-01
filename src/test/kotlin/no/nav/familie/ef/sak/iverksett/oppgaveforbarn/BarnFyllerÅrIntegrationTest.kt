@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -9,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -18,7 +20,8 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -39,6 +42,8 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
+    @Autowired private lateinit var taskRepository: TaskRepository
+
     @Test
     fun `barn har blitt mer enn 6 mnd, skal opprette og lagre oppgave`() {
         val fødselsdato = LocalDate.now().minusDays(183)
@@ -52,15 +57,19 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         vedtakRepository.insert(vedtak(behandling.id))
         lagreFremtidligAndel(behandling, 4000)
 
-        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
+        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
 
-        val finnOppgaverForBarnPersonIdenter = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf(barnPersonIdent))
-        assertThat(finnOppgaverForBarnPersonIdenter.size).isEqualTo(1)
-        assertThat(finnOppgaverForBarnPersonIdenter.first().alder).isEqualTo(Alder.SEKS_MND)
-        assertThat(finnOppgaverForBarnPersonIdenter.first().barnPersonIdent).isEqualTo(barnPersonIdent)
+        val tasks = taskRepository.findAll().toList()
+        assertThat(tasks.size).isEqualTo(1)
 
-        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        assertThat(finnOppgaverForBarnPersonIdenter.size).isEqualTo(1)
+        val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(tasks.first().payload)
+        assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.SEKS_MND)
+        assertThat(opprettOppgavePayload.barnPersonIdent).isEqualTo(barnPersonIdent)
+
+        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
+
+        val tasksEtterAndreKjøring = taskRepository.findAll().toList()
+        assertThat(tasksEtterAndreKjøring.size).isEqualTo(1)
     }
 
     @Test
@@ -76,14 +85,8 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         vedtakRepository.insert(vedtak(behandling.id))
         lagreFremtidligAndel(behandling, 3000)
 
-        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-
-        var finnOppgaverForBarnPersonIdenter = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf(barnPersonIdent))
-        assertThat(finnOppgaverForBarnPersonIdenter.isEmpty()).isTrue
-
-        barnFyllerÅrOppfølgingsoppgaveService.opprettOppgaverForAlleBarnSomHarFyltÅr()
-        finnOppgaverForBarnPersonIdenter = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf(barnPersonIdent))
-        assertThat(finnOppgaverForBarnPersonIdenter.isEmpty()).isTrue
+        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
+        assertThat(taskRepository.findAll().toList().isEmpty()).isTrue
     }
 
     private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {
