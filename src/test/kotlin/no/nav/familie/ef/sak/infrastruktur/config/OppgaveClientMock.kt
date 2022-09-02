@@ -9,7 +9,6 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
-import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -57,44 +56,12 @@ class OppgaveClientMock {
             if (mappeRequest.enhetsnr == "4489") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
-                    mapper = listOf(
-                        MappeDto(
-                            id = 101,
-                            navn = "EF Sak - 01 Uplassert lokal",
-                            enhetsnr = "4489"
-                        ),
-                        MappeDto(
-                            id = 102,
-                            navn = "EF Sak - 70 Godkjenne vedtak",
-                            enhetsnr = "4489"
-                        ),
-                        MappeDto(
-                            id = 103,
-                            navn = "EF Sak - 99 testmappe lokal 99",
-                            enhetsnr = "4489"
-                        )
-                    )
+                    mapper = emptyList()
                 )
             } else if (mappeRequest.enhetsnr == "4483") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
-                    mapper = listOf(
-                        MappeDto(
-                            id = 201,
-                            navn = "EF Sak - 01 Uplassert lokal",
-                            enhetsnr = "4483"
-                        ),
-                        MappeDto(
-                            id = 202,
-                            navn = "EF Sak - 70 Godkjenne vedtak",
-                            enhetsnr = "4483"
-                        ),
-                        MappeDto(
-                            id = 203,
-                            navn = "EF Sak - 99 testmappe lokal 99",
-                            enhetsnr = "4483"
-                        )
-                    )
+                    mapper = emptyList()
                 )
             } else {
                 FinnMappeResponseDto(0, emptyList())
