@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -36,23 +34,5 @@ class EksternBehandlingService(
             .mapNotNull { behandlingService.finnSisteIverksatteBehandling(it.id) }
             .map { it.id }
             .toSet()
-    }
-
-    fun kanOppretteFørstegangsbehandling(ident: String, type: StønadType): Boolean {
-        val allePersonIdenter = personService.hentPersonIdenter(ident).identer.map { it.ident }.toSet()
-        val fagsak = fagsakService.finnFagsak(allePersonIdenter, type)
-
-        return harIngenReelleBehandlinger(fagsak) && harIngenInnslagIInfotrygd(ident, type)
-    }
-
-    private fun harIngenInnslagIInfotrygd(
-        ident: String,
-        type: StønadType
-    ) = !infotrygdService.eksisterer(ident, setOf(type))
-
-    private fun harIngenReelleBehandlinger(fagsak: Fagsak?): Boolean {
-        return fagsak?.let {
-            behandlingService.hentBehandlinger(fagsak.id).none { it.resultat != BehandlingResultat.HENLAGT }
-        } ?: true
     }
 }

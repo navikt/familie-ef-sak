@@ -1,6 +1,5 @@
-package no.nav.familie.ef.sak.ekstern
+package no.nav.familie.ef.sak.ekstern.journalføring
 
-import no.nav.familie.ef.sak.ekstern.journalføring.AutomatiskJournalføringService
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -15,33 +14,17 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping(
-    path = ["/api/ekstern/behandling"],
+    path = ["/api/ekstern/automatisk-journalforing"],
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
-class EksternBehandlingController(
-    private val eksternBehandlingService: EksternBehandlingService,
+class AutomatiskJournalføringController(
     private val automatiskJournalføringService: AutomatiskJournalføringService
 ) {
-
-    /**
-     * Hvis man har alle identer til en person så kan man sende inn alle direkte, for å unngå oppslag mot pdl
-     * Dette er alltså ikke ett bolk-oppslag for flere ulike personer
-     */
-    @PostMapping("har-loepende-stoenad")
-    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun harAktivStønad(@RequestBody personidenter: Set<String>): Ressurs<Boolean> {
-        if (personidenter.isEmpty()) {
-            return Ressurs.failure("Minst en ident påkrevd for søk")
-        }
-        if (personidenter.any { it.length != 11 }) {
-            return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
-        }
-        return Ressurs.success(eksternBehandlingService.harLøpendeStønad(personidenter))
-    }
 
     /**
      * Skal bare brukes av familie-ef-mottak for å vurdere om en journalføring skal automatisk ferdigstilles
@@ -49,7 +32,6 @@ class EksternBehandlingController(
      */
     @PostMapping("kan-opprette-forstegangsbehandling")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    @Deprecated("Bruk heller AutomatiskJournalføringController", ReplaceWith("AutomatiskJorunalføringController"))
     fun kanOppretteFørstegangsbehandling(
         @RequestBody personIdent: PersonIdent,
         @RequestParam type: StønadType
@@ -60,4 +42,39 @@ class EksternBehandlingController(
         validerIdent(personIdent.ident)
         return Ressurs.success(automatiskJournalføringService.kanOppretteFørstegangsbehandling(personIdent.ident, type))
     }
+
+    /**
+     * Skal bare brukes av familie-ef-mottak for å automatisk journalføre
+     */
+    @PostMapping("journalfor")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun automatiskJournalfør(
+        @RequestBody request: AutomatiskJournalføringRequest
+    ): Ressurs<AutomatiskJournalføringResponse> {
+        if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
+            throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
+        }
+        validerIdent(request.personIdent)
+        return Ressurs.success(
+            automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
+                journalpostId = request.journalpostId,
+                personIdent = request.personIdent,
+                stønadstype = request.stønadstype
+            )
+        )
+    }
 }
+
+// TODO: SKal ligger i kontrakter
+data class AutomatiskJournalføringRequest(
+    val personIdent: String,
+    val journalpostId: String,
+    val stønadstype: StønadType
+)
+
+// TODO: SKal ligger i kontrakter
+data class AutomatiskJournalføringResponse(
+    val fagsakId: UUID,
+    val behandlingId: UUID,
+    val behandleSakOppgaveId: Long
+)

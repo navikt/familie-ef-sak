@@ -1,13 +1,12 @@
 package no.nav.familie.ef.sak.journalføring
 
-import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
-import no.nav.familie.ef.sak.ekstern.AutomatiskJournalføringResponse
+import no.nav.familie.ef.sak.ekstern.journalføring.AutomatiskJournalføringResponse
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -53,8 +52,7 @@ class JournalføringService(
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
     private val journalpostService: JournalpostService,
-    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
-    private val arbeidsfordelingService: ArbeidsfordelingService
+    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService
 ) {
 
     @Transactional
@@ -128,16 +126,12 @@ class JournalføringService(
         return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
     }
 
+    @Transactional
     fun automatiskJournalførTilFørstegangsbehandling(
-        journalpostId: String,
-        personIdent: String,
-        stønadstype: StønadType
+        fagsak: Fagsak,
+        journalpost: Journalpost,
+        journalførendeEnhet: String
     ): AutomatiskJournalføringResponse {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
-        val journalpost = journalpostService.hentJournalpost(journalpostId)
-        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
-
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak = fagsak,
@@ -145,7 +139,7 @@ class JournalføringService(
             barnSomSkalFødes = emptyList()
         )
 
-        journalpostService.oppdaterOgFerdigstillJournalpost(
+        journalpostService.oppdaterOgFerdigstillJournalpostMaskinelt(
             journalpost = journalpost,
             journalførendeEnhet = journalførendeEnhet,
             fagsak = fagsak
@@ -153,12 +147,11 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
 
-        val oppgaveId = opprettSaksbehandlingsoppgave(behandling = behandling)
+        val oppgaveId = opprettSaksbehandlingsoppgave(behandling = behandling, navIdent = null)
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id,
             behandleSakOppgaveId = oppgaveId
-
         )
     }
 
@@ -245,7 +238,7 @@ class JournalføringService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
     }
 
-    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String? = null): Long {
+    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String?): Long {
         return oppgaveService.opprettOppgave(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,

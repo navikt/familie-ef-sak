@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.ekstern
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.ekstern.journalføring.AutomatiskJournalføringService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -26,7 +27,8 @@ internal class EksternBehandlingControllerTest {
     private val personService = mockk<PersonService>()
     private val infotrygdService = mockk<InfotrygdService>()
     private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService, personService, infotrygdService)
-    private val eksternBehandlingController = EksternBehandlingController(eksternBehandlingService)
+    private val automatiskJournalføringService = mockk<AutomatiskJournalføringService>()
+    private val eksternBehandlingController = EksternBehandlingController(eksternBehandlingService, automatiskJournalføringService)
 
     @Test
     internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {

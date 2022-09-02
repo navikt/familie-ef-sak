@@ -63,12 +63,24 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         return journalpostClient.hentSkolepengerSøknad(journalpost.journalpostId, dokumentinfo.dokumentInfoId)
     }
 
+    fun oppdaterOgFerdigstillJournalpostMaskinelt(
+        journalpost: Journalpost,
+        journalførendeEnhet: String,
+        fagsak: Fagsak
+    ) = oppdaterOgFerdigstillJournalpost(
+        journalpost = journalpost,
+        dokumenttitler = null,
+        journalførendeEnhet = journalførendeEnhet,
+        fagsak = fagsak,
+        saksbehandler = null
+    )
+
     fun oppdaterOgFerdigstillJournalpost(
         journalpost: Journalpost,
-        dokumenttitler: Map<String, String>? = null,
+        dokumenttitler: Map<String, String>?,
         journalførendeEnhet: String,
         fagsak: Fagsak,
-        saksbehandler: String? = null
+        saksbehandler: String?
     ) {
         if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
             oppdaterJournalpostMedFagsakOgDokumenttitler(
