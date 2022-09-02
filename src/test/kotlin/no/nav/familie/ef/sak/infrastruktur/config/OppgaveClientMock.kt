@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -56,12 +57,34 @@ class OppgaveClientMock {
             if (mappeRequest.enhetsnr == "4489") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
-                    mapper = emptyList()
+                    mapper = listOf(
+                        MappeDto(
+                            id = 102,
+                            navn = "70 Godkjennevedtak",
+                            enhetsnr = "4489"
+                        ),
+                        MappeDto(
+                            id = 103,
+                            navn = "EF Sak - 99 testmappe lokal 99",
+                            enhetsnr = "4489"
+                        )
+                    )
                 )
             } else if (mappeRequest.enhetsnr == "4483") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
-                    mapper = emptyList()
+                    mapper = listOf(
+                        MappeDto(
+                            id = 202,
+                            navn = "70 Godkjennevedtak",
+                            enhetsnr = "4483"
+                        ),
+                        MappeDto(
+                            id = 203,
+                            navn = "EF Sak - 99 testmappe lokal 99",
+                            enhetsnr = "4483"
+                        )
+                    )
                 )
             } else {
                 FinnMappeResponseDto(0, emptyList())
