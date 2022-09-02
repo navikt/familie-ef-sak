@@ -7,6 +7,7 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringRequest
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions
