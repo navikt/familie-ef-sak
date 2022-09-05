@@ -31,9 +31,6 @@ class AutomatiskJournalføringService(
     private val behandlingService: BehandlingService
 ) {
 
-    /**
-     * Lag enhetstester, fiks kontrakter, fiks mottak til riktig url
-     */
     @Transactional
     fun automatiskJournalførTilFørstegangsbehandling(
         journalpostId: String,
