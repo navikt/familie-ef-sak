@@ -21,7 +21,7 @@ class AlderTest {
 
     @Test
     fun `returner null dersom fødselsdato er mer enn ett år siden og utenfor cutoff`() {
-        val fødselsdato = LocalDate.now().minusYears(1).minusDays(7)
+        val fødselsdato = LocalDate.now().minusYears(1).minusDays(8)
         assertThat(Alder.fromFødselsdato(fødselsdato)).isNull()
     }
 

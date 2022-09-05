@@ -191,6 +191,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
             assertThat(resultat[0].behandlingId).isEqualTo(behandling.id)
             assertThat(resultat[0].fødselsnummerSøker).isEqualTo(fnrSøker)
             assertThat(resultat[0].fødselsnummerBarn).isEqualTo(fnrBarn)
+            assertThat(resultat[0].termindatoBarn).isNull()
             assertThat(resultat[0].fraMigrering).isTrue
         }
 

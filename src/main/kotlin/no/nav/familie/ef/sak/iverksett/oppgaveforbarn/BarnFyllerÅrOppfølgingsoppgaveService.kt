@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -18,6 +19,7 @@ import org.springframework.data.relational.core.conversion.DbActionExecutionExce
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.math.abs
 
 @Service
 class BarnFyllerÅrOppfølgingsoppgaveService(
@@ -25,7 +27,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val oppgaveService: OppgaveService,
     private val oppgaveRepository: OppgaveRepository,
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val pdlClient: PdlClient
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -55,12 +58,45 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         logger.info("Oppretting av oppfølgingsoppgave-tasks ferdig")
     }
 
-    private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
-        val barnPersonIdenter = barnTilUtplukkForOppgave.mapNotNull { it.fødselsnummerBarn }
-        if (barnPersonIdenter.isEmpty()) return listOf()
+    private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
+        val personerMedTermindatoBarn = barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
+        val pdlBarn = pdlClient.hentBarn(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
+
+        val returnBarnTilUtplukkForOppgave = mutableListOf<BarnTilUtplukkForOppgave>()
+
+        for (personMedTermindatoBarn in personerMedTermindatoBarn) {
+            val termindato = personMedTermindatoBarn.termindatoBarn!!
+            val forelderBarnRelasjoner = pdlBarn[personMedTermindatoBarn.fødselsnummerSøker]?.forelderBarnRelasjon?.filter { it.relatertPersonsIdent != null }
+            if (forelderBarnRelasjoner == null || forelderBarnRelasjoner.isEmpty()) {
+                secureLogger.info("Ingen registrerte barn på person ${personMedTermindatoBarn.fødselsnummerSøker} med registrert termindato for barn")
+            } else {
+                val uke20 = termindato.minusWeeks(20)
+                val uke44 = termindato.plusWeeks(4)
+
+                val besteMatch = forelderBarnRelasjoner.filter {
+                    val fødselsnummer = Fødselsnummer(it.relatertPersonsIdent!!) // Allerede filtrert på at relatertPersonsIdent != null
+                    val fødselsdato = fødselsnummer.fødselsdato
+                    fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20) and !returnBarnTilUtplukkForOppgave.contains(personMedTermindatoBarn.copy(fødselsnummerBarn = it.relatertPersonsIdent))
+                }.minByOrNull {
+                    val epochDayForFødsel = Fødselsnummer(it.relatertPersonsIdent!!).fødselsdato.toEpochDay()
+                    val epochDayTermindato = termindato.toEpochDay()
+                    abs(epochDayForFødsel - epochDayTermindato)
+                }
+                returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch?.relatertPersonsIdent))
+            }
+        }
+        return returnBarnTilUtplukkForOppgave + barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
+    }
+
+    private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
+        val barnTilUtplukkMedTermindatoBarn = hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
+        val barnPersonIdenter = barnTilUtplukkMedTermindatoBarn.mapNotNull { it.fødselsnummerBarn }
+
+        if (barnPersonIdenter.isEmpty()) return setOf()
+
         val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, barnPersonIdenter)
 
-        return barnTilUtplukkForOppgave.mapNotNull { barn ->
+        return barnTilUtplukkMedTermindatoBarn.mapNotNull { barn ->
             val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
             if (barnetsAlder != null && barn.fødselsnummerBarn != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
                 OpprettOppgaveForBarn(
@@ -72,10 +108,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             } else {
                 null
             }
-        }
+        }.toSet()
     }
 
-    private fun opprettOppgaveTasksForBarn(opprettOppgaverForBarn: List<OpprettOppgaveForBarn>) {
+    private fun opprettOppgaveTasksForBarn(opprettOppgaverForBarn: Set<OpprettOppgaveForBarn>) {
         if (opprettOppgaverForBarn.isEmpty()) return
         val gjeldendeBarnList =
             gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId }).toSet()
@@ -105,8 +141,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                     )
                 } catch (e: DbActionExecutionException) {
                     if (e.cause is DuplicateKeyException) {
-                        logger.info("Oppgave finnes allerede for barn fylt ${opprettOppgaveForEksternId.alder} " +
-                                    "på behandling ${gjeldendeBarn.behandlingId}. Oppretter ikke task.")
+                        logger.info(
+                            "Oppgave finnes allerede for barn fylt ${opprettOppgaveForEksternId.alder} " +
+                                "på behandling ${gjeldendeBarn.behandlingId}. Oppretter ikke task."
+                        )
                     } else {
                         throw e
                     }

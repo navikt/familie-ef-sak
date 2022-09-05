@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import no.nav.familie.ef.sak.felles.util.erOver6MndOgInnenforCutoff
-import no.nav.familie.ef.sak.felles.util.erOverEttÅrOgInnenforCutoff
+import no.nav.familie.ef.sak.felles.util.er6MndEllerMerOgInnenforCutoff
+import no.nav.familie.ef.sak.felles.util.erEttÅrEllerMerOgInnenforCutoff
 import java.time.LocalDate
 import java.util.UUID
 
@@ -19,8 +19,8 @@ enum class Alder(val oppgavebeskrivelse: String) {
     companion object {
         fun fromFødselsdato(fødselsdato: LocalDate?, numberOfDaysCutoff: Long = 7): Alder? {
             fødselsdato?.let {
-                if (fødselsdato.erOverEttÅrOgInnenforCutoff(numberOfDaysCutoff)) return ETT_ÅR
-                if (fødselsdato.erOver6MndOgInnenforCutoff(numberOfDaysCutoff)) return SEKS_MND
+                if (fødselsdato.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff)) return ETT_ÅR
+                if (fødselsdato.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff)) return SEKS_MND
             }
 
             return null
