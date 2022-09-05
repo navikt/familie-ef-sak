@@ -35,7 +35,7 @@ class GjenbrukVilkårService(
     fun finnBehandlingerForGjenbruk(behandlingId: UUID): List<BehandlingDto> {
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandlingerForGjenbruk: List<Behandling> =
-            behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+            behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
         val fagsaker: Map<UUID, Fagsak> =
             behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
         return behandlingerForGjenbruk.map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) }
@@ -138,7 +138,7 @@ class GjenbrukVilkårService(
 
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val behandlingerForGjenbruk: List<Behandling> =
-            behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+            behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsak.fagsakPersonId)
 
         if (behandlingerForGjenbruk.isEmpty()) {
             throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=${behandlingId}")

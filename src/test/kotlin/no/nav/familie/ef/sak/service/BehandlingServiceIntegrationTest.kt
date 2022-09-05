@@ -175,7 +175,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
             )
         )
 
-        val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsakPersonId)
+        val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
         val behandlingerForVilkårsgjenbrukkLagret = listOf(førstegangSp, førstegangBt)
         assertThat(behandlingerForVilkårsgjenbrukHentet).isEqualTo(behandlingerForVilkårsgjenbrukkLagret)
     }
