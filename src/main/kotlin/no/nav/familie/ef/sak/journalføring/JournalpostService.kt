@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.journalføring
 
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
@@ -11,6 +12,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
+import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -61,15 +63,49 @@ class JournalpostService(private val journalpostClient: JournalpostClient) {
         return journalpostClient.hentSkolepengerSøknad(journalpost.journalpostId, dokumentinfo.dokumentInfoId)
     }
 
-    fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String, saksbehandler: String) {
+    fun oppdaterOgFerdigstillJournalpostMaskinelt(
+        journalpost: Journalpost,
+        journalførendeEnhet: String,
+        fagsak: Fagsak
+    ) = oppdaterOgFerdigstillJournalpost(
+        journalpost = journalpost,
+        dokumenttitler = null,
+        journalførendeEnhet = journalførendeEnhet,
+        fagsak = fagsak,
+        saksbehandler = null
+    )
+
+    fun oppdaterOgFerdigstillJournalpost(
+        journalpost: Journalpost,
+        dokumenttitler: Map<String, String>?,
+        journalførendeEnhet: String,
+        fagsak: Fagsak,
+        saksbehandler: String?
+    ) {
+        if (journalpost.journalstatus != Journalstatus.JOURNALFOERT) {
+            oppdaterJournalpostMedFagsakOgDokumenttitler(
+                journalpost = journalpost,
+                dokumenttitler = dokumenttitler,
+                eksternFagsakId = fagsak.eksternId.id,
+                saksbehandler = saksbehandler
+            )
+            ferdigstillJournalføring(
+                journalpostId = journalpost.journalpostId,
+                journalførendeEnhet = journalførendeEnhet,
+                saksbehandler = saksbehandler
+            )
+        }
+    }
+
+    private fun ferdigstillJournalføring(journalpostId: String, journalførendeEnhet: String, saksbehandler: String? = null) {
         journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, saksbehandler)
     }
 
-    fun oppdaterJournalpostMedFagsakOgDokumenttitler(
+    private fun oppdaterJournalpostMedFagsakOgDokumenttitler(
         journalpost: Journalpost,
-        dokumenttitler: Map<String, String>?,
+        dokumenttitler: Map<String, String>? = null,
         eksternFagsakId: Long,
-        saksbehandler: String
+        saksbehandler: String? = null
     ) {
         val oppdatertJournalpost = JournalføringHelper.lagOppdaterJournalpostRequest(journalpost, eksternFagsakId, dokumenttitler)
         journalpostClient.oppdaterJournalpost(oppdatertJournalpost, journalpost.journalpostId, saksbehandler)
