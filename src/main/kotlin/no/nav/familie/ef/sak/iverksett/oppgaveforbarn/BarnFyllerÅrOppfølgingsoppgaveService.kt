@@ -68,7 +68,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             val termindato = personMedTermindatoBarn.termindatoBarn!!
             val forelderBarnRelasjoner = pdlBarn[personMedTermindatoBarn.fødselsnummerSøker]?.forelderBarnRelasjon?.filter { it.relatertPersonsIdent != null }
             if (forelderBarnRelasjoner == null || forelderBarnRelasjoner.isEmpty()) {
-                secureLogger.info("Ingen registrerte barn på person ${personMedTermindatoBarn.fødselsnummerSøker} med registrert termindato for barn")
+                logger.error("Ingen registrerte barn på person med registrert termindato for barn - se securelogs for fødselsnummer på person")
+                secureLogger.error("Ingen registrerte barn på person ${personMedTermindatoBarn.fødselsnummerSøker} med registrert termindato $termindato for barn")
             } else {
                 val uke20 = termindato.minusWeeks(20)
                 val uke44 = termindato.plusWeeks(4)
