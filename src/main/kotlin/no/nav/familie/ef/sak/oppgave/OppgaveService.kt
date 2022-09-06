@@ -49,7 +49,7 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
-        mappeId: Long? = null
+        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
