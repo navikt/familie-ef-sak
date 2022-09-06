@@ -51,6 +51,7 @@ internal class AutomatiskJournalføringServiceTest {
     )
 
     val enhet = "4489"
+    val mappeId = null
     val personIdent = "123456789"
     val aktørId = "9876543210127"
     val tidligerePersonIdent = "9123456789"
@@ -80,6 +81,7 @@ internal class AutomatiskJournalføringServiceTest {
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every {
             journalføringService.automatiskJournalførTilFørstegangsbehandling(
+                any(),
                 any(),
                 any(),
                 any()
@@ -144,7 +146,8 @@ internal class AutomatiskJournalføringServiceTest {
             automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                 journalpostId,
                 personIdent,
-                StønadType.OVERGANGSSTØNAD
+                StønadType.OVERGANGSSTØNAD,
+                mappeId
             )
         }
         Assertions.assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -165,7 +168,8 @@ internal class AutomatiskJournalføringServiceTest {
             automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                 journalpostId,
                 personIdent,
-                StønadType.OVERGANGSSTØNAD
+                StønadType.OVERGANGSSTØNAD,
+                mappeId
             )
         }
         Assertions.assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -182,7 +186,8 @@ internal class AutomatiskJournalføringServiceTest {
             automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                 journalpostId,
                 personIdent,
-                StønadType.OVERGANGSSTØNAD
+                StønadType.OVERGANGSSTØNAD,
+                mappeId
             )
         }
         Assertions.assertThat(feil.message).contains("Journalposten mangler bruker")
@@ -203,7 +208,8 @@ internal class AutomatiskJournalføringServiceTest {
             automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                 journalpostId,
                 personIdent,
-                StønadType.OVERGANGSSTØNAD
+                StønadType.OVERGANGSSTØNAD,
+                mappeId
             )
         }
         Assertions.assertThat(feil.message).contains("Ikke samsvar mellom personident på journalposten")
@@ -225,9 +231,17 @@ internal class AutomatiskJournalføringServiceTest {
         automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
             journalpostId,
             personIdent,
-            StønadType.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD,
+            mappeId
         )
-        verify { journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpostMedAktørId, enhet) }
+        verify {
+            journalføringService.automatiskJournalførTilFørstegangsbehandling(
+                fagsak,
+                journalpostMedAktørId,
+                enhet,
+                mappeId
+            )
+        }
     }
 
     @Test
@@ -245,13 +259,15 @@ internal class AutomatiskJournalføringServiceTest {
             journalføringService.automatiskJournalførTilFørstegangsbehandling(
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns mockk()
         automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
             journalpostId,
             personIdent,
-            StønadType.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD,
+            mappeId
         )
     }
 
@@ -264,7 +280,8 @@ internal class AutomatiskJournalføringServiceTest {
             automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                 journalpostId,
                 personIdent,
-                StønadType.OVERGANGSSTØNAD
+                StønadType.OVERGANGSSTØNAD,
+                mappeId
             )
         }
         Assertions.assertThat(feil.message).contains("Kan ikke opprette førstegangsbehandling")
@@ -285,7 +302,8 @@ internal class AutomatiskJournalføringServiceTest {
                 automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                     journalpostId,
                     personIdent,
-                    StønadType.OVERGANGSSTØNAD
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId
                 )
             }
             Assertions.assertThat(feil.message).contains("Kan ikke opprette førstegangsbehandling")
@@ -302,9 +320,10 @@ internal class AutomatiskJournalføringServiceTest {
         automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
             journalpostId,
             personIdent,
-            StønadType.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD,
+            mappeId
         )
-        verify { journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, enhet) }
+        verify { journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, enhet, mappeId) }
     }
 
     @Test
@@ -316,7 +335,8 @@ internal class AutomatiskJournalføringServiceTest {
                 automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                     journalpostId,
                     personIdent,
-                    StønadType.OVERGANGSSTØNAD
+                    StønadType.OVERGANGSSTØNAD,
+                    mappeId
                 )
             }
             Assertions.assertThat(feil.message).contains("Journalposten har ugyldig journalstatus $journalstatus")

@@ -180,7 +180,7 @@ internal class JournalføringServiceTest {
         mockOpprettBehandling(behandlingId)
 
         every { oppgaveService.ferdigstillOppgave(any()) } just runs
-        every { oppgaveService.opprettOppgave(any(), any(), any(), any()) } returns nyOppgaveId
+        every { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) } returns nyOppgaveId
         every { behandlingService.leggTilBehandlingsjournalpost(any(), any(), any()) } just runs
         every { journalpostClient.ferdigstillJournalpost(any(), any(), any()) } just runs
 
@@ -535,7 +535,8 @@ internal class JournalføringServiceTest {
             } returns Testsøknad.søknadOvergangsstønad
 
             val journalførendeEnhet = "4489"
-            val res = journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet)
+            val mappeId = 1234L
+            val res = journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
             verify { iverksettService.startBehandling(any(), fagsak) }

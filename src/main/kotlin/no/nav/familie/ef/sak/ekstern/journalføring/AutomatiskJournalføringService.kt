@@ -35,14 +35,15 @@ class AutomatiskJournalføringService(
     fun automatiskJournalførTilFørstegangsbehandling(
         journalpostId: String,
         personIdent: String,
-        stønadstype: StønadType
+        stønadstype: StønadType,
+        mappeId: Long?
     ): AutomatiskJournalføringResponse {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         validerKanAutomatiskJournalføre(personIdent, stønadstype, journalpost)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
 
-        return journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet)
+        return journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
     }
 
     fun kanOppretteFørstegangsbehandling(ident: String, type: StønadType): Boolean {

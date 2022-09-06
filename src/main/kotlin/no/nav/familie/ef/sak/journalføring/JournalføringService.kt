@@ -123,14 +123,15 @@ class JournalføringService(
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
-        return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
+        return opprettSaksbehandlingsoppgave(behandling, saksbehandler, null)
     }
 
     @Transactional
     fun automatiskJournalførTilFørstegangsbehandling(
         fagsak: Fagsak,
         journalpost: Journalpost,
-        journalførendeEnhet: String
+        journalførendeEnhet: String,
+        mappeId: Long?
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -147,11 +148,11 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
 
-        val oppgaveId = opprettSaksbehandlingsoppgave(behandling = behandling, navIdent = null)
+        val oppgaveId = opprettSaksbehandlingsoppgave(behandling = behandling, navIdent = null, mappeId = mappeId)
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId
+            behandleSakOppgaveId = oppgaveId,
         )
     }
 
@@ -177,7 +178,7 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandling.id)
 
-        return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
+        return opprettSaksbehandlingsoppgave(behandling, saksbehandler, null)
     }
 
     private fun opprettBehandlingOgPopulerGrunnlagsdata(
@@ -238,11 +239,12 @@ class JournalføringService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
     }
 
-    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String?): Long {
+    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String?, mappeId: Long?): Long {
         return oppgaveService.opprettOppgave(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
-            tilordnetNavIdent = navIdent
+            tilordnetNavIdent = navIdent,
+            mappeId = mappeId
         )
     }
 
