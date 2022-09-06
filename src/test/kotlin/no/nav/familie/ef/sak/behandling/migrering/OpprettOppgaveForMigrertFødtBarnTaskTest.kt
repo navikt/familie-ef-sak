@@ -95,7 +95,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
     private fun tilkjentYtelse(tilOgMed: YearMonth) = lagTilkjentYtelse(
         listOf(
-            lagAndelTilkjentYtelse(1, fraOgMed = YearMonth.now(), tilOgMed = tilOgMed)
+            lagAndelTilkjentYtelse(1, fraOgMed = YearMonth.now().atDay(1), tilOgMed = tilOgMed.atEndOfMonth())
         )
     )
 

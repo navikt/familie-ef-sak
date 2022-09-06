@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TOM
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.values
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -271,7 +272,7 @@ object AndelHistorikkParser {
     private fun mapAndel(andel: AndelHistorikkData): AndelTilkjentYtelse =
         AndelTilkjentYtelse(
             beløp = andel.beløp!!,
-            periode = Månedsperiode(andel.stønadFom!!, andel.stønadTom!!),
+            periode = Datoperiode(andel.stønadFom!!, andel.stønadTom!!),
             personIdent = PERSON_IDENT,
             inntekt = andel.inntekt!!,
             inntektsreduksjon = andel.inntektsreduksjon!!,
@@ -417,7 +418,7 @@ object AndelHistorikkParser {
                     vedtakstidspunkt = LocalDateTime.now(),
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                     personident = PERSON_IDENT,
-                    startmåned = andelerTilkjentYtelse.minOfOrNull { it.periode.fom } ?: YearMonth.now()
+                    startmåned = andelerTilkjentYtelse.minOfOrNull { it.periode.fomMåned } ?: YearMonth.now()
                 )
             }
     }

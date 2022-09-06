@@ -289,12 +289,12 @@ class StepDefinitions {
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 
-            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse.find { it.periode.fomDato == fraOgMed }
+            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse.find { it.periode.fom == fraOgMed }
                 ?: error("Fant ingen andel med startdato $fraOgMed, forventer: $gjeldendeAndelerTilkjentYtelse")
 
             try {
-                assertThat(fraOgMed).isEqualTo(gjelendeAndel.periode.fomDato)
-                assertThat(tilOgMed).isEqualTo(gjelendeAndel.periode.tomDato)
+                assertThat(fraOgMed).isEqualTo(gjelendeAndel.periode.fom)
+                assertThat(tilOgMed).isEqualTo(gjelendeAndel.periode.tom)
                 beløpMellom?.let {
                     assertThat(gjelendeAndel.beløp)
                         .isGreaterThanOrEqualTo(it.first)

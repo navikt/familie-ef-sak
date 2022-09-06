@@ -43,6 +43,7 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -245,7 +246,10 @@ fun tilkjentYtelse(
     val andeler = listOf(
         AndelTilkjentYtelse(
             beløp = beløp,
-            periode = Månedsperiode(YearMonth.of(stønadsår, 1), YearMonth.of(stønadsår, 12)),
+            periode = Datoperiode(
+                LocalDate.of(stønadsår, 1, 1),
+                LocalDate.of(stønadsår, 12, 31)
+            ),
             personIdent = personIdent,
             inntektsreduksjon = 8396,
             inntekt = 277100,
@@ -257,7 +261,7 @@ fun tilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
         vedtakstidspunkt = LocalDateTime.now(),
-        startmåned = min(startmåned, andeler.minOfOrNull { it.periode.fom }) ?: error("Må sette startdato"),
+        startmåned = min(startmåned, andeler.minOfOrNull { it.periode.fomMåned }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
         grunnbeløpsmåned = grunnbeløpsmåned
     )

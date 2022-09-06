@@ -58,7 +58,7 @@ data class AndelMedGrunnlagDto(
         vedtaksinformasjon: VedtakshistorikkperiodeBarnetilsyn?
     ) : this(
         beløp = andel.beløp,
-        periode = andel.periode,
+        periode = andel.periode.toMånedsperiode(),
         inntekt = andel.inntekt,
         inntektsreduksjon = andel.inntektsreduksjon,
         samordningsfradrag = andel.samordningsfradrag,

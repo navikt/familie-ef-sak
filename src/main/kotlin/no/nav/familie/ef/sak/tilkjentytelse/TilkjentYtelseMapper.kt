@@ -26,7 +26,7 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
 fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
     return AndelTilkjentYtelseDto(
         beløp = this.beløp,
-        periode = this.periode,
+        periode = this.periode.toMånedsperiode(),
         inntekt = this.inntekt,
         inntektsreduksjon = this.inntektsreduksjon,
         samordningsfradrag = this.samordningsfradrag
@@ -34,10 +34,10 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
 }
 
 fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode> {
-    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map { andel ->
+    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fom >= startDato }.map { andel ->
         Beløpsperiode(
             beløp = andel.beløp.toBigDecimal(),
-            periode = andel.periode,
+            periode = andel.periode.toMånedsperiode(),
             beregningsgrunnlag = Beregningsgrunnlag(
                 inntekt = andel.inntekt.toBigDecimal(),
                 samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
@@ -53,10 +53,10 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
     val startDato = vedtak.perioder.first().periode.fomDato
     val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
 
-    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fomDato >= startDato }.map {
-        val beløpsperiodeBarnetilsynDto = perioder.getValue(it.periode.fom)
+    return this.andelerTilkjentYtelse.filter { andel -> andel.periode.fom >= startDato }.map {
+        val beløpsperiodeBarnetilsynDto = perioder.getValue(it.periode.fomMåned)
         BeløpsperiodeBarnetilsynDto(
-            periode = it.periode,
+            periode = it.periode.toMånedsperiode(),
             beløp = it.beløp,
             beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
                 beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,

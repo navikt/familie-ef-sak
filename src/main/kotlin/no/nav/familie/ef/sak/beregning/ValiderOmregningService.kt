@@ -101,14 +101,15 @@ class ValiderOmregningService(
         if (tilkjentYtelse.grunnbeløpsmåned < nyesteGrunnbeløpGyldigFraOgMed) return
 
         tilkjentYtelse.andelerTilkjentYtelse
-            .filter { it.periode.tom >= nyesteGrunnbeløpGyldigFraOgMed }
+            .filter { it.periode.tomMåned >= nyesteGrunnbeløpGyldigFraOgMed }
             .forEach { andel ->
                 val inntektsperiodeForAndel = Inntektsperiode(
-                    periode = andel.periode,
+                    periode = andel.periode.toMånedsperiode(),
                     inntekt = andel.inntekt.toBigDecimal(),
                     samordningsfradrag = andel.samordningsfradrag.toBigDecimal()
                 )
-                val beregnetAndel = beregningService.beregnYtelse(listOf(andel.periode), listOf(inntektsperiodeForAndel))
+                val beregnetAndel =
+                    beregningService.beregnYtelse(listOf(andel.periode.toMånedsperiode()), listOf(inntektsperiodeForAndel))
                 brukerfeilHvis(beregnetAndel.size != 1 || beregnetAndel.first().beløp.toInt() != andel.beløp) {
                     feilmeldingForFeilGBeløp(andel)
                 }
@@ -117,5 +118,5 @@ class ValiderOmregningService(
 
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
         "Kan ikke fullføre behandling: Det må revurderes fra " +
-            "${maxOf(andel.periode.fom, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
+            "${maxOf(andel.periode.fomMåned, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
 }

@@ -317,8 +317,8 @@ internal class VedtakServiceTest : OppslagSpringRunnerTest() {
     ): List<AndelTilkjentYtelse> = inntektsperioder.map {
         lagAndelTilkjentYtelse(
             5000,
-            it.periode.fom,
-            it.periode.tom,
+            it.periode.fomDato,
+            it.periode.tomDato,
             inntekt = it.inntekt.toInt(),
             kildeBehandlingId = behandlingId
         )

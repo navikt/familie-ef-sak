@@ -597,8 +597,8 @@ internal class IverksettingDtoMapperTest {
             "andelerTilkjentYtelse": [{
                 "beløp": 200,
                 "periode": { 
-                    "fom": "2022-04",
-                    "tom": "2022-04"
+                    "fom": "2022-04-01",
+                    "tom": "2022-04-30"
                 },
                 "personIdent": "personIdent",
                 "inntekt": 300000,

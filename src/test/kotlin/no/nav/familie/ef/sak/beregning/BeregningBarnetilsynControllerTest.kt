@@ -122,10 +122,10 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             behandlingId = førstegangsbehandling.id,
             andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse(
-                    fraOgMed = YearMonth.of(2022, 1),
+                    fraOgMed = LocalDate.of(2022, 1, 1),
                     kildeBehandlingId = førstegangsbehandling.id,
                     beløp = 2000,
-                    tilOgMed = YearMonth.of(2022, 4)
+                    tilOgMed = LocalDate.of(2022, 4, 30)
                 )
             )
         )
@@ -176,16 +176,16 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
                 andelerTilkjentYtelse =
                 listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 1),
+                        fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 2000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = YearMonth.of(2022, 2)
+                        tilOgMed = LocalDate.of(2022, 2, 28)
                     ),
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 3),
+                        fraOgMed = LocalDate.of(2022, 3, 1),
                         beløp = 3000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = YearMonth.of(2022, 6)
+                        tilOgMed = LocalDate.of(2022, 6, 30)
                     )
                 )
             )

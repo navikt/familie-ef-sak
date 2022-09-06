@@ -136,7 +136,7 @@ object AndelHistorikkBeregner {
         vedtaksperioder.filter { it.erSanksjon }.map {
             AndelTilkjentYtelse(
                 beløp = 0,
-                periode = it.periode,
+                periode = it.periode.toDatoperiode(),
                 "",
                 0,
                 0,
@@ -181,7 +181,7 @@ object AndelHistorikkBeregner {
         andel: AndelTilkjentYtelse,
         vedtaksperioder: List<Vedtakshistorikkperiode>
     ): Vedtakshistorikkperiode {
-        return vedtaksperioder.first { it.periode.inneholder(andel.periode.fom) }
+        return vedtaksperioder.first { it.periode.inneholder(andel.periode.fomMåned) }
     }
 
     private fun sorterTilkjentYtelser(tilkjentYtelser: List<TilkjentYtelse>): List<TilkjentYtelse> =
@@ -246,7 +246,7 @@ object AndelHistorikkBeregner {
             return false
         }
         return vedtaksperiode.erSanksjon && tidligerePeriode.erSanksjon &&
-            vedtaksperiode.periode == tidligereAndel.periode
+            vedtaksperiode.periode == tidligereAndel.periode.toMånedsperiode()
     }
 
     private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(annenVedtaksperiode: Vedtakshistorikkperiode): Boolean {

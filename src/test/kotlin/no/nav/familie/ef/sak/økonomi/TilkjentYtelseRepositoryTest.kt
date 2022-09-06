@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
-import java.time.YearMonth
 
 internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
 
@@ -75,7 +74,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak).innvilgetOgFerdigstilt())
 
         val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
-        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.periode.fomDato }
+        val stønadFom = tilkjentYtelse.andelerTilkjentYtelse.minOf { it.periode.fom }
 
         repository.insert(tilkjentYtelse)
 
@@ -85,7 +84,7 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom))
             .hasSize(1)
 
-        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom.plusMonths(1)))
+        assertThat(repository.finnTilkjentYtelserTilKonsistensavstemming(fagsak.stønadstype, stønadFom.plusDays(1)))
             .isEmpty()
     }
 
@@ -115,8 +114,8 @@ internal class TilkjentYtelseRepositoryTest : OppslagSpringRunnerTest() {
         val andelerTilkjentYtelse = listOf(
             lagAndelTilkjentYtelse(
                 beløp = beløp,
-                fraOgMed = YearMonth.now(),
-                tilOgMed = YearMonth.now(),
+                fraOgMed = LocalDate.now(),
+                tilOgMed = LocalDate.now().plusDays(1),
                 kildeBehandlingId = behandling.id
             )
         )

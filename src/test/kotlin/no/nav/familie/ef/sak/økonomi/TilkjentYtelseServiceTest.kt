@@ -17,7 +17,6 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 class TilkjentYtelseServiceTest {
@@ -37,10 +36,10 @@ class TilkjentYtelseServiceTest {
     private val datoForAvstemming = LocalDate.of(2021, 2, 1)
     private val stønadstype = StønadType.OVERGANGSSTØNAD
 
-    private val andel1 = lagAndelTilkjentYtelse(1, YearMonth.of(2021, 1), YearMonth.of(2021, 1))
-    private val andel2 = lagAndelTilkjentYtelse(2, YearMonth.of(2021, 2), YearMonth.of(2021, 2))
-    private val andel3 = lagAndelTilkjentYtelse(3, YearMonth.of(2021, 3), YearMonth.of(2021, 3))
-    private val andel4 = lagAndelTilkjentYtelse(4, YearMonth.of(2021, 1), YearMonth.of(2021, 3))
+    private val andel1 = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
+    private val andel2 = lagAndelTilkjentYtelse(2, LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 28))
+    private val andel3 = lagAndelTilkjentYtelse(3, LocalDate.of(2021, 3, 1), LocalDate.of(2021, 3, 31))
+    private val andel4 = lagAndelTilkjentYtelse(4, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 3, 31))
 
     @Nested
     inner class FinnTilkjentYtelserTilKonsistensavstemming {
@@ -114,7 +113,7 @@ class TilkjentYtelseServiceTest {
 
         @Test
         internal fun `skal kaste feil hvis den ikke finner eksterneIder til behandling`() {
-            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, YearMonth.of(2021, 1), YearMonth.of(2023, 1))
+            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.of(2023, 1, 31))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
 
@@ -139,7 +138,7 @@ class TilkjentYtelseServiceTest {
 
         @Test
         internal fun `skal returnere true hvis det finnes andel med sluttdato etter idag`() {
-            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, YearMonth.of(2021, 1), YearMonth.now().plusMonths(1))
+            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().plusDays(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse
@@ -148,7 +147,7 @@ class TilkjentYtelseServiceTest {
 
         @Test
         internal fun `skal returnere false hvis det finnes andel mer sluttdato før idag`() {
-            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, YearMonth.of(2021, 1), YearMonth.now().minusMonths(1))
+            val andelTilkjentYtelse = lagAndelTilkjentYtelse(1, LocalDate.of(2021, 1, 1), LocalDate.now().minusMonths(1))
             val tilkjentYtelse = DataGenerator.tilfeldigTilkjentYtelse(behandling)
                 .copy(andelerTilkjentYtelse = listOf(andelTilkjentYtelse))
             every { tilkjentYtelseRepository.findByBehandlingId(any()) } returns tilkjentYtelse

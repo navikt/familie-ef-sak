@@ -76,8 +76,8 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriod
     utgifterBarnetilsyn = 0, // this.utgifterBarnetilsyn TODO
     månedsbeløp = this.beløp,
     engangsbeløp = this.beløp,
-    stønadFom = this.periode.fomDato,
-    stønadTom = this.periode.tomDato,
+    stønadFom = this.periode.fom,
+    stønadTom = this.periode.tom,
     opphørsdato = null,
     datakilde = PeriodeOvergangsstønad.Datakilde.EF
 )

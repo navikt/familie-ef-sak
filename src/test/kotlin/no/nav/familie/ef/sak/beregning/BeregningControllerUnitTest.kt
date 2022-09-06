@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -52,9 +53,9 @@ internal class BeregningControllerUnitTest {
             lagTilkjentYtelse(
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 1),
+                        fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 10_000,
-                        tilOgMed = YearMonth.of(2022, 4)
+                        tilOgMed = LocalDate.of(2022, 4, 30)
                     )
                 )
             )

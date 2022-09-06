@@ -94,7 +94,7 @@ class VedtakService(
     private fun createForventetInntektForMåned(vedtak: Vedtak, forventetInntektForDato: YearMonth): Int? {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingId(vedtak.behandlingId)
         return tilkjentYtelse?.andelerTilkjentYtelse?.firstOrNull {
-            it.periode.inneholder(forventetInntektForDato)
+            it.periode.inneholder(forventetInntektForDato.atDay(1))
         }?.inntekt
     }
 

@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
-import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.Datoperiode
 import java.time.LocalDate
 import java.util.Random
 import java.util.UUID
@@ -26,7 +26,7 @@ object DataGenerator {
     ) =
         AndelTilkjentYtelse(
             beløp = beløp,
-            periode = Månedsperiode(stønadFom, stønadTom),
+            periode = Datoperiode(stønadFom, stønadTom),
             kildeBehandlingId = behandlingId,
             inntekt = 0,
             inntektsreduksjon = 0,
@@ -42,7 +42,7 @@ object DataGenerator {
         return TilkjentYtelse(
             personident = tilfeldigFødselsnummer(),
             behandlingId = behandling.id,
-            startmåned = andelerTilkjentYtelse.minOf { it.periode.fom },
+            startmåned = andelerTilkjentYtelse.minOf { it.periode.fomMåned },
             andelerTilkjentYtelse = andelerTilkjentYtelse
         )
     }

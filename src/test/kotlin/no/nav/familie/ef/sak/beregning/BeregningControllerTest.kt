@@ -119,8 +119,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderFørstegangsbehandling).hasSize(1)
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.fomDato).isEqualTo(LocalDate.of(2022, 1, 1))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.periode?.tomDato).isEqualTo(LocalDate.of(2022, 4, 30))
-        assertThat(beløpsperioderFørstegangsbehandling?.first()?.deprecatedPeriode?.fradato).isEqualTo(LocalDate.of(2022, 1, 1))
-        assertThat(beløpsperioderFørstegangsbehandling?.first()?.deprecatedPeriode?.tildato).isEqualTo(LocalDate.of(2022, 4, 30))
         assertThat(beløpsperioderFørstegangsbehandling?.first()?.beløp).isEqualTo(BigDecimal(10_000))
 
         val responsRevurdering: ResponseEntity<Ressurs<List<Beløpsperiode>>> = hentBeløpsperioderForBehandling(revurdering.id)
@@ -128,8 +126,6 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
         assertThat(beløpsperioderRevurdering).hasSize(1)
         assertThat(beløpsperioderRevurdering?.first()?.periode?.fomDato).isEqualTo(LocalDate.of(2022, 3, 1))
         assertThat(beløpsperioderRevurdering?.first()?.periode?.tomDato).isEqualTo(LocalDate.of(2022, 6, 30))
-        assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.fradato).isEqualTo(LocalDate.of(2022, 3, 1))
-        assertThat(beløpsperioderRevurdering?.first()?.deprecatedPeriode?.tildato).isEqualTo(LocalDate.of(2022, 6, 30))
         assertThat(beløpsperioderRevurdering?.first()?.beløp).isEqualTo(BigDecimal(12_000))
     }
 
@@ -149,10 +145,10 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             behandlingId = førstegangsbehandling.id,
             andelerTilkjentYtelse = listOf(
                 lagAndelTilkjentYtelse(
-                    fraOgMed = YearMonth.of(2022, 1),
+                    fraOgMed = LocalDate.of(2022, 1, 1),
                     kildeBehandlingId = førstegangsbehandling.id,
                     beløp = 10_000,
-                    tilOgMed = YearMonth.of(2022, 4)
+                    tilOgMed = LocalDate.of(2022, 4, 30)
                 )
             )
         )
@@ -194,16 +190,16 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
                 andelerTilkjentYtelse =
                 listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 1),
+                        fraOgMed = LocalDate.of(2022, 1, 1),
                         beløp = 10_000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = YearMonth.of(2022, 2)
+                        tilOgMed = LocalDate.of(2022, 2, 28)
                     ),
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 3),
+                        fraOgMed = LocalDate.of(2022, 3, 1),
                         beløp = 12_000,
                         kildeBehandlingId = revurdering.id,
-                        tilOgMed = YearMonth.of(2022, 6)
+                        tilOgMed = LocalDate.of(2022, 6, 30)
                     )
                 )
             )

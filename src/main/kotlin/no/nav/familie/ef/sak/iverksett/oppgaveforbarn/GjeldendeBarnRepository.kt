@@ -44,7 +44,7 @@ interface GjeldendeBarnRepository :
                      JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
                     WHERE ty.id = aty.tilkjent_ytelse
                      AND ty.behandling_id = b.id
-                     AND (DATE_TRUNC('month', aty.stonad_tom) + INTERVAL '1 month - 1 day') >= :dato
+                     AND aty.stonad_tom >= :dato
                      AND aty.belop > 0)
          AND b.migrert = TRUE
     """

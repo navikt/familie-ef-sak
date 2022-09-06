@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -43,11 +44,11 @@ data class TilkjentYtelse(
     val sporbar: Sporbar = Sporbar()
 ) {
 
-    fun taMedAndelerFremTilDato(fom: YearMonth): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
+    fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
         .filter { andel -> andel.periode.fom < fom }
         .map { andel ->
             if (andel.periode.inneholder(fom)) {
-                andel.copy(periode = andel.periode.copy(tom = fom.minusMonths(1)))
+                andel.copy(periode = andel.periode.copy(tom = fom.minusDays(1)))
             } else {
                 andel
             }

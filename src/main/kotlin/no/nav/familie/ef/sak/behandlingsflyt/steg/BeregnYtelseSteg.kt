@@ -36,6 +36,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -355,11 +356,11 @@ class BeregnYtelseSteg(
         }
         val andelerTilkjentYtelse = lagBeløpsperioderForInnvilgelseSkolepenger(vedtak, saksbehandling)
         validerSkolepenger(saksbehandling, vedtak, andelerTilkjentYtelse, forrigeTilkjentYtelse)
-        val (nyeAndeler, startdato) = when (saksbehandling.type) {
+        val (nyeAndeler, startmåned) = when (saksbehandling.type) {
             FØRSTEGANGSBEHANDLING -> andelerTilkjentYtelse to startdatoForFørstegangsbehandling(andelerTilkjentYtelse)
             // Burde kanskje summere tidligere forbrukt fra andeler, per skoleår
             REVURDERING -> {
-                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
+                val startdatoNyeAndeler = andelerTilkjentYtelse.minOfOrNull { it.periode.fomMåned }
                 val nyttStartdato = min(forrigeTilkjentYtelse?.startmåned, startdatoNyeAndeler)
                     ?: error("Må ha startdato fra forrige behandling eller sende inn andeler")
                 andelerTilkjentYtelse to nyttStartdato
@@ -371,7 +372,7 @@ class BeregnYtelseSteg(
                 personident = saksbehandling.ident,
                 behandlingId = saksbehandling.id,
                 andelerTilkjentYtelse = nyeAndeler,
-                startmåned = startdato
+                startmåned = startmåned
             )
         )
     }
@@ -398,7 +399,7 @@ class BeregnYtelseSteg(
     }
 
     private fun startdatoForFørstegangsbehandling(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): YearMonth {
-        return andelerTilkjentYtelse.minOfOrNull { it.periode.fom }
+        return andelerTilkjentYtelse.minOfOrNull { it.periode.fomMåned }
             ?: error("Må ha med en periode i førstegangsbehandling")
     }
 
@@ -513,7 +514,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp.toInt(),
-                    periode = it.periode,
+                    periode = it.periode.toDatoperiode(),
                     kildeBehandlingId = saksbehandling.id,
                     personIdent = saksbehandling.ident,
                     samordningsfradrag = it.beregningsgrunnlag?.samordningsfradrag?.toInt() ?: 0,
@@ -536,7 +537,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    periode = it.periode,
+                    periode = it.periode.toDatoperiode(),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
@@ -559,7 +560,7 @@ class BeregnYtelseSteg(
             .map {
                 AndelTilkjentYtelse(
                     beløp = it.beløp,
-                    periode = Månedsperiode(it.årMånedFra, it.årMånedFra),
+                    periode = Datoperiode(it.årMånedFra, it.årMånedFra),
                     kildeBehandlingId = saksbehandling.id,
                     inntekt = 0,
                     samordningsfradrag = 0,
@@ -589,8 +590,8 @@ class BeregnYtelseSteg(
         forrigeTilkjentYtelse: TilkjentYtelse,
         opphørsperioder: List<Månedsperiode>
     ): List<AndelTilkjentYtelse> {
-        val fomPerioder = beløpsperioder.firstOrNull()?.periode?.fom ?: YearMonth.from(LocalDate.MAX)
-        val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fom ?: YearMonth.from(LocalDate.MAX)
+        val fomPerioder = beløpsperioder.firstOrNull()?.periode?.fom ?: LocalDate.MAX
+        val fomOpphørPerioder = opphørsperioder.firstOrNull()?.fomDato ?: LocalDate.MAX
         val nyePerioderUtenOpphør =
             forrigeTilkjentYtelse.taMedAndelerFremTilDato(minOf(fomPerioder, fomOpphørPerioder)) + beløpsperioder
         return vurderPeriodeForOpphør(nyePerioderUtenOpphør, opphørsperioder)
@@ -613,7 +614,7 @@ class BeregnYtelseSteg(
         opphørsperioder: List<Månedsperiode>
     ): List<AndelTilkjentYtelse> {
         return andelTilkjentYtelser.map {
-            val tilkjentPeriode = it.periode
+            val tilkjentPeriode = it.periode.toMånedsperiode()
             if (opphørsperioder.none { periode -> periode.overlapper(tilkjentPeriode) }) {
                 listOf(it)
             } else if (opphørsperioder.any { periode -> periode.inneholder(tilkjentPeriode) }) {
@@ -623,19 +624,19 @@ class BeregnYtelseSteg(
 
                 if (overlappendeOpphør.overlapperKunIStartenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(
-                        listOf(it.copy(periode = tilkjentPeriode.copy(fom = overlappendeOpphør.tom.plusMonths(1)))),
+                        listOf(it.copy(periode = tilkjentPeriode.copy(fom = overlappendeOpphør.tom.plusMonths(1)).toDatoperiode())),
                         opphørsperioder
                     )
                 } else if (overlappendeOpphør.overlapperKunISluttenAv(tilkjentPeriode)) {
                     vurderPeriodeForOpphør(
-                        listOf(it.copy(periode = tilkjentPeriode.copy(tom = overlappendeOpphør.fom.minusMonths(1)))),
+                        listOf(it.copy(periode = tilkjentPeriode.copy(tom = overlappendeOpphør.fom.minusMonths(1)).toDatoperiode())),
                         opphørsperioder
                     )
                 } else { // periode blir delt i to av opphold.
                     vurderPeriodeForOpphør(
                         listOf(
-                            it.copy(periode = tilkjentPeriode.copy(tom = overlappendeOpphør.fom.minusMonths(1))),
-                            it.copy(periode = tilkjentPeriode.copy(fom = overlappendeOpphør.tom.plusMonths(1)))
+                            it.copy(periode = tilkjentPeriode.copy(tom = overlappendeOpphør.fom.minusMonths(1)).toDatoperiode()),
+                            it.copy(periode = tilkjentPeriode.copy(fom = overlappendeOpphør.tom.plusMonths(1)).toDatoperiode())
                         ),
                         opphørsperioder
                     )
@@ -649,7 +650,7 @@ class BeregnYtelseSteg(
         opphørFom: YearMonth
     ): List<AndelTilkjentYtelse> {
         brukerfeilHvis(
-            forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.periode.tom }?.isBefore(opphørFom) ?: false
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.periode.tom }?.isBefore(opphørFom.atDay(1)) ?: false
         ) {
             "Kan ikke opphøre frem i tiden"
         }
@@ -661,7 +662,7 @@ class BeregnYtelseSteg(
             "Forrige vedtak er allerede opphørt fra ${forrigeTilkjentYtelse.startmåned}"
         }
 
-        return forrigeTilkjentYtelse.taMedAndelerFremTilDato(opphørFom)
+        return forrigeTilkjentYtelse.taMedAndelerFremTilDato(opphørFom.atDay(1))
     }
 
     private fun hentForrigeTilkjenteYtelse(saksbehandling: Saksbehandling): TilkjentYtelse {

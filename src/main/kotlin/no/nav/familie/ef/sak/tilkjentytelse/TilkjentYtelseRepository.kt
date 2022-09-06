@@ -35,7 +35,7 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
         WHERE ty.behandling_id IN (SELECT id FROM gjeldende_iverksatte_behandlinger WHERE stonadstype=:stønadstype) 
          AND EXISTS (SELECT 1 FROM andel_tilkjent_ytelse aty 
                         WHERE ty.id = aty.tilkjent_ytelse
-                         AND (DATE_TRUNC('month', aty.stonad_tom) + INTERVAL '1 month - 1 day') >= :datoForAvstemming
+                         AND aty.stonad_tom >= :datoForAvstemming
                          AND aty.belop > 0)
           """
     )

@@ -29,6 +29,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -75,8 +76,8 @@ class ValiderOmregningServiceTest {
             lagTilkjentYtelse(
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 4),
-                        tilOgMed = YearMonth.of(2022, 8),
+                        fraOgMed = LocalDate.of(2022, 4, 1),
+                        tilOgMed = LocalDate.of(2022, 8, 30),
                         samordningsfradrag = 5000,
                         beløp = 0
                     )
@@ -316,14 +317,14 @@ class ValiderOmregningServiceTest {
             lagTilkjentYtelse(
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 4),
-                        tilOgMed = YearMonth.of(2022, 4),
+                        fraOgMed = LocalDate.of(2022, 4, 1),
+                        tilOgMed = LocalDate.of(2022, 4, 30),
                         samordningsfradrag = 5000,
                         beløp = 14950
                     ),
                     lagAndelTilkjentYtelse(
-                        fraOgMed = YearMonth.of(2022, 5),
-                        tilOgMed = YearMonth.of(2022, 8),
+                        fraOgMed = LocalDate.of(2022, 5, 1),
+                        tilOgMed = LocalDate.of(2022, 8, 30),
                         samordningsfradrag = 5000,
                         beløp = if (medRiktigBeløp) 15902 else 0
                     )

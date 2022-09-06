@@ -24,7 +24,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
+import java.time.LocalDate
 
 internal class TidligereVedaksperioderServiceTest {
 
@@ -101,7 +101,7 @@ internal class TidligereVedaksperioderServiceTest {
         every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
         every { behandlingService.finnSisteIverksatteBehandling(fagsak.id) } returns behandling
         val andelerTilkjentYtelse =
-            if (harAndeler) listOf(lagAndelTilkjentYtelse(100, YearMonth.now(), YearMonth.now())) else emptyList()
+            if (harAndeler) listOf(lagAndelTilkjentYtelse(100, LocalDate.now(), LocalDate.now())) else emptyList()
         every { tilkjentYtelseService.hentForBehandling(behandling.id) } returns lagTilkjentYtelse(andelerTilkjentYtelse)
     }
 }

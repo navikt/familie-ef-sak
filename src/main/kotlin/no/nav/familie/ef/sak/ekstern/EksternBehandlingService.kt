@@ -19,7 +19,7 @@ class EksternBehandlingService(
         val behandlingIDer = hentAlleBehandlingIDer(personidenter)
         val sisteStønadsdato = behandlingIDer
             .map(tilkjentYtelseService::hentForBehandling)
-            .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull { ytelse -> ytelse.periode.tomDato } }
+            .mapNotNull { it.andelerTilkjentYtelse.maxOfOrNull { ytelse -> ytelse.periode.tom } }
             .maxOfOrNull { it } ?: LocalDate.MIN
         return sisteStønadsdato >= LocalDate.now()
     }

@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
-import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.assertj.core.api.Assertions
@@ -60,7 +60,10 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                     andelerTilkjentYtelse = listOf(
                         AndelTilkjentYtelse(
                             15000,
-                            periode = Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+                            periode = Datoperiode(
+                                LocalDate.of(2021, 1, 1),
+                                LocalDate.of(2021, 12, 31)
+                            ),
                             personIdent,
                             inntekt = 0,
                             inntektsreduksjon = 0,

@@ -76,16 +76,16 @@ internal class PeriodeServiceTest {
         mockBehandling()
         val infotrygdFom = LocalDate.of(2021, 1, 1)
         val infotrygdTom = LocalDate.of(2021, 1, 31)
-        val efFom = YearMonth.of(2021, 2)
-        val efTom = YearMonth.of(2021, 3)
+        val efFom = LocalDate.of(2021, 2, 1)
+        val efTom = LocalDate.of(2021, 3, 31)
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, efFom, efTom))
         mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(2)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[0].stønadFom).isEqualTo(efFom.atDay(1))
-        assertThat(perioder[0].stønadTom).isEqualTo(efTom.atEndOfMonth())
+        assertThat(perioder[0].stønadFom).isEqualTo(efFom)
+        assertThat(perioder[0].stønadTom).isEqualTo(efTom)
 
         assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
@@ -97,20 +97,20 @@ internal class PeriodeServiceTest {
         mockBehandling()
         val infotrygdFom = LocalDate.of(2021, 1, 1)
         val infotrygdTom = LocalDate.of(2021, 3, 31)
-        val efFom = YearMonth.of(2021, 2)
-        val efTom = YearMonth.of(2021, 3)
+        val efFom = LocalDate.of(2021, 2, 1)
+        val efTom = LocalDate.of(2021, 3, 31)
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, efFom, efTom))
         mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(2)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[0].stønadFom).isEqualTo(efFom.atDay(1))
-        assertThat(perioder[0].stønadTom).isEqualTo(efTom.atEndOfMonth())
+        assertThat(perioder[0].stønadFom).isEqualTo(efFom)
+        assertThat(perioder[0].stønadTom).isEqualTo(efTom)
 
         assertThat(perioder[1].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         assertThat(perioder[1].stønadFom).isEqualTo(infotrygdFom)
-        assertThat(perioder[1].stønadTom).isEqualTo(efFom.minusMonths(1).atEndOfMonth())
+        assertThat(perioder[1].stønadTom).isEqualTo(efFom.minusDays(1))
     }
 
     @Test
@@ -118,7 +118,7 @@ internal class PeriodeServiceTest {
         mockBehandling()
         val infotrygdFom = LocalDate.of(2021, 1, 1)
         val infotrygdTom = LocalDate.of(2021, 3, 31)
-        val efFom = YearMonth.of(2021, 2)
+        val efFom = LocalDate.of(2021, 2, 1)
         mockTilkjentYtelse(efFom)
         mockReplika(listOf(lagInfotrygdPeriode(stønadFom = infotrygdFom, stønadTom = infotrygdTom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
@@ -126,22 +126,22 @@ internal class PeriodeServiceTest {
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.INFOTRYGD)
         assertThat(perioder[0].stønadFom).isEqualTo(infotrygdFom)
-        assertThat(perioder[0].stønadTom).isEqualTo(efFom.minusMonths(1).atEndOfMonth())
+        assertThat(perioder[0].stønadTom).isEqualTo(efFom.minusDays(1))
     }
 
     @Test
     internal fun `hvis en periode fra ef overlapper perioder fra infotrygd så er det perioden fra EF som har høyere presidens`() {
         mockBehandling()
-        val fom = YearMonth.now()
-        val tom = YearMonth.now()
+        val fom = YearMonth.now().atDay(1)
+        val tom = YearMonth.now().atEndOfMonth()
         mockTilkjentYtelse(lagAndelTilkjentYtelse(1, fom, tom))
-        mockReplika(listOf(lagInfotrygdPeriode(beløp = 2, stønadFom = fom.atDay(1), stønadTom = tom.atEndOfMonth())))
+        mockReplika(listOf(lagInfotrygdPeriode(beløp = 2, stønadFom = fom, stønadTom = tom)))
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(1)
         assertThat(perioder[0].datakilde).isEqualTo(PeriodeOvergangsstønad.Datakilde.EF)
-        assertThat(perioder[0].stønadFom).isEqualTo(fom.atDay(1))
-        assertThat(perioder[0].stønadTom).isEqualTo(tom.atEndOfMonth())
+        assertThat(perioder[0].stønadFom).isEqualTo(fom)
+        assertThat(perioder[0].stønadTom).isEqualTo(tom)
         assertThat(perioder[0].månedsbeløp).isEqualTo(1)
     }
 
@@ -151,8 +151,8 @@ internal class PeriodeServiceTest {
         val periode1tom = LocalDate.of(2021, 1, 31)
         val periode2fom = LocalDate.of(2021, 2, 1)
         val periode2tom = LocalDate.of(2021, 3, 31)
-        val efFra = YearMonth.of(2021, 3)
-        val efTil = YearMonth.of(2021, 3)
+        val efFra = LocalDate.of(2021, 3, 1)
+        val efTil = LocalDate.of(2021, 3, 31)
 
         mockBehandling()
         mockTilkjentYtelse(lagAndelTilkjentYtelse(100, fraOgMed = efFra, tilOgMed = efTil))
@@ -165,12 +165,12 @@ internal class PeriodeServiceTest {
         val perioder = service.hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent)
 
         assertThat(perioder).hasSize(3)
-        assertThat(perioder[0].stønadFom).isEqualTo(efFra.atDay(1))
-        assertThat(perioder[0].stønadTom).isEqualTo(efTil.atEndOfMonth())
+        assertThat(perioder[0].stønadFom).isEqualTo(efFra)
+        assertThat(perioder[0].stønadTom).isEqualTo(efTil)
 
         assertThat(perioder[1].stønadFom).isEqualTo(periode2fom)
         assertThat(perioder[1].stønadTom).isNotEqualTo(periode2tom)
-        assertThat(perioder[1].stønadTom).isEqualTo(efFra.minusMonths(1).atEndOfMonth())
+        assertThat(perioder[1].stønadTom).isEqualTo(efFra.minusDays(1))
 
         assertThat(perioder[2].stønadFom).isEqualTo(periode1fom)
         assertThat(perioder[2].stønadTom).isEqualTo(periode1tom)
@@ -198,8 +198,8 @@ internal class PeriodeServiceTest {
             lagTilkjentYtelse(andelTilkjentYtelse.toList(), behandlingId = behandling.id)
     }
 
-    private fun mockTilkjentYtelse(startmåned: YearMonth) {
+    private fun mockTilkjentYtelse(startdato: LocalDate) {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns
-            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList(), behandlingId = behandling.id, startmåned = startmåned)
+            lagTilkjentYtelse(andelerTilkjentYtelse = emptyList(), behandlingId = behandling.id, startmåned = YearMonth.from(startdato))
     }
 }
