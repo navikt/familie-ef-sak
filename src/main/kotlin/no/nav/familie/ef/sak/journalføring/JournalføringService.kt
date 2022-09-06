@@ -152,7 +152,7 @@ class JournalføringService(
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId,
+            behandleSakOppgaveId = oppgaveId
         )
     }
 
