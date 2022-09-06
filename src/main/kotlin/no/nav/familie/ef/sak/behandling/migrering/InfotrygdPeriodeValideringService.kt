@@ -242,7 +242,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun validerFinnesIkkeÅpenSak(sakerForOvergangsstønad: List<InfotrygdSak>) {
         sakerForOvergangsstønad
-            .filter { it.type != InfotrygdSakType.KLAGE }
+            .filter { it.type != InfotrygdSakType.KLAGE && it.type != InfotrygdSakType.KLAGE_TILBAKEBETALING }
             .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
                 throw MigreringException(
                     "Har åpen sak. ${lagSakFeilinfo(it)}",
