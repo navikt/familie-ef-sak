@@ -82,8 +82,8 @@ class BarnService(
     }
 
     private fun kobleBarnForOvergangsstønadOgSkolepenger(
-        behandlingId: UUID,
         fagsakId: UUID,
+        behandlingId: UUID,
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
         grunnlagsdataBarn: List<BarnMedIdent>,
         barnSomSkalFødes: List<BarnSomSkalFødes>,
@@ -102,8 +102,8 @@ class BarnService(
                 grunnlagsdataBarn
             )
             UstrukturertDokumentasjonType.ETTERSENDING -> barnForEttersending(
-                behandlingId,
                 fagsakId,
+                behandlingId,
                 vilkårsbehandleNyeBarn,
                 grunnlagsdataBarn
             )
