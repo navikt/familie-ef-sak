@@ -63,7 +63,7 @@ val inngangsvilkår = listOf(
     VilkårType.SIVILSTAND,
     VilkårType.SAMLIV,
     VilkårType.ALENEOMSORG,
-    VilkårType.NYTT_BARN_SAMME_PARTNER,
+    VilkårType.NYTT_BARN_SAMME_PARTNER
 )
 
 enum class Vilkårsresultat(val beskrivelse: String) {

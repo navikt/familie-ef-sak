@@ -211,7 +211,7 @@ class VurderingService(
         behandlingId: UUID,
         nåværendeVurderinger: List<Vilkårsvurdering>,
         tidligereVurderinger: List<Vilkårsvurdering>,
-        forrigeVurderingIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>,
+        forrigeVurderingIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>
     ) = tidligereVurderinger.mapNotNull { tidligereVurdering ->
         val barnForVurdering = forrigeVurderingIdTilNåværendeBarnMap[tidligereVurdering.barnId]
         nåværendeVurderinger.firstOrNull { it.type == tidligereVurdering.type && it.barnId == barnForVurdering?.id }
@@ -241,7 +241,7 @@ class VurderingService(
     private fun hentVurderingerSomSkalGjenbrukes(
         sivilstandErLik: Boolean,
         tidligereBehandlingId: UUID,
-        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
+        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>
     ): List<Vilkårsvurdering> {
         val tidligereVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(tidligereBehandlingId)
@@ -280,11 +280,11 @@ class VurderingService(
 
     private fun validerBehandlingForGjenbruk(
         behandlingId: UUID,
-        tidligereBehandlingId: UUID,
+        tidligereBehandlingId: UUID
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
-            "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=${behandlingId}"
+            "Behandlingen er låst og vilkår kan ikke oppdateres på behandling med id=$behandlingId"
         }
 
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
@@ -292,10 +292,10 @@ class VurderingService(
             behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
 
         if (behandlingerForGjenbruk.isEmpty()) {
-            throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=${behandlingId}")
+            throw Feil("Fant ingen tidligere behandlinger som kan benyttes til gjenbruk av inngangsvilkår for behandling med id=$behandlingId")
         }
         if (!behandlingerForGjenbruk.map { it.id }.contains(tidligereBehandlingId)) {
-            throw Feil("Behandling med id=${tidligereBehandlingId} kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=${behandlingId}")
+            throw Feil("Behandling med id=$tidligereBehandlingId kan ikke benyttes til gjenbruk av inngangsvilkår for behandling med id=$behandlingId")
         }
     }
 
