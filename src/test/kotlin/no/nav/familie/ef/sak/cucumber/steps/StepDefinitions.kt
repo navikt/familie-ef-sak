@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDat
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
@@ -98,7 +99,8 @@ class StepDefinitions {
         tilbakekrevingService,
         barnService,
         fagsakService,
-        validerOmregningService
+        validerOmregningService,
+        mockFeatureToggleService()
     )
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, andelsHistorikkService)
@@ -449,6 +451,9 @@ class StepDefinitions {
                 assertThat(beregnetAndelHistorikk.sanksjonsårsak).isNotNull
             }
             assertThat(beregnetAndelHistorikk.sanksjonsårsak).isEqualTo(forventetHistorikkEndring.sanksjonsårsak)
+        }
+        forventetHistorikkEndring.periodeType?.let {
+            assertThat(beregnetAndelHistorikk.periodeType).isEqualTo(forventetHistorikkEndring.periodeType)
         }
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
 

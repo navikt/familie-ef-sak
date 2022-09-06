@@ -52,7 +52,8 @@ class OppgaveService(
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
-        val oppgaveFinnesFraFør = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
+        val oppgaveFinnesFraFør =
+            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
@@ -98,13 +99,16 @@ class OppgaveService(
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+        if ((enhetsnummer == "4489") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
-            val mappeIdForGodkjenneVedtak = mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
+            val mappeIdForGodkjenneVedtak = mapper.find {
+                (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
+                    !it.navn.contains("EF Sak")
+            }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
-                logger.error("Fant ikke mappe for godkjenne vedtak: EF Sak - 70 Godkjenne vedtak")
+                logger.error("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak for enhetsnummer=$enhetsnummer")
             }
             return mappeIdForGodkjenneVedtak
         }

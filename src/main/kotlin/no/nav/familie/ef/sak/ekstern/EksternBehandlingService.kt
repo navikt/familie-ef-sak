@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -12,7 +14,9 @@ import java.util.UUID
 class EksternBehandlingService(
     val tilkjentYtelseService: TilkjentYtelseService,
     val behandlingService: BehandlingService,
-    val fagsakService: FagsakService
+    val fagsakService: FagsakService,
+    val personService: PersonService,
+    val infotrygdService: InfotrygdService
 ) {
 
     fun harLøpendeStønad(personidenter: Set<String>): Boolean {

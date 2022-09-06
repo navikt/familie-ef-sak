@@ -38,4 +38,6 @@ class PersonService(
             identerUtenCache.chunked(50).map { pdlClient.hentPersonKortBolk(it) }.reduce { acc, it -> acc + it }
         }
     }
+
+    fun hentAktørIder(ident: String): PdlIdenter = pdlClient.hentAktørIder(ident)
 }

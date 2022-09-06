@@ -71,8 +71,8 @@ Egenskap: Andelhistorikk: Sanksjon
     Når beregner ytelse
 
     Så forvent følgende historikk
-      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
-      | 1            |              |                       | 0       | BARN_UNDER_ETT_ÅR    | 01.2022         | 01.2022         |
-      | 2            | ERSTATTET    | 3                     | 0       | IKKE_AKTIVITETSPLIKT | 02.2022         | 02.2022         |
-      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 02.2022         | 03.2022         |
+      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato |
+      | 1            |              |                       | 0       | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 01.2022         |
+      | 2            | ERSTATTET    | 3                     | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 02.2022         | 02.2022         |
+      | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 02.2022         | 03.2022         |
 

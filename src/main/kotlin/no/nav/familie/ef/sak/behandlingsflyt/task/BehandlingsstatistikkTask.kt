@@ -160,7 +160,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.MOTTATT,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
                 oppgaveId = oppgaveId
             )
 

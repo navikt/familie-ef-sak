@@ -14,6 +14,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
@@ -36,10 +38,12 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
+import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.kontrakter.felles.Datoperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.erSammenhengende
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -58,8 +62,11 @@ class BeregnYtelseSteg(
     private val tilbakekrevingService: TilbakekrevingService,
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
-    private val validerOmregningService: ValiderOmregningService
+    private val validerOmregningService: ValiderOmregningService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<VedtakDto> {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun stegType(): StegType {
         return StegType.BEREGNE_YTELSE
@@ -126,7 +133,12 @@ class BeregnYtelseSteg(
     }
 
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
+        if (featureToggleService.isEnabled(Toggle.ERSTATTE_SANKSJON)) {
+            logger.info("Ignorerer validerStartTidEtterSanksjon for behandling=${behandling.id}")
+            return
+        }
         val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+            .filter { it.erIkkeFjernet() }
             .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
         nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
             feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {

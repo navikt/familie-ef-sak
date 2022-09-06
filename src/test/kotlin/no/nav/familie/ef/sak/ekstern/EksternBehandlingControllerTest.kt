@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -21,7 +23,9 @@ internal class EksternBehandlingControllerTest {
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService)
+    private val personService = mockk<PersonService>()
+    private val infotrygdService = mockk<InfotrygdService>()
+    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService, personService, infotrygdService)
     private val eksternBehandlingController = EksternBehandlingController(eksternBehandlingService)
 
     @Test

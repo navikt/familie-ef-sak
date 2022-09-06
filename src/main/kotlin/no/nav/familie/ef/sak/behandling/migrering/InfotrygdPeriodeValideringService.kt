@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
@@ -18,8 +19,23 @@ import java.time.YearMonth
 
 @Service
 class InfotrygdPeriodeValideringService(
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
+    private val behandlingService: BehandlingService
 ) {
+
+    fun validerKanJournalføresGittInfotrygdData(fagsak: Fagsak) {
+        if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
+            when (fagsak.stønadstype) {
+                StønadType.OVERGANGSSTØNAD ->
+                    validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                        fagsak.hentAktivIdent(),
+                        fagsak.stønadstype
+                    )
+                StønadType.BARNETILSYN, StønadType.SKOLEPENGER ->
+                    validerHarIkkeÅpenSakIInfotrygd(fagsak)
+            }
+        }
+    }
 
     fun validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
         feilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
@@ -226,7 +242,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun validerFinnesIkkeÅpenSak(sakerForOvergangsstønad: List<InfotrygdSak>) {
         sakerForOvergangsstønad
-            .filter { it.type != InfotrygdSakType.KLAGE }
+            .filter { it.type != InfotrygdSakType.KLAGE && it.type != InfotrygdSakType.KLAGE_TILBAKEBETALING }
             .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
                 throw MigreringException(
                     "Har åpen sak. ${lagSakFeilinfo(it)}",
