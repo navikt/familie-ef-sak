@@ -13,10 +13,12 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Ressurs.Status
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
@@ -60,7 +62,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Gitt person uten fagsak når søk på personensident kallas skal det returneres RessursFeilet`() {
         val response = søkPerson("01010166666")
-        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.status).isEqualTo(Status.FUNKSJONELL_FEIL)
         assertThat(response.body?.frontendFeilmelding).isEqualTo("Finner ikke fagsak for søkte personen")
     }
 
@@ -81,22 +83,63 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `Skal feile hvis personIdenten ikke finnes i pdl`() {
         val response = søkPerson("19117313797")
-        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.status).isEqualTo(Status.FUNKSJONELL_FEIL)
         assertThat(response.body?.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
     }
 
     @Test
     internal fun `Skal feile hvis personIdenten har feil lengde`() {
         val response = søkPerson("010101999990")
-        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.status).isEqualTo(Status.FUNKSJONELL_FEIL)
         assertThat(response.body?.frontendFeilmelding).isEqualTo("Ugyldig personident. Det må være 11 sifre")
     }
 
     @Test
     internal fun `Skal feile hvis personIdenten inneholder noe annet enn tall`() {
         val response = søkPerson("010et1ord02")
-        assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+        assertThat(response.body?.status).isEqualTo(Status.FUNKSJONELL_FEIL)
         assertThat(response.body?.frontendFeilmelding).isEqualTo("Ugyldig personident. Det kan kun inneholde tall")
+    }
+
+    @Nested
+    inner class SøkPersonForEksternFagsak {
+
+        @Test
+        internal fun `skal finne person hvis fagsaken eksisterer`() {
+            val personIdent = "123"
+            val fagsakPerson = testoppsettService.opprettPerson(personIdent)
+            val fagsak = testoppsettService.lagreFagsak(fagsak(person = fagsakPerson, stønadstype = StønadType.OVERGANGSSTØNAD))
+            testoppsettService.lagreFagsak(fagsak(person = fagsakPerson, stønadstype = StønadType.BARNETILSYN))
+
+            val response = søkPerson(fagsak.eksternId.id)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.status).isEqualTo(Status.SUKSESS)
+            val data = response.body!!.data
+            assertThat(data?.personIdent).isEqualTo(fagsak.hentAktivIdent())
+            assertThat(data?.fagsaker).hasSize(2)
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis fagsaken ikke eksisterer`() {
+            testoppsettService.lagreFagsak(fagsak())
+            val response = søkPerson(100L)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+            val data = response.body!!
+            assertThat(data.data).isNull()
+            assertThat(data.status).isEqualTo(Status.FUNKSJONELL_FEIL)
+            assertThat(data.frontendFeilmelding)
+                .isEqualTo("Finner ikke fagsak for eksternFagsakId=100")
+        }
+
+        private fun søkPerson(eksternFagsakId: Long): ResponseEntity<Ressurs<Søkeresultat>> {
+            return restTemplate.exchange(
+                localhost("/api/sok/person/fagsak-ekstern/$eksternFagsakId"),
+                HttpMethod.GET,
+                HttpEntity<Any>(headers)
+            )
+        }
     }
 
     private fun søkPerson(personIdent: String): ResponseEntity<Ressurs<Søkeresultat>> {
