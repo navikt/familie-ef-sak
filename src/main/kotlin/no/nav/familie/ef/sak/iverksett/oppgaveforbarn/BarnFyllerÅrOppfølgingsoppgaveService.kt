@@ -66,25 +66,22 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         for (personMedTermindatoBarn in personerMedTermindatoBarn) {
             val termindato = personMedTermindatoBarn.termindatoBarn!!
-            val forelderBarnRelasjoner = pdlBarn[personMedTermindatoBarn.fødselsnummerSøker]?.forelderBarnRelasjon?.filter { it.relatertPersonsIdent != null }
-            if (forelderBarnRelasjoner == null || forelderBarnRelasjoner.isEmpty()) {
-                logger.error("Ingen registrerte barn på person med registrert termindato for barn - se securelogs for fødselsnummer på person")
-                secureLogger.error("Ingen registrerte barn på person ${personMedTermindatoBarn.fødselsnummerSøker} med registrert termindato $termindato for barn")
-            } else {
-                val uke20 = termindato.minusWeeks(20)
-                val uke44 = termindato.plusWeeks(4)
+            val barnTilSøker = pdlBarn[personMedTermindatoBarn.fødselsnummerSøker] ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
+            val forelderBarnRelasjoner = barnTilSøker.forelderBarnRelasjon.filter { it.relatertPersonsIdent != null }
 
-                val besteMatch = forelderBarnRelasjoner.filter {
-                    val fødselsnummer = Fødselsnummer(it.relatertPersonsIdent!!) // Allerede filtrert på at relatertPersonsIdent != null
-                    val fødselsdato = fødselsnummer.fødselsdato
-                    fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20) and !returnBarnTilUtplukkForOppgave.contains(personMedTermindatoBarn.copy(fødselsnummerBarn = it.relatertPersonsIdent))
-                }.minByOrNull {
-                    val epochDayForFødsel = Fødselsnummer(it.relatertPersonsIdent!!).fødselsdato.toEpochDay()
-                    val epochDayTermindato = termindato.toEpochDay()
-                    abs(epochDayForFødsel - epochDayTermindato)
-                }
-                returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch?.relatertPersonsIdent))
+            val uke20 = termindato.minusWeeks(20)
+            val uke44 = termindato.plusWeeks(4)
+
+            val besteMatch = forelderBarnRelasjoner.filter {
+                val fødselsnummer = Fødselsnummer(it.relatertPersonsIdent!!) // Allerede filtrert på at relatertPersonsIdent != null
+                val fødselsdato = fødselsnummer.fødselsdato
+                fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20) and !returnBarnTilUtplukkForOppgave.contains(personMedTermindatoBarn.copy(fødselsnummerBarn = it.relatertPersonsIdent))
+            }.minByOrNull {
+                val epochDayForFødsel = Fødselsnummer(it.relatertPersonsIdent!!).fødselsdato.toEpochDay()
+                val epochDayTermindato = termindato.toEpochDay()
+                abs(epochDayForFødsel - epochDayTermindato)
             }
+            returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch?.relatertPersonsIdent))
         }
         return returnBarnTilUtplukkForOppgave + barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
     }
