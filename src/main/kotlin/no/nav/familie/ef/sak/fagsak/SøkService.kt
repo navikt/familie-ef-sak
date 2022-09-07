@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -87,7 +88,9 @@ class SøkService(
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
-            ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
+        feilHvis(bostedsadresse == null) {
+            "Fant ${aktuelleBostedsadresser.size} bostedsadresser, forventet 1"
+        }
 
         brukerfeilHvis(bostedsadresse.ukjentBosted != null) {
             "Personen har ukjent bostedsadresse, kan ikke finne personer på samme adresse"

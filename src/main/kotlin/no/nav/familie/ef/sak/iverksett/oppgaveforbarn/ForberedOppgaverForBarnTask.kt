@@ -29,7 +29,7 @@ class ForberedOppgaverForBarnTask(
     }
 
     fun opprettTaskForNesteUke(sisteKjøring: LocalDate) {
-        val nesteUke = sisteKjøring.plusWeeks(1)
+        val nesteUke = sisteKjøring.plusWeeks(2)
         taskRepository.save(opprettTask(nesteUke))
     }
 
@@ -38,7 +38,7 @@ class ForberedOppgaverForBarnTask(
         const val TYPE = "forberedOppgaverForBarnTask"
 
         fun opprettTask(dato: LocalDate): Task {
-            return Task(TYPE, dato.format(DateTimeFormatter.ISO_LOCAL_DATE)).medTriggerTid(dato.atTime(5, 0))
+            return Task(OpprettTasksForBarnFyltÅrTask.TYPE, dato.format(DateTimeFormatter.ISO_LOCAL_DATE)).medTriggerTid(dato.atTime(5, 0))
         }
     }
 }

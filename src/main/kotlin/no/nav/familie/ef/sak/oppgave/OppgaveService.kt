@@ -115,6 +115,27 @@ class OppgaveService(
         return null
     }
 
+    fun finnHendelseMappeId(enhetsnummer: String): Long? {
+        // val oppgave = finnOppgaveMedId(oppgaveId)
+        if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
+            val finnMappeRequest = FinnMappeRequest(
+                listOf(),
+                enhetsnummer,
+                null,
+                1000
+            )
+            val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+            val mappe = mapperResponse.mapper.find {
+                it.navn.contains("EF Sak", true) &&
+                    it.navn.contains("Hendelser") &&
+                    it.navn.contains("62")
+            }
+                ?: error("Fant ikke mappe for hendelser")
+            return mappe.id.toLong()
+        }
+        return null
+    }
+
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
         val gsakOppgave = hentOppgave(gsakOppgaveId)
         val tidligereSaksbehandler = gsakOppgave.tilordnetRessurs

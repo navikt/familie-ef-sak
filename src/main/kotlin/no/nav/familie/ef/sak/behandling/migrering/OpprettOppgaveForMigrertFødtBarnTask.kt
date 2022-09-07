@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppgaveBeskrivelse
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
@@ -111,8 +111,8 @@ class OpprettOppgaveForMigrertFødtBarnTask(
      * Skal ikke opprette noen oppføglningsoppgaver hvis datoet for når barnet fyller 1 år er før siste utbetalingsperioden
      */
     private fun datoOgBeskrivelse(fødselsdato: LocalDate, sisteUtbetalingsdato: LocalDate): List<Pair<LocalDate, String>> {
-        val beskrivelseBarnBlirSeksMnd = OppgaveBeskrivelse.beskrivelseBarnBlirSeksMnd()
-        val beskrivelseBarnFyllerEttÅr = OppgaveBeskrivelse.beskrivelseBarnFyllerEttÅr()
+        val beskrivelseBarnBlirSeksMnd = Alder.SEKS_MND.oppgavebeskrivelse
+        val beskrivelseBarnFyllerEttÅr = Alder.ETT_ÅR.oppgavebeskrivelse
         val datoOm1År = nesteVirkedagForDatoMinus1Uke(fødselsdato.plusYears(1))
         if (sisteUtbetalingsdato < datoOm1År) {
             logger.info("Dato for sisteUtbetalingsdato=$sisteUtbetalingsdato er før barnet fyller 1 år = $datoOm1År")
@@ -121,8 +121,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         return listOf(
             nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to beskrivelseBarnBlirSeksMnd,
             datoOm1År to beskrivelseBarnFyllerEttÅr
-        )
-            .filter { it.first > LocalDate.now() }
+        ).filter { it.first > LocalDate.now() }
     }
 
     /**
