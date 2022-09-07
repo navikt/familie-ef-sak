@@ -21,7 +21,8 @@ object BrukerContextUtil {
     fun mockBrukerContext(
         preferredUsername: String = "A",
         groups: List<String> = emptyList(),
-        servletRequest: HttpServletRequest = MockHttpServletRequest()
+        servletRequest: HttpServletRequest = MockHttpServletRequest(),
+        azp_name: String? = null
     ) {
         val tokenValidationContext = mockk<TokenValidationContext>()
         val jwtTokenClaims = JwtTokenClaims(
@@ -30,6 +31,7 @@ object BrukerContextUtil {
                 .claim("NAVident", preferredUsername)
                 .claim("name", preferredUsername)
                 .claim("groups", groups)
+                .claim("azp_name", azp_name)
                 .build()
         )
         val requestAttributes = ServletRequestAttributes(servletRequest)
