@@ -8,19 +8,20 @@
           "adressebeskyttelse": [
             {
               "gradering": "STRENGT_FORTROLIG",
-              "metadata":  {
+              "metadata": {
                 "historisk": true
               }
             },
-            {  "gradering": "UGRADERT",
-              "metadata":  {
+            {
+              "gradering": "UGRADERT",
+              "metadata": {
                 "historisk": false
               }
             }
           ],
           "bostedsadresse": [
             {
-              "metadata":  {
+              "metadata": {
                 "historisk": false
               },
               "angittFlyttedato": null,
@@ -50,7 +51,7 @@
               "foedeland": null,
               "foedested": null,
               "foedekommune": null,
-              "metadata":  {
+              "metadata": {
                 "historisk": false
               }
             }
