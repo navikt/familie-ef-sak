@@ -86,6 +86,9 @@ class FagsakService(
     fun finnFagsak(personIdenter: Set<String>, stønadstype: StønadType): Fagsak? =
         fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
 
+    fun finnFagsak(personIdenter: Set<String>): List<Fagsak?> =
+        fagsakRepository.findBySøkerIdent(personIdenter).map { it.tilFagsakMedPerson() }
+
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto {
         return fagsakTilDto(hentFagsak(fagsakId))
     }

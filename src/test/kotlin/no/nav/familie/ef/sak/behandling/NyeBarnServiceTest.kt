@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -55,7 +56,7 @@ class NyeBarnServiceTest {
     @BeforeEach
     fun init() {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
-        every { fagsakService.finnFagsak(any(), any()) } returns fagsak
+        every { fagsakService.finnFagsak(any()) } returns listOf(fagsak)
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("fnr til søker", false)))
         every { fagsakService.hentAktivIdent(any()) } returns "fnr til søker"
@@ -67,6 +68,25 @@ class NyeBarnServiceTest {
             fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
             fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn))
         )
+        every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
+        every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
+
+        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
+        assertThat(barn).hasSize(1)
+        assertThat(barn.first()).isEqualTo(NyttBarn(fnrForNyttBarn, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING))
+    }
+
+    @Test
+    fun `finnNyeEllerTidligereFødteBarn med et nytt barn i PDL siden barnetilsyn-behandling, forvent ett nytt barn`() {
+        val pdlBarn = mapOf(
+            fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
+            fnrForNyttBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoNyttBarn))
+        )
+
+        val fagsakBarnetilsyn = fagsak(stønadstype = StønadType.BARNETILSYN)
+        every { fagsakService.finnFagsak(any()) } returns listOf(fagsakBarnetilsyn)
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling(fagsak)
+
         every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 

@@ -18,7 +18,6 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyeBarnDto
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,17 +40,20 @@ class NyeBarnService(
 
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
-        val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
-            ?: error("Kunne ikke finne fagsak for personident")
-        val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
+        val nyttBarnList = mutableListOf<NyttBarn>()
+        val fagsaker = fagsakService.finnFagsak(personIdenter)
+        if (fagsaker.isEmpty()) error("Kunne ikke finne fagsak for personident")
 
-        val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+        for (fagsak in fagsaker.filterNotNull()) {
+            val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
+            val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+            opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
 
-        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
+            nyttBarnList.addAll(nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) })
+            nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling))
+        }
 
-        val nyeBarnDto = nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) }
-        val forTidligtFødteBarn = finnForTidligtFødteBarn(barnSidenGjeldendeBehandling)
-        return NyeBarnDto(nyeBarnDto + forTidligtFødteBarn)
+        return NyeBarnDto(nyttBarnList)
     }
 
     // TODO slett 4 måneder etter att siste migreringen er klar
