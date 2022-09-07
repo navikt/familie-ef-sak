@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.lagPersonKort
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
@@ -16,6 +17,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariant
@@ -46,6 +49,9 @@ internal class JournalpostControllerTest {
         every {
             tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
+        every { pdlClient.hentPersonKortBolk(any()) } answers {
+            firstArg<List<String>>().associateWith { lagPersonKort(it) }
+        }
     }
 
     @Test
@@ -59,8 +65,25 @@ internal class JournalpostControllerTest {
         } returns journalpostMedAktørId
 
         val journalpostResponse = journalpostController.hentJournalPost(journalpostId)
+
         assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
+        verify(exactly = 1) { pdlClient.hentPersonKortBolk(any()) }
+    }
+
+    @Test
+    internal fun `hentJournalpost skal ikke hente person fra pdl hvis avsender er lik bruker `() {
+        every {
+            pdlClient.hentPersonidenter(aktørId)
+        } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
+        every {
+            journalpostService.hentJournalpost(any())
+        } returns journalpostMedAktørId.copy(avsenderMottaker = avsenderMottaker())
+
+        val journalpostResponse = journalpostController.hentJournalPost(journalpostId)
+
+        assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
+        verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
     }
 
     @Test
@@ -70,6 +93,7 @@ internal class JournalpostControllerTest {
         } returns journalpostMedFødselsnummer
 
         val journalpostResponse = journalpostController.hentJournalPost(journalpostId)
+
         assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
     }
@@ -170,6 +194,14 @@ internal class JournalpostControllerTest {
         }
     }
 
+    private fun avsenderMottaker(erLikBruker: Boolean = true) = AvsenderMottaker(
+        id = "1",
+        type = AvsenderMottakerIdType.FNR,
+        navn = "navn",
+        land = "land",
+        erLikBruker = erLikBruker
+    )
+
     private val aktørId = "11111111111"
     private val personIdentFraPdl = "12345678901"
     private val journalpostId = "1234"
@@ -200,5 +232,6 @@ internal class JournalpostControllerTest {
     private val journalpostMedFødselsnummer =
         journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.FNR, id = personIdentFraPdl))
     private val journalpostUtenBruker = journalpostMedAktørId.copy(bruker = null)
-    private val journalpostMedOrgnr = journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345"))
+    private val journalpostMedOrgnr =
+        journalpostMedAktørId.copy(bruker = Bruker(type = BrukerIdType.ORGNR, id = "12345"))
 }
