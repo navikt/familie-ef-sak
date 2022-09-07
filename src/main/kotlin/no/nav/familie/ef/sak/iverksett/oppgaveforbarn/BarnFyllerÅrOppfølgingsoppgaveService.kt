@@ -43,7 +43,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
 
         val skalOpprettes = filtrerBarnSomHarFyltÅr(alleBarnIGjeldendeBehandlinger)
-        logger.info("Ville opprettet oppgave for ${skalOpprettes.size} barn.")
+        logger.info("Oppretter oppgave for ${skalOpprettes.size} barn. (dry-run: $dryRun)")
 
         if (!dryRun) {
             opprettOppgaveTasksForBarn(skalOpprettes)
