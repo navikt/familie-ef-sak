@@ -83,3 +83,23 @@ Egenskap: Andelhistorikk: Behandling 2 blir oppdelt i 2 då den overlapper mai (
       | 5            | 09.2022         | 09.2022         | SPLITTET     | 6                     |
       | 5            | 10.2022         | 01.2025         | FJERNET      | 6                     |
       | 6            | 10.2022         | 01.2025         |              |                       |
+
+  Scenario: Behandling 2 sin andre periode overlapper behandling 1 sin første periode, men med ulike stønadsbeløp pga ulik inntekt
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato |
+      | 1            | 05.2022         | 04.2025         |
+      | 2            | 02.2022         | 01.2025         |
+
+    Og følgende inntekter
+      | BehandlingId | Fra og med dato | Inntekt  |
+      | 1            | 05.2022         | 0        |
+      | 2            | 02.2022         | 2000000 |
+
+    Når beregner ytelse
+
+    Så forvent følgende historikk
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |
+      | 2            | 02.2022         | 04.2022         |              |                       |
+      | 1            | 05.2022         | 04.2025         | FJERNET      | 2                     |
+      | 2            | 05.2022         | 01.2025         |              |                       |
