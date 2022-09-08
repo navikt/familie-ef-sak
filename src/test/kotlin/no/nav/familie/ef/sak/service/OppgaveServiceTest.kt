@@ -22,7 +22,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
@@ -33,13 +35,16 @@ import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpServerErrorException
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -79,6 +84,7 @@ internal class OppgaveServiceTest {
         )
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
+        every { oppgaveRepository.update(any()) } answers {firstArg()}
     }
 
     @Test
@@ -277,40 +283,6 @@ internal class OppgaveServiceTest {
     }
 
     @Test
-    fun `sett gOppgave til feilregistrert, forvent at ferdigstilling av oppgave bare ferdigstiller ef-oppgave`() {
-        val gOppgave = mockk<no.nav.familie.kontrakter.felles.oppgave.Oppgave>()
-        every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
-        } returns lagTestOppgave()
-        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
-        every { oppgaveClient.finnOppgaveMedId(any()) } returns gOppgave
-        every { oppgaveClient.ferdigstillOppgave(any()) } just runs
-        every { gOppgave.status } returns StatusEnum.FEILREGISTRERT
-
-        oppgaveService.ferdigstillBehandleOppgave(UUID.randomUUID(), Oppgavetype.BehandleSak)
-
-        verify(exactly = 0) { oppgaveClient.ferdigstillOppgave(any()) }
-        verify { oppgaveRepository.update(any()) }
-    }
-
-    @Test
-    fun `sett gOppgave under_behandling, forvent at ferdigstilling av oppgave oppdateres i oppgavesystemet`() {
-        val gOppgave = mockk<no.nav.familie.kontrakter.felles.oppgave.Oppgave>()
-        every {
-            oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
-        } returns lagTestOppgave()
-        every { oppgaveRepository.update(any()) } returns lagTestOppgave()
-        every { oppgaveClient.finnOppgaveMedId(any()) } returns gOppgave
-        every { oppgaveClient.ferdigstillOppgave(any()) } just runs
-        every { gOppgave.status } returns StatusEnum.UNDER_BEHANDLING
-
-        oppgaveService.ferdigstillBehandleOppgave(UUID.randomUUID(), Oppgavetype.BehandleSak)
-
-        verify { oppgaveClient.ferdigstillOppgave(any()) }
-        verify { oppgaveRepository.update(any()) }
-    }
-
-    @Test
     fun `Skal sette frist for oppgave`() {
         val frister = listOf<Pair<LocalDateTime, LocalDate>>(
             Pair(torsdag.morgen(), fredagFrist),
@@ -350,6 +322,58 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
         verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+    }
+
+    @Nested
+    inner class FeilregistertOppgave {
+
+        private val feilregistrertException = RessursException(
+            Ressurs.failure("Oppgave har status feilregistrert"),
+            HttpServerErrorException(HttpStatus.BAD_REQUEST)
+        )
+
+        private val annenException = RessursException(
+            Ressurs.failure("Oppgave har status ferdigstilt"),
+            HttpServerErrorException(HttpStatus.BAD_REQUEST)
+        )
+
+        @BeforeEach
+        internal fun setUp() {
+            every {
+                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+            } returns lagTestOppgave()
+        }
+
+        @Test
+        internal fun `skal ignorere feil fra ferdigstillOppgave hvis den er feilregistrert og vi skal ignorere feilregistrert`() {
+            every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
+
+            oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, true)
+
+            verify(exactly = 1) { oppgaveRepository.update(any()) }
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis oppgaven er feilregistrert og vi ikke ignorerer feilregistrerte`() {
+            every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
+
+            assertThatThrownBy {
+                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, false)
+            }.isInstanceOf(RessursException::class.java)
+
+            verify(exactly = 0) { oppgaveRepository.update(any()) }
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis oppgaven allerede er ferdigstilt og feilmeldingen er ferdigstilt`() {
+            every { oppgaveClient.ferdigstillOppgave(any()) } throws annenException
+
+            assertThatThrownBy {
+                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, true)
+            }.isInstanceOf(RessursException::class.java)
+
+            verify(exactly = 0) { oppgaveRepository.update(any()) }
+        }
     }
 
     private fun mockOpprettOppgave(

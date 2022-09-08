@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -18,7 +19,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
@@ -172,18 +172,27 @@ class OppgaveService(
         ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
     }
 
-    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    /**
+     * @param ignorerFeilregistrert ignorerer oppgaver som allerede er feilregistrerte
+     * Den burde kun settes til true for lukking av oppgaver koblet til henleggelse
+     * Oppgaver skal ikke være lukket når denne kalles, då det er ef-sak som burde lukke oppgaver som vi har opprettet
+     */
+    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype, ignorerFeilregistrert: Boolean = false) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
-            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave, ignorerFeilregistrert)
         }
     }
 
-    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
-        val gsakOppgave = oppgaveClient.finnOppgaveMedId(oppgaveId = oppgave.gsakOppgaveId)
-        val gsakOppgaveStatus = gsakOppgave.status ?: error("Kunne ikke finne status for gsak oppgave")
-        if (!gsakOppgaveStatus.equals(StatusEnum.FEILREGISTRERT)) {
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave, ignorerFeilregistrert: Boolean = false) {
+        try {
             ferdigstillOppgave(oppgave.gsakOppgaveId)
+        } catch (e: RessursException) {
+            if (ignorerFeilregistrert && e.ressurs.melding.contains("Oppgave har status feilregistrert")) {
+                logger.warn("Oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert og er allerede ferdigstilt")
+            } else {
+                throw e
+            }
         }
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
