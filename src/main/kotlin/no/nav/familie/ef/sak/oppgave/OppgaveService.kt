@@ -189,7 +189,7 @@ class OppgaveService(
             ferdigstillOppgave(oppgave.gsakOppgaveId)
         } catch (e: RessursException) {
             if (ignorerFeilregistrert && e.ressurs.melding.contains("Oppgave har status feilregistrert")) {
-                logger.warn("Oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert og er allerede ferdigstilt")
+                logger.warn("Ignorerer ferdigstill av oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert")
             } else {
                 throw e
             }
