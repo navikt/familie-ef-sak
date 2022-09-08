@@ -25,7 +25,8 @@ internal class AutomatiskJournalføringControllerTest {
     val request = AutomatiskJournalføringRequest(
         "12345678901",
         "1234",
-        OVERGANGSSTØNAD
+        OVERGANGSSTØNAD,
+        1L
     )
 
     @BeforeEach

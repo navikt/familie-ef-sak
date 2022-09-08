@@ -18,6 +18,7 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyeBarnDto
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,16 +42,16 @@ class NyeBarnService(
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
         val nyttBarnList = mutableListOf<NyttBarn>()
-        val fagsaker = fagsakService.finnFagsak(personIdenter)
+        val fagsaker = fagsakService.finnFagsaker(personIdenter)
         if (fagsaker.isEmpty()) error("Kunne ikke finne fagsak for personident")
 
-        for (fagsak in fagsaker.filterNotNull()) {
+        for (fagsak in fagsaker) {
             val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
             val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
             opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
 
-            nyttBarnList.addAll(nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) })
-            nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling))
+            nyttBarnList.addAll(nyeBarn.map { NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) })
+            nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
         }
 
         return NyeBarnDto(nyttBarnList)
@@ -93,13 +94,13 @@ class NyeBarnService(
         return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
     }
 
-    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData): List<NyttBarn> {
+    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
         return kobledeBarn.kobledeBarn
             .filter { it.behandlingBarn.personIdent == null }
             .filter { barnFødtFørTermin(it) }
             .map {
                 val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
-                NyttBarn(barn.personIdent, NyttBarnÅrsak.FØDT_FØR_TERMIN)
+                NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_FØR_TERMIN)
             }
     }
 

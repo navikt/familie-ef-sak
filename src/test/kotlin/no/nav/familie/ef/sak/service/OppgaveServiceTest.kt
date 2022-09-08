@@ -84,7 +84,7 @@ internal class OppgaveServiceTest {
         )
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
-        every { oppgaveRepository.update(any()) } answers {firstArg()}
+        every { oppgaveRepository.update(any()) } answers { firstArg() }
     }
 
     @Test

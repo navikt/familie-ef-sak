@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -55,5 +56,21 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(taskRepository.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).isEmpty()
+    }
+
+    @Test
+    fun `finnNyeEllerTidligereFødteBarn med et nytt barn i PDL siden barnetilsyn-behandling, forvent ett nytt barn`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident)), migrert = true, stønadstype = StønadType.BARNETILSYN))
+        behandlingRepository.insert(
+                behandling(
+                        fagsak,
+                        status = BehandlingStatus.FERDIGSTILT,
+                        resultat = BehandlingResultat.INNVILGET
+                )
+        )
+
+        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn //PdlClient.hentBarn er mocket til å returnere 2 barn
+        assertThat(barn).hasSize(2)
+        assertThat(barn.all { it.stønadstype == StønadType.BARNETILSYN }).isTrue
     }
 }
