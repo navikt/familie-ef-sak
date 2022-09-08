@@ -76,7 +76,6 @@ class NyeBarnServiceTest {
         assertThat(barn.first()).isEqualTo(NyttBarn(fnrForNyttBarn, StønadType.OVERGANGSSTØNAD, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING))
     }
 
-
     @Test
     fun `finnNyeEllerTidligereFødteBarn med ett født terminbarn i PDL, forvent ingen treff`() {
         val terminDato = YearMonth.now().atEndOfMonth()

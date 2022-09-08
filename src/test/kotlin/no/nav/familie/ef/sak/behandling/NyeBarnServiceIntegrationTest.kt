@@ -62,14 +62,14 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun `finnNyeEllerTidligereFødteBarn med et nytt barn i PDL siden barnetilsyn-behandling, forvent ett nytt barn`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident)), migrert = true, stønadstype = StønadType.BARNETILSYN))
         behandlingRepository.insert(
-                behandling(
-                        fagsak,
-                        status = BehandlingStatus.FERDIGSTILT,
-                        resultat = BehandlingResultat.INNVILGET
-                )
+            behandling(
+                fagsak,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET
+            )
         )
 
-        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn //PdlClient.hentBarn er mocket til å returnere 2 barn
+        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn // PdlClient.hentBarn er mocket til å returnere 2 barn
         assertThat(barn).hasSize(2)
         assertThat(barn.all { it.stønadstype == StønadType.BARNETILSYN }).isTrue
     }
