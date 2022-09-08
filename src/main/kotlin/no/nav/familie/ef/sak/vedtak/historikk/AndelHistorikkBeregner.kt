@@ -150,7 +150,7 @@ object AndelHistorikkBeregner {
                 0,
                 0,
                 0,
-                it.behandlingId
+                tilkjentYtelse.behandlingId
             )
         }
 
@@ -287,7 +287,7 @@ object AndelHistorikkBeregner {
         historikk: List<AndelHistorikkHolder>,
         andel: AndelTilkjentYtelse
     ): Int {
-        val index = historikk.indexOfFirst { it.andel.stønadFom.isAfter(andel.stønadTom) }
+        val index = historikk.indexOfFirst { it.andel.stønadFom > andel.stønadFom }
         return if (index == -1) historikk.size else index
     }
 
