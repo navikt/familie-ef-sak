@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -171,15 +172,28 @@ class OppgaveService(
         ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
     }
 
-    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    /**
+     * @param ignorerFeilregistrert ignorerer oppgaver som allerede er feilregistrerte
+     * Den burde kun settes til true for lukking av oppgaver koblet til henleggelse
+     * Oppgaver skal ikke være lukket når denne kalles, då det er ef-sak som burde lukke oppgaver som vi har opprettet
+     */
+    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype, ignorerFeilregistrert: Boolean = false) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
-            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave, ignorerFeilregistrert)
         }
     }
 
-    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
-        ferdigstillOppgave(oppgave.gsakOppgaveId)
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave, ignorerFeilregistrert: Boolean = false) {
+        try {
+            ferdigstillOppgave(oppgave.gsakOppgaveId)
+        } catch (e: RessursException) {
+            if (ignorerFeilregistrert && e.ressurs.melding.contains("Oppgave har status feilregistrert")) {
+                logger.warn("Ignorerer ferdigstill av oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert")
+            } else {
+                throw e
+            }
+        }
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
     }
