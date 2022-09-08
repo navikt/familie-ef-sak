@@ -112,7 +112,6 @@ object AndelHistorikkBeregner {
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
             val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
-            // andelerFraSanksjon sin kildebehandlingId = current tilkjent ytelse behandlingId, men selve sanksjonen kan være fra annen behandling
             (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
 
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
