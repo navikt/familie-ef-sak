@@ -117,11 +117,7 @@ object AndelHistorikkBeregner {
             (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
 
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
-                if (!vedtaksperiode.erSanksjon && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
-                    historikk.filter { it.andel.stønadFom > andel.stønadFom }
-                        .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
-                        .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse) }
-                }
+                markerHistorikkEtterAndelSomFjernet(tilkjentYtelse, andel, vedtaksperiode, historikk)
 
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
@@ -136,6 +132,24 @@ object AndelHistorikkBeregner {
             markerAndelerSomErFjernet(historikk, tilkjentYtelse)
         }
         return historikk
+    }
+
+    /**
+     * Hvis en [andel] er oppdatert i denne [TilkjentYtelse] så
+     * markeres historiske andeler som har fom etter denne fom som fjernet
+     * Dette fordi vi alltid revurderer fra X dato, og allt etter det datoet blir overskrevet
+     */
+    private fun markerHistorikkEtterAndelSomFjernet(
+        tilkjentYtelse: TilkjentYtelse,
+        andel: AndelTilkjentYtelse,
+        vedtaksperiode: Vedtakshistorikkperiode,
+        historikk: MutableList<AndelHistorikkHolder>
+    ) {
+        if (!vedtaksperiode.erSanksjon && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
+            historikk.filter { it.andel.stønadFom > andel.stønadFom }
+                .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
+                .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse) }
+        }
     }
 
     private fun lagAndelerFraSanksjoner(
