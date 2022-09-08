@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.service
+package no.nav.familie.ef.sak.vilkår
 
 import io.mockk.every
 import io.mockk.just
@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
@@ -21,22 +22,12 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
-import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.VilkårGrunnlagService
-import no.nav.familie.ef.sak.vilkår.VilkårType
-import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.OPPFYLT
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
-import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
-import no.nav.familie.ef.sak.vilkår.Vurdering
-import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
-import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -107,18 +98,11 @@ internal class VurderingServiceTest {
 
         val barnMedSamvær = barn.map { lagBarnetilsynBarn(it.id) }
 
-        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns VilkårGrunnlagDto(
-            tidligereVedtaksperioder = mockk(relaxed = true),
-            medlemskap = mockk(relaxed = true),
-            sivilstand = sivilstand,
-            bosituasjon = mockk(relaxed = true),
-            barnMedSamvær = barnMedSamvær,
-            sivilstandsplaner = mockk(relaxed = true),
-            aktivitet = mockk(relaxed = true),
-            sagtOppEllerRedusertStilling = mockk(relaxed = true),
-            lagtTilEtterFerdigstilling = false,
-            registeropplysningerOpprettetTid = mockk(relaxed = true)
-        )
+        every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
+            mockVilkårGrunnlagDto(
+                sivilstand = sivilstand,
+                barnMedSamvær = barnMedSamvær
+            )
     }
 
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(
@@ -174,8 +158,16 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }).hasSize(2)
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(4)
-        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
-        assertThat(nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }.map { it.resultat }.toSet()).containsOnly(Vilkårsresultat.OPPFYLT)
+        assertThat(
+            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }
+                .map { it.resultat }
+                .toSet()
+        ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(
+            nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
+                .map { it.resultat }
+                .toSet()
+        ).containsOnly(Vilkårsresultat.OPPFYLT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
 
@@ -282,17 +274,26 @@ internal class VurderingServiceTest {
 
     @Test
     internal fun `Skal returnere aktivitet i historikk`() {
-
         val vilkårsvurderingList = VilkårType.hentVilkårForStønad(BARNETILSYN).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,
                 resultat = OPPFYLT,
                 type = VilkårType.AKTIVITET_ARBEID,
-                delvilkårsvurdering = listOf(Delvilkårsvurdering(OPPFYLT, listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))))
+                delvilkårsvurdering = listOf(
+                    Delvilkårsvurdering(
+                        OPPFYLT,
+                        listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
+                    )
+                )
             )
         }
 
-        every { vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(VilkårType.AKTIVITET_ARBEID, listOf(behandlingId)) } returns vilkårsvurderingList
+        every {
+            vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(
+                VilkårType.AKTIVITET_ARBEID,
+                listOf(behandlingId)
+            )
+        } returns vilkårsvurderingList
 
         val behandlingIdToSvarID = vurderingService.aktivitetArbeidForBehandlingIds(listOf(behandlingId))
 

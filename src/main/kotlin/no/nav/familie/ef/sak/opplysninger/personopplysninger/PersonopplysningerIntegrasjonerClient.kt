@@ -31,7 +31,8 @@ class PersonopplysningerIntegrasjonerClient(
 
     fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
         return postForEntity<List<Tilgang>>(
-            integrasjonerConfig.tilgangPersonUri, listOf(personIdent),
+            integrasjonerConfig.tilgangPersonUri,
+            listOf(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
             }
@@ -40,7 +41,8 @@ class PersonopplysningerIntegrasjonerClient(
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
         return postForEntity(
-            integrasjonerConfig.tilgangRelasjonerUri, PersonIdent(personIdent),
+            integrasjonerConfig.tilgangRelasjonerUri,
+            PersonIdent(personIdent),
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
             }

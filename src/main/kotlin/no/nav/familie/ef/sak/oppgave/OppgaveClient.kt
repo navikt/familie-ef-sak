@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -32,6 +33,8 @@ class OppgaveClient(
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
 
+    private val EF_ENHETNUMMER = "4489"
+
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
         val uri = URI.create("$oppgaveUri/opprett")
 
@@ -56,10 +59,11 @@ class OppgaveClient(
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): Long {
         val baseUri = URI.create("$oppgaveUri/$oppgaveId/fordel")
-        val uri = if (saksbehandler == null)
+        val uri = if (saksbehandler == null) {
             baseUri
-        else
+        } else {
             UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+        }
 
         try {
             val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())
@@ -79,6 +83,15 @@ class OppgaveClient(
         val uri = URI.create("$oppgaveUri/$oppgaveId/ferdigstill")
         val respons = patchForEntity<Ressurs<OppgaveResponse>>(uri, "")
         pakkUtRespons(respons, uri, "ferdigstillOppgave")
+    }
+
+    fun oppdaterOppgave(oppgave: Oppgave): Long {
+        val response = patchForEntity<Ressurs<OppgaveResponse>>(
+            URI.create("$oppgaveUri/${oppgave.id!!}/oppdater"),
+            oppgave,
+            HttpHeaders().medContentTypeJsonUTF8()
+        )
+        return response.getDataOrThrow().oppgaveId
     }
 
     fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {

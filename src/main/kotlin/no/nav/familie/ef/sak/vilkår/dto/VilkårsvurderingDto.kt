@@ -29,6 +29,8 @@ data class SvarPåVurderingerDto(
     val delvilkårsvurderinger: List<DelvilkårsvurderingDto>
 )
 
+data class GjenbrukVilkårsvurderingerDto(val behandlingId: UUID, val kopierBehandlingId: UUID)
+
 data class DelvilkårsvurderingDto(
     val resultat: Vilkårsresultat,
     val vurderinger: List<VurderingDto>

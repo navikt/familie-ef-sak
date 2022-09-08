@@ -72,7 +72,7 @@ internal class OppgaveServiceTest {
             mapper = listOf(
                 MappeDto(
                     123,
-                    "EF Sak - 70 Godkjenne vedtak",
+                    "70 Godkjennevedtak",
                     enhetsnr = "4489"
                 )
             )
@@ -322,7 +322,7 @@ internal class OppgaveServiceTest {
             Pair(søndag.morgen(), tirsdagFrist),
             Pair(søndag.kveld(), tirsdagFrist),
             Pair(mandag.morgen(), tirsdagFrist),
-            Pair(mandag.kveld(), onsdagFrist),
+            Pair(mandag.kveld(), onsdagFrist)
         )
 
         frister.forEach {

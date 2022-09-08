@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
@@ -14,8 +16,11 @@ import java.util.UUID
 
 internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var oppgaveRepository: OppgaveRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var oppgaveRepository: OppgaveRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun findByBehandlingIdAndTypeAndErFerdigstiltIsFalse() {
@@ -62,6 +67,16 @@ internal class OppgaveRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)).isNotNull()
         assertThat(oppgaveRepository.findTopByBehandlingIdOrderBySporbarOpprettetTidDesc(behandling.id)?.gsakOppgaveId)
             .isEqualTo(1)
+    }
+
+    @Test
+    internal fun `skal finne oppgaver for oppgavetype og personident`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, type = Oppgavetype.InnhentDokumentasjon, alder = Alder.SEKS_MND, gsakOppgaveId = 1, barnPersonIdent = "1"))
+        oppgaveRepository.insert(Oppgave(behandlingId = behandling.id, type = Oppgavetype.InnhentDokumentasjon, alder = Alder.SEKS_MND, gsakOppgaveId = 1, barnPersonIdent = "2"))
+
+        assertThat(oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, listOf("1")).size).isEqualTo(1)
     }
 
     @Test

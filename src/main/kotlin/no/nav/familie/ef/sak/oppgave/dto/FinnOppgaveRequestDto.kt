@@ -20,17 +20,25 @@ data class FinnOppgaveRequestDto(
     val fristTom: LocalDate? = null,
     val enhetsmappe: Long? = null,
     val mappeId: Long? = null,
+    val erUtenMappe: Boolean? = null,
     val ident: String?
 ) {
 
     fun tilFinnOppgaveRequest(aktørid: String? = null): FinnOppgaveRequest =
         FinnOppgaveRequest(
             tema = Tema.ENF,
-            behandlingstema = if (this.behandlingstema != null) Behandlingstema.values()
-                .find { it.value == this.behandlingstema } else null,
-            oppgavetype = if (this.oppgavetype != null) Oppgavetype.values()
-                .find { it.value == this.oppgavetype } else null,
+            behandlingstema = if (this.behandlingstema != null) {
+                Behandlingstema.values().find { it.value == this.behandlingstema }
+            } else {
+                null
+            },
+            oppgavetype = if (this.oppgavetype != null) {
+                Oppgavetype.values().find { it.value == this.oppgavetype }
+            } else {
+                null
+            },
             enhet = this.enhet,
+            erUtenMappe = this.erUtenMappe,
             saksbehandler = this.saksbehandler,
             aktørId = aktørid,
             journalpostId = this.journalpostId,
@@ -42,7 +50,7 @@ data class FinnOppgaveRequestDto(
             fristTomDato = this.fristTom,
             aktivFomDato = null,
             aktivTomDato = null,
-            mappeId = mappeId,
+            mappeId = this.mappeId,
             limit = 150,
             offset = 0
         )

@@ -32,7 +32,8 @@ class AMeldingInntektClient(
 
     fun genererAInntektUrl(personIdent: String): String {
         return postForEntity(
-            genererUrlUri, PersonIdent(personIdent),
+            genererUrlUri,
+            PersonIdent(personIdent),
             HttpHeaders().apply {
                 accept = listOf(MediaType.TEXT_PLAIN)
             }

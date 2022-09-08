@@ -127,7 +127,6 @@ class PersonopplysningerMapper(
         bostedsadresserForelder: List<Bostedsadresse>,
         annenForelderMap: Map<String, AnnenForelderMedIdent>
     ): BarnDto {
-
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent

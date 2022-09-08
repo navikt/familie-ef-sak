@@ -49,7 +49,7 @@ internal class VilkårTypeTest {
         AKTIVITET_ARBEID,
         INNTEKT,
         ALDER_PÅ_BARN,
-        DOKUMENTASJON_TILSYNSUTGIFTER,
+        DOKUMENTASJON_TILSYNSUTGIFTER
     )
 
     private val vilkårForSkolepenger = listOf(

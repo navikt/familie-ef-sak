@@ -38,7 +38,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
 
     @BeforeEach
     fun init() {
-
         every { fagsakService.hentAktivIdent(any()) } returns ""
         every { iverksettClient.sendOppgaverForTerminBarn(any()) } just runs
         every { personService.hentPersonMedBarn(any()).barn } returns mockk()
@@ -54,7 +53,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
 
     @Test
     fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, ingen barn i PDL, forvent at oppgave lagres og sendes`() {
-
         val terminBarn = listOf(opprettTerminbarn())
         val pdlBarn = emptyList<PdlBarn>()
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
@@ -67,7 +65,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
 
     @Test
     fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, ingen barn i PDL, forvent at oppgave instansieres riktig`() {
-
         val terminbarn = listOf(opprettTerminbarn(UUID.randomUUID(), UUID.randomUUID(), 1, LocalDate.MIN))
         val pdlBarn = emptyList<PdlBarn>()
 
@@ -85,7 +82,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
 
     @Test
     fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, to umatchede barn i PDL, forvent at oppgave opprettes`() {
-
         val terminBarn = listOf(opprettTerminbarn())
         val pdlBarn = listOf(
             opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(1)),
@@ -102,7 +98,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
 
     @Test
     fun `ett utløpt terminbarn, et av to matchede PDL barn, forvent at oppgave ikke opprettes`() {
-
         val terminBarn = listOf(opprettTerminbarn())
         val pdlBarn = listOf(
             opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
@@ -118,7 +113,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
 
     @Test
     fun `ingen terminbarn finnes, to PDL barn finnes, forvent at oppgave ikke opprettes`() {
-
         val terminBarn = emptyList<TerminbarnTilUtplukkForOppgave>()
         val pdlBarn = listOf(
             opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),

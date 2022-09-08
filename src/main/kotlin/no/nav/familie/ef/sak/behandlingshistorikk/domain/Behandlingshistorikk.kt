@@ -40,7 +40,6 @@ fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
 }
 
 fun Behandlingshistorikk.tilHendelseshistorikkDto(saksbehandling: Saksbehandling): HendelseshistorikkDto {
-
     val hendelse: Hendelse = when (this.steg) {
         StegType.VILKÅR -> Hendelse.OPPRETTET
         StegType.SEND_TIL_BESLUTTER -> Hendelse.SENDT_TIL_BESLUTTER

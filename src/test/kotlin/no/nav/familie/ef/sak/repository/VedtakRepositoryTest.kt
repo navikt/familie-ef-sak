@@ -11,16 +11,21 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var vedtakRepository: VedtakRepository
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    private lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Test
     internal fun `skal lagre vedtak med riktige felter`() {
@@ -45,8 +50,7 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
             inntekter = InntektWrapper(
                 listOf(
                     Inntektsperiode(
-                        LocalDate.now(),
-                        LocalDate.now(),
+                        Månedsperiode(YearMonth.now()),
                         inntekt = BigDecimal(100),
                         samordningsfradrag = BigDecimal(0)
                     )

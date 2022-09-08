@@ -76,7 +76,7 @@ class BehandlingService(
     }
 
     fun hentBehandlingForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
-        return behandlingRepository.finnBehandlingForGjenbrukAvVilkår(fagsakPersonId)
+        return behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
     }
 
     @Transactional

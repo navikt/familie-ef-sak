@@ -52,7 +52,8 @@ internal class AuditLoggerTest {
     internal fun `logger melding med deny policy`() {
         auditLogger.log(
             Sporingsdata(
-                AuditLoggerEvent.ACCESS, "12345678901",
+                AuditLoggerEvent.ACCESS,
+                "12345678901",
                 Tilgang(false, begrunnelse = "har  ikke tilgang")
             )
         )

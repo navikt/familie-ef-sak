@@ -28,10 +28,17 @@ import java.util.UUID
 
 internal class SøknadControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired lateinit var behandlingService: BehandlingService
-    @Autowired lateinit var fagsakService: FagsakService
-    @Autowired lateinit var søknadService: SøknadService
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @Autowired
+    lateinit var søknadService: SøknadService
 
     @BeforeEach
     fun setUp() {
@@ -57,7 +64,11 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
             StønadType.OVERGANGSSTØNAD
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
-        val behandling = behandlingService.opprettBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, fagsak.id, behandlingsårsak = behandlingÅrsak)
+        val behandling = behandlingService.opprettBehandling(
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            fagsak.id,
+            behandlingsårsak = behandlingÅrsak
+        )
         søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
         val søknadSkjema = søknadService.hentOvergangsstønad(behandling.id)!!
         val respons: ResponseEntity<Ressurs<SøknadDatoerDto>> = hentSøknadData(behandling.id)
@@ -69,7 +80,6 @@ internal class SøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     private fun hentSøknadData(behandlingId: UUID): ResponseEntity<Ressurs<SøknadDatoerDto>> {
-
         return restTemplate.exchange(
             localhost("/api/soknad/$behandlingId/datoer"),
             HttpMethod.GET,

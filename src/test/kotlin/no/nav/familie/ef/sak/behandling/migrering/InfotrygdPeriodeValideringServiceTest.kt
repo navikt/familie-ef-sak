@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling.migrering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdPerioderDto
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
@@ -13,6 +14,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -25,7 +27,9 @@ import java.time.YearMonth
 internal class InfotrygdPeriodeValideringServiceTest {
 
     private val infotrygdService = mockk<InfotrygdService>()
-    private val service = InfotrygdPeriodeValideringService(infotrygdService)
+    private val behandlingService = mockk<BehandlingService>()
+
+    private val service = InfotrygdPeriodeValideringService(infotrygdService, behandlingService)
 
     private val personIdent = "1"
 
@@ -92,6 +96,44 @@ internal class InfotrygdPeriodeValideringServiceTest {
                 )
             }
                 .isInstanceOf(ApiFeil::class.java)
+        }
+    }
+
+    @Nested
+    inner class validerHarIkkeÅpenSakIInfotrygd {
+
+        @Test
+        internal fun `skal kunne migrere selv om personen har en klagesak`() {
+            val fagsak = fagsak(stønadstype = BARNETILSYN)
+            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
+                saker = listOf(
+                    InfotrygdSak(
+                        personIdent = fagsak.hentAktivIdent(),
+                        stønadType = fagsak.stønadstype,
+                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                        type = InfotrygdSakType.KLAGE
+                    )
+                )
+            )
+
+            service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
+        }
+
+        @Test
+        internal fun `skal kunne migrere selv om personen har en klagesak for tilbakekreving`() {
+            val fagsak = fagsak(stønadstype = BARNETILSYN)
+            every { infotrygdService.hentSaker(any()) } returns InfotrygdSakResponse(
+                saker = listOf(
+                    InfotrygdSak(
+                        personIdent = fagsak.hentAktivIdent(),
+                        stønadType = fagsak.stønadstype,
+                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                        type = InfotrygdSakType.KLAGE_TILBAKEBETALING
+                    )
+                )
+            )
+
+            service.validerHarIkkeÅpenSakIInfotrygd(fagsak)
         }
     }
 

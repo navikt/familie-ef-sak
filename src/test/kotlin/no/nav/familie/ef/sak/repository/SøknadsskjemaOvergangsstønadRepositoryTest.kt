@@ -35,7 +35,6 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Test
     internal fun `søknad om overgangsstønad lagres korrekt`() {
-
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
@@ -46,7 +45,6 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
 
     @Test
     internal fun `søknad om overgangsstønad uten utdanning lagres korrekt`() {
-
         val aktivitet = Testsøknad.søknadOvergangsstønad.aktivitet
         val barn = Testsøknad.søknadOvergangsstønad.barn
         val barnUtenBarnepass = barn.verdi.map { it.copy(barnepass = null) }

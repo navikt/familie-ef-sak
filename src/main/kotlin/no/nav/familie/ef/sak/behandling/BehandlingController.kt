@@ -43,10 +43,14 @@ class BehandlingController(
 
     @GetMapping("gamle-behandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
-        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD).map { it.tilDto(StønadType.OVERGANGSSTØNAD) }
-        val gamleSkolepengerBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).map { it.tilDto(StønadType.SKOLEPENGER) }
-        val gamleBarnetilsynBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).map { it.tilDto(StønadType.BARNETILSYN) }
-        val gamleBehandlinger = listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
+        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD)
+            .map { it.tilDto(StønadType.OVERGANGSSTØNAD) }
+        val gamleSkolepengerBehandlinger =
+            behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).map { it.tilDto(StønadType.SKOLEPENGER) }
+        val gamleBarnetilsynBehandlinger =
+            behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).map { it.tilDto(StønadType.BARNETILSYN) }
+        val gamleBehandlinger =
+            listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
 
         return Ressurs.success(gamleBehandlinger)
     }
@@ -96,7 +100,8 @@ class BehandlingController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        val behandlinger: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
-        return Ressurs.success(behandlinger.map { it.tilDto(fagsakService.hentFagsak(it.fagsakId).stønadstype) })
+        val behandlingerForGjenbruk: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
+        val fagsaker: Map<UUID, Fagsak> = behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
+        return Ressurs.success(behandlingerForGjenbruk.map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) })
     }
 }

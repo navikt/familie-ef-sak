@@ -94,6 +94,7 @@ spec:
           - id: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
         extra:
           - "NAVident"
+          - "azp_name"
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod

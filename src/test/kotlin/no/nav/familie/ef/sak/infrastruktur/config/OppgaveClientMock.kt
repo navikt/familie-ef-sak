@@ -55,7 +55,6 @@ class OppgaveClientMock {
         every { oppgaveClient.finnMapper(any()) } answers {
             val mappeRequest: FinnMappeRequest = firstArg()
             if (mappeRequest.enhetsnr == "4489") {
-
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
                     mapper = listOf(
@@ -65,8 +64,13 @@ class OppgaveClientMock {
                             enhetsnr = "4489"
                         ),
                         MappeDto(
+                            id = 104,
+                            navn = "EF Sak - 62 Hendelser",
+                            enhetsnr = "4489"
+                        ),
+                        MappeDto(
                             id = 102,
-                            navn = "EF Sak - 70 Godkjenne vedtak",
+                            navn = "70 Godkjennevedtak",
                             enhetsnr = "4489"
                         ),
                         MappeDto(
@@ -81,13 +85,8 @@ class OppgaveClientMock {
                     antallTreffTotalt = 2,
                     mapper = listOf(
                         MappeDto(
-                            id = 201,
-                            navn = "EF Sak - 01 Uplassert lokal",
-                            enhetsnr = "4483"
-                        ),
-                        MappeDto(
                             id = 202,
-                            navn = "EF Sak - 70 Godkjenne vedtak",
+                            navn = "70 Godkjennevedtak",
                             enhetsnr = "4483"
                         ),
                         MappeDto(
@@ -148,11 +147,23 @@ class OppgaveClientMock {
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave3 = lagOppgave(3L, Oppgavetype.Journalføring, beskivelse = "", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgavePapirsøknad =
-        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "2345")
+        lagOppgave(5L, Oppgavetype.Journalføring, beskivelse = "Papirsøknad", behandlesAvApplikasjon = "", journalpostId = "23456")
     private val oppgaveEttersending =
-        lagOppgave(6L, Oppgavetype.Journalføring, beskivelse = "Ettersending", behandlesAvApplikasjon = "familie-ef-sak", journalpostId = "2345")
+        lagOppgave(
+            6L,
+            Oppgavetype.Journalføring,
+            beskivelse = "Ettersending",
+            behandlesAvApplikasjon = "familie-ef-sak",
+            journalpostId = "23457"
+        )
     private val oppgaveEttersendingUtenBehandlesAvApplikasjon =
-        lagOppgave(7L, Oppgavetype.Journalføring, beskivelse = "Ettersending uten behandlesAvApplikasjon", behandlesAvApplikasjon = "", journalpostId = "2345")
+        lagOppgave(
+            7L,
+            Oppgavetype.Journalføring,
+            beskivelse = "Ettersending uten behandlesAvApplikasjon",
+            behandlesAvApplikasjon = "",
+            journalpostId = "23458"
+        )
     private val tilbakekreving1 = lagOppgave(
         4L,
         Oppgavetype.BehandleSak,

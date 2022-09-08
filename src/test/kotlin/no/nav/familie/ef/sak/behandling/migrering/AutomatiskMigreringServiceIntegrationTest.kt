@@ -17,11 +17,20 @@ import java.time.LocalDate
 
 internal class AutomatiskMigreringServiceIntegrationTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var iverksettClient: IverksettClient
-    @Autowired private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
-    @Autowired private lateinit var migreringsstatusRepository: MigreringsstatusRepository
-    @Autowired private lateinit var automatiskMigreringService: AutomatiskMigreringService
-    @Autowired private lateinit var fagsakPersonRepository: FagsakPersonRepository
+    @Autowired
+    private lateinit var iverksettClient: IverksettClient
+
+    @Autowired
+    private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+
+    @Autowired
+    private lateinit var migreringsstatusRepository: MigreringsstatusRepository
+
+    @Autowired
+    private lateinit var automatiskMigreringService: AutomatiskMigreringService
+
+    @Autowired
+    private lateinit var fagsakPersonRepository: FagsakPersonRepository
 
     private val periode1dato = LocalDate.now().plusYears(1)
     private val periode2dato = LocalDate.now().plusYears(2)

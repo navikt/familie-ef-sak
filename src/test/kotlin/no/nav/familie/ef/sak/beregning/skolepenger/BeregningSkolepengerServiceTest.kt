@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.SkolepengerUtgiftDto
 import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -129,7 +130,7 @@ internal class BeregningSkolepengerServiceTest {
         @Test
         internal fun `overlappende skoleår er ikke gyldig`() {
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift())),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode(), delårsperiode()), listOf(utgift()))
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -141,7 +142,7 @@ internal class BeregningSkolepengerServiceTest {
         internal fun `utgifter med samme ider er ikke gyldig`() {
             val utgift = utgift()
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift)),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode()), listOf(utgift, utgift))
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -155,7 +156,7 @@ internal class BeregningSkolepengerServiceTest {
             val delårsperiode2 =
                 delårsperiode(fra = defaultFra.plusMonths(1), studietype = SkolepengerStudietype.VIDEREGÅENDE)
             val skoleårsperioder = listOf(
-                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift())),
+                SkoleårsperiodeSkolepengerDto(listOf(delårsperiode1, delårsperiode2), listOf(utgift()))
             )
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, førstegangsbehandling.id) }
@@ -299,7 +300,7 @@ internal class BeregningSkolepengerServiceTest {
             assertThatThrownBy { service.beregnYtelse(revurderingsperioder, revurdering.id) }
                 .isInstanceOf(Feil::class.java) // denne skal ikke være brukerfeil (ApiFeil)
                 .hasMessageContaining(
-                    "Utgiftsperiode er endret for skoleår=21/22 id=${utgift.id} er endret",
+                    "Utgiftsperiode er endret for skoleår=21/22 id=${utgift.id} er endret"
                 )
         }
     }
@@ -316,8 +317,8 @@ internal class BeregningSkolepengerServiceTest {
             every { vedtakService.hentVedtak(førstegangsbehandling.id) } returns vedtak(tidligerePerioder)
 
             assertThatThrownBy { service.beregnYtelse(skoleårsperioder, revurdering.id, erOpphør = true) }
-                .isInstanceOf(Feil::class.java)
-                .hasMessageContaining("Finner ikke noe som er endret mellom")
+                .isInstanceOf(ApiFeil::class.java)
+                .hasMessageContaining("Periodene er uendrede")
         }
 
         @Test
@@ -529,6 +530,7 @@ internal class BeregningSkolepengerServiceTest {
         studietype = studietype,
         årMånedFra = fra,
         årMånedTil = til,
+        periode = Månedsperiode(fra, til),
         studiebelastning = studiebelastning
     )
 }

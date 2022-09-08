@@ -59,7 +59,6 @@ class OppgaveService(
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
-
             val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
             val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
             val opprettOppgave =
@@ -101,16 +100,39 @@ class OppgaveService(
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+        if ((enhetsnummer == "4489") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
-            val mappeIdForGodkjenneVedtak =
-                mapper.find { it.navn.contains("EF Sak - 70 Godkjenne vedtak") }?.id?.toLong()
+            val mappeIdForGodkjenneVedtak = mapper.find {
+                (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
+                    !it.navn.contains("EF Sak")
+            }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
                 logger.info("Legger oppgave i Godkjenne vedtak-mappe")
             } ?: run {
-                logger.error("Fant ikke mappe for godkjenne vedtak: EF Sak - 70 Godkjenne vedtak")
+                logger.error("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak for enhetsnummer=$enhetsnummer")
             }
             return mappeIdForGodkjenneVedtak
+        }
+        return null
+    }
+
+    fun finnHendelseMappeId(enhetsnummer: String): Long? {
+        // val oppgave = finnOppgaveMedId(oppgaveId)
+        if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
+            val finnMappeRequest = FinnMappeRequest(
+                listOf(),
+                enhetsnummer,
+                null,
+                1000
+            )
+            val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+            val mappe = mapperResponse.mapper.find {
+                it.navn.contains("EF Sak", true) &&
+                    it.navn.contains("Hendelser") &&
+                    it.navn.contains("62")
+            }
+                ?: error("Fant ikke mappe for hendelser")
+            return mappe.id.toLong()
         }
         return null
     }

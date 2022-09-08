@@ -46,7 +46,6 @@ class ArbeidsforholdClientTest {
 
     @Test
     fun `hent arbeidsforhold response`() {
-
         WireMock.stubFor(
             queryMappingForHentOrganisasjon.willReturn(
                 WireMock.aResponse()
@@ -62,7 +61,8 @@ class ArbeidsforholdClientTest {
         Assertions.assertThat(response.data?.size).isEqualTo(1)
     }
 
-    private val queryMappingForHentOrganisasjon: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/aareg/arbeidsforhold"))
+    private val queryMappingForHentOrganisasjon: MappingBuilder =
+        WireMock.post(WireMock.urlPathEqualTo("/api/aareg/arbeidsforhold"))
 
     val aaregIntegrasjonerResponse = """
         {

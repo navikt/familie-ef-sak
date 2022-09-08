@@ -94,7 +94,15 @@ class FagsakService(
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
         val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(fagsak.id)
-        return fagsak.tilDto(behandlinger = behandlinger.map { it.tilDto(fagsak.stønadstype, vedtaksdatoPåBehandlingId.get(it.id)) }, erLøpende = erLøpende)
+        return fagsak.tilDto(
+            behandlinger = behandlinger.map {
+                it.tilDto(
+                    fagsak.stønadstype,
+                    vedtaksdatoPåBehandlingId.get(it.id)
+                )
+            },
+            erLøpende = erLøpende
+        )
     }
 
     fun finnFagsakerForFagsakPersonId(fagsakPersonId: UUID): Fagsaker {
@@ -154,9 +162,14 @@ class FagsakService(
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
     fun hentFagsakPåEksternId(eksternFagsakId: Long): FagsakDto {
-        val fagsak = fagsakRepository.finnMedEksternId(eksternFagsakId)?.tilFagsakMedPerson()
+        return hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
             ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
-        return fagsakTilDto(fagsak)
+    }
+
+    fun hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId: Long): FagsakDto? {
+        return fagsakRepository.finnMedEksternId(eksternFagsakId)
+            ?.tilFagsakMedPerson()
+            ?.let { fagsakTilDto(it) }
     }
 
     fun hentAktivIdent(fagsakId: UUID): String = fagsakRepository.finnAktivIdent(fagsakId)

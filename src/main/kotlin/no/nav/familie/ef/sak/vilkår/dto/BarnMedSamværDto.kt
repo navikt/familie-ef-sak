@@ -37,7 +37,7 @@ data class BarnMedSamværRegistergrunnlagDto(
     val harSammeAdresse: Boolean?,
     val forelder: AnnenForelderDto?,
     val dødsdato: LocalDate? = null,
-    val fødselsdato: LocalDate?,
+    val fødselsdato: LocalDate?
 )
 
 data class AnnenForelderDto(
@@ -54,7 +54,7 @@ data class BarnepassDto(
     val id: UUID,
     val skalHaBarnepass: Boolean? = null,
     val barnepassordninger: List<BarnepassordningDto> = emptyList(),
-    val årsakBarnepass: String? = null,
+    val årsakBarnepass: String? = null
 )
 
 data class BarnepassordningDto(

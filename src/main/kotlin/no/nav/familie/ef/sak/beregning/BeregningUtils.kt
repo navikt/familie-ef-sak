@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.felles.dto.Periode
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -11,8 +11,8 @@ object BeregningUtils {
     private val REDUKSJONSFAKTOR = BigDecimal(0.45)
 
     fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
-        val (startDato, sluttDato, inntekt, samordningsfradrag) = inntektsperiode
-        return finnGrunnbeløpsPerioder(startDato, sluttDato).map {
+        val (_, _, inntekt, samordningsfradrag) = inntektsperiode
+        return finnGrunnbeløpsPerioder(inntektsperiode.periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, inntekt).divide(BigDecimal(12))
                 .setScale(0, RoundingMode.HALF_DOWN)
 
@@ -46,15 +46,17 @@ object BeregningUtils {
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
         val inntektOverHalveGrunnbeløp = inntekt.subtract(grunnbeløp.multiply(BigDecimal(0.5)))
-        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO)
-            inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN) else BigDecimal.ZERO
+        return if (inntektOverHalveGrunnbeløp > BigDecimal.ZERO) {
+            inntektOverHalveGrunnbeløp.multiply(REDUKSJONSFAKTOR).setScale(5, RoundingMode.HALF_DOWN)
+        } else {
+            BigDecimal.ZERO
+        }
     }
 
     fun indeksjusterInntekt(
         sisteBrukteGrunnbeløpsdato: LocalDate,
         inntekter: List<Inntektsperiode> = emptyList()
     ): List<Inntektsperiode> {
-
         val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
             return inntekter
@@ -67,43 +69,42 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp
     ): List<Inntektsperiode> {
-        val (startDato, sluttDato, inntekt, samordningsfradrag) = inntektsperiode
-        return finnGrunnbeløpsPerioder(startDato, sluttDato).map { grunnbeløp ->
-            if (grunnbeløp.periode.fradato > sistBrukteGrunnbeløp.fraOgMedDato &&
+        val (_, _, inntekt, samordningsfradrag) = inntektsperiode
+        return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
+            if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
                 val justerInntekt = inntekt.multiply(faktor).setScale(0, RoundingMode.FLOOR).toLong()
                 val justerInntektAvrundetNedTilNærmeste100 = (justerInntekt / 100L) * 100L
                 Inntektsperiode(
-                    grunnbeløp.periode.fradato,
-                    grunnbeløp.periode.tildato,
+                    grunnbeløp.periode,
                     BigDecimal(justerInntektAvrundetNedTilNærmeste100),
                     samordningsfradrag
                 )
             } else {
-                Inntektsperiode(grunnbeløp.periode.fradato, grunnbeløp.periode.tildato, inntekt, samordningsfradrag)
+                Inntektsperiode(grunnbeløp.periode, inntekt, samordningsfradrag)
             }
         }
     }
 
     fun finnStartDatoOgSluttDatoForBeløpsperiode(
         beløpForInnteksperioder: List<Beløpsperiode>,
-        vedtaksperiode: Periode
+        vedtaksperiode: Månedsperiode
     ): List<Beløpsperiode> {
         return beløpForInnteksperioder.mapNotNull {
             when {
                 it.periode.omsluttesAv(vedtaksperiode) -> {
                     it
                 }
-                it.periode.overlapperIStartenAv(vedtaksperiode) -> {
-                    it.copy(periode = it.periode.copy(fradato = vedtaksperiode.fradato))
+                it.periode.overlapperKunIStartenAv(vedtaksperiode) -> {
+                    it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
-                vedtaksperiode.overlapperIStartenAv(it.periode) -> {
-                    it.copy(periode = it.periode.copy(tildato = vedtaksperiode.tildato))
+                vedtaksperiode.overlapperKunIStartenAv(it.periode) -> {
+                    it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 vedtaksperiode.omsluttesAv(it.periode) -> {
-                    it.copy(periode = it.periode.copy(fradato = vedtaksperiode.fradato, tildato = vedtaksperiode.tildato))
+                    it.copy(periode = (it.periode snitt vedtaksperiode)!!)
                 }
                 else -> {
                     null

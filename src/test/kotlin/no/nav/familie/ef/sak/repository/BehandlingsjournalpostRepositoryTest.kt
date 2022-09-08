@@ -14,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired
 
 internal class BehandlingsjournalpostRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var behandlingsjournalpostRepository: BehandlingsjournalpostRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingsjournalpostRepository: BehandlingsjournalpostRepository
 
     @Test
     internal fun `skal kunne lagre flere journalposter på samme behandling`() {

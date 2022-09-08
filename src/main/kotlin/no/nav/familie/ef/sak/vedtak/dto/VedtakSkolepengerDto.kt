@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ef.sak.felles.dto.Periode
 import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
@@ -9,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.YearMonth
 import java.util.UUID
 
@@ -32,7 +32,8 @@ data class InnvilgelseSkolepenger(
     override val begrunnelse: String?,
     override val skoleårsperioder: List<SkoleårsperiodeSkolepengerDto>
 ) : VedtakSkolepengerDto(
-    resultatType = ResultatType.INNVILGE, _type = "InnvilgelseSkolepenger"
+    resultatType = ResultatType.INNVILGE,
+    _type = "InnvilgelseSkolepenger"
 )
 
 const val VEDTAK_SKOLEPENGER_OPPHØR_TYPE = "OpphørSkolepenger"
@@ -49,16 +50,20 @@ data class SkoleårsperiodeSkolepengerDto(
 
 data class DelårsperiodeSkoleårDto(
     val studietype: SkolepengerStudietype,
-    val årMånedFra: YearMonth,
-    val årMånedTil: YearMonth,
-    val studiebelastning: Int,
+    @Deprecated("Bruke periode", ReplaceWith("periode.fom")) val årMånedFra: YearMonth? = null,
+    @Deprecated("Bruke periode", ReplaceWith("periode.tom")) val årMånedTil: YearMonth? = null,
+    @JsonIgnore
+    val periode: Månedsperiode = Månedsperiode(
+        årMånedFra ?: error("periode eller årMånedFra må ha verdi"),
+        årMånedTil ?: error("periode eller årMånedTil må ha verdi")
+    ),
+    val studiebelastning: Int
 ) {
-    fun tilPeriode(): Periode = Periode(this.årMånedFra.atDay(1), this.årMånedTil.atEndOfMonth())
 
     // Brukes for å ikke være en del av json som blir serialisert
     @delegate:JsonIgnore
     val skoleår: Skoleår by lazy {
-        Skoleår(årMånedFra, årMånedTil)
+        Skoleår(periode)
     }
 }
 
@@ -66,11 +71,11 @@ data class SkolepengerUtgiftDto(
     val id: UUID,
     val årMånedFra: YearMonth,
     val utgifter: Int,
-    val stønad: Int,
+    val stønad: Int
 )
 
 fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
-    perioder = this.perioder.map { it.tilDomene() }.sortedBy { it.datoFra },
+    perioder = this.perioder.map { it.tilDomene() }.sortedBy { it.periode },
     utgiftsperioder = this.utgiftsperioder.map {
         SkolepengerUtgift(
             id = it.id,
@@ -83,8 +88,7 @@ fun SkoleårsperiodeSkolepengerDto.tilDomene() = SkoleårsperiodeSkolepenger(
 
 fun DelårsperiodeSkoleårDto.tilDomene() = DelårsperiodeSkoleårSkolepenger(
     studietype = this.studietype,
-    datoFra = this.årMånedFra.atDay(1),
-    datoTil = this.årMånedTil.atEndOfMonth(),
+    periode = this.periode,
     studiebelastning = this.studiebelastning
 )
 
@@ -118,6 +122,7 @@ fun DelårsperiodeSkoleårSkolepenger.tilDto() = DelårsperiodeSkoleårDto(
     studietype = this.studietype,
     årMånedFra = YearMonth.from(this.datoFra),
     årMånedTil = YearMonth.from(this.datoTil),
+    periode = Månedsperiode(this.datoFra, this.datoTil),
     studiebelastning = this.studiebelastning
 )
 
@@ -125,11 +130,5 @@ fun SkolepengerUtgift.tilDto() = SkolepengerUtgiftDto(
     id = this.id,
     årMånedFra = YearMonth.from(this.utgiftsdato),
     utgifter = this.utgifter,
-    stønad = this.stønad,
+    stønad = this.stønad
 )
-
-fun SkoleårsperiodeSkolepengerDto.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
-    SanksjonertPeriodeDto(
-        årMånedFra = YearMonth.from(this.perioder.single().årMånedFra),
-        årMånedTil = YearMonth.from(this.perioder.single().årMånedTil)
-    )

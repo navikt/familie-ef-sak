@@ -29,8 +29,11 @@ import java.util.UUID
 
 internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
-    @Autowired lateinit var fagsakService: FagsakService
-    @Autowired lateinit var behandlingRepository: BehandlingRepository
+    @Autowired
+    lateinit var fagsakService: FagsakService
+
+    @Autowired
+    lateinit var behandlingRepository: BehandlingRepository
 
     @AfterEach
     internal fun tearDown() {
@@ -55,7 +58,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         fun `skal returnere fagsaker med oppdatert peronIdent fra Pdl når det finnes ny ident`() {
-
             val fagsakerMedOppdatertePersonIdenter =
                 fagsakService.fagsakerMedOppdatertePersonIdenter(
                     listOf(
@@ -76,7 +78,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         fun `skal returnere fagsaker med eksiterende peronIdent når det ikke finnes ny ident i pdl`() {
-
             val fagsakerMedOppdatertePersonIdenter =
                 fagsakService.fagsakerMedOppdatertePersonIdenter(
                     listOf(
@@ -163,7 +164,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal oppdatere personident på fagsak dersom personen har fått ny ident som er tidligere registrert`() {
-
             val iGår = Sporbar(
                 opprettetAv = "XY",
                 opprettetTid = LocalDateTime.now().minusDays(1),
@@ -209,7 +209,6 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal oppdatere personident hvis fagsak har gammel ident`() {
-
             val iGår = Sporbar(
                 opprettetAv = "XY",
                 opprettetTid = LocalDateTime.now().minusDays(1),

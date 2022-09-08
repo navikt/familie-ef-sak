@@ -19,7 +19,6 @@ import java.util.UUID
     taskStepType = StartBehandlingTask.TYPE,
     beskrivelse = "Sender start behandling til Infotrygd"
 )
-
 class StartBehandlingTask(
     private val iverksettClient: IverksettClient,
     private val pdlClient: PdlClient,

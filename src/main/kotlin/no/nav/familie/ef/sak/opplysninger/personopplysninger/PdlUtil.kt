@@ -10,14 +10,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
-val logger: Logger = LoggerFactory.getLogger(PdlClient::class.java)
+private val logger: Logger = LoggerFactory.getLogger(PdlClient::class.java)
 
 inline fun <reified DATA : Any, reified T : Any> feilsjekkOgReturnerData(
     ident: String?,
     pdlResponse: PdlResponse<DATA>,
     dataMapper: (DATA) -> T?
 ): T {
-
     if (pdlResponse.harFeil()) {
         if (pdlResponse.errors?.any { it.extensions?.notFound() == true } == true) {
             throw PdlNotFoundException()

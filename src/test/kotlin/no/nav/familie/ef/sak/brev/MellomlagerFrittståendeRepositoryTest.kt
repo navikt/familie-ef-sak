@@ -15,8 +15,11 @@ import java.time.temporal.ChronoUnit
 
 internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var fagsakRepository: FagsakRepository
-    @Autowired private lateinit var mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository
+    @Autowired
+    private lateinit var fagsakRepository: FagsakRepository
+
+    @Autowired
+    private lateinit var mellomlagerFrittståendeBrevRepository: MellomlagerFrittståendeBrevRepository
 
     @Test
     internal fun `skal lagre mellomlagret brev`() {

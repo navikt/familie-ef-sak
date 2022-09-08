@@ -108,7 +108,6 @@ object GrunnlagsdataMapper {
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>
     ): List<SivilstandMedNavn> {
-
         return pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]
             SivilstandMedNavn(

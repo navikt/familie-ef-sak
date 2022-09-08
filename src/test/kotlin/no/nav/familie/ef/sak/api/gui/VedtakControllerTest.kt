@@ -47,15 +47,32 @@ import java.util.UUID
 
 internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var behandlingService: BehandlingService
-    @Autowired private lateinit var rolleConfig: RolleConfig
-    @Autowired private lateinit var vedtaksbrevService: VedtaksbrevService
-    @Autowired private lateinit var vedtakRepository: VedtakRepository
-    @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-    @Autowired private lateinit var søknadService: SøknadService
-    @Autowired private lateinit var grunnlagsdataService: GrunnlagsdataService
-    @Autowired private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
+    @Autowired
+    private lateinit var vedtaksbrevService: VedtaksbrevService
+
+    @Autowired
+    private lateinit var vedtakRepository: VedtakRepository
+
+    @Autowired
+    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @Autowired
+    private lateinit var søknadService: SøknadService
+
+    @Autowired
+    private lateinit var grunnlagsdataService: GrunnlagsdataService
+
+    @Autowired
+    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)

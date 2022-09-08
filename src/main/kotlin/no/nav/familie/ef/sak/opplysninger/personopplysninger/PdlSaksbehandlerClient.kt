@@ -41,7 +41,6 @@ class PdlSaksbehandlerClient(
     }
 
     private fun httpHeaders(): HttpHeaders {
-
         return HttpHeaders().apply {
             add("Tema", "ENF")
         }

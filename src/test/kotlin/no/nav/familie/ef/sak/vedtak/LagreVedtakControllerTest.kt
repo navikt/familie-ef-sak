@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions
@@ -41,9 +42,14 @@ import java.util.UUID
 
 internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
 
-    @Autowired private lateinit var behandlingRepository: BehandlingRepository
-    @Autowired private lateinit var vedtakService: VedtakService
-    @Autowired private lateinit var barnRepository: BarnRepository
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    private lateinit var vedtakService: VedtakService
+
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
 
     @BeforeEach
     fun setUp() {
@@ -69,8 +75,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             barnetilsyn = BarnetilsynWrapper(
                 perioder = listOf(
                     Barnetilsynperiode(
-                        datoFra = utgiftsperiode.årMånedFra.atDay(1),
-                        datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                        periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn
                     )
@@ -78,7 +83,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = ""
             ),
             kontantstøtte = KontantstøtteWrapper(emptyList()),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
@@ -111,8 +116,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             barnetilsyn = BarnetilsynWrapper(
                 perioder = listOf(
                     Barnetilsynperiode(
-                        datoFra = utgiftsperiode.årMånedFra.atDay(1),
-                        datoTil = utgiftsperiode.årMånedTil.atEndOfMonth(),
+                        periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn
                     )
@@ -122,14 +126,13 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             kontantstøtte = KontantstøtteWrapper(
                 listOf(
                     PeriodeMedBeløp(
-                        datoFra = kontantstøttePeriode.årMånedFra.atDay(1),
-                        datoTil = kontantstøttePeriode.årMånedTil.atEndOfMonth(),
+                        periode = kontantstøttePeriode.periode,
                         beløp = kontantstøttePeriode.beløp
 
                     )
                 )
             ),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
@@ -190,6 +193,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     private fun lagKontantstøttePeriode(beløp: Int): PeriodeMedBeløpDto = PeriodeMedBeløpDto(
         årMånedFra = YearMonth.of(2022, 1),
         årMånedTil = YearMonth.of(2022, 3),
+        periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
         beløp = beløp
     )
 
@@ -197,6 +201,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val utgiftsperiode = UtgiftsperiodeDto(
             årMånedFra = YearMonth.of(2022, 1),
             årMånedTil = YearMonth.of(2022, 3),
+            periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
             barn = listOf(barn.id),
             utgifter = 2500,
             erMidlertidigOpphør = false

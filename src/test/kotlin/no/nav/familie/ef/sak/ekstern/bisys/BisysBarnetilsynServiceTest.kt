@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class BisysBarnetilsynServiceTest {
@@ -149,8 +150,8 @@ internal class BisysBarnetilsynServiceTest {
             personident,
             fomDato
         ).barnetilsynBisysPerioder.first()
-        assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.stønadFra)
-        assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.stønadTil)
+        assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.periode.fomDato)
+        assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.periode.tomDato)
         assertThat(bisysPeriode.barnIdenter.first()).isEqualTo(behandlingBarn.first().personIdent)
         assertThat(bisysPeriode.månedsbeløp).isEqualTo(andelhistorikkDto.andel.beløp)
         assertThat(bisysPeriode.datakilde).isEqualTo(Datakilde.EF)
@@ -304,8 +305,8 @@ internal class BisysBarnetilsynServiceTest {
     fun `en infotrygdperiode med tom dato som overskyter startdato, forvent avkortning av inf-tom dato`() {
         val startdato = LocalDate.MIN.plusDays(2)
         mockTilkjentYtelse(startdato)
-        val efFom = LocalDate.now()
-        val efTom = LocalDate.MAX.minusDays(10)
+        val efFom = YearMonth.now().atDay(1)
+        val efTom = LocalDate.MAX
         val andelhistorikkDto =
             lagAndelHistorikkDto(fraOgMed = efFom, tilOgMed = efTom, behandlingBarn = behandlingBarn)
         every {
@@ -385,7 +386,7 @@ fun lagAndelHistorikkDto(
     tilOgMed: LocalDate,
     behandlingBarn: List<BehandlingBarn>,
     beløp: Int = 1,
-    endring: HistorikkEndring? = null,
+    endring: HistorikkEndring? = null
 ): AndelHistorikkDto {
     return AndelHistorikkDto(
         behandlingId = UUID.randomUUID(),

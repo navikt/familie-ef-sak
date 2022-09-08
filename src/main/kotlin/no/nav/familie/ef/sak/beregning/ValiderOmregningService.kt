@@ -54,16 +54,16 @@ class ValiderOmregningService(
             "Denne skal ikke g-omregnes då den ikke har noen tidligere perioder som er etter $nyesteGrunnbeløpGyldigFraOgMed"
         }
         brukerfeilHvis(data.perioder.size != tidligerePerioder.size) {
-            val tidligereDatoer = tidligerePerioder.values.joinToString(", ") { "${it.årMånedFra}-${it.årMånedTil}" }
+            val tidligereDatoer = tidligerePerioder.values.joinToString(", ") { "${it.periode}" }
             "Antall vedtaksperioder er ulikt fra tidligere vedtak, tidligerePerioder=$tidligereDatoer"
         }
         data.perioder.forEach {
-            val fra = it.årMånedFra
+            val fra = it.periode.fom
             val tidligerePeriode = tidligerePerioder[fra]
                 ?: throw ApiFeil("Finner ikke periode fra $fra", HttpStatus.BAD_REQUEST)
-            brukerfeilHvis(tidligerePeriode.årMånedTil != it.årMånedTil) {
-                "Perioden fra $fra har annet tom-dato(${it.årMånedTil} enn " +
-                    "tidligere periode (${tidligerePeriode.årMånedTil})"
+            brukerfeilHvis(tidligerePeriode.periode.tom != it.periode.tom) {
+                "Perioden fra $fra har annet tom-dato(${it.periode.tom} enn " +
+                    "tidligere periode (${tidligerePeriode.periode.tom})"
             }
             brukerfeilHvis(
                 tidligerePeriode.aktivitet != AktivitetType.MIGRERING &&
@@ -88,7 +88,7 @@ class ValiderOmregningService(
         )
             .perioder
             .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
-            .associateBy { it.årMånedFra }
+            .associateBy { it.periode.fom }
 
     fun validerHarGammelGOgKanLagres(saksbehandling: Saksbehandling) {
         if (saksbehandling.stønadstype != StønadType.OVERGANGSSTØNAD) return
@@ -104,10 +104,9 @@ class ValiderOmregningService(
             .filter { it.stønadTom > nyesteGrunnbeløpGyldigFraOgMed }
             .forEach { andel ->
                 val inntektsperiodeForAndel = Inntektsperiode(
-                    andel.stønadFom,
-                    andel.stønadTom,
-                    andel.inntekt.toBigDecimal(),
-                    andel.samordningsfradrag.toBigDecimal()
+                    periode = andel.periode,
+                    inntekt = andel.inntekt.toBigDecimal(),
+                    samordningsfradrag = andel.samordningsfradrag.toBigDecimal()
                 )
                 val beregnetAndel = beregningService.beregnYtelse(listOf(andel.periode), listOf(inntektsperiodeForAndel))
                 brukerfeilHvis(beregnetAndel.size != 1 || beregnetAndel.first().beløp.toInt() != andel.beløp) {
@@ -118,5 +117,5 @@ class ValiderOmregningService(
 
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
         "Kan ikke fullføre behandling: Det må revurderes fra " +
-            "${maxOf(andel.stønadFom, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
+            "${maxOf(andel.periode.fomDato, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
 }

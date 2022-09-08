@@ -37,12 +37,11 @@ class BisysBarnetilsynService(
         personIdent: String,
         fomDato: LocalDate
     ): List<BarnetilsynBisysPeriode> {
-
         val infotrygdperioder = hentInfotrygdPerioderBarnetilsyn(personIdent, fomDato)
         val perioderBarnetilsyn = hentPerioderBarnetilsyn(personIdent, fomDato)
         return slåSammenPerioder(
             infotrygdPerioder = infotrygdperioder,
-            efPerioder = perioderBarnetilsyn,
+            efPerioder = perioderBarnetilsyn
         )
     }
 
@@ -58,7 +57,7 @@ class BisysBarnetilsynService(
 
         val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
             .filter { it.erIkkeFjernet() }
-            .filter { it.andel.beløp > 0 && it.andel.stønadTil >= fomDato }
+            .filter { it.andel.beløp > 0 && it.andel.periode.tomDato >= fomDato }
 
         val barnIdenter = historikk.flatMap { it.andel.barn }
             .distinct()
@@ -67,7 +66,7 @@ class BisysBarnetilsynService(
 
         val barnetilsynBisysPerioder = historikk.map { andel ->
             BarnetilsynBisysPeriode(
-                Periode(andel.andel.stønadFra, andel.andel.stønadTil),
+                Periode(andel.andel.periode.fomDato, andel.andel.periode.tomDato),
                 andel.andel.barn.map {
                     barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
                 },

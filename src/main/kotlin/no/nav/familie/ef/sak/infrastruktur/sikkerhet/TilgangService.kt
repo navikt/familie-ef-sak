@@ -68,7 +68,9 @@ class TilgangService(
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(
             Sporingsdata(
-                event, personIdent, tilgang,
+                event,
+                personIdent,
+                tilgang,
                 custom1 = CustomKeyValue("behandling", behandlingId.toString())
             )
         )

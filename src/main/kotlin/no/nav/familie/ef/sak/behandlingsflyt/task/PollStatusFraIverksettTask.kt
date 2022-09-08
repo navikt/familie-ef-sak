@@ -18,7 +18,6 @@ import java.util.UUID
     triggerTidVedFeilISekunder = 31L,
     beskrivelse = "Sjekker status på iverksetting av behandling."
 )
-
 class PollStatusFraIverksettTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService

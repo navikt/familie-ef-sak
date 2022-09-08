@@ -34,7 +34,8 @@ object PdlTestdata {
     private val pdlSøkerKortBolk = PersonBolk(
         listOf(
             PersonDataBolk(
-                "11111122222", "ok",
+                "11111122222",
+                "ok",
                 PdlSøkerKort(listOf(Kjønn(KjønnType.KVINNE)), navn)
             )
         )
@@ -68,9 +69,13 @@ object PdlTestdata {
 
     private val oppholdsadresse = listOf(
         Oppholdsadresse(
-            LocalDate.now(), null, "",
+            LocalDate.now(),
+            null,
+            "",
             utenlandskAdresse,
-            vegadresse, "", metadataGjeldende
+            vegadresse,
+            "",
+            metadataGjeldende
         )
     )
 
@@ -160,7 +165,8 @@ object PdlTestdata {
         PersonBolk(
             listOf(
                 PersonDataBolk(
-                    "11111122222", "ok",
+                    "11111122222",
+                    "ok",
                     PdlBarn(
                         adressebeskyttelse,
                         bostedsadresse,
@@ -169,7 +175,8 @@ object PdlTestdata {
                                 LocalDate.now(),
                                 LocalDate.now(),
                                 vegadresse,
-                                UkjentBosted(""), metadataGjeldende
+                                UkjentBosted(""),
+                                metadataGjeldende
                             )
                         ),
                         dødsfall,
@@ -195,14 +202,15 @@ object PdlTestdata {
         PersonBolk(
             listOf(
                 PersonDataBolk(
-                    "11111122222", "ok",
+                    "11111122222",
+                    "ok",
                     PdlAnnenForelder(
                         adressebeskyttelse,
                         bostedsadresse,
                         dødsfall,
                         fødsel,
                         folkeregisteridentifikatorAnnenForelder,
-                        navn,
+                        navn
                     )
                 )
             )
@@ -211,7 +219,8 @@ object PdlTestdata {
     val pdlPersonKortBolk = PersonBolk(
         listOf(
             PersonDataBolk(
-                "11111122222", "ok",
+                "11111122222",
+                "ok",
                 PdlPersonKort(
                     adressebeskyttelse,
                     navn,

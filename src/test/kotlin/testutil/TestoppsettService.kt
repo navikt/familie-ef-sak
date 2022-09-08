@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class TestoppsettService(
     private val fagsakPersonRepository: FagsakPersonRepository,
-    private val fagsakRepository: FagsakRepository,
+    private val fagsakRepository: FagsakRepository
 ) {
 
     fun opprettPerson(ident: String) = fagsakPersonRepository.insert(FagsakPerson(identer = setOf(PersonIdent(ident))))

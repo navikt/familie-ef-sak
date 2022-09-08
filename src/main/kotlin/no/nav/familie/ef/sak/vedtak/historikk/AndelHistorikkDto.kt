@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -7,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,7 +17,7 @@ import java.util.UUID
 enum class EndringType {
     FJERNET,
     ERSTATTET,
-    SPLITTET,
+    SPLITTET
 }
 
 data class AndelHistorikkDto(
@@ -38,8 +40,7 @@ fun AndelHistorikkDto.erIkkeFjernet() =
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,
-    val stønadFra: LocalDate,
-    val stønadTil: LocalDate,
+    val periode: Månedsperiode,
     val inntekt: Int,
     val inntektsreduksjon: Int,
     val samordningsfradrag: Int,
@@ -49,7 +50,7 @@ data class AndelMedGrunnlagDto(
     val utgifter: BigDecimal = BigDecimal.ZERO,
     val barn: List<UUID>,
     val sats: Int,
-    val beløpFørFratrekkOgSatsJustering: Int,
+    val beløpFørFratrekkOgSatsJustering: Int
 ) {
 
     constructor(
@@ -57,8 +58,7 @@ data class AndelMedGrunnlagDto(
         vedtaksinformasjon: VedtakshistorikkperiodeBarnetilsyn?
     ) : this(
         beløp = andel.beløp,
-        stønadFra = andel.stønadFom,
-        stønadTil = andel.stønadTom,
+        periode = andel.periode,
         inntekt = andel.inntekt,
         inntektsreduksjon = andel.inntektsreduksjon,
         samordningsfradrag = andel.samordningsfradrag,
@@ -68,8 +68,16 @@ data class AndelMedGrunnlagDto(
         antallBarn = vedtaksinformasjon?.antallBarn ?: 0,
         barn = vedtaksinformasjon?.barn ?: emptyList(),
         sats = vedtaksinformasjon?.sats ?: 0,
-        beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0,
+        beløpFørFratrekkOgSatsJustering = vedtaksinformasjon?.beløpFørFratrekkOgSatsjustering ?: 0
     )
+
+    @Deprecated("Bruk periode!", ReplaceWith("periode.fomDato"))
+    @get:JsonProperty
+    val stønadFra: LocalDate get() = periode.fomDato
+
+    @Deprecated("Bruk periode!", ReplaceWith("periode.tomDato"))
+    @get:JsonProperty
+    val stønadTil: LocalDate get() = periode.tomDato
 }
 
 data class HistorikkEndring(
