@@ -41,17 +41,20 @@ class NyeBarnService(
 
     fun finnNyeEllerTidligereFødteBarn(personIdent: PersonIdent): NyeBarnDto {
         val personIdenter = personService.hentPersonIdenter(personIdent.ident).identer()
-        val fagsak = fagsakService.finnFagsak(personIdenter, StønadType.OVERGANGSSTØNAD)
-            ?: error("Kunne ikke finne fagsak for personident")
-        val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
+        val nyttBarnList = mutableListOf<NyttBarn>()
+        val fagsaker = fagsakService.finnFagsaker(personIdenter)
+        if (fagsaker.isEmpty()) error("Kunne ikke finne fagsak for personident")
 
-        val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+        for (fagsak in fagsaker) {
+            val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
+            val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+            opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
 
-        opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
+            nyttBarnList.addAll(nyeBarn.map { NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) })
+            nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
+        }
 
-        val nyeBarnDto = nyeBarn.map { NyttBarn(it.personIdent, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) }
-        val forTidligtFødteBarn = finnForTidligtFødteBarn(barnSidenGjeldendeBehandling)
-        return NyeBarnDto(nyeBarnDto + forTidligtFødteBarn)
+        return NyeBarnDto(nyttBarnList)
     }
 
     // TODO slett 4 måneder etter att siste migreringen er klar
@@ -91,13 +94,13 @@ class NyeBarnService(
         return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
     }
 
-    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData): List<NyttBarn> {
+    private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
         return kobledeBarn.kobledeBarn
             .filter { it.behandlingBarn.personIdent == null }
             .filter { barnFødtFørTermin(it) }
             .map {
                 val barn = it.barn ?: error("Skal ha filtrert ut matchet barn uten barn")
-                NyttBarn(barn.personIdent, NyttBarnÅrsak.FØDT_FØR_TERMIN)
+                NyttBarn(barn.personIdent, stønadstype, NyttBarnÅrsak.FØDT_FØR_TERMIN)
             }
     }
 
