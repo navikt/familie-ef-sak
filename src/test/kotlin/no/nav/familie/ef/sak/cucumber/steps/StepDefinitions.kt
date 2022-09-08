@@ -115,7 +115,8 @@ class StepDefinitions {
         every { behandlingService.hentSaksbehandling(any<UUID>()) } answers {
             val behandlingId = firstArg<UUID>()
             val behandlingIdInt = behandlingIdTilUUID.entries.find { it.value == behandlingId }?.key
-            val pair = saksbehandlinger[behandlingId] ?: error("Finner ikke behandling=$behandlingId ($behandlingIdInt)")
+            val pair =
+                saksbehandlinger[behandlingId] ?: error("Finner ikke behandling=$behandlingId ($behandlingIdInt)")
             pair.second
         }
         every { vedtakService.hentVedtak(any()) } answers { lagredeVedtak.single { it.behandlingId == firstArg() } }
@@ -400,15 +401,15 @@ class StepDefinitions {
                 logger.info("Actual: {}", andelHistorikkDto)
                 beregnetAndelHistorikkList.forEach { andel ->
                     logger.info(
-                        "|${behandlingIdTilUUID.entries.find { it.value == andel.behandlingId }!!.key }" +
-                            "|${andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK)}" +
-                            "|${andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK)}"+
-                            "|${andel.endring?.type ?: ""}" +
-                            "|${andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key } ?: ""}" +
-                            "|"
+                        listOf(
+                            behandlingIdTilUUID.entries.find { it.value == andel.behandlingId }!!.key,
+                            andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK),
+                            andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK),
+                            andel.endring?.type ?: "",
+                            andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key } ?: ""
+                        ).joinToString("|", prefix = "|", postfix = "|")
                     )
                 }
-
 
                 throw Throwable("Feilet rad $index", e)
             }
