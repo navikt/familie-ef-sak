@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDat
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseVedtaksperiodeType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
@@ -397,6 +398,18 @@ class StepDefinitions {
             } catch (e: Throwable) {
                 logger.info("Expected: {}", it)
                 logger.info("Actual: {}", andelHistorikkDto)
+                beregnetAndelHistorikkList.forEach { andel ->
+                    logger.info(
+                        "|${behandlingIdTilUUID.entries.find { it.value == andel.behandlingId }!!.key }" +
+                            "|${andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK)}" +
+                            "|${andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK)}"+
+                            "|${andel.endring?.type ?: ""}" +
+                            "|${andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key } ?: ""}" +
+                            "|"
+                    )
+                }
+
+
                 throw Throwable("Feilet rad $index", e)
             }
         }

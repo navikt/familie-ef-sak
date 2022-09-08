@@ -75,7 +75,7 @@ object AndelHistorikkBeregner {
         behandlinger: List<Behandling>
     ): List<AndelHistorikkDto> {
         val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData)
-        val behandlingerPåId = behandlinger.associate { it.id to it }
+        val behandlingerPåId = behandlinger.associateBy { it.id }
 
         return historikk.map {
             val vedtaksperiode = it.vedtaksperiode
@@ -109,13 +109,22 @@ object AndelHistorikkBeregner {
 
         val vedtaksperioderPåBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData)
 
+
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
             val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
+            // andelerFraSanksjon sin kildebehandlingId = current tilkjent ytelse behandlingId, men selve sanksjonen kan være fra annen behandling
             (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
+
+                val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
+                if (!vedtaksperiode.erSanksjon && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
+                    historikk.filter { it.andel.stønadFom > andel.stønadFom }
+                        .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
+                        .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse) }
+                }
+
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
-                val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
                 if (andelFraHistorikk == null) {
                     historikk.add(index, lagNyAndel(tilkjentYtelse, andel, vedtaksperiode))
                 } else {
@@ -141,7 +150,7 @@ object AndelHistorikkBeregner {
                 0,
                 0,
                 0,
-                tilkjentYtelse.behandlingId
+                it.behandlingId
             )
         }
 

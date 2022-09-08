@@ -18,7 +18,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 sealed class Vedtakshistorikkperiode {
-
+    abstract val behandlingId: UUID
     abstract val periode: Månedsperiode
     abstract val erSanksjon: Boolean
     abstract val sanksjonsårsak: Sanksjonsårsak?
@@ -28,6 +28,7 @@ sealed class Vedtakshistorikkperiode {
 }
 
 data class VedtakshistorikkperiodeOvergangsstønad(
+    override val behandlingId: UUID,
     override val periode: Månedsperiode,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
     val aktivitet: AktivitetType,
@@ -36,8 +37,9 @@ data class VedtakshistorikkperiodeOvergangsstønad(
 
     override val erSanksjon = periodeType == VedtaksperiodeType.SANKSJON
 
-    constructor(periode: VedtaksperiodeDto) :
+    constructor(behandlingId: UUID, periode: VedtaksperiodeDto) :
         this(
+            behandlingId = behandlingId,
             periode = periode.periode,
             aktivitet = periode.aktivitet,
             periodeType = periode.periodeType
@@ -53,6 +55,7 @@ data class VedtakshistorikkperiodeOvergangsstønad(
 }
 
 data class VedtakshistorikkperiodeBarnetilsyn(
+    override val behandlingId: UUID,
     override val periode: Månedsperiode,
     override val erSanksjon: Boolean,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
@@ -66,8 +69,9 @@ data class VedtakshistorikkperiodeBarnetilsyn(
     val beløpFørFratrekkOgSatsjustering: Int
 ) : Vedtakshistorikkperiode() {
 
-    constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
+    constructor(behandlingId: UUID, periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
         this(
+            behandlingId = behandlingId,
             periode = periode.periode,
             erSanksjon = false,
             kontantstøtte = periode.beregningsgrunnlag.kontantstøttebeløp.toInt(),
@@ -109,18 +113,18 @@ object VedtakHistorikkBeregner {
         val vedtak = data.vedtakDto
         return when (vedtak) {
             is InnvilgelseOvergangsstønad -> {
-                val nyePerioder = vedtak.perioder.map { VedtakshistorikkperiodeOvergangsstønad(it) }
+                val nyePerioder = vedtak.perioder.map { VedtakshistorikkperiodeOvergangsstønad(data.behandlingId, it) }
                 val førsteFomDato = nyePerioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
             is InnvilgelseBarnetilsyn -> {
                 val perioder = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak)
-                    .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
+                    .map { VedtakshistorikkperiodeBarnetilsyn(data.behandlingId, it, data.aktivitetArbeid) }
                 val førsteFomDato = perioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder
             }
             is Sanksjonert -> {
-                splitOppPerioderSomErSanksjonert(acc, vedtak)
+                splitOppPerioderSomErSanksjonert(acc, vedtak, data.behandlingId)
             }
             is Opphør -> {
                 val opphørFom = vedtak.opphørFom
@@ -135,20 +139,21 @@ object VedtakHistorikkBeregner {
 
     private fun splitOppPerioderSomErSanksjonert(
         acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>,
-        vedtak: Sanksjonert
+        vedtak: Sanksjonert,
+        behandlingId: UUID
     ): List<Vedtakshistorikkperiode> {
         val sanksjonsperiode = vedtak.periode.tilPeriode()
         return acc.last().second.flatMap {
             if (!sanksjonsperiode.overlapper(it.periode)) {
-                return@flatMap listOf(it, lagSanksjonertPeriode(it, vedtak))
+                return@flatMap listOf(it, lagSanksjonertPeriode(it, vedtak, behandlingId))
             }
             val nyePerioder = mutableListOf<Vedtakshistorikkperiode>()
             if (sanksjonsperiode.fom <= it.periode.fom && sanksjonsperiode.tom < it.periode.tom) {
-                nyePerioder.add(lagSanksjonertPeriode(it, vedtak))
+                nyePerioder.add(lagSanksjonertPeriode(it, vedtak, behandlingId))
                 nyePerioder.add(it.medFra(fra = sanksjonsperiode.tom.plusMonths(1)))
             } else if (sanksjonsperiode.fomDato > it.periode.fomDato) {
                 nyePerioder.add(it.medTil(til = sanksjonsperiode.fom.minusMonths(1)))
-                nyePerioder.add(lagSanksjonertPeriode(it, vedtak))
+                nyePerioder.add(lagSanksjonertPeriode(it, vedtak, behandlingId))
                 if (sanksjonsperiode.tomDato < it.periode.tomDato) {
                     nyePerioder.add(it.medFra(fra = sanksjonsperiode.tom.plusMonths(1)))
                 }
@@ -157,10 +162,15 @@ object VedtakHistorikkBeregner {
         }
     }
 
-    private fun lagSanksjonertPeriode(vedtakshistorikkperiode: Vedtakshistorikkperiode, vedtak: Sanksjonert) =
+    private fun lagSanksjonertPeriode(
+        vedtakshistorikkperiode: Vedtakshistorikkperiode,
+        vedtak: Sanksjonert,
+        behandlingId: UUID
+    ) =
         when (vedtakshistorikkperiode) {
             is VedtakshistorikkperiodeOvergangsstønad ->
                 VedtakshistorikkperiodeOvergangsstønad(
+                    behandlingId = behandlingId,
                     periode = vedtak.periode.tilPeriode(),
                     aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                     periodeType = VedtaksperiodeType.SANKSJON,
@@ -168,6 +178,7 @@ object VedtakHistorikkBeregner {
                 )
             is VedtakshistorikkperiodeBarnetilsyn ->
                 VedtakshistorikkperiodeBarnetilsyn(
+                    behandlingId = behandlingId,
                     periode = vedtak.periode.tilPeriode(),
                     kontantstøtte = 0,
                     tilleggsstønad = 0,
