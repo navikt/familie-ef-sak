@@ -59,6 +59,16 @@ class OppgaveClientMock {
                     antallTreffTotalt = 2,
                     mapper = listOf(
                         MappeDto(
+                            id = 101,
+                            navn = "EF Sak - 01 Uplassert lokal",
+                            enhetsnr = "4489"
+                        ),
+                        MappeDto(
+                            id = 104,
+                            navn = "EF Sak - 62 Hendelser",
+                            enhetsnr = "4489"
+                        ),
+                        MappeDto(
                             id = 102,
                             navn = "70 Godkjennevedtak",
                             enhetsnr = "4489"

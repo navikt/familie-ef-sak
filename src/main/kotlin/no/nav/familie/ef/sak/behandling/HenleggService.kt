@@ -22,7 +22,15 @@ class HenleggService(
     }
 
     private fun ferdigstillOppgaveTask(behandling: Behandling) {
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleSak)
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(
+            behandlingId = behandling.id,
+            Oppgavetype.BehandleSak,
+            ignorerFeilregistrert = true
+        )
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(
+            behandlingId = behandling.id,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            ignorerFeilregistrert = true
+        )
     }
 }

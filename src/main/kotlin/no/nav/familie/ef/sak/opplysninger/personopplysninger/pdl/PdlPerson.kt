@@ -113,7 +113,7 @@ data class PdlSøker(
     fun alleIdenter(): Set<String> = folkeregisteridentifikator.map { it.ident }.toSet()
 }
 
-data class PdlBarn(
+data class PdlPersonForelderBarn(
     val adressebeskyttelse: List<Adressebeskyttelse>,
     override val bostedsadresse: List<Bostedsadresse>,
     val deltBosted: List<DeltBosted>,

@@ -38,6 +38,15 @@ class SøkController(
         return Ressurs.success(søkService.søkPerson(personIdenter))
     }
 
+    @GetMapping("/person/fagsak-ekstern/{eksternFagsakId}")
+    fun søkPerson(@PathVariable eksternFagsakId: Long): Ressurs<Søkeresultat> {
+        val søkeresultat = søkService.søkPersonForEksternFagsak(eksternFagsakId)
+        søkeresultat.fagsakPersonId?.let {
+            tilgangService.validerTilgangTilFagsakPerson(it, AuditLoggerEvent.ACCESS)
+        }
+        return Ressurs.success(søkeresultat)
+    }
+
     @PostMapping("/person/uten-fagsak")
     fun søkPersonUtenFagsak(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<SøkeresultatUtenFagsak> {
         validerPersonIdent(personIdentRequest)

@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.fagsak.dto.FagsakForSøkeresultat
 import no.nav.familie.ef.sak.fagsak.dto.PersonFraSøk
 import no.nav.familie.ef.sak.fagsak.dto.Søkeresultat
@@ -9,6 +11,7 @@ import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatUtenFagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -37,6 +40,16 @@ class SøkService(
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    fun søkPersonForEksternFagsak(eksternFagsakId: Long): Søkeresultat {
+        val fagsak = fagsakService.hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
+            ?: throw ApiFeil("Finner ikke fagsak for eksternFagsakId=$eksternFagsakId", HttpStatus.BAD_REQUEST)
+        val fagsakPerson = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsak.fagsakPersonId).let {
+            listOfNotNull(it.overgangsstønad, it.barnetilsyn, it.skolepenger)
+        }
+        return tilSøkeresultat(fagsakPerson.hentAktivIdent(), fagsakPerson, fagsaker)
+    }
+
     fun søkPerson(personIdenter: PdlIdenter): Søkeresultat {
         brukerfeilHvis(personIdenter.identer.isEmpty()) {
             "Finner ingen personer for valgt personident"
@@ -46,6 +59,14 @@ class SøkService(
             fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(personIdenter.identer(), gjeldendePersonIdent)
         val fagsakPerson = fagsakPersonService.finnPerson(personIdenter.identer())
 
+        return tilSøkeresultat(gjeldendePersonIdent, fagsakPerson, fagsaker)
+    }
+
+    private fun tilSøkeresultat(
+        gjeldendePersonIdent: String,
+        fagsakPerson: FagsakPerson?,
+        fagsaker: List<Fagsak>
+    ): Søkeresultat {
         val person = personService.hentSøker(gjeldendePersonIdent)
 
         return Søkeresultat(
@@ -87,7 +108,9 @@ class SøkService(
         val søker = personService.hentSøker(aktivIdent)
         val aktuelleBostedsadresser = søker.bostedsadresse.filterNot { it.metadata.historisk }
         val bostedsadresse = aktuelleBostedsadresser.singleOrNull()
-            ?: throw Feil("Finner 0 eller fler enn 1 bostedsadresse")
+        feilHvis(bostedsadresse == null) {
+            "Fant ${aktuelleBostedsadresser.size} bostedsadresser, forventet 1"
+        }
 
         brukerfeilHvis(bostedsadresse.ukjentBosted != null) {
             "Personen har ukjent bostedsadresse, kan ikke finne personer på samme adresse"

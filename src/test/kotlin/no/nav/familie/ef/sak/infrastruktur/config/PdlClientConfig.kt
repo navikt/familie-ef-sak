@@ -29,9 +29,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdstillatelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
@@ -89,7 +89,7 @@ class PdlClientConfig {
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
 
-        every { pdlClient.hentBarn(any()) } returns barn()
+        every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns barn()
 
         every { pdlClient.hentAndreForeldre(any()) } returns mapOf(annenForelderFnr to annenForelder())
 
@@ -213,7 +213,7 @@ class PdlClientConfig {
             LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55)
         )
 
-        private fun barn(): Map<String, PdlBarn> =
+        private fun barn(): Map<String, PdlPersonForelderBarn> =
             mapOf(
                 barnFnr to pdlBarn(
                     bostedsadresse = bostedsadresse(),

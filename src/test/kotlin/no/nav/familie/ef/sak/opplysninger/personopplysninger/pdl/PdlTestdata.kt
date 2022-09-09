@@ -161,13 +161,13 @@ object PdlTestdata {
             )
         )
 
-    val pdlBarnData =
+    val pdlPersonForelderBarnData =
         PersonBolk(
             listOf(
                 PersonDataBolk(
                     "11111122222",
                     "ok",
-                    PdlBarn(
+                    PdlPersonForelderBarn(
                         adressebeskyttelse,
                         bostedsadresse,
                         listOf(

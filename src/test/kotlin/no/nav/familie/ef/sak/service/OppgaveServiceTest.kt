@@ -22,7 +22,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
@@ -35,10 +37,14 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpServerErrorException
 import java.net.URI
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -78,6 +84,7 @@ internal class OppgaveServiceTest {
         )
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
+        every { oppgaveRepository.update(any()) } answers { firstArg() }
     }
 
     @Test
@@ -90,7 +97,12 @@ internal class OppgaveServiceTest {
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = aktørIdentFraPdl,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -131,7 +143,12 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.mappeId).isNotNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = aktørIdentFraPdl,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -160,7 +177,12 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
         assertThat(slot.captured.mappeId).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = aktørIdentFraPdl, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = aktørIdentFraPdl,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -205,7 +227,12 @@ internal class OppgaveServiceTest {
         } returns null
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
 
-        Assertions.assertThatThrownBy { oppgaveService.ferdigstillBehandleOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak) }
+        Assertions.assertThatThrownBy {
+            oppgaveService.ferdigstillBehandleOppgave(
+                BEHANDLING_ID,
+                Oppgavetype.BehandleSak
+            )
+        }
             .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
             .isInstanceOf(java.lang.IllegalStateException::class.java)
     }
@@ -295,6 +322,58 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
         verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+    }
+
+    @Nested
+    inner class FeilregistertOppgave {
+
+        private val feilregistrertException = RessursException(
+            Ressurs.failure("Oppgave har status feilregistrert"),
+            HttpServerErrorException(HttpStatus.BAD_REQUEST)
+        )
+
+        private val annenException = RessursException(
+            Ressurs.failure("Oppgave har status ferdigstilt"),
+            HttpServerErrorException(HttpStatus.BAD_REQUEST)
+        )
+
+        @BeforeEach
+        internal fun setUp() {
+            every {
+                oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
+            } returns lagTestOppgave()
+        }
+
+        @Test
+        internal fun `skal ignorere feil fra ferdigstillOppgave hvis den er feilregistrert og vi skal ignorere feilregistrert`() {
+            every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
+
+            oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, true)
+
+            verify(exactly = 1) { oppgaveRepository.update(any()) }
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis oppgaven er feilregistrert og vi ikke ignorerer feilregistrerte`() {
+            every { oppgaveClient.ferdigstillOppgave(any()) } throws feilregistrertException
+
+            assertThatThrownBy {
+                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, false)
+            }.isInstanceOf(RessursException::class.java)
+
+            verify(exactly = 0) { oppgaveRepository.update(any()) }
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis oppgaven allerede er ferdigstilt og feilmeldingen er ferdigstilt`() {
+            every { oppgaveClient.ferdigstillOppgave(any()) } throws annenException
+
+            assertThatThrownBy {
+                oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(UUID.randomUUID(), Oppgavetype.BehandleSak, true)
+            }.isInstanceOf(RessursException::class.java)
+
+            verify(exactly = 0) { oppgaveRepository.update(any()) }
+        }
     }
 
     private fun mockOpprettOppgave(

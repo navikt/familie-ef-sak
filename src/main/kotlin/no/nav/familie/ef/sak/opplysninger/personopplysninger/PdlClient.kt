@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBolkResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlHentIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -15,6 +14,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonBolkRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonBolkRequestVariables
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonRequestVariables
@@ -56,13 +56,13 @@ class PdlClient(
         return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }
     }
 
-    fun hentBarn(personIdenter: List<String>): Map<String, PdlBarn> {
+    fun hentPersonForelderBarnRelasjon(personIdenter: List<String>): Map<String, PdlPersonForelderBarn> {
         if (personIdenter.isEmpty()) return emptyMap()
         val pdlPersonRequest = PdlPersonBolkRequest(
             variables = PdlPersonBolkRequestVariables(personIdenter),
-            query = PdlConfig.barnQuery
+            query = PdlConfig.forelderBarnQuery
         )
-        val pdlResponse: PdlBolkResponse<PdlBarn> = postForEntity(
+        val pdlResponse: PdlBolkResponse<PdlPersonForelderBarn> = postForEntity(
             pdlConfig.pdlUri,
             pdlPersonRequest,
             httpHeaders()

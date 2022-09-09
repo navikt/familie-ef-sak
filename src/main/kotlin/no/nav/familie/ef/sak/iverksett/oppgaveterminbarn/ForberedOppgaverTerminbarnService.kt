@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
@@ -42,7 +42,7 @@ class ForberedOppgaverTerminbarnService(
         }
     }
 
-    private fun pdlBarn(fødselsnummerSøker: String): List<PdlBarn> =
+    private fun pdlBarn(fødselsnummerSøker: String): List<PdlPersonForelderBarn> =
         personService.hentPersonMedBarn(fødselsnummerSøker).barn.values.toList()
 
     private fun sendOppgaverTilIverksett(oppgaver: List<OppgaveForBarn>) {
@@ -72,8 +72,8 @@ private fun matchBarn(søknadBarnTermindato: LocalDate, pdlBarnFødselsdato: Loc
         søknadBarnTermindato.plusWeeks(4).isAfter(pdlBarnFødselsdato)
 }
 
-private fun TerminbarnTilUtplukkForOppgave.match(pdlBarn: List<PdlBarn>): Boolean {
-    return pdlBarn
+private fun TerminbarnTilUtplukkForOppgave.match(pdlPersonForelderBarn: List<PdlPersonForelderBarn>): Boolean {
+    return pdlPersonForelderBarn
         .map { it.fødsel.gjeldende().fødselsdato }
         .any { matchBarn(this.termindatoBarn, it ?: error("Fødselsdato er null")) }
 }

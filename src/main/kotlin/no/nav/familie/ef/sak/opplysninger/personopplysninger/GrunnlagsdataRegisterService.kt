@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import org.springframework.stereotype.Service
@@ -55,15 +55,15 @@ class GrunnlagsdataRegisterService(
         }
     }
 
-    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlBarn> {
+    private fun hentPdlBarn(pdlSøker: PdlSøker): Map<String, PdlPersonForelderBarn> {
         return pdlSøker.forelderBarnRelasjon
             .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
             .mapNotNull { it.relatertPersonsIdent }
-            .let { pdlClient.hentBarn(it) }
+            .let { pdlClient.hentPersonForelderBarnRelasjon(it) }
     }
 
     private fun hentPdlBarneForeldre(
-        barn: Map<String, PdlBarn>,
+        barn: Map<String, PdlPersonForelderBarn>,
         personIdent: String,
         barneforeldrePersonIdentFraSøknad: List<String>
     ): Map<String, PdlAnnenForelder> {
