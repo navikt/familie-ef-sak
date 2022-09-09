@@ -10,11 +10,15 @@ import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -36,6 +40,8 @@ class RevurderingService(
     @Transactional
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(revurderingInnhold.fagsakId)
+        validerOpprettRevurdering(fagsak, revurderingInnhold)
+
         val revurdering = behandlingService.opprettBehandling(
             BehandlingType.REVURDERING,
             revurderingInnhold.fagsakId,
@@ -69,6 +75,15 @@ class RevurderingService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
         return revurdering
+    }
+
+    private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
+        feilHvis(
+            fagsak.stønadstype != StønadType.OVERGANGSSTØNAD &&
+                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING
+        ) {
+            "Kan ikke opprette revurdering med årsak g-omregning for ${fagsak.stønadstype}"
+        }
     }
 
     /**
