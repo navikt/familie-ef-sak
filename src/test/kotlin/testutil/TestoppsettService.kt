@@ -37,12 +37,20 @@ class TestoppsettService(
     }
 
     private fun hentEllerOpprettPerson(fagsak: Fagsak): FagsakPerson {
-        val person = fagsakPersonRepository.findByIdOrNull(fagsak.fagsakPersonId)
-        return person ?: fagsakPersonRepository.insert(
-            FagsakPerson(
-                fagsak.fagsakPersonId,
-                identer = fagsak.personIdenter
-            )
-        )
+        return fagsakPersonRepository.findByIdOrNull(fagsak.fagsakPersonId)
+            ?: hentPersonFraIdenter(fagsak)
+            ?: opprettPerson(fagsak)
     }
+
+    private fun hentPersonFraIdenter(fagsak: Fagsak): FagsakPerson? =
+        fagsak.personIdenter.map { it.ident }
+            .takeIf { it.isNotEmpty() }
+            ?.let { fagsakPersonRepository.findByIdent(it) }
+
+    private fun opprettPerson(fagsak: Fagsak) = fagsakPersonRepository.insert(
+        FagsakPerson(
+            fagsak.fagsakPersonId,
+            identer = fagsak.personIdenter
+        )
+    )
 }
