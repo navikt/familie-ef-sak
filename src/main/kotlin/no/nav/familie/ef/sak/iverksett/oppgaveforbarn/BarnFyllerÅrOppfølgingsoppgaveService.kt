@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.mapper.finnBesteMatchPåFødselsnummerForTermindato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -19,7 +20,6 @@ import org.springframework.data.relational.core.conversion.DbActionExecutionExce
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
-import kotlin.math.abs
 
 @Service
 class BarnFyllerÅrOppfølgingsoppgaveService(
@@ -67,21 +67,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         for (personMedTermindatoBarn in personerMedTermindatoBarn) {
             val termindato = personMedTermindatoBarn.termindatoBarn!!
             val pdlPersonMedForelderBarnRelasjonData = pdlPersonMedForelderBarnRelasjon[personMedTermindatoBarn.fødselsnummerSøker] ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
-            val forelderBarnRelasjoner = pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.filter { it.relatertPersonsIdent != null }
+            val forelderBarnRelasjoner = pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
+            val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(forelderBarnRelasjoner, termindato)
 
-            val uke20 = termindato.minusWeeks(20)
-            val uke44 = termindato.plusWeeks(4)
-
-            val besteMatch = forelderBarnRelasjoner.filter {
-                val fødselsnummer = Fødselsnummer(it.relatertPersonsIdent!!) // Allerede filtrert på at relatertPersonsIdent != null
-                val fødselsdato = fødselsnummer.fødselsdato
-                fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20) and !returnBarnTilUtplukkForOppgave.contains(personMedTermindatoBarn.copy(fødselsnummerBarn = it.relatertPersonsIdent))
-            }.minByOrNull {
-                val epochDayForFødsel = Fødselsnummer(it.relatertPersonsIdent!!).fødselsdato.toEpochDay()
-                val epochDayTermindato = termindato.toEpochDay()
-                abs(epochDayForFødsel - epochDayTermindato)
-            }
-            returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch?.relatertPersonsIdent))
+            returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch))
         }
         return returnBarnTilUtplukkForOppgave + barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
     }
