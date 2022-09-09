@@ -60,7 +60,8 @@ class AutomatiskJournalføringController(
             automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
                 journalpostId = request.journalpostId,
                 personIdent = request.personIdent,
-                stønadstype = request.stønadstype
+                stønadstype = request.stønadstype,
+                mappeId = request.mappeId
             )
         )
     }

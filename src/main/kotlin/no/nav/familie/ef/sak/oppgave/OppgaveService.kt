@@ -49,7 +49,8 @@ class OppgaveService(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
         tilordnetNavIdent: String? = null,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
+        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
@@ -73,7 +74,7 @@ class OppgaveService(
                     behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
                     tilordnetRessurs = tilordnetNavIdent,
                     behandlesAvApplikasjon = "familie-ef-sak",
-                    mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
+                    mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
                 )
 
             val opprettetOppgaveId = try {
