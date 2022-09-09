@@ -152,7 +152,7 @@ class JournalføringService(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
             mappeId = mappeId,
-            beskrivelse = "Automatisk journalført"
+            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
         )
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
@@ -241,7 +241,12 @@ class JournalføringService(
     }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long? = null) {
-        taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
+        taskRepository.save(
+            BehandlingsstatistikkTask.opprettMottattTask(
+                behandlingId = behandlingId,
+                oppgaveId = oppgaveId
+            )
+        )
     }
 
     private fun opprettBehandleSakOppgave(behandling: Behandling, navIdent: String): Long {
@@ -265,7 +270,11 @@ class JournalføringService(
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(
+            journalpost.journalpostId,
+            journalpost.journalposttype,
+            behandling.id
+        )
     }
 
     private fun settSøknadPåBehandling(journalpost: Journalpost, fagsak: Fagsak, behandlingId: UUID) {
@@ -283,5 +292,9 @@ class JournalføringService(
                 søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
         }
+    }
+
+    companion object {
+        const val AUTOMATISK_JOURNALFØRING_BESKRIVELSE = "Automatisk journalført"
     }
 }
