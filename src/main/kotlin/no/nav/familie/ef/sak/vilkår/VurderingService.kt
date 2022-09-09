@@ -39,8 +39,6 @@ class VurderingService(
     private val fagsakService: FagsakService
 ) {
 
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
     @Transactional
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
