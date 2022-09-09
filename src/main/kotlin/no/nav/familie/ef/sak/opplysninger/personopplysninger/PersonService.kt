@@ -25,7 +25,7 @@ class PersonService(
         val søker = hentSøker(ident)
         val barnIdentifikatorer = søker.forelderBarnRelasjon.filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
             .mapNotNull { it.relatertPersonsIdent }
-        return SøkerMedBarn(ident, søker, pdlClient.hentBarn(barnIdentifikatorer))
+        return SøkerMedBarn(ident, søker, pdlClient.hentPersonForelderBarnRelasjon(barnIdentifikatorer))
     }
 
     fun hentPersonIdenter(ident: String): PdlIdenter = pdlClient.hentPersonidenter(ident = ident, historikk = true)

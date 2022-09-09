@@ -19,7 +19,7 @@ class PdlConfig(@Value("\${PDL_URL}") pdlUrl: URI) {
 
         val søkerQuery = graphqlQuery("/pdl/søker.graphql")
 
-        val barnQuery = graphqlQuery("/pdl/barn.graphql")
+        val forelderBarnQuery = graphqlQuery("/pdl/forelder_barn.graphql")
 
         val annenForelderQuery = graphqlQuery("/pdl/andreForeldre.graphql")
 

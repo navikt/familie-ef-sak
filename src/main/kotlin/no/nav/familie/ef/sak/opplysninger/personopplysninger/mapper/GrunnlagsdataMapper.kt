@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVed
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
@@ -22,19 +22,19 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRel
 
 object GrunnlagsdataMapper {
 
-    fun mapBarn(pdlBarn: Map<String, PdlBarn>) = pdlBarn.map {
+    fun mapBarn(pdlPersonForelderBarn: Map<String, PdlPersonForelderBarn>) = pdlPersonForelderBarn.map {
         mapBarn(it.value, it.key)
     }
 
-    fun mapBarn(pdlBarn: PdlBarn, personIdent: String) =
+    fun mapBarn(pdlPersonForelderBarn: PdlPersonForelderBarn, personIdent: String) =
         BarnMedIdent(
-            fødsel = pdlBarn.fødsel,
-            adressebeskyttelse = pdlBarn.adressebeskyttelse,
-            navn = pdlBarn.navn.gjeldende(),
-            bostedsadresse = pdlBarn.bostedsadresse,
-            dødsfall = pdlBarn.dødsfall,
-            deltBosted = pdlBarn.deltBosted,
-            forelderBarnRelasjon = pdlBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
+            fødsel = pdlPersonForelderBarn.fødsel,
+            adressebeskyttelse = pdlPersonForelderBarn.adressebeskyttelse,
+            navn = pdlPersonForelderBarn.navn.gjeldende(),
+            bostedsadresse = pdlPersonForelderBarn.bostedsadresse,
+            dødsfall = pdlPersonForelderBarn.dødsfall,
+            deltBosted = pdlPersonForelderBarn.deltBosted,
+            forelderBarnRelasjon = pdlPersonForelderBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
             personIdent = personIdent
         )
 

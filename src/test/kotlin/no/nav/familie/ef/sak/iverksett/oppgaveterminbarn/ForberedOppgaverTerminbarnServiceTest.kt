@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
 import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
@@ -54,8 +54,8 @@ internal class ForberedOppgaverTerminbarnServiceTest {
     @Test
     fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, ingen barn i PDL, forvent at oppgave lagres og sendes`() {
         val terminBarn = listOf(opprettTerminbarn())
-        val pdlBarn = emptyList<PdlBarn>()
-        every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
+        val pdlPersonForelderBarn = emptyList<PdlPersonForelderBarn>()
+        every { personService.hentPersonMedBarn(any()).barn.values } returns pdlPersonForelderBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
 
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
@@ -66,9 +66,9 @@ internal class ForberedOppgaverTerminbarnServiceTest {
     @Test
     fun `ett utløpt terminbarn som ikke finnes i terminbarnRepo, ingen barn i PDL, forvent at oppgave instansieres riktig`() {
         val terminbarn = listOf(opprettTerminbarn(UUID.randomUUID(), UUID.randomUUID(), 1, LocalDate.MIN))
-        val pdlBarn = emptyList<PdlBarn>()
+        val pdlPersonForelderBarn = emptyList<PdlPersonForelderBarn>()
 
-        every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
+        every { personService.hentPersonMedBarn(any()).barn.values } returns pdlPersonForelderBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminbarn
         every { iverksettClient.sendOppgaverForTerminBarn(capture(oppgaverForBarnSlot)) } just runs
 
@@ -135,7 +135,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         return TerminbarnTilUtplukkForOppgave(behandlingId, fagsakId, eksternId, termindato)
     }
 
-    private fun opprettPdlBarn(fødselsdato: LocalDate): PdlBarn {
+    private fun opprettPdlBarn(fødselsdato: LocalDate): PdlPersonForelderBarn {
         return pdlBarn(fødsel = fødsel(fødselsdato = fødselsdato))
     }
 }
