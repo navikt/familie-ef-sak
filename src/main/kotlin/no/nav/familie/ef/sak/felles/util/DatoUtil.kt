@@ -40,3 +40,21 @@ fun LocalDate.harPåfølgendeMåned(påfølgende: LocalDate): Boolean =
     YearMonth.from(this).erPåfølgende(YearMonth.from(påfølgende))
 
 fun YearMonth.erPåfølgende(påfølgende: YearMonth): Boolean = this.plusMonths(1) == påfølgende
+
+fun LocalDate.er6MndEllerMer(): Boolean {
+    return this.plusDays(183) <= LocalDate.now()
+}
+
+fun LocalDate.erEttÅrEllerMer(): Boolean {
+    return this.plusYears(1) <= LocalDate.now()
+}
+
+fun LocalDate.er6MndEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean {
+    return this.er6MndEllerMer() &&
+        LocalDate.now() < this.plusDays(182).plusDays(numberOfDaysCutoff)
+}
+
+fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolean {
+    return erEttÅrEllerMer() &&
+        LocalDate.now() <= this.plusYears(1).plusDays(numberOfDaysCutoff)
+}

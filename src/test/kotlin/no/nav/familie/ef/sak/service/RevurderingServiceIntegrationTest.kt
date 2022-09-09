@@ -30,7 +30,9 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -63,11 +65,11 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private val behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER
     private val kravMottatt = LocalDate.of(2021, 9, 9)
     private lateinit var revurderingDto: RevurderingDto
+    private val identer = fagsakpersoner(setOf(personIdent))
 
     @BeforeEach
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
-        val identer = fagsakpersoner(setOf(personIdent))
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
         revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
     }
@@ -79,13 +81,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal opprette revurdering`() {
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
-        )
+        val behandling = opprettFerdigstiltBehandling(fagsak)
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
 
@@ -101,13 +97,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal opprette revurdering med en avslått førstegangsbehandling`() {
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.AVSLÅTT
-            )
-        )
+        val behandling = opprettFerdigstiltBehandling(fagsak, BehandlingResultat.AVSLÅTT)
         opprettVilkår(behandling, lagreSøknad(behandling))
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
@@ -122,13 +112,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
      */
     @Test
     internal fun `skal peke til forrige iverksatte behandling hvis den finnes`() {
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
-        )
+        val behandling = opprettFerdigstiltBehandling(fagsak)
         opprettVilkår(behandling, lagreSøknad(behandling))
 
         val revurdering1 = behandlingRepository.insert(
@@ -150,13 +134,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
-        )
+        val behandling = opprettFerdigstiltBehandling(fagsak)
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
 
@@ -196,13 +174,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
-        val behandling = behandlingRepository.insert(
-            behandling(
-                fagsak = fagsak,
-                status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
-            )
-        )
+        val behandling = opprettFerdigstiltBehandling(fagsak)
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
         val nyttBarn = RevurderingBarnDto(personIdent = "44445555666")
@@ -239,6 +211,42 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(catchThrowable { revurderingService.opprettRevurderingManuelt(revurderingDto) })
             .hasMessageContaining("Det finnes ikke en tidligere behandling på fagsaken")
     }
+
+    @Test
+    internal fun `kan ikke opprette g-omregning for barnetilsyn eller skolepenger`() {
+        listOf(StønadType.BARNETILSYN, StønadType.SKOLEPENGER).forEach {
+            val fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = it))
+            val behandling = opprettFerdigstiltBehandling(fagsak)
+            opprettVilkår(behandling, lagreSøknad(behandling))
+            val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+
+            assertThatThrownBy {
+                revurderingService.opprettRevurderingManuelt(revurderingInnhold)
+            }.hasMessageContaining("Kan ikke opprette revurdering med årsak g-omregning")
+        }
+    }
+
+    @Test
+    internal fun `kan opprette g-omregning for overgangsstønad`() {
+        val behandling = opprettFerdigstiltBehandling(fagsak)
+        opprettVilkår(behandling, lagreSøknad(behandling))
+        val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
+
+        assertThat(revurdering.årsak).isEqualTo(BehandlingÅrsak.G_OMREGNING)
+    }
+
+    private fun opprettFerdigstiltBehandling(
+        fagsak: Fagsak,
+        resultat: BehandlingResultat = BehandlingResultat.INNVILGET
+    ) = behandlingRepository.insert(
+        behandling(
+            fagsak = fagsak,
+            status = BehandlingStatus.FERDIGSTILT,
+            resultat = resultat
+        )
+    )
 
     private fun getSøknadsskjemaId(revurdering1: Behandling) =
         søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId

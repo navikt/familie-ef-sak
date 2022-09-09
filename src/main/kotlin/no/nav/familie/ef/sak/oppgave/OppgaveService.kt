@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -48,7 +49,8 @@ class OppgaveService(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
         tilordnetNavIdent: String? = null,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
+        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
 
@@ -72,7 +74,7 @@ class OppgaveService(
                     behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
                     tilordnetRessurs = tilordnetNavIdent,
                     behandlesAvApplikasjon = "familie-ef-sak",
-                    mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
+                    mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
                 )
 
             val opprettetOppgaveId = try {
@@ -99,10 +101,10 @@ class OppgaveService(
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if ((enhetsnummer == "4489" || enhetsnummer == "4483") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+        if ((enhetsnummer == "4489") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
-                (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak"))  &&
+                (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
                     !it.navn.contains("EF Sak")
             }?.id?.toLong()
             mappeIdForGodkjenneVedtak?.let {
@@ -111,6 +113,27 @@ class OppgaveService(
                 logger.error("Fant ikke mappe for godkjenne vedtak: 70 Godkjenne vedtak for enhetsnummer=$enhetsnummer")
             }
             return mappeIdForGodkjenneVedtak
+        }
+        return null
+    }
+
+    fun finnHendelseMappeId(enhetsnummer: String): Long? {
+        // val oppgave = finnOppgaveMedId(oppgaveId)
+        if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
+            val finnMappeRequest = FinnMappeRequest(
+                listOf(),
+                enhetsnummer,
+                null,
+                1000
+            )
+            val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+            val mappe = mapperResponse.mapper.find {
+                it.navn.contains("EF Sak", true) &&
+                    it.navn.contains("Hendelser") &&
+                    it.navn.contains("62")
+            }
+                ?: error("Fant ikke mappe for hendelser")
+            return mappe.id.toLong()
         }
         return null
     }
@@ -150,15 +173,28 @@ class OppgaveService(
         ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
     }
 
-    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype) {
+    /**
+     * @param ignorerFeilregistrert ignorerer oppgaver som allerede er feilregistrerte
+     * Den burde kun settes til true for lukking av oppgaver koblet til henleggelse
+     * Oppgaver skal ikke være lukket når denne kalles, då det er ef-sak som burde lukke oppgaver som vi har opprettet
+     */
+    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype, ignorerFeilregistrert: Boolean = false) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
-            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave)
+            ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave, ignorerFeilregistrert)
         }
     }
 
-    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave) {
-        ferdigstillOppgave(oppgave.gsakOppgaveId)
+    private fun ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave: EfOppgave, ignorerFeilregistrert: Boolean = false) {
+        try {
+            ferdigstillOppgave(oppgave.gsakOppgaveId)
+        } catch (e: RessursException) {
+            if (ignorerFeilregistrert && e.ressurs.melding.contains("Oppgave har status feilregistrert")) {
+                logger.warn("Ignorerer ferdigstill av oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert")
+            } else {
+                throw e
+            }
+        }
         oppgave.erFerdigstilt = true
         oppgaveRepository.update(oppgave)
     }

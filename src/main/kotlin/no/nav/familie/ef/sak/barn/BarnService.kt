@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.barn
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -20,7 +21,8 @@ import java.util.UUID
 @Service
 class BarnService(
     private val barnRepository: BarnRepository,
-    private val søknadService: SøknadService
+    private val søknadService: SøknadService,
+    private val behandlingService: BehandlingService
 ) {
 
     /**
@@ -46,6 +48,7 @@ class BarnService(
             StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, barnUnder18)
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
                 kobleBarnForOvergangsstønadOgSkolepenger(
+                    fagsakId,
                     behandlingId,
                     ustrukturertDokumentasjonType,
                     barnUnder18,
@@ -79,6 +82,7 @@ class BarnService(
     }
 
     private fun kobleBarnForOvergangsstønadOgSkolepenger(
+        fagsakId: UUID,
         behandlingId: UUID,
         ustrukturertDokumentasjonType: UstrukturertDokumentasjonType,
         grunnlagsdataBarn: List<BarnMedIdent>,
@@ -98,6 +102,7 @@ class BarnService(
                 grunnlagsdataBarn
             )
             UstrukturertDokumentasjonType.ETTERSENDING -> barnForEttersending(
+                fagsakId,
                 behandlingId,
                 vilkårsbehandleNyeBarn,
                 grunnlagsdataBarn
@@ -111,14 +116,36 @@ class BarnService(
     }
 
     private fun barnForEttersending(
+        fagsakId: UUID,
         behandlingId: UUID,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
         grunnlagsdataBarn: List<BarnMedIdent>
     ): List<BehandlingBarn> = when (vilkårsbehandleNyeBarn) {
-        VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> mapBarnTilBehandlingBarn(behandlingId, grunnlagsdataBarn)
+        VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE ->
+            vilkårsbehandleBarnForEttersending(fagsakId, behandlingId, grunnlagsdataBarn)
         VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
         VilkårsbehandleNyeBarn.IKKE_VALGT ->
             throw Feil("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
+    }
+
+    private fun vilkårsbehandleBarnForEttersending(
+        fagsakId: UUID,
+        behandlingId: UUID,
+        grunnlagsdataBarn: List<BarnMedIdent>
+    ): List<BehandlingBarn> {
+        val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
+        feilHvis(forrigeBehandling == null) {
+            "Kan ikke behandle ettersending når det ikke finnes en tidligere behandling"
+        }
+        val barnSomSkalFødesFraForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandling.id)
+            .filter { it.personIdent == null }
+            .mapNotNull { it.fødselTermindato }
+            .map { BarnSomSkalFødes(it) }
+        return kobleBarnSomSkalFødesPlusAlleRegisterbarn(
+            behandlingId,
+            barnSomSkalFødesFraForrigeBehandling,
+            grunnlagsdataBarn
+        )
     }
 
     /**
