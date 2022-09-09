@@ -80,7 +80,7 @@ internal class AutomatiskJournalføringServiceTest {
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every {
-            journalføringService.automatiskJournalførTilFørstegangsbehandling(
+            journalføringService.automatiskJournalførFørstegangsbehandling(
                 any(),
                 any(),
                 any(),
@@ -235,7 +235,7 @@ internal class AutomatiskJournalføringServiceTest {
             mappeId
         )
         verify {
-            journalføringService.automatiskJournalførTilFørstegangsbehandling(
+            journalføringService.automatiskJournalførFørstegangsbehandling(
                 fagsak,
                 journalpostMedAktørId,
                 enhet,
@@ -256,7 +256,7 @@ internal class AutomatiskJournalføringServiceTest {
         every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
         every { infotrygdService.eksisterer(any(), any()) } returns false
         every {
-            journalføringService.automatiskJournalførTilFørstegangsbehandling(
+            journalføringService.automatiskJournalførFørstegangsbehandling(
                 any(),
                 any(),
                 any(),
@@ -323,7 +323,7 @@ internal class AutomatiskJournalføringServiceTest {
             StønadType.OVERGANGSSTØNAD,
             mappeId
         )
-        verify { journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, enhet, mappeId) }
+        verify { journalføringService.automatiskJournalførFørstegangsbehandling(fagsak, journalpost, enhet, mappeId) }
     }
 
     @Test

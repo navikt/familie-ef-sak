@@ -123,11 +123,11 @@ class JournalføringService(
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
-        return opprettSaksbehandlingsoppgave(behandling, saksbehandler, null)
+        return opprettBehandleSakOppgave(behandling, saksbehandler)
     }
 
     @Transactional
-    fun automatiskJournalførTilFørstegangsbehandling(
+    fun automatiskJournalførFørstegangsbehandling(
         fagsak: Fagsak,
         journalpost: Journalpost,
         journalførendeEnhet: String,
@@ -148,7 +148,12 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
 
-        val oppgaveId = opprettSaksbehandlingsoppgave(behandling = behandling, navIdent = null, mappeId = mappeId)
+        val oppgaveId = oppgaveService.opprettOppgave(
+            behandlingId = behandling.id,
+            oppgavetype = Oppgavetype.BehandleSak,
+            mappeId = mappeId,
+            beskrivelse = "Automatisk journalført"
+        )
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id,
@@ -178,7 +183,7 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandling.id)
 
-        return opprettSaksbehandlingsoppgave(behandling, saksbehandler, null)
+        return opprettBehandleSakOppgave(behandling, saksbehandler)
     }
 
     private fun opprettBehandlingOgPopulerGrunnlagsdata(
@@ -239,12 +244,11 @@ class JournalføringService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
     }
 
-    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String?, mappeId: Long?): Long {
+    private fun opprettBehandleSakOppgave(behandling: Behandling, navIdent: String): Long {
         return oppgaveService.opprettOppgave(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
-            tilordnetNavIdent = navIdent,
-            mappeId = mappeId
+            tilordnetNavIdent = navIdent
         )
     }
 

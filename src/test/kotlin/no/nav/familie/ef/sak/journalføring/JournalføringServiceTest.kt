@@ -536,7 +536,7 @@ internal class JournalføringServiceTest {
 
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
-            val res = journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
+            val res = journalføringService.automatiskJournalførFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
             verify { iverksettService.startBehandling(any(), fagsak) }
@@ -548,6 +548,7 @@ internal class JournalføringServiceTest {
                     behandlingsårsak = SØKNAD
                 )
             }
+            verify { oppgaveService.opprettOppgave(any(), any(), any(), "Automatisk journalført", mappeId) }
             verify { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any()) }
             assertThat(res.behandlingId).isEqualTo(behandlingId)
             assertThat(res.fagsakId).isEqualTo(fagsakId)

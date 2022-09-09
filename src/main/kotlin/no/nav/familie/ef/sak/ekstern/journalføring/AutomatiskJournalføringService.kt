@@ -43,7 +43,7 @@ class AutomatiskJournalføringService(
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
 
-        return journalføringService.automatiskJournalførTilFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
+        return journalføringService.automatiskJournalførFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
     }
 
     fun kanOppretteFørstegangsbehandling(ident: String, type: StønadType): Boolean {
