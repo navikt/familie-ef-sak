@@ -85,7 +85,7 @@ class PdlClientTest {
                 .willReturn(okJson(readFile("barn.json")))
         )
 
-        val response = pdlClient.hentBarn(listOf("11111122222"))
+        val response = pdlClient.hentPersonForelderBarnRelasjon(listOf("11111122222"))
 
         assertThat(response["11111122222"]?.fødsel?.get(0)?.fødselsdato).isEqualTo(LocalDate.of(1966, 11, 18))
     }
@@ -140,7 +140,7 @@ class PdlClientTest {
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                 .willReturn(okJson(readFile("pdlBolkErrorResponse.json")))
         )
-        assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
+        assertThat(Assertions.catchThrowable { pdlClient.hentPersonForelderBarnRelasjon(listOf("")) })
             .hasMessageStartingWith("Feil ved henting av")
             .isInstanceOf(PdlRequestException::class.java)
     }
@@ -151,7 +151,7 @@ class PdlClientTest {
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
                 .willReturn(okJson(readFile("pdlBolkErrorResponse_nullData.json")))
         )
-        assertThat(Assertions.catchThrowable { pdlClient.hentBarn(listOf("")) })
+        assertThat(Assertions.catchThrowable { pdlClient.hentPersonForelderBarnRelasjon(listOf("")) })
             .hasMessageStartingWith("Data er null fra PDL")
             .isInstanceOf(PdlRequestException::class.java)
     }

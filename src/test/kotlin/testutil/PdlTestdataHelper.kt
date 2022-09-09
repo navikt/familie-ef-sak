@@ -17,7 +17,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdsadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
@@ -102,7 +102,7 @@ object PdlTestdataHelper {
         fødsel: Fødsel? = null,
         navn: Navn = lagNavn()
     ) =
-        PdlBarn(
+        PdlPersonForelderBarn(
             adressebeskyttelse,
             bostedsadresse,
             deltBosted,

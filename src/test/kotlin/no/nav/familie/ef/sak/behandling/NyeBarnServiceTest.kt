@@ -9,9 +9,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -264,8 +264,8 @@ class NyeBarnServiceTest {
 
         @Test
         internal fun `har ikke barn fra før, og har ikke noen nye barn`() {
-            val pdlBarn = emptyMap<String, PdlBarn>()
-            every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
+            val pdlPersonForelderBarn = emptyMap<String, PdlPersonForelderBarn>()
+            every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlPersonForelderBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
 
@@ -359,5 +359,5 @@ class NyeBarnServiceTest {
         navn = null
     )
 
-    private fun søkerMedBarn(pdlBarn: Map<String, PdlBarn>): SøkerMedBarn = SøkerMedBarn("søker", pdlSøker, pdlBarn)
+    private fun søkerMedBarn(pdlPersonForelderBarn: Map<String, PdlPersonForelderBarn>): SøkerMedBarn = SøkerMedBarn("søker", pdlSøker, pdlPersonForelderBarn)
 }

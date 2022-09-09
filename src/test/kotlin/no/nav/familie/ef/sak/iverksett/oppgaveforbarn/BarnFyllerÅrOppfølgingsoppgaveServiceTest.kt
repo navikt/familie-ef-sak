@@ -76,7 +76,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveRepository.insert(capture(oppgaveSlot)) } returns oppgaveMock
         every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
         every { taskRepository.save(capture(taskSlot)) } returns mockk()
-        every { pdlClient.hentBarn(any()) } returns emptyMap()
+        every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns emptyMap()
     }
 
     @AfterEach
@@ -169,7 +169,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(opprettBarn(fødselsnummer = null, termindato = termindato, fødselsnummerSøker = fødselsnummerSøker))
 
-        every { pdlClient.hentBarn(listOf(fødselsnummerSøker)) } returns mapOf(
+        every { pdlClient.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns mapOf(
             Pair(
                 fødselsnummerSøker,
                 PdlTestdataHelper.pdlBarn(
@@ -224,7 +224,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
         )
 
-        every { pdlClient.hentBarn(any()) } returns mapOf(
+        every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns mapOf(
             Pair(
                 fødselsnummerSøker,
                 PdlTestdataHelper.pdlBarn(
