@@ -42,7 +42,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
 
-        val skalOpprettes = filtrerBarnSomHarFyltÅr(alleBarnIGjeldendeBehandlinger)
+        val skalOpprettes = lagOpprettOppgaveForBarn(alleBarnIGjeldendeBehandlinger)
         logger.info("Oppretter oppgave for ${skalOpprettes.size} barn. (dry-run: $dryRun)")
 
         if (!dryRun) {
@@ -80,26 +80,38 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
         }
     }
 
-    private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
-        val barnTilUtplukkMedTermindatoBarn = hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
-        val barnPersonIdenter = barnTilUtplukkMedTermindatoBarn.mapNotNull { it.fødselsnummerBarn }
+    private fun lagOpprettOppgaveForBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
+        val barn = hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
+        val oppgaverForBarn = opprettOppgaveForBarn(barn)
+        val opprettedeOppgaver = finnOpprettedeOppgaver(oppgaverForBarn)
 
-        if (barnPersonIdenter.isEmpty()) return setOf()
+        return oppgaverForBarn
+            .filterNot { opprettedeOppgaver.contains(FødselsnummerOgAlder(it.fødselsnummer, it.alder)) }
+            .toSet()
+    }
 
-        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
-            Oppgavetype.InnhentDokumentasjon,
-            barnPersonIdenter
-        )
-
-        return barnTilUtplukkMedTermindatoBarn.mapNotNull { barn ->
-            val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
-            if (barnetsAlder != null && barn.fødselsnummerBarn != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
+    private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
+        return barn.mapNotNull {
+            Alder.fromFødselsdato(fødselsdato(it))?.let { alder ->
                 OpprettOppgaveForBarn(
-                    barn.fødselsnummerBarn,
-                    barn.fødselsnummerSøker,
-                    barnetsAlder,
-                    barn.behandlingId
+                    it.fødselsnummerBarn!!,
+                    it.fødselsnummerSøker,
+                    alder,
+                    it.behandlingId
                 )
+            }
+        }
+    }
+
+    private fun finnOpprettedeOppgaver(oppgaverForBarn: List<OpprettOppgaveForBarn>): Set<FødselsnummerOgAlder> {
+        if (oppgaverForBarn.isEmpty()) return emptySet()
+
+        return oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+            Oppgavetype.InnhentDokumentasjon,
+            oppgaverForBarn.map { it.fødselsnummer }
+        ).mapNotNull {
+            if (it.barnPersonIdent != null && it.alder != null) {
+                FødselsnummerOgAlder(it.barnPersonIdent, it.alder)
             } else {
                 null
             }
@@ -180,4 +192,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             Fødselsnummer(it).fødselsdato
         }
     }
+
+    private data class FødselsnummerOgAlder(val fødselsnummer: String, val alder: Alder)
 }

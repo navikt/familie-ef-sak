@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class OpprettOppgaveForBarn(
-    val fødselsnummer: String?,
+    val fødselsnummer: String,
     val fødselsnummerSøker: String,
     val alder: Alder,
     val behandlingId: UUID
