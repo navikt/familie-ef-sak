@@ -26,7 +26,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
-import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
@@ -88,7 +88,7 @@ internal class VurderingStegServiceTest {
             )
         ).build().søknadOvergangsstønad
     ).tilSøknadsverdier()
-    private val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
+    private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     val fagsak = fagsak()
     private val behandling = behandling(fagsak, BehandlingStatus.OPPRETTET)
     private val behandlingId = UUID.randomUUID()

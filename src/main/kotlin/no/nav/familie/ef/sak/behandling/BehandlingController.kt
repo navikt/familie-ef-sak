@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
@@ -10,6 +9,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -31,7 +31,8 @@ class BehandlingController(
     private val fagsakService: FagsakService,
     private val henleggService: HenleggService,
     private val stegService: StegService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val gjenbrukVilkårService: GjenbrukVilkårService
 ) {
 
     @GetMapping("{behandlingId}")
@@ -99,9 +100,6 @@ class BehandlingController(
     fun hentBehandlingForGjenbrukAvVilkår(@PathVariable behandlingId: UUID): Ressurs<List<BehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        val fagsak: Fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        val behandlingerForGjenbruk: List<Behandling> = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsak.fagsakPersonId)
-        val fagsaker: Map<UUID, Fagsak> = behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
-        return Ressurs.success(behandlingerForGjenbruk.map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) })
+        return Ressurs.success(gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId))
     }
 }

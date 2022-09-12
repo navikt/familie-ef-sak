@@ -44,7 +44,7 @@ fun søknad(
         stønadsstart
     )
 
-fun søknadsBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
+fun søknadBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
     it.tilBehandlingBarn(behandlingId)
 }
 

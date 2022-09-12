@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype.GIFT
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
-import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -306,7 +306,7 @@ internal class OppdaterVilkårTest {
     fun `sivilstand - trenger ikke å svare på hovedvilkår som ikke er aktuelle`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
-        val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
+        val barn = søknadBarnTilBehandlingBarn(søknad.barn)
         val initDelvilkår = regel.initereDelvilkårsvurdering(
             HovedregelMetadata(
                 søknad.sivilstand,
@@ -341,7 +341,7 @@ internal class OppdaterVilkårTest {
     fun `sivilstand - sender inn svar på en annen regel enn det som man skal svare på`() {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
-        val barn = søknadsBarnTilBehandlingBarn(søknad.barn)
+        val barn = søknadBarnTilBehandlingBarn(søknad.barn)
         val initDelvilkår = regel.initereDelvilkårsvurdering(
             HovedregelMetadata(
                 søknad.sivilstand,

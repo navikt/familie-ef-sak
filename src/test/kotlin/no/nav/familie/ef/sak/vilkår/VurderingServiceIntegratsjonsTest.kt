@@ -13,7 +13,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangs
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
-import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -49,8 +49,8 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
         val behandling = behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT))
         val revurdering = behandlingRepository.insert(behandling(fagsak))
         val søknadskjema = lagreSøknad(behandling, fagsak)
-        val barnPåFørsteSøknad = barnRepository.insertAll(søknadsBarnTilBehandlingBarn(søknadskjema.barn, behandling.id))
-        val barnPåRevurdering = barnRepository.insertAll(søknadsBarnTilBehandlingBarn(søknadskjema.barn, revurdering.id))
+        val barnPåFørsteSøknad = barnRepository.insertAll(søknadBarnTilBehandlingBarn(søknadskjema.barn, behandling.id))
+        val barnPåRevurdering = barnRepository.insertAll(søknadBarnTilBehandlingBarn(søknadskjema.barn, revurdering.id))
 
         val vilkårForBehandling = opprettVilkårsvurderinger(søknadskjema, behandling, barnPåFørsteSøknad).first()
         val metadata = HovedregelMetadata(

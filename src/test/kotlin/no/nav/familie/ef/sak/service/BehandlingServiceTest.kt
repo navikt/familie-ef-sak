@@ -81,7 +81,8 @@ internal class BehandlingServiceTest {
 
         @Test
         internal fun `skal kunne henlegge behandling som er førstegangsbehandling`() {
-            val behandling = behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.UTREDES)
+            val behandling =
+                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.UTREDES)
             henleggOgForventOk(behandling, henlagtÅrsak = FEILREGISTRERT)
         }
 
@@ -105,7 +106,11 @@ internal class BehandlingServiceTest {
         @Test
         internal fun `skal ikke kunne henlegge behandling hvor vedtak fattes`() {
             val behandling =
-                behandling(fagsak(), type = BehandlingType.FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FATTER_VEDTAK)
+                behandling(
+                    fagsak(),
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.FATTER_VEDTAK
+                )
             henleggOgForventApiFeilmelding(behandling, FEILREGISTRERT)
         }
 
