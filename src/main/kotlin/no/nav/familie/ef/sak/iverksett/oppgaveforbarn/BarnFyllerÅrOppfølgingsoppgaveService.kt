@@ -59,25 +59,25 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
-        val personerMedTermindatoBarn =
+        val barnUtenFødselsnummer =
             barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
+        return barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null } +
+            finnFødselsnummerTilTerminbarn(barnUtenFødselsnummer)
+    }
+
+    private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
         val pdlPersonMedForelderBarnRelasjon =
-            pdlClient.hentPersonForelderBarnRelasjon(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
+            pdlClient.hentPersonForelderBarnRelasjon(barnMedTermindato.map { it.fødselsnummerSøker })
 
-        val returnBarnTilUtplukkForOppgave = mutableListOf<BarnTilUtplukkForOppgave>()
-
-        for (personMedTermindatoBarn in personerMedTermindatoBarn) {
-            val termindato = personMedTermindatoBarn.termindatoBarn!!
-            val pdlPersonMedForelderBarnRelasjonData =
-                pdlPersonMedForelderBarnRelasjon[personMedTermindatoBarn.fødselsnummerSøker]
-                    ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
-            val forelderBarnRelasjoner =
-                pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
+        return barnMedTermindato.map { barn ->
+            val termindato = barn.termindatoBarn!!
+            val søkerPdlData = pdlPersonMedForelderBarnRelasjon[barn.fødselsnummerSøker]
+                ?: error("Finner ikke pdldata for søker=${barn.fødselsnummerSøker}")
+            val forelderBarnRelasjoner = søkerPdlData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
             val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(forelderBarnRelasjoner, termindato)
 
-            returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch))
+            barn.copy(fødselsnummerBarn = besteMatch)
         }
-        return returnBarnTilUtplukkForOppgave + barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
     }
 
     private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
