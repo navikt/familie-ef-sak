@@ -118,7 +118,6 @@ class OppgaveService(
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        // val oppgave = finnOppgaveMedId(oppgaveId)
         if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
             val finnMappeRequest = FinnMappeRequest(
                 listOf(),
@@ -128,9 +127,7 @@ class OppgaveService(
             )
             val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
             val mappe = mapperResponse.mapper.find {
-                it.navn.contains("EF Sak", true) &&
-                    it.navn.contains("Hendelser") &&
-                    it.navn.contains("62")
+                it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
             }
                 ?: error("Fant ikke mappe for hendelser")
             return mappe.id.toLong()

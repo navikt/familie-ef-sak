@@ -69,6 +69,11 @@ class OppgaveClientMock {
                             enhetsnr = "4489"
                         ),
                         MappeDto(
+                            id = 105,
+                            navn = "62 Hendelser",
+                            enhetsnr = "4489"
+                        ),
+                        MappeDto(
                             id = 102,
                             navn = "70 Godkjennevedtak",
                             enhetsnr = "4489"

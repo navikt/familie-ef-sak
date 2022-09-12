@@ -361,8 +361,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingerForGjenbruk).containsExactly(
             førstegangsbehandlingBT,
             annengangsbehandlingOS,
-            førstegangsbehandlingOS,
-            )
+            førstegangsbehandlingOS
+        )
     }
 
     private fun lagreBehandling(
