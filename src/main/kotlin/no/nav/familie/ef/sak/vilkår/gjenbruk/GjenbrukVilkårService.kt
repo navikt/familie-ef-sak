@@ -78,7 +78,7 @@ class GjenbrukVilkårService(
         behandlingId: UUID,
         nåværendeVurderinger: List<Vilkårsvurdering>,
         tidligereVurderinger: List<Vilkårsvurdering>,
-        forrigeBarnIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>,
+        forrigeBarnIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>
     ) = tidligereVurderinger.mapNotNull { tidligereVurdering ->
         /* Dersom tidligere vurdering og matchende nåværende vurdering ikke gjelder barn vil tidligere vurdering kopieres */
         val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[tidligereVurdering.barnId]
@@ -107,7 +107,7 @@ class GjenbrukVilkårService(
     private fun hentVurderingerSomSkalGjenbrukes(
         sivilstandErLik: Boolean,
         tidligereBehandlingId: UUID,
-        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
+        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>
     ): List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(tidligereBehandlingId)
         .filter { it.type.erInngangsvilkår() }
         .filter { skalGjenbrukeVurdering(it, sivilstandErLik, barnPåBeggeBehandlinger) }
@@ -123,7 +123,7 @@ class GjenbrukVilkårService(
 
     private fun validerBehandlingForGjenbruk(
         behandlingId: UUID,
-        tidligereBehandlingId: UUID,
+        tidligereBehandlingId: UUID
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {

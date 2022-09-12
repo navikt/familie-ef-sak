@@ -62,7 +62,7 @@ internal class GjenbrukVilkårServiceTest {
         TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Barn Nummer En", barn1),
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
+                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2)
             )
         ).build().søknadOvergangsstønad
     ).tilSøknadsverdier()
@@ -70,7 +70,7 @@ internal class GjenbrukVilkårServiceTest {
         TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3),
+                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3)
             )
         ).build().søknadBarnetilsyn
     ).tilSøknadsverdier()
@@ -222,7 +222,7 @@ internal class GjenbrukVilkårServiceTest {
                     behandling.id,
                     vilkårsresultat,
                     type = VilkårType.ALENEOMSORG,
-                    barnId = it.id,
+                    barnId = it.id
                 )
             }
             aktivitetsvilkår = vilkårsvurdering(behandling.id, vilkårsresultat, type = VilkårType.AKTIVITET)
