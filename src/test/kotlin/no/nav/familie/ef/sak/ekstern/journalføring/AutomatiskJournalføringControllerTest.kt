@@ -25,7 +25,8 @@ internal class AutomatiskJournalføringControllerTest {
     val request = AutomatiskJournalføringRequest(
         "12345678901",
         "1234",
-        OVERGANGSSTØNAD
+        OVERGANGSSTØNAD,
+        1234L
     )
 
     @BeforeEach
@@ -61,7 +62,7 @@ internal class AutomatiskJournalføringControllerTest {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns true
         automatiskJournalføringController.automatiskJournalfør(request)
 
-        verify { automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(any(), any(), any()) }
+        verify { automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(any(), any(), any(), any()) }
     }
 
     @Test

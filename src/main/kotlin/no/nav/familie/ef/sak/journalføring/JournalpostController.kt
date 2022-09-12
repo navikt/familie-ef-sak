@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
@@ -41,7 +43,14 @@ class JournalpostController(
     fun hentJournalPost(@PathVariable journalpostId: String): Ressurs<JournalføringResponse> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(JournalføringResponse(journalpost, personIdent, journalpost.harStrukturertSøknad()))
+        return Ressurs.success(
+            JournalføringResponse(
+                journalpost,
+                personIdent,
+                hentBrukersNavn(journalpost, personIdent),
+                journalpost.harStrukturertSøknad()
+            )
+        )
     }
 
     @GetMapping("/{journalpostId}/dokument/{dokumentInfoId}")
@@ -116,4 +125,20 @@ class JournalpostController(
         } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")
         return Pair(journalpost, personIdent)
     }
+
+    /**
+     * Bruker navnet fra avsenderMottaker hvis avsenderMottaker er lik brukeren
+     * Hvis ikke så hentes navnet fra PDL
+     */
+    private fun hentBrukersNavn(
+        journalpost: Journalpost,
+        personIdent: String
+    ): String {
+        return journalpost.avsenderMottaker
+            ?.takeIf { it.erLikBruker }?.navn
+            ?: hentNavnFraPdl(personIdent)
+    }
+
+    private fun hentNavnFraPdl(personIdent: String) =
+        pdlClient.hentPersonKortBolk(listOf(personIdent)).getValue(personIdent).navn.gjeldende().visningsnavn()
 }

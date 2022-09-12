@@ -1,8 +1,11 @@
 package no.nav.familie.ef.sak.barn
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
@@ -11,6 +14,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.testutil.tilBehandlingBarn
@@ -31,7 +35,8 @@ internal class BarnServiceTest {
 
     val barnRepository = mockk<BarnRepository>()
     val søknadService = mockk<SøknadService>()
-    val barnService = BarnService(barnRepository, søknadService)
+    val behandlingService = mockk<BehandlingService>()
+    val barnService = BarnService(barnRepository, søknadService, behandlingService)
     val søknadMock = mockk<Søknadsverdier>()
     val fagsakId: UUID = UUID.randomUUID()
     val behandlingId: UUID = UUID.randomUUID()
@@ -41,6 +46,7 @@ internal class BarnServiceTest {
     @BeforeEach
     internal fun setUp() {
         barnSlot.clear()
+        clearMocks(behandlingService)
         every { søknadService.hentSøknadsgrunnlag(behandlingId) } returns søknadMock
         every { søknadMock.barn } returns emptySet()
         every { barnRepository.insertAll(capture(barnSlot)) } answers { firstArg() }
@@ -113,6 +119,36 @@ internal class BarnServiceTest {
         assertThat(barnSlot.captured).hasSize(2)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB)
         assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B")
+    }
+
+    @Test
+    internal fun `revurdering uten nye barn skal ta med terminbarn fra forrige behandling`() {
+        val grunnlagsdatabarn = listOf(
+            barnMedIdent(fnrBarnD, "Barn D")
+        )
+
+        val forrigeBehandlingId = UUID.randomUUID()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, terminbarnPåSøknad)
+        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(
+            setOf(
+                barnPåSøknadA,
+                terminbarnPåSøknad
+            ),
+            forrigeBehandlingId
+        )
+        val nyeBarnPåRevurdering = emptyList<BehandlingBarn>()
+        barnService.opprettBarnForRevurdering(
+            behandlingId,
+            forrigeBehandlingId,
+            nyeBarnPåRevurdering,
+            grunnlagsdatabarn,
+            StønadType.OVERGANGSSTØNAD
+        )
+
+        assertThat(barnSlot.captured).hasSize(2)
+        assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, null)
+        assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Terminbarn 1")
     }
 
     @Test
@@ -398,6 +434,18 @@ internal class BarnServiceTest {
         private val grunnlagsdataBarn = listOf(
             barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B")
         )
+        private val fødselTermindato = LocalDate.now().minusDays(1)
+        private val tidligereBehandling = behandling()
+        private val barnPåForrigeBehandling = listOf(
+            BehandlingBarn(behandlingId = tidligereBehandling.id, søknadBarnId = UUID.randomUUID(), personIdent = "1", navn = "1"),
+            BehandlingBarn(behandlingId = tidligereBehandling.id, søknadBarnId = UUID.randomUUID(), fødselTermindato = fødselTermindato, navn = "asd")
+        )
+
+        @BeforeEach
+        internal fun setUp() {
+            every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId) } returns tidligereBehandling
+            every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns emptyList()
+        }
 
         @Test
         internal fun `skal legge til registerbarn på behandling hvis man skal vilkårsbehandle nye barn`() {
@@ -412,6 +460,69 @@ internal class BarnServiceTest {
 
             assertThat(barnSlot.captured).hasSize(1)
             assertThat(barnSlot.captured[0].navn).isEqualTo("J B")
+        }
+
+        @Test
+        internal fun `skal beholde terminbarn fra forrige behandling`() {
+            every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns barnPåForrigeBehandling
+
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                emptyList(),
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].personIdent).isNull()
+            assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(fødselTermindato)
+
+            // skal ikke mappe søknadBarnId fra tidligere BehandlingBarn
+            assertThat(barnPåForrigeBehandling.map { it.søknadBarnId }).doesNotContainNull()
+            assertThat(barnSlot.captured[0].søknadBarnId).isNull()
+
+            verify(exactly = 1) { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId) }
+        }
+
+        @Test
+        internal fun `skal beholde terminbarn fra forrige behandling og legge til grunnlagsdatabarn`() {
+            every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns barnPåForrigeBehandling
+
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                grunnlagsdataBarn,
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).hasSize(2)
+            assertThat(barnSlot.captured.single { it.personIdent != null }.personIdent)
+                .isEqualTo(grunnlagsdataBarn[0].personIdent)
+            assertThat(barnSlot.captured.single { it.personIdent == null }.fødselTermindato).isEqualTo(fødselTermindato)
+        }
+
+        @Test
+        internal fun `skal koble terminbarn med barn fra grunnlagsdata`() {
+            val barnFraRegister = barnMedIdent(FnrGenerator.generer(fødselTermindato), "J B")
+
+            every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns barnPåForrigeBehandling
+
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                behandlingId,
+                fagsakId,
+                listOf(barnFraRegister),
+                StønadType.OVERGANGSSTØNAD,
+                UstrukturertDokumentasjonType.ETTERSENDING,
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+
+            assertThat(barnSlot.captured).hasSize(1)
+            assertThat(barnSlot.captured[0].personIdent).isEqualTo(barnFraRegister.personIdent)
+            assertThat(barnSlot.captured[0].fødselTermindato).isEqualTo(fødselTermindato)
         }
 
         @Test
@@ -484,11 +595,11 @@ internal class BarnServiceTest {
         }
     }
 
-    val fnrBarnA = "11111111111"
-    val fnrBarnOver18 = "23118612345"
-    val fnrBarnB = "22222222222"
-    val fnrBarnC = "33333333333"
-    val fnrBarnD = "44444444444"
+    val fnrBarnA = FnrGenerator.generer(Year.now().minusYears(1).value)
+    val fnrBarnOver18 = FnrGenerator.generer(Year.now().minusYears(19).value)
+    val fnrBarnB = FnrGenerator.generer(Year.now().minusYears(2).value)
+    val fnrBarnC = FnrGenerator.generer(Year.now().minusYears(4).value)
+    val fnrBarnD = FnrGenerator.generer(Year.now().minusYears(4).value)
     val barnPåSøknadA = SøknadBarn(
         id = UUID.randomUUID(),
         navn = "Barn A",
@@ -508,5 +619,16 @@ internal class BarnServiceTest {
         erBarnetFødt = true,
         skalHaBarnepass = true,
         lagtTilManuelt = false
+    )
+    val terminbarnPåSøknad = SøknadBarn(
+        id = UUID.randomUUID(),
+        navn = "Terminbarn 1",
+        fødselsnummer = null,
+        harSkalHaSammeAdresse = false,
+        ikkeRegistrertPåSøkersAdresseBeskrivelse = null,
+        erBarnetFødt = false,
+        skalHaBarnepass = true,
+        lagtTilManuelt = true,
+        fødselTermindato = LocalDate.now()
     )
 }

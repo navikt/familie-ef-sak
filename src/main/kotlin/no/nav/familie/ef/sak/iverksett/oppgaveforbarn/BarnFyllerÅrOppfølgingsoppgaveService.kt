@@ -60,14 +60,14 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
     private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
         val personerMedTermindatoBarn = barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
-        val pdlBarn = pdlClient.hentBarn(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
+        val pdlPersonMedForelderBarnRelasjon = pdlClient.hentPersonForelderBarnRelasjon(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
 
         val returnBarnTilUtplukkForOppgave = mutableListOf<BarnTilUtplukkForOppgave>()
 
         for (personMedTermindatoBarn in personerMedTermindatoBarn) {
             val termindato = personMedTermindatoBarn.termindatoBarn!!
-            val barnTilSøker = pdlBarn[personMedTermindatoBarn.fødselsnummerSøker] ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
-            val forelderBarnRelasjoner = barnTilSøker.forelderBarnRelasjon.filter { it.relatertPersonsIdent != null }
+            val pdlPersonMedForelderBarnRelasjonData = pdlPersonMedForelderBarnRelasjon[personMedTermindatoBarn.fødselsnummerSøker] ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
+            val forelderBarnRelasjoner = pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.filter { it.relatertPersonsIdent != null }
 
             val uke20 = termindato.minusWeeks(20)
             val uke44 = termindato.plusWeeks(4)

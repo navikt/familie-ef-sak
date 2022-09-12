@@ -9,9 +9,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -55,7 +56,7 @@ class NyeBarnServiceTest {
     @BeforeEach
     fun init() {
         every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
-        every { fagsakService.finnFagsak(any(), any()) } returns fagsak
+        every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak)
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("fnr til søker", false)))
         every { fagsakService.hentAktivIdent(any()) } returns "fnr til søker"
@@ -72,7 +73,7 @@ class NyeBarnServiceTest {
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
         assertThat(barn).hasSize(1)
-        assertThat(barn.first()).isEqualTo(NyttBarn(fnrForNyttBarn, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING))
+        assertThat(barn.first()).isEqualTo(NyttBarn(fnrForNyttBarn, StønadType.OVERGANGSSTØNAD, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING))
     }
 
     @Test
@@ -263,8 +264,8 @@ class NyeBarnServiceTest {
 
         @Test
         internal fun `har ikke barn fra før, og har ikke noen nye barn`() {
-            val pdlBarn = emptyMap<String, PdlBarn>()
-            every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlBarn)
+            val pdlPersonForelderBarn = emptyMap<String, PdlPersonForelderBarn>()
+            every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(pdlPersonForelderBarn)
             every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
             val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
 
@@ -358,5 +359,5 @@ class NyeBarnServiceTest {
         navn = null
     )
 
-    private fun søkerMedBarn(pdlBarn: Map<String, PdlBarn>): SøkerMedBarn = SøkerMedBarn("søker", pdlSøker, pdlBarn)
+    private fun søkerMedBarn(pdlPersonForelderBarn: Map<String, PdlPersonForelderBarn>): SøkerMedBarn = SøkerMedBarn("søker", pdlSøker, pdlPersonForelderBarn)
 }
