@@ -21,7 +21,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
-import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -260,7 +260,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         ).build().søknadOvergangsstønad
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
         val overgangsstønad = søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
-        barnRepository.insertAll(søknadsBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
+        barnRepository.insertAll(søknadBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
         return overgangsstønad
     }
 

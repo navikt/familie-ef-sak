@@ -19,14 +19,18 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SivilstandMedNavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
@@ -364,7 +368,17 @@ fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate
         personIdent = fnr
     )
 
-fun søker(): Søker =
+fun sivilstand(type: Sivilstandstype) = SivilstandMedNavn(
+    type = type,
+    gyldigFraOgMed = LocalDate.now(),
+    relatertVedSivilstand = null,
+    bekreftelsesdato = null,
+    dødsfall = null,
+    navn = null,
+    metadata = metadataGjeldende
+)
+
+fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
     Søker(
         adressebeskyttelse = Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, Metadata(false)),
         bostedsadresse = listOf(),
@@ -378,7 +392,7 @@ fun søker(): Søker =
         Navn("fornavn", null, "etternavn", Metadata(false)),
         listOf(),
         listOf(),
-        listOf(),
+        sivilstand = sivilstand,
         listOf(),
         listOf(),
         listOf(),

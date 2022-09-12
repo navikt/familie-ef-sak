@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
-import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.testutil.tilBehandlingBarn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
@@ -130,7 +130,7 @@ internal class BarnServiceTest {
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, terminbarnPåSøknad)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
             setOf(
                 barnPåSøknadA,
                 terminbarnPåSøknad
@@ -162,7 +162,7 @@ internal class BarnServiceTest {
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
             setOf(
                 barnPåSøknadA,
                 barnPåSøknadB
@@ -201,7 +201,7 @@ internal class BarnServiceTest {
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
             setOf(
                 barnPåSøknadA,
                 barnPåSøknadB
@@ -242,7 +242,7 @@ internal class BarnServiceTest {
         val forrigeBehandlingId = UUID.randomUUID()
 
         every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadsBarnTilBehandlingBarn(
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
             setOf(
                 barnPåSøknadA,
                 barnPåSøknadB
