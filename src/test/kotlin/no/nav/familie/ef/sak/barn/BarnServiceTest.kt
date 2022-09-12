@@ -124,7 +124,7 @@ internal class BarnServiceTest {
     @Test
     internal fun `revurdering uten nye barn skal ta med terminbarn fra forrige behandling`() {
         val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
+            barnMedIdent(fnrBarnD, "Barn D")
         )
 
         val forrigeBehandlingId = UUID.randomUUID()
