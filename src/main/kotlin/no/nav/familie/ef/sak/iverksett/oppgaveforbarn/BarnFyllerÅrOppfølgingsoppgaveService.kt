@@ -59,15 +59,20 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
-        val personerMedTermindatoBarn = barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
-        val pdlPersonMedForelderBarnRelasjon = pdlClient.hentPersonForelderBarnRelasjon(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
+        val personerMedTermindatoBarn =
+            barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
+        val pdlPersonMedForelderBarnRelasjon =
+            pdlClient.hentPersonForelderBarnRelasjon(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
 
         val returnBarnTilUtplukkForOppgave = mutableListOf<BarnTilUtplukkForOppgave>()
 
         for (personMedTermindatoBarn in personerMedTermindatoBarn) {
             val termindato = personMedTermindatoBarn.termindatoBarn!!
-            val pdlPersonMedForelderBarnRelasjonData = pdlPersonMedForelderBarnRelasjon[personMedTermindatoBarn.fødselsnummerSøker] ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
-            val forelderBarnRelasjoner = pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
+            val pdlPersonMedForelderBarnRelasjonData =
+                pdlPersonMedForelderBarnRelasjon[personMedTermindatoBarn.fødselsnummerSøker]
+                    ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
+            val forelderBarnRelasjoner =
+                pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
             val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(forelderBarnRelasjoner, termindato)
 
             returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch))
@@ -81,7 +86,10 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         if (barnPersonIdenter.isEmpty()) return setOf()
 
-        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, barnPersonIdenter)
+        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+            Oppgavetype.InnhentDokumentasjon,
+            barnPersonIdenter
+        )
 
         return barnTilUtplukkMedTermindatoBarn.mapNotNull { barn ->
             val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
@@ -101,7 +109,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private fun opprettOppgaveTasksForBarn(opprettOppgaverForBarn: Set<OpprettOppgaveForBarn>) {
         if (opprettOppgaverForBarn.isEmpty()) return
         val gjeldendeBarnList =
-            gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId }).toSet()
+            gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId })
+                .toSet()
 
         gjeldendeBarnList.forEach { gjeldendeBarn ->
             val opprettOppgaveForEksternId =
@@ -114,7 +123,8 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             ) != null
 
             if (!finnesOppgave && opprettOppgaveForEksternId != null) {
-                val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
+                val opprettOppgaveRequest =
+                    lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
                 try {
                     taskRepository.save(
                         OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(

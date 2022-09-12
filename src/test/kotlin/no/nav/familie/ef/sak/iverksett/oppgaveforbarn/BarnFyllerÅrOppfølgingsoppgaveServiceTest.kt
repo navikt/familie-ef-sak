@@ -167,7 +167,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(fødselsnummer = null, termindato = termindato, fødselsnummerSøker = fødselsnummerSøker))
+        } returns listOf(
+            opprettBarn(
+                fødselsnummer = null,
+                termindato = termindato,
+                fødselsnummerSøker = fødselsnummerSøker
+            )
+        )
 
         every { pdlClient.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns mapOf(
             Pair(
@@ -292,7 +298,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(behandlingId = behandlingId, fødselsnummer = fødselsnummerBarn, fødselsnummerSøker = fødselsnummerSøker))
+        } returns listOf(
+            opprettBarn(
+                behandlingId = behandlingId,
+                fødselsnummer = fødselsnummerBarn,
+                fødselsnummerSøker = fødselsnummerSøker
+            )
+        )
 
         every {
             gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
