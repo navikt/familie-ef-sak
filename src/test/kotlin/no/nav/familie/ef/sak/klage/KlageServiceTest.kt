@@ -4,8 +4,11 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
+import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
@@ -18,8 +21,8 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
-import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
@@ -41,8 +44,17 @@ internal class KlageServiceTest {
 
     private val infotrygdService = mockk<InfotrygdService>()
 
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+
     private val service =
-        KlageService(behandlingService, fagsakService, fagsakPersonService, klageClient, infotrygdService)
+        KlageService(
+            behandlingService,
+            fagsakService,
+            fagsakPersonService,
+            klageClient,
+            infotrygdService,
+            arbeidsfordelingService
+        )
 
     private val eksternFagsakId = 11L
     private val eksternBehandlingId = 22L
@@ -61,6 +73,7 @@ internal class KlageServiceTest {
         every { behandlingService.hentSaksbehandling(any<UUID>()) } returns saksbehandling
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(ENHET_NAY, "enhet")
         justRun { klageClient.opprettKlage(capture(opprettKlageSlot)) }
     }
 
@@ -79,6 +92,7 @@ internal class KlageServiceTest {
             assertThat(request.fagsystem).isEqualTo(Fagsystem.EF)
             assertThat(request.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
             assertThat(request.klageMottatt).isEqualTo(LocalDate.now())
+            assertThat(request.behandlendeEnhet).isEqualTo(ENHET_NAY)
         }
     }
 
