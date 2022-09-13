@@ -110,6 +110,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-klage-onbehalfof:
+        resource-url: ${FAMILIE_KLAGE_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_KLAGE_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
       ef-proxy:
         resource-url: ${FAMILIE_EF_PROXY_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
@@ -123,6 +132,7 @@ no.nav.security.jwt:
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
 FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
+FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
 
@@ -175,6 +185,7 @@ FAMILIE_DOKUMENT_URL: http://familie-dokument
 
 
 FAMILIE_TILBAKE_URL: http://familie-tilbake
+FAMILIE_KLAGE_URL: http://familie-klage
 
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
