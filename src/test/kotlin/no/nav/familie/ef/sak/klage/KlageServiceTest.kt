@@ -13,8 +13,8 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Ytelsestype
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
+import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -62,7 +62,7 @@ internal class KlageServiceTest {
             assertThat(request.eksternFagsakId).isEqualTo(eksternFagsakId.toString())
             assertThat(request.eksternBehandlingId).isEqualTo(eksternBehandlingId.toString())
             assertThat(request.fagsystem).isEqualTo(Fagsystem.EF)
-            assertThat(request.ytelsestype).isEqualTo(Ytelsestype.OVERGANGSSTØNAD)
+            assertThat(request.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
             assertThat(request.klageMottatt).isEqualTo(LocalDate.now())
         }
     }
