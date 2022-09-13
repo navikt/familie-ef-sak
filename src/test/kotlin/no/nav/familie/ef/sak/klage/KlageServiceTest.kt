@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.repository.fagsakPerson
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
@@ -133,7 +134,8 @@ internal class KlageServiceTest {
         private fun åpenSak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD) = InfotrygdSak(
             "1",
             stønadType = stønadstype,
-            resultat = InfotrygdSakResultat.ÅPEN_SAK
+            resultat = InfotrygdSakResultat.ÅPEN_SAK,
+            type = InfotrygdSakType.KLAGE
         )
     }
 }
