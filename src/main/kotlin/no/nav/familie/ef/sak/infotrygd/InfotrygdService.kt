@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.infotrygd.InfotrygdUtils.KLAGETYPER
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
@@ -8,6 +9,7 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -51,6 +53,12 @@ class InfotrygdService(
                         .thenByDescending(nullsLast()) { it.mottattDato }
                 )
         )
+    }
+
+    fun hentÅpneKlagesaker(personIdent: String): List<InfotrygdSak> {
+        return hentSaker(personIdent).saker.filter {
+            it.resultat == InfotrygdSakResultat.ÅPEN_SAK && KLAGETYPER.contains(it.type)
+        }
     }
 
     /**
