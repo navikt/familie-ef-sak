@@ -3,9 +3,11 @@ package no.nav.familie.ef.sak.klage
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
+import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,4 +31,10 @@ class KlageController(
         return Ressurs.success(behandlingId)
     }
 
+    @GetMapping("/fagsak-person/{fagsakPersonId}/apen")
+    fun harÅpenKlage(@PathVariable fagsakPersonId: UUID): ÅpneKlagerDto {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return klageService.harÅpenKlage(fagsakPersonId)
+    }
 }
