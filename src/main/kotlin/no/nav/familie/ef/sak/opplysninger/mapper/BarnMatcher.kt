@@ -34,6 +34,21 @@ object BarnMatcher {
         }
     }
 
+    fun finnBesteMatchPåFødselsnummerForTermindato(fødselsnumre: List<String>, termindato: LocalDate): String? {
+        val uke20 = termindato.minusWeeks(20)
+        val uke44 = termindato.plusWeeks(4)
+
+        return fødselsnumre.filter {
+            val fødselsnummer = Fødselsnummer(it)
+            val fødselsdato = fødselsnummer.fødselsdato
+            fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
+        }.minByOrNull {
+            val epochDayForFødsel = Fødselsnummer(it).fødselsdato.toEpochDay()
+            val epochDayTermindato = termindato.toEpochDay()
+            abs(epochDayForFødsel - epochDayTermindato)
+        }
+    }
+
     private fun forsøkMatchPåFødselsdato(
         barn: MatchetBehandlingBarn,
         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>
@@ -58,18 +73,3 @@ data class MatchetBehandlingBarn(
     val barn: BarnMedIdent?,
     val behandlingBarn: BehandlingBarn
 )
-
-fun finnBesteMatchPåFødselsnummerForTermindato(fødselsnumre: List<String>, termindato: LocalDate): String? {
-    val uke20 = termindato.minusWeeks(20)
-    val uke44 = termindato.plusWeeks(4)
-
-    return fødselsnumre.filter {
-        val fødselsnummer = Fødselsnummer(it)
-        val fødselsdato = fødselsnummer.fødselsdato
-        fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
-    }.minByOrNull {
-        val epochDayForFødsel = Fødselsnummer(it).fødselsdato.toEpochDay()
-        val epochDayTermindato = termindato.toEpochDay()
-        abs(epochDayForFødsel - epochDayTermindato)
-    }
-}
