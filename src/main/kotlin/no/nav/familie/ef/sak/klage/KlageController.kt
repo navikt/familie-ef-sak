@@ -32,9 +32,9 @@ class KlageController(
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}/apen")
-    fun harÅpenKlage(@PathVariable fagsakPersonId: UUID): ÅpneKlagerDto {
+    fun harÅpenKlage(@PathVariable fagsakPersonId: UUID): Ressurs<ÅpneKlagerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return klageService.harÅpenKlage(fagsakPersonId)
+        return Ressurs.success(klageService.harÅpenKlage(fagsakPersonId))
     }
 }
