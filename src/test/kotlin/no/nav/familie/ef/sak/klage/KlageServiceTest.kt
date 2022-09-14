@@ -29,6 +29,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.util.UUID
 
@@ -103,46 +105,19 @@ internal class KlageServiceTest {
         internal fun `har ikke noen åpen sak`() {
             every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf()
 
-            val harÅpenKlage = service.harÅpenKlage(fagsakPerson.id)
+            val åpneKlager = service.hentÅpneKlagerInfotrygd(fagsakPerson.id)
 
-            assertThat(harÅpenKlage.infotrygd.overgangsstønad).isFalse
-            assertThat(harÅpenKlage.infotrygd.barnetilsyn).isFalse
-            assertThat(harÅpenKlage.infotrygd.skolepenger).isFalse
+            assertThat(åpneKlager.stønadstyper).isEmpty()
         }
 
-        @Test
-        internal fun `har åpen overgangsstønad`() {
-            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf(åpenSak())
+        @ParameterizedTest
+        @EnumSource(StønadType::class)
+        internal fun `har åpen sak for stønadstype`(stønadType: StønadType) {
+            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf(åpenSak(stønadstype = stønadType))
 
-            val harÅpenKlage = service.harÅpenKlage(fagsakPerson.id)
+            val åpneKlager = service.hentÅpneKlagerInfotrygd(fagsakPerson.id)
 
-            assertThat(harÅpenKlage.infotrygd.overgangsstønad).isTrue
-            assertThat(harÅpenKlage.infotrygd.barnetilsyn).isFalse
-            assertThat(harÅpenKlage.infotrygd.skolepenger).isFalse
-        }
-
-        @Test
-        internal fun `har åpen barnetilsyn`() {
-            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns
-                listOf(åpenSak(StønadType.BARNETILSYN))
-
-            val harÅpenKlage = service.harÅpenKlage(fagsakPerson.id)
-
-            assertThat(harÅpenKlage.infotrygd.overgangsstønad).isFalse
-            assertThat(harÅpenKlage.infotrygd.barnetilsyn).isTrue
-            assertThat(harÅpenKlage.infotrygd.skolepenger).isFalse
-        }
-
-        @Test
-        internal fun `har åpen skolepenger`() {
-            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns
-                listOf(åpenSak(StønadType.SKOLEPENGER))
-
-            val harÅpenKlage = service.harÅpenKlage(fagsakPerson.id)
-
-            assertThat(harÅpenKlage.infotrygd.overgangsstønad).isFalse
-            assertThat(harÅpenKlage.infotrygd.barnetilsyn).isFalse
-            assertThat(harÅpenKlage.infotrygd.skolepenger).isTrue
+            assertThat(åpneKlager.stønadstyper).containsExactly(stønadType)
         }
 
         private fun åpenSak(stønadstype: StønadType = StønadType.OVERGANGSSTØNAD) = InfotrygdSak(

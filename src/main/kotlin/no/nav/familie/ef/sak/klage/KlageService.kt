@@ -8,9 +8,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
-import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygd
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
@@ -47,20 +45,13 @@ class KlageService(
         )
     }
 
-    fun harÅpenKlage(fagsakPersonId: UUID): ÅpneKlagerDto {
+    fun hentÅpneKlagerInfotrygd(fagsakPersonId: UUID): ÅpneKlagerInfotrygd {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
-        return ÅpneKlagerDto(infotrygd = hentÅpneKlagerFraInfotrygd(fagsakPerson))
+        return hentÅpneKlagerFraInfotrygd(fagsakPerson)
     }
 
     private fun hentÅpneKlagerFraInfotrygd(fagsakPerson: FagsakPerson): ÅpneKlagerInfotrygd {
-        return infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()).groupBy { it.stønadType }
-            .map { it.key to it.value.isNotEmpty() }.toMap()
-            .let {
-                ÅpneKlagerInfotrygd(
-                    overgangsstønad = it[StønadType.OVERGANGSSTØNAD] ?: false,
-                    barnetilsyn = it[StønadType.BARNETILSYN] ?: false,
-                    skolepenger = it[StønadType.SKOLEPENGER] ?: false
-                )
-            }
+        return infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()).map { it.stønadType }
+            .let { ÅpneKlagerInfotrygd(stønadstyper = it.toSet()) }
     }
 }

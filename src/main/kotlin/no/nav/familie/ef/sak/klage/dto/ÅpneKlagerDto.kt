@@ -1,5 +1,5 @@
 package no.nav.familie.ef.sak.klage.dto
 
-data class ÅpneKlagerDto(val infotrygd: ÅpneKlagerInfotrygd)
+import no.nav.familie.kontrakter.felles.ef.StønadType
 
-data class ÅpneKlagerInfotrygd(val overgangsstønad: Boolean, val barnetilsyn: Boolean, val skolepenger: Boolean)
+data class ÅpneKlagerInfotrygd(val stønadstyper: Set<StønadType>)

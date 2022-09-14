@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.klage
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
-import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerDto
+import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygd
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -31,10 +31,10 @@ class KlageController(
         return Ressurs.success(behandlingId)
     }
 
-    @GetMapping("/fagsak-person/{fagsakPersonId}/apen")
-    fun harÅpenKlage(@PathVariable fagsakPersonId: UUID): Ressurs<ÅpneKlagerDto> {
+    @GetMapping("/fagsak-person/{fagsakPersonId}/infotrygd")
+    fun hentInfotrygdStatus(@PathVariable fagsakPersonId: UUID): Ressurs<ÅpneKlagerInfotrygd> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(klageService.harÅpenKlage(fagsakPersonId))
+        return Ressurs.success(klageService.hentÅpneKlagerInfotrygd(fagsakPersonId))
     }
 }
