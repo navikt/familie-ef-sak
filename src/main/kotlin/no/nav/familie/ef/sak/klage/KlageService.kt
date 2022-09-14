@@ -8,7 +8,7 @@ import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
-import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygd
+import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
@@ -45,13 +45,13 @@ class KlageService(
         )
     }
 
-    fun hentÅpneKlagerInfotrygd(fagsakPersonId: UUID): ÅpneKlagerInfotrygd {
+    fun hentÅpneKlagerInfotrygd(fagsakPersonId: UUID): ÅpneKlagerInfotrygdDto {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         return hentÅpneKlagerFraInfotrygd(fagsakPerson)
     }
 
-    private fun hentÅpneKlagerFraInfotrygd(fagsakPerson: FagsakPerson): ÅpneKlagerInfotrygd {
+    private fun hentÅpneKlagerFraInfotrygd(fagsakPerson: FagsakPerson): ÅpneKlagerInfotrygdDto {
         return infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()).map { it.stønadType }
-            .let { ÅpneKlagerInfotrygd(stønadstyper = it.toSet()) }
+            .let { ÅpneKlagerInfotrygdDto(stønadstyper = it.toSet()) }
     }
 }
