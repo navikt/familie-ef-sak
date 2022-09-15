@@ -7,10 +7,10 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
-import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.springframework.stereotype.Service
@@ -26,18 +26,24 @@ class KlageService(
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
-    fun hentBehandlinger(fagsakPersonId: UUID): Map<Long, List<KlagebehandlingDto>> {
-        val eksternFagsakIder = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId).let {
+    fun hentBehandlinger(fagsakPersonId: UUID): KlagebehandlingerDto {
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId)
+        val eksternFagsakIder = fagsaker.let {
             listOfNotNull(
                 it.overgangsstønad?.eksternId?.id,
                 it.barnetilsyn?.eksternId?.id,
                 it.skolepenger?.eksternId?.id
             )
         }
-        if(eksternFagsakIder.isEmpty()) {
-            return emptyMap()
+        if (eksternFagsakIder.isEmpty()) {
+            return KlagebehandlingerDto(emptyList(), emptyList(), emptyList())
         }
-        return klageClient.hentKlagebehandlinger(eksternFagsakIder.toSet())
+        val klagebehandlingerPåEksternId = klageClient.hentKlagebehandlinger(eksternFagsakIder.toSet())
+        return KlagebehandlingerDto(
+            overgangsstønad = klagebehandlingerPåEksternId[fagsaker.overgangsstønad?.eksternId?.id] ?: emptyList(),
+            barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId?.id] ?: emptyList(),
+            skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId?.id] ?: emptyList(),
+        )
     }
 
     fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
