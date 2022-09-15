@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,6 +30,13 @@ class KlageController(
         tilgangService.validerHarSaksbehandlerrolle()
         klageService.opprettKlage(behandlingId, opprettKlageDto)
         return Ressurs.success(behandlingId)
+    }
+
+    @GetMapping("/fagsak-person/{fagsakPersonId}")
+    fun hentKlagebehandlinger(@PathVariable fagsakPersonId: UUID): Ressurs<Map<Long, List<KlagebehandlingDto>>> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(klageService.hentBehandlinger(fagsakPersonId))
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}/infotrygd")

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.klage
 
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
@@ -31,8 +32,10 @@ class KlageClient(
         return postForEntity(opprettKlage, opprettKlagebehandlingRequest)
     }
 
-    fun hentKlagebehandlinger(eksternIder: Set<Long>): KlagebehandlingDto {
-        val uri = UriComponentsBuilder.fromUri(hentKlagebehandlinger).queryParam("eksternIder", eksternIder)
-        return getForEntity<Ressurs<KlagebehandlingDto>>(hentKlagebehandlinger).data!!
+    fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
+        val uri = UriComponentsBuilder.fromUri(hentKlagebehandlinger)
+            .queryParam("eksternFagsakId", eksternIder.joinToString(","))
+            .build().toUri()
+        return getForEntity<Ressurs<Map<Long, List<KlagebehandlingDto>>>>(uri).getDataOrThrow()
     }
 }

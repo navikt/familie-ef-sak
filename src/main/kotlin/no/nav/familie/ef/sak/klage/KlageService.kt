@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
+import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.springframework.stereotype.Service
@@ -24,6 +25,20 @@ class KlageService(
     private val infotrygdService: InfotrygdService,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
+
+    fun hentBehandlinger(fagsakPersonId: UUID): Map<Long, List<KlagebehandlingDto>> {
+        val eksternFagsakIder = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId).let {
+            listOfNotNull(
+                it.overgangsstønad?.eksternId?.id,
+                it.barnetilsyn?.eksternId?.id,
+                it.skolepenger?.eksternId?.id
+            )
+        }
+        if(eksternFagsakIder.isEmpty()) {
+            return emptyMap()
+        }
+        return klageClient.hentKlagebehandlinger(eksternFagsakIder.toSet())
+    }
 
     fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
