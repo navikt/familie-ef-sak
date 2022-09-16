@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
@@ -24,6 +25,26 @@ class KlageService(
     private val infotrygdService: InfotrygdService,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
+
+    fun hentBehandlinger(fagsakPersonId: UUID): KlagebehandlingerDto {
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPersonId)
+        val eksternFagsakIder = fagsaker.let {
+            listOfNotNull(
+                it.overgangsstønad?.eksternId?.id,
+                it.barnetilsyn?.eksternId?.id,
+                it.skolepenger?.eksternId?.id
+            )
+        }
+        if (eksternFagsakIder.isEmpty()) {
+            return KlagebehandlingerDto(emptyList(), emptyList(), emptyList())
+        }
+        val klagebehandlingerPåEksternId = klageClient.hentKlagebehandlinger(eksternFagsakIder.toSet())
+        return KlagebehandlingerDto(
+            overgangsstønad = klagebehandlingerPåEksternId[fagsaker.overgangsstønad?.eksternId?.id] ?: emptyList(),
+            barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId?.id] ?: emptyList(),
+            skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId?.id] ?: emptyList(),
+        )
+    }
 
     fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
