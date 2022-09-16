@@ -21,7 +21,7 @@ class KlageClient(
     AbstractRestClient(restOperations, "familie.klage") {
 
     private val opprettKlage =
-        UriComponentsBuilder.fromUri(familieKlageUri).pathSegment("api/behandling/opprett").build().toUri()
+        UriComponentsBuilder.fromUri(familieKlageUri).pathSegment("api/ekstern/behandling/opprett").build().toUri()
 
     private val hentKlagebehandlinger =
         UriComponentsBuilder.fromUri(familieKlageUri).pathSegment(
