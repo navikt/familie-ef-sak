@@ -36,9 +36,9 @@
         <felles.version>1.20220901103347_4819e55</felles.version>
         <prosessering.version>1.20220624132237_7f5ba9c</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20220914144308_31454d9</kontrakter.version>
+        <kontrakter.version>2.0_20220916130234_aa8ba65</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20220613122416_43a5f72</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.7.0</cucumber.version>
+        <cucumber.version>7.8.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -173,7 +173,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
-            <version>2.33.2</version>
+            <version>2.34.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
