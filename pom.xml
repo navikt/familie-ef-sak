@@ -38,7 +38,7 @@
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20220914144308_31454d9</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20220613122416_43a5f72</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.7.0</cucumber.version>
+        <cucumber.version>7.8.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
