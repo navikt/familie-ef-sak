@@ -99,6 +99,6 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         assertThatThrownBy {
             nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
-        }.hasMessageContaining("finner ikke behandling for")
+        }.hasMessageContaining("Fant ikke iverksatt eller avslått behandling for fagsak")
     }
 }

@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.dto.BehandlingBarnDto
 import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtBarnTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -46,18 +47,16 @@ class NyeBarnService(
         if (fagsaker.isEmpty()) error("Kunne ikke finne fagsak for personident")
 
         for (fagsak in fagsaker) {
-            val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
-            if (barnSidenGjeldendeBehandling != null) {
-                val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
-                opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
+            val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id, false)
+            val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+            opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
 
-                nyttBarnList.addAll(
-                    nyeBarn.map {
-                        NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING)
-                    }
-                )
-                nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
-            }
+            nyttBarnList.addAll(
+                nyeBarn.map {
+                    NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING)
+                }
+            )
+            nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
         }
 
         return NyeBarnDto(nyttBarnList)
@@ -80,14 +79,21 @@ class NyeBarnService(
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): BehandlingBarnDto {
         val kobledeBarn = finnKobledeBarnSidenGjeldendeBehandling(fagsakId)
-            ?: error("finner ikke behandling for $fagsakId")
         val nyeBarn = filtrerNyeBarn(kobledeBarn)
         return BehandlingBarnDto(nyeBarn, kobledeBarn.kobledeBarn.isNotEmpty())
     }
 
-    private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData? {
+    private fun finnKobledeBarnSidenGjeldendeBehandling(
+        fagsakId: UUID,
+        forventerAtBehandlingFinnes: Boolean = true
+    ): NyeBarnData {
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
-            ?: return null
+        if (behandling == null) {
+            feilHvis(forventerAtBehandlingFinnes) {
+                "Fant ikke iverksatt eller avslått behandling for fagsak=$fagsakId"
+            }
+            return NyeBarnData(emptyList(), emptyList())
+        }
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return finnKobledeBarn(behandling.id, aktivIdent)
     }
