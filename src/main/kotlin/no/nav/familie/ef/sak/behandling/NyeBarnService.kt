@@ -47,11 +47,17 @@ class NyeBarnService(
 
         for (fagsak in fagsaker) {
             val barnSidenGjeldendeBehandling = finnKobledeBarnSidenGjeldendeBehandling(fagsak.id)
-            val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
-            opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
+            if (barnSidenGjeldendeBehandling != null) {
+                val nyeBarn = filtrerNyeBarn(barnSidenGjeldendeBehandling)
+                opprettOppfølgningsoppgaveForBarn(fagsak, nyeBarn)
 
-            nyttBarnList.addAll(nyeBarn.map { NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING) })
-            nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
+                nyttBarnList.addAll(
+                    nyeBarn.map {
+                        NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING)
+                    }
+                )
+                nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
+            }
         }
 
         return NyeBarnDto(nyttBarnList)
@@ -74,13 +80,14 @@ class NyeBarnService(
 
     fun finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsakId: UUID): BehandlingBarnDto {
         val kobledeBarn = finnKobledeBarnSidenGjeldendeBehandling(fagsakId)
+            ?: error("finner ikke behandling for $fagsakId")
         val nyeBarn = filtrerNyeBarn(kobledeBarn)
         return BehandlingBarnDto(nyeBarn, kobledeBarn.kobledeBarn.isNotEmpty())
     }
 
-    private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData {
+    private fun finnKobledeBarnSidenGjeldendeBehandling(fagsakId: UUID): NyeBarnData? {
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
-            ?: error("Kunne ikke finne behandling for fagsak - $fagsakId")
+            ?: return null
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
         return finnKobledeBarn(behandling.id, aktivIdent)
     }
