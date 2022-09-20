@@ -28,11 +28,6 @@ class KlageClient(
             "api/ekstern/behandling/${Fagsystem.EF}"
         ).build().toUri()
 
-    private val hentKlagebehandlinger =
-        UriComponentsBuilder.fromUri(familieKlageUri).pathSegment(
-            "api/ekstern/behandling/${Fagsystem.EF}"
-        ).build().toUri()
-
     fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest) {
         return postForEntity(opprettKlage, opprettKlagebehandlingRequest)
     }
