@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
+import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.repository.behandling
@@ -22,7 +23,9 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
+import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
@@ -32,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class KlageServiceTest {
@@ -113,7 +117,11 @@ internal class KlageServiceTest {
         @ParameterizedTest
         @EnumSource(StønadType::class)
         internal fun `har åpen sak for stønadstype`(stønadType: StønadType) {
-            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf(åpenSak(stønadstype = stønadType))
+            every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf(
+                åpenSak(
+                    stønadstype = stønadType
+                )
+            )
 
             val åpneKlager = service.hentÅpneKlagerInfotrygd(fagsakPerson.id)
 
@@ -125,6 +133,82 @@ internal class KlageServiceTest {
             stønadType = stønadstype,
             resultat = InfotrygdSakResultat.ÅPEN_SAK,
             type = InfotrygdSakType.KLAGE
+        )
+    }
+
+    @Nested
+    inner class Mapping {
+
+        val eksternIdBT = 1L
+        val eksternIdOS = 2L
+        val eksternIdSP = 3L
+
+        @Test
+        internal fun `kaller på klage med eksternFagsakId`() {
+            val eksternFagsakIdSlot = slot<Set<Long>>()
+            val fagsaker = fagsaker()
+
+
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
+            every { klageClient.hentKlagebehandlinger(capture(eksternFagsakIdSlot)) } returns emptyMap()
+
+            service.hentBehandlinger(UUID.randomUUID())
+            assertThat(eksternFagsakIdSlot.captured).containsExactlyInAnyOrder(
+                eksternIdBT,
+                eksternIdOS,
+                eksternIdSP
+            )
+        }
+
+        @Test
+        internal fun `skal mappe fagsakId til riktig stønadstype`() {
+            val fagsaker = fagsaker()
+            val klageBehandlingerDto = klageBehandlingerDto()
+
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
+            every { klageClient.hentKlagebehandlinger(any()) } returns klageBehandlingerDto
+
+            val klager = service.hentBehandlinger(UUID.randomUUID())
+
+            assertThat(klager.overgangsstønad.single()).isEqualTo(klageBehandlingerDto[eksternIdOS]!!.single())
+            assertThat(klager.barnetilsyn.single()).isEqualTo(klageBehandlingerDto[eksternIdBT]!!.single())
+            assertThat(klager.skolepenger.single()).isEqualTo(klageBehandlingerDto[eksternIdSP]!!.single())
+            assertThat(klager.skolepenger.single()).isNotEqualTo(klager.barnetilsyn.single())
+
+        }
+
+        @Test
+        internal fun `skal returnere tomme lister dersom eksternFagsakId ikke eksisterer`() {
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(null, null, null)
+
+            val klager = service.hentBehandlinger(UUID.randomUUID())
+
+            assertThat(klager.overgangsstønad).isEmpty()
+            assertThat(klager.barnetilsyn).isEmpty()
+            assertThat(klager.skolepenger).isEmpty()
+        }
+
+        private fun fagsaker() = Fagsaker(
+            fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = EksternFagsakId(eksternIdOS)),
+            fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = EksternFagsakId(eksternIdBT)),
+            fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = EksternFagsakId(eksternIdSP))
+        )
+
+        private fun klageBehandlingDto() = KlagebehandlingDto(
+            id = UUID.randomUUID(),
+            fagsakId = UUID.randomUUID(),
+            status = BehandlingStatus.UTREDES,
+            opprettet = LocalDateTime.now(),
+            mottattDato = LocalDate.now().minusDays(1),
+            resultat = null,
+            årsak = null,
+            vedtaksdato = null
+        )
+
+        private fun klageBehandlingerDto() = mapOf(
+            eksternIdOS to listOf(klageBehandlingDto()),
+            eksternIdBT to listOf(klageBehandlingDto()),
+            eksternIdSP to listOf(klageBehandlingDto())
         )
     }
 }
