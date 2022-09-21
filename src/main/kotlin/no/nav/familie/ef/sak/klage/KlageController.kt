@@ -35,14 +35,12 @@ class KlageController(
     @GetMapping("/fagsak-person/{fagsakPersonId}")
     fun hentKlagebehandlinger(@PathVariable fagsakPersonId: UUID): Ressurs<KlagebehandlingerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarVeilederrolle()
         return Ressurs.success(klageService.hentBehandlinger(fagsakPersonId))
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}/infotrygd")
     fun hentInfotrygdStatus(@PathVariable fagsakPersonId: UUID): Ressurs<ÅpneKlagerInfotrygdDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarVeilederrolle()
         return Ressurs.success(klageService.hentÅpneKlagerInfotrygd(fagsakPersonId))
     }
 }

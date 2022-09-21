@@ -153,10 +153,6 @@ class TilgangService(
         validerTilgangTilRolle(BehandlerRolle.BESLUTTER)
     }
 
-    fun validerHarVeilederrolle() {
-        validerTilgangTilRolle(BehandlerRolle.VEILEDER)
-    }
-
     fun validerTilgangTilRolle(minimumsrolle: BehandlerRolle) {
         if (!harTilgangTilRolle(minimumsrolle)) {
             throw ManglerTilgang(
