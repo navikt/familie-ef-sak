@@ -19,7 +19,7 @@ class VentePåStatusFraIverksett(
         iverksettClient.hentStatus(saksbehandling.id).let {
             when {
                 erBrevløsIverksettingOk(saksbehandling, it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
-                setOf(IverksettStatus.JOURNALFØRT, it == IverksettStatus.OK).contains(it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
+                setOf(IverksettStatus.JOURNALFØRT, IverksettStatus.OK).contains(it) -> opprettLagSaksbehandlingsblankettTask(saksbehandling)
                 else -> throw TaskExceptionUtenStackTrace("Mottok status $it fra iverksett for behandlingId=${saksbehandling.id}")
             }
         }

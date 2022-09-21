@@ -148,7 +148,6 @@ internal class KlageServiceTest {
             val eksternFagsakIdSlot = slot<Set<Long>>()
             val fagsaker = fagsaker()
 
-
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
             every { klageClient.hentKlagebehandlinger(capture(eksternFagsakIdSlot)) } returns emptyMap()
 
@@ -174,7 +173,6 @@ internal class KlageServiceTest {
             assertThat(klager.barnetilsyn.single()).isEqualTo(klageBehandlingerDto[eksternIdBT]!!.single())
             assertThat(klager.skolepenger.single()).isEqualTo(klageBehandlingerDto[eksternIdSP]!!.single())
             assertThat(klager.skolepenger.single()).isNotEqualTo(klager.barnetilsyn.single())
-
         }
 
         @Test
