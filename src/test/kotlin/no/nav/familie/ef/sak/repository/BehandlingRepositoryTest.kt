@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -328,15 +329,15 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
 
         val fagsakOS = lagreFagsak(UUID.randomUUID(), OVERGANGSSTØNAD, fagsakPersonId)
         val førstegangsbehandlingOS = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakOS)
-        lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakOS)
+        lagreBehandling(UUID.randomUUID(), OPPRETTET, IKKE_SATT, fagsakOS)
 
         val fagsakBT = lagreFagsak(UUID.randomUUID(), BARNETILSYN, fagsakPersonId)
-        lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
+        val førstegangsbehandlingBT = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
 
         val behandlingerForGjenbruk: List<Behandling> =
             behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakBT.fagsakPersonId)
 
-        assertThat(behandlingerForGjenbruk).containsExactly(førstegangsbehandlingOS)
+        assertThat(behandlingerForGjenbruk).containsExactly(førstegangsbehandlingBT, førstegangsbehandlingOS)
     }
 
     @Test
@@ -346,19 +347,21 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val fagsakOS = lagreFagsak(UUID.randomUUID(), OVERGANGSSTØNAD, fagsakPersonId)
         val førstegangsbehandlingOS = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakOS)
         val annengangsbehandlingOS = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakOS)
-        lagreBehandling(UUID.randomUUID(), FATTER_VEDTAK, IKKE_SATT, fagsakOS)
+        lagreBehandling(UUID.randomUUID(), FERDIGSTILT, HENLAGT, fagsakOS)
 
         val fagsakBT = lagreFagsak(UUID.randomUUID(), BARNETILSYN, fagsakPersonId)
         val førstegangsbehandlingBT = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakBT)
-        lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
+        val revurderingUnderArbeidBT = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
 
         val fagsakSP = lagreFagsak(UUID.randomUUID(), SKOLEPENGER, fagsakPersonId)
-        lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakSP)
+        val revurderingUnderArbeidSP = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakSP)
 
         val behandlingerForGjenbruk: List<Behandling> =
             behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakSP.fagsakPersonId)
 
         assertThat(behandlingerForGjenbruk).containsExactly(
+            revurderingUnderArbeidSP,
+            revurderingUnderArbeidBT,
             førstegangsbehandlingBT,
             annengangsbehandlingOS,
             førstegangsbehandlingOS

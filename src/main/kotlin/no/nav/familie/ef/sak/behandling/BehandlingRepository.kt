@@ -130,8 +130,8 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         JOIN fagsak f on b.fagsak_id = f.id 
         WHERE f.fagsak_person_id = :fagsakPersonId
-         AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT')
-         AND b.status = 'FERDIGSTILT'
+         AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT', 'IKKE_SATT')
+         AND b.status NOT IN ('OPPRETTET')
         ORDER BY b.opprettet_tid DESC
     """
     )
