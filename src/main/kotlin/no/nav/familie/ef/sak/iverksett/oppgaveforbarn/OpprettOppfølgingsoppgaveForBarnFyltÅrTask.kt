@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -44,7 +46,9 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
         const val TYPE = "opprettOppfølgingsoppgaveForBarnFyltÅrTask"
 
         fun opprettTask(opprettOppgavePayload: OpprettOppgavePayload): Task {
-            return Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload))
+            return Task(TYPE, objectMapper.writeValueAsString(opprettOppgavePayload)).apply {
+                this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+            }
         }
     }
 }
