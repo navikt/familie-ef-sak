@@ -168,15 +168,15 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 status = BehandlingStatus.FERDIGSTILT
             )
         )
-        behandlingRepository.insert(
+        val revurderingUnderArbeidSP = behandlingRepository.insert(
             behandling(fagsakSp).copy(
                 resultat = BehandlingResultat.IKKE_SATT,
                 status = BehandlingStatus.UTREDES
             )
         )
 
-        val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingForGjenbrukAvVilkår(fagsakPersonId)
-        val behandlingerForVilkårsgjenbrukkLagret = listOf(førstegangSp, førstegangBt)
+        val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+        val behandlingerForVilkårsgjenbrukkLagret = listOf(revurderingUnderArbeidSP, førstegangSp, førstegangBt)
         assertThat(behandlingerForVilkårsgjenbrukHentet).isEqualTo(behandlingerForVilkårsgjenbrukkLagret)
     }
 }

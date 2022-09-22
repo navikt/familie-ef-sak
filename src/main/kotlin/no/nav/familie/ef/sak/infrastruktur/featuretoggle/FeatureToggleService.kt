@@ -34,7 +34,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_GJENBRUKE_VILKÅR("familie.ef.sak.frontend-skal-vise-alertboks-gjenbruk-vilkar"),
 
     FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder"),
-    FRONTEND_VIS_VEDTAK_LEGG_TIL_RAD_KNAPP("familie.ef.sak.frontend-vis-vedtak-legg-til-rad-knapp")
+    FRONTEND_VIS_VEDTAK_LEGG_TIL_RAD_KNAPP("familie.ef.sak.frontend-vis-vedtak-legg-til-rad-knapp"),
+    FRONTEND_OPPRETT_KLAGE("familie.ef.sak.frontend-vis-opprett-klage")
     ;
 
     companion object {

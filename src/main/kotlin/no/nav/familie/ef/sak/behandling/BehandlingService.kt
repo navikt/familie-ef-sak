@@ -75,7 +75,7 @@ class BehandlingService(
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
     }
 
-    fun hentBehandlingForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
+    fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
         return behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
     }
 

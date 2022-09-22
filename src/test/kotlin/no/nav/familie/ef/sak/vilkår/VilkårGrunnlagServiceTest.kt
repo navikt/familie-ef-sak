@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import no.nav.familie.ef.sak.testutil.søknadsBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
@@ -93,8 +93,8 @@ internal class VilkårGrunnlagServiceTest {
     private val søknadBarnetilsyn =
         SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)
             .tilSøknadsverdier()
-    private val barn = søknadsBarnTilBehandlingBarn(søknadOvergangsstønad.barn)
-    private val barnBarnetilsyn = søknadsBarnTilBehandlingBarn(søknadBarnetilsyn.barn)
+    private val barn = søknadBarnTilBehandlingBarn(søknadOvergangsstønad.barn)
+    private val barnBarnetilsyn = søknadBarnTilBehandlingBarn(søknadBarnetilsyn.barn)
     private val medlemskapsinfo = Medlemskapsinfo(søknadOvergangsstønad.fødselsnummer, emptyList(), emptyList(), emptyList())
     private val fagsak = fagsak(identer = setOf(PersonIdent(søknadOvergangsstønad.fødselsnummer)))
 

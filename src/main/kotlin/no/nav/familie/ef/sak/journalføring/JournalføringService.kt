@@ -123,14 +123,15 @@ class JournalføringService(
         ferdigstillJournalføringsoppgave(journalføringRequest)
         opprettBehandlingsstatistikkTask(behandling.id, journalføringRequest.oppgaveId.toLong())
 
-        return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
+        return opprettBehandleSakOppgave(behandling, saksbehandler)
     }
 
     @Transactional
-    fun automatiskJournalførTilFørstegangsbehandling(
+    fun automatiskJournalførFørstegangsbehandling(
         fagsak: Fagsak,
         journalpost: Journalpost,
-        journalførendeEnhet: String
+        journalførendeEnhet: String,
+        mappeId: Long?
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -147,7 +148,12 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
 
-        val oppgaveId = opprettSaksbehandlingsoppgave(behandling = behandling, navIdent = null)
+        val oppgaveId = oppgaveService.opprettOppgave(
+            behandlingId = behandling.id,
+            oppgavetype = Oppgavetype.BehandleSak,
+            mappeId = mappeId,
+            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
+        )
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id,
@@ -177,7 +183,7 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandling.id)
 
-        return opprettSaksbehandlingsoppgave(behandling, saksbehandler)
+        return opprettBehandleSakOppgave(behandling, saksbehandler)
     }
 
     private fun opprettBehandlingOgPopulerGrunnlagsdata(
@@ -235,10 +241,15 @@ class JournalføringService(
     }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long? = null) {
-        taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandlingId, oppgaveId = oppgaveId))
+        taskRepository.save(
+            BehandlingsstatistikkTask.opprettMottattTask(
+                behandlingId = behandlingId,
+                oppgaveId = oppgaveId
+            )
+        )
     }
 
-    private fun opprettSaksbehandlingsoppgave(behandling: Behandling, navIdent: String?): Long {
+    private fun opprettBehandleSakOppgave(behandling: Behandling, navIdent: String): Long {
         return oppgaveService.opprettOppgave(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
@@ -259,7 +270,11 @@ class JournalføringService(
     }
 
     private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandlingService.leggTilBehandlingsjournalpost(journalpost.journalpostId, journalpost.journalposttype, behandling.id)
+        behandlingService.leggTilBehandlingsjournalpost(
+            journalpost.journalpostId,
+            journalpost.journalposttype,
+            behandling.id
+        )
     }
 
     private fun settSøknadPåBehandling(journalpost: Journalpost, fagsak: Fagsak, behandlingId: UUID) {
@@ -277,5 +292,9 @@ class JournalføringService(
                 søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
         }
+    }
+
+    companion object {
+        const val AUTOMATISK_JOURNALFØRING_BESKRIVELSE = "Automatisk journalført"
     }
 }

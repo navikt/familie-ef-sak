@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -72,5 +73,32 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn // PdlClient.hentBarn er mocket til å returnere 2 barn
         assertThat(barn).hasSize(2)
         assertThat(barn.all { it.stønadstype == StønadType.BARNETILSYN }).isTrue
+    }
+
+    /**
+     * Denne kalles på av ef-personhendelse og man itererer over flere fagsaker på en person
+     * Det kan være at en av disse fagsakene ikke har en iverksatt behandling ennå
+     */
+    @Test
+    internal fun `finnNyeEllerTidligereFødteBarn skal ikke feile hvis det ikke finnes en behandling på fagsaken`() {
+        testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident)), migrert = true))
+
+        val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn
+
+        assertThat(barn).isEmpty()
+    }
+
+    /**
+     * Denne skal kaste feil fordi den er brukt fra frontend,
+     * som kaller på denne hvis det finnes en tidligere iverksatt behandling
+     * Og forventer då at det skal finnes en iverksatt/avslått behandling på fagsaken
+     */
+    @Test
+    internal fun `finnNyeBarnSidenGjeldendeBehandlingForFagsak skal feile hvis den ikke finner en behandling på fagsak`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = fagsakpersoner(setOf(ident)), migrert = true))
+
+        assertThatThrownBy {
+            nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(fagsak.id)
+        }.hasMessageContaining("Fant ikke iverksatt eller avslått behandling for fagsak")
     }
 }

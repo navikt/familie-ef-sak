@@ -49,7 +49,8 @@ class OppgaveService(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
         tilordnetNavIdent: String? = null,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
+        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val oppgaveFinnesFraFør =
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
@@ -58,7 +59,7 @@ class OppgaveService(
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
             val opprettetOppgaveId =
-                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, beskrivelse, tilordnetNavIdent)
+                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, beskrivelse, tilordnetNavIdent, mappeId)
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
@@ -76,7 +77,8 @@ class OppgaveService(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
         beskrivelse: String?,
-        tilordnetNavIdent: String?
+        tilordnetNavIdent: String?,
+        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
@@ -92,7 +94,7 @@ class OppgaveService(
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
             behandlesAvApplikasjon = "familie-ef-sak",
-            mappeId = finnAktuellMappe(enhetsnummer, oppgavetype)
+            mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
         )
 
         return try {
@@ -127,7 +129,6 @@ class OppgaveService(
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        // val oppgave = finnOppgaveMedId(oppgaveId)
         if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
             val finnMappeRequest = FinnMappeRequest(
                 listOf(),
@@ -137,9 +138,7 @@ class OppgaveService(
             )
             val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
             val mappe = mapperResponse.mapper.find {
-                it.navn.contains("EF Sak", true) &&
-                    it.navn.contains("Hendelser") &&
-                    it.navn.contains("62")
+                it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
             }
                 ?: error("Fant ikke mappe for hendelser")
             return mappe.id.toLong()

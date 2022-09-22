@@ -2,16 +2,26 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -50,13 +60,18 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     fun `hentUferdigeBehandlingerFørDato skal bare hente behandlinger før en gitt dato`() {
         val enMånedSiden = LocalDateTime.now().minusMonths(1)
 
-        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = StønadType.OVERGANGSSTØNAD))
+        val fagsak = testoppsettService.lagreFagsak(fagsak(stønadstype = OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(fagsak, opprettetTid = LocalDateTime.now().minusMonths(2)))
         val annenFagsak =
-            testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = StønadType.OVERGANGSSTØNAD))
+            testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1")), stønadstype = OVERGANGSSTØNAD))
         behandlingRepository.insert(behandling(annenFagsak, opprettetTid = LocalDateTime.now().minusWeeks(1)))
 
-        assertThat(behandlingRepository.hentUferdigeBehandlingerFørDato(StønadType.OVERGANGSSTØNAD, enMånedSiden)).size()
+        assertThat(
+            behandlingRepository.hentUferdigeBehandlingerFørDato(
+                OVERGANGSSTØNAD,
+                enMånedSiden
+            )
+        ).size()
             .isEqualTo(1)
     }
 
@@ -166,7 +181,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Test
     fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
-        val fagsak = testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))).copy(id = førstegangsbehandling.fagsakId))
+        val fagsak =
+            testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))).copy(id = førstegangsbehandling.fagsakId))
 
         val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
         behandlingRepository.insertAll(behandlinger)
@@ -305,5 +321,80 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             assertThat(ikkeFerdigstiltFinnes).isTrue()
             assertThat(ikkeUtredesFinnesIkke).isFalse()
         }
+    }
+
+    @Test
+    internal fun `skal finne aktuell behandling for gjenbruk av inngangsvilkår`() {
+        val fagsakPersonId = UUID.randomUUID()
+
+        val fagsakOS = lagreFagsak(UUID.randomUUID(), OVERGANGSSTØNAD, fagsakPersonId)
+        val førstegangsbehandlingOS = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakOS)
+        lagreBehandling(UUID.randomUUID(), OPPRETTET, IKKE_SATT, fagsakOS)
+
+        val fagsakBT = lagreFagsak(UUID.randomUUID(), BARNETILSYN, fagsakPersonId)
+        val førstegangsbehandlingBT = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
+
+        val behandlingerForGjenbruk: List<Behandling> =
+            behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakBT.fagsakPersonId)
+
+        assertThat(behandlingerForGjenbruk).containsExactly(førstegangsbehandlingBT, førstegangsbehandlingOS)
+    }
+
+    @Test
+    internal fun `skal finne alle aktuelle behandlinger for gjenbruk av inngangsvilkår`() {
+        val fagsakPersonId = UUID.randomUUID()
+
+        val fagsakOS = lagreFagsak(UUID.randomUUID(), OVERGANGSSTØNAD, fagsakPersonId)
+        val førstegangsbehandlingOS = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakOS)
+        val annengangsbehandlingOS = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakOS)
+        lagreBehandling(UUID.randomUUID(), FERDIGSTILT, HENLAGT, fagsakOS)
+
+        val fagsakBT = lagreFagsak(UUID.randomUUID(), BARNETILSYN, fagsakPersonId)
+        val førstegangsbehandlingBT = lagreBehandling(UUID.randomUUID(), FERDIGSTILT, INNVILGET, fagsakBT)
+        val revurderingUnderArbeidBT = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakBT)
+
+        val fagsakSP = lagreFagsak(UUID.randomUUID(), SKOLEPENGER, fagsakPersonId)
+        val revurderingUnderArbeidSP = lagreBehandling(UUID.randomUUID(), UTREDES, IKKE_SATT, fagsakSP)
+
+        val behandlingerForGjenbruk: List<Behandling> =
+            behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakSP.fagsakPersonId)
+
+        assertThat(behandlingerForGjenbruk).containsExactly(
+            revurderingUnderArbeidSP,
+            revurderingUnderArbeidBT,
+            førstegangsbehandlingBT,
+            annengangsbehandlingOS,
+            førstegangsbehandlingOS
+        )
+    }
+
+    private fun lagreBehandling(
+        behandlingId: UUID,
+        status: BehandlingStatus,
+        resultat: BehandlingResultat,
+        fagsak: Fagsak
+    ): Behandling {
+        return behandlingRepository.insert(
+            behandling(
+                id = behandlingId,
+                status = status,
+                resultat = resultat,
+                fagsak = fagsak
+            )
+        )
+    }
+
+    private fun lagreFagsak(
+        fagsakId: UUID,
+        stønadType: StønadType,
+        fagsakPersonId: UUID
+    ): Fagsak {
+        return testoppsettService.lagreFagsak(
+            fagsak(
+                id = fagsakId,
+                stønadstype = stønadType,
+                fagsakPersonId = fagsakPersonId
+            )
+        )
     }
 }
