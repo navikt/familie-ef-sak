@@ -52,41 +52,14 @@ class OppgaveService(
         beskrivelse: String? = null,
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
-        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-
         val oppgaveFinnesFraFør =
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
 
         return if (oppgaveFinnesFraFør !== null) {
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
-            val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
-            val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
-            val opprettOppgave =
-                OpprettOppgaveRequest(
-                    ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
-                    saksId = fagsak.eksternId.id.toString(),
-                    tema = Tema.ENF,
-                    oppgavetype = oppgavetype,
-                    fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
-                    beskrivelse = lagOppgaveTekst(beskrivelse),
-                    enhetsnummer = enhetsnummer,
-                    behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-                    tilordnetRessurs = tilordnetNavIdent,
-                    behandlesAvApplikasjon = "familie-ef-sak",
-                    mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
-                )
-
-            val opprettetOppgaveId = try {
-                oppgaveClient.opprettOppgave(opprettOppgave)
-            } catch (e: Exception) {
-                if (finnerIkkeGyldigArbeidsfordeling(e)) {
-                    oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
-                } else {
-                    throw e
-                }
-            }
-
+            val opprettetOppgaveId =
+                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, beskrivelse, tilordnetNavIdent, mappeId)
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
@@ -94,6 +67,44 @@ class OppgaveService(
             )
             oppgaveRepository.insert(oppgave)
             opprettetOppgaveId
+        }
+    }
+
+    /**
+     * I de tilfeller en service ønsker å ansvare selv for lagring til [OppgaveRepository]
+     */
+    fun opprettOppgaveUtenÅLagreIRepository(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        beskrivelse: String?,
+        tilordnetNavIdent: String?,
+        mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
+    ): Long {
+        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
+        val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
+        val opprettOppgave = OpprettOppgaveRequest(
+            ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
+            saksId = fagsak.eksternId.id.toString(),
+            tema = Tema.ENF,
+            oppgavetype = oppgavetype,
+            fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
+            beskrivelse = lagOppgaveTekst(beskrivelse),
+            enhetsnummer = enhetsnummer,
+            behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
+            tilordnetRessurs = tilordnetNavIdent,
+            behandlesAvApplikasjon = "familie-ef-sak",
+            mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
+        )
+
+        return try {
+            oppgaveClient.opprettOppgave(opprettOppgave)
+        } catch (e: Exception) {
+            if (finnerIkkeGyldigArbeidsfordeling(e)) {
+                oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
+            } else {
+                throw e
+            }
         }
     }
 

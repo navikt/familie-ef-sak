@@ -41,15 +41,12 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val taskRepository = mockk<TaskRepository>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
-    private val opprettOppgaveForBarnService =
-        BarnFyllerÅrOppfølgingsoppgaveService(
-            gjeldendeBarnRepository,
-            oppgaveService,
-            oppgaveRepository,
-            personopplysningerIntegrasjonerClient,
-            taskRepository,
-            pdlClient
-        )
+    private val opprettOppgaveForBarnService = BarnFyllerÅrOppfølgingsoppgaveService(
+        gjeldendeBarnRepository,
+        oppgaveRepository,
+        taskRepository,
+        pdlClient
+    )
 
     private val oppgaveSlot = slot<Oppgave>()
     private val oppgaveMock = mockk<Oppgave>()
@@ -91,14 +88,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(
-            BarnTilOppgave(
-                barnTilUtplukkForOppgave.fødselsnummerBarn!!,
-                barnTilUtplukkForOppgave.behandlingId,
-                1,
-                1
-            )
-        )
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify { taskRepository.save(any()) }
     }
@@ -110,14 +99,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(
-            BarnTilOppgave(
-                barnTilUtplukkForOppgave.fødselsnummerBarn!!,
-                barnTilUtplukkForOppgave.behandlingId,
-                1,
-                1
-            )
-        )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify { taskRepository.save(any()) }
@@ -130,14 +111,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(
-            BarnTilOppgave(
-                barnTilUtplukkForOppgave.fødselsnummerBarn!!,
-                barnTilUtplukkForOppgave.behandlingId,
-                1,
-                1
-            )
-        )
+
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify(exactly = 0) { taskRepository.save(any()) }
     }
@@ -153,7 +127,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         val opprettBarnTilOppgave =
             opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns opprettBarnTilOppgave
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify(exactly = 5) { taskRepository.save(any()) }
@@ -167,7 +140,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(fødselsnummer = null, termindato = termindato, fødselsnummerSøker = fødselsnummerSøker))
+        } returns listOf(
+            opprettBarn(
+                fødselsnummer = null,
+                termindato = termindato,
+                fødselsnummerSøker = fødselsnummerSøker
+            )
+        )
 
         every { pdlClient.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns mapOf(
             Pair(
@@ -182,15 +161,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                         )
                     )
                 )
-            )
-        )
-
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(
-            BarnTilOppgave(
-                fødselsnummerBarn,
-                UUID.randomUUID(),
-                1,
-                1
             )
         )
 
@@ -245,15 +215,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
         )
 
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(
-            BarnTilOppgave(
-                fødselsnummerBarn,
-                behandlingId,
-                1,
-                1
-            )
-        )
-
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
 
         verify(exactly = 1) { taskRepository.save(any()) }
@@ -275,7 +236,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         val opprettBarnTilOppgave =
             opprettBarnForFødselsdato.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns opprettBarnTilOppgave
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify(exactly = 2) { taskRepository.save(any()) }
@@ -292,7 +252,13 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         every {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
-        } returns listOf(opprettBarn(behandlingId = behandlingId, fødselsnummer = fødselsnummerBarn, fødselsnummerSøker = fødselsnummerSøker))
+        } returns listOf(
+            opprettBarn(
+                behandlingId = behandlingId,
+                fødselsnummer = fødselsnummerBarn,
+                fødselsnummerSøker = fødselsnummerSøker
+            )
+        )
 
         every {
             gjeldendeBarnRepository.finnBarnTilMigrerteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
@@ -301,21 +267,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
                 behandlingId = migrertBehandlingId,
                 fødselsnummer = fødselsnummerBarnMigrert,
                 fraMigrering = true
-            )
-        )
-
-        every { gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(any()) } returns setOf(
-            BarnTilOppgave(
-                fødselsnummerBarnMigrert,
-                UUID.randomUUID(),
-                1,
-                1
-            ),
-            BarnTilOppgave(
-                fødselsnummerBarn,
-                UUID.randomUUID(),
-                2,
-                2
             )
         )
 
