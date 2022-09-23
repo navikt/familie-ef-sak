@@ -133,7 +133,7 @@ class BarnService(
         behandlingId: UUID,
         grunnlagsdataBarn: List<BarnMedIdent>
     ): List<BehandlingBarn> {
-        val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
+        val forrigeBehandling = behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsakId)
         feilHvis(forrigeBehandling == null) {
             "Kan ikke behandle ettersending når det ikke finnes en tidligere behandling"
         }

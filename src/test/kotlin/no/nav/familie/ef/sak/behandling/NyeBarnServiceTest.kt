@@ -55,7 +55,7 @@ class NyeBarnServiceTest {
 
     @BeforeEach
     fun init() {
-        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns behandling
+        every { behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(any()) } returns behandling
         every { fagsakService.finnFagsaker(any()) } returns listOf(fagsak)
         every { grunnlagsdataMedMetadata.grunnlagsdata } returns grunnlagsdataDomene
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent("fnr til søker", false)))

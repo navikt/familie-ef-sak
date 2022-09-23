@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
@@ -91,10 +90,7 @@ class RevurderingService(
      * Skal håndtere en førstegangsbehandling som er avslått, då vi trenger en behandlingId for å kopiere data fra søknaden
      */
     private fun forrigeBehandling(revurdering: Behandling): UUID {
-        val sisteBehandling = behandlingService.hentBehandlinger(revurdering.fagsakId)
-            .filter { it.id != revurdering.id }
-            .filter { it.resultat != BehandlingResultat.HENLAGT }
-            .maxByOrNull { it.sporbar.opprettetTid }
+        val sisteBehandling = behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(revurdering.fagsakId)
         return revurdering.forrigeBehandlingId
             ?: sisteBehandling?.id
             ?: error("Revurdering må ha eksisterende iverksatt behandling")

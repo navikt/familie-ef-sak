@@ -443,7 +443,7 @@ internal class BarnServiceTest {
 
         @BeforeEach
         internal fun setUp() {
-            every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId) } returns tidligereBehandling
+            every { behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsakId) } returns tidligereBehandling
             every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns emptyList()
         }
 
@@ -483,7 +483,7 @@ internal class BarnServiceTest {
             assertThat(barnPåForrigeBehandling.map { it.søknadBarnId }).doesNotContainNull()
             assertThat(barnSlot.captured[0].søknadBarnId).isNull()
 
-            verify(exactly = 1) { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId) }
+            verify(exactly = 1) { behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsakId) }
         }
 
         @Test

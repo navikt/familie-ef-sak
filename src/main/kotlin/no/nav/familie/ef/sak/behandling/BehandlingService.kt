@@ -3,7 +3,10 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.AVSLÅTT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.OPPHØRT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -54,7 +57,7 @@ class BehandlingService(
         ?.let { behandlingRepository.finnEksterneIder(it) } ?: emptySet()
 
     fun finnSisteIverksatteBehandling(fagsakId: UUID) =
-        behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        behandlingRepository.finnSisteFerdigstilteBehandlingen(fagsakId, setOf(INNVILGET, OPPHØRT))
 
     fun hentGamleUferdigeBehandlinger(stønadtype: StønadType): List<Behandling> {
         val enMånedSiden = LocalDateTime.now().minusMonths(1)
@@ -65,11 +68,8 @@ class BehandlingService(
     fun finnesÅpenBehandling(fagsakId: UUID) =
         behandlingRepository.existsByFagsakIdAndStatusIsNot(fagsakId, FERDIGSTILT)
 
-    fun finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId: UUID): Behandling? =
-        behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-            ?: hentBehandlinger(fagsakId).lastOrNull {
-                it.status == FERDIGSTILT && it.resultat != HENLAGT
-            }
+    fun finnSisteIverksatteEllerAvslåtteBehandling(fagsakId: UUID): Behandling? =
+        behandlingRepository.finnSisteFerdigstilteBehandlingen(fagsakId, setOf(INNVILGET, OPPHØRT, AVSLÅTT))
 
     fun hentBehandlingsjournalposter(behandlingId: UUID): List<Behandlingsjournalpost> {
         return behandlingsjournalpostRepository.findAllByBehandlingId(behandlingId)
@@ -115,7 +115,7 @@ class BehandlingService(
             "Feature toggle for korrigering er ikke skrudd på for bruker"
         }
         val tidligereBehandlinger = behandlingRepository.findByFagsakId(fagsakId)
-        val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        val forrigeBehandling = finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, erMigrering)
 
         val behandling = behandlingRepository.insert(

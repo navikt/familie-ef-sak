@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.task
 
-import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -23,7 +23,7 @@ class StartBehandlingTask(
     private val iverksettClient: IverksettClient,
     private val pdlClient: PdlClient,
     private val fagsakService: FagsakService,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingService: BehandlingService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -38,7 +38,7 @@ class StartBehandlingTask(
     }
 
     private fun finnesEnIverksattBehandlingFor(fagsak: Fagsak) =
-        behandlingRepository.finnSisteIverksatteBehandling(fagsak.id) != null
+        behandlingService.finnSisteIverksatteBehandling(fagsak.id) != null
 
     companion object {
 

@@ -3,16 +3,21 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
@@ -71,61 +76,85 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(behandlingService.hentBehandlinger(setOf(behandling.id, behandling2.id))).hasSize(2)
     }
 
-    @Test
-    internal fun `skal finne siste behandling med avslåtte hvis kun avslått`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val behandling = behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
-        assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
-    }
+    @Nested
+    inner class finnSisteBehandling {
 
-    @Test
-    internal fun `skal finne siste behandling med avslåtte hvis avslått og henlagt`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val avslag = behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
-        assertThat(sisteBehandling?.id).isEqualTo(avslag.id)
-    }
+        var datoCounter = 0L
 
-    @Test
-    internal fun `skal plukke ut førstegangsbehandling hvis det finnes førstegangsbehandling, avslått og henlagt`() {
-        val fagsak = testoppsettService.lagreFagsak(fagsak())
-        val førstegang = behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
+        @Nested
+        inner class finnSisteIverksatteBehandling {
+
+            @ParameterizedTest
+            @EnumSource(BehandlingResultat::class, names = ["INNVILGET", "OPPHØRT"])
+            internal fun `skal finne siste behandlingen av ferdigstilt`(resultat: BehandlingResultat) {
+                val fagsak = testoppsettService.lagreFagsak(fagsak())
+                leggInnBehandlingerForAlleBehandlingsresultat(fagsak)
+                val behandling = lagreBehandling(fagsak, resultat)
+
+                val sisteBehandling = behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsak.id)
+
+                assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
+            }
+
+            @ParameterizedTest
+            @EnumSource(BehandlingResultat::class, names = ["IKKE_SATT", "HENLAGT", "AVSLÅTT"])
+            internal fun `skal ikke finne behandling med ikke_satt, avslått eller henlagt som resultat`(resultat: BehandlingResultat) {
+                val fagsak = testoppsettService.lagreFagsak(fagsak())
+                lagreBehandling(fagsak, resultat)
+
+                val sisteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id)
+
+                assertThat(sisteBehandling).isNull()
+            }
+        }
+
+        @Nested
+        inner class finnSisteIverksatteEllerAvslåtteBehandling {
+            @ParameterizedTest
+            @EnumSource(BehandlingResultat::class, names = ["INNVILGET", "OPPHØRT", "AVSLÅTT"])
+            internal fun `skal finne siste behandlingen av ferdigstilt, opphørt, eller avslått`(resultat: BehandlingResultat) {
+                val fagsak = testoppsettService.lagreFagsak(fagsak())
+                leggInnBehandlingerForAlleBehandlingsresultat(fagsak)
+                val behandling = lagreBehandling(fagsak, resultat)
+
+                val sisteBehandling = behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsak.id)
+
+                assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
+            }
+
+            @ParameterizedTest
+            @EnumSource(BehandlingResultat::class, names = ["IKKE_SATT", "HENLAGT"])
+            internal fun `skal ikke finne behandling med ikke_satt eller henlagt som resultat`(resultat: BehandlingResultat) {
+                val fagsak = testoppsettService.lagreFagsak(fagsak())
+                lagreBehandling(fagsak, resultat)
+
+                val sisteBehandling = behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsak.id)
+
+                assertThat(sisteBehandling).isNull()
+            }
+        }
+
+        private fun leggInnBehandlingerForAlleBehandlingsresultat(fagsak: Fagsak) {
+            BehandlingResultat.values().forEach { lagreBehandling(fagsak, it) }
+        }
+
+        /**
+         * For å få behandlinger i riktig rekkefølge brukes [datoCounter] som legger til en minut på hver behandling som opprettes
+         */
+        private fun lagreBehandling(
+            fagsak: Fagsak,
+            resultat: BehandlingResultat
+        ): Behandling {
+            val behandling = behandling(fagsak)
+            val opprettetTid = behandling.sporbar.opprettetTid.plusMinutes(datoCounter++)
+            return behandlingRepository.insert(
+                behandling.copy(
+                    resultat = resultat,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    sporbar = behandling.sporbar.copy(opprettetTid = opprettetTid)
+                )
             )
-        )
-        behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
-        )
-        val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
-        assertThat(sisteBehandling?.id).isEqualTo(førstegang.id)
+        }
     }
 
     @Test

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.OPPHØRT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
@@ -166,7 +167,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `finnSisteIverksatteBehandling - skal ikke returnere noe hvis behandlingen ikke er ferdigstilt`() {
+    fun `finnSisteFerdigstilteBehandlingen - skal ikke returnere noe hvis behandlingen ikke er ferdigstilt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent(ident))))
         behandlingRepository.insert(
             behandling(
@@ -175,11 +176,12 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                 opprettetTid = LocalDateTime.now().minusDays(2)
             )
         )
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)).isNull()
+        val behandlingResultater = BehandlingResultat.values().toSet()
+        assertThat(behandlingRepository.finnSisteFerdigstilteBehandlingen(fagsak.id, behandlingResultater)).isNull()
     }
 
     @Test
-    fun `finnSisteIverksatteBehandling skal finne id til siste ferdigstilte behandling`() {
+    fun `finnSisteFerdigstilteBehandlingen skal finne id til siste ferdigstilte behandling`() {
         val førstegangsbehandling = BehandlingOppsettUtil.iverksattFørstegangsbehandling
         val fagsak =
             testoppsettService.lagreFagsak(fagsak(setOf(PersonIdent("1"))).copy(id = førstegangsbehandling.fagsakId))
@@ -187,7 +189,8 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val behandlinger = BehandlingOppsettUtil.lagBehandlingerForSisteIverksatte()
         behandlingRepository.insertAll(behandlinger)
 
-        assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)?.id)
+        val iverksattBehandlinger = setOf(INNVILGET, OPPHØRT)
+        assertThat(behandlingRepository.finnSisteFerdigstilteBehandlingen(fagsak.id, iverksattBehandlinger)?.id)
             .isEqualTo(førstegangsbehandling.id)
     }
 

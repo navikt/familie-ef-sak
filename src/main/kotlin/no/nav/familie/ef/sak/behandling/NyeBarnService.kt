@@ -87,7 +87,7 @@ class NyeBarnService(
         fagsakId: UUID,
         forventerAtBehandlingFinnes: Boolean = true
     ): NyeBarnData {
-        val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
+        val behandling = behandlingService.finnSisteIverksatteEllerAvslåtteBehandling(fagsakId)
         if (behandling == null) {
             feilHvis(forventerAtBehandlingFinnes) {
                 "Fant ikke iverksatt eller avslått behandling for fagsak=$fagsakId"

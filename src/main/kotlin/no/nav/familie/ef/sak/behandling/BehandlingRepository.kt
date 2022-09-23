@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.EksternId
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
@@ -115,13 +116,13 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         FROM behandling b
         JOIN behandling_ekstern be ON b.id = be.behandling_id
         WHERE b.fagsak_id = :fagsakId
-         AND b.resultat IN ('OPPHØRT', 'INNVILGET')
+         AND b.resultat IN (:behandlingResultater)
          AND b.status = 'FERDIGSTILT'
         ORDER BY b.opprettet_tid DESC
         LIMIT 1
     """
     )
-    fun finnSisteIverksatteBehandling(fagsakId: UUID): Behandling?
+    fun finnSisteFerdigstilteBehandlingen(fagsakId: UUID, behandlingResultater: Set<BehandlingResultat>): Behandling?
 
     @Query(
         """
