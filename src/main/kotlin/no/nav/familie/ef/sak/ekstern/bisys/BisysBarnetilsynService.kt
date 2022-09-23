@@ -51,8 +51,7 @@ class BisysBarnetilsynService(
     ): EfPerioder? {
         val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val fagsak: Fagsak = fagsakService.finnFagsak(personIdenter, StønadType.BARNETILSYN) ?: return null
-        val sisteGjeldendeBehandling =
-            behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id) ?: return null
+        val sisteGjeldendeBehandling = behandlingService.finnSisteIverksatteBehandling(fagsak.id) ?: return null
         val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
 
         val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
