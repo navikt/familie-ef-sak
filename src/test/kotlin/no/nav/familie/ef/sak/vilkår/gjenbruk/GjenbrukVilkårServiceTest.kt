@@ -80,6 +80,7 @@ internal class GjenbrukVilkårServiceTest {
     private val fagsakBT = fagsak(stønadstype = StønadType.BARNETILSYN, fagsakPersonId = fagsakPersonId)
     private val ferdigstiltBehandlingOS = behandling(fagsakOS, status = BehandlingStatus.FERDIGSTILT)
     private val nyBehandlingBT = behandling(fagsak = fagsakBT, status = BehandlingStatus.UTREDES)
+    private val nyBehandlingOS = behandling(fagsak = fagsakOS, status = BehandlingStatus.OPPRETTET)
 
     private val vilkårsvurderingerSlot = slot<List<Vilkårsvurdering>>()
 
@@ -87,12 +88,15 @@ internal class GjenbrukVilkårServiceTest {
         TestData(fagsakOS, ferdigstiltBehandlingOS, søknadOS, Vilkårsresultat.OPPFYLT)
     private val nyBT =
         TestData(fagsakBT, nyBehandlingBT, søknadBT, Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+    private val nyOS =
+        TestData(fagsakOS, nyBehandlingOS, søknadOS, Vilkårsresultat.IKKE_TATT_STILLING_TIL)
 
     @BeforeEach
     internal fun setUp() {
         vilkårsvurderingerSlot.clear()
-        listOf(ferdigstiltOS, nyBT).forEach {
+        listOf(ferdigstiltOS, nyBT, nyOS).forEach {
             every { fagsakService.hentFagsakForBehandling(it.behandling.id) } returns it.fagsak
+            every { fagsakService.hentFagsak(it.fagsak.id) } returns it.fagsak
 
             every { behandlingService.hentSaksbehandling(it.behandling.id) } returns it.saksbehandling
 
@@ -106,10 +110,23 @@ internal class GjenbrukVilkårServiceTest {
             every { barnService.finnBarnPåBehandling(it.behandling.id) } returns it.behandlingBarn
         }
         every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns listOf(
-            ferdigstiltBehandlingOS
+            ferdigstiltBehandlingOS,
+            nyBehandlingBT
         )
 
         every { vilkårsvurderingRepository.updateAll(capture(vilkårsvurderingerSlot)) } answers { firstArg() }
+    }
+
+    @Test
+    internal fun `skal ikke hente ut behandlingen man står på når det skal gjenbrukes vilkår`() {
+        val behandlingerForGjenruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(nyBT.behandling.id)
+        assertThat(behandlingerForGjenruk.map { it.id }).containsOnly(ferdigstiltOS.behandling.id)
+    }
+
+    @Test
+    internal fun `skal hente ut behandlinger for gjenbruk av vilkår`() {
+        val behandlingerForGjenruk = gjenbrukVilkårService.finnBehandlingerForGjenbruk(nyOS.behandling.id)
+        assertThat(behandlingerForGjenruk.map { it.id }).containsExactlyInAnyOrder(ferdigstiltOS.behandling.id, nyBT.behandling.id)
     }
 
     @Test

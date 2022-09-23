@@ -65,7 +65,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.SEKS_MND)
         assertThat(opprettOppgavePayload.barnPersonIdent).isEqualTo(barnPersonIdent)
 
-        assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()}
+        assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr() }
             .isInstanceOf(UnexpectedRollbackException::class.java)
 
         val tasksEtterAndreKjøring = taskRepository.findAll().toList()

@@ -21,12 +21,13 @@ import java.util.UUID
 )
 class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
     private val oppgaveRepository: OppgaveRepository,
-    private val oppgaveService: OppgaveService,
+    private val oppgaveService: OppgaveService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(task.payload)
-        val opprettetOppgaveId = oppgaveService.opprettOppgaveUtenÅLagreIRepository(opprettOppgavePayload.behandlingId,
+        val opprettetOppgaveId = oppgaveService.opprettOppgaveUtenÅLagreIRepository(
+            opprettOppgavePayload.behandlingId,
             Oppgavetype.InnhentDokumentasjon,
             opprettOppgavePayload.alder.oppgavebeskrivelse,
             tilordnetNavIdent = null
