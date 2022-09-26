@@ -15,12 +15,13 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.repository.behandling
-import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.testutil.tilBehandlingBarn
-import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
+import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
+import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -91,7 +92,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.OVERGANGSSTØNAD
+            OVERGANGSSTØNAD
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -114,7 +115,7 @@ internal class BarnServiceTest {
             behandlingId,
             UUID.randomUUID(),
             grunnlagsdatabarn,
-            StønadType.SKOLEPENGER
+            SKOLEPENGER
         )
 
         assertThat(barnSlot.captured).hasSize(2)
@@ -139,9 +140,9 @@ internal class BarnServiceTest {
             forrigeBehandlingId
         )
         barnService.opprettBarnForRevurdering(
-            behandling(fagsak()),
+            behandling(),
             forrigeBehandlingId,
-            StønadType.OVERGANGSSTØNAD,
+            OVERGANGSSTØNAD,
             grunnlagsdatabarn,
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
@@ -173,9 +174,9 @@ internal class BarnServiceTest {
 
         val feil = assertThrows<Feil> {
             barnService.opprettBarnForRevurdering(
-                behandling = behandling(fagsak(stønadstype = BARNETILSYN)),
+                behandling = behandling(),
                 forrigeBehandlingId,
-                stønadstype = StønadType.OVERGANGSSTØNAD,
+                stønadstype = OVERGANGSSTØNAD,
                 grunnlagsdatabarn,
                 VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
             )
@@ -203,9 +204,9 @@ internal class BarnServiceTest {
             forrigeBehandlingId
         )
         barnService.opprettBarnForRevurdering(
-            behandling(fagsak()),
+            behandling(),
             forrigeBehandlingId,
-            StønadType.OVERGANGSSTØNAD,
+            OVERGANGSSTØNAD,
             grunnlagsdatabarn,
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
@@ -213,6 +214,51 @@ internal class BarnServiceTest {
         assertThat(barnSlot.captured).hasSize(4)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC, fnrBarnD)
         assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B", "Barn C", "Barn D")
+    }
+
+    @Test
+    internal fun `skal kaste feil ved revurdering med årsak g-omregning når man sender inn at man skal vilkårsbehandle nye barn`() {
+        val forrigeBehandlingId = UUID.randomUUID()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
+            setOf(barnPåSøknadB),
+            forrigeBehandlingId
+        )
+
+        val feil = assertThrows<Feil> {
+            barnService.opprettBarnForRevurdering(
+                behandling = behandling(årsak = BehandlingÅrsak.G_OMREGNING),
+                forrigeBehandlingId,
+                stønadstype = OVERGANGSSTØNAD,
+                emptyList(),
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+        }
+
+        assertThat(feil.message).contains("Kan ikke sende inn nye barn på revurdering med årsak G-omregning")
+    }
+
+    @Test
+    internal fun `skal kaste feil ved revurdering med IKKE_VILKÅRSBEHANDLE når forrige behandling har barn`() {
+        val forrigeBehandlingId = UUID.randomUUID()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
+            setOf(barnPåSøknadB),
+            forrigeBehandlingId
+        )
+        val feil = assertThrows<Feil> {
+            barnService.opprettBarnForRevurdering(
+                behandling = behandling(),
+                forrigeBehandlingId,
+                stønadstype = OVERGANGSSTØNAD,
+                emptyList(),
+                VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+            )
+        }
+
+        assertThat(feil.message).contains("Alle barn skal være med i revurderingen av en barnetilsynbehandling.")
     }
 
     @Test
@@ -233,9 +279,9 @@ internal class BarnServiceTest {
             forrigeBehandlingId
         )
         barnService.opprettBarnForRevurdering(
-            behandling(fagsak()),
+            behandling(),
             forrigeBehandlingId,
-            StønadType.OVERGANGSSTØNAD,
+            OVERGANGSSTØNAD,
             grunnlagsdatabarn,
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
@@ -255,7 +301,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 emptyList(),
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
@@ -269,7 +315,7 @@ internal class BarnServiceTest {
                     behandlingId,
                     fagsakId,
                     emptyList(),
-                    StønadType.OVERGANGSSTØNAD,
+                    OVERGANGSSTØNAD,
                     UstrukturertDokumentasjonType.IKKE_VALGT,
                     listOf(BarnSomSkalFødes(termindato))
                 )
@@ -286,7 +332,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 listOf(barnMedIdent),
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
@@ -313,9 +359,9 @@ internal class BarnServiceTest {
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns barnPåForrigeBehandling
             barnService.opprettBarnForRevurdering(
-                behandling = behandling(fagsak()),
+                behandling = behandling(),
                 forrigeBehandlingId = forrigeBehandlingId,
-                stønadstype = StønadType.OVERGANGSSTØNAD,
+                stønadstype = OVERGANGSSTØNAD,
                 grunnlagsdataBarn = grunnlagsdatabarn,
                 VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
@@ -337,9 +383,9 @@ internal class BarnServiceTest {
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns søknadsBarnTilBehandlingBarn
             barnService.opprettBarnForRevurdering(
-                behandling = behandling(fagsak()),
+                behandling = behandling(),
                 forrigeBehandlingId = forrigeBehandlingId,
-                stønadstype = StønadType.OVERGANGSSTØNAD,
+                stønadstype = OVERGANGSSTØNAD,
                 grunnlagsdataBarn = grunnlagsdatabarn,
                 VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
@@ -359,7 +405,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 listOf(barnMedIdent, barnMedIdent2),
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.PAPIRSØKNAD,
                 listOf(BarnSomSkalFødes(termindato))
             )
@@ -388,7 +434,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 grunnlagsdataBarn,
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.PAPIRSØKNAD
             )
 
@@ -422,7 +468,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 grunnlagsdataBarn,
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.ETTERSENDING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
@@ -439,7 +485,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 emptyList(),
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.ETTERSENDING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
@@ -463,7 +509,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 grunnlagsdataBarn,
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.ETTERSENDING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
@@ -484,7 +530,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 listOf(barnFraRegister),
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.ETTERSENDING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
@@ -500,7 +546,7 @@ internal class BarnServiceTest {
                 behandlingId,
                 fagsakId,
                 grunnlagsdataBarn,
-                StønadType.OVERGANGSSTØNAD,
+                OVERGANGSSTØNAD,
                 UstrukturertDokumentasjonType.ETTERSENDING,
                 vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
             )
@@ -515,7 +561,7 @@ internal class BarnServiceTest {
                     behandlingId,
                     fagsakId,
                     grunnlagsdataBarn,
-                    StønadType.OVERGANGSSTØNAD,
+                    OVERGANGSSTØNAD,
                     UstrukturertDokumentasjonType.ETTERSENDING
                 )
             }.hasMessage("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")

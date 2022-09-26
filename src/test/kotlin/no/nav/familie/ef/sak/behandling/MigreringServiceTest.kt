@@ -725,7 +725,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             fagsakId = migrering.fagsakId,
             behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             kravMottatt = LocalDate.now(),
-            emptyList(),
             VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
         )
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }

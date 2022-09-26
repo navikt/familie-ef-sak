@@ -229,17 +229,26 @@ class BarnService(
         val barnPåForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandlingId)
         validerVilkårsbehandleNyeBarn(behandling, stønadstype, barnPåForrigeBehandling, vilkårsbehandleNyeBarn)
 
-        val aktuelleBarn = when (vilkårsbehandleNyeBarn) {
-            VilkårsbehandleNyeBarn.IKKE_VALGT -> throw Feil("")
-            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> barnFraForrigePlusNye(
-                behandling.id,
-                barnPåForrigeBehandling,
-                grunnlagsdataBarn
-            )
-            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> barnPåForrigeBehandling
-        }
+        val aktuelleBarn =
+            barnForRevurdering(behandling, grunnlagsdataBarn, barnPåForrigeBehandling, vilkårsbehandleNyeBarn)
 
         barnRepository.insertAll(aktuelleBarn)
+    }
+
+    private fun barnForRevurdering(
+        behandling: Behandling,
+        grunnlagsdataBarn: List<BarnMedIdent>,
+        barnPåForrigeBehandling: List<BehandlingBarn>,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn
+    ): List<BehandlingBarn> {
+        val pdlBarn = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }
+        val kobledeBarn = kobleBarn(behandling.id, pdlBarn, barnPåForrigeBehandling)
+
+        return when (vilkårsbehandleNyeBarn) {
+            VilkårsbehandleNyeBarn.IKKE_VALGT -> throw Feil("Kan ikke velge IKKE_VALGT for VilkårsbehandleNyeBarn")
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> kobledeBarn + nyeBarn(pdlBarn, kobledeBarn, behandling.id)
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> kobledeBarn
+        }
     }
 
     private fun validerVilkårsbehandleNyeBarn(
@@ -255,26 +264,37 @@ class BarnService(
             "Må vilkårsbehandle alle nye barn på "
         }
 
-        feilHvis(saksbehandling.årsak != BehandlingÅrsak.G_OMREGNING && vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE && barnPåForrigeBehandling.isNotEmpty()) {
+        feilHvis(
+            saksbehandling.årsak != BehandlingÅrsak.G_OMREGNING &&
+            vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE &&
+            barnPåForrigeBehandling.isNotEmpty()
+        ) {
             "Alle barn skal være med i revurderingen av en barnetilsynbehandling."
+        }
+        feilHvis(saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING && vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE) {
+            "Kan ikke sende inn nye barn på revurdering med årsak G-omregning"
         }
     }
 
-    private fun barnFraForrigePlusNye(
+    private fun kobleBarn(
         behandlingId: UUID,
-        barnPåForrigeBehandling: List<BehandlingBarn>,
-        grunnlagsdataBarn: List<BarnMedIdent>
+        pdlBarn: List<BarnMedIdent>,
+        barnPåForrigeBehandling: List<BehandlingBarn>
+    ) = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnPåForrigeBehandling, pdlBarn)
+        .map {
+            it.behandlingBarn.copy(
+                id = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
+                navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn
+            )
+        }
+
+    private fun nyeBarn(
+        pdlBarn: List<BarnMedIdent>,
+        kobledeBarn: List<BehandlingBarn>,
+        behandlingId: UUID
     ): List<BehandlingBarn> {
-        val pdlBarn = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }
-        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnPåForrigeBehandling, pdlBarn)
-            .map {
-                it.behandlingBarn.copy(
-                    id = UUID.randomUUID(),
-                    behandlingId = behandlingId,
-                    personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
-                    navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn
-                )
-            }
         val nyeBarn = pdlBarn.filter { barn -> kobledeBarn.none { it.personIdent == barn.personIdent } }
             .map {
                 BehandlingBarn(
@@ -283,7 +303,7 @@ class BarnService(
                     navn = it.navn.visningsnavn()
                 )
             }
-        return kobledeBarn + nyeBarn
+        return nyeBarn
     }
 
     private fun finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId: UUID): List<BehandlingBarn> {

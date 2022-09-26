@@ -8,10 +8,10 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
@@ -31,12 +31,14 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -76,7 +78,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             fagsak.id,
             behandlingsårsak,
             kravMottatt,
-            emptyList(),
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
     }
@@ -184,9 +185,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
         val søknad = lagreSøknad(behandling)
         opprettVilkår(behandling, søknad)
-        val nyttBarn = RevurderingBarnDto(personIdent = "44445555666")
 
-        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto.copy(barn = listOf(nyttBarn)))
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
         val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id)
@@ -196,13 +196,57 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.filter { it.barnId != null }).hasSize(1)
         assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(3)
         assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
-        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(barnPåBehandling.map { it.id }.sorted())
+        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(barnPåBehandling.map { it.id }
+            .sorted())
         assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
         assertThat(vilkårForBehandling.first { it.type == VilkårType.SIVILSTAND }).usingRecursiveComparison()
             .ignoringFields("id", "sporbar", "behandlingId", "barnId")
             .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
+    }
+
+    @Nested
+    inner class RevurderingMedNyeBarn {
+
+        @Test
+        internal fun `skal ikke vilkårsbehandle nye barn, men skal matche eksisterende med fnr fra PDL`() {
+            val behandling = opprettFerdigstiltBehandling(fagsak)
+            val søknad = lagreSøknad(behandling, medTerminbarn = true)
+            opprettVilkår(behandling, søknad)
+
+            val revurdering = revurderingService.opprettRevurderingManuelt(
+                RevurderingDto(
+                    fagsak.id,
+                    BehandlingÅrsak.G_OMREGNING,
+                    kravMottatt,
+                    VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+                )
+            )
+            val barn = barnRepository.findByBehandlingId(revurdering.id)
+            assertThat(barn).hasSize(2)
+            assertThat(barn.map { it.personIdent }).containsExactlyInAnyOrder("27062188745", PdlClientConfig.barnFnr)
+        }
+
+        @Test
+        internal fun `skal vilkårsbehandle nye barn og matche eksisterende med fnr fra pdl`() {
+            val behandling = opprettFerdigstiltBehandling(fagsak)
+            val søknad = lagreSøknad(behandling, medTerminbarn = true)
+            opprettVilkår(behandling, søknad)
+
+            val revurdering = revurderingService.opprettRevurderingManuelt(
+                RevurderingDto(
+                    fagsak.id,
+                    BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    kravMottatt,
+                    VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+                )
+            )
+            val barn = barnRepository.findByBehandlingId(revurdering.id)
+            assertThat(barn).hasSize(3)
+            assertThat(barn.map { it.personIdent })
+                .containsExactlyInAnyOrder("27062188745", PdlClientConfig.barnFnr, PdlClientConfig.barn2Fnr)
+        }
     }
 
     @Test
@@ -229,7 +273,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 fagsak.id,
                 BehandlingÅrsak.G_OMREGNING,
                 kravMottatt,
-                emptyList(),
                 VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
 
@@ -247,8 +290,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             fagsak.id,
             BehandlingÅrsak.G_OMREGNING,
             kravMottatt,
-            emptyList(),
-            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
         )
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
@@ -270,15 +312,19 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     private fun getSøknadsskjemaId(revurdering1: Behandling) =
         søknadRepository.findByBehandlingId(revurdering1.id)!!.soknadsskjemaId
 
-    private fun lagreSøknad(behandling: Behandling): SøknadsskjemaOvergangsstønad {
-        val søknad = TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
-            )
-        ).build().søknadOvergangsstønad
+    private fun lagreSøknad(behandling: Behandling, medTerminbarn: Boolean = false): SøknadsskjemaOvergangsstønad {
+        val barn = mutableListOf(
+            TestsøknadBuilder.Builder()
+                .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
+        )
+        if (medTerminbarn) {
+            val fødselTermindato = Fødselsnummer(PdlClientConfig.barnFnr).fødselsdato
+            barn += TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", fødselTermindato = fødselTermindato)
+        }
+        val søknad = TestsøknadBuilder.Builder().setBarn(barn).build().søknadOvergangsstønad
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
-        val overgangsstønad = søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
+        val overgangsstønad =
+            søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
         barnRepository.insertAll(søknadBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
         return overgangsstønad
     }
