@@ -266,8 +266,8 @@ class BarnService(
 
         feilHvis(
             saksbehandling.årsak != BehandlingÅrsak.G_OMREGNING &&
-            vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE &&
-            barnPåForrigeBehandling.isNotEmpty()
+                vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE &&
+                barnPåForrigeBehandling.isNotEmpty()
         ) {
             "Alle barn skal være med i revurderingen av en barnetilsynbehandling."
         }
