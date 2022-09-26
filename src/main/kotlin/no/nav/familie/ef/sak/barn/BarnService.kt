@@ -1,19 +1,19 @@
 package no.nav.familie.ef.sak.barn
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
-import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -94,6 +94,12 @@ class BarnService(
                 barnSomSkalFødes.isNotEmpty()
         ) {
             "Kan ikke legge til terminbarn med ustrukturertDokumentasjonType=$ustrukturertDokumentasjonType"
+        }
+        feilHvis(
+            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT &&
+                ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.ETTERSENDING
+        ) {
+            "Kun ettersending forventes å sende inn vilkårsbehandle nye barn"
         }
         return when (ustrukturertDokumentasjonType) {
             UstrukturertDokumentasjonType.PAPIRSØKNAD -> kobleBarnSomSkalFødesPlusAlleRegisterbarn(
@@ -209,58 +215,75 @@ class BarnService(
         )
     }
 
+    /**
+     * @param forrigeBehandlingId finnes her fordi det kan være
+     * en avslått forrigeBehandlingId i de tilfeller behandling.forrigeBehandlingId er null
+     */
     fun opprettBarnForRevurdering(
-        behandlingId: UUID,
+        behandling: Behandling,
         forrigeBehandlingId: UUID,
-        nyeBarnPåRevurdering: List<BehandlingBarn>,
+        stønadstype: StønadType,
         grunnlagsdataBarn: List<BarnMedIdent>,
-        stønadstype: StønadType
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn
     ) {
-        val kobledeBarn: List<MatchetBehandlingBarn> = kobleAktuelleBarn(
-            forrigeBehandlingId = forrigeBehandlingId,
-            nyeBarnPåRevurdering = nyeBarnPåRevurdering,
-            grunnlagsdataBarn = grunnlagsdataBarn,
-            stønadstype = stønadstype
-        )
+        val barnPåForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandlingId)
+        validerVilkårsbehandleNyeBarn(behandling, stønadstype, barnPåForrigeBehandling, vilkårsbehandleNyeBarn)
 
-        val alleBarnPåRevurdering = kobledeBarn.map {
-            it.behandlingBarn.copy(
-                id = UUID.randomUUID(),
-                behandlingId = behandlingId,
-                personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
-                navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn
+        val aktuelleBarn = when (vilkårsbehandleNyeBarn) {
+            VilkårsbehandleNyeBarn.IKKE_VALGT -> throw Feil("")
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> barnFraForrigePlusNye(
+                behandling.id,
+                barnPåForrigeBehandling,
+                grunnlagsdataBarn
             )
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> barnPåForrigeBehandling
         }
 
-        barnRepository.insertAll(alleBarnPåRevurdering)
+        barnRepository.insertAll(aktuelleBarn)
     }
 
-    private fun validerAtAlleBarnErMedPåRevurderingen(
-        kobledeBarn: List<BehandlingBarn>,
-        grunnlagsdataBarn: List<BarnMedIdent>
+    private fun validerVilkårsbehandleNyeBarn(
+        saksbehandling: Behandling,
+        stønadstype: StønadType,
+        barnPåForrigeBehandling: List<BehandlingBarn>,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn
     ) {
-        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }.map { it.personIdent }
-        val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
+        feilHvis(vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT) {
+            "Forventer at man sender inn vilkårsbehandleNyeBarn"
+        }
+        feilHvis(stønadstype == StønadType.BARNETILSYN && vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE) {
+            "Må vilkårsbehandle alle nye barn på "
+        }
 
-        feilHvisIkke(kobledeBarnIdenter.containsAll(grunnlagsdataBarnIdenter)) {
+        feilHvis(saksbehandling.årsak != BehandlingÅrsak.G_OMREGNING && vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE && barnPåForrigeBehandling.isNotEmpty()) {
             "Alle barn skal være med i revurderingen av en barnetilsynbehandling."
         }
     }
 
-    private fun kobleAktuelleBarn(
-        forrigeBehandlingId: UUID,
-        nyeBarnPåRevurdering: List<BehandlingBarn>,
-        grunnlagsdataBarn: List<BarnMedIdent>,
-        stønadstype: StønadType
-    ): List<MatchetBehandlingBarn> {
-        val barnPåForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandlingId)
-        val alleAktuelleBarn = barnPåForrigeBehandling + nyeBarnPåRevurdering
-
-        if (stønadstype == StønadType.BARNETILSYN) {
-            validerAtAlleBarnErMedPåRevurderingen(alleAktuelleBarn, grunnlagsdataBarn)
-        }
-
-        return BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleAktuelleBarn, grunnlagsdataBarn)
+    private fun barnFraForrigePlusNye(
+        behandlingId: UUID,
+        barnPåForrigeBehandling: List<BehandlingBarn>,
+        grunnlagsdataBarn: List<BarnMedIdent>
+    ): List<BehandlingBarn> {
+        val pdlBarn = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }
+        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(barnPåForrigeBehandling, pdlBarn)
+            .map {
+                it.behandlingBarn.copy(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    personIdent = it.barn?.personIdent ?: it.behandlingBarn.personIdent,
+                    navn = it.barn?.navn?.visningsnavn() ?: it.behandlingBarn.navn
+                )
+            }
+        val nyeBarn = pdlBarn.filter { barn -> kobledeBarn.none { it.personIdent == barn.personIdent } }
+            .map {
+                BehandlingBarn(
+                    behandlingId = behandlingId,
+                    personIdent = it.personIdent,
+                    navn = it.navn.visningsnavn()
+                )
+            }
+        return kobledeBarn + nyeBarn
     }
 
     private fun finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId: UUID): List<BehandlingBarn> {

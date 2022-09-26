@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.familie.ef.sak.felles.util.erUnder18år
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -264,8 +265,8 @@ data class Fødsel(
     val metadata: Metadata
 ) {
 
-    fun erUnder18År() = this.fødselsdato?.let { LocalDate.now() < it.plusYears(18) }
-        ?: this.fødselsår?.let { LocalDate.now() < LocalDate.of(it, 1, 1).plusYears(18) }
+    fun erUnder18År() = this.fødselsdato?.erUnder18år()
+        ?: this.fødselsår?.let { LocalDate.of(it, 1, 1).plusYears(18) }?.erUnder18år()
         ?: true
 }
 

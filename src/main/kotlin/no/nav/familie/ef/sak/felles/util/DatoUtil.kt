@@ -58,3 +58,5 @@ fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolea
     return erEttÅrEllerMer() &&
         LocalDate.now() <= this.plusYears(1).plusDays(numberOfDaysCutoff)
 }
+
+fun LocalDate.erUnder18år() = LocalDate.now() < this.plusYears(18)

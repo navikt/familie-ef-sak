@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -71,7 +72,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun setUp() {
         BrukerContextUtil.mockBrukerContext("Heider")
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
-        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
+        revurderingDto = RevurderingDto(
+            fagsak.id,
+            behandlingsårsak,
+            kravMottatt,
+            emptyList(),
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+        )
     }
 
     @AfterEach
@@ -185,9 +192,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id)
 
         assertThat(vilkårForBehandling).hasSize(2)
-        assertThat(vilkårForRevurdering).hasSize(3)
+        assertThat(vilkårForRevurdering).hasSize(4)
         assertThat(vilkårForBehandling.filter { it.barnId != null }).hasSize(1)
-        assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(2)
+        assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(3)
         assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
         assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(barnPåBehandling.map { it.id }.sorted())
         assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
@@ -218,7 +225,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             val fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = it))
             val behandling = opprettFerdigstiltBehandling(fagsak)
             opprettVilkår(behandling, lagreSøknad(behandling))
-            val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+            val revurderingInnhold = RevurderingDto(
+                fagsak.id,
+                BehandlingÅrsak.G_OMREGNING,
+                kravMottatt,
+                emptyList(),
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
 
             assertThatThrownBy {
                 revurderingService.opprettRevurderingManuelt(revurderingInnhold)
@@ -230,7 +243,13 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `kan opprette g-omregning for overgangsstønad`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
         opprettVilkår(behandling, lagreSøknad(behandling))
-        val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+        val revurderingInnhold = RevurderingDto(
+            fagsak.id,
+            BehandlingÅrsak.G_OMREGNING,
+            kravMottatt,
+            emptyList(),
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+        )
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
 

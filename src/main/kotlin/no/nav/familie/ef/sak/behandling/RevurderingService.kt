@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
-import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
@@ -57,11 +56,11 @@ class RevurderingService(
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)
 
         barnService.opprettBarnForRevurdering(
-            behandlingId = revurdering.id,
+            behandling = revurdering,
             forrigeBehandlingId = forrigeBehandlingId,
-            nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
+            stønadstype = fagsak.stønadstype,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-            stønadstype = fagsak.stønadstype
+            revurderingInnhold.vilkårsbehandleNyeBarn
         )
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
         vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata, fagsak.stønadstype)

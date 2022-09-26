@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import java.time.LocalDate
 import java.util.UUID
 
+// TODO remvoe?
 data class RevurderingBarnDto(
     val personIdent: String? = null,
     val navn: String? = null,

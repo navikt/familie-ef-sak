@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.repository.barnMedIdent
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.testutil.tilBehandlingBarn
@@ -124,7 +125,7 @@ internal class BarnServiceTest {
     @Test
     internal fun `revurdering uten nye barn skal ta med terminbarn fra forrige behandling`() {
         val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D")
+            barnMedIdent(fnrBarnA, "Barn A")
         )
 
         val forrigeBehandlingId = UUID.randomUUID()
@@ -137,57 +138,17 @@ internal class BarnServiceTest {
             ),
             forrigeBehandlingId
         )
-        val nyeBarnPåRevurdering = emptyList<BehandlingBarn>()
         barnService.opprettBarnForRevurdering(
-            behandlingId,
+            behandling(fagsak()),
             forrigeBehandlingId,
-            nyeBarnPåRevurdering,
+            StønadType.OVERGANGSSTØNAD,
             grunnlagsdatabarn,
-            StønadType.OVERGANGSSTØNAD
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
 
         assertThat(barnSlot.captured).hasSize(2)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, null)
         assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Terminbarn 1")
-    }
-
-    @Test
-    internal fun `skal ta med ett nytt barn ved revurdering av Overgangsstønad hvor to barn eksisterer fra før`() {
-        val grunnlagsdatabarn = listOf(
-            barnMedIdent(fnrBarnD, "Barn D"),
-            barnMedIdent(fnrBarnC, "Barn C"),
-            barnMedIdent(fnrBarnB, "Barn B"),
-            barnMedIdent(fnrBarnA, "Barn A")
-        )
-        val forrigeBehandlingId = UUID.randomUUID()
-
-        every { søknadMock.barn } returns setOf(barnPåSøknadA, barnPåSøknadB)
-        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
-            setOf(
-                barnPåSøknadA,
-                barnPåSøknadB
-            ),
-            forrigeBehandlingId
-        )
-        val nyeBarnPåRevurdering = listOf(
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnC,
-                navn = "Barn C"
-            )
-        )
-        barnService.opprettBarnForRevurdering(
-            behandlingId,
-            forrigeBehandlingId,
-            nyeBarnPåRevurdering,
-            grunnlagsdatabarn,
-            StønadType.OVERGANGSSTØNAD
-        )
-
-        assertThat(barnSlot.captured).hasSize(3)
-        assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC)
-        assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B", "Barn C")
     }
 
     @Test
@@ -210,21 +171,13 @@ internal class BarnServiceTest {
         )
         every { barnRepository.insertAll(capture(barnSlot)) } returns emptyList()
 
-        val nyeBarnPåRevurdering = listOf(
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnC,
-                navn = "Barn C"
-            )
-        )
         val feil = assertThrows<Feil> {
             barnService.opprettBarnForRevurdering(
-                behandlingId,
+                behandling = behandling(fagsak(stønadstype = BARNETILSYN)),
                 forrigeBehandlingId,
-                nyeBarnPåRevurdering,
+                stønadstype = StønadType.OVERGANGSSTØNAD,
                 grunnlagsdatabarn,
-                BARNETILSYN
+                VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
             )
         }
 
@@ -249,31 +202,47 @@ internal class BarnServiceTest {
             ),
             forrigeBehandlingId
         )
-        val nyeBarnPåRevurdering = listOf(
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnD,
-                navn = "Barn C"
-            ),
-            BehandlingBarn(
-                behandlingId = behandlingId,
-                søknadBarnId = null,
-                personIdent = fnrBarnC,
-                navn = "Barn C"
-            )
-        )
         barnService.opprettBarnForRevurdering(
-            behandlingId,
+            behandling(fagsak()),
             forrigeBehandlingId,
-            nyeBarnPåRevurdering,
+            StønadType.OVERGANGSSTØNAD,
             grunnlagsdatabarn,
-            BARNETILSYN
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
 
         assertThat(barnSlot.captured).hasSize(4)
         assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrBarnB, fnrBarnC, fnrBarnD)
         assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B", "Barn C", "Barn D")
+    }
+
+    @Test
+    internal fun `skal matche terminbarn med fnr fra pdl `() {
+        val fnrFødtTerminbarn = FnrGenerator.generer(LocalDate.now())
+        val grunnlagsdatabarn = listOf(
+            barnMedIdent(fnrBarnA, "Barn A"),
+            barnMedIdent(fnrFødtTerminbarn, "Barn B"),
+        )
+        val forrigeBehandlingId = UUID.randomUUID()
+
+        every { søknadMock.barn } returns setOf(barnPåSøknadA, terminbarnPåSøknad)
+        every { barnRepository.findByBehandlingId(any()) } returns søknadBarnTilBehandlingBarn(
+            setOf(
+                barnPåSøknadA,
+                terminbarnPåSøknad
+            ),
+            forrigeBehandlingId
+        )
+        barnService.opprettBarnForRevurdering(
+            behandling(fagsak()),
+            forrigeBehandlingId,
+            StønadType.OVERGANGSSTØNAD,
+            grunnlagsdatabarn,
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+        )
+
+        assertThat(barnSlot.captured).hasSize(2)
+        assertThat(barnSlot.captured.map { it.personIdent }).containsOnlyOnce(fnrBarnA, fnrFødtTerminbarn)
+        assertThat(barnSlot.captured.map { it.navn }).containsOnlyOnce("Barn A", "Barn B")
     }
 
     @Nested
@@ -344,11 +313,11 @@ internal class BarnServiceTest {
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns barnPåForrigeBehandling
             barnService.opprettBarnForRevurdering(
-                behandlingId = behandlingId,
+                behandling = behandling(fagsak()),
                 forrigeBehandlingId = forrigeBehandlingId,
-                emptyList(),
+                stønadstype = StønadType.OVERGANGSSTØNAD,
                 grunnlagsdataBarn = grunnlagsdatabarn,
-                stønadstype = BARNETILSYN
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
 
             assertThat(barnSlot.captured).hasSize(2)
@@ -368,11 +337,11 @@ internal class BarnServiceTest {
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns søknadsBarnTilBehandlingBarn
             barnService.opprettBarnForRevurdering(
-                behandlingId = behandlingId,
+                behandling = behandling(fagsak()),
                 forrigeBehandlingId = forrigeBehandlingId,
-                emptyList(),
+                stønadstype = StønadType.OVERGANGSSTØNAD,
                 grunnlagsdataBarn = grunnlagsdatabarn,
-                stønadstype = BARNETILSYN
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
 
             assertThat(barnSlot.captured).hasSize(1)
