@@ -14,8 +14,8 @@ object BarnMatcher {
     ): List<MatchetBehandlingBarn> {
         val grunnlagsbarnPåIdent = grunnlagsbarn.associateBy { it.personIdent }
         val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
-            val firstOrNull = grunnlagsbarnPåIdent.entries.firstOrNull { entry -> it.personIdent == entry.key }
-            MatchetBehandlingBarn(firstOrNull?.key, firstOrNull?.value, it)
+            val matchetBarnPåIdent = grunnlagsbarnPåIdent[it.personIdent]
+            MatchetBehandlingBarn(matchetBarnPåIdent?.personIdent, matchetBarnPåIdent, it)
         }
 
         val pdlBarnIkkeIBehandlingBarn =
