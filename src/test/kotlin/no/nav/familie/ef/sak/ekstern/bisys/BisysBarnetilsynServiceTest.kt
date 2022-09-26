@@ -70,7 +70,7 @@ internal class BisysBarnetilsynServiceTest {
     fun setup() {
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(listOf(PdlIdent(personident, false)))
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
-        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns lagBehandlingerForSisteIverksatte().first()
+        every { behandlingService.finnSisteIverksatteBehandling(any()) } returns lagBehandlingerForSisteIverksatte().first()
         every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarn
         every {
             infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
