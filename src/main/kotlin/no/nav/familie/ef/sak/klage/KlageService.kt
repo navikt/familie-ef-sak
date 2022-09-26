@@ -55,13 +55,13 @@ class KlageService(
         }
         klageClient.opprettKlage(
             OpprettKlagebehandlingRequest(
-                aktivIdent,
-                Stønadstype.fraEfStønadstype(behandling.stønadstype),
-                behandling.eksternId.toString(),
-                behandling.eksternFagsakId.toString(),
-                Fagsystem.EF,
-                opprettKlageDto.mottattDato,
-                enhetId
+                ident = aktivIdent,
+                stønadstype = Stønadstype.fraEfStønadstype(behandling.stønadstype),
+                eksternBehandlingId = behandling.eksternId.toString(),
+                eksternFagsakId = behandling.eksternFagsakId.toString(),
+                fagsystem = Fagsystem.EF,
+                klageMottatt = opprettKlageDto.mottattDato,
+                behandlendeEnhet = enhetId
             )
         )
     }

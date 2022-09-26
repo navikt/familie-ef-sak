@@ -232,7 +232,8 @@ class VurderingService(
 
     private fun finnBarnId(barnId: UUID?, barnIdMap: Map<UUID, BehandlingBarn>): UUID? {
         return barnId?.let {
-            barnIdMap[it]?.id ?: error("Fant ikke barn=$it på gjeldende behandling")
+            val barnIdMapping = barnIdMap.map { it.key to it.value.id }.toMap()
+            barnIdMap[it]?.id ?: error("Fant ikke barn=$it på gjeldende behandling med barnIdMapping=$barnIdMapping")
         }
     }
 
