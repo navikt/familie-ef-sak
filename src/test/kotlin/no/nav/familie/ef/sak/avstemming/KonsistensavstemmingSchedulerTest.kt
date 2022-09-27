@@ -32,7 +32,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
         val jobb = repository.insert(KonsistensavstemmingJobb(triggerdato = LocalDate.now()))
         repository.update(jobb)
         assertThat(catchThrowable { repository.update(jobb) })
-            .hasRootCauseInstanceOf(OptimisticLockingFailureException::class.java)
+            .isInstanceOf(OptimisticLockingFailureException::class.java)
     }
 
     @Test
