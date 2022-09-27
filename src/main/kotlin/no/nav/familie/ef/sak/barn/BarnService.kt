@@ -261,7 +261,7 @@ class BarnService(
             "Forventer at man sender inn vilkårsbehandleNyeBarn"
         }
         feilHvis(stønadstype == StønadType.BARNETILSYN && vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE) {
-            "Må vilkårsbehandle alle nye barn på "
+            "Må vilkårsbehandle nye barn hvis det er barnetilsyn"
         }
 
         feilHvis(
@@ -269,10 +269,10 @@ class BarnService(
                 vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE &&
                 barnPåForrigeBehandling.isNotEmpty()
         ) {
-            "Alle barn skal være med i revurderingen av en barnetilsynbehandling."
+            "Må vilkårsbehandle nye barn hvis forrige behandling inneholder barn"
         }
         feilHvis(saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING && vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE) {
-            "Kan ikke sende inn nye barn på revurdering med årsak G-omregning"
+            "Skal ikke vilkårsbehandle nye barn på revurdering med årsak G-omregning"
         }
     }
 

@@ -151,7 +151,7 @@ class OmregningService(
             forrigeBehandlingId = forrigeBehandlingId,
             stønadstype = StønadType.OVERGANGSSTØNAD,
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
         )
         vurderingService.opprettVilkårForOmregning(behandling)
     }

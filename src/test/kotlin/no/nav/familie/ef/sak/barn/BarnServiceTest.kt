@@ -176,13 +176,13 @@ internal class BarnServiceTest {
             barnService.opprettBarnForRevurdering(
                 behandling = behandling(),
                 forrigeBehandlingId,
-                stønadstype = OVERGANGSSTØNAD,
+                stønadstype = BARNETILSYN,
                 grunnlagsdatabarn,
                 VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
             )
         }
 
-        assertThat(feil.message).contains("Alle barn skal være med i revurderingen av en barnetilsynbehandling.")
+        assertThat(feil.message).contains("Må vilkårsbehandle nye barn hvis det er barnetilsyn")
     }
 
     @Test
@@ -206,7 +206,7 @@ internal class BarnServiceTest {
         barnService.opprettBarnForRevurdering(
             behandling(),
             forrigeBehandlingId,
-            OVERGANGSSTØNAD,
+            BARNETILSYN,
             grunnlagsdatabarn,
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
@@ -236,7 +236,7 @@ internal class BarnServiceTest {
             )
         }
 
-        assertThat(feil.message).contains("Kan ikke sende inn nye barn på revurdering med årsak G-omregning")
+        assertThat(feil.message).contains("Skal ikke vilkårsbehandle nye barn på revurdering med årsak G-omregning")
     }
 
     @Test
@@ -258,7 +258,7 @@ internal class BarnServiceTest {
             )
         }
 
-        assertThat(feil.message).contains("Alle barn skal være med i revurderingen av en barnetilsynbehandling.")
+        assertThat(feil.message).contains("Må vilkårsbehandle nye barn hvis forrige behandling inneholder barn")
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class BarnServiceTest {
         val fnrFødtTerminbarn = FnrGenerator.generer(LocalDate.now())
         val grunnlagsdatabarn = listOf(
             barnMedIdent(fnrBarnA, "Barn A"),
-            barnMedIdent(fnrFødtTerminbarn, "Barn B"),
+            barnMedIdent(fnrFødtTerminbarn, "Barn B")
         )
         val forrigeBehandlingId = UUID.randomUUID()
 
