@@ -10,16 +10,16 @@ object BarnMatcher {
 
     fun kobleBehandlingBarnOgRegisterBarn(
         behandlingBarn: List<BehandlingBarn>,
-        barn: List<BarnMedIdent>
+        grunnlagsbarn: List<BarnMedIdent>
     ): List<MatchetBehandlingBarn> {
-        val barnMap = barn.associateBy { it.personIdent }
+        val grunnlagsbarnPåIdent = grunnlagsbarn.associateBy { it.personIdent }
         val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
-            val firstOrNull = barnMap.entries.firstOrNull { entry -> it.personIdent == entry.key }
-            MatchetBehandlingBarn(firstOrNull?.key, firstOrNull?.value, it)
+            val matchetBarnPåIdent = grunnlagsbarnPåIdent[it.personIdent]
+            MatchetBehandlingBarn(matchetBarnPåIdent?.personIdent, matchetBarnPåIdent, it)
         }
 
         val pdlBarnIkkeIBehandlingBarn =
-            barnMap.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
+            grunnlagsbarnPåIdent.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
 
         return behandlingBarnFnrMatchetTilPdlBarn.map {
             if (it.barn != null) {
