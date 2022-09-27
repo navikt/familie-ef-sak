@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -32,6 +33,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
@@ -52,7 +54,7 @@ internal class KlageServiceTest {
 
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
-    private val service =
+    private val klageService =
         KlageService(
             behandlingService,
             fagsakService,
@@ -88,7 +90,7 @@ internal class KlageServiceTest {
 
         @Test
         internal fun `skal mappe riktige verdier`() {
-            service.opprettKlage(UUID.randomUUID(), OpprettKlageDto(LocalDate.now()))
+            klageService.opprettKlage(UUID.randomUUID(), OpprettKlageDto(LocalDate.now()))
 
             val request = opprettKlageSlot.captured
 
@@ -109,7 +111,7 @@ internal class KlageServiceTest {
         internal fun `har ikke noen åpen sak`() {
             every { infotrygdService.hentÅpneKlagesaker(fagsakPerson.hentAktivIdent()) } returns listOf()
 
-            val åpneKlager = service.hentÅpneKlagerInfotrygd(fagsakPerson.id)
+            val åpneKlager = klageService.hentÅpneKlagerInfotrygd(fagsakPerson.id)
 
             assertThat(åpneKlager.stønadstyper).isEmpty()
         }
@@ -123,7 +125,7 @@ internal class KlageServiceTest {
                 )
             )
 
-            val åpneKlager = service.hentÅpneKlagerInfotrygd(fagsakPerson.id)
+            val åpneKlager = klageService.hentÅpneKlagerInfotrygd(fagsakPerson.id)
 
             assertThat(åpneKlager.stønadstyper).containsExactly(stønadType)
         }
@@ -151,7 +153,7 @@ internal class KlageServiceTest {
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
             every { klageClient.hentKlagebehandlinger(capture(eksternFagsakIdSlot)) } returns emptyMap()
 
-            service.hentBehandlinger(UUID.randomUUID())
+            klageService.hentBehandlinger(UUID.randomUUID())
             assertThat(eksternFagsakIdSlot.captured).containsExactlyInAnyOrder(
                 eksternIdBT,
                 eksternIdOS,
@@ -167,7 +169,7 @@ internal class KlageServiceTest {
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
             every { klageClient.hentKlagebehandlinger(any()) } returns klageBehandlingerDto
 
-            val klager = service.hentBehandlinger(UUID.randomUUID())
+            val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
             assertThat(klager.overgangsstønad.single()).isEqualTo(klageBehandlingerDto[eksternIdOS]!!.single())
             assertThat(klager.barnetilsyn.single()).isEqualTo(klageBehandlingerDto[eksternIdBT]!!.single())
@@ -179,7 +181,7 @@ internal class KlageServiceTest {
         internal fun `skal returnere tomme lister dersom eksternFagsakId ikke eksisterer`() {
             every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns Fagsaker(null, null, null)
 
-            val klager = service.hentBehandlinger(UUID.randomUUID())
+            val klager = klageService.hentBehandlinger(UUID.randomUUID())
 
             assertThat(klager.overgangsstønad).isEmpty()
             assertThat(klager.barnetilsyn).isEmpty()
@@ -208,5 +210,29 @@ internal class KlageServiceTest {
             eksternIdBT to listOf(klageBehandlingDto()),
             eksternIdSP to listOf(klageBehandlingDto())
         )
+    }
+
+    @Nested
+    inner class Validering {
+
+        @Test
+        internal fun `skal ikke kunne opprette klage med krav mottatt frem i tid`() {
+            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1))
+            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(UUID.randomUUID(), opprettKlageDto) }
+
+            assertThat(feil.feil).contains("Kan ikke opprette klage med krav mottatt frem i tid for behandling med id=")
+        }
+
+        @Test
+        internal fun `skal ikke kunne opprette dersom enhetId ikke finnes`() {
+            every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
+
+            val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now())
+            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(UUID.randomUUID(), opprettKlageDto) }
+
+            assertThat(feil.feil).isEqualTo("Finner ikke behandlende enhet for personen")
+        }
+
+
     }
 }
