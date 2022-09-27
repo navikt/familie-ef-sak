@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -47,6 +48,9 @@ class KlageService(
     }
 
     fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
+        brukerfeilHvis(opprettKlageDto.mottattDato.isAfter(LocalDate.now())) {
+            "Kan ikke opprette klage med krav mottatt frem i tid for behandling med id=$behandlingId"
+        }
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
         val enhetId = arbeidsfordelingService.hentNavEnhet(aktivIdent)?.enhetId
