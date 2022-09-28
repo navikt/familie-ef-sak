@@ -1,14 +1,14 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.felles.util.opprettBarnMedIdent
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
-import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
@@ -20,7 +20,9 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,33 +31,33 @@ import java.time.LocalDateTime
 
 internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
-    val iverksettClient = mockk<IverksettClient>()
     val behandlingService = mockk<BehandlingService>()
     val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
+    val taskRepository = mockk<TaskRepository>()
     val service = OpprettOppgaveForMigrertFødtBarnTask(
-        iverksettClient,
         behandlingService,
         tilkjentYtelseService,
-        grunnlagsdataService
+        grunnlagsdataService,
+        taskRepository
     )
 
-    val oppgaverSlot = slot<OppgaverForBarnDto>()
+    val taskSlot = slot<List<Task>>()
 
     @BeforeEach
     internal fun setUp() {
-        justRun { iverksettClient.sendOppgaverForBarn(capture(oppgaverSlot)) }
         every { behandlingService.hentAktivIdent(any()) } returns "1"
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling(fagsak())
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(LocalDate.now().plusYears(2))
         every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns opprettGrunnlagsdata(null)
+        every { taskRepository.saveAll(capture(taskSlot)) } answers { firstArg() }
     }
 
     @Test
     internal fun `skal ikke opprette oppgave hvis fødelsdato mangler`() {
         service.doTask(opprettOppgave(null))
 
-        verify(exactly = 0) { iverksettClient.sendOppgaverForBarn(any()) }
+        verify(exactly = 0) { taskRepository.saveAll<Task>(any()) }
     }
 
     @Test
@@ -65,16 +67,15 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
         service.doTask(opprettOppgave(fødelsdato))
 
-        verify(exactly = 0) { iverksettClient.sendOppgaverForBarn(any()) }
+        verify(exactly = 0) { taskRepository.saveAll<Task>(any()) }
     }
 
     @Test
-    internal fun `skal ikke opprette hvis siste utbetalingsperioden er før barnet fyller 1 år`() {
+    internal fun `skal ikke opprette oppgave hvis siste utbetalingsperioden er før barnet fyller 1 år`() {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(LocalDate.now().plusMonths(10))
 
         service.doTask(opprettOppgave(LocalDate.now()))
-
-        verify(exactly = 0) { iverksettClient.sendOppgaverForBarn(any()) }
+        verify(exactly = 0) { taskRepository.saveAll<Task>(any()) }
     }
 
     @Test
@@ -84,12 +85,21 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
         service.doTask(opprettOppgave(LocalDate.now()))
 
-        verify(exactly = 1) { iverksettClient.sendOppgaverForBarn(any()) }
-        val oppgaver = oppgaverSlot.captured.oppgaverForBarn
-        assertThat(oppgaver).hasSize(2)
+        val tasks = taskSlot.captured
+        assertThat(tasks.size).isEqualTo(2)
 
-        assertThat(oppgaver.single { it.aktivFra in halvtÅr.minusWeeks(1)..halvtÅr.plusWeeks(2) })
-        assertThat(oppgaver.single { it.aktivFra in etÅr.minusWeeks(1)..etÅr.plusWeeks(2) })
+        assertThat(
+            tasks.single {
+                objectMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
+                    halvtÅr.minusWeeks(1)..halvtÅr.plusWeeks(2)
+            }
+        )
+        assertThat(
+            tasks.single {
+                objectMapper.readValue<OpprettOppgavePayload>(it.payload).aktivFra in
+                    etÅr.minusWeeks(1)..etÅr.plusWeeks(2)
+            }
+        )
     }
 
     private fun tilkjentYtelse(tilOgMed: LocalDate) = lagTilkjentYtelse(

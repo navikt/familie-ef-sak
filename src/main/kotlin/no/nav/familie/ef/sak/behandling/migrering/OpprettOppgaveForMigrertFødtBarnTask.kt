@@ -3,19 +3,19 @@ package no.nav.familie.ef.sak.behandling.migrering
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppfølgingsoppgaveForBarnFyltÅrTask
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
-import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,10 +32,10 @@ import java.util.UUID
     beskrivelse = "Oppretter oppgave for fødte barn"
 )
 class OpprettOppgaveForMigrertFødtBarnTask(
-    private val iverksettClient: IverksettClient,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val grunnlagsdataService: GrunnlagsdataService
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val taskRepository: TaskRepository
 ) : AsyncTaskStep {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -49,19 +49,30 @@ class OpprettOppgaveForMigrertFødtBarnTask(
             logger.info("fagsak=$fagsakId behandling=$behandlingId har ingen utbetalingsperioder")
             return
         }
-        lagOgSendOppgaver(fagsakId, behandlingId, sisteUtbetalingsdato, data)
+        lagOgSendOppgaver(behandlingId, sisteUtbetalingsdato, data)
     }
 
     private fun lagOgSendOppgaver(
-        fagsakId: UUID,
         behandlingId: UUID,
         sisteUtbetalingsdato: LocalDate,
         data: OpprettOppgaveForMigrertFødtBarnTaskData
     ) {
-        val oppgaver = lagOppgaver(behandlingId, data, sisteUtbetalingsdato)
-        if (oppgaver.isNotEmpty()) {
-            logger.info("Sender ${oppgaver.size} for fagsakId=$fagsakId")
-            iverksettClient.sendOppgaverForBarn(OppgaverForBarnDto(oppgaver))
+        val oppgaverForBarn = lagOppgaver(behandlingId, data, sisteUtbetalingsdato)
+
+        val opprettOppfølgingsoppgaveForBarnFyltÅrTasks = oppgaverForBarn.map {
+            OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(
+                OpprettOppgavePayload(
+                    it.behandlingId,
+                    it.personIdent,
+                    data.personIdent,
+                    it.alder,
+                    it.aktivFra
+                )
+            )
+        }
+
+        if (opprettOppfølgingsoppgaveForBarnFyltÅrTasks.isNotEmpty()) {
+            taskRepository.saveAll(opprettOppfølgingsoppgaveForBarnFyltÅrTasks)
         }
     }
 
@@ -92,15 +103,16 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                 logger.info("Fødselsdato=$fødselsdato finnes allerede i grunnlagsdata, oppretter ikke oppgave")
                 return@mapNotNull null
             }
-            datoOgBeskrivelse(fødselsdato, sisteUtbetalingsdato)
+            datoOgAlder(fødselsdato, sisteUtbetalingsdato)
                 .map { datoOgBeskrivelse ->
                     OppgaveForBarn(
                         behandlingId = behandlingId,
                         eksternFagsakId = data.eksternFagsakId,
-                        personIdent = data.personIdent,
+                        personIdent = it.personIdent,
                         stønadType = data.stønadType,
-                        beskrivelse = datoOgBeskrivelse.second,
-                        aktivFra = datoOgBeskrivelse.first
+                        beskrivelse = datoOgBeskrivelse.second.oppgavebeskrivelse,
+                        aktivFra = datoOgBeskrivelse.first,
+                        alder = datoOgBeskrivelse.second
                     )
                 }
         }.flatten()
@@ -110,17 +122,15 @@ class OpprettOppgaveForMigrertFødtBarnTask(
      * Oppretter datoer for 6 og 12 måneder
      * Skal ikke opprette noen oppføglningsoppgaver hvis datoet for når barnet fyller 1 år er før siste utbetalingsperioden
      */
-    private fun datoOgBeskrivelse(fødselsdato: LocalDate, sisteUtbetalingsdato: LocalDate): List<Pair<LocalDate, String>> {
-        val beskrivelseBarnBlirSeksMnd = Alder.SEKS_MND.oppgavebeskrivelse
-        val beskrivelseBarnFyllerEttÅr = Alder.ETT_ÅR.oppgavebeskrivelse
+    private fun datoOgAlder(fødselsdato: LocalDate, sisteUtbetalingsdato: LocalDate): List<Pair<LocalDate, Alder>> {
         val datoOm1År = nesteVirkedagForDatoMinus1Uke(fødselsdato.plusYears(1))
         if (sisteUtbetalingsdato < datoOm1År) {
             logger.info("Dato for sisteUtbetalingsdato=$sisteUtbetalingsdato er før barnet fyller 1 år = $datoOm1År")
             return emptyList()
         }
         return listOf(
-            nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to beskrivelseBarnBlirSeksMnd,
-            datoOm1År to beskrivelseBarnFyllerEttÅr
+            nesteVirkedagForDatoMinus1Uke(fødselsdato.plusMonths(6)) to Alder.SEKS_MND,
+            datoOm1År to Alder.ETT_ÅR
         ).filter { it.first > LocalDate.now() }
     }
 
@@ -159,4 +169,14 @@ data class OpprettOppgaveForMigrertFødtBarnTaskData(
     val stønadType: StønadType,
     val personIdent: String,
     val barn: List<BarnMinimumDto>
+)
+
+data class OppgaveForBarn(
+    val behandlingId: UUID,
+    val eksternFagsakId: Long,
+    val personIdent: String,
+    val stønadType: StønadType,
+    val beskrivelse: String,
+    val aktivFra: LocalDate? = null,
+    val alder: Alder?
 )
