@@ -24,16 +24,19 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBar
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.VurderingStegService
 import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.SvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Barn
@@ -92,19 +95,28 @@ class TestSaksbehandlingController(
         val regler = vilkårsreglerForStønad(saksbehandling.stønadstype).associateBy { it.vilkårType }
 
         vurderinger.forEach { vurdering ->
-            val regel = regler.getValue(vurdering.vilkårType)
-            val delvilkår = vurdering.delvilkårsvurderinger.map { delvilkkårDto ->
-                val hovedregel = delvilkkårDto.hovedregel()
-                val regelSteg = regel.regler.getValue(hovedregel)
-                regelSteg.svarMapping.entries.mapNotNull { (svarId, svarRegel) ->
-                    lagOppfyltVilkår(delvilkkårDto, svarRegel, svarId)
-                }.firstOrNull()
-                    ?: error("Finner ikke oppfylt svar for vilkårstype=${vurdering.vilkårType} hovedregel=$hovedregel")
-            }
+            val delvilkår = lagDelvilkår(regler, vurdering)
             vurderingStegService.oppdaterVilkår(SvarPåVurderingerDto(vurdering.id, behandlingId, delvilkår))
         }
-
         return Ressurs.success(behandlingId)
+    }
+
+    private fun lagDelvilkår(
+        regler: Map<VilkårType, Vilkårsregel>,
+        vurdering: VilkårsvurderingDto
+    ): List<DelvilkårsvurderingDto> {
+        val regel = regler.getValue(vurdering.vilkårType)
+        if (vurdering.vilkårType == VilkårType.ER_UTDANNING_HENSIKTSMESSIG) {
+            return listOf(delvilkårErUtdanningHensiktsmessig())
+        }
+        return vurdering.delvilkårsvurderinger.map { delvilkår ->
+            val hovedregel = delvilkår.hovedregel()
+            val regelSteg = regel.regler.getValue(hovedregel)
+            regelSteg.svarMapping.entries.mapNotNull { (svarId, svarRegel) ->
+                lagOppfyltVilkår(delvilkår, svarRegel, svarId)
+            }.firstOrNull()
+                ?: error("Finner ikke oppfylt svar for vilkårstype=${vurdering.vilkårType} hovedregel=$hovedregel")
+        }
     }
 
     private fun lagOppfyltVilkår(
@@ -125,6 +137,14 @@ class TestSaksbehandlingController(
     private fun delvilkår(regelId: RegelId, svar: SvarId, begrunnelse: String? = null) = DelvilkårsvurderingDto(
         Vilkårsresultat.OPPFYLT,
         listOf(VurderingDto(regelId, svar, begrunnelse))
+    )
+
+    private fun delvilkårErUtdanningHensiktsmessig() = DelvilkårsvurderingDto(
+        Vilkårsresultat.OPPFYLT,
+        listOf(
+            VurderingDto(RegelId.NAVKONTOR_VURDERING, SvarId.JA),
+            VurderingDto(RegelId.SAKSBEHANDLER_VURDERING, SvarId.JA, "begrunnelse")
+        )
     )
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
