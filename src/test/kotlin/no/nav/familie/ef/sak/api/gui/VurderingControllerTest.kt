@@ -54,12 +54,18 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `skal hente vilkår`() {
+    internal fun `Henter vilkår og sjekker initiering av nære boforhold`() {
         val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettInngangsvilkår()
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data).isNotNull
+
+        val næreBoforholdVurderingDto = respons.body?.data?.vurderinger?.first { it.vilkårType == VilkårType.ALENEOMSORG }
+            ?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.NÆRE_BOFORHOLD }?.vurderinger?.first()
+
+        assertThat(næreBoforholdVurderingDto?.svar).isEqualTo(SvarId.NEI)
+        assertThat(næreBoforholdVurderingDto?.begrunnelse).contains("annen forelder bor mer enn 1 km unna søker")
     }
 
     @Test
@@ -167,13 +173,16 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         )
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
-        val søknad = TestsøknadBuilder.Builder().setBarn(
-            listOf(
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
+        val søknad = TestsøknadBuilder.Builder()
+            .setBarn(
+                listOf(
+                    TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
+                    TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
+                )
             )
-        ).build().søknadOvergangsstønad
-        
+            .setPersonalia("Navn på forsørger", "01010172272")
+            .build().søknadOvergangsstønad
+
         // val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
             søknad.personalia.verdi.fødselsnummer.verdi.verdi,

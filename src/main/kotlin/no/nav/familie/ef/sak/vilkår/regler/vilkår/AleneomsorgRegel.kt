@@ -48,7 +48,7 @@ class AleneomsorgRegel : Vilkårsregel(
                             regelId = RegelId.NÆRE_BOFORHOLD,
                             svar = if (!harNæreBoforhold) SvarId.NEI else null,
                             begrunnelse = if (!harNæreBoforhold) {
-                                "Automatisk vurdert: Ut ifra annens forelder registrerte adresse er det registrert at forelder bor mer enn 1 km unna."
+                                "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna søker"
                             } else {
                                 null
                             }
