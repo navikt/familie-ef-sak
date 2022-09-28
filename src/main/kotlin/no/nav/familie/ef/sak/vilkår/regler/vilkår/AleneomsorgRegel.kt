@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -37,6 +38,8 @@ class AleneomsorgRegel : Vilkårsregel(
         return hovedregler.map { hovedregel ->
             if (hovedregel == RegelId.NÆRE_BOFORHOLD) {
                 val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
+                secureLogger.info("Nære boforhold: barnForelderLangAvstandTilSøkerList antall ${metadata.langAvstandTilSøker.size}")
+                secureLogger.info("Nære boforhold: barnId $barnId - ${metadata.langAvstandTilSøker}")
                 val finnForelderLangAvstandTilSøkerForGjeldendeBarn = barnForelderLangAvstandTilSøkerList.firstOrNull { it.barnId == barnId }
                 val harNæreBoforhold = finnForelderLangAvstandTilSøkerForGjeldendeBarn?.langAvstandTilSøker == null ||
                     finnForelderLangAvstandTilSøkerForGjeldendeBarn.langAvstandTilSøker == LangAvstandTilSøker.UKJENT
