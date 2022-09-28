@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import java.util.UUID
 
 /**
@@ -19,7 +20,13 @@ data class HovedregelMetadata(
     val sivilstandstype: Sivilstandstype,
     val erMigrering: Boolean = false,
     val barn: List<BehandlingBarn>,
-    val søktOmBarnetilsyn: List<UUID>
+    val søktOmBarnetilsyn: List<UUID>,
+    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf()
+)
+
+data class BarnForelderLangAvstandTilSøker(
+    val barnId: UUID,
+    val langAvstandTilSøker: LangAvstandTilSøker?
 )
 
 abstract class Vilkårsregel(

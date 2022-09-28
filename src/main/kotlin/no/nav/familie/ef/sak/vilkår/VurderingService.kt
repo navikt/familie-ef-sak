@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -96,7 +97,10 @@ class VurderingService(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
-            søktOmBarnetilsyn = søktOmBarnetilsyn
+            søktOmBarnetilsyn = søktOmBarnetilsyn,
+            langAvstandTilSøker = grunnlag.barnMedSamvær.map {
+                BarnForelderLangAvstandTilSøker(it.barnId, it.registergrunnlag.forelder?.langAvstandTilSøker)
+            }
         )
         return Pair(grunnlag, metadata)
     }

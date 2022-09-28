@@ -1,6 +1,11 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
@@ -8,6 +13,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import java.util.UUID
 
 class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
@@ -22,6 +28,38 @@ class AleneomsorgRegel : Vilkårsregel(
         MER_AV_DAGLIG_OMSORG
     )
 ) {
+
+    override fun initereDelvilkårsvurdering(
+        metadata: HovedregelMetadata,
+        resultat: Vilkårsresultat,
+        barnId: UUID?
+    ): List<Delvilkårsvurdering> {
+        val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
+        val finnForelderLangAvstandTilSøkerForGjeldendeBarn = barnForelderLangAvstandTilSøkerList.firstOrNull { it.barnId == barnId }
+        val harNæreBoforhold = if (finnForelderLangAvstandTilSøkerForGjeldendeBarn == null ||
+            finnForelderLangAvstandTilSøkerForGjeldendeBarn.langAvstandTilSøker == LangAvstandTilSøker.UKJENT
+        ) {
+            null
+        } else {
+            SvarId.NEI
+        }
+        return listOf(
+            Delvilkårsvurdering(
+                resultat = if (harNæreBoforhold == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.NÆRE_BOFORHOLD,
+                        svar = harNæreBoforhold,
+                        begrunnelse = if (harNæreBoforhold == SvarId.NEI) {
+                            "Automatisk vurdert: Ut ifra annens forelder registrerte adresse er det registrert at forelder bor mer enn 1 km unna."
+                        } else {
+                            null
+                        }
+                    )
+                )
+            )
+        )
+    }
 
     companion object {
 
