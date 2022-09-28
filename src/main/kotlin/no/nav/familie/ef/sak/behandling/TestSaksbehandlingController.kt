@@ -105,14 +105,14 @@ class TestSaksbehandlingController(
         regler: Map<VilkårType, Vilkårsregel>,
         vurdering: VilkårsvurderingDto
     ): List<DelvilkårsvurderingDto> {
-        val regel = regler.getValue(vurdering.vilkårType)
+        val vilkårsregel = regler.getValue(vurdering.vilkårType)
         if (vurdering.vilkårType == VilkårType.ER_UTDANNING_HENSIKTSMESSIG) {
             return listOf(delvilkårErUtdanningHensiktsmessig())
         }
         return vurdering.delvilkårsvurderinger.map { delvilkår ->
             val hovedregel = delvilkår.hovedregel()
-            val regelSteg = regel.regler.getValue(hovedregel)
-            regelSteg.svarMapping.entries.mapNotNull { (svarId, svarRegel) ->
+            val regelSteg = vilkårsregel.regler.getValue(hovedregel)
+            regelSteg.svarMapping.mapNotNull { (svarId, svarRegel) ->
                 lagOppfyltVilkår(delvilkår, svarRegel, svarId)
             }.firstOrNull()
                 ?: error("Finner ikke oppfylt svar for vilkårstype=${vurdering.vilkårType} hovedregel=$hovedregel")
@@ -120,14 +120,14 @@ class TestSaksbehandlingController(
     }
 
     private fun lagOppfyltVilkår(
-        it: DelvilkårsvurderingDto,
+        delvilkår: DelvilkårsvurderingDto,
         svarRegel: SvarRegel,
         svarId: SvarId
     ) = when (svarRegel) {
         SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
         SluttSvarRegel.OPPFYLT -> delvilkår(
-            it.hovedregel(),
+            delvilkår.hovedregel(),
             svarId,
             if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null
         )
