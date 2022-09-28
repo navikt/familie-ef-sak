@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -23,13 +24,16 @@ internal class TestSaksbehandlingControllerTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var grunnlagsdataService: GrunnlagsdataService
 
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
     @Test
     internal fun `vilkår for overgangsstønad`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.hentEllerOpprettVurderinger(behandling.id)
-        testWithBrukerContext {
+        testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
             testSaksbehandlingController.utfyllVilkår(behandling.id)
         }
         val hentAlleVurderinger = vurderingService.hentAlleVurderinger(behandling.id)
