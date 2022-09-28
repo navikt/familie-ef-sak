@@ -47,7 +47,8 @@ data class AnnenForelderDto(
     val bosattINorge: Boolean?,
     val land: String?,
     val dødsfall: LocalDate? = null,
-    val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null
+    val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
+    val langAvstandTilSøker: LangAvstandTilSøker?
 )
 
 data class BarnepassDto(
@@ -64,3 +65,8 @@ data class BarnepassordningDto(
     val til: LocalDate,
     val beløp: Int
 )
+
+enum class LangAvstandTilSøker {
+    JA,
+    UKJENT
+}

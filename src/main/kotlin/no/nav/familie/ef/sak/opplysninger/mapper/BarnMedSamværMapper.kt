@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassordningDto
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 
 object BarnMedSamværMapper {
@@ -137,7 +138,7 @@ object BarnMedSamværMapper {
             harSammeAdresse = matchetBarn.barn?.let {
                 AdresseHjelper.borPåSammeAdresse(it, søkerAdresse)
             },
-            forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr) },
+            forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
             dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
             fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato
         )
@@ -149,11 +150,16 @@ object BarnMedSamværMapper {
             fødselsnummer = annenForelder.person?.fødselsnummer,
             fødselsdato = annenForelder.person?.fødselsdato,
             bosattINorge = annenForelder.bosattNorge,
-            land = annenForelder.land
+            land = annenForelder.land,
+            langAvstandTilSøker = null
         )
     }
 
-    private fun tilAnnenForelderDto(pdlAnnenForelder: AnnenForelderMedIdent, annenForelderFnr: String?): AnnenForelderDto {
+    private fun tilAnnenForelderDto(
+        pdlAnnenForelder: AnnenForelderMedIdent,
+        annenForelderFnr: String?,
+        søkerAdresse: List<Bostedsadresse>
+    ): AnnenForelderDto {
         return AnnenForelderDto(
             navn = pdlAnnenForelder.navn.visningsnavn(),
             fødselsnummer = annenForelderFnr,
@@ -161,7 +167,18 @@ object BarnMedSamværMapper {
             dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
             bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
             land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode,
-            tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto()
+            tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
+            langAvstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende())
         )
     }
+    private fun langAvstandTilSøker(
+        søkerAdresse: List<Bostedsadresse>,
+        bostedsadresse: Bostedsadresse?
+    ) =
+        bostedsadresse
+            ?.vegadresse
+            ?.fjerneBoforhold(søkerAdresse.gjeldende()?.vegadresse)
+            ?.takeIf { it }
+            ?.let { LangAvstandTilSøker.JA }
+            ?: LangAvstandTilSøker.UKJENT
 }

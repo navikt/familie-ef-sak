@@ -232,7 +232,5 @@ internal class KlageServiceTest {
 
             assertThat(feil.feil).isEqualTo("Finner ikke behandlende enhet for personen")
         }
-
-
     }
 }

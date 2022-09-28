@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.lang.Math.abs
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.math.sqrt
 
 data class PdlResponse<T>(
     val data: T,
@@ -231,7 +233,35 @@ data class Vegadresse(
     val postnummer: String?,
     val koordinater: Koordinater?,
     val matrikkelId: Long?
-)
+) {
+    fun fjerneBoforhold(annenVegadresse: Vegadresse?): Boolean {
+        if (this.koordinater == null || annenVegadresse?.koordinater == null) {
+            return false
+        }
+
+        val koordinater1 = this.koordinater
+        val koordinater2 = annenVegadresse.koordinater
+
+        if (koordinater1.x == null || koordinater1.y == null || koordinater2.x == null || koordinater2.y == null) {
+            return false
+        }
+
+        if (koordinater1.y > 7_200_000 || koordinater2.y > 7_200_000) {
+            return abs(koordinater2.y - koordinater1.y) > 1000
+        }
+
+        return beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y) > 1000
+    }
+
+    private fun beregnAvstandIMeter(xKoordinat1: Float, yKoordinat1: Float, xKoordinat2: Float, yKoordinat2: Float): Float {
+        return abs(
+            sqrt(
+                (xKoordinat1 - xKoordinat2) * (xKoordinat1 - xKoordinat2) +
+                    (yKoordinat1 - yKoordinat2) * (yKoordinat1 - yKoordinat2)
+            )
+        )
+    }
+}
 
 data class UkjentBosted(val bostedskommune: String?)
 
