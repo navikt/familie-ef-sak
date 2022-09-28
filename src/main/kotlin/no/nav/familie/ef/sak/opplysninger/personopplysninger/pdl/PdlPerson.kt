@@ -262,11 +262,9 @@ data class Vegadresse(
     }
 
     private fun beregnAvstandIMeter(xKoordinat1: Float, yKoordinat1: Float, xKoordinat2: Float, yKoordinat2: Float): Float {
-        return abs(
-            sqrt(
-                (xKoordinat1 - xKoordinat2) * (xKoordinat1 - xKoordinat2) +
-                    (yKoordinat1 - yKoordinat2) * (yKoordinat1 - yKoordinat2)
-            )
+        return sqrt(
+            (xKoordinat1 - xKoordinat2) * (xKoordinat1 - xKoordinat2) +
+                (yKoordinat1 - yKoordinat2) * (yKoordinat1 - yKoordinat2)
         )
     }
 }
