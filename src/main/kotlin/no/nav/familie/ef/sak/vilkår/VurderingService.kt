@@ -103,7 +103,7 @@ class VurderingService(
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         secureLogger.info("Hent grunnlag og metadata antall barn med samvær: ${grunnlag.barnMedSamvær.size}, " +
-                                  "annen forelder  ${grunnlag.barnMedSamvær.first().registergrunnlag.forelder}")
+                                  "annen forelder  ${grunnlag.barnMedSamvær.firstOrNull()?.registergrunnlag?.forelder}")
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
