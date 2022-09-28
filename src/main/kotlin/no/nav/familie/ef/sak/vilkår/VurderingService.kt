@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
@@ -102,8 +101,6 @@ class VurderingService(
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
-        secureLogger.info("Hent grunnlag og metadata antall barn med samvær: ${grunnlag.barnMedSamvær.size}, " +
-                                  "annen forelder  ${grunnlag.barnMedSamvær.firstOrNull()?.registergrunnlag?.forelder}")
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
