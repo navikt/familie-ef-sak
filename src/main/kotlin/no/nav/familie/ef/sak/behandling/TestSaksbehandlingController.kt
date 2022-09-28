@@ -24,6 +24,32 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBar
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET
+import no.nav.familie.ef.sak.vilkår.VilkårType.AKTIVITET_ARBEID
+import no.nav.familie.ef.sak.vilkår.VilkårType.ALDER_PÅ_BARN
+import no.nav.familie.ef.sak.vilkår.VilkårType.ALENEOMSORG
+import no.nav.familie.ef.sak.vilkår.VilkårType.DOKUMENTASJON_AV_UTDANNING
+import no.nav.familie.ef.sak.vilkår.VilkårType.DOKUMENTASJON_TILSYNSUTGIFTER
+import no.nav.familie.ef.sak.vilkår.VilkårType.ER_UTDANNING_HENSIKTSMESSIG
+import no.nav.familie.ef.sak.vilkår.VilkårType.FORUTGÅENDE_MEDLEMSKAP
+import no.nav.familie.ef.sak.vilkår.VilkårType.INNTEKT
+import no.nav.familie.ef.sak.vilkår.VilkårType.LOVLIG_OPPHOLD
+import no.nav.familie.ef.sak.vilkår.VilkårType.MOR_ELLER_FAR
+import no.nav.familie.ef.sak.vilkår.VilkårType.NYTT_BARN_SAMME_PARTNER
+import no.nav.familie.ef.sak.vilkår.VilkårType.RETT_TIL_OVERGANGSSTØNAD
+import no.nav.familie.ef.sak.vilkår.VilkårType.SAGT_OPP_ELLER_REDUSERT
+import no.nav.familie.ef.sak.vilkår.VilkårType.SAMLIV
+import no.nav.familie.ef.sak.vilkår.VilkårType.SIVILSTAND
+import no.nav.familie.ef.sak.vilkår.VilkårType.TIDLIGERE_VEDTAKSPERIODER
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.VurderingStegService
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
@@ -44,6 +70,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -68,14 +95,100 @@ class TestSaksbehandlingController(
     private val taskRepository: TaskRepository,
     private val oppgaveService: OppgaveService,
     private val journalpostClient: JournalpostClient,
-    private val migreringService: MigreringService
+    private val migreringService: MigreringService,
+    private val vurderingService: VurderingService,
+    private val vurderingStegService: VurderingStegService
 ) {
+
+    @PostMapping("{behandlingId}/utfyll-vilkar")
+    fun utfyllVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        val vurderinger = vurderingService.hentAlleVurderinger(behandlingId)
+        vurderinger.filter { it.vilkårType != SIVILSTAND }.forEach { vurdering ->
+            val delvilkårsvurderinger = lagDelvilkår(vurdering)
+            vurderingStegService.oppdaterVilkår(SvarPåVurderingerDto(vurdering.id, behandlingId, delvilkårsvurderinger))
+        }
+        return Ressurs.success(behandlingId)
+    }
+
+    private fun lagDelvilkår(vurdering: VilkårsvurderingDto): List<DelvilkårsvurderingDto> {
+        return when (vurdering.vilkårType) {
+            FORUTGÅENDE_MEDLEMSKAP -> listOf(jaMedBegrunnelse(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN))
+            LOVLIG_OPPHOLD -> listOf(
+                jaMedBegrunnelse(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE)
+            )
+            MOR_ELLER_FAR -> listOf(jaUtenBegrunnelse(RegelId.OMSORG_FOR_EGNE_ELLER_ADOPTERTE_BARN))
+            SIVILSTAND -> error("yolo")
+            SAMLIV -> listOf(
+                jaMedBegrunnelse(RegelId.LEVER_IKKE_MED_ANNEN_FORELDER),
+                jaMedBegrunnelse(RegelId.LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD)
+            )
+            ALENEOMSORG -> listOf(
+                jaUtenBegrunnelse(RegelId.SKRIFTLIG_AVTALE_OM_DELT_BOSTED),
+                neiMedBegrunnelse(RegelId.NÆRE_BOFORHOLD),
+                jaMedBegrunnelse(RegelId.MER_AV_DAGLIG_OMSORG)
+            )
+            NYTT_BARN_SAMME_PARTNER -> listOf(neiUtenBegrunnelse(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER))
+
+            SAGT_OPP_ELLER_REDUSERT -> listOf(
+                neiUtenBegrunnelse(RegelId.SAGT_OPP_ELLER_REDUSERT)
+            )
+            AKTIVITET -> listOf(
+                jaMedBegrunnelse(RegelId.FYLLER_BRUKER_AKTIVITETSPLIKT)
+            )
+            AKTIVITET_ARBEID -> listOf(
+                delvilkår(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID, "begrunnelse")
+            )
+            TIDLIGERE_VEDTAKSPERIODER -> listOf(
+                neiUtenBegrunnelse(RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD),
+                neiUtenBegrunnelse(RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING)
+            )
+            INNTEKT -> listOf(
+                jaMedBegrunnelse(RegelId.INNTEKT_LAVERE_ENN_INNTEKTSGRENSE),
+                jaMedBegrunnelse(RegelId.INNTEKT_SAMSVARER_MED_OS)
+            )
+
+            ALDER_PÅ_BARN -> listOf(
+                neiUtenBegrunnelse(RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI)
+            )
+            DOKUMENTASJON_TILSYNSUTGIFTER -> listOf(
+                jaMedBegrunnelse(RegelId.HAR_DOKUMENTERTE_TILSYNSUTGIFTER)
+            )
+
+            RETT_TIL_OVERGANGSSTØNAD -> listOf(
+                jaMedBegrunnelse(RegelId.RETT_TIL_OVERGANGSSTØNAD)
+            )
+
+            DOKUMENTASJON_AV_UTDANNING -> listOf(
+                jaMedBegrunnelse(RegelId.DOKUMENTASJON_AV_UTDANNING),
+                jaMedBegrunnelse(RegelId.DOKUMENTASJON_AV_UTGIFTER_UTDANNING)
+            )
+
+            ER_UTDANNING_HENSIKTSMESSIG -> listOf(
+                jaMedBegrunnelse(RegelId.SAKSBEHANDLER_VURDERING)
+            )
+
+        }
+    }
+
+    private fun neiUtenBegrunnelse(regelId: RegelId) = delvilkår(regelId, SvarId.NEI)
+
+    private fun neiMedBegrunnelse(regelId: RegelId) = delvilkår(regelId, SvarId.NEI, "begrunnelse")
+
+    private fun jaUtenBegrunnelse(regelId: RegelId) = delvilkår(regelId, SvarId.JA)
+
+    private fun jaMedBegrunnelse(regelId: RegelId) = delvilkår(regelId, SvarId.JA, "begrunnelse")
+
+    private fun delvilkår(regelId: RegelId, svar: SvarId, begrunnelse: String? = null) = DelvilkårsvurderingDto(
+        Vilkårsresultat.OPPFYLT,
+        listOf(VurderingDto(regelId, svar, begrunnelse))
+    )
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
         val personIdent = testFagsakRequest.personIdent
         val søknadBuilder = lagSøknad(personIdent)
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
 
         val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
             FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(søknadBuilder.søknadOvergangsstønad, fagsak)
