@@ -34,31 +34,31 @@ class AleneomsorgRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
-        val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
-        val finnForelderLangAvstandTilSøkerForGjeldendeBarn = barnForelderLangAvstandTilSøkerList.firstOrNull { it.barnId == barnId }
-        val harNæreBoforhold = if (finnForelderLangAvstandTilSøkerForGjeldendeBarn == null ||
-            finnForelderLangAvstandTilSøkerForGjeldendeBarn.langAvstandTilSøker == LangAvstandTilSøker.UKJENT
-        ) {
-            null
-        } else {
-            SvarId.NEI
-        }
-        return listOf(
-            Delvilkårsvurdering(
-                resultat = if (harNæreBoforhold == SvarId.NEI) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                listOf(
-                    Vurdering(
-                        regelId = RegelId.NÆRE_BOFORHOLD,
-                        svar = harNæreBoforhold,
-                        begrunnelse = if (harNæreBoforhold == SvarId.NEI) {
-                            "Automatisk vurdert: Ut ifra annens forelder registrerte adresse er det registrert at forelder bor mer enn 1 km unna."
-                        } else {
-                            null
-                        }
+        return hovedregler.map { hovedregel ->
+            if (hovedregel == RegelId.NÆRE_BOFORHOLD) {
+                val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
+                val finnForelderLangAvstandTilSøkerForGjeldendeBarn = barnForelderLangAvstandTilSøkerList.firstOrNull { it.barnId == barnId }
+                val harNæreBoforhold = finnForelderLangAvstandTilSøkerForGjeldendeBarn?.langAvstandTilSøker == null ||
+                    finnForelderLangAvstandTilSøkerForGjeldendeBarn.langAvstandTilSøker == LangAvstandTilSøker.UKJENT
+
+                Delvilkårsvurdering(
+                    resultat = if (!harNæreBoforhold) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                    listOf(
+                        Vurdering(
+                            regelId = RegelId.NÆRE_BOFORHOLD,
+                            svar = if (!harNæreBoforhold) SvarId.NEI else null,
+                            begrunnelse = if (!harNæreBoforhold) {
+                                "Automatisk vurdert: Ut ifra annens forelder registrerte adresse er det registrert at forelder bor mer enn 1 km unna."
+                            } else {
+                                null
+                            }
+                        )
                     )
                 )
-            )
-        )
+            } else {
+                Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
+            }
+        }
     }
 
     companion object {

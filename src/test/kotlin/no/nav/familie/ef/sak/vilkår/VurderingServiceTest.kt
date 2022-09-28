@@ -24,8 +24,11 @@ import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.OPPFYLT
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
+import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
@@ -39,6 +42,7 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderingServiceTest {
@@ -108,7 +112,15 @@ internal class VurderingServiceTest {
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(
         barnId,
         søknadsgrunnlag = mockk(relaxed = true),
-        registergrunnlag = mockk(relaxed = true),
+        registergrunnlag = BarnMedSamværRegistergrunnlagDto(
+            UUID.randomUUID(),
+            "navn",
+            "fnr",
+            false,
+            AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge", null, null, LangAvstandTilSøker.UKJENT),
+            null,
+            null
+        ),
         barnepass = BarnepassDto(
             barnId,
             skalHaBarnepass = true,

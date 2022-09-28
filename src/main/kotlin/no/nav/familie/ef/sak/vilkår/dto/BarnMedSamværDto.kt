@@ -48,7 +48,7 @@ data class AnnenForelderDto(
     val land: String?,
     val dødsfall: LocalDate? = null,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
-    val langAvstandTilSøker: LangAvstandTilSøker?
+    val langAvstandTilSøker: LangAvstandTilSøker? = LangAvstandTilSøker.UKJENT
 )
 
 data class BarnepassDto(
