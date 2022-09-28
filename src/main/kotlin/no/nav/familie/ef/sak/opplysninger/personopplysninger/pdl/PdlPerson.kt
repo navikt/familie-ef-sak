@@ -234,6 +234,14 @@ data class Vegadresse(
     val koordinater: Koordinater?,
     val matrikkelId: Long?
 ) {
+
+    /**
+     * Norge er delt i tre UTM-soner (32, 33 og 35) - men PDL returnerer ikke hvilken sone et koordinat tilhører
+     * Pga dette vil det være vanskelig å sammenligne x-verdi på tvers av soner. Grensen mellom 32 og 33 ligger på ca 7 200 000
+     * og alt sør for dette kan avstandsberegnes med både x- og y-koordinater. Nord for dette gjør vi ren avstandsberegning på
+     * y-koordinater inntil vi evt får riktig UTM-sone i datagrunnlaget.
+     */
+    val UTM_GRENSE = 7_200_000
     fun fjerneBoforhold(annenVegadresse: Vegadresse?): Boolean {
         if (this.koordinater == null || annenVegadresse?.koordinater == null) {
             return false
@@ -246,7 +254,7 @@ data class Vegadresse(
             return false
         }
 
-        if (koordinater1.y > 7_200_000 || koordinater2.y > 7_200_000) {
+        if (koordinater1.y > UTM_GRENSE || koordinater2.y > UTM_GRENSE) {
             return abs(koordinater2.y - koordinater1.y) > 1000
         }
 
