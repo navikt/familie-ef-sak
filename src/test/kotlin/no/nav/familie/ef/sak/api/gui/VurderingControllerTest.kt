@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.api.gui
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -15,8 +18,7 @@ import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.søknad.SøknadMedVedlegg
-import no.nav.familie.kontrakter.ef.søknad.Testsøknad
+import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
@@ -42,6 +44,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var søknadService: SøknadService
+
+    @Autowired
+    lateinit var barnService: BarnService
 
     @BeforeEach
     fun setUp() {
@@ -162,9 +167,16 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         )
 
     private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
-        val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
+        val søknad = TestsøknadBuilder.Builder().setBarn(
+            listOf(
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
+            )
+        ).build().søknadOvergangsstønad
+        
+        // val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
-            søknad.søknad.personalia.verdi.fødselsnummer.verdi.verdi,
+            søknad.personalia.verdi.fødselsnummer.verdi.verdi,
             StønadType.OVERGANGSSTØNAD
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
@@ -173,8 +185,17 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             fagsak.id,
             behandlingsårsak = behandlingÅrsak
         )
-        søknadService.lagreSøknadForOvergangsstønad(søknad.søknad, behandling.id, fagsak.id, "1234")
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsak.id, "1234")
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        barnService.opprettBarnPåBehandlingMedSøknadsdata(
+            behandlingId = behandling.id,
+            fagsakId = behandling.fagsakId,
+            grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
+            stønadstype = StønadType.OVERGANGSSTØNAD,
+            ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
+            barnSomSkalFødes = listOf(),
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+        )
 
         return restTemplate.exchange(
             localhost("/api/vurdering/${behandling.id}/vilkar"),
