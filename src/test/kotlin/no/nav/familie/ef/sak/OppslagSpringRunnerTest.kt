@@ -94,9 +94,11 @@ abstract class OppslagSpringRunnerTest {
     @Autowired
     private lateinit var rolleConfig: RolleConfig
 
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private lateinit var mockOAuth2Server: MockOAuth2Server
 
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     lateinit var testoppsettService: TestoppsettService
 

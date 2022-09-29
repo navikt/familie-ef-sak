@@ -173,7 +173,7 @@ class BeregnYtelseSteg(
     ) {
         validerAntallBarnOgUtgifterVedMidlertidigOpphør(utgiftsperioder, saksbehandling.id)
         validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
-        validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
+        validerSammenhengendePerioder(utgiftsperioder)
     }
 
     private fun validerAntallBarnOgUtgifterVedMidlertidigOpphør(
@@ -209,12 +209,11 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerSammenhengendePerioderVedMidlertidigOpphør(
+    private fun validerSammenhengendePerioder(
         utgiftsperioder: List<UtgiftsperiodeDto>,
-        saksbehandling: Saksbehandling
     ) {
         brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
-            "Perioder som er midlertidig opphør må være sammenhengende, på behandling=${saksbehandling.id}"
+            "Periodene må være sammenhengende"
         }
     }
 
