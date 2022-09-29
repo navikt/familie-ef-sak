@@ -35,6 +35,7 @@ class AleneomsorgRegel : Vilkårsregel(
         resultat: Vilkårsresultat,
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
+        secureLogger.info("Nære boforhold. BarnId: $barnId langAvstandTilSøker: ${metadata.langAvstandTilSøker}" )
         return hovedregler.map { hovedregel ->
             if (hovedregel == RegelId.NÆRE_BOFORHOLD && metadata.langAvstandTilSøker.isNotEmpty()) {
                 val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
