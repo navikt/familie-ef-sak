@@ -173,7 +173,7 @@ class BeregnYtelseSteg(
     ) {
         validerAntallBarnOgUtgifterVedMidlertidigOpphør(utgiftsperioder, saksbehandling.id)
         validerTidligereVedtakVedMidlertidigOpphør(utgiftsperioder, saksbehandling)
-        validerSammenhengendePerioderVedMidlertidigOpphør(utgiftsperioder)
+        validerSammenhengendePerioder(utgiftsperioder)
     }
 
     private fun validerAntallBarnOgUtgifterVedMidlertidigOpphør(
@@ -209,7 +209,7 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerSammenhengendePerioderVedMidlertidigOpphør(
+    private fun validerSammenhengendePerioder(
         utgiftsperioder: List<UtgiftsperiodeDto>,
     ) {
         brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
