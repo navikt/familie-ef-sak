@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 internal class VegadresseTest {
 
     @Test
-    fun avstandTilAnnenAdresse() {
+    fun `returner false når avstand til annen adresse er mindre enn minimumsavstand for automatisk behandling`() {
         val avstandTilAnnenAdresse =
             PdlTestdata.vegadresse.fjerneBoforhold(
                 PdlTestdata.vegadresse.copy(
@@ -19,11 +19,11 @@ internal class VegadresseTest {
                 )
             )
 
-        assertThat(avstandTilAnnenAdresse).isFalse()
+        assertThat(avstandTilAnnenAdresse).isFalse
     }
 
     @Test
-    fun avstandTilAnnenAdresse2() {
+    fun `returner true når avstand til annen adresse er lenger enn minimumsavstand for automatisk behandling, sjekk Motzfeldts Gate og Sofiemyr`() {
         val motzfeldtsgate = PdlTestdata.vegadresse.copy(
             koordinater = Koordinater(
                 598845f,
@@ -43,11 +43,11 @@ internal class VegadresseTest {
         val avstandTilAnnenAdresse =
             motzfeldtsgate.fjerneBoforhold(sofiemyr)
 
-        assertThat(avstandTilAnnenAdresse).isTrue()
+        assertThat(avstandTilAnnenAdresse).isTrue
     }
 
     @Test
-    fun avstandTilAnnenAdresse3() {
+    fun `returner true når avstand til annen adresse er lenger enn minimumsavstand for automatisk behandling, sjekk Sofiemyr og Kirkenes`() {
         val kirkenes = PdlTestdata.vegadresse.copy(
             koordinater = Koordinater(
                 615386.4f,
