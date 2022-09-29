@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -36,7 +38,8 @@ class VurderingService(
     private val barnService: BarnService,
     private val vilkårGrunnlagService: VilkårGrunnlagService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
@@ -101,13 +104,18 @@ class VurderingService(
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
+        val skalSjekkeNæreBoforholdMetadata = featureToggleService.isEnabled(Toggle.AUTOMATISK_BEREGN_NÆRE_BOFORHOLD)
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
-            langAvstandTilSøker = grunnlag.barnMedSamvær.map {
-                BarnForelderLangAvstandTilSøker(it.barnId, it.registergrunnlag.forelder?.langAvstandTilSøker)
+            langAvstandTilSøker = if (skalSjekkeNæreBoforholdMetadata) {
+                grunnlag.barnMedSamvær.map {
+                    BarnForelderLangAvstandTilSøker(it.barnId, it.registergrunnlag.forelder?.langAvstandTilSøker)
+                }
+            } else {
+                listOf()
             }
         )
         return Pair(grunnlag, metadata)

@@ -36,7 +36,7 @@ class AleneomsorgRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         return hovedregler.map { hovedregel ->
-            if (hovedregel == RegelId.NÆRE_BOFORHOLD) {
+            if (hovedregel == RegelId.NÆRE_BOFORHOLD && metadata.langAvstandTilSøker.isNotEmpty()) {
                 val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
                 secureLogger.info("Nære boforhold: barnForelderLangAvstandTilSøkerList antall ${metadata.langAvstandTilSøker.size}")
                 secureLogger.info("Nære boforhold: barnId $barnId - ${metadata.langAvstandTilSøker}")

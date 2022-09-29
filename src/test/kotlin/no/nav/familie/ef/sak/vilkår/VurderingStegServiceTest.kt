@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -63,6 +64,7 @@ internal class VurderingStegServiceTest {
     private val taskRepository = mockk<TaskRepository>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val vurderingService = VurderingService(
         behandlingService,
         søknadService,
@@ -70,7 +72,8 @@ internal class VurderingStegServiceTest {
         barnService,
         vilkårGrunnlagService,
         grunnlagsdataService,
-        fagsakService
+        fagsakService,
+        featureToggleService
     )
     private val vurderingStegService = VurderingStegService(
         behandlingService = behandlingService,
@@ -103,6 +106,7 @@ internal class VurderingStegServiceTest {
         every { blankettRepository.deleteById(any()) } just runs
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         every { taskRepository.save(any()) } answers { firstArg() }
+        every { featureToggleService.isEnabled(any()) } returns true
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
             .returns(
                 Medlemskapsinfo(
