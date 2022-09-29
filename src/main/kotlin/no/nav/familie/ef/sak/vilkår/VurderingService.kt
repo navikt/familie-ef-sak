@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
@@ -111,6 +112,7 @@ class VurderingService(
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = if (skalSjekkeNæreBoforholdMetadata) {
+                secureLogger.info("Skal sjekke nære boforhold. Mapper barn med samvær: ${grunnlag.barnMedSamvær}")
                 grunnlag.barnMedSamvær.map {
                     BarnForelderLangAvstandTilSøker(it.barnId, it.registergrunnlag.forelder?.langAvstandTilSøker)
                 }
