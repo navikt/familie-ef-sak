@@ -45,6 +45,14 @@ class VurderingService(
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
     }
 
+    fun hentAlleVurderinger(behandlingId: UUID): List<VilkårsvurderingDto> {
+        val vurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        feilHvis(vurderinger.isEmpty()) {
+            "Mangler vurderinger for behandling=$behandlingId"
+        }
+        return vurderinger.map { it.tilDto() }
+    }
+
     @Transactional
     fun oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         grunnlagsdataService.oppdaterOgHentNyGrunnlagsdata(behandlingId)
