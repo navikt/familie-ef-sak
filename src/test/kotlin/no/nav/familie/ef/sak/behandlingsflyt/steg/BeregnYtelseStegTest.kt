@@ -1751,7 +1751,7 @@ internal class BeregnYtelseStegTest {
                 innvilgetBarnetilsynMedFlerePerioder(data)
             )
         }
-        assertThat(feil.feil).contains("Perioder som er midlertidig opphør må være sammenhengende, på behandling=")
+        assertThat(feil.feil).contains("Periodene må være sammenhengende")
     }
 
     private fun identerTilBehandlingBarn(identer: List<UUID>) = identer.map { BehandlingBarn(it, UUID.randomUUID()) }
