@@ -255,7 +255,6 @@ data class Vegadresse(
             return false
         }
 
-
         if (koordinater1.y > UTM_GRENSE || koordinater2.y > UTM_GRENSE) {
             return abs(koordinater2.y - koordinater1.y) > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER
         }
