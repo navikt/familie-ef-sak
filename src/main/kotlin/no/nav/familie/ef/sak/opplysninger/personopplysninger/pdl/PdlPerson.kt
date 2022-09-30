@@ -242,6 +242,7 @@ data class Vegadresse(
      * y-koordinater inntil vi evt får riktig UTM-sone i datagrunnlaget.
      */
     val UTM_GRENSE = 7_200_000
+    val MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER = 1000
     fun fjerneBoforhold(annenVegadresse: Vegadresse?): Boolean {
         if (this.koordinater == null || annenVegadresse?.koordinater == null) {
             return false
@@ -255,10 +256,10 @@ data class Vegadresse(
         }
 
         if (koordinater1.y > UTM_GRENSE || koordinater2.y > UTM_GRENSE) {
-            return abs(koordinater2.y - koordinater1.y) > 1000
+            return abs(koordinater2.y - koordinater1.y) > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER
         }
 
-        return beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y) > 1000
+        return beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y) > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER
     }
 
     private fun beregnAvstandIMeter(xKoordinat1: Float, yKoordinat1: Float, xKoordinat2: Float, yKoordinat2: Float): Float {
