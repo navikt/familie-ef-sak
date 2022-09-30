@@ -151,7 +151,7 @@ object BarnMedSamværMapper {
             fødselsdato = annenForelder.person?.fødselsdato,
             bosattINorge = annenForelder.bosattNorge,
             land = annenForelder.land,
-            langAvstandTilSøker = null
+            langAvstandTilSøker = LangAvstandTilSøker.UKJENT
         )
     }
 

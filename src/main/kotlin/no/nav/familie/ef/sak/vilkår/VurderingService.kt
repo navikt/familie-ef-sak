@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
@@ -112,7 +113,9 @@ class VurderingService(
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = if (skalSjekkeNæreBoforholdMetadata) {
                 grunnlag.barnMedSamvær.map {
-                    BarnForelderLangAvstandTilSøker(it.barnId, it.registergrunnlag.forelder?.langAvstandTilSøker)
+                    BarnForelderLangAvstandTilSøker(
+                        it.barnId,
+                        it.registergrunnlag.forelder?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT)
                 }
             } else {
                 listOf()

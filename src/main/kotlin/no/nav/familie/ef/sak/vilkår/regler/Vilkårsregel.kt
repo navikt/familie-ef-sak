@@ -26,7 +26,7 @@ data class HovedregelMetadata(
 
 data class BarnForelderLangAvstandTilSøker(
     val barnId: UUID,
-    val langAvstandTilSøker: LangAvstandTilSøker?
+    val langAvstandTilSøker: LangAvstandTilSøker
 )
 
 abstract class Vilkårsregel(
