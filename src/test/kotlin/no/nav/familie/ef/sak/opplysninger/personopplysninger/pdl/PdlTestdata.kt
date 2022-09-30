@@ -7,7 +7,7 @@ object PdlTestdata {
 
     private val metadataGjeldende = Metadata(false)
 
-    private val vegadresse = Vegadresse(
+    val vegadresse = Vegadresse(
         "",
         "",
         "",
