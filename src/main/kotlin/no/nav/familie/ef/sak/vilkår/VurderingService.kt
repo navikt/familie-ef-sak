@@ -14,12 +14,11 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
-import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -111,17 +110,18 @@ class VurderingService(
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
-            langAvstandTilSøker = if (skalSjekkeNæreBoforholdMetadata) {
-                grunnlag.barnMedSamvær.map {
-                    BarnForelderLangAvstandTilSøker(
-                        it.barnId,
-                        it.registergrunnlag.forelder?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT)
-                }
-            } else {
-                listOf()
-            }
+            langAvstandTilSøker = mapBarnMedSamværTilLangAvstandTilSøker(skalSjekkeNæreBoforholdMetadata, grunnlag.barnMedSamvær)
         )
         return Pair(grunnlag, metadata)
+    }
+
+    private fun mapBarnMedSamværTilLangAvstandTilSøker(
+        skalSjekkeNæreBoforholdMetadata: Boolean,
+        barnMedSamvær: List<BarnMedSamværDto>
+    ) = if (skalSjekkeNæreBoforholdMetadata) {
+        barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
+    } else {
+        listOf()
     }
 
     private fun hentEllerOpprettVurderinger(

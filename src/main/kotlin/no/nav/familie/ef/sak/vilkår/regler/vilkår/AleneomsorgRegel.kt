@@ -35,31 +35,27 @@ class AleneomsorgRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         return hovedregler.map { hovedregel ->
-            if (hovedregel == RegelId.NÆRE_BOFORHOLD && metadata.langAvstandTilSøker.isNotEmpty()) {
-                val barnForelderLangAvstandTilSøkerList = metadata.langAvstandTilSøker
-                val finnForelderLangAvstandTilSøkerForGjeldendeBarn = barnForelderLangAvstandTilSøkerList.firstOrNull { it.barnId == barnId }
-                val harNæreBoforhold = finnForelderLangAvstandTilSøkerForGjeldendeBarn?.langAvstandTilSøker == null ||
-                    finnForelderLangAvstandTilSøkerForGjeldendeBarn.langAvstandTilSøker == LangAvstandTilSøker.UKJENT
-
-                Delvilkårsvurdering(
-                    resultat = if (!harNæreBoforhold) Vilkårsresultat.AUTOMATISK_OPPFYLT else Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                    listOf(
-                        Vurdering(
-                            regelId = RegelId.NÆRE_BOFORHOLD,
-                            svar = if (!harNæreBoforhold) SvarId.NEI else null,
-                            begrunnelse = if (!harNæreBoforhold) {
-                                "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna søker"
-                            } else {
-                                null
-                            }
-                        )
-                    )
-                )
+            if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
+                opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
             } else {
                 Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
             }
         }
     }
+
+    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() = Delvilkårsvurdering(
+        resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+        listOf(
+            Vurdering(
+                regelId = RegelId.NÆRE_BOFORHOLD,
+                svar = SvarId.NEI,
+                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna søker"
+            )
+        )
+    )
+
+    private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
+        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker == LangAvstandTilSøker.JA
 
     companion object {
 

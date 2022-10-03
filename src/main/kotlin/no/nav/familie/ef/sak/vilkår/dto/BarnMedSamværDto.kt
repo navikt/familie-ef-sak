@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import java.time.LocalDate
 import java.util.UUID
 
@@ -8,7 +9,14 @@ data class BarnMedSamværDto(
     val søknadsgrunnlag: BarnMedSamværSøknadsgrunnlagDto,
     val registergrunnlag: BarnMedSamværRegistergrunnlagDto,
     val barnepass: BarnepassDto? = null
-)
+) {
+    fun mapTilBarnForelderLangAvstandTilSøker(): BarnForelderLangAvstandTilSøker {
+        return BarnForelderLangAvstandTilSøker(
+            barnId = barnId,
+            langAvstandTilSøker = registergrunnlag.forelder?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT
+        )
+    }
+}
 
 data class BarnMedSamværSøknadsgrunnlagDto(
     val id: UUID,
