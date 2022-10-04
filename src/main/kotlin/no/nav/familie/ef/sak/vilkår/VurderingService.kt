@@ -10,8 +10,11 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
@@ -35,7 +38,8 @@ class VurderingService(
     private val barnService: BarnService,
     private val vilkårGrunnlagService: VilkårGrunnlagService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
@@ -43,6 +47,14 @@ class VurderingService(
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+    }
+
+    fun hentAlleVurderinger(behandlingId: UUID): List<VilkårsvurderingDto> {
+        val vurderinger = vilkårsvurderingRepository.findByBehandlingId(behandlingId)
+        feilHvis(vurderinger.isEmpty()) {
+            "Mangler vurderinger for behandling=$behandlingId"
+        }
+        return vurderinger.map { it.tilDto() }
     }
 
     @Transactional
@@ -92,13 +104,24 @@ class VurderingService(
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
+        val skalSjekkeNæreBoforholdMetadata = featureToggleService.isEnabled(Toggle.AUTOMATISK_BEREGN_NÆRE_BOFORHOLD)
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
-            søktOmBarnetilsyn = søktOmBarnetilsyn
+            søktOmBarnetilsyn = søktOmBarnetilsyn,
+            langAvstandTilSøker = mapBarnMedSamværTilLangAvstandTilSøker(skalSjekkeNæreBoforholdMetadata, grunnlag.barnMedSamvær)
         )
         return Pair(grunnlag, metadata)
+    }
+
+    private fun mapBarnMedSamværTilLangAvstandTilSøker(
+        skalSjekkeNæreBoforholdMetadata: Boolean,
+        barnMedSamvær: List<BarnMedSamværDto>
+    ) = if (skalSjekkeNæreBoforholdMetadata) {
+        barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
+    } else {
+        listOf()
     }
 
     private fun hentEllerOpprettVurderinger(
@@ -232,7 +255,8 @@ class VurderingService(
 
     private fun finnBarnId(barnId: UUID?, barnIdMap: Map<UUID, BehandlingBarn>): UUID? {
         return barnId?.let {
-            barnIdMap[it]?.id ?: error("Fant ikke barn=$it på gjeldende behandling")
+            val barnIdMapping = barnIdMap.map { it.key to it.value.id }.toMap()
+            barnIdMap[it]?.id ?: error("Fant ikke barn=$it på gjeldende behandling med barnIdMapping=$barnIdMapping")
         }
     }
 

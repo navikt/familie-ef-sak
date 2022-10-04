@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilN
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kontaktadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KontaktadresseType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Koordinater
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
@@ -232,7 +233,7 @@ class PdlClientConfig {
         private fun annenForelder(): PdlAnnenForelder =
             PdlAnnenForelder(
                 adressebeskyttelse = emptyList(),
-                bostedsadresse = bostedsadresse(),
+                bostedsadresse = bostedsadresse(Koordinater(x = 598845f, y = 6643333f, z = null, kvalitet = null)),
                 dødsfall = listOf(Dødsfall(LocalDate.of(2021, 9, 22))),
                 fødsel = listOf(fødsel(1994, 11, 1)),
                 navn = listOf(Navn("Bob", "", "Burger", metadataGjeldende)),
@@ -323,8 +324,8 @@ class PdlClientConfig {
                     omraader = listOf()
                 )
             )
-
-        private fun bostedsadresse(): List<Bostedsadresse> =
+        val defaultKoordinater = Koordinater(x = 601372f, y = 6629367f, z = null, kvalitet = null)
+        private fun bostedsadresse(koordinater: Koordinater = defaultKoordinater): List<Bostedsadresse> =
             listOf(
                 Bostedsadresse(
                     angittFlyttedato = startdato.plusDays(1),
@@ -332,14 +333,14 @@ class PdlClientConfig {
                     gyldigTilOgMed = LocalDate.of(2199, 1, 1),
                     utenlandskAdresse = null,
                     coAdressenavn = "CONAVN",
-                    vegadresse = vegadresse(),
+                    vegadresse = vegadresse(koordinater),
                     ukjentBosted = null,
                     matrikkeladresse = null,
                     metadata = metadataGjeldende
                 )
             )
 
-        private fun vegadresse(): Vegadresse =
+        private fun vegadresse(koordinater: Koordinater = defaultKoordinater): Vegadresse =
             Vegadresse(
                 husnummer = "13",
                 husbokstav = "b",
@@ -348,7 +349,7 @@ class PdlClientConfig {
                 postnummer = "0575",
                 bruksenhetsnummer = "",
                 tilleggsnavn = null,
-                koordinater = null,
+                koordinater = koordinater,
                 matrikkelId = 0
             )
 

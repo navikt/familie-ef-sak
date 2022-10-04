@@ -10,16 +10,16 @@ object BarnMatcher {
 
     fun kobleBehandlingBarnOgRegisterBarn(
         behandlingBarn: List<BehandlingBarn>,
-        barn: List<BarnMedIdent>
+        grunnlagsbarn: List<BarnMedIdent>
     ): List<MatchetBehandlingBarn> {
-        val barnMap = barn.associateBy { it.personIdent }
+        val grunnlagsbarnPåIdent = grunnlagsbarn.associateBy { it.personIdent }
         val behandlingBarnFnrMatchetTilPdlBarn = behandlingBarn.map {
-            val firstOrNull = barnMap.entries.firstOrNull { entry -> it.personIdent == entry.key }
-            MatchetBehandlingBarn(firstOrNull?.key, firstOrNull?.value, it)
+            val matchetBarnPåIdent = grunnlagsbarnPåIdent[it.personIdent]
+            MatchetBehandlingBarn(matchetBarnPåIdent?.personIdent, matchetBarnPåIdent, it)
         }
 
         val pdlBarnIkkeIBehandlingBarn =
-            barnMap.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
+            grunnlagsbarnPåIdent.filter { entry -> behandlingBarn.none { it.personIdent == entry.key } }.toMutableMap()
 
         return behandlingBarnFnrMatchetTilPdlBarn.map {
             if (it.barn != null) {
@@ -39,27 +39,17 @@ object BarnMatcher {
         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>
     ): MatchetBehandlingBarn {
         val fødselTermindato = barn.behandlingBarn.fødselTermindato ?: return barn
-        val nærmesteMatch = nærmesteMatch(pdlBarnIkkeISøknad, fødselTermindato) ?: return barn
+        val nærmesteMatchBarnMedIdent = nærmesteMatch(pdlBarnIkkeISøknad, fødselTermindato) ?: return barn
 
-        return barn.copy(fødselsnummer = nærmesteMatch.key, barn = nærmesteMatch.value)
+        return barn.copy(fødselsnummer = nærmesteMatchBarnMedIdent.personIdent, barn = nærmesteMatchBarnMedIdent)
     }
 
     private fun nærmesteMatch(
         pdlBarnIkkeISøknad: Map<String, BarnMedIdent>,
         fødselTermindato: LocalDate
-    ): Map.Entry<String, BarnMedIdent>? {
-        val uke20 = fødselTermindato.minusWeeks(20)
-        val uke44 = fødselTermindato.plusWeeks(4)
-
-        return pdlBarnIkkeISøknad.entries.filter {
-            val fødselsnummer = Fødselsnummer(it.key)
-            val fødselsdato = fødselsnummer.fødselsdato
-            fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
-        }.minByOrNull {
-            val epochDayForFødsel = Fødselsnummer(it.key).fødselsdato.toEpochDay()
-            val epochDayTermindato = fødselTermindato.toEpochDay()
-            abs(epochDayForFødsel - epochDayTermindato)
-        }
+    ): BarnMedIdent? {
+        val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(pdlBarnIkkeISøknad.map { it.key }, fødselTermindato)
+        return pdlBarnIkkeISøknad[besteMatch]
     }
 }
 
@@ -68,3 +58,18 @@ data class MatchetBehandlingBarn(
     val barn: BarnMedIdent?,
     val behandlingBarn: BehandlingBarn
 )
+
+fun finnBesteMatchPåFødselsnummerForTermindato(fødselsnumre: List<String>, termindato: LocalDate): String? {
+    val uke20 = termindato.minusWeeks(20)
+    val uke44 = termindato.plusWeeks(4)
+
+    return fødselsnumre.filter {
+        val fødselsnummer = Fødselsnummer(it)
+        val fødselsdato = fødselsnummer.fødselsdato
+        fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20)
+    }.minByOrNull {
+        val epochDayForFødsel = Fødselsnummer(it).fødselsdato.toEpochDay()
+        val epochDayTermindato = termindato.toEpochDay()
+        abs(epochDayForFødsel - epochDayTermindato)
+    }
+}

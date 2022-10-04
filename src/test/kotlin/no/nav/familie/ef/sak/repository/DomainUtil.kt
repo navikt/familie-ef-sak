@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
@@ -79,7 +80,8 @@ fun behandling(
     opprettetTid: LocalDateTime = SporbarUtils.now(),
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
+    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
+    eksternId: EksternBehandlingId = EksternBehandlingId()
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -91,7 +93,8 @@ fun behandling(
         resultat = resultat,
         sporbar = Sporbar(opprettetTid = opprettetTid),
         årsak = årsak,
-        henlagtÅrsak = henlagtÅrsak
+        henlagtÅrsak = henlagtÅrsak,
+        eksternId = eksternId
     )
 
 fun saksbehandling(

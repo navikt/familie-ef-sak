@@ -1,32 +1,23 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
-import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.ef.sak.opplysninger.mapper.finnBesteMatchPåFødselsnummerForTermindato
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Fødselsnummer
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalDateTime
-import kotlin.math.abs
 
 @Service
 class BarnFyllerÅrOppfølgingsoppgaveService(
     private val gjeldendeBarnRepository: GjeldendeBarnRepository,
-    private val oppgaveService: OppgaveService,
     private val oppgaveRepository: OppgaveRepository,
-    private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     private val taskRepository: TaskRepository,
     private val pdlClient: PdlClient
 ) {
@@ -34,6 +25,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    @Transactional
     fun opprettTasksForAlleBarnSomHarFyltÅr(dryRun: Boolean = false) {
         val dagensDato = LocalDate.now()
         val alleBarnIGjeldendeBehandlinger =
@@ -42,7 +34,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         logger.info("Antall barn i gjeldende behandlinger: ${alleBarnIGjeldendeBehandlinger.size}")
 
-        val skalOpprettes = filtrerBarnSomHarFyltÅr(alleBarnIGjeldendeBehandlinger)
+        val skalOpprettes = lagOpprettOppgaveForBarn(alleBarnIGjeldendeBehandlinger)
         logger.info("Oppretter oppgave for ${skalOpprettes.size} barn. (dry-run: $dryRun)")
 
         if (!dryRun) {
@@ -59,121 +51,89 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     }
 
     private fun hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
-        val personerMedTermindatoBarn = barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
-        val pdlPersonMedForelderBarnRelasjon = pdlClient.hentPersonForelderBarnRelasjon(personerMedTermindatoBarn.map { it.fødselsnummerSøker })
-
-        val returnBarnTilUtplukkForOppgave = mutableListOf<BarnTilUtplukkForOppgave>()
-
-        for (personMedTermindatoBarn in personerMedTermindatoBarn) {
-            val termindato = personMedTermindatoBarn.termindatoBarn!!
-            val pdlPersonMedForelderBarnRelasjonData = pdlPersonMedForelderBarnRelasjon[personMedTermindatoBarn.fødselsnummerSøker] ?: error("Finner ikke pdldata for søker=${personMedTermindatoBarn.fødselsnummerSøker}")
-            val forelderBarnRelasjoner = pdlPersonMedForelderBarnRelasjonData.forelderBarnRelasjon.filter { it.relatertPersonsIdent != null }
-
-            val uke20 = termindato.minusWeeks(20)
-            val uke44 = termindato.plusWeeks(4)
-
-            val besteMatch = forelderBarnRelasjoner.filter {
-                val fødselsnummer = Fødselsnummer(it.relatertPersonsIdent!!) // Allerede filtrert på at relatertPersonsIdent != null
-                val fødselsdato = fødselsnummer.fødselsdato
-                fødselsdato.isBefore(uke44) and fødselsdato.isAfter(uke20) and !returnBarnTilUtplukkForOppgave.contains(personMedTermindatoBarn.copy(fødselsnummerBarn = it.relatertPersonsIdent))
-            }.minByOrNull {
-                val epochDayForFødsel = Fødselsnummer(it.relatertPersonsIdent!!).fødselsdato.toEpochDay()
-                val epochDayTermindato = termindato.toEpochDay()
-                abs(epochDayForFødsel - epochDayTermindato)
-            }
-            returnBarnTilUtplukkForOppgave.add(personMedTermindatoBarn.copy(fødselsnummerBarn = besteMatch?.relatertPersonsIdent))
-        }
-        return returnBarnTilUtplukkForOppgave + barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null }
+        val barnUtenFødselsnummer =
+            barnTilUtplukkForOppgave.filter { it.termindatoBarn != null && it.fødselsnummerBarn == null }
+        return barnTilUtplukkForOppgave.filter { it.fødselsnummerBarn != null } +
+            finnFødselsnummerTilTerminbarn(barnUtenFødselsnummer)
     }
 
-    private fun filtrerBarnSomHarFyltÅr(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
-        val barnTilUtplukkMedTermindatoBarn = hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
-        val barnPersonIdenter = barnTilUtplukkMedTermindatoBarn.mapNotNull { it.fødselsnummerBarn }
+    private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
+        val pdlPersonMedForelderBarnRelasjon =
+            pdlClient.hentPersonForelderBarnRelasjon(barnMedTermindato.map { it.fødselsnummerSøker })
 
-        if (barnPersonIdenter.isEmpty()) return setOf()
+        return barnMedTermindato.map { barn ->
+            val termindato = barn.termindatoBarn!!
+            val søkerPdlData = pdlPersonMedForelderBarnRelasjon[barn.fødselsnummerSøker]
+                ?: error("Finner ikke pdldata for søker=${barn.fødselsnummerSøker}")
+            val forelderBarnRelasjoner = søkerPdlData.forelderBarnRelasjon.mapNotNull { it.relatertPersonsIdent }
+            val besteMatch = finnBesteMatchPåFødselsnummerForTermindato(forelderBarnRelasjoner, termindato)
 
-        val opprettedeOppgaver = oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(Oppgavetype.InnhentDokumentasjon, barnPersonIdenter)
+            barn.copy(fødselsnummerBarn = besteMatch)
+        }
+    }
 
-        return barnTilUtplukkMedTermindatoBarn.mapNotNull { barn ->
-            val barnetsAlder = Alder.fromFødselsdato(fødselsdato(barn))
-            if (barnetsAlder != null && barn.fødselsnummerBarn != null && opprettedeOppgaver.none { it.barnPersonIdent == barn.fødselsnummerBarn && it.alder == barnetsAlder }) {
+    private fun lagOpprettOppgaveForBarn(barnTilUtplukkForOppgave: List<BarnTilUtplukkForOppgave>): Set<OpprettOppgaveForBarn> {
+        val barn = hentFødselsnummerTilTermindatoBarn(barnTilUtplukkForOppgave)
+        val oppgaverForBarn = opprettOppgaveForBarn(barn)
+        val opprettedeOppgaver = finnOpprettedeOppgaver(oppgaverForBarn)
+
+        return oppgaverForBarn
+            .filterNot { opprettedeOppgaver.contains(FødselsnummerOgAlder(it.fødselsnummer, it.alder)) }
+            .toSet()
+    }
+
+    private fun opprettOppgaveForBarn(barn: List<BarnTilUtplukkForOppgave>): List<OpprettOppgaveForBarn> {
+        return barn.mapNotNull {
+            Alder.fromFødselsdato(fødselsdato(it))?.let { alder ->
                 OpprettOppgaveForBarn(
-                    barn.fødselsnummerBarn,
-                    barn.fødselsnummerSøker,
-                    barnetsAlder,
-                    barn.behandlingId
+                    it.fødselsnummerBarn!!,
+                    it.fødselsnummerSøker,
+                    alder,
+                    it.behandlingId
                 )
+            }
+        }
+    }
+
+    private fun finnOpprettedeOppgaver(oppgaverForBarn: List<OpprettOppgaveForBarn>): Set<FødselsnummerOgAlder> {
+        if (oppgaverForBarn.isEmpty()) return emptySet()
+
+        return oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
+            Oppgavetype.InnhentDokumentasjon,
+            oppgaverForBarn.map { it.fødselsnummer }
+        ).mapNotNull {
+            if (it.barnPersonIdent != null && it.alder != null) {
+                FødselsnummerOgAlder(it.barnPersonIdent, it.alder)
             } else {
                 null
             }
         }.toSet()
     }
 
-    private fun opprettOppgaveTasksForBarn(opprettOppgaverForBarn: Set<OpprettOppgaveForBarn>) {
-        if (opprettOppgaverForBarn.isEmpty()) return
-        val gjeldendeBarnList =
-            gjeldendeBarnRepository.finnEksternFagsakIdForBehandlingId(opprettOppgaverForBarn.map { it.behandlingId }).toSet()
+    private fun opprettOppgaveTasksForBarn(oppgaver: Set<OpprettOppgaveForBarn>) {
+        if (oppgaver.isEmpty()) return
 
-        gjeldendeBarnList.forEach { gjeldendeBarn ->
-            val opprettOppgaveForEksternId =
-                opprettOppgaverForBarn.firstOrNull { it.fødselsnummer == gjeldendeBarn.barnPersonIdent }
-
-            val finnesOppgave = oppgaveRepository.findByBehandlingIdAndBarnPersonIdentAndAlder(
-                gjeldendeBarn.behandlingId,
-                gjeldendeBarn.barnPersonIdent,
-                opprettOppgaveForEksternId?.alder
-            ) != null
-
-            if (!finnesOppgave && opprettOppgaveForEksternId != null) {
-                val opprettOppgaveRequest = lagOppgaveRequestForOppfølgingAvBarnFyltÅr(opprettOppgaveForEksternId, gjeldendeBarn)
-                try {
-                    taskRepository.save(
-                        OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(
-                            OpprettOppgavePayload(
-                                gjeldendeBarn.behandlingId,
-                                gjeldendeBarn.barnPersonIdent,
-                                opprettOppgaveForEksternId.alder,
-                                opprettOppgaveRequest
-                            )
-                        )
+        oppgaver.map {
+            OpprettOppgavePayload(
+                it.behandlingId,
+                it.fødselsnummer,
+                it.fødselsnummerSøker,
+                it.alder
+            )
+        }.forEach {
+            try {
+                taskRepository.save(OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(it))
+            } catch (e: DbActionExecutionException) {
+                if (e.cause is DuplicateKeyException) {
+                    logger.info(
+                        "Oppgave finnes allerede for barn fylt ${it.alder} " +
+                            "på behandling ${it.behandlingId}. Oppretter ikke task."
                     )
-                } catch (e: DbActionExecutionException) {
-                    if (e.cause is DuplicateKeyException) {
-                        logger.info(
-                            "Oppgave finnes allerede for barn fylt ${opprettOppgaveForEksternId.alder} " +
-                                "på behandling ${gjeldendeBarn.behandlingId}. Oppretter ikke task."
-                        )
-                    } else {
-                        throw e
-                    }
+                } else {
+                    throw e
                 }
             }
         }
-    }
-
-    private fun lagOppgaveRequestForOppfølgingAvBarnFyltÅr(
-        opprettOppgaveForEksternId: OpprettOppgaveForBarn,
-        barnTilOppgave: BarnTilOppgave
-    ): OpprettOppgaveRequest {
-        val enhetsnummer = personopplysningerIntegrasjonerClient.hentNavEnhetForPersonMedRelasjoner(
-            opprettOppgaveForEksternId.fødselsnummerSøker
-        ).first().enhetId
-        return OpprettOppgaveRequest(
-            ident = OppgaveIdentV2(
-                ident = opprettOppgaveForEksternId.fødselsnummerSøker,
-                gruppe = IdentGruppe.FOLKEREGISTERIDENT
-            ),
-            saksId = barnTilOppgave.eksternFagsakId.toString(),
-            tema = Tema.ENF,
-            oppgavetype = Oppgavetype.InnhentDokumentasjon,
-            fristFerdigstillelse = oppgaveService.lagFristForOppgave(LocalDateTime.now()),
-            beskrivelse = opprettOppgaveForEksternId.alder.oppgavebeskrivelse,
-            enhetsnummer = enhetsnummer,
-            behandlingstema = Behandlingstema.Overgangsstønad.value,
-            tilordnetRessurs = null,
-            behandlesAvApplikasjon = "familie-ef-sak",
-            mappeId = oppgaveService.finnHendelseMappeId(enhetsnummer)
-        )
     }
 
     private fun fødselsdato(barnTilUtplukkForOppgave: BarnTilUtplukkForOppgave): LocalDate? {
@@ -181,4 +141,6 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             Fødselsnummer(it).fødselsdato
         }
     }
+
+    private data class FødselsnummerOgAlder(val fødselsnummer: String, val alder: Alder)
 }

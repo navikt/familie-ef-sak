@@ -34,6 +34,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -55,6 +56,8 @@ class JournalføringService(
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     fun fullførJournalpost(journalføringRequest: JournalføringRequest, journalpostId: String): Long {
         journalføringRequest.valider()
@@ -75,6 +78,10 @@ class JournalføringService(
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        logger.info(
+            "Journalfører journalpost=${journalpost.journalpostId} på eksisterende behandling=${behandling.id} på " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
+        )
         knyttJournalpostTilBehandling(journalpost, behandling)
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,
@@ -95,6 +102,12 @@ class JournalføringService(
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        logger.info(
+            "Journalfører journalpost=${journalpost.journalpostId} på ny behandling på " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} " +
+                " vilkårsbehandleNyeBarn=${journalføringRequest.vilkårsbehandleNyeBarn} " +
+                " dokumentasjonstype=${journalføringRequest.behandling.ustrukturertDokumentasjonType}"
+        )
         validerJournalføringNyBehandling(
             journalpost,
             journalføringRequest,
@@ -172,6 +185,10 @@ class JournalføringService(
             "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
         }
         val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        logger.info(
+            "Journalfører ferdigstilt journalpost=${journalpost.journalpostId} på ny behandling på " +
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
+        )
         infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(

@@ -39,6 +39,7 @@ class GjenbrukVilkårService(
         val fagsaker: Map<UUID, Fagsak> =
             behandlingerForGjenbruk.map { it.fagsakId }.distinct().associateWith { fagsakService.hentFagsak(it) }
         return behandlingerForGjenbruk.map { it.tilDto(fagsaker.getValue(it.fagsakId).stønadstype) }
+            .filterNot { it.id == behandlingId }
     }
 
     @Transactional

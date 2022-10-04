@@ -1,6 +1,11 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.Vurdering
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
+import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
@@ -8,6 +13,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import java.util.UUID
 
 class AleneomsorgRegel : Vilkårsregel(
     vilkårType = VilkårType.ALENEOMSORG,
@@ -22,6 +28,34 @@ class AleneomsorgRegel : Vilkårsregel(
         MER_AV_DAGLIG_OMSORG
     )
 ) {
+
+    override fun initereDelvilkårsvurdering(
+        metadata: HovedregelMetadata,
+        resultat: Vilkårsresultat,
+        barnId: UUID?
+    ): List<Delvilkårsvurdering> {
+        return hovedregler.map { hovedregel ->
+            if (hovedregel == RegelId.NÆRE_BOFORHOLD && borLangtFraHverandre(metadata, barnId)) {
+                opprettAutomatiskBeregnetNæreBoforholdDelvilkår()
+            } else {
+                Delvilkårsvurdering(resultat, vurderinger = listOf(Vurdering(hovedregel)))
+            }
+        }
+    }
+
+    private fun opprettAutomatiskBeregnetNæreBoforholdDelvilkår() = Delvilkårsvurdering(
+        resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+        listOf(
+            Vurdering(
+                regelId = RegelId.NÆRE_BOFORHOLD,
+                svar = SvarId.NEI,
+                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna søker"
+            )
+        )
+    )
+
+    private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
+        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker == LangAvstandTilSøker.JA
 
     companion object {
 

@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.BarnFyllerÅrOppfølgingsoppgaveService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettOppgavePayload
-import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.vedtak
@@ -24,8 +23,10 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.UnexpectedRollbackException
 import java.time.LocalDate
 
 class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
@@ -35,8 +36,6 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired private lateinit var barnRepository: BarnRepository
-
-    @Autowired private lateinit var oppgaveRepository: OppgaveRepository
 
     @Autowired private lateinit var vedtakRepository: VedtakRepository
 
@@ -66,7 +65,8 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.SEKS_MND)
         assertThat(opprettOppgavePayload.barnPersonIdent).isEqualTo(barnPersonIdent)
 
-        barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
+        assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr() }
+            .isInstanceOf(UnexpectedRollbackException::class.java)
 
         val tasksEtterAndreKjøring = taskRepository.findAll().toList()
         assertThat(tasksEtterAndreKjøring.size).isEqualTo(1)

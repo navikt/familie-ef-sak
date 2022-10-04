@@ -50,17 +50,4 @@ interface GjeldendeBarnRepository :
     """
     )
     fun finnBarnTilMigrerteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
-
-    // language=PostgreSQL
-    @Query(
-        """
-        SELECT bb.person_ident barn_person_ident, b.id behandling_id, be.id ekstern_behandling_id, fe.id ekstern_fagsak_id
-        FROM behandling b
-            JOIN behandling_ekstern be ON b.id = be.behandling_id
-            JOIN fagsak_ekstern fe ON b.fagsak_id = fe.fagsak_id
-            JOIN behandling_barn bb ON b.id = bb.behandling_id
-        WHERE b.id IN (:behandlingIds) 
-        """
-    )
-    fun finnEksternFagsakIdForBehandlingId(behandlingIds: List<UUID>): Set<BarnTilOppgave>
 }

@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -31,7 +33,11 @@ class OpprettTasksForBarnFyltÅrTask(
         const val TYPE = "opprettOppfølgingsoppgaverForBarnFyltÅrTask"
 
         fun opprettTask(dato: LocalDate): Task {
-            return Task(TYPE, dato.format(DateTimeFormatter.ISO_LOCAL_DATE)).medTriggerTid(dato.atTime(22, 0))
+            return Task(TYPE, dato.format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .medTriggerTid(dato.atTime(22, 0))
+                .apply {
+                    this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+                }
         }
     }
 }

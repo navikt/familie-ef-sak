@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
@@ -24,8 +25,11 @@ import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.OPPFYLT
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
+import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
+import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
@@ -39,6 +43,7 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.UUID
 
 internal class VurderingServiceTest {
@@ -52,6 +57,7 @@ internal class VurderingServiceTest {
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val vurderingService = VurderingService(
         behandlingService = behandlingService,
         søknadService = søknadService,
@@ -59,7 +65,8 @@ internal class VurderingServiceTest {
         vilkårGrunnlagService = vilkårGrunnlagService,
         grunnlagsdataService = grunnlagsdataService,
         barnService = barnService,
-        fagsakService = fagsakService
+        fagsakService = fagsakService,
+        featureToggleService = featureToggleService
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
@@ -89,6 +96,7 @@ internal class VurderingServiceTest {
                 )
             )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
+        every { featureToggleService.isEnabled(any()) } returns true
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         val sivilstand = SivilstandInngangsvilkårDto(
@@ -108,7 +116,15 @@ internal class VurderingServiceTest {
     private fun lagBarnetilsynBarn(barnId: UUID = UUID.randomUUID()) = BarnMedSamværDto(
         barnId,
         søknadsgrunnlag = mockk(relaxed = true),
-        registergrunnlag = mockk(relaxed = true),
+        registergrunnlag = BarnMedSamværRegistergrunnlagDto(
+            UUID.randomUUID(),
+            "navn",
+            "fnr",
+            false,
+            AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge", null, null, LangAvstandTilSøker.UKJENT),
+            null,
+            null
+        ),
         barnepass = BarnepassDto(
             barnId,
             skalHaBarnepass = true,

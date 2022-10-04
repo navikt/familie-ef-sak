@@ -24,6 +24,20 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBar
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vilkår.VilkårType
+import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.ef.sak.vilkår.VurderingStegService
+import no.nav.familie.ef.sak.vilkår.dto.DelvilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
+import no.nav.familie.ef.sak.vilkår.dto.VurderingDto
+import no.nav.familie.ef.sak.vilkår.regler.RegelId
+import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.ef.sak.vilkår.regler.SvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
+import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.EnumTekstverdiMedSvarId
@@ -44,6 +58,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -68,14 +83,76 @@ class TestSaksbehandlingController(
     private val taskRepository: TaskRepository,
     private val oppgaveService: OppgaveService,
     private val journalpostClient: JournalpostClient,
-    private val migreringService: MigreringService
+    private val migreringService: MigreringService,
+    private val vurderingService: VurderingService,
+    private val vurderingStegService: VurderingStegService
 ) {
+
+    @PostMapping("{behandlingId}/utfyll-vilkar")
+    fun utfyllVilkår(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        val vurderinger = vurderingService.hentAlleVurderinger(behandlingId)
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val regler = vilkårsreglerForStønad(saksbehandling.stønadstype).associateBy { it.vilkårType }
+
+        vurderinger.forEach { vurdering ->
+            val delvilkår = lagDelvilkår(regler, vurdering)
+            vurderingStegService.oppdaterVilkår(SvarPåVurderingerDto(vurdering.id, behandlingId, delvilkår))
+        }
+        return Ressurs.success(behandlingId)
+    }
+
+    private fun lagDelvilkår(
+        regler: Map<VilkårType, Vilkårsregel>,
+        vurdering: VilkårsvurderingDto
+    ): List<DelvilkårsvurderingDto> {
+        val vilkårsregel = regler.getValue(vurdering.vilkårType)
+        if (vurdering.vilkårType == VilkårType.ER_UTDANNING_HENSIKTSMESSIG) {
+            return listOf(delvilkårErUtdanningHensiktsmessig())
+        }
+        return vurdering.delvilkårsvurderinger.map { delvilkår ->
+            val hovedregel = delvilkår.hovedregel()
+            val regelSteg = vilkårsregel.regler.getValue(hovedregel)
+            regelSteg.svarMapping.mapNotNull { (svarId, svarRegel) ->
+                lagOppfyltVilkår(delvilkår, svarRegel, svarId)
+            }.firstOrNull()
+                ?: error("Finner ikke oppfylt svar for vilkårstype=${vurdering.vilkårType} hovedregel=$hovedregel")
+        }
+    }
+
+    private fun lagOppfyltVilkår(
+        delvilkår: DelvilkårsvurderingDto,
+        svarRegel: SvarRegel,
+        svarId: SvarId
+    ) = when (svarRegel) {
+        SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+        SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
+        SluttSvarRegel.OPPFYLT -> delvilkår(
+            delvilkår.hovedregel(),
+            svarId,
+            if (svarRegel == SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE) "begrunnelse" else null
+        )
+        else -> null
+    }
+
+    private fun delvilkår(regelId: RegelId, svar: SvarId, begrunnelse: String? = null) = DelvilkårsvurderingDto(
+        Vilkårsresultat.OPPFYLT,
+        listOf(VurderingDto(regelId, svar, begrunnelse))
+    )
+
+    private fun delvilkårErUtdanningHensiktsmessig() = DelvilkårsvurderingDto(
+        Vilkårsresultat.OPPFYLT,
+        listOf(
+            VurderingDto(RegelId.NAVKONTOR_VURDERING, SvarId.JA),
+            VurderingDto(RegelId.SAKSBEHANDLER_VURDERING, SvarId.JA, "begrunnelse")
+        )
+    )
 
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
         val personIdent = testFagsakRequest.personIdent
         val søknadBuilder = lagSøknad(personIdent)
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsak(personIdent, testFagsakRequest.behandlingsType.tilStønadstype())
 
         val behandling: Behandling = when (testFagsakRequest.behandlingsType) {
             FØRSTEGANGSBEHANDLING -> lagFørstegangsbehandling(søknadBuilder.søknadOvergangsstønad, fagsak)

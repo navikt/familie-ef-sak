@@ -8,7 +8,11 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTes
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -36,7 +40,16 @@ class InfotrygdReplikaMock {
             every { client.hentSammenslåttePerioder(any()) } answers {
                 hentPerioderDefaultResponse(firstArg())
             }
-            every { client.hentSaker(any()) } returns InfotrygdSakResponse(emptyList())
+            every { client.hentSaker(any()) } returns InfotrygdSakResponse(
+                listOf(
+                    InfotrygdSak(
+                        "1",
+                        stønadType = StønadType.BARNETILSYN,
+                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                        type = InfotrygdSakType.KLAGE
+                    )
+                )
+            )
             every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
             every { client.hentPersonerForMigrering(any()) } returns emptySet()
         }
