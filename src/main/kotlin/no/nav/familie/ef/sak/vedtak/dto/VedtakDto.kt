@@ -163,7 +163,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             behandlingId = behandlingId,
             avslåBegrunnelse = begrunnelse,
             resultatType = ResultatType.OPPHØRT,
-            opphørFom = opphørFom.atDay(1)
+            opphørFom = opphørFom
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
