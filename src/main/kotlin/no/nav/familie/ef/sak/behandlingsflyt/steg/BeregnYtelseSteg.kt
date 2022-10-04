@@ -209,9 +209,7 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerSammenhengendePerioder(
-        utgiftsperioder: List<UtgiftsperiodeDto>,
-    ) {
+    private fun validerSammenhengendePerioder(utgiftsperioder: List<UtgiftsperiodeDto>) {
         brukerfeilHvis(!utgiftsperioder.erSammenhengende()) {
             "Periodene må være sammenhengende"
         }
