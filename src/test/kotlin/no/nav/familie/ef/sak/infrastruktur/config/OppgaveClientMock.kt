@@ -2,7 +2,9 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.søkerFnr
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
@@ -27,7 +29,7 @@ class OppgaveClientMock {
 
     @Bean
     @Primary
-    fun oppgaveClient(): OppgaveClient {
+    fun oppgaveClient(pdlClient: PdlClient): OppgaveClient {
         val oppgaveClient: OppgaveClient = mockk()
 
         val oppgaver: MutableMap<Long, Oppgave> =
@@ -111,7 +113,7 @@ class OppgaveClientMock {
             val nyOppgaveId = ++maxId
             val oppgave = Oppgave(
                 id = nyOppgaveId,
-                identer = arg.ident?.let { listOf(it) },
+                identer = arg.ident?.let { leggTilFolkeregisterIdentHvisAktørId(it, pdlClient) },
                 saksreferanse = arg.saksId,
                 tema = arg.tema,
                 oppgavetype = arg.oppgavetype.value,
@@ -147,6 +149,15 @@ class OppgaveClientMock {
 
         return oppgaveClient
     }
+
+    private fun leggTilFolkeregisterIdentHvisAktørId(
+        it: OppgaveIdentV2,
+        pdlClient: PdlClient
+    ) =
+        if (it.gruppe == IdentGruppe.AKTOERID) listOf(
+            it,
+            OppgaveIdentV2(pdlClient.hentPersonidenter(søkerFnr).gjeldende().ident, IdentGruppe.FOLKEREGISTERIDENT)
+        ) else listOf(it)
 
     private val oppgave1 = lagOppgave(1L, Oppgavetype.Journalføring, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")
     private val oppgave2 = lagOppgave(2L, Oppgavetype.BehandleSak, "Z999999", behandlesAvApplikasjon = "familie-ef-sak")

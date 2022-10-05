@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import io.mockk.slot
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
@@ -94,21 +93,23 @@ class PdlClientConfig {
 
         every { pdlClient.hentAndreForeldre(any()) } returns mapOf(annenForelderFnr to annenForelder())
 
-        val personIdentAktør = slot<String>()
-        every { pdlClient.hentAktørIder(capture(personIdentAktør)) } answers {
-            if (personIdentAktør.captured == "19117313797") {
+        every { pdlClient.hentAktørIder(any()) } answers {
+            if (firstArg<String>() == "19117313797") {
                 throw PdlNotFoundException()
             } else {
                 PdlIdenter(listOf(PdlIdent("12345678901232", false)))
             }
         }
 
-        val personIdent = slot<String>()
-        every { pdlClient.hentPersonidenter(capture(personIdent), eq(true)) } answers {
-            if (personIdent.captured == "19117313797") {
+        every { pdlClient.hentPersonidenter(any(), any()) } answers {
+            if (firstArg<String>() == "19117313797") {
                 throw PdlNotFoundException()
             } else {
-                PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true)))
+                val personidenter = mutableListOf(PdlIdent(firstArg(), false))
+                if(secondArg()) {
+                    personidenter += PdlIdent("98765432109", true)
+                }
+                PdlIdenter(personidenter)
             }
         }
 
