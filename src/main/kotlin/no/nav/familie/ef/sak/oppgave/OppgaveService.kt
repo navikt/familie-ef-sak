@@ -59,7 +59,7 @@ class OppgaveService(
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
             val opprettetOppgaveId =
-                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, beskrivelse, tilordnetNavIdent, mappeId)
+                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, lagOppgaveTekst(beskrivelse), tilordnetNavIdent, mappeId)
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
@@ -76,7 +76,7 @@ class OppgaveService(
     fun opprettOppgaveUtenÅLagreIRepository(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
-        beskrivelse: String?,
+        beskrivelse: String,
         tilordnetNavIdent: String?,
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
@@ -89,7 +89,7 @@ class OppgaveService(
             tema = Tema.ENF,
             oppgavetype = oppgavetype,
             fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
-            beskrivelse = lagOppgaveTekst(beskrivelse),
+            beskrivelse = beskrivelse,
             enhetsnummer = enhetsnummer,
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
