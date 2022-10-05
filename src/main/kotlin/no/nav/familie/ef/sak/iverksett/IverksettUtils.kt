@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.ef.iverksett.AndelTilkjentYtelseDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
-import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker.*
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker.IdentType
 
 fun AndelTilkjentYtelse.tilIverksettDto() =
     AndelTilkjentYtelseDto(
