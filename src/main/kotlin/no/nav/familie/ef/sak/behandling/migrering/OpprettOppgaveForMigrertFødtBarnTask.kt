@@ -178,5 +178,5 @@ data class OppgaveForBarn(
     val stønadType: StønadType,
     val beskrivelse: String,
     val aktivFra: LocalDate? = null,
-    val alder: Alder?
+    val alder: Alder
 )

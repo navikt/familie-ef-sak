@@ -31,7 +31,7 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
             opprettOppgavePayload.behandlingId,
             Oppgavetype.InnhentDokumentasjon,
             opprettOppgavePayload.aktivFra,
-            opprettOppgavePayload.alder?.oppgavebeskrivelse,
+            opprettOppgavePayload.alder.oppgavebeskrivelse,
             tilordnetNavIdent = null
         )
         val oppgave = Oppgave(
@@ -60,6 +60,6 @@ data class OpprettOppgavePayload(
     val behandlingId: UUID,
     val barnPersonIdent: String,
     val søkerPersonIdent: String,
-    val alder: Alder? = null,
+    val alder: Alder,
     val aktivFra: LocalDate? = null
 )
