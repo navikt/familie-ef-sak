@@ -6,6 +6,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
@@ -55,7 +57,11 @@ internal class FrittståendeBrevServiceTest {
             )
         ),
         fagsak.id,
-        FrittståendeBrevKategori.INFORMASJONSBREV
+        FrittståendeBrevKategori.INFORMASJONSBREV,
+        BrevmottakereDto(
+            personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
+            organisasjoner = emptyList()
+        )
     )
 
     private val brevtyperTestData = listOf(
@@ -113,6 +119,8 @@ internal class FrittståendeBrevServiceTest {
                 frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
 
                 assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
+                assertThat(frittståendeBrevSlot.captured.mottakere).hasSize(1)
+                assertThat(frittståendeBrevSlot.captured.mottakere!![0].ident).isEqualTo("mottakerIdent")
             }
         }
 
@@ -127,7 +135,11 @@ internal class FrittståendeBrevServiceTest {
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
         every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
-        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto("Navn Navnesen", "En enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto(
+            "Navn Navnesen",
+            "En enhet",
+            false
+        )
     }
 
     companion object {

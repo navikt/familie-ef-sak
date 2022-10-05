@@ -13,5 +13,11 @@ data class MellomlagretFrittståendeBrev(
     val brev: Fritekstbrev,
     val brevType: FrittståendeBrevKategori,
     val saksbehandlerIdent: String,
-    val tidspunktOpprettet: LocalDateTime = LocalDateTime.now()
+    val tidspunktOpprettet: LocalDateTime = LocalDateTime.now(),
+    val mottakere: FrittståendeBrevmottakere?
+)
+
+data class FrittståendeBrevmottakere(
+    val personer: List<BrevmottakerPerson>,
+    val organisasjoner: List<BrevmottakerOrganisasjon>
 )
