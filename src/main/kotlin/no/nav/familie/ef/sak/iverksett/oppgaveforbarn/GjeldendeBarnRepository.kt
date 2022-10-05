@@ -25,8 +25,7 @@ interface GjeldendeBarnRepository :
             JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
             WHERE ty.id = aty.tilkjent_ytelse 
             AND ty.behandling_id = b.id
-          AND aty.stonad_tom >= :dato
-          AND aty.belop > 0)
+          AND aty.stonad_tom >= :dato)
         """
     )
     fun finnBarnAvGjeldendeIverksatteBehandlinger(stønadstype: StønadType, dato: LocalDate): List<BarnTilUtplukkForOppgave>
@@ -44,8 +43,7 @@ interface GjeldendeBarnRepository :
                      JOIN tilkjent_ytelse ty ON aty.tilkjent_ytelse = ty.id
                     WHERE ty.id = aty.tilkjent_ytelse
                      AND ty.behandling_id = b.id
-                     AND aty.stonad_tom >= :dato
-                     AND aty.belop > 0)
+                     AND aty.stonad_tom >= :dato)
          AND b.migrert = TRUE
     """
     )
