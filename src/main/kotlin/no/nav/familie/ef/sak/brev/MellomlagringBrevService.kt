@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.brev.BrevmottakerUtil.validerUnikeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
 import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
@@ -50,6 +51,7 @@ class MellomlagringBrevService(
     }
 
     fun mellomlagreFrittståendeBrev(mellomlagretBrev: FrittståendeBrevDto): UUID {
+        mellomlagretBrev.mottakere?.let { validerUnikeBrevmottakere(it) }
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         slettMellomlagretFrittståendeBrev(mellomlagretBrev, saksbehandlerIdent)
         val mellomlagretFrittståendeBrev = MellomlagretFrittståendeBrev(
