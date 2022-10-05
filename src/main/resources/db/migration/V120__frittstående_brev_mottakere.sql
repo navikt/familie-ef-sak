@@ -1,1 +1,0 @@
-ALTER TABLE mellomlagret_frittstaende_brev ADD COLUMN mottakere JSON;
