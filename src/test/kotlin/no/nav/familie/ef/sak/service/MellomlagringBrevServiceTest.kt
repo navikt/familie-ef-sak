@@ -91,9 +91,8 @@ internal class MellomlagringBrevServiceTest {
             brevType = FrittståendeBrevKategori.INFORMASJONSBREV,
             saksbehandlerIdent = "Bob",
             mottakere = FrittståendeBrevmottakere(
-                listOf(brevmottakerPerson()), listOf(
-                    brevmottakerOrganisasjon()
-                )
+                listOf(brevmottakerPerson()),
+                listOf(brevmottakerOrganisasjon())
             )
         )
         every {
