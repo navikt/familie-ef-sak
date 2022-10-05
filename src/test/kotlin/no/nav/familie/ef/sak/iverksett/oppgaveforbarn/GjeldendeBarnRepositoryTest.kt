@@ -73,7 +73,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel med null i inntekt, forvent ingen treff `() {
+    internal fun `finnBarnAvGjeldendeIverksatteBehandlinger med fremtidig andel med null i inntekt, forvent treff `() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(fagsakpersoner(setOf("12345678910"))))
 
         val behandlingMedFremtidigAndel = lagreInnvilgetBehandling(fagsak)
@@ -83,7 +83,7 @@ class GjeldendeBarnRepositoryTest : OppslagSpringRunnerTest() {
         barnRepository.insertAll(listOf(barn(behandlingId = behandlingMedFremtidigAndel.id)))
 
         val barnForUtplukk = finnBarnAvGjeldendeIverksatteBehandlinger()
-        assertThat(barnForUtplukk.size).isEqualTo(0)
+        assertThat(barnForUtplukk.size).isEqualTo(1)
     }
 
     @Test
