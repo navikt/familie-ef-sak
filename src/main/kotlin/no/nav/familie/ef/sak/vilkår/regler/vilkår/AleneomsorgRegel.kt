@@ -29,7 +29,7 @@ class AleneomsorgRegel : Vilkårsregel(
     )
 ) {
 
-    override fun initereDelvilkårsvurdering(
+    override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
         barnId: UUID?

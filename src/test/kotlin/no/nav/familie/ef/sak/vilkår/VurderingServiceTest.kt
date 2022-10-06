@@ -207,7 +207,7 @@ internal class VurderingServiceTest {
     @Test
     internal fun `skal ikke returnere delvilkår som er ikke aktuelle til frontend`() {
         val delvilkårsvurdering =
-            SivilstandRegel().initereDelvilkårsvurdering(
+            SivilstandRegel().initiereDelvilkårsvurdering(
                 HovedregelMetadata(
                     mockk(),
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
