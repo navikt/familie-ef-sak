@@ -33,8 +33,6 @@ class OppgaveClient(
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
 
-    private val EF_ENHETNUMMER = "4489"
-
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
         val uri = URI.create("$oppgaveUri/opprett")
 

@@ -56,14 +56,15 @@ object SikkerhetContext {
             )
     }
 
-    fun hentGrupperFraToken(): List<String> {
+    fun hentGrupperFraToken(): Set<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
-                    it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
+                    val groups = it.getClaims("azuread")?.get("groups") as List<String>?
+                    groups?.toSet() ?: emptySet()
                 },
-                onFailure = { emptyList() }
+                onFailure = { emptySet() }
             )
     }
 

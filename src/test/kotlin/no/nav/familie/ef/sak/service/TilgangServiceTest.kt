@@ -41,7 +41,7 @@ internal class TilgangServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
     private val kode6Gruppe = "kode6"
     private val kode7Gruppe = "kode7"
-    private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe)
+    private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe, "")
     private val tilgangService =
         TilgangService(
             personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
