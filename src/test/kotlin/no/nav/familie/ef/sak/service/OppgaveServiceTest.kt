@@ -18,9 +18,6 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -35,7 +32,6 @@ import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -56,7 +52,6 @@ internal class OppgaveServiceTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
-    private val pdlClient = mockk<PdlClient>()
     private val cacheManager = ConcurrentMapCacheManager()
 
     private val oppgaveService =
@@ -65,7 +60,6 @@ internal class OppgaveServiceTest {
             fagsakService,
             oppgaveRepository,
             arbeidsfordelingService,
-            pdlClient,
             cacheManager,
             URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
         )
@@ -74,13 +68,7 @@ internal class OppgaveServiceTest {
     internal fun setUp() {
         val finnMappeResponseDto = FinnMappeResponseDto(
             antallTreffTotalt = 1,
-            mapper = listOf(
-                MappeDto(
-                    123,
-                    "70 Godkjennevedtak",
-                    enhetsnr = "4489"
-                )
-            )
+            mapper = listOf(MappeDto(123, "70 Godkjennevedtak", enhetsnr = "4489"))
         )
         every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
@@ -89,20 +77,14 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
-        val aktørIdentFraPdl = "AKTØERIDENT"
         val slot = slot<OpprettOppgaveRequest>()
-        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        mockOpprettOppgave(slot)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(
-            OppgaveIdentV2(
-                ident = aktørIdentFraPdl,
-                gruppe = IdentGruppe.AKTOERID
-            )
-        )
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -112,9 +94,8 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave som feiler med fordeling skal prøve på nytt med 4489`() {
-        val aktørIdentFraPdl = "AKTØERIDENT"
         val slot = slot<OpprettOppgaveRequest>()
-        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        mockOpprettOppgave(slot)
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
 
@@ -123,9 +104,8 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave som feiler på en ukjent måte skal bare kaste feil videre`() {
-        val aktørIdentFraPdl = "AKTØERIDENT"
         val slot = slot<OpprettOppgaveRequest>()
-        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        mockOpprettOppgave(slot)
         every { oppgaveClient.opprettOppgave(any()) } throws IntegrasjonException("En merkelig feil vi ikke kjenner til")
         assertThrows<IntegrasjonException> {
             oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak)
@@ -134,21 +114,15 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
-        val aktørIdentFraPdl = "AKTØERIDENT"
         val slot = slot<OpprettOppgaveRequest>()
-        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        mockOpprettOppgave(slot)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.mappeId).isNotNull()
+        assertThat(slot.captured.mappeId).isNotNull
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(
-            OppgaveIdentV2(
-                ident = aktørIdentFraPdl,
-                gruppe = IdentGruppe.AKTOERID
-            )
-        )
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -158,7 +132,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Skal ikke legge oppgave i mappe når det er godkjenne vedtak-oppgave for enhet ulik 4489`() {
-        val aktørIdentFraPdl = "AKTØERIDENT"
         every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
@@ -170,19 +143,13 @@ internal class OppgaveServiceTest {
         )
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
         assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
         assertThat(slot.captured.mappeId).isNull()
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(
-            OppgaveIdentV2(
-                ident = aktørIdentFraPdl,
-                gruppe = IdentGruppe.AKTOERID
-            )
-        )
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
@@ -227,7 +194,7 @@ internal class OppgaveServiceTest {
         } returns null
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             oppgaveService.ferdigstillBehandleOppgave(
                 BEHANDLING_ID,
                 Oppgavetype.BehandleSak
@@ -314,9 +281,8 @@ internal class OppgaveServiceTest {
 
     @Test
     internal fun `skal cache mapper når man kaller på den indirekte`() {
-        val aktørIdentFraPdl = "AKTØERIDENT"
         val slot = slot<OpprettOppgaveRequest>()
-        mockOpprettOppgave(slot, aktørIdentFraPdl)
+        mockOpprettOppgave(slot)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
@@ -376,10 +342,7 @@ internal class OppgaveServiceTest {
         }
     }
 
-    private fun mockOpprettOppgave(
-        slot: CapturingSlot<OpprettOppgaveRequest>,
-        aktørIdentFraPdl: String
-    ) {
+    private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>) {
         every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
         every {
@@ -397,7 +360,6 @@ internal class OppgaveServiceTest {
                 GSAK_OPPGAVE_ID
             }
         }
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent(aktørIdentFraPdl, false)))
     }
 
     private fun lagTestFagsak(): Fagsak {
