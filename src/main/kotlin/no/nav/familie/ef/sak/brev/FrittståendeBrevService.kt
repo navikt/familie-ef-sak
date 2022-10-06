@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
@@ -32,6 +33,7 @@ class FrittståendeBrevService(
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
+        val mottakere = validerOgMapBrevmottakere(frittståendeBrevDto.mottakere)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(frittståendeBrevDto.fagsakId)
         val ident = fagsak.hentAktivIdent()
         val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
@@ -45,23 +47,21 @@ class FrittståendeBrevService(
                 fil = brev,
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true),
-                mottakere = mapMottakere(frittståendeBrevDto)
+                mottakere = mottakere
             )
         )
     }
 
-    private fun mapMottakere(frittståendeBrevDto: FrittståendeBrevDto): List<Brevmottaker>? {
-        val mottakere = frittståendeBrevDto.mottakere
-        return if(mottakere == null || (mottakere.personer.isEmpty() && mottakere.organisasjoner.isEmpty())) {
-            null
-        } else {
-            val personer = mottakere.personer.map(BrevmottakerPerson::tilIverksettDto)
-            val organisasjoner = mottakere.organisasjoner.map(BrevmottakerOrganisasjon::tilIverksettDto)
-            personer + organisasjoner
-        }
+    private fun mapMottakere(mottakere: BrevmottakereDto): List<Brevmottaker> {
+        val personer = mottakere.personer.map(BrevmottakerPerson::tilIverksettDto)
+        val organisasjoner = mottakere.organisasjoner.map(BrevmottakerOrganisasjon::tilIverksettDto)
+        return personer + organisasjoner
     }
 
-    private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto, ident: String): FrittståendeBrevRequestDto {
+    private fun lagFrittståendeBrevRequest(
+        frittståendeBrevDto: FrittståendeBrevDto,
+        ident: String
+    ): FrittståendeBrevRequestDto {
         val navn = personopplysningerService.hentGjeldeneNavn(listOf(ident))
         return FrittståendeBrevRequestDto(
             overskrift = frittståendeBrevDto.overskrift,
@@ -91,4 +91,11 @@ class FrittståendeBrevService(
             FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE
             FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE
         }
+
+    private fun validerOgMapBrevmottakere(mottakere: BrevmottakereDto?): List<Brevmottaker> {
+        brukerfeilHvis(mottakere == null || (mottakere.personer.isEmpty() && mottakere.organisasjoner.isEmpty())) {
+            "Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til"
+        }
+        return mapMottakere(mottakere)
+    }
 }
