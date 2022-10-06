@@ -128,6 +128,7 @@ internal class OppgaveControllerTest {
         @Test
         internal fun `skal hente mappe for egen ansatt hvis man har riktig rolle`() {
             every { tilgangService.harEgenAnsattRolle() } returns true
+            every { oppgaveService.finnMapper(any<List<String>>()) } returns emptyList()
 
             oppgaveController.hentMapper()
 
@@ -137,6 +138,7 @@ internal class OppgaveControllerTest {
         @Test
         internal fun `skal hente ikke mappe for egen ansatt hvis man har riktig rolle`() {
             every { tilgangService.harEgenAnsattRolle() } returns false
+            every { oppgaveService.finnMapper(any<List<String>>()) } returns emptyList()
 
             oppgaveController.hentMapper()
 
