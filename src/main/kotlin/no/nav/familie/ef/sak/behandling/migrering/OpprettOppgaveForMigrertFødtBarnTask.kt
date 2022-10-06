@@ -62,11 +62,11 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         val opprettOppfølgingsoppgaveForBarnFyltÅrTasks = oppgaverForBarn.map {
             OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(
                 OpprettOppgavePayload(
-                    it.behandlingId,
-                    it.personIdent,
-                    data.personIdent,
-                    it.alder,
-                    it.aktivFra
+                    behandlingId = it.behandlingId,
+                    barnPersonIdent = it.personIdent,
+                    søkerPersonIdent = data.personIdent,
+                    alder = it.alder,
+                    aktivFra = it.aktivFra
                 )
             )
         }
@@ -107,10 +107,8 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                 .map { datoOgBeskrivelse ->
                     OppgaveForBarn(
                         behandlingId = behandlingId,
-                        eksternFagsakId = data.eksternFagsakId,
                         personIdent = it.personIdent,
                         stønadType = data.stønadType,
-                        beskrivelse = datoOgBeskrivelse.second.oppgavebeskrivelse,
                         aktivFra = datoOgBeskrivelse.first,
                         alder = datoOgBeskrivelse.second
                     )
@@ -155,7 +153,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
                         eksternFagsakId = fagsak.eksternId.id,
                         stønadType = fagsak.stønadstype,
                         personIdent = fagsak.hentAktivIdent(),
-                        nyeBarn
+                        barn = nyeBarn
                     )
                 )
             )
@@ -173,10 +171,8 @@ data class OpprettOppgaveForMigrertFødtBarnTaskData(
 
 data class OppgaveForBarn(
     val behandlingId: UUID,
-    val eksternFagsakId: Long,
     val personIdent: String,
     val stønadType: StønadType,
-    val beskrivelse: String,
     val aktivFra: LocalDate? = null,
     val alder: Alder
 )
