@@ -307,7 +307,7 @@ internal class OppdaterVilkårTest {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
         val barn = søknadBarnTilBehandlingBarn(søknad.barn)
-        val initDelvilkår = regel.initereDelvilkårsvurdering(
+        val initDelvilkår = regel.initiereDelvilkårsvurdering(
             HovedregelMetadata(
                 søknad.sivilstand,
                 Sivilstandstype.SKILT,
@@ -342,7 +342,7 @@ internal class OppdaterVilkårTest {
         val søknad = SøknadsskjemaMapper.tilDomene(TestsøknadBuilder.Builder().build().søknadOvergangsstønad)
         val regel = SivilstandRegel()
         val barn = søknadBarnTilBehandlingBarn(søknad.barn)
-        val initDelvilkår = regel.initereDelvilkårsvurdering(
+        val initDelvilkår = regel.initiereDelvilkårsvurdering(
             HovedregelMetadata(
                 søknad.sivilstand,
                 Sivilstandstype.SKILT,
