@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -41,7 +42,6 @@ class OppgaveService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    val ENHET_NAY = "4489"
 
     fun opprettOppgave(
         behandlingId: UUID,
@@ -100,7 +100,7 @@ class OppgaveService(
             oppgaveClient.opprettOppgave(opprettOppgave)
         } catch (e: Exception) {
             if (finnerIkkeGyldigArbeidsfordeling(e)) {
-                oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
+                oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NR_NAY))
             } else {
                 throw e
             }
@@ -128,7 +128,7 @@ class OppgaveService(
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
+        if (enhetsnummer == ENHET_NR_NAY) { // Skjermede personer skal ikke puttes i mappe
             val finnMappeRequest = FinnMappeRequest(
                 listOf(),
                 enhetsnummer,

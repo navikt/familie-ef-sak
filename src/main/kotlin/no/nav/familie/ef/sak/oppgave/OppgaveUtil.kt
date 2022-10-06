@@ -9,6 +9,9 @@ object OppgaveUtil {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    val ENHET_NR_NAY = "4489"
+    val ENHET_NR_EGEN_ANSATT = "4483"
+
     fun sekunderSidenEndret(oppgave: Oppgave): Long? {
         val endretTidspunkt = oppgave.endretTidspunkt
         return if (!endretTidspunkt.isNullOrBlank()) {
