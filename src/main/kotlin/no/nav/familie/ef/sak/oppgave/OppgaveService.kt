@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -37,7 +36,6 @@ class OppgaveService(
     private val fagsakService: FagsakService,
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val pdlClient: PdlClient,
     private val cacheManager: CacheManager,
     @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI
 ) {
@@ -82,10 +80,10 @@ class OppgaveService(
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
-        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
+        val personIdent = fagsak.hentAktivIdent()
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
         val opprettOppgave = OpprettOppgaveRequest(
-            ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
+            ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
             saksId = fagsak.eksternId.id.toString(),
             tema = Tema.ENF,
             oppgavetype = oppgavetype,
