@@ -53,7 +53,7 @@ class MellomlagringBrevService(
     fun mellomlagreFrittståendeBrev(mellomlagretBrev: FrittståendeBrevDto): UUID {
         mellomlagretBrev.mottakere?.let { validerUnikeBrevmottakere(it) }
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        slettMellomlagretFrittståendeBrev(mellomlagretBrev, saksbehandlerIdent)
+        slettMellomlagretFrittståendeBrev(mellomlagretBrev.fagsakId, saksbehandlerIdent)
         val mellomlagretFrittståendeBrev = MellomlagretFrittståendeBrev(
             fagsakId = mellomlagretBrev.fagsakId,
             brev =
@@ -102,11 +102,8 @@ class MellomlagringBrevService(
         mellomlagerFritekstbrevRepository.deleteById(behandlingId)
     }
 
-    private fun slettMellomlagretFrittståendeBrev(mellomlagretBrev: FrittståendeBrevDto, saksbehandlerIdent: String) {
-        mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(
-            mellomlagretBrev.fagsakId,
-            saksbehandlerIdent
-        )
+    fun slettMellomlagretFrittståendeBrev(fagsakId: UUID, saksbehandlerIdent: String) {
+        mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)
             ?.let { mellomlagerFrittståendeBrevRepository.deleteById(it.id) }
     }
 }

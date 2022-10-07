@@ -24,7 +24,8 @@ class FrittståendeBrevService(
     private val personopplysningerService: PersonopplysningerService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val iverksettClient: IverksettClient,
-    private val brevsignaturService: BrevsignaturService
+    private val brevsignaturService: BrevsignaturService,
+    private val mellomlagringBrevService: MellomlagringBrevService
 ) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
@@ -32,6 +33,7 @@ class FrittståendeBrevService(
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(frittståendeBrevDto.fagsakId)
         val ident = fagsak.hentAktivIdent()
         val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
@@ -44,15 +46,16 @@ class FrittståendeBrevService(
                 brevtype = utledFrittståendeBrevtype(frittståendeBrevDto.brevType),
                 fil = brev,
                 journalførendeEnhet = journalførendeEnhet,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true),
+                saksbehandlerIdent = saksbehandlerIdent,
                 mottakere = mapMottakere(frittståendeBrevDto)
             )
         )
+        mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, saksbehandlerIdent)
     }
 
     private fun mapMottakere(frittståendeBrevDto: FrittståendeBrevDto): List<Brevmottaker>? {
         val mottakere = frittståendeBrevDto.mottakere
-        return if(mottakere == null || (mottakere.personer.isEmpty() && mottakere.organisasjoner.isEmpty())) {
+        return if (mottakere == null || (mottakere.personer.isEmpty() && mottakere.organisasjoner.isEmpty())) {
             null
         } else {
             val personer = mottakere.personer.map(BrevmottakerPerson::tilIverksettDto)
