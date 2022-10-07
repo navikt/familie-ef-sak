@@ -26,7 +26,8 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_PREFYLL_VEDTAKSPERIODER,
         Toggle.FRONTEND_VIS_VEDTAK_LEGG_TIL_RAD_KNAPP,
         Toggle.FRONTEND_OPPRETT_KLAGE,
-        Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR
+        Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
+        Toggle.FRONTEND_VERGE_FRITTSTÅENDE_BREV
     )
 
     @GetMapping

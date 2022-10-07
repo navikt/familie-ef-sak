@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.infrastruktur.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
+import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.OrganisasjonerWrapper
 import no.nav.familie.ef.sak.brev.domain.PersonerWrapper
 import no.nav.familie.ef.sak.felles.domain.Endret
@@ -133,7 +134,9 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
                 PGobjectTilBrevmottakerOrganisasjoner(),
                 BrevmottakereOrganisasjonerTilPGobjectConverter(),
                 PGobjectTilSkolepengerConverter(),
-                SkolepengerTilPGobjectConverter()
+                SkolepengerTilPGobjectConverter(),
+                PGobjectTilFrittståendeBrevmottakere(),
+                FrittståendeBrevmottakereTilPGobjectConverter()
             )
         )
     }
@@ -488,6 +491,24 @@ class DatabaseConfiguration : AbstractJdbcConfiguration() {
     class BrevmottakereOrganisasjonerTilPGobjectConverter : Converter<OrganisasjonerWrapper, PGobject> {
 
         override fun convert(mottakere: OrganisasjonerWrapper): PGobject =
+            PGobject().apply {
+                type = "json"
+                value = objectMapper.writeValueAsString(mottakere)
+            }
+    }
+
+    @ReadingConverter
+    class PGobjectTilFrittståendeBrevmottakere : Converter<PGobject, FrittståendeBrevmottakere> {
+
+        override fun convert(pGobject: PGobject): FrittståendeBrevmottakere? {
+            return pGobject.value?.let { objectMapper.readValue(it) }
+        }
+    }
+
+    @WritingConverter
+    class FrittståendeBrevmottakereTilPGobjectConverter : Converter<FrittståendeBrevmottakere, PGobject> {
+
+        override fun convert(mottakere: FrittståendeBrevmottakere): PGobject =
             PGobject().apply {
                 type = "json"
                 value = objectMapper.writeValueAsString(mottakere)

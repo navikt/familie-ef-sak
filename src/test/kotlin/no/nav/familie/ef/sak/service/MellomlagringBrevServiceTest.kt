@@ -7,9 +7,14 @@ import io.mockk.unmockkObject
 import no.nav.familie.ef.sak.brev.MellomlagerBrevRepository
 import no.nav.familie.ef.sak.brev.MellomlagerFritekstbrevRepository
 import no.nav.familie.ef.sak.brev.MellomlagerFrittståendeBrevRepository
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
+import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle
+import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevSanity
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -78,17 +83,35 @@ internal class MellomlagringBrevServiceTest {
     @Test
     fun `hentMellomlagretFrittståendeBrev skal returnere mellomlagret frittstående brev`() {
         val fagsakId = UUID.randomUUID()
+        val avsnitt = listOf(FrittståendeBrevAvsnitt("del", "innehold", true))
         val brev = MellomlagretFrittståendeBrev(
             id = UUID.randomUUID(),
             fagsakId = fagsakId,
-            brev = Fritekstbrev(overskrift = "Hei", avsnitt = listOf()),
+            brev = Fritekstbrev(overskrift = "Hei", avsnitt = avsnitt),
             brevType = FrittståendeBrevKategori.INFORMASJONSBREV,
-            saksbehandlerIdent = "Bob"
+            saksbehandlerIdent = "Bob",
+            mottakere = FrittståendeBrevmottakere(
+                listOf(brevmottakerPerson()),
+                listOf(brevmottakerOrganisasjon())
+            )
         )
-        every { mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, any()) } returns brev
-        val mellomlagretFrittståendeBrev = mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId)
-        assertThat(mellomlagretFrittståendeBrev).isNotNull
+        every {
+            mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(
+                fagsakId,
+                any()
+            )
+        } returns brev
+        val dto = mellomlagringBrevService.hentMellomlagretFrittståendeBrev(fagsakId)
+        assertThat(dto).isNotNull
+        assertThat(dto!!.fagsakId).isEqualTo(brev.fagsakId)
+        assertThat(dto.avsnitt).isEqualTo(brev.brev.avsnitt)
+        assertThat(dto.brevType).isEqualTo(brev.brevType)
+        assertThat(dto.mottakere!!.organisasjoner).isEqualTo(brev.mottakere!!.organisasjoner)
+        assertThat(dto.mottakere!!.personer).isEqualTo(brev.mottakere!!.personer)
     }
+
+    private fun brevmottakerOrganisasjon() = BrevmottakerOrganisasjon("456", "Power", MottakerRolle.FULLMAKT)
+    private fun brevmottakerPerson() = BrevmottakerPerson("123", "Arne", MottakerRolle.VERGE)
 
     private val behandlingId = UUID.randomUUID()
     private val brevmal = "testMal"

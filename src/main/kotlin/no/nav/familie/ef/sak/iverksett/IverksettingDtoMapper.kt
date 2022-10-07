@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp
 import no.nav.familie.ef.sak.brev.BrevmottakereRepository
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.felles.util.Skoleår
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -319,24 +321,8 @@ class IverksettingDtoMapper(
 
     private fun mapBrevmottakere(behandlingId: UUID): List<Brevmottaker> {
         return brevmottakereRepository.findByIdOrNull(behandlingId)?.let {
-            val personer = it.personer.personer.map { mottaker ->
-                Brevmottaker(
-                    ident = mottaker.personIdent,
-                    navn = mottaker.navn,
-                    mottakerRolle = mottaker.mottakerRolle.tilIverksettDto(),
-                    identType = Brevmottaker.IdentType.PERSONIDENT
-                )
-            }
-
-            val organisasjoner = it.organisasjoner.organisasjoner.map { mottaker ->
-                Brevmottaker(
-                    ident = mottaker.organisasjonsnummer,
-                    navn = mottaker.navnHosOrganisasjon,
-                    mottakerRolle = mottaker.mottakerRolle.tilIverksettDto(),
-                    identType = Brevmottaker.IdentType.ORGANISASJONSNUMMER
-                )
-            }
-
+            val personer = it.personer.personer.map(BrevmottakerPerson::tilIverksettDto)
+            val organisasjoner = it.organisasjoner.organisasjoner.map(BrevmottakerOrganisasjon::tilIverksettDto)
             personer + organisasjoner
         } ?: emptyList()
     }

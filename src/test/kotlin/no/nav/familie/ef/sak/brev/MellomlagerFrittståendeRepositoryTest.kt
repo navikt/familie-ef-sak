@@ -1,8 +1,12 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
+import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
@@ -36,7 +40,11 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
                 )
             ),
             brevType = FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
-            saksbehandlerIdent = "12345678910"
+            saksbehandlerIdent = "12345678910",
+            mottakere = FrittståendeBrevmottakere(
+                personer = listOf(brevmottakerPerson()),
+                organisasjoner = listOf(brevmottakerOrganisasjon())
+            )
         )
 
         mellomlagerFrittståendeBrevRepository.insert(mellomlagretBrev)
@@ -64,7 +72,8 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
                 )
             ),
             brevType = FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT,
-            saksbehandlerIdent = saksbehandlerIdent
+            saksbehandlerIdent = saksbehandlerIdent,
+            mottakere = null
         )
 
         mellomlagerFrittståendeBrevRepository.insert(mellomlagretBrev)
@@ -76,4 +85,7 @@ internal class MellomlagerFrittståendeRepositoryTest : OppslagSpringRunnerTest(
             .ignoringFields("tidspunktOpprettet")
             .isEqualTo(mellomlagretBrev)
     }
+
+    private fun brevmottakerOrganisasjon() = BrevmottakerOrganisasjon("456", "Power", MottakerRolle.FULLMAKT)
+    private fun brevmottakerPerson() = BrevmottakerPerson("123", "Arne", MottakerRolle.VERGE)
 }
