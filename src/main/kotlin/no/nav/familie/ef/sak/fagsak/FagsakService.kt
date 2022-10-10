@@ -150,12 +150,7 @@ class FagsakService(
     private fun oppdatertPerson(
         person: FagsakPerson,
         gjeldendePersonIdent: PdlIdent
-    ) =
-        if (featureToggleService.isEnabled(Toggle.SYNKRONISER_PERSONIDENTER)) {
-            fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
-        } else {
-            person
-        }
+    ) = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
 
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
         return fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
