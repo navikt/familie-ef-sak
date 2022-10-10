@@ -13,7 +13,7 @@ data class BarnMedSamværDto(
     fun mapTilBarnForelderLangAvstandTilSøker(): BarnForelderLangAvstandTilSøker {
         return BarnForelderLangAvstandTilSøker(
             barnId = barnId,
-            langAvstandTilSøker = registergrunnlag.forelder?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT
+            langAvstandTilSøker = registergrunnlag.forelder?.avstandTilSøker?.langAvstandTilSøker ?: LangAvstandTilSøker.UKJENT
         )
     }
 }
@@ -56,7 +56,7 @@ data class AnnenForelderDto(
     val land: String?,
     val dødsfall: LocalDate? = null,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
-    val langAvstandTilSøker: LangAvstandTilSøker? = LangAvstandTilSøker.UKJENT
+    val avstandTilSøker: AvstandTilSøkerDto
 )
 
 data class BarnepassDto(
@@ -74,7 +74,13 @@ data class BarnepassordningDto(
     val beløp: Int
 )
 
+data class AvstandTilSøkerDto(
+    val avstandIKm: Long?,
+    val langAvstandTilSøker: LangAvstandTilSøker
+)
+
 enum class LangAvstandTilSøker {
     JA,
+    JA_UPRESIS,
     UKJENT
 }

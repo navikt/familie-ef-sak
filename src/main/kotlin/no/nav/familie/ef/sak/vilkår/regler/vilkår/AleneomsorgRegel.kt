@@ -55,7 +55,9 @@ class AleneomsorgRegel : Vilkårsregel(
     )
 
     private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
-        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker == LangAvstandTilSøker.JA
+        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
+            it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
+        } ?: false
 
     companion object {
 
