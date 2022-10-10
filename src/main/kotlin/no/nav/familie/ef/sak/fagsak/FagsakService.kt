@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -188,7 +187,6 @@ class FagsakService(
     }
 
     private fun opprettFagsak(stønadstype: StønadType, fagsakPerson: FagsakPerson): FagsakDomain {
-        validerStønadstype(stønadstype)
         return fagsakRepository.insert(
             FagsakDomain(
                 stønadstype = stønadstype,
@@ -200,15 +198,5 @@ class FagsakService(
     fun FagsakDomain.tilFagsakMedPerson(): Fagsak {
         val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)
         return this.tilFagsakMedPerson(personIdenter)
-    }
-
-    private fun validerStønadstype(stønadstype: StønadType) {
-        when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> {}
-            StønadType.BARNETILSYN -> {}
-            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled(Toggle.SKOLEPENGER)) {
-                "Støtter ikke opprettelse av fagsak for skolepenger"
-            }
-        }
     }
 }

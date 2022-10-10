@@ -18,8 +18,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
 
     SYNKRONISER_PERSONIDENTER("familie.ef.sak.synkroniser-personidenter"),
-    SKOLEPENGER("familie.ef.sak.skolepenger"),
-    SKOLEPENGER_OPPHØR("familie.ef.sak.skolepenger-opphor"),
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
     AUTOMATISK_BEREGN_NÆRE_BOFORHOLD("familie.ef.sak.beregne-naere-boforhold"),
@@ -29,9 +27,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     ERSTATTE_SANKSJON("familie.ef.sak.erstatte-sanksjon"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
-    FRONTEND_JOURNALFØRING_KAN_LEGGE_TIL_TERMINBARN("familie.ef.sak.frontend-journalforing-kan-legge-til-terminbarn"),
-    FRONTEND_JOURNALFØRING_ETTERSENDING_NY_BEHANDLING("familie.ef.sak.frontend-journalforing-ettersending-ny-behandling"),
-    FRONTEND_SKOLEPENGER_REVURDERING("familie.ef.sak.frontend-skal-vise-opprett-ny-behandling-knapp-skolepenger"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder"),
     FRONTEND_VIS_VEDTAK_LEGG_TIL_RAD_KNAPP("familie.ef.sak.frontend-vis-vedtak-legg-til-rad-knapp"),

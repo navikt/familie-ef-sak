@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -14,7 +13,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
-import no.nav.familie.ef.sak.vedtak.dto.VEDTAK_SKOLEPENGER_OPPHØR_TYPE
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -105,12 +103,6 @@ class VedtakController(
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
-        brukerfeilHvis(
-            vedtak._type == VEDTAK_SKOLEPENGER_OPPHØR_TYPE &&
-                !featureToggleService.isEnabled(Toggle.SKOLEPENGER_OPPHØR)
-        ) {
-            "Feature toggle for opphør av skolepenger er disabled"
-        }
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 
