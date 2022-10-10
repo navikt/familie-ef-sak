@@ -13,9 +13,10 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.infrastruktur.config.OppgaveClientMock
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
+import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.Alder
 import no.nav.familie.ef.sak.oppgave.Oppgave
-import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.fagsak
@@ -24,11 +25,9 @@ import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
-import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
@@ -48,7 +47,7 @@ import java.util.UUID
 
 internal class OppgaveServiceTest {
 
-    private val oppgaveClient = mockk<OppgaveClient>()
+    private val oppgaveClient = OppgaveClientMock().oppgaveClient()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
@@ -66,11 +65,6 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        val finnMappeResponseDto = FinnMappeResponseDto(
-            antallTreffTotalt = 1,
-            mapper = listOf(MappeDto(123, "70 Godkjennevedtak", enhetsnr = "4489"))
-        )
-        every { oppgaveClient.finnMapper(any()) } returns finnMappeResponseDto
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
         every { oppgaveRepository.update(any()) } answers { firstArg() }
     }
@@ -271,11 +265,11 @@ internal class OppgaveServiceTest {
 
     @Test
     internal fun `finnMapper - skal cache mapper`() {
-        oppgaveService.finnMapper("1")
-        oppgaveService.finnMapper("1")
+        oppgaveService.finnMapper("4489")
+        oppgaveService.finnMapper("4489")
 
         verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
-        oppgaveService.finnMapper("11")
+        oppgaveService.finnMapper("4483")
         verify(exactly = 2) { oppgaveClient.finnMapper(any()) }
     }
 
@@ -288,6 +282,26 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
         verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+    }
+
+    @Test
+    fun `sjekk at oppgaver av type InnhentDokumentasjon blir lagt i hendelse-mappe`() {
+        val behandlingId = UUID.randomUUID()
+        every { oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any()) } returns null
+        every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak()
+        every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("4489", "")
+        every { oppgaveRepository.insert(any()) } answers { firstArg() }
+        val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
+        every { oppgaveClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns 1
+
+        oppgaveService.opprettOppgave(
+            behandlingId,
+            Oppgavetype.InnhentDokumentasjon,
+            null,
+            Alder.ETT_ÅR.oppgavebeskrivelse
+        )
+
+        assertThat(opprettOppgaveRequestSlot.captured.mappeId).isEqualTo(105)
     }
 
     @Nested
