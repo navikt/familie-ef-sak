@@ -1,0 +1,54 @@
+package no.nav.familie.ef.sak.utestengelse
+
+import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
+
+@RestController
+@RequestMapping("/api/perioder")
+@ProtectedWithClaims(issuer = "azuread")
+@Validated
+class UtestengelseController(
+    private val tilgangService: TilgangService,
+    private val utestengelseService: UtestengelseService
+) {
+
+    @GetMapping("/{fagsakPersonId}")
+    fun hentUtestengelser(@PathVariable fagsakPersonId: UUID): Ressurs<List<UtestengelseDto>> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(utestengelseService.hentUtestengelser(fagsakPersonId).map { it.tilDto() })
+    }
+
+    @PostMapping("/{fagsakPersonId}")
+    fun hentUtestengelser(
+        @PathVariable fagsakPersonId: UUID,
+        @RequestBody opprettUtestengelseDto: OpprettUtestengelseDto
+    ): Ressurs<UtestengelseDto> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        feilHvisIkke(fagsakPersonId == opprettUtestengelseDto.fagsakPersonId) {
+            "Innsendt fagsakPersonId matcher ikke body(${opprettUtestengelseDto.fagsakPersonId})"
+        }
+        return Ressurs.success(utestengelseService.opprettUtestengelse(opprettUtestengelseDto))
+    }
+
+    @DeleteMapping("/{fagsakPersonId}/{id}")
+    fun slettUtestengelse(
+        @PathVariable fagsakPersonId: UUID,
+        @PathVariable id: UUID,
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        utestengelseService.slettUtestengelse(fagsakPersonId, id)
+        return Ressurs.success(id)
+    }
+}

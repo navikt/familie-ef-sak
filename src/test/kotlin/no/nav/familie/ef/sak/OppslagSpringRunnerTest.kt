@@ -47,6 +47,10 @@ import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpHeaders
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
+import org.springframework.jdbc.core.namedparam.SqlParameterSource
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -80,6 +84,9 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
+
+    @Autowired
+    lateinit var namedParameterJdbcOperations: NamedParameterJdbcOperations
 
     @Autowired
     private lateinit var applicationContext: ApplicationContext
@@ -126,6 +133,7 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
+        namedParameterJdbcOperations.update("TRUNCATE TABLE utestengelse", MapSqlParameterSource())
         listOf(
             UttrekkArbeidssøkere::class,
             KonsistensavstemmingJobb::class,
