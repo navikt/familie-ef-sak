@@ -9,7 +9,7 @@ CREATE TABLE utestengelse
     opprettet_av     VARCHAR      NOT NULL,
     opprettet_tid    TIMESTAMP(3) NOT NULL,
     endret_av        VARCHAR      NOT NULL,
-    endret_tid       TIMESTAMP(3) NOT NULL,
+    endret_tid       TIMESTAMP(3) NOT NULL
 );
 
 CREATE INDEX ON utestengelse (fagsak_person_id);

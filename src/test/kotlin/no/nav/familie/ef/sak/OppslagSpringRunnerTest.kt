@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.testutil.TestoppsettService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.utestengelse.Utestengelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.uttrekk.UttrekkArbeidssøkere
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -47,10 +48,6 @@ import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.data.jdbc.core.JdbcAggregateOperations
 import org.springframework.http.HttpHeaders
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
-import org.springframework.jdbc.core.namedparam.SqlParameterSource
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -84,9 +81,6 @@ abstract class OppslagSpringRunnerTest {
 
     @Autowired
     private lateinit var jdbcAggregateOperations: JdbcAggregateOperations
-
-    @Autowired
-    lateinit var namedParameterJdbcOperations: NamedParameterJdbcOperations
 
     @Autowired
     private lateinit var applicationContext: ApplicationContext
@@ -133,8 +127,8 @@ abstract class OppslagSpringRunnerTest {
     }
 
     private fun resetDatabase() {
-        namedParameterJdbcOperations.update("TRUNCATE TABLE utestengelse", MapSqlParameterSource())
         listOf(
+            Utestengelse::class,
             UttrekkArbeidssøkere::class,
             KonsistensavstemmingJobb::class,
             Simuleringsresultat::class,
@@ -162,7 +156,6 @@ abstract class OppslagSpringRunnerTest {
             TaskLogg::class,
             Task::class,
             Migreringsstatus::class
-
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
@@ -183,7 +176,10 @@ abstract class OppslagSpringRunnerTest {
             return onBehalfOfToken(role = rolleConfig.beslutterRolle)
         }
 
-    protected fun onBehalfOfToken(role: String = rolleConfig.beslutterRolle, saksbehandler: String = "julenissen"): String {
+    protected fun onBehalfOfToken(
+        role: String = rolleConfig.beslutterRolle,
+        saksbehandler: String = "julenissen"
+    ): String {
         return TokenUtil.onBehalfOfToken(mockOAuth2Server, role, saksbehandler)
     }
 

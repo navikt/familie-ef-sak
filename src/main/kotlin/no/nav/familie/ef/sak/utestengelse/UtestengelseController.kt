@@ -31,11 +31,11 @@ class UtestengelseController(
     }
 
     @PostMapping("/{fagsakPersonId}")
-    fun hentUtestengelser(
+    fun opprettUtestengelser(
         @PathVariable fagsakPersonId: UUID,
         @RequestBody opprettUtestengelseDto: OpprettUtestengelseDto
     ): Ressurs<UtestengelseDto> {
-        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         feilHvisIkke(fagsakPersonId == opprettUtestengelseDto.fagsakPersonId) {
             "Innsendt fagsakPersonId matcher ikke body(${opprettUtestengelseDto.fagsakPersonId})"
         }
@@ -46,9 +46,9 @@ class UtestengelseController(
     fun slettUtestengelse(
         @PathVariable fagsakPersonId: UUID,
         @PathVariable id: UUID,
-    ): Ressurs<UUID> {
-        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+    ): Ressurs<String> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.DELETE)
         utestengelseService.slettUtestengelse(fagsakPersonId, id)
-        return Ressurs.success(id)
+        return Ressurs.success("OK")
     }
 }
