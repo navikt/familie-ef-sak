@@ -57,7 +57,14 @@ class OppgaveService(
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
             val opprettetOppgaveId =
-                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, null, lagOppgaveTekst(beskrivelse), tilordnetNavIdent, mappeId)
+                opprettOppgaveUtenÅLagreIRepository(
+                    behandlingId,
+                    oppgavetype,
+                    null,
+                    lagOppgaveTekst(beskrivelse),
+                    tilordnetNavIdent,
+                    mappeId
+                )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
@@ -111,7 +118,7 @@ class OppgaveService(
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if ((enhetsnummer == "4489") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
@@ -124,25 +131,25 @@ class OppgaveService(
             }
             return mappeIdForGodkjenneVedtak
         }
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.InnhentDokumentasjon) { // Skjermede personer skal ikke puttes i mappe
+            return finnHendelseMappeId(enhetsnummer)
+        }
         return null
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        if (enhetsnummer == ENHET_NR_NAY) { // Skjermede personer skal ikke puttes i mappe
-            val finnMappeRequest = FinnMappeRequest(
-                listOf(),
-                enhetsnummer,
-                null,
-                1000
-            )
-            val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
-            val mappe = mapperResponse.mapper.find {
-                it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
-            }
-                ?: error("Fant ikke mappe for hendelser")
-            return mappe.id.toLong()
+        val finnMappeRequest = FinnMappeRequest(
+            listOf(),
+            enhetsnummer,
+            null,
+            1000
+        )
+        val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+        val mappe = mapperResponse.mapper.find {
+            it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
         }
-        return null
+            ?: error("Fant ikke mappe for hendelser")
+        return mappe.id.toLong()
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
@@ -185,7 +192,11 @@ class OppgaveService(
      * Den burde kun settes til true for lukking av oppgaver koblet til henleggelse
      * Oppgaver skal ikke være lukket når denne kalles, då det er ef-sak som burde lukke oppgaver som vi har opprettet
      */
-    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype, ignorerFeilregistrert: Boolean = false) {
+    fun ferdigstillOppgaveHvisOppgaveFinnes(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        ignorerFeilregistrert: Boolean = false
+    ) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
             ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave, ignorerFeilregistrert)

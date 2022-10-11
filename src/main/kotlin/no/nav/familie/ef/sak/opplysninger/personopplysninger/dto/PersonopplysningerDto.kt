@@ -66,7 +66,8 @@ data class SivilstandDto(
     val gyldigFraOgMed: LocalDate?,
     val relatertVedSivilstand: String?,
     val navn: String?,
-    val dødsdato: LocalDate?
+    val dødsdato: LocalDate?,
+    val erGjeldende: Boolean
 )
 
 @Suppress("unused") // Kopi fra PDL

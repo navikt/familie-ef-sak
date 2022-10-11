@@ -17,7 +17,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     G_BEREGNING("familie.ef.sak.g-beregning"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
 
-    SYNKRONISER_PERSONIDENTER("familie.ef.sak.synkroniser-personidenter"),
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
     AUTOMATISK_BEREGN_NÆRE_BOFORHOLD("familie.ef.sak.beregne-naere-boforhold"),
