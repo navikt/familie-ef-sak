@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/perioder")
+@RequestMapping("/api/utestengelse")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UtestengelseController(
