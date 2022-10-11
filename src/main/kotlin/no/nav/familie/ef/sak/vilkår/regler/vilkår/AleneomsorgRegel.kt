@@ -49,7 +49,7 @@ class AleneomsorgRegel : Vilkårsregel(
             Vurdering(
                 regelId = RegelId.NÆRE_BOFORHOLD,
                 svar = SvarId.NEI,
-                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna søker"
+                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna bruker."
             )
         )
     )
