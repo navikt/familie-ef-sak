@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -46,7 +45,6 @@ class VedtakController(
     private val vurderingService: VurderingService,
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
-    private val featureToggleService: FeatureToggleService,
     private val nullstillVedtakService: NullstillVedtakService
 ) {
 
