@@ -1,7 +1,6 @@
 CREATE TABLE utestengelse
 (
     id               UUID PRIMARY KEY,
-    versjon          SMALLINT     NOT NULL,
     fagsak_person_id UUID         NOT NULL REFERENCES fagsak_person (id),
     fom              DATE         NOT NULL,
     tom              DATE         NOT NULL,

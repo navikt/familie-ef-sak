@@ -37,7 +37,6 @@ internal class UtestengelseRepositoryTest : OppslagSpringRunnerTest() {
         utestengelseRepository.insert(utestengelse)
         val fraDb = utestengelseRepository.findByIdOrThrow(utestengelse.id)
         assertThat(fraDb.id).isEqualTo(utestengelse.id)
-        assertThat(fraDb.versjon).isEqualTo(utestengelse.versjon)
         assertThat(fraDb.fagsakPersonId).isEqualTo(utestengelse.fagsakPersonId)
         assertThat(fraDb.fom).isEqualTo(utestengelse.fom)
         assertThat(fraDb.tom).isEqualTo(utestengelse.tom)

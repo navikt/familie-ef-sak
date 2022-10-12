@@ -14,8 +14,6 @@ import java.util.UUID
 data class Utestengelse(
     @Id
     val id: UUID = UUID.randomUUID(),
-    @Version
-    val versjon: Int = 1,
     val fagsakPersonId: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
