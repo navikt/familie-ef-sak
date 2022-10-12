@@ -53,6 +53,18 @@ internal class UtestengelseServiceTest : OppslagSpringRunnerTest() {
         }
 
         @Test
+        internal fun `skal kunne opprette utestengelse når det finnes en overlappende slettet utestengelse`() {
+            utestengelseRepository.insert(utestengelse.copy(slettet = true))
+
+            utestengelseService.opprettUtestengelse(OpprettUtestengelseDto(fagsakPerson.id, periode))
+
+            val utestengelser = utestengelseService.hentUtestengelser(fagsakPerson.id)
+            assertThat(utestengelser).hasSize(1)
+            assertThat(utestengelser[0].fom).isEqualTo(periode.fomDato)
+            assertThat(utestengelser[0].tom).isEqualTo(periode.tomDato)
+        }
+
+        @Test
         internal fun `validerer at utestengelse ikke overlapper tidligere utestengelser`() {
             utestengelseRepository.insert(utestengelse)
 

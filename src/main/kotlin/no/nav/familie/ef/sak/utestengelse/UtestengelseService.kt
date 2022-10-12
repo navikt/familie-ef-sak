@@ -27,6 +27,7 @@ class UtestengelseService(
 
     fun hentUtestengelser(fagsakPersonId: UUID): List<Utestengelse> =
         utestengelseRepository.findAllByFagsakPersonId(fagsakPersonId)
+            .filterNot { it.slettet }
             .sortedWith(compareBy({ it.fom }, { it.sporbar.opprettetTid }))
 
     fun slettUtestengelse(fagsakPersonId: UUID, id: UUID) {
