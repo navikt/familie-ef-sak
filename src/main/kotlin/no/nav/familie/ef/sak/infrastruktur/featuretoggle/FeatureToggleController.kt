@@ -18,8 +18,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
         Toggle.MIGRERING,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
-        Toggle.FRONTEND_PREFYLL_VEDTAKSPERIODER,
-        Toggle.FRONTEND_VIS_VEDTAK_LEGG_TIL_RAD_KNAPP,
         Toggle.FRONTEND_OPPRETT_KLAGE,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_VERGE_FRITTSTÅENDE_BREV
