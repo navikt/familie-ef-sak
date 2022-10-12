@@ -27,7 +27,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
-    FRONTEND_PREFYLL_VEDTAKSPERIODER("familie.ef.sak.frontend-prefyll-vedtaksperioder"),
     FRONTEND_VIS_VEDTAK_LEGG_TIL_RAD_KNAPP("familie.ef.sak.frontend-vis-vedtak-legg-til-rad-knapp"),
     FRONTEND_OPPRETT_KLAGE("familie.ef.sak.frontend-vis-opprett-klage"),
     FRONTEND_VERGE_FRITTSTÅENDE_BREV("familie.ef.sak.frontend-verge-frittstaende-brev")
