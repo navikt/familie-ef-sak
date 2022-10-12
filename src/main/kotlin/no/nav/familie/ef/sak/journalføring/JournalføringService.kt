@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalføringNyBehandling
@@ -110,8 +109,7 @@ class JournalføringService(
         )
         validerJournalføringNyBehandling(
             journalpost,
-            journalføringRequest,
-            featureToggleService.isEnabled(Toggle.FRONTEND_JOURNALFØRING_ETTERSENDING_NY_BEHANDLING)
+            journalføringRequest
         )
 
         infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
