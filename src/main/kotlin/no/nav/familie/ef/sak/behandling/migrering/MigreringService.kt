@@ -149,7 +149,8 @@ class MigreringService(
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadType)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, stønadType, kjøremåned)
         if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.tom) {
-            throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
+            secureLogger.info("Har ikke aktiv stønad $periode")
+            throw MigreringException("Har ikke aktiv stønad (${periode.stønadsperiode.tom})", MigreringExceptionType.INGEN_AKTIV_STØNAD)
         }
         return when(stønadType) {
             StønadType.OVERGANGSSTØNAD -> opprettMigreringOvergangsstønad(fagsak, periode)
