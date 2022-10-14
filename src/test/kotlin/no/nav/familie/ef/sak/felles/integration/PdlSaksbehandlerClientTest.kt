@@ -14,15 +14,14 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 
 internal class PdlSaksbehandlerClientTest {
 
     companion object {
 
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val webClient: WebClient = WebClient.create()
         lateinit var pdlClient: PdlSaksbehandlerClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -31,7 +30,7 @@ internal class PdlSaksbehandlerClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            pdlClient = PdlSaksbehandlerClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), restOperations)
+            pdlClient = PdlSaksbehandlerClient(PdlConfig(URI.create(wiremockServerItem.baseUrl())), webClient)
         }
 
         @AfterAll

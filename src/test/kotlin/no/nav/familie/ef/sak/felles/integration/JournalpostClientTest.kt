@@ -24,16 +24,15 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.net.URI
 
 internal class JournalpostClientTest {
 
     companion object {
 
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val webClient: WebClient = WebClient.create()
         lateinit var journalpostClient: JournalpostClient
         lateinit var wiremockServerItem: WireMockServer
         lateinit var integrasjonerConfig: IntegrasjonerConfig
@@ -44,7 +43,7 @@ internal class JournalpostClientTest {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
             integrasjonerConfig = IntegrasjonerConfig(URI.create(wiremockServerItem.baseUrl()))
-            journalpostClient = JournalpostClient(restOperations, integrasjonerConfig)
+            journalpostClient = JournalpostClient(webClient, integrasjonerConfig)
         }
 
         @AfterAll
@@ -129,7 +128,7 @@ internal class JournalpostClientTest {
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
                 .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg))))
         )
-        assertThrows<HttpClientErrorException> {
+        assertThrows<WebClientResponseException> {
             journalpostClient.hentDokument("123", "abc", DokumentVariantformat.ARKIV)
         }
     }

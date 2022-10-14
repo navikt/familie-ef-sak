@@ -11,10 +11,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.time.LocalDate
 
@@ -22,14 +21,14 @@ class ArbeidsforholdClientTest {
 
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val webClient: WebClient = WebClient.create()
         lateinit var arbeidsforholdClient: ArbeidsforholdClient
 
         @BeforeAll
         @JvmStatic
         fun start() {
             server.start()
-            arbeidsforholdClient = ArbeidsforholdClient(URI.create(server.baseUrl()), restOperations)
+            arbeidsforholdClient = ArbeidsforholdClient(URI.create(server.baseUrl()), webClient)
         }
 
         @AfterAll

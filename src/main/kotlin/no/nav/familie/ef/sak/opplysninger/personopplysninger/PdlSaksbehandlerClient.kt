@@ -8,11 +8,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlResponse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SøkeKriterier
-import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.webflux.client.AbstractWebClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 
 /**
  * Denne klienten sender med azuretokenet til saksbehandler slik att PDL kan sjekke tilgang på dataen som returneres
@@ -20,9 +20,9 @@ import org.springframework.web.client.RestOperations
 @Service
 class PdlSaksbehandlerClient(
     val pdlConfig: PdlConfig,
-    @Qualifier("azureOnBehalfOf") restTemplate: RestOperations
+    @Qualifier("azureOnBehalfOfWebClient") webClient: WebClient
 ) :
-    AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
+    AbstractWebClient(webClient, "pdl.personinfo.saksbehandler") {
 
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {
         val pdlPersonSøkRequest = PdlPersonSøkRequest(

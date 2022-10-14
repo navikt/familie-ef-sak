@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
-import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -11,21 +10,22 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevReq
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
+import no.nav.familie.webflux.client.AbstractWebClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class TilbakekrevingClient(
-    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("azureWebClient") webClient: WebClient,
     @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI
 ) :
-    AbstractRestClient(restOperations, "familie.tilbakekreving") {
+    AbstractWebClient(webClient, "familie.tilbakekreving") {
 
     private val hentForhåndsvisningVarselbrevUri: URI = UriComponentsBuilder.fromUri(familieTilbakeUri)
         .pathSegment("api/dokument/forhandsvis-varselbrev")

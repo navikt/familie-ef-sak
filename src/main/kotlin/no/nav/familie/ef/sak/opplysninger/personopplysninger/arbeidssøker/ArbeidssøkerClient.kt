@@ -1,10 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker
 
-import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.webflux.client.AbstractWebClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.LocalDate
@@ -13,9 +14,10 @@ import java.time.LocalDate
 class ArbeidssøkerClient(
     @Value("\${ARBEIDSSOKER_URL}")
     private val uriGcp: URI,
-    @Qualifier("azure") restOperations: RestOperations
+    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("azureWebClient") webClient: WebClient
 ) :
-    AbstractRestClient(restOperations, "paw.arbeidssoker") {
+    AbstractWebClient(webClient, "paw.arbeidssoker") {
 
     fun hentPerioder(personIdent: String, fraOgMed: LocalDate, tilOgMed: LocalDate? = null): ArbeidssøkerResponse {
         val uriBuilder = UriComponentsBuilder.fromUri(uriGcp)
