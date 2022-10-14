@@ -23,7 +23,8 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
 import no.nav.familie.ef.sak.infotrygd.SummertInfotrygdPeriodeDto
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -133,6 +134,9 @@ class MigreringService(
      */
     @Transactional
     fun migrerBarnetilsyn(fagsakPersonId: UUID): UUID {
+        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING_BARNETILSYN)) {
+            "Feature toggle for migrering av barnetilsyn er ikke aktivert"
+        }
         try {
             return migrerFagsakPerson(fagsakPersonId, StønadType.BARNETILSYN, kunAktivStønad = true)
         } catch (e: MigreringException) {
@@ -226,7 +230,7 @@ class MigreringService(
         periode: Månedsperiode,
         vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto
     ): Behandling {
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
+        feilHvis(featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
         }
         fagsakService.settFagsakTilMigrert(fagsak.id)
