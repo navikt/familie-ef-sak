@@ -126,6 +126,12 @@ class InfotrygdPeriodeValideringService(
         val periode = gjeldendePerioder.single()
         validerFomDato(periode)
         validerTomDato(periode)
+        if (periode.månedsbeløp < 1) {
+            throw MigreringException(
+                "Kan ikke migrere perioder frem i tiden med månedsbløp=${periode.månedsbeløp}",
+                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP
+            )
+        }
         return periode.copy(
             stønadsperiode = periode.stønadsperiode.copy(
                 fom = maxOf(

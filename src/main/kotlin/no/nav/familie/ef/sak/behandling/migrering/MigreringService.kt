@@ -178,13 +178,7 @@ class MigreringService(
         fagsak: Fagsak,
         periode: SummertInfotrygdPeriodeDto
     ) = opprettMigrering(fagsak, periode.stønadsperiode) { saksbehandling, grunnlagsdata ->
-        val barnIdenter = periode.barnIdenter
-        val grunnlagsbarn = grunnlagsdata.grunnlagsdata.barn.associateBy { it.personIdent }
-        val behandlingBarn = barnIdenter.map { barnIdent ->
-            val barnFraGrunnlag = grunnlagsbarn[barnIdent] ?: error("Finner ikke barn=$barnIdent i grunnlagsdata")
-            BehandlingBarn(behandlingId = saksbehandling.id, personIdent = barnIdent, navn = barnFraGrunnlag.navn.visningsnavn())
-        }
-        barnRepository.insertAll(behandlingBarn)
+        val behandlingBarn = opprettBehandlingBarn(saksbehandling, grunnlagsdata, periode)
         InnvilgelseBarnetilsyn(
             begrunnelse = null,
             perioder = listOf(
@@ -199,6 +193,24 @@ class MigreringService(
             perioderKontantstøtte = emptyList(),
             tilleggsstønad = TilleggsstønadDto(false, begrunnelse = null)
         )
+    }
+
+    private fun opprettBehandlingBarn(
+        saksbehandling: Saksbehandling,
+        grunnlagsdata: GrunnlagsdataMedMetadata,
+        periode: SummertInfotrygdPeriodeDto
+    ): List<BehandlingBarn> {
+        val barnIdenter = periode.barnIdenter
+        val grunnlagsbarn = grunnlagsdata.grunnlagsdata.barn.associateBy { it.personIdent }
+        val behandlingBarn = barnIdenter.map { barnIdent ->
+            val barnFraGrunnlag = grunnlagsbarn[barnIdent] ?: error("Finner ikke barn=$barnIdent i grunnlagsdata")
+            BehandlingBarn(
+                behandlingId = saksbehandling.id,
+                personIdent = barnIdent,
+                navn = barnFraGrunnlag.navn.visningsnavn()
+            )
+        }
+        return barnRepository.insertAll(behandlingBarn)
     }
 
     /**
