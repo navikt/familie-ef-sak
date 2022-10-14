@@ -707,6 +707,22 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Nested
+    inner class Barnetilsyn {
+
+        @Test
+        internal fun `migrering av skolepenger`() {
+            mockPerioder(utgifterBarnetilsyn = 100)
+
+            val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
+            val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
+                migreringService.migrerBarnetilsyn(fagsak.fagsakPersonId)
+            }
+
+            kjørTasks()
+        }
+    }
+
     private fun verifiserVurderinger(migrering: Behandling) {
         val vilkårsvurderinger = vilkårsvurderingRepository.findByBehandlingId(migrering.id)
         val alleVurderingerManglerSvar = vilkårsvurderinger.flatMap { it.delvilkårsvurdering.delvilkårsvurderinger }
@@ -812,12 +828,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         opphørsdato: YearMonth? = opphørsmåned,
         stønadFom: YearMonth = periodeFraMåned,
         stønadTom: YearMonth = til,
-        aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT
+        aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
+        utgifterBarnetilsyn: Int = 0,
     ) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             vedtakId = 1,
             stønadFom = stønadFom.atDay(1),
-            stønadTom = stønadTom.atEndOfMonth()
+            stønadTom = stønadTom.atEndOfMonth(),
+            utgifterBarnetilsyn = utgifterBarnetilsyn
         )
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(
@@ -827,7 +845,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             aktivitetstype = aktivitetstype
         )
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
-            InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
+            InfotrygdPeriodeResponse(listOf(periodeForKallNr2), listOf(periodeForKallNr2), emptyList())
     }
 
     private fun kjørTasks(erMigrering: Boolean = true) {

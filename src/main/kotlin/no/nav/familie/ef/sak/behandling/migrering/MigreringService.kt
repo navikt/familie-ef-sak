@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -30,7 +31,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -77,7 +82,7 @@ class MigreringService(
     fun hentMigreringInfo(fagsakPersonId: UUID, kjøremåned: YearMonth = kjøremåned()): MigreringInfo {
         val periode = try {
             val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
-            hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
+            hentGjeldendePeriodeOgValiderState(fagsakPerson, StønadType.OVERGANGSSTØNAD, kjøremåned)
         } catch (e: MigreringException) {
             logger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.info("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
@@ -101,7 +106,7 @@ class MigreringService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerOvergangsstønadAutomatisk(personIdent: String) {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
-        migrerOvergangsstønadForFagsakPerson(fagsak.fagsakPersonId, kunAktivStønad = true)
+        migrerFagsakPerson(fagsak.fagsakPersonId, kunAktivStønad = true)
     }
 
     /**
@@ -110,7 +115,7 @@ class MigreringService(
     @Transactional
     fun migrerOvergangsstønad(fagsakPersonId: UUID): UUID {
         try {
-            return migrerOvergangsstønadForFagsakPerson(fagsakPersonId)
+            return migrerFagsakPerson(fagsakPersonId)
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
@@ -118,22 +123,65 @@ class MigreringService(
         }
     }
 
-    private fun migrerOvergangsstønadForFagsakPerson(fagsakPersonId: UUID, kunAktivStønad: Boolean = false): UUID {
+    /**
+     * Henter data fra infotrygd og oppretter migrering
+     */
+    @Transactional
+    fun migrerBarnetilsyn(fagsakPersonId: UUID): UUID {
+        try {
+            return migrerFagsakPerson(fagsakPersonId, StønadType.BARNETILSYN, kunAktivStønad = true)
+        } catch (e: MigreringException) {
+            logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
+            secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
+            throw ApiFeil(e.årsak, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    private fun migrerFagsakPerson(fagsakPersonId: UUID, stønadType: StønadType = StønadType.OVERGANGSSTØNAD, kunAktivStønad: Boolean = false): UUID {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         val personIdent = fagsakPerson.hentAktivIdent()
         val kjøremåned = kjøremåned()
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
-        val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, kjøremåned)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadType)
+        val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, stønadType, kjøremåned)
         if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.fom) {
             throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
         }
-        return opprettMigrering(
-            fagsak = fagsak,
-            periode = periode.stønadsperiode,
-            inntektsgrunnlag = periode.inntektsgrunnlag,
-            samordningsfradrag = periode.samordningsfradrag,
-            erReellArbeidssøker = erReellArbeidssøker(periode)
-        ).id
+        return when(stønadType) {
+            StønadType.OVERGANGSSTØNAD -> opprettMigreringOvergangsstønad(fagsak, periode)
+            StønadType.BARNETILSYN -> opprettMigreringBarnetilsyn(fagsak, periode)
+            StønadType.SKOLEPENGER -> error("Kan ikke migrere skolepenger")
+        }.id
+    }
+
+    private fun opprettMigreringOvergangsstønad(
+        fagsak: Fagsak,
+        periode: SummertInfotrygdPeriodeDto
+    ) = opprettMigrering(
+        fagsak = fagsak,
+        periode = periode.stønadsperiode,
+        inntektsgrunnlag = periode.inntektsgrunnlag,
+        samordningsfradrag = periode.samordningsfradrag,
+        erReellArbeidssøker = erReellArbeidssøker(periode)
+    )
+
+    private fun opprettMigreringBarnetilsyn(
+        fagsak: Fagsak,
+        periode: SummertInfotrygdPeriodeDto
+    ) = opprettMigrering(fagsak, periode.stønadsperiode) {
+        InnvilgelseBarnetilsyn(
+            begrunnelse = null,
+            perioder = listOf(
+                UtgiftsperiodeDto(
+                    årMånedFra = periode.stønadsperiode.fom,
+                    årMånedTil = periode.stønadsperiode.tom,
+                    barn = emptyList(),
+                    utgifter = periode.utgifterBarnetilsyn,
+                    erMidlertidigOpphør = false
+                )
+            ),
+            perioderKontantstøtte = emptyList(),
+            tilleggsstønad = TilleggsstønadDto(false, begrunnelse = null)
+        )
     }
 
     /**
@@ -146,6 +194,24 @@ class MigreringService(
         inntektsgrunnlag: Int,
         samordningsfradrag: Int,
         erReellArbeidssøker: Boolean = false
+    ): Behandling {
+        return opprettMigrering(fagsak, periode) { saksbehandling ->
+            val inntekter = inntekter(periode.fom, inntektsgrunnlag, samordningsfradrag)
+            val vedtaksperioder = vedtaksperioder(periode, erReellArbeidssøker)
+            InnvilgelseOvergangsstønad(
+                periodeBegrunnelse = null,
+                inntektBegrunnelse = null,
+                perioder = vedtaksperioder,
+                inntekter = inntekter
+            )
+        }
+    }
+
+    @Transactional
+    fun opprettMigrering(
+        fagsak: Fagsak,
+        periode: Månedsperiode,
+        vedtak: (saksbehandling: Saksbehandling) -> VedtakDto
     ): Behandling {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
@@ -161,18 +227,9 @@ class MigreringService(
         grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForMigrering(behandling)
 
-        val vedtaksperioder = vedtaksperioder(periode, erReellArbeidssøker)
-        val inntekter = inntekter(periode.fom, inntektsgrunnlag, samordningsfradrag)
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
-        beregnYtelseSteg.utførSteg(
-            saksbehandling,
-            InnvilgelseOvergangsstønad(
-                periodeBegrunnelse = null,
-                inntektBegrunnelse = null,
-                perioder = vedtaksperioder,
-                inntekter = inntekter
-            )
-        )
+        beregnYtelseSteg.utførSteg(saksbehandling, vedtak.invoke(saksbehandling))
+
         validerSimulering(behandling)
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
@@ -273,18 +330,24 @@ class MigreringService(
 
     private fun hentGjeldendePeriodeOgValiderState(
         fagsakPerson: FagsakPerson,
+        stønadType: StønadType,
         kjøremåned: YearMonth
     ): SummertInfotrygdPeriodeDto {
         val personIdent = fagsakPerson.hentAktivIdent()
-        val fagsak = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id).overgangsstønad
+        val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id)
+        val fagsak = when(stønadType) {
+            StønadType.OVERGANGSSTØNAD ->fagsaker.overgangsstønad
+            StønadType.BARNETILSYN ->fagsaker.barnetilsyn
+            StønadType.SKOLEPENGER -> error("Har ikke støtte for å migrere skolepenger")
+        }
         fagsak?.let { validerFagsakOgBehandling(it) }
-        return infotrygdPeriodeValideringService.hentPeriodeForMigrering(personIdent, kjøremåned)
+        return infotrygdPeriodeValideringService.hentPeriodeForMigrering(personIdent, stønadType, kjøremåned)
     }
 
     private fun validerFagsakOgBehandling(fagsak: Fagsak) {
-        if (fagsak.stønadstype != StønadType.OVERGANGSSTØNAD) {
+        if (fagsak.stønadstype == StønadType.SKOLEPENGER) {
             throw MigreringException(
-                "Håndterer ikke andre stønadstyper enn overgangsstønad",
+                "Kan ikke migrere skolepenger",
                 MigreringExceptionType.FEIL_STØNADSTYPE
             )
         } else if (fagsak.migrert) {
