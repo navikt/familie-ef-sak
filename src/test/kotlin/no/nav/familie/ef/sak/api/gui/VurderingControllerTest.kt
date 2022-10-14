@@ -65,7 +65,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             ?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.NÆRE_BOFORHOLD }?.vurderinger?.first()
 
         assertThat(næreBoforholdVurderingDto?.svar).isEqualTo(SvarId.NEI)
-        assertThat(næreBoforholdVurderingDto?.begrunnelse).contains("annen forelder bor mer enn 1 km unna søker")
+        assertThat(næreBoforholdVurderingDto?.begrunnelse).contains("annen forelder bor mer enn 1 km unna bruker")
     }
 
     @Test

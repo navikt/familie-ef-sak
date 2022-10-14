@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.OPPFYLT
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat.SKAL_IKKE_VURDERES
 import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
+import no.nav.familie.ef.sak.vilkår.dto.AvstandTilSøkerDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
@@ -121,7 +122,7 @@ internal class VurderingServiceTest {
             "navn",
             "fnr",
             false,
-            AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge", null, null, LangAvstandTilSøker.UKJENT),
+            AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge", null, null, AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT)),
             null,
             null
         ),

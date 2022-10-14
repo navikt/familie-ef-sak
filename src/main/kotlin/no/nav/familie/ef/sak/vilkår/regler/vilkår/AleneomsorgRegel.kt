@@ -49,13 +49,15 @@ class AleneomsorgRegel : Vilkårsregel(
             Vurdering(
                 regelId = RegelId.NÆRE_BOFORHOLD,
                 svar = SvarId.NEI,
-                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna søker"
+                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna bruker."
             )
         )
     )
 
     private fun borLangtFraHverandre(metadata: HovedregelMetadata, barnId: UUID?) =
-        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker == LangAvstandTilSøker.JA
+        metadata.langAvstandTilSøker.firstOrNull { it.barnId == barnId }?.langAvstandTilSøker?.let {
+            it == LangAvstandTilSøker.JA_UPRESIS || it == LangAvstandTilSøker.JA
+        } ?: false
 
     companion object {
 
