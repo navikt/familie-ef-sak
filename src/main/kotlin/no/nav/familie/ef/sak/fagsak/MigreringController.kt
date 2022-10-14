@@ -34,4 +34,10 @@ class MigreringController(
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         return Ressurs.success(migreringService.migrerOvergangsstønad(fagsakPersonId))
     }
+
+    @PostMapping("{fagsakPersonId}/barnetilsyn")
+    fun migrerBarnetilsyn(@PathVariable fagsakPersonId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
+        return Ressurs.success(migreringService.migrerBarnetilsyn(fagsakPersonId))
+    }
 }
