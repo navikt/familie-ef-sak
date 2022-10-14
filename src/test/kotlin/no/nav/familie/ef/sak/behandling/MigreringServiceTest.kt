@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -23,6 +24,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock.Companion.mockSimulering
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
@@ -123,6 +125,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
     private val opphørsmåned = YearMonth.now()
@@ -715,11 +720,14 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             mockPerioder(utgifterBarnetilsyn = 100)
 
             val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
-            val behandling = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
+            val behandlingId = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
                 migreringService.migrerBarnetilsyn(fagsak.fagsakPersonId)
             }
 
             kjørTasks()
+
+            val barnIdenter = barnRepository.findByBehandlingId(behandlingId).map { it.personIdent }
+            assertThat(barnIdenter).containsExactly(PdlClientConfig.barnFnr)
         }
     }
 
@@ -835,7 +843,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             vedtakId = 1,
             stønadFom = stønadFom.atDay(1),
             stønadTom = stønadTom.atEndOfMonth(),
-            utgifterBarnetilsyn = utgifterBarnetilsyn
+            utgifterBarnetilsyn = utgifterBarnetilsyn,
+            barnIdenter = listOf(PdlClientConfig.barnFnr)
         )
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(

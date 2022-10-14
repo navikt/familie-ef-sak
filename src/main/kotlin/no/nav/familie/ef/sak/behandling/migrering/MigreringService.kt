@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.behandling.migrering
 
+import no.nav.familie.ef.sak.barn.BarnRepository
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -28,6 +30,8 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -73,7 +77,8 @@ class MigreringService(
     private val infotrygdService: InfotrygdService,
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
-    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService
+    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
+    private val barnRepository: BarnRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -167,14 +172,21 @@ class MigreringService(
     private fun opprettMigreringBarnetilsyn(
         fagsak: Fagsak,
         periode: SummertInfotrygdPeriodeDto
-    ) = opprettMigrering(fagsak, periode.stønadsperiode) {
+    ) = opprettMigrering(fagsak, periode.stønadsperiode) { saksbehandling, grunnlagsdata ->
+        val barnIdenter = periode.barnIdenter
+        val grunnlagsbarn = grunnlagsdata.grunnlagsdata.barn.associateBy { it.personIdent }
+        val behandlingBarn = barnIdenter.map { barnIdent ->
+            val barnFraGrunnlag = grunnlagsbarn[barnIdent] ?: error("Finner ikke barn=$barnIdent i grunnlagsdata")
+            BehandlingBarn(behandlingId = saksbehandling.id, personIdent = barnIdent, navn = barnFraGrunnlag.navn.visningsnavn())
+        }
+        barnRepository.insertAll(behandlingBarn)
         InnvilgelseBarnetilsyn(
             begrunnelse = null,
             perioder = listOf(
                 UtgiftsperiodeDto(
                     årMånedFra = periode.stønadsperiode.fom,
                     årMånedTil = periode.stønadsperiode.tom,
-                    barn = emptyList(),
+                    barn = behandlingBarn.map { it.id },
                     utgifter = periode.utgifterBarnetilsyn,
                     erMidlertidigOpphør = false
                 )
@@ -195,7 +207,7 @@ class MigreringService(
         samordningsfradrag: Int,
         erReellArbeidssøker: Boolean = false
     ): Behandling {
-        return opprettMigrering(fagsak, periode) { saksbehandling ->
+        return opprettMigrering(fagsak, periode) { saksbehandling, grunnlagsdata ->
             val inntekter = inntekter(periode.fom, inntektsgrunnlag, samordningsfradrag)
             val vedtaksperioder = vedtaksperioder(periode, erReellArbeidssøker)
             InnvilgelseOvergangsstønad(
@@ -211,7 +223,7 @@ class MigreringService(
     fun opprettMigrering(
         fagsak: Fagsak,
         periode: Månedsperiode,
-        vedtak: (saksbehandling: Saksbehandling) -> VedtakDto
+        vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto
     ): Behandling {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
@@ -224,11 +236,11 @@ class MigreringService(
         )
         iverksettService.startBehandling(behandling, fagsak)
 
-        grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
+        val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
         vurderingService.opprettVilkårForMigrering(behandling)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
-        beregnYtelseSteg.utførSteg(saksbehandling, vedtak.invoke(saksbehandling))
+        beregnYtelseSteg.utførSteg(saksbehandling, vedtak.invoke(saksbehandling, grunnlagsdata))
 
         validerSimulering(behandling)
 

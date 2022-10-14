@@ -26,7 +26,8 @@ data class SummertInfotrygdPeriodeDto(
     val utgifterBarnetilsyn: Int,
     val månedsbeløp: Int,
     val engangsbeløp: Int,
-    val aktivitet: InfotrygdAktivitetstype?
+    val aktivitet: InfotrygdAktivitetstype?,
+    val barnIdenter: List<String>
 ) {
 
     @Deprecated("Bruk stønadsperiode", ReplaceWith("stønadsperiode.fom"))
@@ -48,5 +49,6 @@ fun InfotrygdPeriode.tilSummertInfotrygdperiodeDto(): SummertInfotrygdPeriodeDto
         utgifterBarnetilsyn = this.utgifterBarnetilsyn,
         månedsbeløp = this.månedsbeløp,
         engangsbeløp = this.engangsbeløp,
-        aktivitet = this.aktivitetstype
+        aktivitet = this.aktivitetstype,
+        barnIdenter = this.barnIdenter
     )
