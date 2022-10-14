@@ -138,7 +138,7 @@ class MigreringService(
             "Feature toggle for migrering av barnetilsyn er ikke aktivert"
         }
         try {
-            return migrerFagsakPerson(fagsakPersonId, StønadType.BARNETILSYN, kunAktivStønad = true)
+            return migrerFagsakPerson(fagsakPersonId, StønadType.BARNETILSYN)
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
