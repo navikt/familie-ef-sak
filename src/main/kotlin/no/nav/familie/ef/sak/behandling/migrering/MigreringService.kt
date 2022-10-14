@@ -148,7 +148,7 @@ class MigreringService(
         val kjøremåned = kjøremåned()
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadType)
         val periode = hentGjeldendePeriodeOgValiderState(fagsakPerson, stønadType, kjøremåned)
-        if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.fom) {
+        if (kunAktivStønad && YearMonth.now() > periode.stønadsperiode.tom) {
             throw MigreringException("Har ikke aktiv stønad", MigreringExceptionType.INGEN_AKTIV_STØNAD)
         }
         return when(stønadType) {
