@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
@@ -8,8 +10,10 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
+import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
 
@@ -20,7 +24,8 @@ class FrittståendeBrevService(
     private val personopplysningerService: PersonopplysningerService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val iverksettClient: IverksettClient,
-    private val brevsignaturService: BrevsignaturService
+    private val brevsignaturService: BrevsignaturService,
+    private val mellomlagringBrevService: MellomlagringBrevService
 ) {
 
     fun forhåndsvisFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto): ByteArray {
@@ -28,23 +33,35 @@ class FrittståendeBrevService(
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(frittståendeBrevDto.fagsakId)
         val ident = fagsak.hentAktivIdent()
         val brev = lagFrittståendeBrevMedSignatur(frittståendeBrevDto, fagsak)
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(ident)
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        val brevType = utledFrittståendeBrevtype(frittståendeBrevDto.brevType)
         iverksettClient.sendFrittståendeBrev(
             FrittståendeBrevDtoIverksetting(
                 personIdent = ident,
                 eksternFagsakId = fagsak.eksternId.id,
                 stønadType = fagsak.stønadstype,
-                brevtype = brevType,
+                brevtype = utledFrittståendeBrevtype(frittståendeBrevDto.brevType),
                 fil = brev,
                 journalførendeEnhet = journalførendeEnhet,
-                saksbehandlerIdent = saksbehandlerIdent
+                saksbehandlerIdent = saksbehandlerIdent,
+                mottakere = mapMottakere(frittståendeBrevDto)
             )
         )
+        mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, saksbehandlerIdent)
+    }
+
+    private fun mapMottakere(frittståendeBrevDto: FrittståendeBrevDto): List<Brevmottaker>? {
+        val mottakere = frittståendeBrevDto.mottakere
+        return if (mottakere == null || (mottakere.personer.isEmpty() && mottakere.organisasjoner.isEmpty())) {
+            null
+        } else {
+            val personer = mottakere.personer.map(BrevmottakerPerson::tilIverksettDto)
+            val organisasjoner = mottakere.organisasjoner.map(BrevmottakerOrganisasjon::tilIverksettDto)
+            personer + organisasjoner
+        }
     }
 
     private fun lagFrittståendeBrevRequest(frittståendeBrevDto: FrittståendeBrevDto, ident: String): FrittståendeBrevRequestDto {

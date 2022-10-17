@@ -8,10 +8,17 @@ import java.util.UUID
 
 @Table("mellomlagret_frittstaende_brev")
 data class MellomlagretFrittståendeBrev(
-    @Id val id: UUID = UUID.randomUUID(),
+    @Id
+    val id: UUID = UUID.randomUUID(),
     val fagsakId: UUID,
     val brev: Fritekstbrev,
     val brevType: FrittståendeBrevKategori,
     val saksbehandlerIdent: String,
-    val tidspunktOpprettet: LocalDateTime = LocalDateTime.now()
+    val tidspunktOpprettet: LocalDateTime = LocalDateTime.now(),
+    val mottakere: FrittståendeBrevmottakere?
+)
+
+data class FrittståendeBrevmottakere(
+    val personer: List<BrevmottakerPerson>,
+    val organisasjoner: List<BrevmottakerOrganisasjon>
 )

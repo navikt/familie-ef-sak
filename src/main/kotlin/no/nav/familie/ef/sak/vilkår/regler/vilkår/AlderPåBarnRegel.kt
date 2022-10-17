@@ -30,7 +30,7 @@ class AlderPåBarnRegel :
     @JsonIgnore
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    override fun initereDelvilkårsvurdering(
+    override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
         barnId: UUID?

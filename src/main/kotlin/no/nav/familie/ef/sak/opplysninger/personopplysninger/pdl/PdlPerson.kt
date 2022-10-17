@@ -1,6 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.familie.ef.sak.vilkår.dto.AvstandTilSøkerDto
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker.JA
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker.JA_UPRESIS
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker.UKJENT
 import java.lang.Math.abs
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -243,23 +247,30 @@ data class Vegadresse(
      */
     val UTM_GRENSE = 7_200_000
     val MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER = 1000
-    fun fjerneBoforhold(annenVegadresse: Vegadresse?): Boolean {
+    fun fjerneBoforhold(annenVegadresse: Vegadresse?): AvstandTilSøkerDto {
         if (this.koordinater == null || annenVegadresse?.koordinater == null) {
-            return false
+            return AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = UKJENT)
         }
 
         val koordinater1 = this.koordinater
         val koordinater2 = annenVegadresse.koordinater
 
         if (koordinater1.x == null || koordinater1.y == null || koordinater2.x == null || koordinater2.y == null) {
-            return false
+            return AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = UKJENT)
         }
 
         if (koordinater1.y > UTM_GRENSE || koordinater2.y > UTM_GRENSE) {
-            return abs(koordinater2.y - koordinater1.y) > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER
+            val distanse = abs(koordinater2.y - koordinater1.y)
+            return AvstandTilSøkerDto(
+                avstandIKm = distanse.div(1000).toLong(),
+                langAvstandTilSøker = if (distanse > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER) JA_UPRESIS else UKJENT
+            )
         }
-
-        return beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y) > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER
+        val distanse = beregnAvstandIMeter(koordinater1.x, koordinater1.y, koordinater2.x, koordinater2.y)
+        return AvstandTilSøkerDto(
+            avstandIKm = distanse.div(1000).toLong(),
+            langAvstandTilSøker = if (distanse > MINIMUM_AVSTAND_FOR_AUTOMATISK_BEREGNING_I_METER) JA else UKJENT
+        )
     }
 
     private fun beregnAvstandIMeter(xKoordinat1: Float, yKoordinat1: Float, xKoordinat2: Float, yKoordinat2: Float): Float {

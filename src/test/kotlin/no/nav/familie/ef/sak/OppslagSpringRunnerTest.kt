@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.testutil.TestoppsettService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.utestengelse.Utestengelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.uttrekk.UttrekkArbeidssøkere
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -127,6 +128,7 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetDatabase() {
         listOf(
+            Utestengelse::class,
             UttrekkArbeidssøkere::class,
             KonsistensavstemmingJobb::class,
             Simuleringsresultat::class,
@@ -154,7 +156,6 @@ abstract class OppslagSpringRunnerTest {
             TaskLogg::class,
             Task::class,
             Migreringsstatus::class
-
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
@@ -175,7 +176,10 @@ abstract class OppslagSpringRunnerTest {
             return onBehalfOfToken(role = rolleConfig.beslutterRolle)
         }
 
-    protected fun onBehalfOfToken(role: String = rolleConfig.beslutterRolle, saksbehandler: String = "julenissen"): String {
+    protected fun onBehalfOfToken(
+        role: String = rolleConfig.beslutterRolle,
+        saksbehandler: String = "julenissen"
+    ): String {
         return TokenUtil.onBehalfOfToken(mockOAuth2Server, role, saksbehandler)
     }
 

@@ -370,15 +370,16 @@ fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate
         personIdent = fnr
     )
 
-fun sivilstand(type: Sivilstandstype) = SivilstandMedNavn(
-    type = type,
-    gyldigFraOgMed = LocalDate.now(),
-    relatertVedSivilstand = null,
-    bekreftelsesdato = null,
-    dødsfall = null,
-    navn = null,
-    metadata = metadataGjeldende
-)
+fun sivilstand(type: Sivilstandstype, gyldigFraOgMed: LocalDate = LocalDate.now(), metadata: Metadata = metadataGjeldende) =
+    SivilstandMedNavn(
+        type = type,
+        gyldigFraOgMed = gyldigFraOgMed,
+        relatertVedSivilstand = null,
+        bekreftelsesdato = null,
+        dødsfall = null,
+        navn = null,
+        metadata = metadata
+    )
 
 fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
     Søker(

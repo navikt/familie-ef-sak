@@ -202,7 +202,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         behandlingId: UUID
     ): List<Vilkårsvurdering> {
         val vilkårsvurderinger = vilkårsreglerForStønad(StønadType.OVERGANGSSTØNAD).map { vilkårsregel ->
-            val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(
+            val delvilkårsvurdering = vilkårsregel.initiereDelvilkårsvurdering(
                 HovedregelMetadata(
                     sivilstandSøknad = null,
                     sivilstandstype = Sivilstandstype.UGIFT,

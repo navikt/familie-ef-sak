@@ -4,8 +4,8 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -37,13 +37,11 @@ class OppgaveService(
     private val fagsakService: FagsakService,
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val pdlClient: PdlClient,
     private val cacheManager: CacheManager,
     @Value("\${FRONTEND_OPPGAVE_URL}") private val frontendOppgaveUrl: URI
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    val ENHET_NAY = "4489"
 
     fun opprettOppgave(
         behandlingId: UUID,
@@ -59,7 +57,14 @@ class OppgaveService(
             oppgaveFinnesFraFør.gsakOppgaveId
         } else {
             val opprettetOppgaveId =
-                opprettOppgaveUtenÅLagreIRepository(behandlingId, oppgavetype, beskrivelse, tilordnetNavIdent, mappeId)
+                opprettOppgaveUtenÅLagreIRepository(
+                    behandlingId,
+                    oppgavetype,
+                    null,
+                    lagOppgaveTekst(beskrivelse),
+                    tilordnetNavIdent,
+                    mappeId
+                )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
                 behandlingId = behandlingId,
@@ -76,20 +81,21 @@ class OppgaveService(
     fun opprettOppgaveUtenÅLagreIRepository(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
-        beskrivelse: String?,
+        fristFerdigstillelse: LocalDate?,
+        beskrivelse: String,
         tilordnetNavIdent: String?,
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
-        val aktørId = pdlClient.hentAktørIder(fagsak.hentAktivIdent()).identer.first().ident
-        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(fagsak.hentAktivIdent())?.enhetId
+        val personIdent = fagsak.hentAktivIdent()
+        val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
         val opprettOppgave = OpprettOppgaveRequest(
-            ident = OppgaveIdentV2(ident = aktørId, gruppe = IdentGruppe.AKTOERID),
+            ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
             saksId = fagsak.eksternId.id.toString(),
             tema = Tema.ENF,
             oppgavetype = oppgavetype,
-            fristFerdigstillelse = lagFristForOppgave(LocalDateTime.now()),
-            beskrivelse = lagOppgaveTekst(beskrivelse),
+            fristFerdigstillelse = fristFerdigstillelse ?: lagFristForOppgave(LocalDateTime.now()),
+            beskrivelse = beskrivelse,
             enhetsnummer = enhetsnummer,
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
@@ -101,7 +107,7 @@ class OppgaveService(
             oppgaveClient.opprettOppgave(opprettOppgave)
         } catch (e: Exception) {
             if (finnerIkkeGyldigArbeidsfordeling(e)) {
-                oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NAY))
+                oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NR_NAY))
             } else {
                 throw e
             }
@@ -112,7 +118,7 @@ class OppgaveService(
         e.message?.contains("Fant ingen gyldig arbeidsfordeling for oppgaven") ?: false
 
     private fun finnAktuellMappe(enhetsnummer: String?, oppgavetype: Oppgavetype): Long? {
-        if ((enhetsnummer == "4489") && oppgavetype == Oppgavetype.GodkjenneVedtak) {
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.GodkjenneVedtak) {
             val mapper = finnMapper(enhetsnummer)
             val mappeIdForGodkjenneVedtak = mapper.find {
                 (it.navn.contains("70 Godkjennevedtak") || it.navn.contains("70 Godkjenne vedtak")) &&
@@ -125,25 +131,25 @@ class OppgaveService(
             }
             return mappeIdForGodkjenneVedtak
         }
+        if (enhetsnummer == "4489" && oppgavetype == Oppgavetype.InnhentDokumentasjon) { // Skjermede personer skal ikke puttes i mappe
+            return finnHendelseMappeId(enhetsnummer)
+        }
         return null
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        if (enhetsnummer == ENHET_NAY) { // Skjermede personer skal ikke puttes i mappe
-            val finnMappeRequest = FinnMappeRequest(
-                listOf(),
-                enhetsnummer,
-                null,
-                1000
-            )
-            val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
-            val mappe = mapperResponse.mapper.find {
-                it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
-            }
-                ?: error("Fant ikke mappe for hendelser")
-            return mappe.id.toLong()
+        val finnMappeRequest = FinnMappeRequest(
+            listOf(),
+            enhetsnummer,
+            null,
+            1000
+        )
+        val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+        val mappe = mapperResponse.mapper.find {
+            it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
         }
-        return null
+            ?: error("Fant ikke mappe for hendelser")
+        return mappe.id.toLong()
     }
 
     fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
@@ -186,7 +192,11 @@ class OppgaveService(
      * Den burde kun settes til true for lukking av oppgaver koblet til henleggelse
      * Oppgaver skal ikke være lukket når denne kalles, då det er ef-sak som burde lukke oppgaver som vi har opprettet
      */
-    fun ferdigstillOppgaveHvisOppgaveFinnes(behandlingId: UUID, oppgavetype: Oppgavetype, ignorerFeilregistrert: Boolean = false) {
+    fun ferdigstillOppgaveHvisOppgaveFinnes(
+        behandlingId: UUID,
+        oppgavetype: Oppgavetype,
+        ignorerFeilregistrert: Boolean = false
+    ) {
         val oppgave = oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(behandlingId, oppgavetype)
         oppgave?.let {
             ferdigstillOppgaveOgSettEfOppgaveTilFerdig(oppgave, ignorerFeilregistrert)

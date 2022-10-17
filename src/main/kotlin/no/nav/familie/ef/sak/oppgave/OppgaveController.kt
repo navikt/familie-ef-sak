@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
@@ -110,7 +112,11 @@ class OppgaveController(
 
     @GetMapping(path = ["/mapper"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMapper(): Ressurs<List<MappeDto>> {
-        return Ressurs.success(oppgaveService.finnMapper(enheter = listOf("4489", "4483")))
+        val enheter = mutableListOf(ENHET_NR_NAY)
+        if (tilgangService.harEgenAnsattRolle()) {
+            enheter += ENHET_NR_EGEN_ANSATT
+        }
+        return Ressurs.success(oppgaveService.finnMapper(enheter = enheter))
     }
 }
 

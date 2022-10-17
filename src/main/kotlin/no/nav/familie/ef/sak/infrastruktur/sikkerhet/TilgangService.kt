@@ -167,6 +167,9 @@ class TilgangService(
         return SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
     }
 
+    fun harEgenAnsattRolle(): Boolean =
+        hentGrupperFraToken().contains(rolleConfig.egenAnsatt)
+
     /**
      * Filtrerer data basert på om man har tilgang til den eller ikke
      * Filtrer ikke på egen ansatt

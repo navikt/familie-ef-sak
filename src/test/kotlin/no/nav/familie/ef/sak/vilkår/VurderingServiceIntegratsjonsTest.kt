@@ -143,7 +143,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                 barn = barn,
                 søktOmBarnetilsyn = emptyList()
             )
-        val delvilkårsvurdering = SivilstandRegel().initereDelvilkårsvurdering(hovedregelMetadata)
+        val delvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(
             vilkårsvurdering(
                 resultat = Vilkårsresultat.OPPFYLT,

@@ -31,6 +31,7 @@ import java.time.LocalDate
 object PdlTestdataHelper {
 
     val metadataGjeldende = Metadata(historisk = false)
+    val metadataHistorisk = Metadata(historisk = true)
 
     fun lagKjønn(kjønnType: KjønnType = KjønnType.KVINNE) = Kjønn(kjønnType)
 

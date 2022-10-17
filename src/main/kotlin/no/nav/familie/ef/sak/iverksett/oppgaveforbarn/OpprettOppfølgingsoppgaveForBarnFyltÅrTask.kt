@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -29,6 +30,7 @@ class OpprettOppfølgingsoppgaveForBarnFyltÅrTask(
         val opprettetOppgaveId = oppgaveService.opprettOppgaveUtenÅLagreIRepository(
             opprettOppgavePayload.behandlingId,
             Oppgavetype.InnhentDokumentasjon,
+            opprettOppgavePayload.aktivFra,
             opprettOppgavePayload.alder.oppgavebeskrivelse,
             tilordnetNavIdent = null
         )
@@ -58,5 +60,6 @@ data class OpprettOppgavePayload(
     val behandlingId: UUID,
     val barnPersonIdent: String,
     val søkerPersonIdent: String,
-    val alder: Alder
+    val alder: Alder,
+    val aktivFra: LocalDate? = null
 )

@@ -115,7 +115,7 @@ class VurderingStegService(
         vilkårsvurdering: Vilkårsvurdering
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(metadata)
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(
             vilkårsvurdering.copy(
@@ -130,7 +130,7 @@ class VurderingStegService(
         vilkårsvurdering: Vilkårsvurdering
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(
             metadata,
             Vilkårsresultat.SKAL_IKKE_VURDERES
         )

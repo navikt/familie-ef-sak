@@ -1,11 +1,14 @@
 package no.nav.familie.ef.sak.brev
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
+import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
+import no.nav.familie.ef.sak.brev.domain.MottakerRolle
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
@@ -14,6 +17,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -22,7 +26,11 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as KontrakterFrittståendeBrevDto
 
@@ -34,6 +42,7 @@ internal class FrittståendeBrevServiceTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val iverksettClient = mockk<IverksettClient>()
     private val brevsignaturService = mockk<BrevsignaturService>()
+    private val mellomlagringBrevService = mockk<MellomlagringBrevService>()
 
     private val frittståendeBrevService =
         FrittståendeBrevService(
@@ -42,8 +51,8 @@ internal class FrittståendeBrevServiceTest {
             personopplysningerService,
             arbeidsfordelingService,
             iverksettClient,
-            brevsignaturService
-
+            brevsignaturService,
+            mellomlagringBrevService
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(
@@ -55,7 +64,11 @@ internal class FrittståendeBrevServiceTest {
             )
         ),
         fagsak.id,
-        FrittståendeBrevKategori.INFORMASJONSBREV
+        FrittståendeBrevKategori.INFORMASJONSBREV,
+        BrevmottakereDto(
+            personer = listOf(BrevmottakerPerson("mottakerIdent", "navn", MottakerRolle.BRUKER)),
+            organisasjoner = emptyList()
+        )
     )
 
     private val brevtyperTestData = listOf(
@@ -97,6 +110,20 @@ internal class FrittståendeBrevServiceTest {
         ) to FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
     )
 
+    private val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
+
+    @BeforeEach
+    internal fun setUp() {
+        BrukerContextUtil.mockBrukerContext("Saksbehandler")
+        frittståendeBrevSlot.clear()
+        mockAvhengigheter()
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
+    }
+
     @TestFactory
     fun `skal sende frittstående brev med riktig brevtype`() =
         brevtyperTestData.map { (input, forventetBrevtype) ->
@@ -104,20 +131,94 @@ internal class FrittståendeBrevServiceTest {
                 "Skal sende brev for stønadtype ${input.first} og brevkategori " +
                     "${input.second} til iverksett for journalføring med brevtype $forventetBrevtype"
             ) {
-                mockAvhengigheter()
-
-                val frittståendeBrevSlot = slot<KontrakterFrittståendeBrevDto>()
                 every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak.copy(stønadstype = input.first)
-                every { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) } just Runs
 
                 frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(brevType = input.second))
 
                 assertThat(frittståendeBrevSlot.captured.brevtype).isEqualTo(forventetBrevtype)
+                assertThat(frittståendeBrevSlot.captured.mottakere).hasSize(1)
+                assertThat(frittståendeBrevSlot.captured.mottakere!![0].ident).isEqualTo("mottakerIdent")
             }
         }
 
+    @Test
+    internal fun `skal slette mellomlagret brev etter at man har sendt brevet`() {
+        frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto)
+
+        verifyOrder {
+            iverksettClient.sendFrittståendeBrev(any())
+            mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, "Saksbehandler")
+        }
+    }
+
+    @Nested
+    inner class Mottakere {
+
+        private val organisasjon = BrevmottakerOrganisasjon("org1", "navn", MottakerRolle.FULLMAKT)
+        private val person = BrevmottakerPerson("ident", "navn", MottakerRolle.BRUKER)
+
+        @Test
+        internal fun `skal sette mottakere til null hvis mottakere i dto er null`() {
+            frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(mottakere = null))
+            assertThat(frittståendeBrevSlot.captured.mottakere).isNull()
+        }
+
+        @Test
+        internal fun `skal sette mottakere til null hvis mottakere i dto inneholder tom liste då iverksett kaster feil hvis listen er tom`() {
+            frittståendeBrevService.sendFrittståendeBrev(
+                frittståendeBrevDto.copy(
+                    mottakere = BrevmottakereDto(
+                        emptyList(),
+                        emptyList()
+                    )
+                )
+            )
+            assertThat(frittståendeBrevSlot.captured.mottakere).isNull()
+        }
+
+        @Test
+        internal fun `skal sette mottakere hvis personer finnes`() {
+            frittståendeBrevService.sendFrittståendeBrev(
+                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), emptyList()))
+            )
+            val mottakere = frittståendeBrevSlot.captured.mottakere!!
+            assertThat(mottakere).hasSize(1)
+            assertThat(mottakere[0].ident).isEqualTo(person.personIdent)
+            assertThat(mottakere[0].navn).isEqualTo(person.navn)
+            assertThat(mottakere[0].mottakerRolle).isEqualTo(person.mottakerRolle.tilIverksettDto())
+        }
+
+        @Test
+        internal fun `skal sette mottakere hvis organisasjoner finnes`() {
+            frittståendeBrevService.sendFrittståendeBrev(
+                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(emptyList(), listOf(organisasjon)))
+            )
+            val mottakere = frittståendeBrevSlot.captured.mottakere!!
+            assertThat(mottakere).hasSize(1)
+            assertThat(mottakere[0].ident).isEqualTo(organisasjon.organisasjonsnummer)
+            assertThat(mottakere[0].navn).isEqualTo(organisasjon.navnHosOrganisasjon)
+            assertThat(mottakere[0].mottakerRolle).isEqualTo(organisasjon.mottakerRolle.tilIverksettDto())
+        }
+
+        @Test
+        internal fun `skal sette mottakere hvis organisasjoner og personer finnes`() {
+            frittståendeBrevService.sendFrittståendeBrev(
+                frittståendeBrevDto.copy(mottakere = BrevmottakereDto(listOf(person), listOf(organisasjon)))
+            )
+
+            val mottakere = frittståendeBrevSlot.captured.mottakere!!
+            assertThat(mottakere).hasSize(2)
+            assertThat(mottakere[0].ident).isEqualTo(person.personIdent)
+            assertThat(mottakere[0].navn).isEqualTo(person.navn)
+            assertThat(mottakere[0].mottakerRolle).isEqualTo(person.mottakerRolle.tilIverksettDto())
+
+            assertThat(mottakere[1].ident).isEqualTo(organisasjon.organisasjonsnummer)
+            assertThat(mottakere[1].navn).isEqualTo(organisasjon.navnHosOrganisasjon)
+            assertThat(mottakere[1].mottakerRolle).isEqualTo(organisasjon.mottakerRolle.tilIverksettDto())
+        }
+    }
+
     private fun mockAvhengigheter() {
-        BrukerContextUtil.mockBrukerContext("Saksbehandler")
         every { brevClient.genererBrev(any(), any(), any()) } returns "123".toByteArray()
         every { fagsakService.hentAktivIdent(any()) } returns fagsak.hentAktivIdent()
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
@@ -126,8 +227,13 @@ internal class FrittståendeBrevServiceTest {
         every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf(fagsak.hentAktivIdent() to "Navn Navnesen")
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
-        every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
-        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto("Navn Navnesen", "En enhet", false)
+        every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto(
+            "Navn Navnesen",
+            "En enhet",
+            false
+        )
+        justRun { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) }
+        justRun { mellomlagringBrevService.slettMellomlagretFrittståendeBrev(any(), any()) }
     }
 
     companion object {

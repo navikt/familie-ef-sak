@@ -29,7 +29,8 @@
     "gyldigFraOgMed" : "2020-01-01",
     "relatertVedSivilstand" : "11111122222",
     "navn" : "11111122222 mellomnavn Etternavn",
-    "dødsdato" : null
+    "dødsdato" : null,
+    "erGjeldende": true
   } ],
   "adresse" : [ {
     "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",

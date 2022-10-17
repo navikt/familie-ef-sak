@@ -34,8 +34,7 @@ object JournalføringHelper {
 
     fun validerJournalføringNyBehandling(
         journalpost: Journalpost,
-        journalføringRequest: JournalføringRequest,
-        kanJournalføreEttersendingPåNyBehandlingToggle: Boolean
+        journalføringRequest: JournalføringRequest
     ) {
         val ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType
         if (journalpost.harStrukturertSøknad()) {
@@ -48,12 +47,6 @@ object JournalføringHelper {
         } else {
             brukerfeilHvis(ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.IKKE_VALGT) {
                 "Må sende inn dokumentasjonstype når journalposten mangler digital søknad"
-            }
-            feilHvis(
-                ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
-                    !kanJournalføreEttersendingPåNyBehandlingToggle
-            ) {
-                "Featuretoggle for ettersending på ny behandling er ikke aktivert"
             }
         }
     }

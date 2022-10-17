@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.brev
 
+import no.nav.familie.ef.sak.brev.BrevmottakerUtil.validerUnikeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.Fritekstbrev
+import no.nav.familie.ef.sak.brev.domain.FrittståendeBrevmottakere
 import no.nav.familie.ef.sak.brev.domain.MellomlagretBrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFritekstbrev
 import no.nav.familie.ef.sak.brev.domain.MellomlagretFrittståendeBrev
@@ -49,8 +51,9 @@ class MellomlagringBrevService(
     }
 
     fun mellomlagreFrittståendeBrev(mellomlagretBrev: FrittståendeBrevDto): UUID {
+        mellomlagretBrev.mottakere?.let { validerUnikeBrevmottakere(it) }
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
-        slettMellomlagretFrittståendeBrev(mellomlagretBrev, saksbehandlerIdent)
+        slettMellomlagretFrittståendeBrev(mellomlagretBrev.fagsakId, saksbehandlerIdent)
         val mellomlagretFrittståendeBrev = MellomlagretFrittståendeBrev(
             fagsakId = mellomlagretBrev.fagsakId,
             brev =
@@ -60,7 +63,8 @@ class MellomlagringBrevService(
             ),
             brevType =
             mellomlagretBrev.brevType,
-            saksbehandlerIdent = saksbehandlerIdent
+            saksbehandlerIdent = saksbehandlerIdent,
+            mottakere = mellomlagretBrev.mottakere?.let { FrittståendeBrevmottakere(it.personer, it.organisasjoner) }
         )
         return mellomlagerFrittståendeBrevRepository.insert(mellomlagretFrittståendeBrev).fagsakId
     }
@@ -72,7 +76,8 @@ class MellomlagringBrevService(
                 it.brev.overskrift,
                 it.brev.avsnitt,
                 fagsakId,
-                it.brevType
+                it.brevType,
+                it.mottakere?.let { mottakere -> BrevmottakereDto(mottakere.personer, mottakere.organisasjoner) }
             )
         }
     }
@@ -97,11 +102,8 @@ class MellomlagringBrevService(
         mellomlagerFritekstbrevRepository.deleteById(behandlingId)
     }
 
-    private fun slettMellomlagretFrittståendeBrev(mellomlagretBrev: FrittståendeBrevDto, saksbehandlerIdent: String) {
-        mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(
-            mellomlagretBrev.fagsakId,
-            saksbehandlerIdent
-        )
+    fun slettMellomlagretFrittståendeBrev(fagsakId: UUID, saksbehandlerIdent: String) {
+        mellomlagerFrittståendeBrevRepository.findByFagsakIdAndSaksbehandlerIdent(fagsakId, saksbehandlerIdent)
             ?.let { mellomlagerFrittståendeBrevRepository.deleteById(it.id) }
     }
 }
