@@ -5,14 +5,14 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.LagSaksbehandlingsblankettTask
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
 import org.springframework.stereotype.Service
 
 @Service
 class VentePåStatusFraIverksett(
     private val iverksettClient: IverksettClient,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService
 ) : BehandlingSteg<Void?> {
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
@@ -41,7 +41,7 @@ class VentePåStatusFraIverksett(
     }
 
     fun opprettLagSaksbehandlingsblankettTask(saksbehandling: Saksbehandling) {
-        taskRepository.save(LagSaksbehandlingsblankettTask.opprettTask(saksbehandling.id))
+        taskService.save(LagSaksbehandlingsblankettTask.opprettTask(saksbehandling.id))
     }
 
     override fun stegType(): StegType {

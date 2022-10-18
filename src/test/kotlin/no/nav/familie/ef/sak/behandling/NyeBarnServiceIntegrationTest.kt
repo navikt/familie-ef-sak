@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
     lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
-    lateinit var taskRepository: TaskRepository
+    lateinit var taskService: TaskService
 
     val ident = "123"
 
@@ -41,7 +41,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
-        assertThat(taskRepository.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).hasSize(1)
+        assertThat(taskService.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).hasSize(1)
     }
 
     @Test
@@ -56,7 +56,7 @@ class NyeBarnServiceIntegrationTest : OppslagSpringRunnerTest() {
         )
 
         assertThat(nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent(ident)).nyeBarn).hasSize(2)
-        assertThat(taskRepository.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).isEmpty()
+        assertThat(taskService.findAll().filter { it.type == OpprettOppgaveForMigrertFødtBarnTask.TYPE }).isEmpty()
     }
 
     @Test

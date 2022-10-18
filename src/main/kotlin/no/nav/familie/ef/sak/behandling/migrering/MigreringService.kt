@@ -52,7 +52,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -64,7 +64,7 @@ import java.util.UUID
 
 @Service
 class MigreringService(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
     private val behandlingService: BehandlingService,
@@ -267,10 +267,10 @@ class MigreringService(
 
         val iverksettDto = iverksettingDtoMapper.tilDtoMaskineltBehandlet(saksbehandling)
         iverksettClient.iverksettUtenBrev(iverksettDto)
-        taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
+        taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
         if (periode.tom >= YearMonth.now()) {
-            taskRepository.save(
+            taskService.save(
                 SjekkMigrertStatusIInfotrygdTask.opprettTask(
                     behandling.id,
                     periode.fom.minusMonths(1),

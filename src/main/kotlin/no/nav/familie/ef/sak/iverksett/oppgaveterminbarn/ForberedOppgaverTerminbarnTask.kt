@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
     beskrivelse = "Oppretter oppgave for ufødte terminbarn"
 )
 class ForberedOppgaverTerminbarnTask(
-    val taskRepository: TaskRepository,
+    val taskService: TaskService,
     val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService,
     val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
@@ -39,7 +39,7 @@ class ForberedOppgaverTerminbarnTask(
     fun opprettTaskForNesteUke() {
         val nesteUke = LocalDate.now().plusWeeks(1)
         val triggerTid = nesteUke.atTime(5, 0)
-        taskRepository.save(Task(TYPE, LocalDate.now().format(DateTimeFormatter.ISO_DATE)).medTriggerTid(triggerTid))
+        taskService.save(Task(TYPE, LocalDate.now().format(DateTimeFormatter.ISO_DATE)).medTriggerTid(triggerTid))
     }
 
     companion object {

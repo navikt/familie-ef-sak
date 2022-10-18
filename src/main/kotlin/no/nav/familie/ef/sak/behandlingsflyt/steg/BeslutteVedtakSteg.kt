@@ -22,13 +22,13 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class BeslutteVedtakSteg(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
     private val iverksettClient: IverksettClient,
@@ -72,7 +72,7 @@ class BeslutteVedtakSteg(
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
-        taskRepository.save(
+        taskService.save(
             BehandlingsstatistikkTask.opprettBesluttetTask(
                 behandlingId = behandlingId,
                 oppgaveId = oppgaveId
@@ -97,7 +97,7 @@ class BeslutteVedtakSteg(
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
         return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskRepository.save(
+            taskService.save(
                 FerdigstillOppgaveTask.opprettTask(
                     behandlingId = saksbehandling.id,
                     oppgavetype = oppgavetype,
@@ -110,7 +110,7 @@ class BeslutteVedtakSteg(
     }
 
     private fun opprettBehandleUnderkjentVedtakOppgave(saksbehandling: Saksbehandling, navIdent: String) {
-        taskRepository.save(
+        taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
@@ -122,7 +122,7 @@ class BeslutteVedtakSteg(
     }
 
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {
-        taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
+        taskService.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
     }
 
     override fun stegType(): StegType {

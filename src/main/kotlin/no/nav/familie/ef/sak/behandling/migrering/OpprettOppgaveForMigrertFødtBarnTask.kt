@@ -15,7 +15,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,7 +35,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService
 ) : AsyncTaskStep {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -72,7 +72,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
         }
 
         if (opprettOppfølgingsoppgaveForBarnFyltÅrTasks.isNotEmpty()) {
-            taskRepository.saveAll(opprettOppfølgingsoppgaveForBarnFyltÅrTasks)
+            taskService.saveAll(opprettOppfølgingsoppgaveForBarnFyltÅrTasks)
         }
     }
 

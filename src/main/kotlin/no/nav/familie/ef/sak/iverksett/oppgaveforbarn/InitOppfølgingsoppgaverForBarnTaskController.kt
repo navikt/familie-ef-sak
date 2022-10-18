@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,13 +16,13 @@ import java.time.LocalDate
 )
 @Unprotected
 class InitOppfølgingsoppgaverForBarnTaskController(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
 ) {
 
     @PostMapping("/initialiser")
     fun opprettTask() {
-        taskRepository.save(OpprettTasksForBarnFyltÅrTask.opprettTask(LocalDate.now().plusDays(1)))
+        taskService.save(OpprettTasksForBarnFyltÅrTask.opprettTask(LocalDate.now().plusDays(1)))
     }
 
     @PostMapping("/dry-run")

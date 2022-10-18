@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -18,7 +18,7 @@ import java.time.LocalDate
 class BarnFyllerÅrOppfølgingsoppgaveService(
     private val gjeldendeBarnRepository: GjeldendeBarnRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val pdlClient: PdlClient
 ) {
 
@@ -122,7 +122,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             )
         }.forEach {
             try {
-                taskRepository.save(OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(it))
+                taskService.save(OpprettOppfølgingsoppgaveForBarnFyltÅrTask.opprettTask(it))
             } catch (e: DbActionExecutionException) {
                 if (e.cause is DuplicateKeyException) {
                     logger.info(

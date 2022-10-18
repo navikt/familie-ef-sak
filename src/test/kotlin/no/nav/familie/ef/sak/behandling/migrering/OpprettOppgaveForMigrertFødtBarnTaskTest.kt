@@ -22,7 +22,7 @@ import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,12 +34,12 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
     val behandlingService = mockk<BehandlingService>()
     val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
-    val taskRepository = mockk<TaskRepository>()
+    val taskService = mockk<TaskService>()
     val service = OpprettOppgaveForMigrertFødtBarnTask(
         behandlingService,
         tilkjentYtelseService,
         grunnlagsdataService,
-        taskRepository
+        taskService
     )
 
     val taskSlot = slot<List<Task>>()
@@ -50,14 +50,14 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns behandling(fagsak())
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(LocalDate.now().plusYears(2))
         every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns opprettGrunnlagsdata(null)
-        every { taskRepository.saveAll(capture(taskSlot)) } answers { firstArg() }
+        every { taskService.saveAll(capture(taskSlot)) } answers { firstArg() }
     }
 
     @Test
     internal fun `skal ikke opprette oppgave hvis fødelsdato mangler`() {
         service.doTask(opprettOppgave(null))
 
-        verify(exactly = 0) { taskRepository.saveAll<Task>(any()) }
+        verify(exactly = 0) { taskService.saveAll(any()) }
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
 
         service.doTask(opprettOppgave(fødelsdato))
 
-        verify(exactly = 0) { taskRepository.saveAll<Task>(any()) }
+        verify(exactly = 0) { taskService.saveAll(any()) }
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(LocalDate.now().plusMonths(10))
 
         service.doTask(opprettOppgave(LocalDate.now()))
-        verify(exactly = 0) { taskRepository.saveAll<Task>(any()) }
+        verify(exactly = 0) { taskService.saveAll(any()) }
     }
 
     @Test
