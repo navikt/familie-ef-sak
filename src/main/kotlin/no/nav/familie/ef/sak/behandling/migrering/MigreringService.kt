@@ -112,7 +112,7 @@ class MigreringService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun migrerOvergangsstønadAutomatisk(personIdent: String) {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, StønadType.OVERGANGSSTØNAD)
-        migrerFagsakPerson(fagsak.fagsakPersonId, kunAktivStønad = true)
+        migrerFagsakPerson(fagsak.fagsakPersonId, StønadType.OVERGANGSSTØNAD, kunAktivStønad = true)
     }
 
     /**
@@ -121,7 +121,7 @@ class MigreringService(
     @Transactional
     fun migrerOvergangsstønad(fagsakPersonId: UUID): UUID {
         try {
-            return migrerFagsakPerson(fagsakPersonId)
+            return migrerFagsakPerson(fagsakPersonId, StønadType.OVERGANGSSTØNAD)
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
@@ -146,7 +146,7 @@ class MigreringService(
         }
     }
 
-    private fun migrerFagsakPerson(fagsakPersonId: UUID, stønadType: StønadType = StønadType.OVERGANGSSTØNAD, kunAktivStønad: Boolean = false): UUID {
+    private fun migrerFagsakPerson(fagsakPersonId: UUID, stønadType: StønadType, kunAktivStønad: Boolean = false): UUID {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         val personIdent = fagsakPerson.hentAktivIdent()
         val kjøremåned = kjøremåned()
