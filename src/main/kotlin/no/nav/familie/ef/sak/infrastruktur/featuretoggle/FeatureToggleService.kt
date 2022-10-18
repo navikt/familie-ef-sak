@@ -14,6 +14,7 @@ interface FeatureToggleService : DisposableBean {
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering"),
     MIGRERING("familie.ef.sak.migrering"),
+    MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
     G_BEREGNING("familie.ef.sak.g-beregning"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
 
