@@ -1,0 +1,81 @@
+package no.nav.familie.ef.sak.ekstern
+
+import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
+import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
+import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.web.client.exchange
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
+
+internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
+
+    @BeforeEach
+    fun setUp() {
+        headers.setBearerAuth(lokalTestToken)
+    }
+
+    @AfterEach
+    fun tearDown() {
+    }
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
+
+    @Test
+    fun hentVedtak() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("123"))))
+        val førstegangsbehandling = behandling(
+            fagsak = fagsak,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            status = BehandlingStatus.FERDIGSTILT,
+            eksternId = EksternBehandlingId(1)
+        )
+        val revurdering =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                eksternId = EksternBehandlingId(2)
+            )
+        val revurderingIkkeFerdigstilt =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FATTER_VEDTAK,
+                eksternId = EksternBehandlingId(3)
+            )
+
+        behandlingRepository.insertAll(listOf(førstegangsbehandling, revurdering, revurderingIkkeFerdigstilt))
+
+        val vedtakResponse = hentVedtak(fagsak.eksternId.id).body
+
+        Assertions.assertThat(vedtakResponse.data!!.size).isEqualTo(2)
+        Assertions.assertThat(vedtakResponse.data!!.map { fagsystemVedtak -> fagsystemVedtak.eksternBehandlingId })
+            .containsExactlyInAnyOrder(
+                førstegangsbehandling.eksternId.id.toString(),
+                revurdering.eksternId.id.toString()
+            )
+    }
+
+    private fun hentVedtak(eksternFagsakId: Long): ResponseEntity<Ressurs<List<FagsystemVedtak>>> {
+        return restTemplate.exchange(
+            localhost("/api/ekstern/vedtak/$eksternFagsakId"),
+            HttpMethod.GET,
+            HttpEntity(null, headers.medContentTypeJsonUTF8())
+        )
+    }
+}
