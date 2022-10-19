@@ -26,6 +26,7 @@ FAMILIE_BLANKETT_API_URL: http://localhost:8033
 FAMILIE_EF_IVERKSETT_URL: http://localhost:8094
 FAMILIE_EF_PROXY_URL: http://localhost:8002
 FAMILIE_DOKUMENT_URL: http://localhost:8082
+FAMILIE_KLAGE_URL: http://localhost:8094
 
 AZURE_APP_TENANT_ID: navq.onmicrosoft.com
 

@@ -56,6 +56,8 @@ spec:
         - application: familie-prosessering-lokal
         - application: familie-ef-sak-frontend-lokal
         - application: familie-ef-mottak
+        - application: familie-klage
+        - application: familie-klage-lokal
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: dev-fss
@@ -70,6 +72,7 @@ spec:
       rules:
         - application: familie-tilbake
         - application: familie-klage
+        - application: familie-klage-lokal
         - application: familie-brev
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
