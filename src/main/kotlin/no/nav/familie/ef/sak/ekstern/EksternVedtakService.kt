@@ -34,7 +34,7 @@ class EksternVedtakService(
             behandling.sporbar.endret.endretTid
         } else {
             throw Feil(
-                "Kan ikke utlede vedtaksdato for behandling"
+                "Kan ikke utlede vedtaksdato for behandling=${behandling.id} status=${behandling.status}"
             )
         }
     )
