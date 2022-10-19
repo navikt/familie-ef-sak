@@ -24,7 +24,7 @@ class EksternVedtakController(
 
     @GetMapping
     @ProtectedWithClaims(issuer = "azuread")
-    fun harAktivStønad(@PathVariable eksternFagsakId: Long): Ressurs<List<FagsystemVedtak>> {
+    fun hentVedtak(@PathVariable eksternFagsakId: Long): Ressurs<List<FagsystemVedtak>> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.ACCESS)
 
         return Ressurs.success(eksternVedtakService.hentVedtak(eksternFagsakId))
