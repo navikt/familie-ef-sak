@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -214,6 +215,14 @@ internal class TilgangServiceTest {
         testWithBrukerContext(groups = listOf()) {
             assertThat(filtrer(listOf(uten))).containsExactly(uten)
         }
+    }
+
+    @Test
+    internal fun `validerTilgangTilEksternFagsak `() {
+        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { fagsakService.hentFagsakPåEksternId(any()) } returns fagsak.tilDto(emptyList(), true)
+
+        tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId.id, AuditLoggerEvent.ACCESS)
     }
 
     private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =
