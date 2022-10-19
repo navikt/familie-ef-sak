@@ -56,7 +56,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun trengerMigrering(personIdent: String): Boolean {
         try {
-            hentPeriodeForMigrering(personIdent)
+            hentPeriodeForMigrering(personIdent, StønadType.OVERGANGSSTØNAD)
         } catch (e: MigreringException) {
             if (e.type.kanGåVidereTilJournalføring) {
                 return false
@@ -65,9 +65,18 @@ class InfotrygdPeriodeValideringService(
         return true
     }
 
-    fun hentPeriodeForMigrering(personIdent: String, kjøremåned: YearMonth = YearMonth.now()): SummertInfotrygdPeriodeDto {
-        validerSakerIInfotrygd(personIdent, StønadType.OVERGANGSSTØNAD)
-        val perioder = infotrygdService.hentDtoPerioder(personIdent).overgangsstønad
+    fun hentPeriodeForMigrering(
+        personIdent: String,
+        stønadType: StønadType,
+        kjøremåned: YearMonth = YearMonth.now()
+    ): SummertInfotrygdPeriodeDto {
+        validerSakerIInfotrygd(personIdent, stønadType)
+        val dtoPerioder = infotrygdService.hentDtoPerioder(personIdent)
+        val perioder = when (stønadType) {
+            StønadType.OVERGANGSSTØNAD -> dtoPerioder.overgangsstønad
+            StønadType.BARNETILSYN -> dtoPerioder.barnetilsyn
+            StønadType.SKOLEPENGER -> error("Har ikke støtte for å migrere skolepenger")
+        }
         validerHarKunEnIdentPåPerioder(perioder, personIdent)
         return periodeFremEllerBakITiden(perioder, kjøremåned)
     }
@@ -117,7 +126,20 @@ class InfotrygdPeriodeValideringService(
         val periode = gjeldendePerioder.single()
         validerFomDato(periode)
         validerTomDato(periode)
-        return periode.copy(stønadsperiode = periode.stønadsperiode.copy(fom = maxOf(kjøremåned, periode.stønadsperiode.fom)))
+        if (periode.månedsbeløp < 1) {
+            throw MigreringException(
+                "Kan ikke migrere perioder frem i tiden med månedsbløp=${periode.månedsbeløp}",
+                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP
+            )
+        }
+        return periode.copy(
+            stønadsperiode = periode.stønadsperiode.copy(
+                fom = maxOf(
+                    kjøremåned,
+                    periode.stønadsperiode.fom
+                )
+            )
+        )
     }
 
     private fun slåSammenFremtidligePerioderHvisLike(perioderFremITiden: List<SummertInfotrygdPeriodeDto>): List<SummertInfotrygdPeriodeDto> {
