@@ -53,6 +53,7 @@ spec:
       rules:
         - application: familie-ef-sak-frontend
         - application: familie-prosessering
+        - application: familie-klage
         - application: familie-ef-personhendelse
         - application: familie-ef-mottak
         - application: familie-ef-proxy
