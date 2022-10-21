@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.journalføring
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
 import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
@@ -117,11 +118,18 @@ class JournalpostClient(
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String, saksbehandler: String?) {
-        val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
-            URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
-            "",
-            headerMedSaksbehandler(saksbehandler)
-        )
+        val ressurs = try {
+            putForEntity<Ressurs<OppdaterJournalpostResponse>>(
+                URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
+                "",
+                headerMedSaksbehandler(saksbehandler)
+            )
+        } catch (e: RessursException) {
+            brukerfeilHvis(e.ressurs.melding.contains("DokumentInfo.tittel")) {
+                "Mangler tittel på et/flere dokument/vedlegg"
+            }
+            throw e
+        }
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
             secureLogger.error(" Feil ved oppdatering av journalpost=$journalpostId - mottok: $ressurs")
