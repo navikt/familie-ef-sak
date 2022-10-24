@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
+import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_VEDTAKSDATO_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.FRITEKST
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
@@ -37,10 +38,11 @@ class BrevClient(
         return postForEntity(
             url,
             FritekstBrevRequestMedSignatur(
-                fritekstBrev,
-                saksbehandlerNavn,
-                null,
-                enhet
+                brevFraSaksbehandler = fritekstBrev,
+                saksbehandlersignatur = saksbehandlerNavn,
+                besluttersignatur = null,
+                enhet = enhet,
+                datoPlaceholder = null
             ),
             HttpHeaders().medContentTypeJsonUTF8()
         )
@@ -66,21 +68,27 @@ class BrevClient(
                 saksbehandlersignatur = saksbehandlersignatur,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 enhet = enhet,
-                skjulBeslutterSignatur = skjulBeslutterSignatur
+                skjulBeslutterSignatur = skjulBeslutterSignatur,
+                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
             ),
             HttpHeaders().medContentTypeJsonUTF8()
         )
     }
 
-    fun genererHtmlFritekstbrev(fritekstBrev: FrittståendeBrevRequestDto, saksbehandlerNavn: String, enhet: String): String {
+    fun genererHtmlFritekstbrev(
+        fritekstBrev: FrittståendeBrevRequestDto,
+        saksbehandlerNavn: String,
+        enhet: String
+    ): String {
         val url = URI.create("$familieBrevUri/api/fritekst-brev/html")
         return postForEntity(
             url,
             FritekstBrevRequestMedSignatur(
-                fritekstBrev,
-                saksbehandlerNavn,
-                BESLUTTER_SIGNATUR_PLACEHOLDER,
-                enhet
+                brevFraSaksbehandler = fritekstBrev,
+                saksbehandlersignatur = saksbehandlerNavn,
+                besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
+                enhet = enhet,
+                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
             ),
             HttpHeaders().medContentTypeJsonUTF8()
         )
@@ -98,12 +106,14 @@ data class BrevRequestMedSignaturer(
     val saksbehandlersignatur: String,
     val besluttersignatur: String?,
     val enhet: String?,
-    val skjulBeslutterSignatur: Boolean
+    val skjulBeslutterSignatur: Boolean,
+    val datoPlaceholder: String
 )
 
 data class FritekstBrevRequestMedSignatur(
     val brevFraSaksbehandler: FrittståendeBrevRequestDto,
     val saksbehandlersignatur: String,
     val besluttersignatur: String?,
-    val enhet: String
+    val enhet: String,
+    val datoPlaceholder: String?
 )
