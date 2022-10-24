@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -13,9 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(
-    path = ["/api/ekstern/vedtak"],
-    consumes = [MediaType.APPLICATION_JSON_VALUE],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    path = ["/api/ekstern/vedtak"]
 )
 class EksternVedtakController(
     private val tilgangService: TilgangService,
