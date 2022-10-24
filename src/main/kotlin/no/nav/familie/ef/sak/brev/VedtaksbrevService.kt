@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -20,6 +21,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerS
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -166,7 +168,9 @@ class VedtaksbrevService(
         }
 
         val beslutterSignatur = if (signaturMedEnhet.skjulBeslutter) "" else signaturMedEnhet.navn
-        return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
+        return html
+            .replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
+            .replace(BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
     }
 
     fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
@@ -223,5 +227,6 @@ class VedtaksbrevService(
     companion object {
 
         const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
+        const val BESLUTTER_VEDTAKSDATO_PLACEHOLDER = "BESLUTTER_VEDTAKSDATO"
     }
 }
