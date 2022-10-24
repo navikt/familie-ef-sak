@@ -42,7 +42,7 @@ class BrevClient(
                 saksbehandlersignatur = saksbehandlerNavn,
                 besluttersignatur = null,
                 enhet = enhet,
-                datoVedtatt = null
+                datoPlaceholder = null
             ),
             HttpHeaders().medContentTypeJsonUTF8()
         )
@@ -69,7 +69,7 @@ class BrevClient(
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 enhet = enhet,
                 skjulBeslutterSignatur = skjulBeslutterSignatur,
-                datoVedtatt = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
+                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
             ),
             HttpHeaders().medContentTypeJsonUTF8()
         )
@@ -88,7 +88,7 @@ class BrevClient(
                 saksbehandlersignatur = saksbehandlerNavn,
                 besluttersignatur = BESLUTTER_SIGNATUR_PLACEHOLDER,
                 enhet = enhet,
-                datoVedtatt = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
+                datoPlaceholder = BESLUTTER_VEDTAKSDATO_PLACEHOLDER
             ),
             HttpHeaders().medContentTypeJsonUTF8()
         )
@@ -107,7 +107,7 @@ data class BrevRequestMedSignaturer(
     val besluttersignatur: String?,
     val enhet: String?,
     val skjulBeslutterSignatur: Boolean,
-    val datoVedtatt: String
+    val datoPlaceholder: String
 )
 
 data class FritekstBrevRequestMedSignatur(
@@ -115,5 +115,5 @@ data class FritekstBrevRequestMedSignatur(
     val saksbehandlersignatur: String,
     val besluttersignatur: String?,
     val enhet: String,
-    val datoVedtatt: String?
+    val datoPlaceholder: String?
 )
