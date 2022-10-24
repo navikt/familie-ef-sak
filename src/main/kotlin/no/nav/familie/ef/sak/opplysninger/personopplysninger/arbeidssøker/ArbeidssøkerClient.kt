@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker
 
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
@@ -14,14 +16,22 @@ import java.time.LocalDate
 class ArbeidssøkerClient(
     @Value("\${FAMILIE_EF_PROXY_URL}")
     private val uri: URI,
+    private val featureToggleService: FeatureToggleService,
+    @Value("\${ARBEIDSSOKER_URL}")
+    private val uriGcp: URI,
     @Qualifier("azure") restOperations: RestOperations
 ) :
     AbstractRestClient(restOperations, "pdl.personinfo.saksbehandler") {
 
     fun hentPerioder(personIdent: String, fraOgMed: LocalDate, tilOgMed: LocalDate? = null): ArbeidssøkerResponse {
-        val uriBuilder = UriComponentsBuilder.fromUri(uri).pathSegment("api/arbeidssoker/perioder")
+        val initUriBuilder = if (featureToggleService.isEnabled(Toggle.ARBEIDSSOKER_API_GCP)) {
+            UriComponentsBuilder.fromUri(uriGcp)
+        } else {
+            UriComponentsBuilder.fromUri(uri)
+        }
+        val uriBuilder = initUriBuilder.pathSegment("api/arbeidssoker/perioder")
             .queryParam("fraOgMed", fraOgMed)
-        tilOgMed?.let { uriBuilder.queryParam("tilOgMed", tilOgMed) }
+        tilOgMed?.let { initUriBuilder.queryParam("tilOgMed", tilOgMed) }
 
         return postForEntity(uriBuilder.build().toUri(), PersonIdent(personIdent))
     }

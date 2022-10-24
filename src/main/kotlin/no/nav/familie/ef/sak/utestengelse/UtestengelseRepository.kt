@@ -9,5 +9,4 @@ import java.util.UUID
 interface UtestengelseRepository : RepositoryInterface<Utestengelse, UUID>, InsertUpdateRepository<Utestengelse> {
 
     fun findAllByFagsakPersonId(fagsakPersonId: UUID): List<Utestengelse>
-
 }

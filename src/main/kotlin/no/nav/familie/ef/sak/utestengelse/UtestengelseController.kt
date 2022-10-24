@@ -54,7 +54,7 @@ class UtestengelseController(
     @DeleteMapping("/{fagsakPersonId}/{id}")
     fun slettUtestengelse(
         @PathVariable fagsakPersonId: UUID,
-        @PathVariable id: UUID,
+        @PathVariable id: UUID
     ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.DELETE)
         utestengelseService.slettUtestengelse(fagsakPersonId, id)

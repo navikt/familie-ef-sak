@@ -11,7 +11,7 @@ data class UtestengelseDto(
     val opprettetAv: String,
     val opprettetTid: LocalDateTime,
     val endretAv: String,
-    val endretTid: LocalDateTime,
+    val endretTid: LocalDateTime
 )
 
 data class OpprettUtestengelseDto(

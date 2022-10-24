@@ -837,7 +837,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         stønadFom: YearMonth = periodeFraMåned,
         stønadTom: YearMonth = til,
         aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
-        utgifterBarnetilsyn: Int = 0,
+        utgifterBarnetilsyn: Int = 0
     ) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             vedtakId = 1,
