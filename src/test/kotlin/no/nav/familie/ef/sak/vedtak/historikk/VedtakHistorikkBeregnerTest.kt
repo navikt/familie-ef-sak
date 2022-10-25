@@ -16,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VedtakHistorikkBeregnerTest {
@@ -128,13 +129,16 @@ internal class VedtakHistorikkBeregnerTest {
         }
         val behandlingHistorikkData = vedtak.map {
             BehandlingHistorikkData(
-                it.behandlingId,
-                it.tilVedtakDto(),
-                null,
-                tilkjenteytelser.getValue(it.behandlingId)
+                behandlingId = it.behandlingId,
+                vedtakstidspunkt = LocalDateTime.now(),
+                vedtakDto = it.tilVedtakDto(),
+                aktivitetArbeid = null,
+                tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
             )
         }
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData)
+            .map { it.key to it.value.perioder }
+            .toMap()
     }
 
     private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
