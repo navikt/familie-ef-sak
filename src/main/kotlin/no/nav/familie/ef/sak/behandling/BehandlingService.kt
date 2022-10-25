@@ -200,7 +200,8 @@ class BehandlingService(
             henlagtÅrsak = henlagt.årsak,
             resultat = HENLAGT,
             steg = BEHANDLING_FERDIGSTILT,
-            status = FERDIGSTILT
+            status = FERDIGSTILT,
+            vedtakstidspunkt = SporbarUtils.now()
         )
         behandlingshistorikkService.opprettHistorikkInnslag(
             behandlingId = henlagtBehandling.id,
