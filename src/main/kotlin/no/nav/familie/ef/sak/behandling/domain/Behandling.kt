@@ -58,6 +58,9 @@ enum class BehandlingType(val visningsnavn: String) {
     REVURDERING("Revurdering")
 }
 
+/**
+ * Sjekkes sammen med vedtakstidspunkt i [behandling_resultat_vedtakstidspunkt_check]
+ */
 enum class BehandlingResultat(val displayName: String) {
     INNVILGET(displayName = "Innvilget"),
     OPPHØRT(displayName = "Opphørt"),

@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import java.time.LocalDateTime
@@ -18,17 +19,7 @@ object BehandlingOppsettUtil {
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,
             resultat = BehandlingResultat.HENLAGT,
-            sporbar = Sporbar(
-                opprettetTid = LocalDateTime.now()
-                    .minusDays(4)
-            )
-        )
-
-    val førstegangsbehandlingUnderBehandling = behandling(fagsak)
-        .copy(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            status = BehandlingStatus.UTREDES,
-            resultat = BehandlingResultat.IKKE_SATT,
+            vedtakstidspunkt = SporbarUtils.now(),
             sporbar = Sporbar(
                 opprettetTid = LocalDateTime.now()
                     .minusDays(4)
@@ -40,6 +31,7 @@ object BehandlingOppsettUtil {
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,
             resultat = BehandlingResultat.INNVILGET,
+            vedtakstidspunkt = SporbarUtils.now(),
             sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(3))
         )
 
@@ -48,6 +40,7 @@ object BehandlingOppsettUtil {
             type = BehandlingType.REVURDERING,
             status = BehandlingStatus.FERDIGSTILT,
             resultat = BehandlingResultat.HENLAGT,
+            vedtakstidspunkt = SporbarUtils.now(),
             sporbar = Sporbar(opprettetTid = LocalDateTime.now().minusDays(1))
         )
 
@@ -55,14 +48,16 @@ object BehandlingOppsettUtil {
         .copy(
             type = BehandlingType.REVURDERING,
             status = BehandlingStatus.IVERKSETTER_VEDTAK,
-            resultat = BehandlingResultat.INNVILGET
+            resultat = BehandlingResultat.INNVILGET,
+            vedtakstidspunkt = SporbarUtils.now()
         )
 
     val iverksattRevurdering = behandling(fagsak)
         .copy(
             type = BehandlingType.REVURDERING,
             status = BehandlingStatus.FERDIGSTILT,
-            resultat = BehandlingResultat.INNVILGET
+            resultat = BehandlingResultat.INNVILGET,
+            vedtakstidspunkt = SporbarUtils.now()
         )
 
     val revurdering = behandling(fagsak)

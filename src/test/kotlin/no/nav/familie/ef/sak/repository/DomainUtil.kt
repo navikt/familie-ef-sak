@@ -153,7 +153,8 @@ fun saksbehandling(
 fun Behandling.innvilgetOgFerdigstilt() =
     this.copy(
         resultat = BehandlingResultat.INNVILGET,
-        status = BehandlingStatus.FERDIGSTILT
+        status = BehandlingStatus.FERDIGSTILT,
+        vedtakstidspunkt = SporbarUtils.now()
     )
 
 val defaultIdenter = setOf(PersonIdent("15"))

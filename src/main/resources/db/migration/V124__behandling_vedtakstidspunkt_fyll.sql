@@ -15,3 +15,9 @@ FROM (SELECT b.id
         AND b.vedtakstidspunkt IS NULL
      ) subquery
 WHERE subquery.id = behandling.id;
+
+ALTER TABLE behandling
+    ADD CONSTRAINT behandling_resultat_vedtakstidspunkt_check
+        CHECK ((resultat = 'IKKE_SATT' AND vedtakstidspunkt IS null)
+            OR
+               (resultat <> 'IKKE_SATT' AND vedtakstidspunkt IS NOT null));

@@ -17,13 +17,16 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -367,6 +370,43 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             annengangsbehandlingOS,
             førstegangsbehandlingOS
         )
+    }
+
+    @Nested
+    inner class Vedtakstidspunkt {
+
+        private val fagsak = fagsak()
+
+        @BeforeEach
+        internal fun setUp() {
+            testoppsettService.lagreFagsak(fagsak)
+        }
+
+        @Test
+        internal fun `kan sette resultat med vedtakstidspunkt`() {
+            behandlingRepository.insert(behandling(fagsak, resultat = INNVILGET))
+        }
+
+        @Test
+        internal fun `kan ikke sette resultat uten vedtakstidspunkt`() {
+            assertThatThrownBy {
+                behandlingRepository.insert(behandling(fagsak, resultat = INNVILGET).copy(vedtakstidspunkt = null))
+            }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
+        }
+
+        @Test
+        internal fun `kan ikke sette vedtakstidspunkt uten resultat`() {
+            assertThatThrownBy {
+                behandlingRepository.insert(behandling(fagsak, resultat = IKKE_SATT).copy(vedtakstidspunkt = SporbarUtils.now()))
+            }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
+        }
+
+        @Test
+        internal fun `kan ikke sette resultat IKKE_SATT med vedtakstidspunkt`() {
+            assertThatThrownBy {
+                behandlingRepository.insert(behandling(fagsak, resultat = IKKE_SATT).copy(vedtakstidspunkt = SporbarUtils.now()))
+            }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
+        }
     }
 
     private fun lagreBehandling(
