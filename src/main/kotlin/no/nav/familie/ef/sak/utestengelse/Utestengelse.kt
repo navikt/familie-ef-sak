@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.utestengelse
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Embedded
 import java.time.LocalDate
 import java.util.UUID

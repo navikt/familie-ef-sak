@@ -51,4 +51,3 @@ internal class UtestengelseRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(utestengelseRepository.findAllByFagsakPersonId(fagsakPerson.id)).hasSize(2)
     }
 }
-

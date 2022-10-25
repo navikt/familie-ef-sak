@@ -156,7 +156,7 @@ class MigreringService(
             secureLogger.info("Har ikke aktiv stønad $periode")
             throw MigreringException("Har ikke aktiv stønad (${periode.stønadsperiode.tom})", MigreringExceptionType.INGEN_AKTIV_STØNAD)
         }
-        return when(stønadType) {
+        return when (stønadType) {
             StønadType.OVERGANGSSTØNAD -> opprettMigreringOvergangsstønad(fagsak, periode)
             StønadType.BARNETILSYN -> opprettMigreringBarnetilsyn(fagsak, periode)
             StønadType.SKOLEPENGER -> error("Kan ikke migrere skolepenger")
@@ -364,9 +364,9 @@ class MigreringService(
     ): SummertInfotrygdPeriodeDto {
         val personIdent = fagsakPerson.hentAktivIdent()
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id)
-        val fagsak = when(stønadType) {
-            StønadType.OVERGANGSSTØNAD ->fagsaker.overgangsstønad
-            StønadType.BARNETILSYN ->fagsaker.barnetilsyn
+        val fagsak = when (stønadType) {
+            StønadType.OVERGANGSSTØNAD -> fagsaker.overgangsstønad
+            StønadType.BARNETILSYN -> fagsaker.barnetilsyn
             StønadType.SKOLEPENGER -> error("Har ikke støtte for å migrere skolepenger")
         }
         fagsak?.let { validerFagsakOgBehandling(it) }
