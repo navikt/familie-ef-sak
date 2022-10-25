@@ -93,7 +93,8 @@ fun behandling(
         sporbar = Sporbar(opprettetTid = opprettetTid),
         årsak = årsak,
         henlagtÅrsak = henlagtÅrsak,
-        eksternId = eksternId
+        eksternId = eksternId,
+        vedtakstidspunkt = if(resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null
     )
 
 fun saksbehandling(
@@ -137,6 +138,7 @@ fun saksbehandling(
         steg = behandling.steg,
         årsak = behandling.årsak,
         resultat = behandling.resultat,
+        vedtakstidspunkt = behandling.vedtakstidspunkt,
         henlagtÅrsak = behandling.henlagtÅrsak,
         ident = fagsak.hentAktivIdent(),
         fagsakId = fagsak.id,

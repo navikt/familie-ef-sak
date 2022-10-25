@@ -105,7 +105,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     )
                 )
             )
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET, resultat = INNVILGET))
 
         val behandlingServiceObject = behandlingRepository.finnSaksbehandling(behandling.id)
 
@@ -127,6 +127,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingServiceObject.opprettetAv).isEqualTo(behandling.sporbar.opprettetAv)
         assertThat(behandlingServiceObject.opprettetTid).isEqualTo(behandling.sporbar.opprettetTid)
         assertThat(behandlingServiceObject.endretTid).isEqualTo(behandling.sporbar.endret.endretTid)
+        assertThat(behandlingServiceObject.vedtakstidspunkt).isEqualTo(behandling.vedtakstidspunkt)
     }
 
     @Test
