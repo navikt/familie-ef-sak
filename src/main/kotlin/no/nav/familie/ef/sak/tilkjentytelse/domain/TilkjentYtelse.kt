@@ -32,6 +32,7 @@ data class TilkjentYtelse(
     val id: UUID = UUID.randomUUID(),
     val behandlingId: UUID,
     val personident: String,
+    //TODO kan fjernes?
     val vedtakstidspunkt: LocalDateTime = SporbarUtils.now(),
     val type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,

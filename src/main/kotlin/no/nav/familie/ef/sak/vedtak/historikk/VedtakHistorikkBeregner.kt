@@ -14,8 +14,14 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+
+data class Vedtaksdata(
+    val vedtakstidspunkt: LocalDateTime,
+    val perioder: List<Vedtakshistorikkperiode>
+)
 
 sealed class Vedtakshistorikkperiode {
 
@@ -93,18 +99,24 @@ object VedtakHistorikkBeregner {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<BehandlingHistorikkData>): Map<UUID, List<Vedtakshistorikkperiode>> {
+    /**
+     * Lager totalbilde av vedtak per behandling
+     */
+    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<BehandlingHistorikkData>): Map<UUID, Vedtaksdata> {
         return vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
-            .fold(listOf<Pair<UUID, List<Vedtakshistorikkperiode>>>()) { acc, vedtak ->
-                acc + Pair(vedtak.behandlingId, lagTotalbildeForNyttVedtak(vedtak, acc))
+            .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
+                acc + Pair(
+                    vedtak.behandlingId,
+                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc))
+                )
             }
             .toMap()
     }
 
     private fun lagTotalbildeForNyttVedtak(
         data: BehandlingHistorikkData,
-        acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>
+        acc: List<Pair<UUID, Vedtaksdata>>
     ): List<Vedtakshistorikkperiode> {
         val vedtak = data.vedtakDto
         return when (vedtak) {
@@ -134,11 +146,12 @@ object VedtakHistorikkBeregner {
     }
 
     private fun splitOppPerioderSomErSanksjonert(
-        acc: List<Pair<UUID, List<Vedtakshistorikkperiode>>>,
+        acc: List<Pair<UUID, Vedtaksdata>>,
         vedtak: Sanksjonert
     ): List<Vedtakshistorikkperiode> {
         val sanksjonsperiode = vedtak.periode.tilPeriode()
-        return acc.last().second.flatMap {
+        val perioder = acc.last().second.perioder
+        return perioder.flatMap {
             if (!sanksjonsperiode.overlapper(it.periode)) {
                 return@flatMap listOf(it, lagSanksjonertPeriode(it, vedtak))
             }
@@ -187,11 +200,11 @@ object VedtakHistorikkBeregner {
      * så må vi avkorte tidligere periode, då det nye vedtaket overskrever det seneste
      */
     private fun avkortTidligerePerioder(
-        sisteVedtak: Pair<UUID, List<Vedtakshistorikkperiode>>?,
+        sisteVedtak: Pair<UUID, Vedtaksdata>?,
         datoSomTidligerePeriodeOpphør: YearMonth
     ): List<Vedtakshistorikkperiode> {
         if (sisteVedtak == null) return emptyList()
-        return sisteVedtak.second.mapNotNull {
+        return sisteVedtak.second.perioder.mapNotNull {
             if (it.periode.fom >= datoSomTidligerePeriodeOpphør) {
                 null
             } else if (it.periode.tom < datoSomTidligerePeriodeOpphør) {
