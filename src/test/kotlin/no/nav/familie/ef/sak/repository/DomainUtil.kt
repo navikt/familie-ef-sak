@@ -80,7 +80,8 @@ fun behandling(
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
-    eksternId: EksternBehandlingId = EksternBehandlingId()
+    eksternId: EksternBehandlingId = EksternBehandlingId(),
+    vedtakstidspunkt: LocalDateTime? = null
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -94,7 +95,8 @@ fun behandling(
         årsak = årsak,
         henlagtÅrsak = henlagtÅrsak,
         eksternId = eksternId,
-        vedtakstidspunkt = if(resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null
+        vedtakstidspunkt = vedtakstidspunkt
+            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null
     )
 
 fun saksbehandling(

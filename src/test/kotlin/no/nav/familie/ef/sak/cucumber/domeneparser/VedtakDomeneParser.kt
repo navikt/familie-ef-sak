@@ -302,7 +302,8 @@ object VedtakDomeneParser {
         val utgifter: Int?,
         val arbeidAktivitet: SvarId?,
         val erSanksjon: Boolean?,
-        val sanksjonsårsak: Sanksjonsårsak?
+        val sanksjonsårsak: Sanksjonsårsak?,
+        val vedtaksdato: LocalDate?
     )
 
     class BehandlingForHistorikkEndringMapper {
@@ -313,10 +314,12 @@ object VedtakDomeneParser {
             return ForventetHistorikk(
                 behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                 historikkEndring = parseEndringType(rad)?.let { endringType ->
+                    val vedtakstidspunkt =
+                        parseValgfriDato(VedtakDomenebegrep.ENDRET_I_VEDTAKSDATO, rad)?.atStartOfDay() ?: LocalDateTime.MIN
                     HistorikkEndring(
                         type = endringType,
                         behandlingId = behandlingIdTilUUID[parseInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, rad)]!!,
-                        vedtakstidspunkt = LocalDateTime.now()
+                        vedtakstidspunkt = vedtakstidspunkt
                     )
                 },
                 stønadFra = parseFraOgMed(rad),
@@ -331,7 +334,8 @@ object VedtakDomeneParser {
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
                 arbeidAktivitet = parseArbeidAktivitet(rad),
                 erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad),
-                sanksjonsårsak = parseSanksjonsårsak(rad)
+                sanksjonsårsak = parseSanksjonsårsak(rad),
+                vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad)
             )
         }
     }
@@ -363,7 +367,9 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIETYPE("Studietype"),
     DATO_FAKTURA("Dato faktura"),
     STUDIEBELASTNING("Studiebelastning"),
-    ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør")
+    ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
+    VEDTAKSDATO("Vedtaksdato"),
+    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato")
     ;
 
     override fun nøkkel(): String {

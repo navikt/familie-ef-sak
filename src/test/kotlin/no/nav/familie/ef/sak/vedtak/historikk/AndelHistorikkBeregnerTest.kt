@@ -125,7 +125,7 @@ object AndelHistorikkRunner {
 
         val now = LocalDateTime.now()
         val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
-            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()))
+            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()), vedtakstidspunkt = LocalDateTime.now())
         }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
