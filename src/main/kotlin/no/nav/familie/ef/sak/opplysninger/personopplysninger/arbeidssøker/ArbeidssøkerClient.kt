@@ -21,7 +21,7 @@ class ArbeidssøkerClient(
     private val uriGcp: URI,
     @Qualifier("azure") restOperations: RestOperations
 ) :
-    AbstractRestClient(restOperations, "pdl.personinfo.saksbehandler") {
+    AbstractRestClient(restOperations, "paw.arbeidssoker") {
 
     fun hentPerioder(personIdent: String, fraOgMed: LocalDate, tilOgMed: LocalDate? = null): ArbeidssøkerResponse {
         val initUriBuilder = if (featureToggleService.isEnabled(Toggle.ARBEIDSSOKER_API_GCP)) {
