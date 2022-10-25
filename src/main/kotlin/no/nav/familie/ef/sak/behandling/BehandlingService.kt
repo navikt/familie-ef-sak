@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -219,9 +220,23 @@ class BehandlingService(
         }
     }
 
+    /**
+     * Setter endelig resultat på behandling, setter vedtakstidspunkt på behandling
+     */
     fun oppdaterResultatPåBehandling(behandlingId: UUID, behandlingResultat: BehandlingResultat): Behandling {
         val behandling = hentBehandling(behandlingId)
-        return behandlingRepository.update(behandling.copy(resultat = behandlingResultat))
+        feilHvis(behandlingResultat == BehandlingResultat.IKKE_SATT) {
+            "Må sette et endelig resultat og ikke $behandlingResultat"
+        }
+        feilHvis(behandling.resultat != BehandlingResultat.IKKE_SATT) {
+            "Kan ikke endre resultat på behandling når resultat=${behandling.resultat}"
+        }
+        return behandlingRepository.update(
+            behandling.copy(
+                resultat = behandlingResultat,
+                vedtakstidspunkt = SporbarUtils.now()
+            )
+        )
     }
 
     @Transactional

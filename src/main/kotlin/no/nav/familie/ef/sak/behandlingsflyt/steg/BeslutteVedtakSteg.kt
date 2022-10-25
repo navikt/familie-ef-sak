@@ -79,7 +79,7 @@ class BeslutteVedtakSteg(
             )
         )
 
-    fun oppdaterResultatPåBehandling(behandlingId: UUID) {
+    private fun oppdaterResultatPåBehandling(behandlingId: UUID) {
         val resultat = vedtakService.hentVedtaksresultat(behandlingId)
         when (resultat) {
             ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> behandlingService.oppdaterResultatPåBehandling(

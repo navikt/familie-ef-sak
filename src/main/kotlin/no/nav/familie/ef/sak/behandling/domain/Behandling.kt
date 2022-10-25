@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -35,7 +36,8 @@ data class Behandling(
     val sporbar: Sporbar = Sporbar(),
     val resultat: BehandlingResultat,
     @Column("henlagt_arsak")
-    val henlagtÅrsak: HenlagtÅrsak? = null
+    val henlagtÅrsak: HenlagtÅrsak? = null,
+    val vedtakstidspunkt: LocalDateTime? = null
 ) {
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
