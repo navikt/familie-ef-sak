@@ -29,6 +29,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -101,6 +102,7 @@ internal class BehandlingServiceTest {
             assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.FERDIGSTILT)
             assertThat(behandlingSlot.captured.resultat).isEqualTo(BehandlingResultat.HENLAGT)
             assertThat(behandlingSlot.captured.steg).isEqualTo(StegType.BEHANDLING_FERDIGSTILT)
+            assertThat(behandlingSlot.captured.vedtakstidspunkt).isNotNull
         }
 
         @Test
@@ -213,6 +215,37 @@ internal class BehandlingServiceTest {
             val feil: ApiFeil = assertThrows { behandlingService.taAvVent(UUID.randomUUID()) }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @Nested
+    inner class oppdaterResultatPåBehandling {
+
+        private val behandling = behandling()
+
+        @Test
+        internal fun `skal sette vedtakstidspunkt når man setter resultat`() {
+            every {
+                behandlingRepository.findByIdOrThrow(any())
+            } returns behandling.copy(resultat = BehandlingResultat.IKKE_SATT)
+            behandlingService.oppdaterResultatPåBehandling(UUID.randomUUID(), BehandlingResultat.INNVILGET)
+        }
+
+        @Test
+        internal fun `skal feile hvis resultatet på behandlingen allerede er satt`() {
+            every {
+                behandlingRepository.findByIdOrThrow(any())
+            } returns behandling.copy(resultat = BehandlingResultat.INNVILGET)
+            assertThatThrownBy {
+                behandlingService.oppdaterResultatPåBehandling(UUID.randomUUID(), BehandlingResultat.INNVILGET)
+            }.hasMessageContaining("Kan ikke endre resultat på behandling når resultat")
+        }
+
+        @Test
+        internal fun `skal feile hvis man setter IKKE_SATT`() {
+            assertThatThrownBy {
+                behandlingService.oppdaterResultatPåBehandling(UUID.randomUUID(), BehandlingResultat.IKKE_SATT)
+            }.hasMessageContaining("Må sette et endelig resultat")
         }
     }
 }

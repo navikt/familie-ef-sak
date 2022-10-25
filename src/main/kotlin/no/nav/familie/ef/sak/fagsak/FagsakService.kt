@@ -99,7 +99,7 @@ class FagsakService(
             behandlinger = behandlinger.map {
                 it.tilDto(
                     fagsak.stønadstype,
-                    vedtaksdatoPåBehandlingId.get(it.id)
+                    vedtaksdatoPåBehandlingId[it.id]
                 )
             },
             erLøpende = erLøpende
