@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
@@ -49,8 +48,7 @@ class AndelsHistorikkService(
         return behandling.forrigeBehandlingId?.let {
             val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
             val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
-            val vedtaksdatoEllerDagensdato =
-                finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling)
+            val vedtaksdatoEllerDagensdato = behandling.vedtakstidspunkt?.toLocalDate() ?: LocalDate.now()
 
             val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
                 .filter { it.endring?.type != EndringType.FJERNET }
@@ -65,12 +63,4 @@ class AndelsHistorikkService(
             return BarnMedLøpendeStønad(barn = barnMedLøpendeStønad, dato = vedtaksdatoEllerDagensdato)
         } ?: BarnMedLøpendeStønad(barn = emptyList(), dato = LocalDate.now())
     }
-
-    private fun finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling: Behandling) =
-        vedtakService.hentVedtakHvisEksisterer(behandling.id)
-            ?.let {
-                tilkjentYtelseRepository.findByBehandlingId(behandling.id)?.vedtakstidspunkt?.toLocalDate()
-                    ?: behandling.sporbar.opprettetTid.toLocalDate()
-            }
-            ?: LocalDate.now()
 }
