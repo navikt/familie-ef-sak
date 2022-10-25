@@ -18,7 +18,6 @@ import java.time.YearMonth
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(
         behandlingId = this.behandlingId,
-        vedtakstidspunkt = this.vedtakstidspunkt,
         andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
         samordningsfradragType = this.samordningsfradragType
     )
