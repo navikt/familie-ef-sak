@@ -268,7 +268,6 @@ fun tilkjentYtelse(
     return TilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
-        vedtakstidspunkt = LocalDateTime.now(),
         startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
         grunnbeløpsdato = grunnbeløpsdato

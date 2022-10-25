@@ -21,3 +21,5 @@ ALTER TABLE behandling
         CHECK ((resultat = 'IKKE_SATT' AND vedtakstidspunkt IS null)
             OR
                (resultat <> 'IKKE_SATT' AND vedtakstidspunkt IS NOT null));
+
+ALTER TABLE tilkjent_ytelse DROP COLUMN vedtakstidspunkt;
