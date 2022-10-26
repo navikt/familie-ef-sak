@@ -29,7 +29,7 @@ class ArbeidssøkerClient(
         } else {
             UriComponentsBuilder.fromUri(uri)
         }
-        val uriBuilder = initUriBuilder.pathSegment("arbeidssoker/perioder")
+        val uriBuilder = initUriBuilder.pathSegment("veilarbregistrering/api/arbeidssoker/perioder")
             .queryParam("fraOgMed", fraOgMed)
         tilOgMed?.let { initUriBuilder.queryParam("tilOgMed", tilOgMed) }
 
