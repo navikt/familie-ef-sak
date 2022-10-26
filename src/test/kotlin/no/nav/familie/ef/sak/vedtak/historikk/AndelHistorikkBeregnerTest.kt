@@ -309,7 +309,7 @@ object AndelHistorikkParser {
             .map { (behandlingId, vedtaksperioder) ->
                 val resultat: ResultatType
                 var periodeWrapper: PeriodeWrapper? = null
-                var opphørFom: LocalDate? = null
+                var opphørFom: YearMonth? = null
                 var sanksjonsårsak: Sanksjonsårsak? = null
                 if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
                     resultat = ResultatType.SANKSJONERE
@@ -323,7 +323,7 @@ object AndelHistorikkParser {
                         "Kan kun være en vedtaksperiode som er av typen opphør"
                     }
                     resultat = ResultatType.OPPHØRT
-                    opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
+                    opphørFom = YearMonth.from(vedtaksperioder.single().stønadFom) ?: error("Mangler stønadFom i opphør")
                 }
                 val inntekter = periodeWrapper?.perioder?.firstOrNull()
                     ?.let {

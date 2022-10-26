@@ -556,7 +556,7 @@ internal class IverksettingDtoMapperTest {
             "skolepenger": $vedtakSkolepengerJson,
             "samordningsfradragType": "UFØRETRYGD",
             "saksbehandlerIdent": "saksbehandlerIdent",
-            "opphørFom": "2022-03-27",
+            "opphørFom": "2022-03",
             "beslutterIdent": "beslutter",
             "sanksjonsårsak": "SAGT_OPP_STILLING",
             "internBegrunnelse": "internBegrunnelse"

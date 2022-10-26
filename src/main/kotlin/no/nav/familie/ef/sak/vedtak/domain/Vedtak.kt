@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 data class Vedtak(
@@ -26,7 +27,7 @@ data class Vedtak(
     val samordningsfradragType: SamordningsfradragType? = null,
     val saksbehandlerIdent: String? = null,
     @Column("opphor_fom")
-    val opphørFom: LocalDate? = null,
+    val opphørFom: YearMonth? = null,
     val barnetilsyn: BarnetilsynWrapper? = null,
     @Column("kontantstotte")
     val kontantstøtte: KontantstøtteWrapper? = null,

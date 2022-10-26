@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtakHistorikkBeregnerTest {
@@ -29,7 +30,8 @@ internal class VedtakHistorikkBeregnerTest {
 
     @Test
     internal fun `opphør har ikke periodeWrapper inne på vedtak`() {
-        val andreVedtak = lagVedtak(perioder = null, opphørFom = LocalDate.of(2021, 2, 1))
+        val opphørFom = YearMonth.of(2021, 2)
+        val andreVedtak = lagVedtak(perioder = null, opphørFom = opphørFom)
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -159,7 +161,7 @@ internal class VedtakHistorikkBeregnerTest {
     private fun lagVedtak(
         behandlingId: UUID = UUID.randomUUID(),
         perioder: List<Vedtaksperiode>?,
-        opphørFom: LocalDate? = null
+        opphørFom: YearMonth? = null
     ): Vedtak {
         require((perioder == null) xor (opphørFom == null)) { "Må definiere perioder eller opphørFom" }
         return Vedtak(
