@@ -77,6 +77,8 @@ spec:
         - application: familie-dokument
         - application: familie-ef-proxy
           cluster: dev-fss
+        - application: veilarbregistrering
+          namespace: paw
       external:
         - host: api-gw-q1.oera.no
         - host: unleash.nais.io

@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -21,7 +20,7 @@ class ArbeidssøkerClient(
     private val uriGcp: URI,
     @Qualifier("azure") restOperations: RestOperations
 ) :
-    AbstractRestClient(restOperations, "pdl.personinfo.saksbehandler") {
+    AbstractRestClient(restOperations, "paw.arbeidssoker") {
 
     fun hentPerioder(personIdent: String, fraOgMed: LocalDate, tilOgMed: LocalDate? = null): ArbeidssøkerResponse {
         val initUriBuilder = if (featureToggleService.isEnabled(Toggle.ARBEIDSSOKER_API_GCP)) {
@@ -29,10 +28,14 @@ class ArbeidssøkerClient(
         } else {
             UriComponentsBuilder.fromUri(uri)
         }
-        val uriBuilder = initUriBuilder.pathSegment("api/arbeidssoker/perioder")
+        val uriBuilder = initUriBuilder.pathSegment("veilarbregistrering/api/arbeidssoker/perioder")
             .queryParam("fraOgMed", fraOgMed)
         tilOgMed?.let { initUriBuilder.queryParam("tilOgMed", tilOgMed) }
 
-        return postForEntity(uriBuilder.build().toUri(), PersonIdent(personIdent))
+        return postForEntity(uriBuilder.build().toUri(), FnrArbeidssøker(personIdent))
     }
 }
+
+data class FnrArbeidssøker(
+    val fnr: String
+)
