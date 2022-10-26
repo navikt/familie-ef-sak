@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -33,6 +32,10 @@ class ArbeidssøkerClient(
             .queryParam("fraOgMed", fraOgMed)
         tilOgMed?.let { initUriBuilder.queryParam("tilOgMed", tilOgMed) }
 
-        return postForEntity(uriBuilder.build().toUri(), PersonIdent(personIdent))
+        return postForEntity(uriBuilder.build().toUri(), FnrArbeidssøker(personIdent))
     }
 }
+
+data class FnrArbeidssøker(
+    val fnr: String
+)
