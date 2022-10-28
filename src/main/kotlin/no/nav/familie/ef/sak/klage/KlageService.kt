@@ -61,7 +61,6 @@ class KlageService(
             OpprettKlagebehandlingRequest(
                 ident = aktivIdent,
                 stønadstype = Stønadstype.fraEfStønadstype(behandling.stønadstype),
-                eksternBehandlingId = behandling.eksternId.toString(),
                 eksternFagsakId = behandling.eksternFagsakId.toString(),
                 fagsystem = Fagsystem.EF,
                 klageMottatt = opprettKlageDto.mottattDato,
