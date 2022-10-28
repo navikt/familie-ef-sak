@@ -89,14 +89,14 @@ internal class KlageServiceTest {
     inner class OpprettKlage {
 
         @Test
-        internal fun `skal mappe riktige verdier`() {
+        internal fun `skal mappe riktige verdier ved manuelt opprettet klage`() {
             klageService.opprettKlage(UUID.randomUUID(), OpprettKlageDto(LocalDate.now()))
 
             val request = opprettKlageSlot.captured
 
             assertThat(request.ident).isEqualTo(personIdent)
             assertThat(request.eksternFagsakId).isEqualTo(eksternFagsakId.toString())
-            assertThat(request.eksternBehandlingId).isEqualTo(eksternBehandlingId.toString())
+            assertThat(request.eksternBehandlingId).isNull()
             assertThat(request.fagsystem).isEqualTo(Fagsystem.EF)
             assertThat(request.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
             assertThat(request.klageMottatt).isEqualTo(LocalDate.now())
