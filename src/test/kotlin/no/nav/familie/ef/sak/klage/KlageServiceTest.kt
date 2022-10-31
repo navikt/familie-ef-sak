@@ -24,9 +24,12 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
+import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.kontrakter.felles.klage.KlageinstansResultatDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.assertj.core.api.Assertions.assertThat
@@ -38,6 +41,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.util.UUID
 
 internal class KlageServiceTest {
@@ -188,21 +192,111 @@ internal class KlageServiceTest {
             assertThat(klager.skolepenger).isEmpty()
         }
 
+        @Test
+        internal fun `Hent klage - skal bruke vedtaksdato fra kabal hvis resultat IKKE_MEDHOLD og avsluttet i kabal`() {
+            val fagsaker = fagsaker()
+
+            val tidsPunktAvsluttetIKabal = LocalDateTime.of(2022, Month.OCTOBER, 1, 0, 0)
+            val tidspunktAvsluttetIFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
+
+            val klagebehandlingAvsluttetKabal = klageBehandlingDto(
+                resultat = BehandlingResultat.IKKE_MEDHOLD,
+                klageinstansResultat = listOf(
+                    KlageinstansResultatDto(
+                        type = BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET,
+                        utfall = null,
+                        mottattEllerAvsluttetTidspunkt = tidsPunktAvsluttetIKabal,
+                        journalpostReferanser = listOf()
+                    )
+                ),
+                vedtaksdato = tidspunktAvsluttetIFamilieKlage
+            )
+
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
+            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
+                eksternIdOS to listOf(klagebehandlingAvsluttetKabal),
+                eksternIdBT to emptyList(),
+                eksternIdSP to emptyList()
+            )
+
+            val klager = klageService.hentBehandlinger(UUID.randomUUID())
+
+            assertThat(klager.overgangsstønad.first().vedtaksdato).isEqualTo(tidsPunktAvsluttetIKabal)
+        }
+
+        @Test
+        internal fun `Hent klage - hvis resultat fra kabal ikke foreligger enda skal vedtaksdato være null behandlingsresultat er IKKE_MEDHOLD`() {
+            val fagsaker = fagsaker()
+            val tidspunktAvsluttetFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
+
+            val klagebehandlingIkkeAvsluttetKabal = klageBehandlingDto(
+                resultat = BehandlingResultat.IKKE_MEDHOLD,
+                klageinstansResultat = emptyList(),
+                vedtaksdato = tidspunktAvsluttetFamilieKlage
+            )
+
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
+            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
+                eksternIdOS to listOf(klagebehandlingIkkeAvsluttetKabal),
+                eksternIdBT to emptyList(),
+                eksternIdSP to emptyList()
+            )
+
+            val klager = klageService.hentBehandlinger(UUID.randomUUID())
+
+            assertThat(klager.overgangsstønad.first().vedtaksdato).isNull()
+        }
+
+        @Test
+        internal fun `Hent klage - skal bruke vedtaksdato fra klageløsning dersom behandling ikke er oversendt kabal`() {
+            val fagsaker = fagsaker()
+            val tidspunktAvsluttetFamilieKlage = LocalDateTime.of(2022, Month.AUGUST, 1, 0, 0)
+
+            every { fagsakService.finnFagsakerForFagsakPersonId(any()) } returns fagsaker
+            every { klageClient.hentKlagebehandlinger(any()) } returns mapOf(
+                eksternIdOS to listOf(
+                    klageBehandlingDto(
+                        resultat = BehandlingResultat.MEDHOLD,
+                        klageinstansResultat = emptyList(),
+                        vedtaksdato = tidspunktAvsluttetFamilieKlage
+                    )
+                ),
+                eksternIdBT to listOf(
+                    klageBehandlingDto(
+                        resultat = BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
+                        klageinstansResultat = emptyList(),
+                        vedtaksdato = tidspunktAvsluttetFamilieKlage
+                    )
+                ),
+                eksternIdSP to emptyList()
+            )
+
+            val klager = klageService.hentBehandlinger(UUID.randomUUID())
+
+            assertThat(klager.overgangsstønad.first().vedtaksdato).isEqualTo(tidspunktAvsluttetFamilieKlage)
+            assertThat(klager.barnetilsyn.first().vedtaksdato).isEqualTo(tidspunktAvsluttetFamilieKlage)
+        }
+
         private fun fagsaker() = Fagsaker(
             fagsak(stønadstype = StønadType.OVERGANGSSTØNAD, eksternId = EksternFagsakId(eksternIdOS)),
             fagsak(stønadstype = StønadType.BARNETILSYN, eksternId = EksternFagsakId(eksternIdBT)),
             fagsak(stønadstype = StønadType.SKOLEPENGER, eksternId = EksternFagsakId(eksternIdSP))
         )
 
-        private fun klageBehandlingDto() = KlagebehandlingDto(
+        private fun klageBehandlingDto(
+            resultat: BehandlingResultat? = null,
+            vedtaksdato: LocalDateTime? = null,
+            klageinstansResultat: List<KlageinstansResultatDto> = emptyList()
+        ) = KlagebehandlingDto(
             id = UUID.randomUUID(),
             fagsakId = UUID.randomUUID(),
             status = BehandlingStatus.UTREDES,
             opprettet = LocalDateTime.now(),
             mottattDato = LocalDate.now().minusDays(1),
-            resultat = null,
+            resultat = resultat,
             årsak = null,
-            vedtaksdato = null
+            vedtaksdato = vedtaksdato,
+            klageinstansResultat = klageinstansResultat
         )
 
         private fun klageBehandlingerDto() = mapOf(
