@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
@@ -22,7 +23,9 @@ class EksternVedtakController(
     @GetMapping("/{eksternFagsakId}")
     @ProtectedWithClaims(issuer = "azuread")
     fun hentVedtak(@PathVariable eksternFagsakId: Long): Ressurs<List<FagsystemVedtak>> {
-        tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.ACCESS)
+        if (!SikkerhetContext.erMaskinTilMaskinToken()) {
+            tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.ACCESS)
+        }
 
         return Ressurs.success(eksternVedtakService.hentVedtak(eksternFagsakId))
     }
