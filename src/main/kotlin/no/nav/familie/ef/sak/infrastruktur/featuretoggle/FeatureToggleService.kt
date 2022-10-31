@@ -21,7 +21,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
-    AUTOMATISK_BEREGN_NÆRE_BOFORHOLD("familie.ef.sak.beregne-naere-boforhold"),
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
