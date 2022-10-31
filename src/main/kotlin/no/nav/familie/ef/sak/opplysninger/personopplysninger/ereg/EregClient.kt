@@ -14,7 +14,7 @@ class EregClient(
     private val familieEfProxyUri: URI,
     @Qualifier("azure")
     private val restOperations: RestOperations
-) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
+) : AbstractPingableRestClient(restOperations, "ereg") {
 
     fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<OrganisasjonDto> {
         val uriBuilder = UriComponentsBuilder.fromUri(familieEfProxyUri)

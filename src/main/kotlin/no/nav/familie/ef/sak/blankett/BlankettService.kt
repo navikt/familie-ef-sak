@@ -37,7 +37,7 @@ class BlankettService(
         return blankettPdfAsByteArray
     }
 
-    fun oppdaterEllerOpprettBlankett(behandlingId: UUID, pdf: ByteArray): Blankett {
+    private fun oppdaterEllerOpprettBlankett(behandlingId: UUID, pdf: ByteArray): Blankett {
         val blankett = Blankett(behandlingId, Fil(pdf))
         if (blankettRepository.existsById(behandlingId)) {
             return blankettRepository.update(blankett)
