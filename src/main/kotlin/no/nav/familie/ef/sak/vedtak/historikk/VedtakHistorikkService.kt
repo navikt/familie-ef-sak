@@ -77,7 +77,7 @@ class VedtakHistorikkService(
             }
     }
 
-    private fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
+    fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
         return andelsHistorikkService.hentHistorikk(fagsakId, null)
             .filter { it.erIkkeFjernet() }
             .sortedBy { it.andel.periode.fom }
