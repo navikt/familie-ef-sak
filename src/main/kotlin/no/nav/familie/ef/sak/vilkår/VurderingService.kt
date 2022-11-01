@@ -11,10 +11,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
@@ -104,24 +102,14 @@ class VurderingService(
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
-        val skalSjekkeNæreBoforholdMetadata = featureToggleService.isEnabled(Toggle.AUTOMATISK_BEREGN_NÆRE_BOFORHOLD)
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
-            langAvstandTilSøker = mapBarnMedSamværTilLangAvstandTilSøker(skalSjekkeNæreBoforholdMetadata, grunnlag.barnMedSamvær)
+            langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
         )
         return Pair(grunnlag, metadata)
-    }
-
-    private fun mapBarnMedSamværTilLangAvstandTilSøker(
-        skalSjekkeNæreBoforholdMetadata: Boolean,
-        barnMedSamvær: List<BarnMedSamværDto>
-    ) = if (skalSjekkeNæreBoforholdMetadata) {
-        barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
-    } else {
-        listOf()
     }
 
     private fun hentEllerOpprettVurderinger(
