@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
@@ -124,7 +125,8 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         behandlingRepository.update(
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
+                resultat = BehandlingResultat.INNVILGET,
+                vedtakstidspunkt = SporbarUtils.now()
             )
         )
     }

@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 data class TilkjentYtelseDto(
     val behandlingId: UUID,
-    val vedtakstidspunkt: LocalDateTime,
     val andeler: List<AndelTilkjentYtelseDto>,
     val samordningsfradragType: SamordningsfradragType?
 )

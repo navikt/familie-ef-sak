@@ -60,6 +60,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -339,7 +340,8 @@ class StepDefinitions {
                     id = id,
                     opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
                     type = if (index == 0) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING,
-                    forrigeBehandlingId = acc.lastOrNull()?.id
+                    forrigeBehandlingId = acc.lastOrNull()?.id,
+                    vedtakstidspunkt = LocalDateTime.MIN
                 )
             }
             .map { it to saksbehandling(fagsak, it) }
@@ -467,14 +469,23 @@ class StepDefinitions {
             assertThat(beregnetAndelHistorikk.sanksjonsårsak).isEqualTo(forventetHistorikkEndring.sanksjonsårsak)
         }
         forventetHistorikkEndring.periodeType?.let {
-            assertThat(beregnetAndelHistorikk.periodeType).isEqualTo(forventetHistorikkEndring.periodeType)
+            assertThat(beregnetAndelHistorikk.periodeType).isEqualTo(it)
         }
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+
+        forventetHistorikkEndring.vedtaksdato?.let {
+            assertThat(beregnetAndelHistorikk.vedtakstidspunkt.toLocalDate()).isEqualTo(it)
+        }
 
         if (beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
             assertThat(beregnetAndelHistorikk.endring?.type).isEqualTo(forventetHistorikkEndring.historikkEndring?.type)
             assertThat(beregnetAndelHistorikk.endring?.behandlingId)
                 .isEqualTo(forventetHistorikkEndring.historikkEndring?.behandlingId)
+
+            forventetHistorikkEndring.historikkEndring?.vedtakstidspunkt
+                ?.takeIf { it != LocalDateTime.MIN } // denne er satt til MIN som default då den er required
+                ?.let { assertThat(beregnetAndelHistorikk.endring?.vedtakstidspunkt).isEqualTo(it) }
         }
+
     }
 }

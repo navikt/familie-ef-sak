@@ -18,7 +18,6 @@ import java.time.YearMonth
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(
         behandlingId = this.behandlingId,
-        vedtakstidspunkt = this.vedtakstidspunkt,
         andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
         samordningsfradragType = this.samordningsfradragType
     )
@@ -75,7 +74,8 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
     saksbehandlerId: String,
     eksternBehandlingId: Long,
     stønadstype: StønadType,
-    eksternFagsakId: Long
+    eksternFagsakId: Long,
+    vedtaksdato: LocalDate
 ): TilkjentYtelseMedMetadata {
     return TilkjentYtelseMedMetadata(
         tilkjentYtelse = this.tilIverksettDto(),
@@ -85,6 +85,6 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
         eksternFagsakId = eksternFagsakId,
         personIdent = this.personident,
         behandlingId = this.behandlingId,
-        vedtaksdato = this.vedtakstidspunkt.toLocalDate()
+        vedtaksdato = vedtaksdato
     )
 }
