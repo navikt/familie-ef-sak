@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedlegg
 
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import java.time.LocalDateTime
@@ -17,7 +18,8 @@ data class DokumentinfoDto(
     val dato: LocalDateTime?,
     val journalstatus: Journalstatus,
     val journalposttype: Journalposttype,
-    val logiskeVedlegg: List<LogiskVedleggDto>
+    val logiskeVedlegg: List<LogiskVedleggDto>,
+    val avsenderMottaker: AvsenderMottaker?
 )
 
 data class LogiskVedleggDto(val tittel: String)
