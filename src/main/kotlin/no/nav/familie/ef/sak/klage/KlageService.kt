@@ -10,7 +10,10 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
 import no.nav.familie.ef.sak.klage.dto.ÅpneKlagerInfotrygdDto
+import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
+import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
+import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.springframework.stereotype.Service
@@ -39,7 +42,11 @@ class KlageService(
         if (eksternFagsakIder.isEmpty()) {
             return KlagebehandlingerDto(emptyList(), emptyList(), emptyList())
         }
-        val klagebehandlingerPåEksternId = klageClient.hentKlagebehandlinger(eksternFagsakIder.toSet())
+        val klagebehandlingerPåEksternId =
+            klageClient.hentKlagebehandlinger(eksternFagsakIder.toSet()).mapValues { klagebehandlingerPåEksternId ->
+                klagebehandlingerPåEksternId.value.map { brukVedtaksdatoFraKlageinstansHvisOversendt(it) }
+            }
+
         return KlagebehandlingerDto(
             overgangsstønad = klagebehandlingerPåEksternId[fagsaker.overgangsstønad?.eksternId?.id] ?: emptyList(),
             barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId?.id] ?: emptyList(),
@@ -72,6 +79,14 @@ class KlageService(
     fun hentÅpneKlagerInfotrygd(fagsakPersonId: UUID): ÅpneKlagerInfotrygdDto {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         return hentÅpneKlagerFraInfotrygd(fagsakPerson)
+    }
+
+    private fun brukVedtaksdatoFraKlageinstansHvisOversendt(klagebehandling: KlagebehandlingDto): KlagebehandlingDto {
+        val erOversendtTilKlageinstans = klagebehandling.resultat == BehandlingResultat.IKKE_MEDHOLD
+        val vedtaksdato = if (erOversendtTilKlageinstans) {
+            klagebehandling.klageinstansResultat.singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET }?.mottattEllerAvsluttetTidspunkt
+        } else klagebehandling.vedtaksdato
+        return klagebehandling.copy(vedtaksdato = vedtaksdato)
     }
 
     private fun hentÅpneKlagerFraInfotrygd(fagsakPerson: FagsakPerson): ÅpneKlagerInfotrygdDto {
