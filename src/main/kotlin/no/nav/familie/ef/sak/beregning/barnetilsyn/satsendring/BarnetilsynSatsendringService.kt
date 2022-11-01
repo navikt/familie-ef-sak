@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn.satsendring
 
-import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
@@ -32,10 +32,18 @@ class BarnetilsynSatsendringService(
                 UtgiftsperiodeDto( periode = it.andel.periode, barn = it.andel.barn, utgifter = it.andel.utgifter.toInt(), erMidlertidigOpphør = false)     // TODO sjekk erMidlertidigOpphør...
             }
 
-            val tilBeløpsperioderPerUtgiftsmåned =
-                utgiftsperiode.tilBeløpsperioderPerUtgiftsmåned(emptyList(), emptyList()) // TODO legge til lister med kontantstøtte iog tillegssstønader
-                    .values.toList()
-                    .mergeSammenhengendePerioder()
+            val simulertNyBeregning =
+                utgiftsperiode.tilBeløpsperioderPerUtgiftsmåned(andeler2023.map {
+                    PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.kontantstøtte)
+                }, andeler2023.map {
+                    PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
+                }).values.toList()
+
+            val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
+
+
+//TODO sammenlikne  "simulertNyBeregning" med andeler2023?
+
 
         }
 
