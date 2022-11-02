@@ -21,52 +21,43 @@ class BarnetilsynSatsendringService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun sjekkIngenEndringerMedNåværendeSats(): Boolean {
-        val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
-        val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> = fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
+    fun finnFagsakerSomSkalSatsendresMedNySatsDersomBaselineErOk() {
+        val barnetilsynGjeldeneAvstemmingsfeil =
+            finnFagsakerSomSkalSatsendresMedNySats(false)
 
-        val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKanditat.map {
-            val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
-            val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser = false)
-            val skalRevurderes: Boolean = finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
-
-            // val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
-            it.copy(skalRevurderes = skalRevurderes)
-        }
-
-        logger.info("Antall kandidater til sjekk på satsendring med nåværende satser: ${barnetilsynSatsendringKanditat.size}")
-
-        kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }.forEach {
+        barnetilsynGjeldeneAvstemmingsfeil.forEach {
             logger.warn(
                 "Skulle ikke ha fått differanse i andeler ved reberegning av barnetilsyn-saker med nåværende satser." +
                     " FagsakId: ${it.fagsakId}"
             )
         }
 
-        return kandidaterMedSkalRevurderesSatt.any { it.skalRevurderes }
+
+        if (barnetilsynGjeldeneAvstemmingsfeil.isEmpty()) {
+            val fagsakerSomMåRevurderesGrunnetSatsendring =
+                finnFagsakerSomSkalSatsendresMedNySats(true)
+
+            fagsakerSomMåRevurderesGrunnetSatsendring.forEach {
+                logger.info("${it.fagsakId}: skal revurderes/endres etter satsendring")
+            }
+        }
     }
 
-    fun logFagsakerSomSkalSatsendresMedNySats() {
-        if (sjekkIngenEndringerMedNåværendeSats()) {
-            return
-        }
+    private fun finnFagsakerSomSkalSatsendresMedNySats(brukIkkeVedtatteSatser: Boolean = true): List<BarnetilsynSatsendringKanditat> {
         val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
-        val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> = fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
+        val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> =
+            fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
+        logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKanditat.size}")
 
         val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKanditat.map {
             val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
-            val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser = true)
-            val skalRevurderes: Boolean = finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
-
-            // val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
+            val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser)
+            val skalRevurderes: Boolean =
+                finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
             it.copy(skalRevurderes = skalRevurderes)
         }
 
-        logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKanditat.size}")
-
-        kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }.forEach {
-            logger.info("${it.fagsakId}: skal revurderes/endres etter satsendring")
-        }
+        return kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }
     }
 
     private fun finnesStørreBeløpINyBeregning(

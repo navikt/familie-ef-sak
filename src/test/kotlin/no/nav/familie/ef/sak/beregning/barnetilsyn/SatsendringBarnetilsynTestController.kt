@@ -13,6 +13,6 @@ class SatsendringBarnetilsynTestController(val barnetilsynSatsendringService: Ba
 
     @GetMapping
     fun finnKanditater() {
-        barnetilsynSatsendringService.logFagsakerSomSkalSatsendresMedNySats()
+        barnetilsynSatsendringService.finnFagsakerSomSkalSatsendresMedNySatsDersomBaselineErOk()
     }
 }
