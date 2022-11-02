@@ -32,7 +32,6 @@ class BarnetilsynSatsendringService(
             )
         }
 
-
         if (barnetilsynGjeldeneAvstemmingsfeil.isEmpty()) {
             val fagsakerSomMåRevurderesGrunnetSatsendring =
                 finnFagsakerSomSkalSatsendresMedNySats(true)
