@@ -16,21 +16,26 @@ data class MaxbeløpBarnetilsynSats(
 
 object BeregningBarnetilsynUtil {
 
-    val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
-        listOf(
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
-            ),
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
-                maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)
-            ),
+    private val eldreBarnetilsynsatser: List<MaxbeløpBarnetilsynSats> =
+        listOf(   MaxbeløpBarnetilsynSats(
+            Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
+            maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)
+        ),
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 12)),
                 maxbeløp = mapOf(1 to 4053, 2 to 5289, 3 to 5993)
             )
         )
+
+    val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
+        listOf(
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
+            )
+        ) + eldreBarnetilsynsatser
+
+
 
     val ikkeVedtatteSatserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
         listOf(
@@ -41,16 +46,8 @@ object BeregningBarnetilsynUtil {
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
                 maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
-            ),
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
-                maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)
-            ),
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 12)),
-                maxbeløp = mapOf(1 to 4053, 2 to 5289, 3 to 5993)
             )
-        )
+        ) + eldreBarnetilsynsatser
 
     fun lagBeløpsPeriodeBarnetilsyn(
         utgiftsperiode: UtgiftsMåned,
