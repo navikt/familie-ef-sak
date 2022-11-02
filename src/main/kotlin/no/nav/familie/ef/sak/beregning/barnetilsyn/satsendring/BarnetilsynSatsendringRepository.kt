@@ -15,7 +15,6 @@ interface BarnetilsynSatsendringRepository : RepositoryInterface<BarnetilsynSats
         FROM gjeldende_iverksatte_behandlinger gib
          JOIN tilkjent_ytelse ty ON ty.behandling_id = gib.id
          JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
-         JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
         WHERE aty.stonad_tom >= '2023-01-01' AND gib.stonadstype = 'BARNETILSYN'
         """
     )
