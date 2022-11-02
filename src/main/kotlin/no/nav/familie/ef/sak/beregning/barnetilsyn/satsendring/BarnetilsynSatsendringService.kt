@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn.satsendring
 
-import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -48,23 +47,18 @@ class BarnetilsynSatsendringService(
                         }
                     ).values.toList()
 
-                val skalRevurderes = simulertNyBeregning.any { nyMånedsberegning ->
-                    andeler2023.filter { it.andel.periode.overlapper(nyMånedsberegning.periode) }
-                        .first().andel.beløp < nyMånedsberegning.beløp
+                val skalRevurderes: Boolean = simulertNyBeregning.any { nyMånedsberegning ->
+                    andeler2023.any { it.andel.periode.overlapper(nyMånedsberegning.periode) && it.andel.beløp < nyMånedsberegning.beløp }
                 }
-
-                val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
-
+                // val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
                 it.copy(skalRevurderes = skalRevurderes)
             }
-
             logger.info("Kandidater satsendring størrelse ${barnetilsynSatsendringKanditat.size}")
             skalRevurderes.forEach {
                 logger.info("${it.fagsakId}: Skal revurderes/endres etter satsendring:  ${it.skalRevurderes}")
             }
         }
-        logger.info("Duration: ${elapsed}")
-
+        logger.info("Duration: $elapsed")
     }
 }
 
