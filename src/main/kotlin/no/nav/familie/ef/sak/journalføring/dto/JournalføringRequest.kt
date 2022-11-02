@@ -17,15 +17,6 @@ data class JournalføringRequest(
     val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
 )
 
-data class JournalføringKlageRequest(
-    val dokumentTitler: Map<String, String>? = null,
-    val fagsakId: UUID,
-    val oppgaveId: String,
-    val behandlingId: UUID?,
-    val journalførendeEnhet: String,
-    val mottattDato: LocalDate?
-)
-
 data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 
     fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn = BehandlingBarn(
@@ -100,12 +91,9 @@ fun JournalføringRequest.valider() {
 }
 
 fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean = this.behandling.behandlingsId != null
-fun JournalføringKlageRequest.skalJournalførePåEksisterendeBehandling(): Boolean = this.behandlingId != null
 
 data class JournalføringBehandling(
     val behandlingsId: UUID? = null,
     val behandlingstype: BehandlingType? = null,
-    @Deprecated("Bruk ustrukturertDokumentasjonType - kan slettes etter at frontend tatt i bruk ny ")
-    val årsak: UstrukturertDokumentasjonType? = null,
-    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = årsak ?: UstrukturertDokumentasjonType.IKKE_VALGT
+    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT
 )

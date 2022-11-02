@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.journalføring
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerMottakerFinnes
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
-import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.skalJournalførePåEksisterendeBehandling
 import no.nav.familie.ef.sak.klage.KlageService
 import no.nav.familie.ef.sak.oppgave.OppgaveService
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +19,6 @@ import java.util.UUID
 
 @Service
 class JournalføringKlageService(
-    private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
     private val journalpostService: JournalpostService,
@@ -44,15 +43,17 @@ class JournalføringKlageService(
         journalføringRequest: JournalføringKlageRequest,
         journalpost: Journalpost
     ) {
+        val behandlingId = journalføringRequest.behandling.behandlingId ?: error("Mangler behandlingId")
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
-        val behandling: Behandling = hentBehandling(journalføringRequest)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        validerKlagebehandlinger(fagsak, behandlingId)
+
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på eksisterende" +
-                " klageBehandling=${journalføringRequest.behandlingId} på " +
+                " klageBehandling=${behandlingId} på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
-        knyttJournalpostTilBehandling(journalpost, behandling)
+
         journalpostService.oppdaterOgFerdigstillJournalpost(
             journalpost = journalpost,
             dokumenttitler = journalføringRequest.dokumentTitler,
@@ -68,14 +69,15 @@ class JournalføringKlageService(
         journalpost: Journalpost
     ) {
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
+        val mottattDato = journalføringRequest.behandling.mottattDato
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på ny klagebehandling på " +
-                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype}"
+                "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} mottattDato=$mottattDato"
         )
 
-        val klageMottatt = journalpost.datoMottatt?.toLocalDate() ?: journalføringRequest.mottattDato
-        brukerfeilHvis(klageMottatt == null) {
+        val klageMottatt = mottattDato ?: journalpost.datoMottatt?.toLocalDate()
+        feilHvis(klageMottatt == null) {
             "Mangler dato mottatt"
         }
 
@@ -92,24 +94,22 @@ class JournalføringKlageService(
         ferdigstillJournalføringsoppgave(journalføringRequest)
     }
 
+    private fun validerKlagebehandlinger(fagsak: Fagsak, behandlingId: UUID) {
+        val klagebehandlinger = hentKlagebehandlinger(fagsak)
+        klagebehandlinger.singleOrNull { it.id == behandlingId }
+            ?: error("Klagebehandlinger for person=${fagsak.fagsakPersonId} mangler behandlingId=$behandlingId")
+    }
+
+    private fun hentKlagebehandlinger(fagsak: Fagsak): List<KlagebehandlingDto> {
+        val klagebehandlinger = klageService.hentBehandlinger(fagsak.fagsakPersonId)
+        return when (fagsak.stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> klagebehandlinger.overgangsstønad
+            StønadType.BARNETILSYN -> klagebehandlinger.barnetilsyn
+            StønadType.SKOLEPENGER -> klagebehandlinger.skolepenger
+        }
+    }
+
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringKlageRequest) {
         oppgaveService.ferdigstillOppgave(journalføringRequest.oppgaveId.toLong())
     }
-
-    private fun hentBehandling(journalføringRequest: JournalføringRequest): Behandling =
-        hentEksisterendeBehandling(journalføringRequest.behandling.behandlingsId)
-            ?: error("Finner ikke behandling med id=${journalføringRequest.behandling.behandlingsId}")
-
-    private fun hentEksisterendeBehandling(behandlingId: UUID?): Behandling? {
-        return behandlingId?.let { behandlingService.hentBehandling(it) }
-    }
-
-    private fun knyttJournalpostTilBehandling(journalpost: Journalpost, behandling: Behandling) {
-        behandlingService.leggTilBehandlingsjournalpost(
-            journalpost.journalpostId,
-            journalpost.journalposttype,
-            behandling.id
-        )
-    }
-
 }
