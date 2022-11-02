@@ -11,14 +11,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(path = ["/api/test/barnetilsyn/satsendring"])
 class SatsendringBarnetilsynTestController(val barnetilsynSatsendringService: BarnetilsynSatsendringService) {
 
-    fun opprettTasks() {
-    }
-
     @GetMapping
     fun finnKanditater() {
-        barnetilsynSatsendringService.kjørSatsendring()
-    }
-
-    fun kjørRevurdering() {
+        barnetilsynSatsendringService.logSatsendringKandidater()
     }
 }

@@ -23,7 +23,7 @@ object BeregningBarnetilsynUtil {
             //     maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460)
             // ),
             MaxbeløpBarnetilsynSats(
-                //Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
+                // Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
                 Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
                 maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
             ),
