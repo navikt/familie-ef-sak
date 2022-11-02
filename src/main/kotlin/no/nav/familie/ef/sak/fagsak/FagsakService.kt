@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
@@ -34,7 +33,6 @@ class FagsakService(
     private val pdlClient: PdlClient,
     private val featureToggleService: FeatureToggleService,
     private val infotrygdService: InfotrygdService,
-    private val behandlingshistorikkService: BehandlingshistorikkService
 ) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: StønadType): FagsakDto {
@@ -94,13 +92,9 @@ class FagsakService(
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
-        val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(fagsak.id)
         return fagsak.tilDto(
             behandlinger = behandlinger.map {
-                it.tilDto(
-                    fagsak.stønadstype,
-                    vedtaksdatoPåBehandlingId[it.id]
-                )
+                it.tilDto(fagsak.stønadstype)
             },
             erLøpende = erLøpende
         )

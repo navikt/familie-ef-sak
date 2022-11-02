@@ -28,7 +28,7 @@ data class BehandlingDto(
     val henlagtÅrsak: HenlagtÅrsak? = null
 )
 
-fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = null): BehandlingDto =
+fun Behandling.tilDto(stønadstype: StønadType): BehandlingDto =
     BehandlingDto(
         id = this.id,
         forrigeBehandlingId = this.forrigeBehandlingId,
@@ -43,8 +43,7 @@ fun Behandling.tilDto(stønadstype: StønadType, vedtaksdato: LocalDateTime? = n
         behandlingsårsak = this.årsak,
         henlagtÅrsak = this.henlagtÅrsak,
         stønadstype = stønadstype,
-        vedtaksdato = vedtaksdato
-            ?: (if (this.status == BehandlingStatus.FERDIGSTILT) this.sporbar.endret.endretTid else null)
+        vedtaksdato = this.vedtakstidspunkt
     )
 
 fun Saksbehandling.tilDto(): BehandlingDto =
