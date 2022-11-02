@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 @Service
 class BarnetilsynSatsendringService(
@@ -18,49 +21,59 @@ class BarnetilsynSatsendringService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-
-
+    @OptIn(ExperimentalTime::class)
     fun kjørSatsendring() {
-        val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
-        val barnetilsynSatsendringKanditat : List <BarnetilsynSatsendringKanditat> = fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
+        val elapsed: Duration = measureTime {
+            val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
+            val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> = fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
 
+            val skalRevurderes = barnetilsynSatsendringKanditat.map {
+                val andeler2023 = it.andelerEtter(YearMonth.of(2022, 12))
+                val utgiftsperiode = andeler2023.map {
+                    UtgiftsperiodeDto(
+                        periode = it.andel.periode,
+                        barn = it.andel.barn,
+                        utgifter = it.andel.utgifter.toInt(),
+                        erMidlertidigOpphør = false
+                    ) // TODO sjekk erMidlertidigOpphør???...
+                }
 
-        barnetilsynSatsendringKanditat.forEach{
-            val andeler2023 = it.andelerEtter(YearMonth.of(2022, 12))
+                val simulertNyBeregning =
+                    utgiftsperiode.tilBeløpsperioderPerUtgiftsmåned(
+                        andeler2023.map {
+                            PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.kontantstøtte)
+                        },
+                        andeler2023.map {
+                            PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
+                        }
+                    ).values.toList()
 
-            val utgiftsperiode = andeler2023.map {
-                UtgiftsperiodeDto( periode = it.andel.periode, barn = it.andel.barn, utgifter = it.andel.utgifter.toInt(), erMidlertidigOpphør = false)     // TODO sjekk erMidlertidigOpphør...
+                val skalRevurderes = simulertNyBeregning.any { nyMånedsberegning ->
+                    andeler2023.filter { it.andel.periode.overlapper(nyMånedsberegning.periode) }
+                        .first().andel.beløp < nyMånedsberegning.beløp
+                }
+
+                val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
+
+                it.copy(skalRevurderes = skalRevurderes)
             }
 
-            val simulertNyBeregning =
-                utgiftsperiode.tilBeløpsperioderPerUtgiftsmåned(andeler2023.map {
-                    PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.kontantstøtte)
-                }, andeler2023.map {
-                    PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
-                }).values.toList()
-
-            val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
-
-
-//TODO sammenlikne  "simulertNyBeregning" med andeler2023?
-
-
+            logger.info("Kandidater satsendring størrelse ${barnetilsynSatsendringKanditat.size}")
+            skalRevurderes.forEach {
+                logger.info("${it.fagsakId}: Skal revurderes/endres etter satsendring:  ${it.skalRevurderes}")
+            }
         }
-
-
-        logger.info("Kandidater satsendring størrelse ${barnetilsynSatsendringKanditat.size}")
+        logger.info("Duration: ${elapsed}")
 
     }
 }
 
 data class BarnetilsynSatsendringKanditat(
     val fagsakId: UUID,
-    val andelshistorikk: List<AndelHistorikkDto>
+    val andelshistorikk: List<AndelHistorikkDto>,
+    val skalRevurderes: Boolean = false
 ) {
     fun andelerEtter(yearMonth: YearMonth): List<AndelHistorikkDto> {
-
         return andelshistorikk.filter { it.andel.periode.tom.isAfter(yearMonth) }
     }
-
-
 }
