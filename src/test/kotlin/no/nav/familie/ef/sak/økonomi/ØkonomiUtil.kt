@@ -14,7 +14,6 @@ fun lagTilkjentYtelse(
     id: UUID = UUID.randomUUID(),
     behandlingId: UUID = UUID.randomUUID(),
     personident: String = "123",
-    vedtaksdato: LocalDate = LocalDate.now(),
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
     grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato
@@ -23,7 +22,6 @@ fun lagTilkjentYtelse(
         id = id,
         behandlingId = behandlingId,
         personident = personident,
-        vedtakstidspunkt = vedtaksdato.atStartOfDay().truncatedTo(ChronoUnit.MILLIS),
         type = type,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
         startdato = startdato,

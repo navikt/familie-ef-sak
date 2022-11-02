@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.fagsak
@@ -125,7 +126,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 status = BehandlingStatus.FERDIGSTILT,
                 steg = StegType.BEHANDLING_FERDIGSTILT,
                 resultat = BehandlingResultat.INNVILGET,
-                årsak = BehandlingÅrsak.SØKNAD
+                årsak = BehandlingÅrsak.SØKNAD,
+                vedtakstidspunkt = SporbarUtils.now()
             )
             val behandling2 = Behandling(
                 fagsakId = fagsakDB.id,
@@ -133,7 +135,8 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
                 status = BehandlingStatus.UTREDES,
                 steg = StegType.VILKÅR,
                 resultat = BehandlingResultat.INNVILGET,
-                årsak = BehandlingÅrsak.SØKNAD
+                årsak = BehandlingÅrsak.SØKNAD,
+                vedtakstidspunkt = SporbarUtils.now()
             )
 
             behandlingRepository.insert(behandling1)

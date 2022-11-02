@@ -52,7 +52,6 @@ internal class SimuleringControllerTest : OppslagSpringRunnerTest() {
                 TilkjentYtelse(
                     behandlingId = behandling.id,
                     personident = personIdent,
-                    vedtakstidspunkt = LocalDate.of(2020, 5, 5).atStartOfDay(),
                     type = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
                     startdato = LocalDate.of(2021, 1, 1),
                     andelerTilkjentYtelse = listOf(

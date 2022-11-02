@@ -80,7 +80,8 @@ fun behandling(
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
-    eksternId: EksternBehandlingId = EksternBehandlingId()
+    eksternId: EksternBehandlingId = EksternBehandlingId(),
+    vedtakstidspunkt: LocalDateTime? = null
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -93,7 +94,9 @@ fun behandling(
         sporbar = Sporbar(opprettetTid = opprettetTid),
         årsak = årsak,
         henlagtÅrsak = henlagtÅrsak,
-        eksternId = eksternId
+        eksternId = eksternId,
+        vedtakstidspunkt = vedtakstidspunkt
+            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null
     )
 
 fun saksbehandling(
@@ -137,6 +140,7 @@ fun saksbehandling(
         steg = behandling.steg,
         årsak = behandling.årsak,
         resultat = behandling.resultat,
+        vedtakstidspunkt = behandling.vedtakstidspunkt,
         henlagtÅrsak = behandling.henlagtÅrsak,
         ident = fagsak.hentAktivIdent(),
         fagsakId = fagsak.id,
@@ -151,7 +155,8 @@ fun saksbehandling(
 fun Behandling.innvilgetOgFerdigstilt() =
     this.copy(
         resultat = BehandlingResultat.INNVILGET,
-        status = BehandlingStatus.FERDIGSTILT
+        status = BehandlingStatus.FERDIGSTILT,
+        vedtakstidspunkt = SporbarUtils.now()
     )
 
 val defaultIdenter = setOf(PersonIdent("15"))
@@ -263,7 +268,6 @@ fun tilkjentYtelse(
     return TilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
-        vedtakstidspunkt = LocalDateTime.now(),
         startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
         grunnbeløpsdato = grunnbeløpsdato

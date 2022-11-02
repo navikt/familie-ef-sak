@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.dto.BehandlingshistorikkDto
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.JsonWrapper
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -85,7 +86,7 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         leggInnHistorikk(behandling, "7", LocalDateTime.now().plusDays(6), StegType.FERDIGSTILLE_BEHANDLING)
         leggInnHistorikk(behandling, "8", LocalDateTime.now().plusDays(7), StegType.PUBLISER_VEDTAKSHENDELSE)
         leggInnHistorikk(behandling, "9", LocalDateTime.now().plusDays(8), StegType.BEHANDLING_FERDIGSTILT)
-        behandlingRepository.update(behandling.copy(resultat = BehandlingResultat.INNVILGET))
+        behandlingRepository.update(behandling.copy(resultat = BehandlingResultat.INNVILGET, vedtakstidspunkt = SporbarUtils.now()))
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("7", "4", "3", "1")
     }
@@ -107,7 +108,12 @@ internal class BehandlingshistorikkControllerTest : OppslagSpringRunnerTest() {
         )
         leggInnHistorikk(behandling, "5", LocalDateTime.now().plusDays(6), StegType.FERDIGSTILLE_BEHANDLING)
         leggInnHistorikk(behandling, "6", LocalDateTime.now().plusDays(8), StegType.BEHANDLING_FERDIGSTILT)
-        behandlingRepository.update(behandling.copy(resultat = BehandlingResultat.HENLAGT))
+        behandlingRepository.update(
+            behandling.copy(
+                resultat = BehandlingResultat.HENLAGT,
+                vedtakstidspunkt = SporbarUtils.now()
+            )
+        )
         val respons = hentHistorikk(behandling.id)
         assertThat(respons.body?.data!!.map { it.endretAvNavn }).containsExactly("6", "4", "3", "1")
     }

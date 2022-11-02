@@ -24,6 +24,7 @@ data class Saksbehandling(
     val årsak: BehandlingÅrsak,
     val kravMottatt: LocalDate? = null,
     val resultat: BehandlingResultat,
+    val vedtakstidspunkt: LocalDateTime?,
     @Column("henlagt_arsak")
     val henlagtÅrsak: HenlagtÅrsak? = null,
     val ident: String,
