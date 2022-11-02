@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 fun lagTilkjentYtelse(
