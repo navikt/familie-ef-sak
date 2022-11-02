@@ -33,13 +33,13 @@ class JournalføringKlageService(
         validerMottakerFinnes(journalpost)
 
         return if (journalføringRequest.skalJournalførePåEksisterendeBehandling()) {
-            journalførSøknadTilEksisterendeBehandling(journalføringRequest, journalpost)
+            journalførKlageTilEksisterendeBehandling(journalføringRequest, journalpost)
         } else {
-            journalførSøknadTilNyBehandling(journalføringRequest, journalpost)
+            journalførKlageTilNyBehandling(journalføringRequest, journalpost)
         }
     }
 
-    private fun journalførSøknadTilEksisterendeBehandling(
+    private fun journalførKlageTilEksisterendeBehandling(
         journalføringRequest: JournalføringKlageRequest,
         journalpost: Journalpost
     ) {
@@ -64,7 +64,7 @@ class JournalføringKlageService(
         ferdigstillJournalføringsoppgave(journalføringRequest)
     }
 
-    private fun journalførSøknadTilNyBehandling(
+    private fun journalførKlageTilNyBehandling(
         journalføringRequest: JournalføringKlageRequest,
         journalpost: Journalpost
     ) {
