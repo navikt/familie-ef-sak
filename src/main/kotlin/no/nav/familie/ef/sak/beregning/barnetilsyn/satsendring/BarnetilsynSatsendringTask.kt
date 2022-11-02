@@ -17,7 +17,7 @@ import java.util.Properties
 class BarnetilsynSatsendringTask(val barnetilsynSatsendringService: BarnetilsynSatsendringService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        barnetilsynSatsendringService.logSatsendringKandidater()
+        barnetilsynSatsendringService.logFagsakerSomSkalSatsendresMedNySats()
     }
 
     companion object {

@@ -31,7 +31,7 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
         kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
         tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
         barn = this.barn,
-            brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
+        brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
     )
 }
 

@@ -20,23 +20,49 @@ class BarnetilsynSatsendringService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun logSatsendringKandidater() {
+    fun sjekkIngenEndringerMedNåværendeSats(): Boolean {
         val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
         val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> = fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
 
         val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKanditat.map {
             val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
-            val nyBeregningMånedsperioder = gjørNyBeregningForNesteÅr(nåværendeAndelerForNesteÅr)
+            val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser = false)
             val skalRevurderes: Boolean = finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
 
             // val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
             it.copy(skalRevurderes = skalRevurderes)
         }
 
-        logger.info("Kandidater satsendring størrelse ${barnetilsynSatsendringKanditat.size}")
+        logger.info("Antall kandidater til sjekk på satsendring med nåværende satser: ${barnetilsynSatsendringKanditat.size}")
 
-        kandidaterMedSkalRevurderesSatt.forEach {
-            logger.info("${it.fagsakId}: Skal revurderes/endres etter satsendring:  ${it.skalRevurderes}")
+        kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }.forEach {
+            logger.warn("Skulle ikke ha fått differanse i andeler ved reberegning av barnetilsyn-saker med nåværende satser." +
+                                " FagsakId: ${it.fagsakId}")
+        }
+
+        return kandidaterMedSkalRevurderesSatt.any { it.skalRevurderes }
+    }
+
+    fun logFagsakerSomSkalSatsendresMedNySats() {
+        if (sjekkIngenEndringerMedNåværendeSats()) {
+            return
+        }
+        val fagsakIds = barnetilsynSatsendringRepository.finnSatsendringskandidaterForBarnetilsyn()
+        val barnetilsynSatsendringKanditat: List<BarnetilsynSatsendringKanditat> = fagsakIds.map { BarnetilsynSatsendringKanditat(it, vedtakHistorikkService.hentAktivHistorikk(it)) }
+
+        val kandidaterMedSkalRevurderesSatt = barnetilsynSatsendringKanditat.map {
+            val nåværendeAndelerForNesteÅr = it.andelerEtter(YearMonth.of(YearMonth.now().year, 12))
+            val nyBeregningMånedsperioder = gjørNyBeregning(nåværendeAndelerForNesteÅr, brukIkkeVedtatteSatser = true)
+            val skalRevurderes: Boolean = finnesStørreBeløpINyBeregning(nyBeregningMånedsperioder, nåværendeAndelerForNesteÅr)
+
+            // val sammenhengendePerioder = simulertNyBeregning.mergeSammenhengendePerioder()
+            it.copy(skalRevurderes = skalRevurderes)
+        }
+
+        logger.info("Antall kandidater til satsendring: ${barnetilsynSatsendringKanditat.size}")
+
+        kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }.forEach {
+            logger.info("${it.fagsakId}: skal revurderes/endres etter satsendring")
         }
     }
 
@@ -47,7 +73,7 @@ class BarnetilsynSatsendringService(
         nåværendeAndelerForNesteÅr.any { it.andel.periode.overlapper(nyMånedsberegning.periode) && it.andel.beløp < nyMånedsberegning.beløp }
     }
 
-    private fun gjørNyBeregningForNesteÅr(andelerNesteÅr: List<AndelHistorikkDto>): List<BeløpsperiodeBarnetilsynDto> {
+    private fun gjørNyBeregning(andelerNesteÅr: List<AndelHistorikkDto>, brukIkkeVedtatteSatser: Boolean = false): List<BeløpsperiodeBarnetilsynDto> {
         val utgiftsperiode = mapAndelerForNesteÅrTilUtgiftsperiodeDto(andelerNesteÅr)
 
         val simulertNyBeregning =
@@ -58,7 +84,7 @@ class BarnetilsynSatsendringService(
                 andelerNesteÅr.map {
                     PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
                 },
-                brukIkkeVedtatteSatser = true
+                brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
             ).values.toList()
         return simulertNyBeregning
     }
