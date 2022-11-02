@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 import java.util.UUID
 
@@ -36,8 +37,10 @@ class BarnetilsynSatsendringService(
         logger.info("Antall kandidater til sjekk på satsendring med nåværende satser: ${barnetilsynSatsendringKanditat.size}")
 
         kandidaterMedSkalRevurderesSatt.filter { it.skalRevurderes }.forEach {
-            logger.warn("Skulle ikke ha fått differanse i andeler ved reberegning av barnetilsyn-saker med nåværende satser." +
-                                " FagsakId: ${it.fagsakId}")
+            logger.warn(
+                "Skulle ikke ha fått differanse i andeler ved reberegning av barnetilsyn-saker med nåværende satser." +
+                    " FagsakId: ${it.fagsakId}"
+            )
         }
 
         return kandidaterMedSkalRevurderesSatt.any { it.skalRevurderes }
@@ -101,6 +104,7 @@ class BarnetilsynSatsendringService(
         return utgiftsperiode
     }
 
+    @Transactional
     fun opprettTask() {
         val finnesTask = taskRepository.findByPayloadAndType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
         if (finnesTask == null) {
