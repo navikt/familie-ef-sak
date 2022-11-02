@@ -49,8 +49,8 @@ class JournalføringKlageService(
         validerKlagebehandlinger(fagsak, behandlingId)
 
         logger.info(
-            "Journalfører journalpost=${journalpost.journalpostId} på eksisterende" +
-                " klageBehandling=${behandlingId} på " +
+            "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
+                "klageBehandling=${behandlingId} på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
 
