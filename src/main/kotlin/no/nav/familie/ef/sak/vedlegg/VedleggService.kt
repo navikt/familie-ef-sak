@@ -80,7 +80,8 @@ class VedleggService(
             dato = mestRelevanteDato(journalpost),
             journalstatus = journalpost.journalstatus,
             journalposttype = journalpost.journalposttype,
-            logiskeVedlegg = dokumentInfo.logiskeVedlegg?.map { LogiskVedleggDto(tittel = it.tittel) } ?: emptyList()
+            logiskeVedlegg = dokumentInfo.logiskeVedlegg?.map { LogiskVedleggDto(tittel = it.tittel) } ?: emptyList(),
+            avsenderMottaker = journalpost.avsenderMottaker
         )
     }
 }
