@@ -57,7 +57,8 @@ class BarnetilsynSatsendringService(
                 },
                 andelerNesteÅr.map {
                     PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
-                }
+                },
+                brukIkkeVedtatteSatser = true
             ).values.toList()
         return simulertNyBeregning
     }
