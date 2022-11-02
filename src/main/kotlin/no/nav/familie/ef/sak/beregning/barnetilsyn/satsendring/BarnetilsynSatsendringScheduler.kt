@@ -12,6 +12,7 @@ class BarnetilsynSatsendringScheduler(val barnetilsynSatsendringService: Barneti
 
     @Scheduled(initialDelay = 60 * 1000L, fixedDelay = 365 * 24 * 60 * 60 * 1000L) // TODO Slettes
     fun opprettTask() {
+        logger.info("Oppretter satsendring-task")
         Thread.sleep(Random.nextLong(5_000)) // YOLO unngå feil med att 2 noder
         barnetilsynSatsendringService.opprettTask()
     }

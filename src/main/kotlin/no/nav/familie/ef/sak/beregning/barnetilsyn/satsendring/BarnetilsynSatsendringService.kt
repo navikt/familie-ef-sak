@@ -76,7 +76,10 @@ class BarnetilsynSatsendringService(
 
     fun opprettTask() {
         val finnesTask = taskRepository.findByPayloadAndType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
-        if (finnesTask == null) BarnetilsynSatsendringTask.opprettTask()
+        if (finnesTask == null) {
+            val task = BarnetilsynSatsendringTask.opprettTask()
+            taskRepository.save(task)
+        }
     }
 }
 
