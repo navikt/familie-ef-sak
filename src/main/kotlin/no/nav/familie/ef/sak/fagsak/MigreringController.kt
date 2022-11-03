@@ -34,10 +34,15 @@ class MigreringController(
     @PostMapping("{fagsakPersonId}")
     fun migrerOvergangsstønad(
         @PathVariable fagsakPersonId: UUID,
-        @RequestBody request: MigrerOvergangsstønadDto
+        @RequestBody request: MigrerOvergangsstønadDto?
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
-        return Ressurs.success(migreringService.migrerOvergangsstønad(fagsakPersonId, request))
+        return Ressurs.success(
+            migreringService.migrerOvergangsstønad(
+                fagsakPersonId,
+                request ?: MigrerOvergangsstønadDto()
+            )
+        )
     }
 
     @PostMapping("{fagsakPersonId}/barnetilsyn")
