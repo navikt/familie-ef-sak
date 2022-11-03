@@ -60,7 +60,7 @@ class BehandlingsstatistikkTask(
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
-        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling.stønadstype)
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
@@ -110,17 +110,17 @@ class BehandlingsstatistikkTask(
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, stønadType: StønadType): String? {
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, saksbehandling: Saksbehandling): String? {
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
-                        stønadType,
+                        saksbehandling.stønadstype,
                         vedtak
                     )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
-                    ResultatType.HENLEGGE -> error("Ikke implementert")
+                    ResultatType.HENLEGGE -> saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
                     null -> error("Mangler vedtak")
                 }

@@ -209,6 +209,9 @@ class BehandlingService(
             utfall = StegUtfall.HENLAGT,
             metadata = henlagt
         )
+        if (!behandling.erMigrering()) {
+            taskService.save(BehandlingsstatistikkTask.opprettFerdigTask(behandlingId = behandling.id))
+        }
         return behandlingRepository.update(henlagtBehandling)
     }
 
