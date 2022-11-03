@@ -137,10 +137,10 @@ class BehandlingsstatistikkTask(
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER ->
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
                 gjeldendeSaksbehandler
                     ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
+            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
                 vedtak?.saksbehandlerIdent
                     ?: error("Mangler saksbehandler på vedtaket")
         }
@@ -203,6 +203,14 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.FERDIG,
                 hendelseTidspunkt = LocalDateTime.now()
+            )
+
+        fun opprettHenlagtTask(behandlingId: UUID, hendelseTidspunkt: LocalDateTime, gjeldendeSaksbehandler: String): Task =
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.FERDIG,
+                hendelseTidspunkt = hendelseTidspunkt,
+                gjeldendeSaksbehandler = gjeldendeSaksbehandler
             )
 
         private fun opprettTask(
