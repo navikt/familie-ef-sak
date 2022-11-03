@@ -218,7 +218,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                 dokumenter =
                 listOf(
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123451",
                         tittel = "Søknad om overgangsstønad - dokument 1",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
@@ -228,21 +228,21 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         )
                     ),
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123452",
                         tittel = "Søknad om barnetilsyn - dokument 1",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
                         listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
                     ),
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123453",
                         tittel = "Samboeravtale",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
                         listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
                     ),
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123454",
                         tittel = "Manuelt skannet dokument",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
@@ -259,21 +259,21 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                         )
                     ),
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123455",
                         tittel = "EtFrykteligLangtDokumentNavnSomTroligIkkeBrekkerOgØdeleggerGUI",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
                         listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
                     ),
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123456",
                         tittel = "Søknad om overgangsstønad - dokument 2",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
                         listOf(Dokumentvariant(variantformat = Dokumentvariantformat.ARKIV))
                     ),
                     DokumentInfo(
-                        dokumentInfoId = "12345",
+                        dokumentInfoId = "123457",
                         tittel = "Søknad om overgangsstønad - dokument 3",
                         brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                         dokumentvarianter =
@@ -298,7 +298,7 @@ class FamilieIntegrasjonerMock(integrasjonerConfig: IntegrasjonerConfig) {
                     dokumenter =
                     listOf(
                         DokumentInfo(
-                            dokumentInfoId = "12345",
+                            dokumentInfoId = "12341",
                             tittel = "Søknad om overgangsstønad - dokument 1",
                             brevkode = DokumentBrevkode.OVERGANGSSTØNAD.verdi,
                             dokumentvarianter =
