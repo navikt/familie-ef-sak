@@ -214,15 +214,13 @@ class BehandlingService(
     }
 
     private fun opprettStatistikkTask(behandling: Behandling) {
-        if (!behandling.erMigrering()) {
-            taskService.save(
-                BehandlingsstatistikkTask.opprettHenlagtTask(
-                    behandlingId = behandling.id,
-                    hendelseTidspunkt = behandling.sporbar.endret.endretTid,
-                    gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
-                )
+        taskService.save(
+            BehandlingsstatistikkTask.opprettHenlagtTask(
+                behandlingId = behandling.id,
+                hendelseTidspunkt = LocalDateTime.now(),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
             )
-        }
+        )
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
