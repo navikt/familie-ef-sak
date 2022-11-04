@@ -31,7 +31,7 @@ class EksternVedtakService(
         behandlingstype = behandling.type.visningsnavn,
         resultat = behandling.resultat.displayName,
         vedtakstidspunkt = if (behandling.status == BehandlingStatus.FERDIGSTILT) {
-            behandling.sporbar.endret.endretTid
+            behandling.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}")
         } else {
             throw Feil(
                 "Kan ikke utlede vedtaksdato for behandling=${behandling.id} status=${behandling.status}"
