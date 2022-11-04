@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -111,6 +112,9 @@ class BehandlingsstatistikkTask(
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
     private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, saksbehandling: Saksbehandling): String? {
+        if (saksbehandling.resultat == BehandlingResultat.HENLAGT) {
+            return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
+        }
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
@@ -120,9 +124,7 @@ class BehandlingsstatistikkTask(
                         vedtak
                     )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
-                    ResultatType.HENLEGGE ->
-                        saksbehandling.henlagtÅrsak?.name
-                            ?: error("Mangler henlagtårsak for henlagt behandling")
+                    ResultatType.HENLEGGE -> error("ResultatType henlegge er ikke i bruk for vedtak")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
                     null -> error("Mangler vedtak")
                 }
