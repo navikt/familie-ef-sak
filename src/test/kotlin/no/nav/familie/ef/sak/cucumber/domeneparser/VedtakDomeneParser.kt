@@ -256,9 +256,9 @@ object VedtakDomeneParser {
         perioder.firstOrNull()?.let {
             listOf(
                 Inntektsperiode(
-                    Månedsperiode(it.datoFra, LocalDate.MAX),
-                    BigDecimal.ZERO,
-                    BigDecimal.ZERO
+                    periode = Månedsperiode(it.datoFra, LocalDate.MAX),
+                    inntekt = BigDecimal.ZERO,
+                    samordningsfradrag = BigDecimal.ZERO
                 )
             )
         } ?: emptyList()
@@ -270,9 +270,9 @@ object VedtakDomeneParser {
                 acc.removeLastOrNull()?.copy(sluttDato = datoFra.minusDays(1))?.let { acc.add(it) }
                 acc.add(
                     Inntektsperiode(
-                        Månedsperiode(datoFra, LocalDate.MAX),
-                        BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
-                        BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)
+                        periode = Månedsperiode(datoFra, LocalDate.MAX),
+                        inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
+                        samordningsfradrag = BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)
                     )
                 )
                 acc

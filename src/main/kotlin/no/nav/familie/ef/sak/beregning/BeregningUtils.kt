@@ -11,8 +11,8 @@ object BeregningUtils {
     private val REDUKSJONSFAKTOR = BigDecimal(0.45)
 
     fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
-        val (_, _, inntekt, samordningsfradrag) = inntektsperiode
-        return finnGrunnbeløpsPerioder(inntektsperiode.periode).map {
+        val (_, _, periode, inntekt, samordningsfradrag) = inntektsperiode
+        return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, inntekt).divide(BigDecimal(12))
                 .setScale(0, RoundingMode.HALF_DOWN)
 
@@ -69,7 +69,7 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp
     ): List<Inntektsperiode> {
-        val (_, _, inntekt, samordningsfradrag) = inntektsperiode
+        val (_, _, periode, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
@@ -78,12 +78,12 @@ object BeregningUtils {
                 val justerInntekt = inntekt.multiply(faktor).setScale(0, RoundingMode.FLOOR).toLong()
                 val justerInntektAvrundetNedTilNærmeste100 = (justerInntekt / 100L) * 100L
                 Inntektsperiode(
-                    grunnbeløp.periode,
-                    BigDecimal(justerInntektAvrundetNedTilNærmeste100),
-                    samordningsfradrag
+                    periode = grunnbeløp.periode,
+                    inntekt = BigDecimal(justerInntektAvrundetNedTilNærmeste100),
+                    samordningsfradrag = samordningsfradrag
                 )
             } else {
-                Inntektsperiode(grunnbeløp.periode, inntekt, samordningsfradrag)
+                Inntektsperiode(periode = grunnbeløp.periode, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
             }
         }
     }
