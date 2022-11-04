@@ -168,7 +168,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2022, 5, 1),
+                YearMonth.of(2022, 5),
                 inntektsperioder
             )
 
@@ -198,7 +198,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                nyesteGrunnbeløp.periode.fomDato,
+                nyesteGrunnbeløp.periode.fom,
                 inntektsperioder
             )
 
@@ -228,7 +228,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2020, 5, 1),
+                YearMonth.of(2020, 5),
                 inntektsperioder
             )
 
@@ -261,7 +261,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2020, 5, 1),
+                YearMonth.of(2020, 5),
                 inntektsperioder
             )
 
@@ -299,7 +299,7 @@ internal class BeregningUtilsTest {
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2019, 5, 1),
+                YearMonth.of(2019, 5),
                 inntektsperioder
             )
 

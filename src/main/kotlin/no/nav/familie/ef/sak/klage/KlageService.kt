@@ -92,7 +92,9 @@ class KlageService(
         val erOversendtTilKlageinstans = klagebehandling.resultat == BehandlingResultat.IKKE_MEDHOLD
         val vedtaksdato = if (erOversendtTilKlageinstans) {
             klagebehandling.klageinstansResultat.singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET }?.mottattEllerAvsluttetTidspunkt
-        } else klagebehandling.vedtaksdato
+        } else {
+            klagebehandling.vedtaksdato
+        }
         return klagebehandling.copy(vedtaksdato = vedtaksdato)
     }
 

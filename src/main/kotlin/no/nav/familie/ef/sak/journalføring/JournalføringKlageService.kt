@@ -50,7 +50,7 @@ class JournalføringKlageService(
 
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på eksisterende " +
-                "klageBehandling=${behandlingId} på " +
+                "klageBehandling=$behandlingId på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
 

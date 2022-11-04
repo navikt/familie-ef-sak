@@ -32,7 +32,7 @@ class FagsakService(
     private val behandlingService: BehandlingService,
     private val pdlClient: PdlClient,
     private val featureToggleService: FeatureToggleService,
-    private val infotrygdService: InfotrygdService,
+    private val infotrygdService: InfotrygdService
 ) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: StønadType): FagsakDto {
