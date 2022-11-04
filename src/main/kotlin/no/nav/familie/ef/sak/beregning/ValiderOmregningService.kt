@@ -117,5 +117,5 @@ class ValiderOmregningService(
 
     private fun feilmeldingForFeilGBeløp(andel: AndelTilkjentYtelse) =
         "Kan ikke fullføre behandling: Det må revurderes fra " +
-            "${maxOf(andel.periode.fomDato, nyesteGrunnbeløpGyldigFraOgMed.atDay(1))} for at beregning av ny G blir riktig"
+            "${maxOf(andel.periode.fom, nyesteGrunnbeløpGyldigFraOgMed)} for at beregning av ny G blir riktig"
 }
