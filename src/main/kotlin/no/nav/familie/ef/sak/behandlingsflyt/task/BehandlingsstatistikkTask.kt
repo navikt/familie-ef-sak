@@ -120,7 +120,9 @@ class BehandlingsstatistikkTask(
                         vedtak
                     )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
-                    ResultatType.HENLEGGE -> saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
+                    ResultatType.HENLEGGE ->
+                        saksbehandling.henlagtÅrsak?.name
+                            ?: error("Mangler henlagtårsak for henlagt behandling")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
                     null -> error("Mangler vedtak")
                 }
@@ -138,11 +140,9 @@ class BehandlingsstatistikkTask(
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
             Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
-                gjeldendeSaksbehandler
-                    ?: error("Mangler saksbehandler for hendelse")
+                gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
             Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
-                vedtak?.saksbehandlerIdent
-                    ?: error("Mangler saksbehandler på vedtaket")
+                vedtak?.saksbehandlerIdent ?: gjeldendeSaksbehandler ?: error("Mangler saksbehandler på vedtaket")
         }
     }
 
