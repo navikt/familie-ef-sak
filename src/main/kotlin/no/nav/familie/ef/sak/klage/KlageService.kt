@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -55,11 +56,17 @@ class KlageService(
     }
 
     fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
-        brukerfeilHvis(opprettKlageDto.mottattDato.isAfter(LocalDate.now())) {
+        val klageMottatt = opprettKlageDto.mottattDato
+        brukerfeilHvis(klageMottatt.isAfter(LocalDate.now())) {
             "Kan ikke opprette klage med krav mottatt frem i tid for behandling med id=$behandlingId"
         }
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        val aktivIdent = fagsakService.hentAktivIdent(behandling.fagsakId)
+        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
+        opprettKlage(fagsak, klageMottatt)
+    }
+
+    fun opprettKlage(fagsak: Fagsak, klageMottatt: LocalDate) {
+        val aktivIdent = fagsak.hentAktivIdent()
         val enhetId = arbeidsfordelingService.hentNavEnhet(aktivIdent)?.enhetId
         brukerfeilHvis(enhetId == null) {
             "Finner ikke behandlende enhet for personen"
@@ -67,10 +74,10 @@ class KlageService(
         klageClient.opprettKlage(
             OpprettKlagebehandlingRequest(
                 ident = aktivIdent,
-                stønadstype = Stønadstype.fraEfStønadstype(behandling.stønadstype),
-                eksternFagsakId = behandling.eksternFagsakId.toString(),
+                stønadstype = Stønadstype.fraEfStønadstype(fagsak.stønadstype),
+                eksternFagsakId = fagsak.eksternId.id.toString(),
                 fagsystem = Fagsystem.EF,
-                klageMottatt = opprettKlageDto.mottattDato,
+                klageMottatt = klageMottatt,
                 behandlendeEnhet = enhetId
             )
         )

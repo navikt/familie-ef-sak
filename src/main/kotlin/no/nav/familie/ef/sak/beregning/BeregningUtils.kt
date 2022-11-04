@@ -4,7 +4,7 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
-import java.time.LocalDate
+import java.time.YearMonth
 
 object BeregningUtils {
 
@@ -54,7 +54,7 @@ object BeregningUtils {
     }
 
     fun indeksjusterInntekt(
-        sisteBrukteGrunnbeløpsdato: LocalDate,
+        sisteBrukteGrunnbeløpsdato: YearMonth,
         inntekter: List<Inntektsperiode> = emptyList()
     ): List<Inntektsperiode> {
         val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)

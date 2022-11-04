@@ -245,7 +245,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
             ObjectMapperProvider.objectMapper.readValue(readFile("expectedIverksettDto.json"))
 
         val andelerTilkjentYtelse = expectedIverksettDto.vedtak.tilkjentYtelse?.andelerTilkjentYtelse?.map {
-            if (it.periode.fomDato >= nyesteGrunnbeløpGyldigFraOgMed) {
+            if (it.periode.fomDato >= nyesteGrunnbeløpGyldigFraOgMed.atDay(1)) {
                 it.copy(kildeBehandlingId = forrigeBehandling.id)
             } else {
                 it.copy(kildeBehandlingId = behandling.id)

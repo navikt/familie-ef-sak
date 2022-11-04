@@ -277,7 +277,7 @@ class BeregnYtelseSteg(
                 andelerTilkjentYtelse = nyeAndeler,
                 samordningsfradragType = null,
                 startdato = nyStartdato,
-                grunnbeløpsdato = forrigeTilkjenteYtelse.grunnbeløpsdato
+                grunnbeløpsmåned = forrigeTilkjenteYtelse.grunnbeløpsmåned
             )
         )
     }
