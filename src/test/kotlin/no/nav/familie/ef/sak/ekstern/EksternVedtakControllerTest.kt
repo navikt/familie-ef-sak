@@ -74,6 +74,45 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
             )
     }
 
+    @Test
+    fun `hentVedtak skal ikke ta med henlagte behandlinger`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("123"))))
+        val førstegangsbehandling = behandling(
+            fagsak = fagsak,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            status = BehandlingStatus.FERDIGSTILT,
+            eksternId = EksternBehandlingId(1),
+            resultat = BehandlingResultat.INNVILGET
+        )
+        val revurdering =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                eksternId = EksternBehandlingId(2),
+                resultat = BehandlingResultat.AVSLÅTT
+            )
+        val revurderingIkkeFerdigstilt =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                eksternId = EksternBehandlingId(3),
+                resultat = BehandlingResultat.HENLAGT
+            )
+
+        behandlingRepository.insertAll(listOf(førstegangsbehandling, revurdering, revurderingIkkeFerdigstilt))
+
+        val vedtakResponse = hentVedtak(fagsak.eksternId.id).body
+
+        Assertions.assertThat(vedtakResponse.data!!.size).isEqualTo(2)
+        Assertions.assertThat(vedtakResponse.data!!.map { fagsystemVedtak -> fagsystemVedtak.eksternBehandlingId })
+            .containsExactlyInAnyOrder(
+                førstegangsbehandling.eksternId.id.toString(),
+                revurdering.eksternId.id.toString()
+            )
+    }
+
     private fun hentVedtak(eksternFagsakId: Long): ResponseEntity<Ressurs<List<FagsystemVedtak>>> {
         return restTemplate.exchange(
             localhost("/api/ekstern/vedtak/$eksternFagsakId"),
