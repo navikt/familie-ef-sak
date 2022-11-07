@@ -415,7 +415,7 @@
       }
     ],
     "fomDatoNestePeriode": null,
-    "etterbetaling": 0,
+    "etterbetaling": 10,
     "feilutbetaling": 0,
     "fom": "2021-02-01",
     "tomDatoNestePeriode": null,

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
@@ -42,14 +43,16 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
             fagsak = fagsak,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,
-            eksternId = EksternBehandlingId(1)
+            eksternId = EksternBehandlingId(1),
+            resultat = BehandlingResultat.INNVILGET
         )
         val revurdering =
             behandling(
                 fagsak = fagsak,
                 type = BehandlingType.REVURDERING,
                 status = BehandlingStatus.FERDIGSTILT,
-                eksternId = EksternBehandlingId(2)
+                eksternId = EksternBehandlingId(2),
+                resultat = BehandlingResultat.AVSLÅTT
             )
         val revurderingIkkeFerdigstilt =
             behandling(
