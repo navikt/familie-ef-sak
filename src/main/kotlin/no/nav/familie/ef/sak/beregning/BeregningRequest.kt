@@ -14,7 +14,11 @@ data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal
 data class Inntektsperiode(
     @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val startDato: LocalDate? = null,
     @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val sluttDato: LocalDate? = null,
-    val periode: Månedsperiode,
+    val periode: Månedsperiode =
+        Månedsperiode(
+            startDato ?: error("periode eller startDato må ha verdi"),
+            sluttDato ?: error("periode eller sluttDato må ha verdi")
+        ),
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
 )
