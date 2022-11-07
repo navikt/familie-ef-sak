@@ -209,7 +209,18 @@ class BehandlingService(
             utfall = StegUtfall.HENLAGT,
             metadata = henlagt
         )
+        opprettStatistikkTask(henlagtBehandling)
         return behandlingRepository.update(henlagtBehandling)
+    }
+
+    private fun opprettStatistikkTask(behandling: Behandling) {
+        taskService.save(
+            BehandlingsstatistikkTask.opprettHenlagtTask(
+                behandlingId = behandling.id,
+                hendelseTidspunkt = LocalDateTime.now(),
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+            )
+        )
     }
 
     private fun validerAtBehandlingenKanHenlegges(behandling: Behandling) {
