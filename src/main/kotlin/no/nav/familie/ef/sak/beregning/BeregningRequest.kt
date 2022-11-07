@@ -12,6 +12,8 @@ data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(
+    @Deprecated("Bruk periode", ReplaceWith("periode.fom")) val startDato: LocalDate? = null,
+    @Deprecated("Bruk periode", ReplaceWith("periode.tom")) val sluttDato: LocalDate? = null,
     val periode: Månedsperiode,
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
