@@ -1,11 +1,13 @@
 package no.nav.familie.ef.sak.arbeidsforhold.ekstern
 
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.http.AbstractRestWebClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.arbeidsforhold.Arbeidsforhold
-import no.nav.familie.webflux.client.AbstractWebClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestOperations
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -14,8 +16,10 @@ import java.time.LocalDate
 @Component
 class ArbeidsforholdClient(
     @Value("\${FAMILIE_INTEGRASJONER_URL}") private val uri: URI,
-    @Qualifier("azureWebClient") webClient: WebClient
-) : AbstractWebClient(webClient, "arbeidsforhold") {
+    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("azureWebClient") webClient: WebClient,
+    featureToggleService: FeatureToggleService
+) : AbstractRestWebClient(restOperations, webClient, "arbeidsforhold", featureToggleService) {
 
     private fun lagArbeidsforholdUri() =
         UriComponentsBuilder.fromUri(uri).pathSegment("api/aareg/arbeidsforhold").build().toUri()

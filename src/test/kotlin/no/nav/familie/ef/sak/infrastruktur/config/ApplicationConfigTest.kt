@@ -24,7 +24,7 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.LocalDate
 
 @Disabled
-internal class ApplicationConfigTest: OppslagSpringRunnerTest() {
+internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var restTemplateBuilder: RestTemplateBuilder

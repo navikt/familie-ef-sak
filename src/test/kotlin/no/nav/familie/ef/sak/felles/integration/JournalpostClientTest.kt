@@ -10,6 +10,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.web.client.RestOperations
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.net.URI
@@ -32,6 +35,7 @@ internal class JournalpostClientTest {
 
     companion object {
 
+        private val restOperations: RestOperations = RestTemplateBuilder().build()
         private val webClient: WebClient = WebClient.create()
         lateinit var journalpostClient: JournalpostClient
         lateinit var wiremockServerItem: WireMockServer
@@ -43,7 +47,8 @@ internal class JournalpostClientTest {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
             integrasjonerConfig = IntegrasjonerConfig(URI.create(wiremockServerItem.baseUrl()))
-            journalpostClient = JournalpostClient(webClient, integrasjonerConfig)
+            journalpostClient =
+                JournalpostClient(restOperations, webClient, integrasjonerConfig, mockFeatureToggleService())
         }
 
         @AfterAll
