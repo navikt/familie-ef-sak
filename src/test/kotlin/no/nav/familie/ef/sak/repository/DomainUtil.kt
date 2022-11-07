@@ -298,7 +298,7 @@ fun inntektsperiode(
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)
 ) =
-    Inntektsperiode(Månedsperiode(startDato, sluttDato), inntekt, samordningsfradrag)
+    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
