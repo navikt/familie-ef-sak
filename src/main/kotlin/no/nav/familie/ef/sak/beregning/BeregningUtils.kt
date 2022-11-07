@@ -11,7 +11,7 @@ object BeregningUtils {
     private val REDUKSJONSFAKTOR = BigDecimal(0.45)
 
     fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
-        val (periode, inntekt, samordningsfradrag) = inntektsperiode
+        val (_, _, periode, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, inntekt).divide(BigDecimal(12))
                 .setScale(0, RoundingMode.HALF_DOWN)
@@ -69,7 +69,7 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp
     ): List<Inntektsperiode> {
-        val (_, inntekt, samordningsfradrag) = inntektsperiode
+        val (_, _, _, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
