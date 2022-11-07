@@ -247,21 +247,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `migrering feiler når man har etterbetaling`() {
-        mockSimulering(iverksettClient, etterbetaling = 1)
-        assertThatThrownBy { opprettOgIverksettMigrering() }
-            .hasMessageContaining("Etterbetaling er 1")
-    }
-
-    @Test
-    internal fun `migrering feiler når man har feilutbetaling`() {
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        mockSimulering(iverksettClient, feilutbetaling = 2)
-        assertThatThrownBy { opprettOgIverksettMigrering() }
-            .hasMessageContaining("Feilutbetaling er 2")
-    }
-
-    @Test
     internal fun `hentMigreringInfo - historisk periode`() {
         val startdato = YearMonth.now().minusYears(1).atDay(1)
         val sluttMåned = opphørsmåned.minusMonths(2)
@@ -695,6 +680,32 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
+    inner class Simuleringssituasjoner {
+
+        @Test
+        internal fun `migrering feiler når man har etterbetaling`() {
+            mockSimulering(iverksettClient, etterbetaling = 1)
+            assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Etterbetaling er 1")
+        }
+
+        @Test
+        internal fun `migrering feiler når man har feilutbetaling`() {
+            @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+            mockSimulering(iverksettClient, feilutbetaling = 2)
+            assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Feilutbetaling er 2")
+        }
+
+        @Test
+        internal fun `skal ignorere etterbetaling hvis ignorerFeilISimulering=true`() {
+            mockSimulering(iverksettClient, etterbetaling = 1)
+            opprettOgIverksettMigrering(ignorerFeilISimulering = true)
+        }
+
+    }
+
+    @Nested
     inner class AutomatiskMigrering {
 
         @Test
@@ -810,7 +821,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         migrerFraDato: YearMonth = this.migrerFraDato,
         migrerTilDato: YearMonth = til,
         erReellArbeidssøker: Boolean = false,
-        mockPerioder: () -> Unit = { mockPerioder(opphørsdato) }
+        mockPerioder: () -> Unit = { mockPerioder(opphørsdato) },
+        ignorerFeilISimulering: Boolean = false
     ): Behandling {
         mockPerioder()
 
@@ -821,7 +833,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                 Månedsperiode(migrerFraDato, migrerTilDato),
                 inntektsgrunnlag.toInt(),
                 samordningsfradrag.toInt(),
-                erReellArbeidssøker = erReellArbeidssøker
+                erReellArbeidssøker = erReellArbeidssøker,
+                ignorerFeilISimulering = ignorerFeilISimulering
             )
         }
 

@@ -37,12 +37,20 @@ import kotlin.test.assertFailsWith
 internal class JournalpostControllerTest {
 
     private val journalføringService = mockk<JournalføringService>()
+    private val journalføringKlageService = mockk<JournalføringKlageService>()
     private val journalpostService = mockk<JournalpostService>()
     private val pdlClient = mockk<PdlClient>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val journalpostController =
-        JournalpostController(journalføringService, journalpostService, pdlClient, tilgangService, featureToggleService)
+        JournalpostController(
+            journalføringService,
+            journalføringKlageService,
+            journalpostService,
+            pdlClient,
+            tilgangService,
+            featureToggleService
+        )
 
     @BeforeEach
     internal fun setUp() {

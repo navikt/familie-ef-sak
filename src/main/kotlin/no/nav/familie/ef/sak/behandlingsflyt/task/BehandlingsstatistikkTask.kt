@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -60,7 +61,7 @@ class BehandlingsstatistikkTask(
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
-        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling.stønadstype)
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
@@ -110,17 +111,20 @@ class BehandlingsstatistikkTask(
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, stønadType: StønadType): String? {
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, saksbehandling: Saksbehandling): String? {
+        if (saksbehandling.resultat == BehandlingResultat.HENLAGT) {
+            return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
+        }
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
-                        stønadType,
+                        saksbehandling.stønadstype,
                         vedtak
                     )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
-                    ResultatType.HENLEGGE -> error("Ikke implementert")
+                    ResultatType.HENLEGGE -> error("ResultatType henlegge er ikke i bruk for vedtak")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
                     null -> error("Mangler vedtak")
                 }
@@ -137,12 +141,10 @@ class BehandlingsstatistikkTask(
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER ->
-                gjeldendeSaksbehandler
-                    ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
-                vedtak?.saksbehandlerIdent
-                    ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
+                gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
+            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
+                vedtak?.saksbehandlerIdent ?: gjeldendeSaksbehandler ?: error("Mangler saksbehandler på vedtaket")
         }
     }
 
@@ -203,6 +205,14 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.FERDIG,
                 hendelseTidspunkt = LocalDateTime.now()
+            )
+
+        fun opprettHenlagtTask(behandlingId: UUID, hendelseTidspunkt: LocalDateTime, gjeldendeSaksbehandler: String): Task =
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.FERDIG,
+                hendelseTidspunkt = hendelseTidspunkt,
+                gjeldendeSaksbehandler = gjeldendeSaksbehandler
             )
 
         private fun opprettTask(

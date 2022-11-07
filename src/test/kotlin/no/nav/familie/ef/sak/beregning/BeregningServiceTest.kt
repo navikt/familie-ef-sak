@@ -49,12 +49,12 @@ internal class BeregningServiceTest {
         val fullYtelse = beregningService.beregnYtelse(
             inntektsperioder = listOf(
                 Inntektsperiode(
-                    Månedsperiode(
+                    periode = Månedsperiode(
                         LocalDate.parse("2019-04-30"),
                         LocalDate.parse("2022-04-30")
                     ),
-                    BigDecimal(0),
-                    BigDecimal(0)
+                    inntekt = BigDecimal(0),
+                    samordningsfradrag = BigDecimal(0)
                 )
             ),
             vedtaksperioder = listOf(

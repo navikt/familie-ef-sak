@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.fagsak.domain.Fagsaker
+import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
@@ -71,9 +72,10 @@ internal class KlageServiceTest {
     private val eksternFagsakId = 11L
     private val eksternBehandlingId = 22L
     private val personIdent = "100"
-    private val fagsakPerson = fagsakPerson()
+    private val fagsakPerson = fagsakPerson(setOf(PersonIdent(personIdent)))
+    val fagsak = fagsak(eksternId = EksternFagsakId(eksternFagsakId), person = fagsakPerson)
     private val saksbehandling = saksbehandling(
-        fagsak(eksternId = EksternFagsakId(eksternFagsakId), person = fagsakPerson),
+        fagsak,
         behandling(eksternId = EksternBehandlingId(eksternBehandlingId))
     )
 
@@ -83,6 +85,7 @@ internal class KlageServiceTest {
     internal fun setUp() {
         opprettKlageSlot.clear()
         every { behandlingService.hentSaksbehandling(any<UUID>()) } returns saksbehandling
+        every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(ENHET_NAY, "enhet")

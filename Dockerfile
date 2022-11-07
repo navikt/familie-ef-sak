@@ -1,4 +1,4 @@
-FROM navikt/java:17
+FROM ghcr.io/navikt/baseimages/temurin:17
 
 ENV APP_NAME=familie-ef-sak
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75"

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
@@ -42,14 +43,16 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
             fagsak = fagsak,
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,
-            eksternId = EksternBehandlingId(1)
+            eksternId = EksternBehandlingId(1),
+            resultat = BehandlingResultat.INNVILGET
         )
         val revurdering =
             behandling(
                 fagsak = fagsak,
                 type = BehandlingType.REVURDERING,
                 status = BehandlingStatus.FERDIGSTILT,
-                eksternId = EksternBehandlingId(2)
+                eksternId = EksternBehandlingId(2),
+                resultat = BehandlingResultat.AVSLÅTT
             )
         val revurderingIkkeFerdigstilt =
             behandling(
@@ -57,6 +60,45 @@ internal class EksternVedtakControllerTest : OppslagSpringRunnerTest() {
                 type = BehandlingType.REVURDERING,
                 status = BehandlingStatus.FATTER_VEDTAK,
                 eksternId = EksternBehandlingId(3)
+            )
+
+        behandlingRepository.insertAll(listOf(førstegangsbehandling, revurdering, revurderingIkkeFerdigstilt))
+
+        val vedtakResponse = hentVedtak(fagsak.eksternId.id).body
+
+        Assertions.assertThat(vedtakResponse.data!!.size).isEqualTo(2)
+        Assertions.assertThat(vedtakResponse.data!!.map { fagsystemVedtak -> fagsystemVedtak.eksternBehandlingId })
+            .containsExactlyInAnyOrder(
+                førstegangsbehandling.eksternId.id.toString(),
+                revurdering.eksternId.id.toString()
+            )
+    }
+
+    @Test
+    fun `hentVedtak skal ikke ta med henlagte behandlinger`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("123"))))
+        val førstegangsbehandling = behandling(
+            fagsak = fagsak,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            status = BehandlingStatus.FERDIGSTILT,
+            eksternId = EksternBehandlingId(1),
+            resultat = BehandlingResultat.INNVILGET
+        )
+        val revurdering =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                eksternId = EksternBehandlingId(2),
+                resultat = BehandlingResultat.AVSLÅTT
+            )
+        val revurderingIkkeFerdigstilt =
+            behandling(
+                fagsak = fagsak,
+                type = BehandlingType.REVURDERING,
+                status = BehandlingStatus.FERDIGSTILT,
+                eksternId = EksternBehandlingId(3),
+                resultat = BehandlingResultat.HENLAGT
             )
 
         behandlingRepository.insertAll(listOf(førstegangsbehandling, revurdering, revurderingIkkeFerdigstilt))

@@ -100,7 +100,7 @@ class JournalføringService(
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} " +

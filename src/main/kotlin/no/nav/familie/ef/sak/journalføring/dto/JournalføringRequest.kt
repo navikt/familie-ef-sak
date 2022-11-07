@@ -95,7 +95,5 @@ fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean =
 data class JournalføringBehandling(
     val behandlingsId: UUID? = null,
     val behandlingstype: BehandlingType? = null,
-    @Deprecated("Bruk ustrukturertDokumentasjonType - kan slettes etter at frontend tatt i bruk ny ")
-    val årsak: UstrukturertDokumentasjonType? = null,
-    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = årsak ?: UstrukturertDokumentasjonType.IKKE_VALGT
+    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT
 )

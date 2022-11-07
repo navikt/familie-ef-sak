@@ -40,6 +40,7 @@ internal class SøkControllerTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setUp() {
+        every { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
         headers.setBearerAuth(lokalTestToken)
     }
 
