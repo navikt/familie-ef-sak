@@ -267,7 +267,10 @@ object VedtakDomeneParser {
         return dataTable.forHverBehandling { behandlingId, rader ->
             val inntektsperioder = rader.fold(mutableListOf<Inntektsperiode>()) { acc, rad ->
                 val datoFra = parseFraOgMed(rad)
-                acc.removeLastOrNull()?.copy(sluttDato = datoFra.minusDays(1))?.let { acc.add(it) }
+                val nyPeriode = acc.lastOrNull()?.periode?.copy(tom = YearMonth.from(datoFra.minusDays(1)))
+                if (nyPeriode != null) {
+                    acc.removeLastOrNull()?.copy(periode = nyPeriode)?.let { acc.add(it) }
+                }
                 acc.add(
                     Inntektsperiode(
                         periode = Månedsperiode(datoFra, LocalDate.MAX),
