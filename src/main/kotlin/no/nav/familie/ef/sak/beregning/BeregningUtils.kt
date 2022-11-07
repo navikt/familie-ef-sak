@@ -69,7 +69,7 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp
     ): List<Inntektsperiode> {
-        val (_, _, periode, inntekt, samordningsfradrag) = inntektsperiode
+        val (_, _, _, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
