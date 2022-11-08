@@ -702,7 +702,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             mockSimulering(iverksettClient, etterbetaling = 1)
             opprettOgIverksettMigrering(ignorerFeilISimulering = true)
         }
-
     }
 
     @Nested
