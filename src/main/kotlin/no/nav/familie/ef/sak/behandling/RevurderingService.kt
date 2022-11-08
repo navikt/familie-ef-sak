@@ -84,6 +84,12 @@ class RevurderingService(
         ) {
             "Kan ikke opprette revurdering med årsak g-omregning for ${fagsak.stønadstype}"
         }
+        feilHvis(
+            fagsak.stønadstype != StønadType.BARNETILSYN &&
+                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+        ) {
+            "Kan ikke opprette revurdering med årsak satsendring for ${fagsak.stønadstype}"
+        }
     }
 
     /**
