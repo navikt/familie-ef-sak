@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -36,8 +35,7 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService,
-    private val featureToggleService: FeatureToggleService
+    private val vedtaksbrevService: VedtaksbrevService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {

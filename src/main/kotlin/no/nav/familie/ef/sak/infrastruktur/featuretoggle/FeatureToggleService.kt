@@ -31,7 +31,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_OPPRETT_KLAGE("familie.ef.sak.frontend-vis-opprett-klage"),
     FRONTEND_VERGE_FRITTSTÅENDE_BREV("familie.ef.sak.frontend-verge-frittstaende-brev"),
-    FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse")
+    FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse"),
+    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring")
     ;
 
     companion object {
