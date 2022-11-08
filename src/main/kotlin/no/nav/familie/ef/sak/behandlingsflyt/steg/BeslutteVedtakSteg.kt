@@ -58,7 +58,7 @@ class BeslutteVedtakSteg(
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-            if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning) {
+            if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning || saksbehandling.årsak == BehandlingÅrsak.SATSENDRING) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
                 val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
