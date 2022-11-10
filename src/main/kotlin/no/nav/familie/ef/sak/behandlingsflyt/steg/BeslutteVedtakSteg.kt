@@ -19,7 +19,6 @@ import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -56,7 +55,7 @@ class BeslutteVedtakSteg(
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-            if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning || saksbehandling.årsak == BehandlingÅrsak.SATSENDRING) {
+            if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
                 val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
