@@ -73,7 +73,7 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `default webClient skal kunne ta emot stor request`() {
+    internal fun `default webClient skal kunne ta imot stor request`() {
         val fil = this::class.java.classLoader.getResource("dummy/image.jpg").readText()
         val mockResponse = WireMock.okJson(fil)
         wiremockServerItem.stubFor(WireMock.post(WireMock.anyUrl()).willReturn(mockResponse))
