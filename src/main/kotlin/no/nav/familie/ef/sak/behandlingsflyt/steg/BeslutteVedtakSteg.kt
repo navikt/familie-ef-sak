@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -20,7 +19,6 @@ import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
@@ -36,8 +34,7 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService,
-    private val featureToggleService: FeatureToggleService
+    private val vedtaksbrevService: VedtaksbrevService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -58,7 +55,7 @@ class BeslutteVedtakSteg(
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
             opprettTaskForBehandlingsstatistikk(saksbehandling.id, oppgaveId)
-            if (saksbehandling.årsak == BehandlingÅrsak.KORRIGERING_UTEN_BREV || saksbehandling.erOmregning) {
+            if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
                 val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)

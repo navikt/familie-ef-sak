@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus
@@ -52,8 +51,7 @@ class SendTilBeslutterSteg(
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
-        if (saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-            saksbehandling.årsak !== BehandlingÅrsak.G_OMREGNING &&
+        if (saksbehandling.skalSendeBrev &&
             !vedtaksbrevRepository.existsById(saksbehandling.id)
         ) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
@@ -135,7 +133,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
-        if (saksbehandling.årsak in setOf(BehandlingÅrsak.KORRIGERING_UTEN_BREV, BehandlingÅrsak.G_OMREGNING)) return
+        if (saksbehandling.skalIkkeSendeBrev) return
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 

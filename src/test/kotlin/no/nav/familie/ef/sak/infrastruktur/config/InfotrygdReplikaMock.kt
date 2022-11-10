@@ -62,7 +62,8 @@ class InfotrygdReplikaMock {
                             StønadType.OVERGANGSSTØNAD,
                             false
                         )
-                    ), emptyList()
+                    ),
+                    emptyList()
                 )
             }
             every { client.hentPersonerForMigrering(any()) } returns emptySet()

@@ -265,7 +265,7 @@ class MigreringService(
         fagsak: Fagsak,
         periode: Månedsperiode,
         ignorerFeilISimulering: Boolean = false,
-        vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto,
+        vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto
     ): Behandling {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
@@ -329,7 +329,7 @@ class MigreringService(
                 MigreringExceptionType.SIMULERING_DEBET_TREKK
             )
         }
-        if(inneholderEtterbetaling) {
+        if (inneholderEtterbetaling) {
             logger.warn(
                 "Migrering inneholder etterbetaling fagsakPersonId=${fagsak.fagsakPersonId} " +
                     "fagsak=${fagsak.id} behandling=${behandling.id} etterbetaling=${oppsummering.etterbetaling}"
