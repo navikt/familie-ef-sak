@@ -20,7 +20,6 @@ no.nav.security.jwt:
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 FAMILIE_INTEGRASJONER_URL: http://localhost:8385
-FAMILIE_OPPDRAG_API_URL: http://localhost:8087
 FAMILIE_BREV_API_URL: http://localhost:8001
 FAMILIE_BLANKETT_API_URL: http://localhost:8033
 #FAMILIE_EF_IVERKSETT_URL: http://localhost:8094 # Fordi iverksett og klage er på samme url/port lokalt så må vi kommentere ut den av de vi ikke vil kjøre opp mot lokalt
