@@ -25,7 +25,6 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.http.HttpStatus
