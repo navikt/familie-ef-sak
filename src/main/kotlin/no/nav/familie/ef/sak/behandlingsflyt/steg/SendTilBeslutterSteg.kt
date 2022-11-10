@@ -52,9 +52,7 @@ class SendTilBeslutterSteg(
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
-        if (saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-            saksbehandling.årsak !== BehandlingÅrsak.G_OMREGNING &&
-            saksbehandling.årsak !== BehandlingÅrsak.SATSENDRING &&
+        if (saksbehandling.skalSendeBrev &&
             !vedtaksbrevRepository.existsById(saksbehandling.id)
         ) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
@@ -136,7 +134,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
-        if (saksbehandling.årsak in setOf(BehandlingÅrsak.SATSENDRING, BehandlingÅrsak.KORRIGERING_UTEN_BREV, BehandlingÅrsak.G_OMREGNING)) return
+        if (saksbehandling.skalIkkeSendeBrev) return
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 
