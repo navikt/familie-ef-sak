@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -10,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
@@ -111,7 +111,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `resetSteg med steg som er før steg på behandling, forvent unntak`() {
+    internal fun `resetSteg med steg som er samme steg som på behandling, forvent ingen unntak og uendret steg`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
             behandling(
@@ -122,7 +122,22 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         )
 
         stegService.resetSteg(behandling.id, steg = StegType.BEREGNE_YTELSE)
-        verify { behandlingRepository.update(any()) }
+        assertThat(behandlingRepository.findByIdOrThrow(behandling.id).steg).isEqualTo(StegType.BEREGNE_YTELSE)
+    }
+
+    @Test
+    internal fun `resetSteg med  steg som er før steg som på behandling, forvent at behandling oppdateres`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(
+            behandling(
+                status = BehandlingStatus.UTREDES,
+                fagsak = fagsak,
+                steg = StegType.BEREGNE_YTELSE
+            )
+        )
+
+        stegService.resetSteg(behandling.id, steg = StegType.VILKÅR)
+        assertThat(behandlingRepository.findByIdOrThrow(behandling.id).steg).isEqualTo(StegType.VILKÅR)
     }
 
     @Test
