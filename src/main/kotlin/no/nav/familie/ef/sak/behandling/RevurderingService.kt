@@ -16,6 +16,15 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -34,7 +43,9 @@ class RevurderingService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val taskRepository: TaskRepository,
     private val barnService: BarnService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val vedtakService: VedtakService,
+    private val vedtakHistorikkService: VedtakHistorikkService
 ) {
 
     @Transactional
@@ -74,7 +85,65 @@ class RevurderingService(
 
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+
+        lagreVedtakHvisSatsendring(revurderingInnhold, fagsak, forrigeBehandlingId, revurdering)
         return revurdering
+    }
+
+    private fun lagreVedtakHvisSatsendring(
+        revurderingInnhold: RevurderingDto,
+        fagsak: Fagsak,
+        forrigeBehandlingId: UUID,
+        revurdering: Behandling
+    ) {
+        if (revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING) {
+            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, forrigeBehandlingId)
+            vedtakService.lagreVedtak(vedtakDto, revurdering.id, StønadType.BARNETILSYN)
+        }
+    }
+
+    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, forrigeBehandlingId: UUID): VedtakDto {
+        val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId)
+
+        return InnvilgelseBarnetilsyn(
+            perioder = mapUtgiftsperioder(historikk),
+            resultatType = ResultatType.INNVILGE,
+            perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
+            tilleggsstønad = mapTilleggsstønadDto(historikk),
+            begrunnelse = vedtakService.hentVedtak(forrigeBehandlingId).periodeBegrunnelse
+        )
+    }
+
+    private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>): TilleggsstønadDto {
+        return TilleggsstønadDto(
+            historikk.any { it.andel.tilleggsstønad > 0 },
+            historikk.map {
+                PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
+            },
+            null
+        )
+    }
+
+    private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> {
+        return historikk.map {
+            PeriodeMedBeløpDto(
+                periode = it.andel.periode,
+                beløp = it.andel.kontantstøtte
+            )
+        }
+    }
+
+    private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>): List<UtgiftsperiodeDto> {
+        return historikk.map {
+            UtgiftsperiodeDto(
+                årMånedFra = it.andel.periode.fom,
+                årMånedTil = it.andel.periode.tom,
+                periode = it.andel.periode,
+                barn = it.andel.barn,
+                utgifter = it.andel.utgifter.toInt(),
+                erMidlertidigOpphør = false
+            )
+        }
     }
 
     private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
