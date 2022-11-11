@@ -86,7 +86,7 @@ enum class StegType(
     }
 
     fun kommerEtter(steg: StegType): Boolean {
-        return this.rekkefølge > steg.rekkefølge
+        return this.rekkefølge >= steg.rekkefølge
     }
 
     fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean {
