@@ -102,7 +102,7 @@ class StegService(
         if (behandling.status != BehandlingStatus.UTREDES) {
             error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
         }
-        if (!behandling.steg.kommerEtter(steg)) {
+        if (steg.kommerEtter(behandling.steg)) {
             error(
                 "Kan ikke sette behandling til steg=$steg når behandling allerede " +
                     "er på ${behandling.steg} behandling=$behandlingId"

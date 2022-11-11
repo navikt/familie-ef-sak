@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import io.mockk.verify
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -91,6 +92,37 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertThrows<IllegalStateException> {
             stegService.håndterVilkår(saksbehandling(fagsak, behandling))
         }
+    }
+
+    @Test
+    internal fun `resetSteg med steg etter steg på behandling, forvent IllegalStateException`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(
+            behandling(
+                status = BehandlingStatus.UTREDES,
+                fagsak = fagsak,
+                steg = StegType.VILKÅR
+            )
+        )
+
+        assertThrows<IllegalStateException> {
+            stegService.resetSteg(behandling.id, steg = StegType.BEREGNE_YTELSE)
+        }
+    }
+
+    @Test
+    internal fun `resetSteg med steg som er før steg på behandling, forvent unntak`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(
+            behandling(
+                status = BehandlingStatus.UTREDES,
+                fagsak = fagsak,
+                steg = StegType.BEREGNE_YTELSE
+            )
+        )
+
+        stegService.resetSteg(behandling.id, steg = StegType.BEREGNE_YTELSE)
+        verify { behandlingRepository.update(any()) }
     }
 
     @Test
