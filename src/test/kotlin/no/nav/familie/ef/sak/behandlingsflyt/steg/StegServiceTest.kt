@@ -126,7 +126,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `resetSteg med  steg som er før steg som på behandling, forvent at behandling oppdateres`() {
+    internal fun `resetSteg med steg som er før steg på behandling, forvent at behandling oppdateres`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
             behandling(
