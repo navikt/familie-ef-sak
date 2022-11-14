@@ -114,7 +114,7 @@ class RevurderingService(
             resultatType = ResultatType.INNVILGE,
             perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
             tilleggsstønad = mapTilleggsstønadDto(historikk),
-            begrunnelse = vedtakService.hentVedtak(forrigeBehandlingId).periodeBegrunnelse
+            begrunnelse = "Satsendring barnetilsyn"
         )
     }
 
@@ -129,7 +129,8 @@ class RevurderingService(
     }
 
     private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> {
-        return historikk.map {
+        return historikk.filter { kontanstaøtte -> kontanstaøtte.andel.kontantstøtte > 0 }
+            .map {
             PeriodeMedBeløpDto(
                 periode = it.andel.periode,
                 beløp = it.andel.kontantstøtte
