@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.behandling.domain
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
@@ -27,6 +29,51 @@ enum class KildeOpplysninger {
     OPPLYSNINGER_INTERNE_KONTROLLER
 }
 
-enum class Årsak {
-    ENDRING_INNTEKT
+@Suppress("EnumEntryName", "unused")
+enum class Årsak(
+    vararg stønadstyper: StønadType = arrayOf(
+        StønadType.OVERGANGSSTØNAD,
+        StønadType.BARNETILSYN,
+        StønadType.SKOLEPENGER
+    )
+) {
+
+    ENDRING_INNTEKT(StønadType.OVERGANGSSTØNAD),
+    ENDRING_AKTIVITET(StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN),
+    ENDRING_INNTEKT_OG_AKTIVITET(StønadType.OVERGANGSSTØNAD),
+
+    SØKNAD_UTVIDELSE_UTDANNING(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_UTVIDELSE_SÆRLIG_TILSYNSKREVENDE_BARN(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_FORLENGELSE_FORBIGÅENDE_SYKDOM(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_FORLENGELSE_PÅVENTE_DIV(StønadType.OVERGANGSSTØNAD), // (Søknad om forlengelse i påvente av jobb, utdanning, barnepass eller som arbeidssøker)
+    SØKNAD_NY_PERIODE_NYTT_BARN(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_NYTT_BGH_SKOLEÅR(StønadType.BARNETILSYN),
+    SØKNAD_NYTT_SKOLEÅR(StønadType.SKOLEPENGER),
+
+    OPPHØR_VILKÅR_IKKE_OPPFYLT,
+    OPPHØR_EGET_ØNSKE,
+
+    ENDRING_STØNADSPERIODE(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_NY_PERIODE_HOVEDPERIODE_IKKE_BRUKT_OPP_TIDLIGERE(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_BRUKT_OPP_HOVEDPERIODEN_TIDLIGERE(StønadType.OVERGANGSSTØNAD),
+    SØKNAD_ETTER_AVSLAG,
+    SØKNAD_ETTER_OPPHØR,
+
+    ENDRING_TILSYNSUTGIFTER(StønadType.BARNETILSYN),
+    ENDRING_ANTALL_BARN(StønadType.BARNETILSYN),
+    ENDRING_UTGIFTER_SKOLEPENGER(StønadType.SKOLEPENGER),
+
+    SANKSJON_1_MÅNED,
+    UTESTENGELSE,
+    ANNET,
+    KLAGE_OMGJØRING,
+    ANKE_OMGJØRING;
+
+    val gjelderStønadstyper = stønadstyper.toSet()
+
+    fun gyldig(stønadType: StønadType) {
+        feilHvis(!gjelderStønadstyper.contains(stønadType)) {
+            "$this er ikke gyldig for stønadstype=$stønadType"
+        }
+    }
 }
