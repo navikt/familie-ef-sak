@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -90,12 +89,29 @@ class BehandlingService(
         )
     }
 
+    private fun førsteSteg() =
+        if (featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK)) {
+            StegType.REVURDERING_ÅRSAK
+        } else {
+            StegType.VILKÅR
+        }
+
+    private fun utledSteg(forrigeBehandling: Behandling?, behandlingType: BehandlingType): StegType {
+        return if (forrigeBehandling == null && behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            StegType.VILKÅR
+        } else if (featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK)) {
+            StegType.REVURDERING_ÅRSAK
+        } else {
+            StegType.BEREGNE_YTELSE
+        }
+    }
+
     @Transactional
     fun opprettBehandling(
         behandlingType: BehandlingType,
         fagsakId: UUID,
         status: BehandlingStatus = BehandlingStatus.OPPRETTET,
-        stegType: StegType = VILKÅR,
+        stegType: StegType? = null,
         behandlingsårsak: BehandlingÅrsak,
         kravMottatt: LocalDate? = null,
         erMigrering: Boolean = false
@@ -119,12 +135,14 @@ class BehandlingService(
         val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         validerKanOppretteNyBehandling(behandlingType, tidligereBehandlinger, erMigrering)
 
+        val steg = stegType ?: utledSteg(forrigeBehandling, behandlingType)
+
         val behandling = behandlingRepository.insert(
             Behandling(
                 fagsakId = fagsakId,
                 forrigeBehandlingId = forrigeBehandling?.id,
                 type = behandlingType,
-                steg = stegType,
+                steg = steg,
                 status = status,
                 resultat = BehandlingResultat.IKKE_SATT,
                 årsak = behandlingsårsak,
@@ -135,7 +153,7 @@ class BehandlingService(
         behandlingshistorikkService.opprettHistorikkInnslag(
             behandlingshistorikk = Behandlingshistorikk(
                 behandlingId = behandling.id,
-                steg = VILKÅR
+                steg = steg
             )
         )
 

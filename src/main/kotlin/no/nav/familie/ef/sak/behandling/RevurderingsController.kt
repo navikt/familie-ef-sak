@@ -2,11 +2,15 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -39,5 +43,26 @@ class RevurderingsController(
         }
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
         return Ressurs.success(revurdering.id)
+    }
+
+    @PostMapping("arsak/{behandlingId}")
+    fun lagreÅrsakRevurdering(
+        @PathVariable behandlingId: UUID,
+        @RequestBody årsakRevurderingDto: ÅrsakRevurderingDto
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        revurderingService.lagreÅrsakRevurdering(behandlingId, årsakRevurderingDto)
+
+        return Ressurs.success(behandlingId)
+    }
+
+    @GetMapping("arsak/{behandlingId}")
+    fun hentÅrsakRevurdering(
+        @PathVariable behandlingId: UUID,
+        @RequestBody årsakRevurderingDto: ÅrsakRevurderingDto
+    ): Ressurs<ÅrsakRevurderingDto?> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(revurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto())
     }
 }

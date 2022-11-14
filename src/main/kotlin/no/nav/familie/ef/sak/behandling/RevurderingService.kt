@@ -5,12 +5,15 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandling.dto.tilDomene
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -21,6 +24,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -34,8 +38,22 @@ class RevurderingService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val taskRepository: TaskRepository,
     private val barnService: BarnService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 ) {
+
+    @Transactional
+    fun lagreÅrsakRevurdering(behandlingId: UUID, årsakRevurderingDto: ÅrsakRevurderingDto) {
+        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
+            "Behandlingen er låst og kan ikke oppdatere årsak til revurdering"
+        }
+        årsakRevurderingsRepository.deleteById(behandlingId)
+        årsakRevurderingsRepository.insert(årsakRevurderingDto.tilDomene(behandlingId))
+    }
+
+    fun hentÅrsakRevurdering(behandlingId: UUID): ÅrsakRevurdering? {
+        return årsakRevurderingsRepository.findByIdOrNull(behandlingId)
+    }
 
     @Transactional
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
@@ -43,12 +61,11 @@ class RevurderingService(
         validerOpprettRevurdering(fagsak, revurderingInnhold)
 
         val revurdering = behandlingService.opprettBehandling(
-            BehandlingType.REVURDERING,
-            revurderingInnhold.fagsakId,
-            BehandlingStatus.UTREDES,
-            StegType.BEREGNE_YTELSE,
-            revurderingInnhold.behandlingsårsak,
-            revurderingInnhold.kravMottatt
+            behandlingType = BehandlingType.REVURDERING,
+            fagsakId = revurderingInnhold.fagsakId,
+            status = BehandlingStatus.UTREDES,
+            behandlingsårsak = revurderingInnhold.behandlingsårsak,
+            kravMottatt = revurderingInnhold.kravMottatt
         )
         val forrigeBehandlingId = forrigeBehandling(revurdering)
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)

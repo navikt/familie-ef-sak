@@ -34,7 +34,11 @@ enum class StegType(
     val tillattFor: BehandlerRolle,
     private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>
 ) {
-
+    REVURDERING_ÅRSAK(
+        rekkefølge = 0,
+        tillattFor = BehandlerRolle.SAKSBEHANDLER,
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES)
+    ),
     VILKÅR(
         rekkefølge = 1,
         tillattFor = BehandlerRolle.SAKSBEHANDLER,
@@ -95,6 +99,7 @@ enum class StegType(
 
     fun hentNesteSteg(): StegType {
         return when (this) {
+            REVURDERING_ÅRSAK -> VILKÅR
             VILKÅR -> BEREGNE_YTELSE
             BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
             SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
