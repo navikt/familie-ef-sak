@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -45,7 +47,8 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val vedtakService: VedtakService,
-    private val vedtakHistorikkService: VedtakHistorikkService
+    private val vedtakHistorikkService: VedtakHistorikkService,
+    private val barnRepository: BarnRepository
 ) {
 
     @Transactional
@@ -97,16 +100,17 @@ class RevurderingService(
         revurdering: Behandling
     ) {
         if (revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING) {
-            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, forrigeBehandlingId)
+            val behandlingBarn = barnRepository.findByBehandlingId(revurdering.id)
+            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, forrigeBehandlingId, behandlingBarn)
             vedtakService.lagreVedtak(vedtakDto, revurdering.id, StønadType.BARNETILSYN)
         }
     }
 
-    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, forrigeBehandlingId: UUID): VedtakDto {
+    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, forrigeBehandlingId: UUID, behandlingBarn: List<BehandlingBarn>): VedtakDto {
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId)
 
         return InnvilgelseBarnetilsyn(
-            perioder = mapUtgiftsperioder(historikk),
+            perioder = mapUtgiftsperioder(historikk, behandlingBarn),
             resultatType = ResultatType.INNVILGE,
             perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
             tilleggsstønad = mapTilleggsstønadDto(historikk),
@@ -133,17 +137,22 @@ class RevurderingService(
         }
     }
 
-    private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>): List<UtgiftsperiodeDto> {
+    private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
         return historikk.map {
             UtgiftsperiodeDto(
                 årMånedFra = it.andel.periode.fom,
                 årMånedTil = it.andel.periode.tom,
                 periode = it.andel.periode,
-                barn = it.andel.barn,
+                barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
                 utgifter = it.andel.utgifter.toInt(),
                 erMidlertidigOpphør = false
             )
         }
+    }
+
+    private fun finnBehandlingBarnIdsGittTidligereAndelBarn(andelBarn: List<UUID>, behandlingBarn: List<BehandlingBarn>): List<UUID> {
+        val tidligereValgteAndelBarn = barnRepository.findAllById(andelBarn)
+        return behandlingBarn.filter { it.personIdent in tidligereValgteAndelBarn.map { b -> b.personIdent } }.map { it.id }
     }
 
     private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
