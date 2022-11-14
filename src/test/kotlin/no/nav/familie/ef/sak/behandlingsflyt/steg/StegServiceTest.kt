@@ -95,7 +95,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `resetSteg med steg etter steg på behandling, forvent IllegalStateException`() {
+    internal fun `kast feil når man resetter med et steg etter behandlingen sitt steg`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
             behandling(
@@ -111,7 +111,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `resetSteg med steg som er samme steg som på behandling, forvent ingen unntak og uendret steg`() {
+    internal fun `steg på behandlingen beholdes når man resetter på samme steg`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
             behandling(
@@ -126,7 +126,7 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `resetSteg med steg som er før steg på behandling, forvent at behandling oppdateres`() {
+    internal fun `steg på behandlingen oppdateres når man resetter med et tidligere steg`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
             behandling(
