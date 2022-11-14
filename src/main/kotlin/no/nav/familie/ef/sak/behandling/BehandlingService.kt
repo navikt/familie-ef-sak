@@ -89,13 +89,6 @@ class BehandlingService(
         )
     }
 
-    private fun førsteSteg() =
-        if (featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK)) {
-            StegType.REVURDERING_ÅRSAK
-        } else {
-            StegType.VILKÅR
-        }
-
     private fun utledSteg(forrigeBehandling: Behandling?, behandlingType: BehandlingType): StegType {
         return if (forrigeBehandling == null && behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             StegType.VILKÅR
