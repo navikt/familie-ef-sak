@@ -33,10 +33,10 @@
         <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
         <springdoc.version>1.6.12</springdoc.version>
         <mockk.version>1.13.2</mockk.version>
-        <felles.version>1.20221006150009_46021ed</felles.version>
+        <felles.version>1.20221107122251_cd3a0ff</felles.version>
         <prosessering.version>1.20221024145007_b6fe7d6</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20221108132527_9f0a1d4</kontrakter.version>
+        <kontrakter.version>2.0_20221110144342_36a697b</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20220613122416_43a5f72</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.8.1</cucumber.version>
 
@@ -138,6 +138,11 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>web-client</artifactId>
             <version>${felles.version}</version>
         </dependency>
         <dependency>

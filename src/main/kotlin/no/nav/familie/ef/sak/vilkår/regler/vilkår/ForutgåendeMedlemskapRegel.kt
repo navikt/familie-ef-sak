@@ -25,7 +25,8 @@ class ForutgåendeMedlemskapRegel : Vilkårsregel(
             SvarId.ANDRE_FORELDER_MEDLEM_SISTE_5_ÅR,
             SvarId.ANDRE_FORELDER_MEDLEM_MINST_5_ÅR_AVBRUDD_MINDRE_ENN_10_ÅR,
             SvarId.ANDRE_FORELDER_MEDLEM_MINST_7_ÅR_AVBRUDD_MER_ENN_10_ÅR,
-            SvarId.TOTALVURDERING_OPPFYLLER_FORSKRIFT
+            SvarId.TOTALVURDERING_OPPFYLLER_FORSKRIFT,
+            SvarId.MEDLEM_MER_ENN_5_ÅR_EØS
         ).associateWith { SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE } +
             mapOf(SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
         private val MEDLEMSKAP_UNNTAK =
