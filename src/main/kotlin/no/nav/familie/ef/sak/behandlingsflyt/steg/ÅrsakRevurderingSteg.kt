@@ -1,19 +1,22 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.tilDomene
-import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class ÅrsakRevurderingSteg(
-    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
-) : BehandlingSteg<ÅrsakRevurderingDto> {
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val behandlingService: BehandlingService
+) : BehandlingSteg<RevurderingsinformasjonDto> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -21,19 +24,28 @@ class ÅrsakRevurderingSteg(
         return StegType.REVURDERING_ÅRSAK
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: ÅrsakRevurderingDto) {
+    override fun utførSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto) {
+        val (kravMottatt, årsakRevurdering) = data
+
+        feilHvis(kravMottatt == null) {
+            "Mangler kravMottatt"
+        }
+        feilHvis(årsakRevurdering == null) {
+            "Mangler årsakRevurdering"
+        }
 
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere årsak til revurdering"
         }
-        brukerfeilHvisIkke(data.årsak.erGyldigForStønadstype(saksbehandling.stønadstype)) {
+        brukerfeilHvisIkke(årsakRevurdering.årsak.erGyldigForStønadstype(saksbehandling.stønadstype)) {
             "Årsak er ikke gyldig for stønadstype"
         }
-        brukerfeilHvis(data.årsak == Revurderingsårsak.ANNET && data.beskrivelse.isNullOrBlank()) {
+        brukerfeilHvis(årsakRevurdering.årsak == Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse.isNullOrBlank()) {
             "Mangler beskrivelse"
         }
 
         årsakRevurderingsRepository.deleteById(saksbehandling.id)
-        årsakRevurderingsRepository.insert(data.tilDomene(saksbehandling.id))
+        årsakRevurderingsRepository.insert(årsakRevurdering.tilDomene(saksbehandling.id))
+        behandlingService.oppdaterKravMottatt(saksbehandling.id, kravMottatt)
     }
 }

@@ -3,15 +3,21 @@ package no.nav.familie.ef.sak.behandling.dto
 import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
 import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+
+data class RevurderingsinformasjonDto(
+    val kravMottatt: LocalDate?,
+    val årsakRevurdering: ÅrsakRevurderingDto?
+)
 
 data class ÅrsakRevurderingDto(
     val kilde: Opplysningskilde,
     val årsak: Revurderingsårsak,
     val beskrivelse: String?,
     val endretAv: String,
-    val endretTid: LocalDateTime,
+    val endretTid: LocalDateTime
 )
 
 fun ÅrsakRevurderingDto.tilDomene(behandlingId: UUID) =

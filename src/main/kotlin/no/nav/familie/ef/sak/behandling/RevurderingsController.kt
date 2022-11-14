@@ -2,8 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
-import no.nav.familie.ef.sak.behandling.dto.tilDto
-import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -47,24 +46,24 @@ class RevurderingsController(
         return Ressurs.success(revurdering.id)
     }
 
-    @PostMapping("arsak/{behandlingId}")
-    fun lagreÅrsakRevurdering(
+    @PostMapping("informasjon/{behandlingId}")
+    fun lagreRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
-        @RequestBody årsakRevurderingDto: ÅrsakRevurderingDto
+        @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
-        stegService.håndterÅrsakRevurdering(behandlingId, årsakRevurderingDto)
+        stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
 
         return Ressurs.success(behandlingId)
     }
 
-    @GetMapping("arsak/{behandlingId}")
-    fun hentÅrsakRevurdering(
+    @GetMapping("informasjon/{behandlingId}")
+    fun hentRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
-    ): Ressurs<ÅrsakRevurderingDto?> {
+    ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(revurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto())
+        return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))
     }
 }

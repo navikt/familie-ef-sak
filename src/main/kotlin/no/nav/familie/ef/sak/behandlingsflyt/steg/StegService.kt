@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
@@ -71,7 +71,7 @@ class StegService(
     }
 
     @Transactional
-    fun håndterÅrsakRevurdering(behandlingId: UUID, data: ÅrsakRevurderingDto): Behandling {
+    fun håndterÅrsakRevurdering(behandlingId: UUID, data: RevurderingsinformasjonDto): Behandling {
         val årsakRevurderingSteg: ÅrsakRevurderingSteg = hentBehandlingSteg(REVURDERING_ÅRSAK)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)

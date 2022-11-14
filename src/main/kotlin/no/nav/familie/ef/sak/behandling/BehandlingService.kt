@@ -185,6 +185,10 @@ class BehandlingService(
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
+    fun oppdaterKravMottatt(behandlingId: UUID, kravMottatt: LocalDate): Behandling {
+        return behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
+    }
+
     fun finnesBehandlingForFagsak(fagsakId: UUID) =
         behandlingRepository.existsByFagsakId(fagsakId)
 

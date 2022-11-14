@@ -5,9 +5,10 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
+import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -39,8 +40,10 @@ class RevurderingService(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 ) {
 
-    fun hentÅrsakRevurdering(behandlingId: UUID): ÅrsakRevurdering? {
-        return årsakRevurderingsRepository.findByIdOrNull(behandlingId)
+    fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
+        val kravMottatt = behandlingService.hentBehandling(behandlingId).kravMottatt
+        val årsakRevurdering = årsakRevurderingsRepository.findByIdOrNull(behandlingId)
+        return RevurderingsinformasjonDto(kravMottatt, årsakRevurdering?.tilDto())
     }
 
     @Transactional
