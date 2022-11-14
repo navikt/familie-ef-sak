@@ -60,7 +60,6 @@ class RevurderingsController(
     @GetMapping("arsak/{behandlingId}")
     fun hentÅrsakRevurdering(
         @PathVariable behandlingId: UUID,
-        @RequestBody årsakRevurderingDto: ÅrsakRevurderingDto
     ): Ressurs<ÅrsakRevurderingDto?> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(revurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto())

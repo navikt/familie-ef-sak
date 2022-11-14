@@ -1,13 +1,13 @@
 package no.nav.familie.ef.sak.behandling.dto
 
-import no.nav.familie.ef.sak.behandling.domain.KildeOpplysninger
+import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
 import no.nav.familie.ef.sak.behandling.domain.Årsak
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class ÅrsakRevurderingDto(
-    val kilde: KildeOpplysninger,
+    val kilde: Opplysningskilde,
     val årsak: Årsak,
     val beskrivelse: String?,
     val endretAv: String,
@@ -17,13 +17,13 @@ data class ÅrsakRevurderingDto(
 fun ÅrsakRevurderingDto.tilDomene(behandlingId: UUID) =
     ÅrsakRevurdering(
         behandlingId = behandlingId,
-        kilde = this.kilde,
+        opplysningskilde = this.kilde,
         årsak = this.årsak,
         beskrivelse = this.beskrivelse
     )
 
 fun ÅrsakRevurdering.tilDto() = ÅrsakRevurderingDto(
-    kilde = this.kilde,
+    kilde = this.opplysningskilde,
     årsak = this.årsak,
     beskrivelse = this.beskrivelse,
     endretAv = this.sporbar.endret.endretAv,

@@ -13,7 +13,7 @@ import java.util.UUID
 data class ÅrsakRevurdering(
     @Id
     val behandlingId: UUID,
-    val kilde: KildeOpplysninger,
+    val opplysningskilde: Opplysningskilde,
     @Column("arsak")
     val årsak: Årsak,
     val beskrivelse: String?,
@@ -21,7 +21,7 @@ data class ÅrsakRevurdering(
     val sporbar: Sporbar = Sporbar()
 )
 
-enum class KildeOpplysninger {
+enum class Opplysningskilde {
     MELDING_MODIA,
     INNSENDT_DOKUMENTASJON,
     BESKJED_ANNEN_ENHET,
@@ -71,7 +71,7 @@ enum class Årsak(
 
     val gjelderStønadstyper = stønadstyper.toSet()
 
-    fun gyldig(stønadType: StønadType) {
+    fun gyldigForStønadstype(stønadType: StønadType) {
         feilHvis(!gjelderStønadstyper.contains(stønadType)) {
             "$this er ikke gyldig for stønadstype=$stønadType"
         }

@@ -42,6 +42,7 @@ class RevurderingService(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 ) {
 
+    // eget steg / flytt til stegservice
     @Transactional
     fun lagreÅrsakRevurdering(behandlingId: UUID, årsakRevurderingDto: ÅrsakRevurderingDto) {
         brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
