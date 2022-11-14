@@ -12,6 +12,7 @@ interface FeatureToggleService : DisposableBean {
 }
 
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
+    WEBCLIENT("familie.ef.sak.webclient"),
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering"),
     MIGRERING("familie.ef.sak.migrering"),
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
