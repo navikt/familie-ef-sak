@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.behandling.domain
 
 import no.nav.familie.ef.sak.felles.domain.Sporbar
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -15,7 +14,7 @@ data class ÅrsakRevurdering(
     val behandlingId: UUID,
     val opplysningskilde: Opplysningskilde,
     @Column("arsak")
-    val årsak: Årsak,
+    val årsak: Revurderingsårsak,
     val beskrivelse: String?,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar()
@@ -30,7 +29,7 @@ enum class Opplysningskilde {
 }
 
 @Suppress("EnumEntryName", "unused")
-enum class Årsak(
+enum class Revurderingsårsak(
     vararg stønadstyper: StønadType = arrayOf(
         StønadType.OVERGANGSSTØNAD,
         StønadType.BARNETILSYN,
@@ -71,9 +70,7 @@ enum class Årsak(
 
     val gjelderStønadstyper = stønadstyper.toSet()
 
-    fun gyldigForStønadstype(stønadType: StønadType) {
-        feilHvis(!gjelderStønadstyper.contains(stønadType)) {
-            "$this er ikke gyldig for stønadstype=$stønadType"
-        }
+    fun erGyldigForStønadstype(stønadType: StønadType): Boolean {
+        return !gjelderStønadstyper.contains(stønadType)
     }
 }
