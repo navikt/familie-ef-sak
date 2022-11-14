@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -22,7 +23,8 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class RevurderingsController(
     private val revurderingService: RevurderingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val stegService: StegService
 ) {
 
     @PostMapping("{fagsakId}")
@@ -52,7 +54,8 @@ class RevurderingsController(
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        revurderingService.lagreÅrsakRevurdering(behandlingId, årsakRevurderingDto)
+
+        stegService.håndterÅrsakRevurdering(behandlingId, årsakRevurderingDto)
 
         return Ressurs.success(behandlingId)
     }
