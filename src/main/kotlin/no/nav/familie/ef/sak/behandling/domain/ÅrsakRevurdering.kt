@@ -71,6 +71,6 @@ enum class Revurderingsårsak(
     val gjelderStønadstyper = stønadstyper.toSet()
 
     fun erGyldigForStønadstype(stønadType: StønadType): Boolean {
-        return !gjelderStønadstyper.contains(stønadType)
+        return gjelderStønadstyper.contains(stønadType)
     }
 }
