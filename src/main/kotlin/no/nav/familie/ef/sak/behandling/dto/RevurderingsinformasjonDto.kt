@@ -13,25 +13,21 @@ data class RevurderingsinformasjonDto(
 )
 
 data class ÅrsakRevurderingDto(
-    val kilde: Opplysningskilde,
+    val opplysningskilde: Opplysningskilde,
     val årsak: Revurderingsårsak,
-    val beskrivelse: String?,
-    val endretAv: String,
-    val endretTid: LocalDateTime
+    val beskrivelse: String?
 )
 
 fun ÅrsakRevurderingDto.tilDomene(behandlingId: UUID) =
     ÅrsakRevurdering(
         behandlingId = behandlingId,
-        opplysningskilde = this.kilde,
+        opplysningskilde = this.opplysningskilde,
         årsak = this.årsak,
         beskrivelse = this.beskrivelse
     )
 
 fun ÅrsakRevurdering.tilDto() = ÅrsakRevurderingDto(
-    kilde = this.opplysningskilde,
+    opplysningskilde = this.opplysningskilde,
     årsak = this.årsak,
-    beskrivelse = this.beskrivelse,
-    endretAv = this.sporbar.endret.endretAv,
-    endretTid = this.sporbar.endret.endretTid
+    beskrivelse = this.beskrivelse
 )
