@@ -89,11 +89,11 @@ class RevurderingService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
-        lagreVedtakHvisSatsendring(revurderingInnhold, fagsak, forrigeBehandlingId, revurdering)
+        kopierVedtakHvisSatsendring(revurderingInnhold, fagsak, forrigeBehandlingId, revurdering)
         return revurdering
     }
 
-    private fun lagreVedtakHvisSatsendring(
+    private fun kopierVedtakHvisSatsendring(
         revurderingInnhold: RevurderingDto,
         fagsak: Fagsak,
         forrigeBehandlingId: UUID,
@@ -101,12 +101,12 @@ class RevurderingService(
     ) {
         if (revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING) {
             val behandlingBarn = barnRepository.findByBehandlingId(revurdering.id)
-            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, forrigeBehandlingId, behandlingBarn)
+            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, behandlingBarn)
             vedtakService.lagreVedtak(vedtakDto, revurdering.id, StønadType.BARNETILSYN)
         }
     }
 
-    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, forrigeBehandlingId: UUID, behandlingBarn: List<BehandlingBarn>): VedtakDto {
+    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>): VedtakDto {
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId)
 
         return InnvilgelseBarnetilsyn(
