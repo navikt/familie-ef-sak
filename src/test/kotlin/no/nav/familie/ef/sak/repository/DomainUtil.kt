@@ -109,7 +109,8 @@ fun saksbehandling(
     opprettetTid: LocalDateTime = SporbarUtils.now(),
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
+    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
+    kravMottatt: LocalDate? = null
 ): Saksbehandling =
     saksbehandling(
         fagsak,
@@ -123,7 +124,8 @@ fun saksbehandling(
             resultat = resultat,
             sporbar = Sporbar(opprettetTid = opprettetTid),
             årsak = årsak,
-            henlagtÅrsak = henlagtÅrsak
+            henlagtÅrsak = henlagtÅrsak,
+            kravMottatt = kravMottatt
         )
     )
 

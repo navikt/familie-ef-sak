@@ -8,7 +8,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
-import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
@@ -24,7 +23,6 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -39,18 +37,12 @@ class RevurderingService(
     private val taskRepository: TaskRepository,
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
-    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val årsakRevurderingService: ÅrsakRevurderingService,
     private val stegService: StegService
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
-        val kravMottatt = behandlingService.hentBehandling(behandlingId).kravMottatt
-        val årsakRevurdering = årsakRevurderingsRepository.findByIdOrNull(behandlingId)
-        return RevurderingsinformasjonDto(
-            kravMottatt = kravMottatt,
-            årsakRevurdering = årsakRevurdering?.tilDto(),
-            endretTid = årsakRevurdering?.sporbar?.endret?.endretTid
-        )
+        return årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
     }
 
     fun lagreRevurderingsinformasjon(
@@ -63,8 +55,7 @@ class RevurderingService(
 
     @Transactional
     fun slettRevurderingsinformasjon(behandlingId: UUID) {
-        årsakRevurderingsRepository.deleteById(behandlingId)
-        behandlingService.oppdaterKravMottatt(behandlingId, null)
+        årsakRevurderingService.slettRevurderingsinformasjon(behandlingId)
         stegService.resetSteg(behandlingId, StegType.REVURDERING_ÅRSAK)
     }
 
