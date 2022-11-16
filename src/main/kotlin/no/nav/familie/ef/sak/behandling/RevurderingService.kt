@@ -89,14 +89,13 @@ class RevurderingService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
-        kopierVedtakHvisSatsendring(revurderingInnhold, fagsak, forrigeBehandlingId, revurdering)
+        kopierVedtakHvisSatsendring(revurderingInnhold, fagsak, revurdering)
         return revurdering
     }
 
     private fun kopierVedtakHvisSatsendring(
         revurderingInnhold: RevurderingDto,
         fagsak: Fagsak,
-        forrigeBehandlingId: UUID,
         revurdering: Behandling
     ) {
         if (revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING) {
