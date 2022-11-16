@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,8 +16,6 @@ class ÅrsakRevurderingSteg(
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
     private val behandlingService: BehandlingService
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun stegType(): StegType {
         return StegType.REVURDERING_ÅRSAK
@@ -41,7 +38,11 @@ class ÅrsakRevurderingSteg(
             "Årsak er ikke gyldig for stønadstype"
         }
         brukerfeilHvis(årsakRevurdering.årsak == Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse.isNullOrBlank()) {
-            "Mangler beskrivelse"
+            "Må ha med beskrivelse når årsak er annet"
+        }
+
+        brukerfeilHvis(årsakRevurdering.årsak != Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse != null) {
+            "Kan ikke ha med beskrivelse når årsak er noe annet en annet"
         }
 
         årsakRevurderingsRepository.deleteById(saksbehandling.id)

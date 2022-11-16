@@ -43,7 +43,11 @@ class RevurderingService(
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
         val kravMottatt = behandlingService.hentBehandling(behandlingId).kravMottatt
         val årsakRevurdering = årsakRevurderingsRepository.findByIdOrNull(behandlingId)
-        return RevurderingsinformasjonDto(kravMottatt, årsakRevurdering?.tilDto())
+        return RevurderingsinformasjonDto(
+            kravMottatt = kravMottatt,
+            årsakRevurdering = årsakRevurdering?.tilDto(),
+            endretTid = årsakRevurdering?.sporbar?.endret?.endretTid
+        )
     }
 
     @Transactional

@@ -8,14 +8,15 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class RevurderingsinformasjonDto(
-    val kravMottatt: LocalDate?,
-    val årsakRevurdering: ÅrsakRevurderingDto?
+    val kravMottatt: LocalDate? = null,
+    val årsakRevurdering: ÅrsakRevurderingDto? = null,
+    val endretTid: LocalDateTime? = null
 )
 
 data class ÅrsakRevurderingDto(
     val opplysningskilde: Opplysningskilde,
     val årsak: Revurderingsårsak,
-    val beskrivelse: String?
+    val beskrivelse: String? = null
 )
 
 fun ÅrsakRevurderingDto.tilDomene(behandlingId: UUID) =
