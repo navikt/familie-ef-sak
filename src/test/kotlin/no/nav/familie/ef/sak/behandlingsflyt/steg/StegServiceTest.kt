@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
@@ -91,6 +92,52 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertThrows<IllegalStateException> {
             stegService.håndterVilkår(saksbehandling(fagsak, behandling))
         }
+    }
+
+    @Test
+    internal fun `kast feil når man resetter med et steg etter behandlingen sitt steg`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(
+            behandling(
+                status = BehandlingStatus.UTREDES,
+                fagsak = fagsak,
+                steg = StegType.VILKÅR
+            )
+        )
+
+        assertThrows<IllegalStateException> {
+            stegService.resetSteg(behandling.id, steg = StegType.BEREGNE_YTELSE)
+        }
+    }
+
+    @Test
+    internal fun `steg på behandlingen beholdes når man resetter på samme steg`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(
+            behandling(
+                status = BehandlingStatus.UTREDES,
+                fagsak = fagsak,
+                steg = StegType.BEREGNE_YTELSE
+            )
+        )
+
+        stegService.resetSteg(behandling.id, steg = StegType.BEREGNE_YTELSE)
+        assertThat(behandlingRepository.findByIdOrThrow(behandling.id).steg).isEqualTo(StegType.BEREGNE_YTELSE)
+    }
+
+    @Test
+    internal fun `steg på behandlingen oppdateres når man resetter med et tidligere steg`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(
+            behandling(
+                status = BehandlingStatus.UTREDES,
+                fagsak = fagsak,
+                steg = StegType.BEREGNE_YTELSE
+            )
+        )
+
+        stegService.resetSteg(behandling.id, steg = StegType.VILKÅR)
+        assertThat(behandlingRepository.findByIdOrThrow(behandling.id).steg).isEqualTo(StegType.VILKÅR)
     }
 
     @Test
