@@ -89,46 +89,47 @@ class RevurderingService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
-        kopierVedtakHvisSatsendring(revurderingInnhold.behandlingsårsak, fagsak, revurdering)
+        kopierVedtakHvisSatsendring(revurderingInnhold.behandlingsårsak, fagsak, revurdering, forrigeBehandlingId)
         return revurdering
     }
 
     fun kopierVedtakHvisSatsendring(
         behandlingsÅrsak: BehandlingÅrsak,
         fagsak: Fagsak,
-        revurdering: Behandling
+        revurdering: Behandling,
+        forrigeBehandlingId: UUID
     ) {
         if (behandlingsÅrsak == BehandlingÅrsak.SATSENDRING) {
             val behandlingBarn = barnRepository.findByBehandlingId(revurdering.id)
-            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, behandlingBarn)
+            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, behandlingBarn, forrigeBehandlingId)
             vedtakService.lagreVedtak(vedtakDto, revurdering.id, StønadType.BARNETILSYN)
         }
     }
 
-    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>): VedtakDto {
+    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId)
 
         return InnvilgelseBarnetilsyn(
             perioder = mapUtgiftsperioder(historikk, behandlingBarn),
             resultatType = ResultatType.INNVILGE,
             perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
-            tilleggsstønad = mapTilleggsstønadDto(historikk),
+            tilleggsstønad = mapTilleggsstønadDto(historikk, forrigeBehandlingId),
             begrunnelse = "Satsendring barnetilsyn"
         )
     }
 
-    private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>): TilleggsstønadDto {
+    private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>, forrigeBehandlingId: UUID): TilleggsstønadDto {
         return TilleggsstønadDto(
             historikk.any { it.andel.tilleggsstønad > 0 },
             historikk.filter { it.andel.tilleggsstønad > 0 }.map {
                 PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
             },
-            null
+            vedtakService.hentVedtak(forrigeBehandlingId).tilleggsstønad?.begrunnelse
         )
     }
 
     private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> {
-        return historikk.filter { kontanstaøtte -> kontanstaøtte.andel.kontantstøtte > 0 }
+        return historikk.filter { kontantstøtte -> kontantstøtte.andel.kontantstøtte > 0 }
             .map {
                 PeriodeMedBeløpDto(
                     periode = it.andel.periode,

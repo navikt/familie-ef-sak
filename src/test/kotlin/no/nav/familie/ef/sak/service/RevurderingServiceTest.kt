@@ -9,7 +9,9 @@ import no.nav.familie.ef.sak.ekstern.bisys.lagAndelHistorikkDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
@@ -65,18 +67,17 @@ internal class RevurderingServiceTest {
     )
 
     val andelFraOgMedDato = LocalDate.now().minusMonths(2)
-    val element = lagAndelHistorikkDto(fraOgMed = andelFraOgMedDato, tilOgMed = LocalDate.now(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
+    val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = andelFraOgMedDato, tilOgMed = LocalDate.now(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
 
     @Test
     fun `Skal kopiere vedtak innhold til ny behandling hvis satsendring `() {
         every { barnRepository.findByBehandlingId(revurdering.id) } returns listOf(barn)
-        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(element)
+        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto)
         every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf(historiskBehandlingsbarn)
         every { vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN) } returns revurdering.id
+        every { vedtakService.hentVedtak(forrigeBehandling.id) } returns vedtak(forrigeBehandling.id, ResultatType.INNVILGE).copy(tilleggsstønad = TilleggsstønadWrapper(false, listOf(), "Testbegrunnelse tilleggsstønad"))
 
-
-
-        revurderingService.kopierVedtakHvisSatsendring(BehandlingÅrsak.SATSENDRING, fagsak = fagsak, revurdering = revurdering)
+        revurderingService.kopierVedtakHvisSatsendring(BehandlingÅrsak.SATSENDRING, fagsak = fagsak, revurdering = revurdering, forrigeBehandling.id)
 
         val expectedUtgiftsperiodeDto = UtgiftsperiodeDto(
             årMånedFra = YearMonth.from(andelFraOgMedDato),
@@ -87,13 +88,13 @@ internal class RevurderingServiceTest {
             erMidlertidigOpphør = false
         )
         val expectedVedtakDto = InnvilgelseBarnetilsyn(
-            begrunnelse = "Barnetilsyn satsendring",
+            begrunnelse = "Satsendring barnetilsyn",
             perioder = listOf(expectedUtgiftsperiodeDto),
             perioderKontantstøtte = listOf(),
             tilleggsstønad = TilleggsstønadDto(
                 harTilleggsstønad = false,
                 perioder = listOf(),
-                begrunnelse = null
+                begrunnelse = "Testbegrunnelse tilleggsstønad"
             ),
             resultatType = ResultatType.INNVILGE,
             _type = "InnvilgelseBarnetilsyn"
