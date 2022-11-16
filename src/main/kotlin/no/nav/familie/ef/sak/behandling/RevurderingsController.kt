@@ -50,13 +50,13 @@ class RevurderingsController(
     fun lagreRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
         @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto
-    ): Ressurs<UUID> {
+    ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
         stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
 
-        return Ressurs.success(behandlingId)
+        return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))
     }
 
     @GetMapping("informasjon/{behandlingId}")
