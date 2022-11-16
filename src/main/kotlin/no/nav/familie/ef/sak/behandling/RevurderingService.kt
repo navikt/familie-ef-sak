@@ -89,16 +89,16 @@ class RevurderingService(
         taskRepository.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
-        kopierVedtakHvisSatsendring(revurderingInnhold, fagsak, revurdering)
+        kopierVedtakHvisSatsendring(revurderingInnhold.behandlingsårsak, fagsak, revurdering)
         return revurdering
     }
 
-    private fun kopierVedtakHvisSatsendring(
-        revurderingInnhold: RevurderingDto,
+    fun kopierVedtakHvisSatsendring(
+        behandlingsÅrsak: BehandlingÅrsak,
         fagsak: Fagsak,
         revurdering: Behandling
     ) {
-        if (revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING) {
+        if (behandlingsÅrsak == BehandlingÅrsak.SATSENDRING) {
             val behandlingBarn = barnRepository.findByBehandlingId(revurdering.id)
             val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, behandlingBarn)
             vedtakService.lagreVedtak(vedtakDto, revurdering.id, StønadType.BARNETILSYN)
@@ -130,11 +130,11 @@ class RevurderingService(
     private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> {
         return historikk.filter { kontanstaøtte -> kontanstaøtte.andel.kontantstøtte > 0 }
             .map {
-            PeriodeMedBeløpDto(
-                periode = it.andel.periode,
-                beløp = it.andel.kontantstøtte
-            )
-        }
+                PeriodeMedBeløpDto(
+                    periode = it.andel.periode,
+                    beløp = it.andel.kontantstøtte
+                )
+            }
     }
 
     private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
