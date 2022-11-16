@@ -20,7 +20,10 @@ import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -69,14 +72,17 @@ internal class RevurderingServiceTest {
     val andelFraOgMedDato = LocalDate.now().minusMonths(2)
     val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = andelFraOgMedDato, tilOgMed = LocalDate.now(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
 
-    @Test
-    fun `Skal kopiere vedtak innhold til ny behandling hvis satsendring `() {
+    @BeforeEach
+    fun setup() {
         every { barnRepository.findByBehandlingId(revurdering.id) } returns listOf(barn)
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto)
         every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf(historiskBehandlingsbarn)
         every { vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN) } returns revurdering.id
         every { vedtakService.hentVedtak(forrigeBehandling.id) } returns vedtak(forrigeBehandling.id, ResultatType.INNVILGE).copy(tilleggsstønad = TilleggsstønadWrapper(false, listOf(), "Testbegrunnelse tilleggsstønad"))
+    }
 
+    @Test
+    fun `Skal kopiere vedtak innhold til ny behandling hvis satsendring `() {
         revurderingService.kopierVedtakHvisSatsendring(BehandlingÅrsak.SATSENDRING, fagsak = fagsak, revurdering = revurdering, forrigeBehandling.id)
 
         val expectedUtgiftsperiodeDto = UtgiftsperiodeDto(
@@ -101,5 +107,13 @@ internal class RevurderingServiceTest {
         )
 
         verify { vedtakService.lagreVedtak(expectedVedtakDto, revurdering.id, StønadType.BARNETILSYN) }
+    }
+
+    @Test
+    fun `Skal kopiere vedtak innhold til ny behandling - sjekk kopiering av utgiftsbeløp`() {
+        val andelMedUtgift = andelHistorikkDto.andel.copy(utgifter = BigDecimal.valueOf(1000))
+        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto.copy(andel = andelMedUtgift))
+        val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
+        assertThat(vedtakDto.perioder.first().utgifter).isEqualTo(1000)
     }
 }

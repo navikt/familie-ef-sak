@@ -106,7 +106,7 @@ class RevurderingService(
         }
     }
 
-    private fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
+    fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId)
 
         return InnvilgelseBarnetilsyn(
