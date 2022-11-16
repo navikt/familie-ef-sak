@@ -9,6 +9,8 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -37,7 +39,8 @@ class RevurderingService(
     private val taskRepository: TaskRepository,
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
-    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
+    private val stegService: StegService
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
@@ -48,6 +51,21 @@ class RevurderingService(
             årsakRevurdering = årsakRevurdering?.tilDto(),
             endretTid = årsakRevurdering?.sporbar?.endret?.endretTid
         )
+    }
+
+    fun lagreRevurderingsinformasjon(
+        behandlingId: UUID,
+        revurderingsinformasjonDto: RevurderingsinformasjonDto
+    ): RevurderingsinformasjonDto {
+        stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
+        return hentRevurderingsinformasjon(behandlingId)
+    }
+
+    @Transactional
+    fun slettRevurderingsinformasjon(behandlingId: UUID) {
+        årsakRevurderingsRepository.deleteById(behandlingId)
+        behandlingService.oppdaterKravMottatt(behandlingId, null)
+        stegService.resetSteg(behandlingId, StegType.REVURDERING_ÅRSAK)
     }
 
     @Transactional

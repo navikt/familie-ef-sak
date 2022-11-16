@@ -185,7 +185,7 @@ class BehandlingService(
         return behandlingRepository.update(behandling.copy(steg = steg))
     }
 
-    fun oppdaterKravMottatt(behandlingId: UUID, kravMottatt: LocalDate): Behandling {
+    fun oppdaterKravMottatt(behandlingId: UUID, kravMottatt: LocalDate?): Behandling {
         return behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
     }
 

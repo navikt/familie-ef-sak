@@ -3,12 +3,12 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,8 +22,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class RevurderingsController(
     private val revurderingService: RevurderingService,
-    private val tilgangService: TilgangService,
-    private val stegService: StegService
+    private val tilgangService: TilgangService
 ) {
 
     @PostMapping("{fagsakId}")
@@ -54,9 +53,19 @@ class RevurderingsController(
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
-        stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
+        val oppdatertRevurderingsinformasjon =
+            revurderingService.lagreRevurderingsinformasjon(behandlingId, revurderingsinformasjonDto)
+        return Ressurs.success(oppdatertRevurderingsinformasjon)
+    }
 
-        return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))
+    @DeleteMapping("informasjon/{behandlingId}")
+    fun slettRevurderingsinformasjon(@PathVariable behandlingId: UUID): Ressurs<String> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+
+        revurderingService.slettRevurderingsinformasjon(behandlingId)
+
+        return Ressurs.success("Slettet")
     }
 
     @GetMapping("informasjon/{behandlingId}")
