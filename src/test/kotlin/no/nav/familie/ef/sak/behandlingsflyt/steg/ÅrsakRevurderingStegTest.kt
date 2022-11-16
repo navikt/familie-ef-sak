@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -45,14 +46,14 @@ internal class ÅrsakRevurderingStegTest {
         every { årsakRevurderingsRepository.insert(capture(årsakRevurderingSlot)) } answers { firstArg() }
     }
 
+    private val gyldigRevurderingsinformasjon = revurderingsinformasjon()
+
     @Test
     internal fun `lagrer kravMottatt og årsakRevurdering når dataen er gyldig`() {
-        val data = RevurderingsinformasjonDto(
-            LocalDate.now(),
-            ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse")
-        )
-        steg.utførSteg(saksbehandling, data)
+        val data = gyldigRevurderingsinformasjon
+        val nesteSteg = steg.utførOgReturnerNesteSteg(saksbehandling, data)
 
+        assertThat(nesteSteg).isEqualTo(saksbehandling.steg)
         val lagretObjekt = årsakRevurderingSlot.captured
         assertThat(lagretObjekt.årsak).isEqualTo(data.årsakRevurdering?.årsak)
         assertThat(lagretObjekt.opplysningskilde).isEqualTo(data.årsakRevurdering?.opplysningskilde)
@@ -63,56 +64,64 @@ internal class ÅrsakRevurderingStegTest {
         }
     }
 
+    @Test
+    internal fun `skal returnere saksbehandlingens nåværende steg for å ikke endre steg`() {
+        val behandling = saksbehandling.copy(steg = StegType.BEREGNE_YTELSE)
+        val data = gyldigRevurderingsinformasjon
+
+        val nesteSteg = steg.utførOgReturnerNesteSteg(behandling, data)
+
+        assertThat(nesteSteg).isEqualTo(StegType.BEREGNE_YTELSE)
+    }
+
     @Nested
     inner class validering {
 
         @Test
         internal fun `feiler hvis kravMottatt mangler`() {
-            assertThatThrownBy { steg.utførSteg(saksbehandling, RevurderingsinformasjonDto(null, null)) }
+            assertThatThrownBy { utførOgReturnerNesteSteg(RevurderingsinformasjonDto()) }
                 .hasMessage("Mangler kravMottatt")
         }
 
         @Test
         internal fun `feiler hvis årsakRevurdering mangler`() {
-            assertThatThrownBy { steg.utførSteg(saksbehandling, RevurderingsinformasjonDto(LocalDate.now(), null)) }
+            assertThatThrownBy { utførOgReturnerNesteSteg(RevurderingsinformasjonDto(LocalDate.now())) }
                 .hasMessage("Mangler årsakRevurdering")
         }
 
         @Test
         internal fun `feiler hvis man man sender inn en årsak som ikke er gyldig for gitt stønadstype`() {
-            assertThatThrownBy {
-                steg.utførSteg(
-                    saksbehandling, RevurderingsinformasjonDto(
-                        LocalDate.now(),
-                        ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
-                    )
-                )
-            }.hasMessage("Årsak er ikke gyldig for stønadstype")
+            val dto = RevurderingsinformasjonDto(
+                LocalDate.now(),
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
+            )
+            assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
+                .hasMessage("Årsak er ikke gyldig for stønadstype")
         }
 
         @Test
         internal fun `må angi beskrivelse når årsak=ANNET`() {
             val årsak = Revurderingsårsak.ANNET
-            assertThatThrownBy {
-                steg.utførSteg(
-                    saksbehandling, RevurderingsinformasjonDto(
-                        LocalDate.now(),
-                        ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, årsak, "   ")
-                    )
-                )
-            }.hasMessage("Må ha med beskrivelse når årsak er annet")
+            val dto = RevurderingsinformasjonDto(
+                LocalDate.now(),
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, årsak, "   ")
+            )
+            assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
+                .hasMessage("Må ha med beskrivelse når årsak er annet")
         }
 
         @Test
         internal fun `skal ikke sende med beskrivelse når årsak er annet enn ANNET`() {
-            assertThatThrownBy {
-                steg.utførSteg(
-                    saksbehandling, RevurderingsinformasjonDto(
-                        LocalDate.now(),
-                        ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd")
-                    )
-                )
-            }.hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet en annet")
+            val dto = RevurderingsinformasjonDto(
+                LocalDate.now(),
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, gyldigÅrsak, "asd")
+            )
+            assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
+                .hasMessage("Kan ikke ha med beskrivelse når årsak er noe annet en annet")
         }
+    }
+
+    fun utførOgReturnerNesteSteg(dto: RevurderingsinformasjonDto) {
+        steg.utførOgReturnerNesteSteg(saksbehandling, dto)
     }
 }

@@ -46,3 +46,8 @@ funksjonsbrytere:
     uri: http://localhost:4242/api
     environment: local
     applicationName: familie-ef-sak
+
+prosessering:
+  fixedDelayString:
+    in:
+      milliseconds: 3000

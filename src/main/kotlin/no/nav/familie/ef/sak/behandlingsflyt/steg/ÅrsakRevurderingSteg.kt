@@ -21,7 +21,7 @@ class ÅrsakRevurderingSteg(
         return StegType.REVURDERING_ÅRSAK
     }
 
-    override fun utførSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto) {
+    override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto): StegType {
         val (kravMottatt, årsakRevurdering) = data
 
         feilHvis(kravMottatt == null) {
@@ -48,5 +48,12 @@ class ÅrsakRevurderingSteg(
         årsakRevurderingsRepository.deleteById(saksbehandling.id)
         årsakRevurderingsRepository.insert(årsakRevurdering.tilDomene(saksbehandling.id))
         behandlingService.oppdaterKravMottatt(saksbehandling.id, kravMottatt)
+
+        // returnerer behandlingen sitt nåværende steg for å ikke endre steg
+        return saksbehandling.steg
+    }
+
+    override fun utførSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto) {
+        error("utførOgReturnerNesteSteg utfør og returnerer steg")
     }
 }

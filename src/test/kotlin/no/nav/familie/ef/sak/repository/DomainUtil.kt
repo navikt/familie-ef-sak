@@ -7,7 +7,11 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
+import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
+import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
@@ -245,6 +249,11 @@ fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
 fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> = identer.map {
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
+
+fun revurderingsinformasjon() = RevurderingsinformasjonDto(
+    LocalDate.now(),
+    ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse")
+)
 
 fun tilkjentYtelse(
     behandlingId: UUID,

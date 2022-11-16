@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -55,8 +56,10 @@ class RevurderingService(
 
     @Transactional
     fun slettRevurderingsinformasjon(behandlingId: UUID) {
+        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke slette revurderingsinformasjon når behandlingen er låst"
+        }
         årsakRevurderingService.slettRevurderingsinformasjon(behandlingId)
-        stegService.resetSteg(behandlingId, StegType.REVURDERING_ÅRSAK)
     }
 
     @Transactional
@@ -68,6 +71,7 @@ class RevurderingService(
             behandlingType = BehandlingType.REVURDERING,
             fagsakId = revurderingInnhold.fagsakId,
             status = BehandlingStatus.UTREDES,
+            stegType = StegType.BEREGNE_YTELSE,
             behandlingsårsak = revurderingInnhold.behandlingsårsak,
             kravMottatt = revurderingInnhold.kravMottatt
         )
