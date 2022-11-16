@@ -44,8 +44,7 @@ internal class RevurderingServiceTest {
 
     val fagsak = fagsak()
     val forrigeBehandling = behandling(fagsak)
-    val revurdering = behandling(fagsak= fagsak, forrigeBehandlingId = forrigeBehandling.id)
-
+    val revurdering = behandling(fagsak = fagsak, forrigeBehandlingId = forrigeBehandling.id)
 
     val historiskBehandlingsbarn = behandlingBarn(
         id = UUID.randomUUID(),
@@ -67,13 +66,16 @@ internal class RevurderingServiceTest {
 
     val andelFraOgMedDato = LocalDate.now().minusMonths(2)
     val element = lagAndelHistorikkDto(fraOgMed = andelFraOgMedDato, tilOgMed = LocalDate.now(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
+
     @Test
     fun `Skal kopiere vedtak innhold til ny behandling hvis satsendring `() {
-
         every { barnRepository.findByBehandlingId(revurdering.id) } returns listOf(barn)
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(element)
-        every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf( historiskBehandlingsbarn)
-        every {vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN)} returns revurdering.id
+        every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf(historiskBehandlingsbarn)
+        every { vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN) } returns revurdering.id
+
+
+
         revurderingService.kopierVedtakHvisSatsendring(BehandlingÅrsak.SATSENDRING, fagsak = fagsak, revurdering = revurdering)
 
         val expectedUtgiftsperiodeDto = UtgiftsperiodeDto(
@@ -92,7 +94,9 @@ internal class RevurderingServiceTest {
                 harTilleggsstønad = false,
                 perioder = listOf(),
                 begrunnelse = null
-            ), resultatType = ResultatType.INNVILGE, _type = "InnvilgelseBarnetilsyn"
+            ),
+            resultatType = ResultatType.INNVILGE,
+            _type = "InnvilgelseBarnetilsyn"
         )
 
         verify { vedtakService.lagreVedtak(expectedVedtakDto, revurdering.id, StønadType.BARNETILSYN) }

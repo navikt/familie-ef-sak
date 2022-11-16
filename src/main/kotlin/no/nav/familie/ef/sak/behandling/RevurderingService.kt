@@ -120,7 +120,7 @@ class RevurderingService(
     private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>): TilleggsstønadDto {
         return TilleggsstønadDto(
             historikk.any { it.andel.tilleggsstønad > 0 },
-            historikk.map {
+            historikk.filter { it.andel.tilleggsstønad > 0 }.map {
                 PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
             },
             null
