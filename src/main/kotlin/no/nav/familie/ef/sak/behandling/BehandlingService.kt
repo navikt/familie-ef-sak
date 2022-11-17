@@ -135,7 +135,7 @@ class BehandlingService(
         behandlingshistorikkService.opprettHistorikkInnslag(
             behandlingshistorikk = Behandlingshistorikk(
                 behandlingId = behandling.id,
-                steg = VILKÅR // TODO er dette riktig?
+                steg = VILKÅR
             )
         )
 
