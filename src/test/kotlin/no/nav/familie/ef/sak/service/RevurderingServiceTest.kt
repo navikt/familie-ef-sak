@@ -69,8 +69,10 @@ internal class RevurderingServiceTest {
         fødselTermindato = LocalDate.now()
     )
 
-    val andelFraOgMedDato = LocalDate.now().minusMonths(2)
-    val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = andelFraOgMedDato, tilOgMed = LocalDate.now(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
+    val førsteAndelFraOgMedDato = LocalDate.now().minusMonths(2)
+    val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato, tilOgMed = LocalDate.now(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
+    val sisteAndelTilOgMed = LocalDate.now().plusMonths(3)
+    val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = LocalDate.now().plusMonths(1), tilOgMed = sisteAndelTilOgMed, behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 1, endring = null)
 
     @BeforeEach
     fun setup() {
@@ -86,9 +88,9 @@ internal class RevurderingServiceTest {
         revurderingService.kopierVedtakHvisSatsendring(BehandlingÅrsak.SATSENDRING, fagsak = fagsak, revurdering = revurdering, forrigeBehandling.id)
 
         val expectedUtgiftsperiodeDto = UtgiftsperiodeDto(
-            årMånedFra = YearMonth.from(andelFraOgMedDato),
+            årMånedFra = YearMonth.from(førsteAndelFraOgMedDato),
             årMånedTil = YearMonth.now(),
-            periode = Månedsperiode(andelFraOgMedDato, LocalDate.now()),
+            periode = Månedsperiode(førsteAndelFraOgMedDato, LocalDate.now()),
             barn = listOf(barn.id),
             utgifter = 0,
             erMidlertidigOpphør = false
@@ -115,5 +117,29 @@ internal class RevurderingServiceTest {
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto.copy(andel = andelMedUtgift))
         val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
         assertThat(vedtakDto.perioder.first().utgifter).isEqualTo(1000)
+        assertThat(vedtakDto.perioder).hasSize(1)
     }
+
+    @Test
+    fun `Skal kopiere vedtak innhold til ny behandling - sjekk kopiering av flere perioder med forskjellig utgift`() {
+        val andelMedUtgift = andelHistorikkDto.andel.copy(utgifter = BigDecimal.valueOf(1000))
+        val andelMedUtgift2 = andelHistorikkDto2.andel.copy(utgifter = BigDecimal.valueOf(2000))
+        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto.copy(andel = andelMedUtgift), andelHistorikkDto2.copy(andel = andelMedUtgift2))
+        val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
+        assertThat(vedtakDto.perioder).hasSize(2)
+        assertThat(vedtakDto.perioder.find { it.periode.fom == YearMonth.from(førsteAndelFraOgMedDato)}?.utgifter ).isEqualTo(1000)
+        assertThat(vedtakDto.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMed)}?.utgifter ).isEqualTo(2000)
+    }
+
+    @Test
+    fun `Skal kopiere vedtak innhold til ny behandling - sjekk kopiering av kontantstøtteperioder`() {
+        val andelMedUtgift = andelHistorikkDto.andel.copy(kontantstøtte = 1000)
+        val andelMedUtgift2 = andelHistorikkDto2.andel.copy(kontantstøtte = 2000)
+        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto.copy(andel = andelMedUtgift), andelHistorikkDto2.copy(andel = andelMedUtgift2))
+        val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
+        assertThat(vedtakDto.perioderKontantstøtte).hasSize(2)
+        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom ==  YearMonth.from(førsteAndelFraOgMedDato)}?.beløp).isEqualTo(1000)
+        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom ==  YearMonth.from(sisteAndelTilOgMed)}?.beløp).isEqualTo(2000)
+    }
+
 }
