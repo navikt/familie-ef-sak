@@ -12,7 +12,9 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -22,9 +24,13 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -66,6 +72,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var vedtakService: VedtakService
+
+    @Autowired
+    lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
@@ -191,13 +200,14 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vedtak ved satsendring`() {
-
         val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
         revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
 
         val behandling = opprettFerdigstiltBehandling(fagsakBarnetilsyn)
         val søknad = lagreSøknadForBarnetilsyn(behandling)
         opprettVilkårForBarnetilsyn(behandling, søknad)
+        val vedtakForBehandling = vedtak(behandling.id, perioder = PeriodeWrapper(listOf(vedtaksperiode(sluttDato = LocalDate.of(2023, 12, 1)))))
+        vedtakService.lagreVedtak(vedtakForBehandling.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
 
         val revurdering =
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
@@ -206,8 +216,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val vedtak = vedtakService.hentVedtak(revurdering.id)
 
         assertThat(forrigeVedtak.barnetilsyn?.perioder?.size).isEqualTo(vedtak.barnetilsyn?.perioder?.size)
-
-
     }
 
     @Test
@@ -307,12 +315,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     }
 
     private fun lagreSøknadForBarnetilsyn(behandling: Behandling): SøknadsskjemaBarnetilsyn {
-
-
         val søknad = TestsøknadBuilder.Builder().setBarn(
             listOf(
-                TestsøknadBuilder.Builder()
-                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
+                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barnFnr),
+                TestsøknadBuilder.Builder().defaultBarn("any", PdlClientConfig.barn2Fnr)
             )
         ).build().søknadBarnetilsyn
         søknadService.lagreSøknadForBarnetilsyn(søknad, behandling.id, behandling.fagsakId, "1L")
