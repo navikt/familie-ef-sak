@@ -29,6 +29,8 @@ import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -39,6 +41,7 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -207,7 +210,18 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = lagreSøknadForBarnetilsyn(behandling)
         opprettVilkårForBarnetilsyn(behandling, søknad)
         val vedtakForBehandling = vedtak(behandling.id, perioder = PeriodeWrapper(listOf(vedtaksperiode(sluttDato = LocalDate.of(2023, 12, 1)))))
-        vedtakService.lagreVedtak(vedtakForBehandling.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
+
+        val månedsperiode = Månedsperiode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        val map = barnRepository.findByBehandlingId(behandling.id).map { it.id }
+        val utgifter = 234
+        val barnetilsynperiode = Barnetilsynperiode(månedsperiode, utgifter, map, null)
+        val barnetilsynWrapper = BarnetilsynWrapper(perioder = listOf(barnetilsynperiode), begrunnelse = null)
+
+
+
+        vedtakService.lagreVedtak(vedtakForBehandling.copy(barnetilsyn = barnetilsynWrapper).tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
+
+
 
         val revurdering =
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
