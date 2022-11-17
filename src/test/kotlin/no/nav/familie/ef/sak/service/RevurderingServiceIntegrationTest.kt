@@ -15,8 +15,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -50,7 +48,6 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
@@ -77,9 +74,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var vedtakService: VedtakService
-
-    @Autowired
-    lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
 
     @Autowired
     private lateinit var beregnYtelseSteg: BeregnYtelseSteg
@@ -196,16 +190,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             .isEqualTo(aleneomsorgVilkårForRevurdering)
     }
 
-    // TODO flytte til unittest?
-    @Test
-    internal fun `revurdering - skal kaste feil dersom satsendring på overgangsstønad`() {
-        val behandling = opprettFerdigstiltBehandling(fagsak)
-        val søknad = lagreSøknad(behandling)
-        opprettVilkår(behandling, søknad)
-        val feil = assertThrows<Feil> { revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING)) }
-        assertThat(feil.message).isEqualTo("Kan ikke opprette revurdering med årsak satsendring for OVERGANGSSTØNAD")
-    }
-
     @Test
     internal fun `revurdering - skal kopiere vedtak ved satsendring`() {
         BrukerContextUtil.clearBrukerContext()
@@ -217,10 +201,12 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val søknad = lagreSøknadForBarnetilsyn(behandling)
         opprettVilkårForBarnetilsyn(behandling, søknad)
         val vedtak = vedtakBarnetilsyn(
-            behandling.id,
-            barnRepository.findByBehandlingId(behandling.id).map { it.id },
+            behandlingId = behandling.id,
+            barn = barnRepository.findByBehandlingId(behandling.id).map { it.id },
             beløp = 8000,
-            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 4)), 1000)))
+            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 4)), 1000))),
+            fom = YearMonth.of(2022, 1),
+            tom = YearMonth.of(2022, 12)
         )
 
         vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)

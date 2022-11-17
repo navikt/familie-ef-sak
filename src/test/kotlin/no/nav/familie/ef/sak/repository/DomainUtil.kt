@@ -300,22 +300,24 @@ fun vedtakBarnetilsyn(
     barn: List<UUID>,
     resultatType: ResultatType = ResultatType.INNVILGE,
     beløp: Int = 1000,
-    kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList())
+    kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList()),
+    fom: YearMonth,
+    tom: YearMonth
 ) = Vedtak(
     behandlingId = behandlingId,
     resultatType = resultatType,
-    barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp)), "begrunnelse"),
+    barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp, fom = fom, tom = tom)), "begrunnelse"),
     kontantstøtte = kontantstøtteWrapper,
     tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
 )
 
 fun barnetilsynperiode(
     år: Int = 2022,
-    start: YearMonth = YearMonth.of(år, 1),
-    slutt: YearMonth = YearMonth.of(år, 12),
+    fom: YearMonth = YearMonth.of(år, 1),
+    tom: YearMonth = YearMonth.of(år, 12),
     beløp: Int = 1000,
     barn: List<UUID>
-) = Barnetilsynperiode(Månedsperiode(start, slutt), beløp, barn, false)
+) = Barnetilsynperiode(Månedsperiode(fom, tom), beløp, barn, false)
 
 fun inntektsperiode(
     år: Int = 2021,

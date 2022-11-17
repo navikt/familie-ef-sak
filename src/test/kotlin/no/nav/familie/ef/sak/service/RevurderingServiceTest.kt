@@ -5,7 +5,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.RevurderingService
+import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.ekstern.bisys.lagAndelHistorikkDto
+import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
@@ -23,6 +26,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -33,6 +37,7 @@ internal class RevurderingServiceTest {
     val barnRepository = mockk<BarnRepository>()
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val vedtakService = mockk<VedtakService>()
+    val fagsakService = mockk<FagsakService>()
     val revurderingService: RevurderingService = RevurderingService(
         søknadService = mockk(),
         behandlingService = mockk(),
@@ -41,7 +46,7 @@ internal class RevurderingServiceTest {
         grunnlagsdataService = mockk(),
         taskRepository = mockk(),
         barnService = mockk(),
-        fagsakService = mockk(),
+        fagsakService = fagsakService,
         vedtakService = vedtakService,
         vedtakHistorikkService = vedtakHistorikkService,
         barnRepository = barnRepository
@@ -146,6 +151,16 @@ internal class RevurderingServiceTest {
         assertThat(vedtakDto.perioderKontantstøtte).hasSize(2)
         assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom == YearMonth.from(førsteAndelFraOgMedDato) }?.beløp).isEqualTo(1000)
         assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMed) }?.beløp).isEqualTo(2000)
+    }
+
+    @Test
+    internal fun `revurdering - skal kaste feil dersom satsendring på overgangsstønad`() {
+        val overgangsstønadFagsak = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
+        val revurderingDto = RevurderingDto(overgangsstønadFagsak.id, behandlingsårsak = BehandlingÅrsak.SATSENDRING, LocalDate.now(), emptyList())
+        every { fagsakService.fagsakMedOppdatertPersonIdent(overgangsstønadFagsak.id) } returns overgangsstønadFagsak
+
+        val feil = assertThrows<Feil> { revurderingService.opprettRevurderingManuelt(revurderingDto) }
+        assertThat(feil.message).isEqualTo("Kan ikke opprette revurdering med årsak satsendring for OVERGANGSSTØNAD")
     }
 
     @Test
