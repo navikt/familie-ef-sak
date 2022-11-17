@@ -96,7 +96,8 @@ data class AdresseDto(
     val type: AdresseType,
     val gyldigFraOgMed: LocalDate?,
     val gyldigTilOgMed: LocalDate?,
-    val angittFlyttedato: LocalDate? = null
+    val angittFlyttedato: LocalDate? = null,
+    val erGjeldende: Boolean = false
 )
 
 enum class AdresseType(val rekkefølge: Int) {
