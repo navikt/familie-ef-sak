@@ -18,7 +18,7 @@ class ÅrsakRevurderingService(
         if (saksbehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
             val revurderingsinformasjon = hentRevurderingsinformasjon(saksbehandling.id)
             brukerfeilHvis(revurderingsinformasjon.kravMottatt == null || revurderingsinformasjon.årsakRevurdering == null) {
-                "Behandlingen mangler årsak til revurdering. fyll i informasjonen i fanen for årsak revurdering"
+                "Behandlingen mangler årsak til revurdering. fyll inn informasjonen i fanen for årsak revurdering"
             }
         }
     }
