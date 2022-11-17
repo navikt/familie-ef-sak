@@ -10,7 +10,9 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -24,13 +26,12 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
@@ -41,7 +42,6 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
-import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -78,6 +78,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
+
+    @Autowired
+    private lateinit var beregnYtelseSteg: BeregnYtelseSteg
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
@@ -206,30 +209,28 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
         revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
 
-        val behandling = opprettFerdigstiltBehandling(fagsakBarnetilsyn)
+        val behandling = behandling(fagsakBarnetilsyn)
+        behandlingRepository.insert(behandling)
         val søknad = lagreSøknadForBarnetilsyn(behandling)
         opprettVilkårForBarnetilsyn(behandling, søknad)
-        val vedtakForBehandling = vedtak(behandling.id, perioder = PeriodeWrapper(listOf(vedtaksperiode(sluttDato = LocalDate.of(2023, 12, 1)))))
+        val vedtak = vedtak(behandling.id, perioder = PeriodeWrapper(listOf(vedtaksperiode(sluttDato = LocalDate.of(2023, 12, 1)))))
 
-        val månedsperiode = Månedsperiode(LocalDate.now(), LocalDate.now().plusMonths(1))
-        val map = barnRepository.findByBehandlingId(behandling.id).map { it.id }
-        val utgifter = 234
-        val barnetilsynperiode = Barnetilsynperiode(månedsperiode, utgifter, map, null)
-        val barnetilsynWrapper = BarnetilsynWrapper(perioder = listOf(barnetilsynperiode), begrunnelse = null)
-
-
-
-        vedtakService.lagreVedtak(vedtakForBehandling.copy(barnetilsyn = barnetilsynWrapper).tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
-
-
+        beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak.tilVedtakDto())
+        behandlingRepository.update(
+            behandling.copy(
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.INNVILGET,
+                vedtakstidspunkt = SporbarUtils.now()
+            )
+        )
 
         val revurdering =
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
 
         val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
-        val vedtak = vedtakService.hentVedtak(revurdering.id)
+        val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
 
-        assertThat(forrigeVedtak.barnetilsyn?.perioder?.size).isEqualTo(vedtak.barnetilsyn?.perioder?.size)
+        assertThat(forrigeVedtak.barnetilsyn?.perioder?.size).isEqualTo(nyttVedtak.barnetilsyn?.perioder?.size)
     }
 
     @Test
