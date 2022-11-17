@@ -160,5 +160,4 @@ internal class RevurderingServiceTest {
         assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.fom == YearMonth.from(førsteAndelFraOgMedDato) }?.beløp).isEqualTo(1000)
         assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMed) }?.beløp).isEqualTo(2000)
     }
-
 }

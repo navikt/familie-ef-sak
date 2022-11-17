@@ -12,9 +12,11 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaBarnetilsyn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -22,6 +24,7 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -37,6 +40,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
@@ -59,6 +63,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var søknadRepository: SøknadRepository
+
+    @Autowired
+    lateinit var vedtakService: VedtakService
 
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
@@ -172,6 +179,37 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             .isEqualTo(aleneomsorgVilkårForRevurdering)
     }
 
+    // TODO flytte til unittest?
+    @Test
+    internal fun `revurdering - skal kaste feil dersom satsendring på overgangsstønad`() {
+        val behandling = opprettFerdigstiltBehandling(fagsak)
+        val søknad = lagreSøknad(behandling)
+        opprettVilkår(behandling, søknad)
+        val feil = assertThrows<Feil> { revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING)) }
+        assertThat(feil.message).isEqualTo("Kan ikke opprette revurdering med årsak satsendring for OVERGANGSSTØNAD")
+    }
+
+    @Test
+    internal fun `revurdering - skal kopiere vedtak ved satsendring`() {
+
+        val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
+        revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
+
+        val behandling = opprettFerdigstiltBehandling(fagsakBarnetilsyn)
+        val søknad = lagreSøknadForBarnetilsyn(behandling)
+        opprettVilkårForBarnetilsyn(behandling, søknad)
+
+        val revurdering =
+            revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
+
+        val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
+        val vedtak = vedtakService.hentVedtak(revurdering.id)
+
+        assertThat(forrigeVedtak.barnetilsyn?.perioder?.size).isEqualTo(vedtak.barnetilsyn?.perioder?.size)
+
+
+    }
+
     @Test
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
@@ -189,7 +227,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.filter { it.barnId != null }).hasSize(1)
         assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(2)
         assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
-        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(barnPåBehandling.map { it.id }.sorted())
+        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(
+            barnPåBehandling.map { it.id }
+                .sorted()
+        )
         assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
@@ -259,9 +300,68 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             )
         ).build().søknadOvergangsstønad
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, behandling.fagsakId, "1L")
-        val overgangsstønad = søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
+        val overgangsstønad =
+            søknadService.hentOvergangsstønad(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
         barnRepository.insertAll(søknadBarnTilBehandlingBarn(overgangsstønad.barn, behandling.id))
         return overgangsstønad
+    }
+
+    private fun lagreSøknadForBarnetilsyn(behandling: Behandling): SøknadsskjemaBarnetilsyn {
+
+
+        val søknad = TestsøknadBuilder.Builder().setBarn(
+            listOf(
+                TestsøknadBuilder.Builder()
+                    .defaultBarn("Navn navnesen", "27062188745", fødselTermindato = LocalDate.of(2021, 6, 27))
+            )
+        ).build().søknadBarnetilsyn
+        søknadService.lagreSøknadForBarnetilsyn(søknad, behandling.id, behandling.fagsakId, "1L")
+        val barnetilsyn = søknadService.hentBarnetilsyn(behandling.id) ?: error("Fant ikke overgangsstønad for testen")
+        barnRepository.insertAll(søknadBarnTilBehandlingBarn(barnetilsyn.barn, behandling.id))
+        return barnetilsyn
+    }
+
+    private fun opprettVilkårForBarnetilsyn(
+        behandling: Behandling,
+        søknad: SøknadsskjemaBarnetilsyn
+    ) {
+        val barn = barnRepository.findByBehandlingId(behandling.id)
+        val delvilkårsvurdering =
+            SivilstandRegel().initiereDelvilkårsvurdering(
+                HovedregelMetadata(
+                    søknad.sivilstand,
+                    Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                    barn = emptyList(),
+                    søktOmBarnetilsyn = emptyList()
+                )
+            )
+
+        val delvilkårsvurderingAleneomsorg =
+            AleneomsorgRegel().initiereDelvilkårsvurdering(
+                HovedregelMetadata(
+                    søknad.sivilstand,
+                    Sivilstandstype.ENKE_ELLER_ENKEMANN,
+                    barn = barn,
+                    søktOmBarnetilsyn = emptyList()
+                )
+            )
+        vilkårsvurderingRepository.insertAll(
+            listOf(
+                vilkårsvurdering(
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = VilkårType.SIVILSTAND,
+                    behandlingId = behandling.id,
+                    delvilkårsvurdering = delvilkårsvurdering
+                ),
+                vilkårsvurdering(
+                    resultat = Vilkårsresultat.OPPFYLT,
+                    type = VilkårType.ALENEOMSORG,
+                    behandlingId = behandling.id,
+                    barnId = barn.first().id,
+                    delvilkårsvurdering = delvilkårsvurderingAleneomsorg
+                )
+            )
+        )
     }
 
     private fun opprettVilkår(
