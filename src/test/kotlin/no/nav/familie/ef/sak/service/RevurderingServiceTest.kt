@@ -127,8 +127,8 @@ internal class RevurderingServiceTest {
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto.copy(andel = andelMedUtgift), andelHistorikkDto2.copy(andel = andelMedUtgift2))
         val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
         assertThat(vedtakDto.perioder).hasSize(2)
-        assertThat(vedtakDto.perioder.find { it.periode.fom == YearMonth.from(førsteAndelFraOgMedDato)}?.utgifter ).isEqualTo(1000)
-        assertThat(vedtakDto.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMed)}?.utgifter ).isEqualTo(2000)
+        assertThat(vedtakDto.perioder.find { it.periode.fom == YearMonth.from(førsteAndelFraOgMedDato) }?.utgifter).isEqualTo(1000)
+        assertThat(vedtakDto.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMed) }?.utgifter).isEqualTo(2000)
     }
 
     @Test
@@ -138,8 +138,7 @@ internal class RevurderingServiceTest {
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto.copy(andel = andelMedUtgift), andelHistorikkDto2.copy(andel = andelMedUtgift2))
         val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
         assertThat(vedtakDto.perioderKontantstøtte).hasSize(2)
-        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom ==  YearMonth.from(førsteAndelFraOgMedDato)}?.beløp).isEqualTo(1000)
-        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom ==  YearMonth.from(sisteAndelTilOgMed)}?.beløp).isEqualTo(2000)
+        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom == YearMonth.from(førsteAndelFraOgMedDato) }?.beløp).isEqualTo(1000)
+        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMed) }?.beløp).isEqualTo(2000)
     }
-
 }
