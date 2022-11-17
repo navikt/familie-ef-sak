@@ -34,8 +34,12 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -290,6 +294,28 @@ fun vedtak(
         perioder = perioder,
         inntekter = inntekter
     )
+
+fun vedtakBarnetilsyn(
+    behandlingId: UUID,
+    barn: List<UUID>,
+    resultatType: ResultatType = ResultatType.INNVILGE,
+    beløp: Int = 1000,
+    kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList())
+) = Vedtak(
+    behandlingId = behandlingId,
+    resultatType = resultatType,
+    barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp)), "begrunnelse"),
+    kontantstøtte = kontantstøtteWrapper,
+    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+)
+
+fun barnetilsynperiode(
+    år: Int = 2022,
+    start: YearMonth = YearMonth.of(år, 1),
+    slutt: YearMonth = YearMonth.of(år, 12),
+    beløp: Int = 1000,
+    barn: List<UUID>
+) = Barnetilsynperiode(Månedsperiode(start, slutt), beløp, barn, false)
 
 fun inntektsperiode(
     år: Int = 2021,

@@ -27,16 +27,12 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
-import no.nav.familie.ef.sak.repository.vedtak
-import no.nav.familie.ef.sak.repository.vedtaksperiode
+import no.nav.familie.ef.sak.repository.vedtakBarnetilsyn
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
-import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -57,6 +53,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
@@ -96,14 +93,14 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setUp() {
-        //BrukerContextUtil.mockBrukerContext("Heider")
+        BrukerContextUtil.mockBrukerContext("Heider")
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
         revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
     }
 
     @AfterEach
     internal fun tearDown() {
-        //BrukerContextUtil.clearBrukerContext()
+        BrukerContextUtil.clearBrukerContext()
     }
 
     @Test
@@ -211,6 +208,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vedtak ved satsendring`() {
+        BrukerContextUtil.clearBrukerContext()
         val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
         revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
 
@@ -218,27 +216,16 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         behandlingRepository.insert(behandling)
         val søknad = lagreSøknadForBarnetilsyn(behandling)
         opprettVilkårForBarnetilsyn(behandling, søknad)
-        val vedtak = vedtak(behandling.id, perioder = PeriodeWrapper(listOf(vedtaksperiode(sluttDato = LocalDate.of(2023, 12, 1)))))
-
-        val månedsperiode = Månedsperiode(LocalDate.now(), LocalDate.now().plusMonths(1))
-        val map = barnRepository.findByBehandlingId(behandling.id).map { it.id }
-        val utgifter = 2345
-        val barnetilsynperiode = Barnetilsynperiode(månedsperiode, utgifter, map, null)
-
-        val barnetilsynWrapper = BarnetilsynWrapper(perioder = listOf(barnetilsynperiode), begrunnelse = "JA")
-
-        val vedtakMedbarnetilsynWrapper = vedtak.copy(
-            barnetilsyn = barnetilsynWrapper,
-            kontantstøtte = KontantstøtteWrapper(emptyList()),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+        val vedtak = vedtakBarnetilsyn(
+            behandling.id,
+            barnRepository.findByBehandlingId(behandling.id).map { it.id },
+            beløp = 8000,
+            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 4)), 1000)))
         )
 
-        vedtakService.lagreVedtak(vedtakMedbarnetilsynWrapper.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
+        vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
 
-
-
-
-        beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak.tilVedtakDto())
+        beregnYtelseSteg.utførSteg(saksbehandling(fagsakBarnetilsyn, behandling), vedtak.tilVedtakDto())
         behandlingRepository.update(
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
@@ -249,19 +236,14 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         BrukerContextUtil.mockBrukerContext("Heider")
 
-
         val revurdering =
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
 
-        val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
         val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
 
-
-
-        assertThat(forrigeVedtak.barnetilsyn?.perioder?.size).isEqualTo(nyttVedtak.barnetilsyn?.perioder?.size)
-
-        BrukerContextUtil.clearBrukerContext()
-
+        assertThat(nyttVedtak.barnetilsyn?.perioder?.size).isEqualTo(3)
+        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.utgifter).isEqualTo(8000)
+        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.barn?.size).isEqualTo(2)
     }
 
     @Test
