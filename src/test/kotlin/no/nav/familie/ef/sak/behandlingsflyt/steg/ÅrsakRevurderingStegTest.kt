@@ -1,18 +1,13 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
 import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
-import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
-import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import org.assertj.core.api.Assertions.assertThat
@@ -24,11 +19,9 @@ import java.time.LocalDate
 
 internal class ÅrsakRevurderingStegTest {
 
-    private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
+    private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
-    private val behandlingService = mockk<BehandlingService>()
-
-    private val steg = ÅrsakRevurderingSteg(årsakRevurderingsRepository, behandlingService)
+    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService)
 
     private val saksbehandling = saksbehandling()
     private val stønadstype = saksbehandling.stønadstype
@@ -36,14 +29,9 @@ internal class ÅrsakRevurderingStegTest {
     private val gyldigÅrsak = Revurderingsårsak.values().first { it.gjelderStønadstyper.contains(stønadstype) }
     private val ugyldigÅrsak = Revurderingsårsak.values().first { !it.gjelderStønadstyper.contains(stønadstype) }
 
-    private val årsakRevurderingSlot = slot<ÅrsakRevurdering>()
-
     @BeforeEach
     internal fun setUp() {
-        every { behandlingService.oppdaterKravMottatt(saksbehandling.id, any()) } returns behandling()
-
-        justRun { årsakRevurderingsRepository.deleteById(saksbehandling.id) }
-        every { årsakRevurderingsRepository.insert(capture(årsakRevurderingSlot)) } answers { firstArg() }
+        justRun { årsakRevurderingService.oppdaterRevurderingsinformasjon(any(), any(), any()) }
     }
 
     private val gyldigRevurderingsinformasjon = revurderingsinformasjon()
@@ -54,13 +42,13 @@ internal class ÅrsakRevurderingStegTest {
         val nesteSteg = steg.utførOgReturnerNesteSteg(saksbehandling, data)
 
         assertThat(nesteSteg).isEqualTo(saksbehandling.steg)
-        val lagretObjekt = årsakRevurderingSlot.captured
-        assertThat(lagretObjekt.årsak).isEqualTo(data.årsakRevurdering?.årsak)
-        assertThat(lagretObjekt.opplysningskilde).isEqualTo(data.årsakRevurdering?.opplysningskilde)
-        assertThat(lagretObjekt.beskrivelse).isEqualTo(data.årsakRevurdering?.beskrivelse)
 
         verify {
-            behandlingService.oppdaterKravMottatt(saksbehandling.id, data.kravMottatt!!)
+            årsakRevurderingService.oppdaterRevurderingsinformasjon(
+                saksbehandling,
+                data.kravMottatt!!,
+                data.årsakRevurdering!!
+            )
         }
     }
 

@@ -2,11 +2,15 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
+import no.nav.familie.ef.sak.behandling.dto.tilDomene
 import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -31,6 +35,20 @@ class ÅrsakRevurderingService(
             årsakRevurdering = årsakRevurdering?.tilDto(),
             endretTid = årsakRevurdering?.sporbar?.endret?.endretTid
         )
+    }
+
+    @Transactional
+    fun oppdaterRevurderingsinformasjon(
+        saksbehandling: Saksbehandling,
+        kravMottatt: LocalDate,
+        årsakRevurdering: ÅrsakRevurderingDto
+    ) {
+        feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
+            "Behandlingen er låst og kan ikke oppdatere revurderingsinformasjon"
+        }
+        årsakRevurderingsRepository.deleteById(saksbehandling.id)
+        årsakRevurderingsRepository.insert(årsakRevurdering.tilDomene(saksbehandling.id))
+        behandlingService.oppdaterKravMottatt(saksbehandling.id, kravMottatt)
     }
 
     @Transactional

@@ -4,8 +4,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
-import no.nav.familie.ef.sak.behandling.dto.tilDomene
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ÅrsakRevurderingSteg(
-    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
-    private val behandlingService: BehandlingService
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
 
     override fun stegType(): StegType {
@@ -31,6 +30,18 @@ class ÅrsakRevurderingSteg(
             "Mangler årsakRevurdering"
         }
 
+        validerGyldigeVerdier(saksbehandling, årsakRevurdering)
+
+        årsakRevurderingService.oppdaterRevurderingsinformasjon(saksbehandling, kravMottatt, årsakRevurdering)
+
+        // returnerer behandlingen sitt nåværende steg for å ikke endre steg
+        return saksbehandling.steg
+    }
+
+    private fun validerGyldigeVerdier(
+        saksbehandling: Saksbehandling,
+        årsakRevurdering: ÅrsakRevurderingDto
+    ) {
         brukerfeilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere årsak til revurdering"
         }
@@ -44,13 +55,6 @@ class ÅrsakRevurderingSteg(
         brukerfeilHvis(årsakRevurdering.årsak != Revurderingsårsak.ANNET && årsakRevurdering.beskrivelse != null) {
             "Kan ikke ha med beskrivelse når årsak er noe annet en annet"
         }
-
-        årsakRevurderingsRepository.deleteById(saksbehandling.id)
-        årsakRevurderingsRepository.insert(årsakRevurdering.tilDomene(saksbehandling.id))
-        behandlingService.oppdaterKravMottatt(saksbehandling.id, kravMottatt)
-
-        // returnerer behandlingen sitt nåværende steg for å ikke endre steg
-        return saksbehandling.steg
     }
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto) {
