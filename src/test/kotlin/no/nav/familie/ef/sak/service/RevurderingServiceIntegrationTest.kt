@@ -32,7 +32,11 @@ import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -42,6 +46,7 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkår.AleneomsorgRegel
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -91,14 +96,14 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setUp() {
-        BrukerContextUtil.mockBrukerContext("Heider")
+        //BrukerContextUtil.mockBrukerContext("Heider")
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
         revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
     }
 
     @AfterEach
     internal fun tearDown() {
-        BrukerContextUtil.clearBrukerContext()
+        //BrukerContextUtil.clearBrukerContext()
     }
 
     @Test
@@ -215,6 +220,24 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         opprettVilkårForBarnetilsyn(behandling, søknad)
         val vedtak = vedtak(behandling.id, perioder = PeriodeWrapper(listOf(vedtaksperiode(sluttDato = LocalDate.of(2023, 12, 1)))))
 
+        val månedsperiode = Månedsperiode(LocalDate.now(), LocalDate.now().plusMonths(1))
+        val map = barnRepository.findByBehandlingId(behandling.id).map { it.id }
+        val utgifter = 2345
+        val barnetilsynperiode = Barnetilsynperiode(månedsperiode, utgifter, map, null)
+
+        val barnetilsynWrapper = BarnetilsynWrapper(perioder = listOf(barnetilsynperiode), begrunnelse = "JA")
+
+        val vedtakMedbarnetilsynWrapper = vedtak.copy(
+            barnetilsyn = barnetilsynWrapper,
+            kontantstøtte = KontantstøtteWrapper(emptyList()),
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+        )
+
+        vedtakService.lagreVedtak(vedtakMedbarnetilsynWrapper.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
+
+
+
+
         beregnYtelseSteg.utførSteg(saksbehandling(fagsak, behandling), vedtak.tilVedtakDto())
         behandlingRepository.update(
             behandling.copy(
@@ -224,13 +247,21 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             )
         )
 
+        BrukerContextUtil.mockBrukerContext("Heider")
+
+
         val revurdering =
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
 
         val forrigeVedtak = vedtakService.hentVedtak(behandling.id)
         val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
 
+
+
         assertThat(forrigeVedtak.barnetilsyn?.perioder?.size).isEqualTo(nyttVedtak.barnetilsyn?.perioder?.size)
+
+        BrukerContextUtil.clearBrukerContext()
+
     }
 
     @Test
