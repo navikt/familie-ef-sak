@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -11,6 +12,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -34,7 +36,8 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService
+    private val vedtaksbrevService: VedtaksbrevService,
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -50,6 +53,11 @@ class BeslutteVedtakSteg(
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
+            brukerfeilHvis(årsakRevurderingService.hentRevurderingsinformasjon(saksbehandling.id).årsakRevurdering != null) {
+                "Behandlingen inneholder årsak revurdering. " +
+                    "Denne behandlingen må vente 1-2 dager med å godkjennes pga en feil vi skal fikse. " +
+                    "Vi gir beskjed når saken kan godkjennes."
+            }
             vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)

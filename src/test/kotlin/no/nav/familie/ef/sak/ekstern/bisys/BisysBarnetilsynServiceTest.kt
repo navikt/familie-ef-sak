@@ -158,6 +158,178 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
+    fun `Skal ikke slå sammen perioder som ikke er sammenhengende`() {
+        mockTilkjentYtelse()
+
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now(),
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(3),
+                tilOgMed = LocalDate.now().plusMonths(4),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(6),
+                tilOgMed = LocalDate.now().plusMonths(7),
+                behandlingBarn = behandlingBarn
+            )
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        assertThat(
+            barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+                personident,
+                LocalDate.now()
+            ).barnetilsynBisysPerioder
+        ).hasSize(3)
+    }
+
+    @Test
+    fun `Skal slå sammen perioder som er sammenhengende`() {
+        mockTilkjentYtelse()
+
+        val førsteDato = YearMonth.from(LocalDate.now()).atDay(1)
+        val senesteDato = YearMonth.from(LocalDate.now().plusMonths(5)).atEndOfMonth()
+
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                fraOgMed = førsteDato,
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(2),
+                tilOgMed = LocalDate.now().plusMonths(3),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(4),
+                tilOgMed = senesteDato,
+                behandlingBarn = behandlingBarn
+            )
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+            personident,
+            LocalDate.now()
+        ).barnetilsynBisysPerioder
+
+        assertThat(perioder).hasSize(1)
+        assertThat(perioder.first().periode.fom).isEqualTo(førsteDato)
+        assertThat(perioder.first().periode.tom).isEqualTo(senesteDato)
+    }
+
+    @Test
+    fun `Skal ikke slå sammen perioder som er sammenhengende hvis antall barn er ulike`() {
+        mockTilkjentYtelse()
+
+        val førsteDato = YearMonth.from(LocalDate.now()).atDay(1)
+        val senesteDato = YearMonth.from(LocalDate.now().plusMonths(5)).atEndOfMonth()
+
+        val behandlingBarnListe = behandlingBarn + behandlingBarn.first()
+            .copy(personIdent = "14041385481", søknadBarnId = UUID.randomUUID(), id = UUID.randomUUID())
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                fraOgMed = førsteDato,
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarnListe
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(2),
+                tilOgMed = LocalDate.now().plusMonths(3),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(4),
+                tilOgMed = senesteDato,
+                behandlingBarn = behandlingBarn
+            )
+
+        every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarnListe andThen behandlingBarn
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+            personident,
+            LocalDate.now()
+        ).barnetilsynBisysPerioder
+
+        assertThat(perioder).hasSize(2)
+    }
+
+    @Test
+    fun `Skal ikke slå sammen sammenhengende perioder som ikke har like beløp`() {
+        mockTilkjentYtelse()
+
+        val førsteDato = YearMonth.from(LocalDate.now()).atDay(1)
+        val senesteDato = YearMonth.from(LocalDate.now().plusMonths(5)).atEndOfMonth()
+
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                beløp = 9999,
+                fraOgMed = førsteDato,
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                beløp = 9999,
+                fraOgMed = LocalDate.now().plusMonths(2),
+                tilOgMed = LocalDate.now().plusMonths(3),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                beløp = 8888,
+                fraOgMed = LocalDate.now().plusMonths(4),
+                tilOgMed = senesteDato,
+                behandlingBarn = behandlingBarn
+            )
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+            personident,
+            LocalDate.now()
+        ).barnetilsynBisysPerioder
+
+        assertThat(perioder).hasSize(2)
+        // Periode 1 (to andeler med beløp 9999
+        assertThat(perioder.first().periode.fom).isEqualTo(førsteDato)
+        assertThat(YearMonth.from(perioder.first().periode.tom)).isEqualTo(andelhistorikkDto2.andel.periode.tom)
+        // Periode 2: andel med beløp = 8888
+        assertThat(YearMonth.from(perioder.last().periode.fom)).isEqualTo(andelhistorikkDto3.andel.periode.fom)
+        assertThat(YearMonth.from(perioder.last().periode.tom)).isEqualTo(andelhistorikkDto3.andel.periode.tom)
+    }
+
+    @Test
     fun `personident med to andelshistorikker der den ene er før fomDato, forvent en andelshistorikk`() {
         mockTilkjentYtelse()
         val andelhistorikkDto =

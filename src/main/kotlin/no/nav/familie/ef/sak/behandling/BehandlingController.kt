@@ -4,8 +4,6 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
-import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
@@ -30,7 +28,6 @@ class BehandlingController(
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val henleggService: HenleggService,
-    private val stegService: StegService,
     private val tilgangService: TilgangService,
     private val gjenbrukVilkårService: GjenbrukVilkårService
 ) {
@@ -44,24 +41,11 @@ class BehandlingController(
 
     @GetMapping("gamle-behandlinger")
     fun hentGamleUferdigeBehandlinger(): Ressurs<List<BehandlingDto>> {
-        val gamleOvergangsstønadBehandlinger = behandlingService.hentGamleUferdigeBehandlinger(StønadType.OVERGANGSSTØNAD)
-            .map { it.tilDto(StønadType.OVERGANGSSTØNAD) }
-        val gamleSkolepengerBehandlinger =
-            behandlingService.hentGamleUferdigeBehandlinger(StønadType.SKOLEPENGER).map { it.tilDto(StønadType.SKOLEPENGER) }
-        val gamleBarnetilsynBehandlinger =
-            behandlingService.hentGamleUferdigeBehandlinger(StønadType.BARNETILSYN).map { it.tilDto(StønadType.BARNETILSYN) }
-        val gamleBehandlinger =
-            listOf(gamleOvergangsstønadBehandlinger, gamleSkolepengerBehandlinger, gamleBarnetilsynBehandlinger).flatten()
-
+        val stønadstyper = listOf(StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER, StønadType.BARNETILSYN)
+        val gamleBehandlinger = stønadstyper.flatMap { stønadstype ->
+            behandlingService.hentGamleUferdigeBehandlinger(stønadstype).map { it.tilDto(stønadstype) }
+        }
         return Ressurs.success(gamleBehandlinger)
-    }
-
-    @PostMapping("{behandlingId}/reset/{steg}")
-    fun resetSteg(@PathVariable behandlingId: UUID, @PathVariable steg: StegType): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        stegService.resetSteg(behandlingId, steg)
-        return Ressurs.success(behandlingId)
     }
 
     @PostMapping("{behandlingId}/vent")

@@ -30,20 +30,22 @@
     "relatertVedSivilstand" : "11111122222",
     "navn" : "11111122222 mellomnavn Etternavn",
     "dødsdato" : null,
-    "erGjeldende": true
+    "erGjeldende" : true
   } ],
   "adresse" : [ {
     "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
     "type" : "BOSTEDADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
     "gyldigTilOgMed" : "2199-01-01",
-    "angittFlyttedato" : "2020-01-02"
+    "angittFlyttedato" : "2020-01-02",
+    "erGjeldende" : true
   }, {
     "visningsadresse" : "c/o co, Charlies vei 13 b, 0575 Oslo",
     "type" : "KONTAKTADRESSE",
     "gyldigFraOgMed" : "2020-01-01",
     "gyldigTilOgMed" : "2021-01-01",
-    "angittFlyttedato" : null
+    "angittFlyttedato" : null,
+    "erGjeldende" : false
   } ],
   "fullmakt" : [ {
     "gyldigFraOgMed" : "2021-01-01",
@@ -67,7 +69,8 @@
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
       "gyldigTilOgMed" : "2199-01-01",
-      "angittFlyttedato" : "2020-01-02"
+      "angittFlyttedato" : "2020-01-02",
+      "erGjeldende" : true
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01",
@@ -85,7 +88,8 @@
       "type" : "BOSTEDADRESSE",
       "gyldigFraOgMed" : "2020-01-01",
       "gyldigTilOgMed" : "2199-01-01",
-      "angittFlyttedato" : "2020-01-02"
+      "angittFlyttedato" : "2020-01-02",
+      "erGjeldende" : true
     } ],
     "borHosSøker" : true,
     "fødselsdato" : "2018-01-01",

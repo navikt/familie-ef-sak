@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -15,6 +16,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -43,7 +46,9 @@ class SendTilBeslutterSteg(
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val vurderingService: VurderingService,
-    private val validerOmregningService: ValiderOmregningService
+    private val validerOmregningService: ValiderOmregningService,
+    private val featureToggleService: FeatureToggleService,
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) : BehandlingSteg<Void?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -62,6 +67,10 @@ class SendTilBeslutterSteg(
         validerRiktigTilstandVedInvilgelse(saksbehandling)
         validerSaksbehandlersignatur(saksbehandling)
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
+
+        if (featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK)) {
+            årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
+        }
     }
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
@@ -79,7 +88,8 @@ class SendTilBeslutterSteg(
         }
         val feilutbetaling =
             simuleringService.hentLagretSimuleringsoppsummering(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
-        val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
+        val harIkkeTattStillingTil =
+            !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
         if (feilutbetaling && harIkkeTattStillingTil) {
             return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(saksbehandling.id)
         }
