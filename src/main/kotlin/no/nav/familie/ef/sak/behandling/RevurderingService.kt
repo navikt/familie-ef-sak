@@ -50,7 +50,7 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
-    private val stegService: StegService
+    private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val barnRepository: BarnRepository

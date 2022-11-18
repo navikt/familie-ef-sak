@@ -49,7 +49,9 @@ internal class RevurderingServiceTest {
         fagsakService = fagsakService,
         vedtakService = vedtakService,
         vedtakHistorikkService = vedtakHistorikkService,
-        barnRepository = barnRepository
+        barnRepository = barnRepository,
+        stegService = mockk(),
+        årsakRevurderingService = mockk()
     )
 
     val fagsak = fagsak()
