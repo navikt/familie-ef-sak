@@ -18,6 +18,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
         Toggle.MIGRERING,
         Toggle.MIGRERING_BARNETILSYN,
+        Toggle.REVURDERING_ÅRSAK,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_OPPRETT_KLAGE,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,

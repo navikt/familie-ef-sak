@@ -6,12 +6,14 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLING
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDELSE
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -66,6 +68,15 @@ class StegService(
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
         return håndterSteg(saksbehandling, behandlingSteg, data)
+    }
+
+    @Transactional
+    fun håndterÅrsakRevurdering(behandlingId: UUID, data: RevurderingsinformasjonDto): Behandling {
+        val årsakRevurderingSteg: ÅrsakRevurderingSteg = hentBehandlingSteg(REVURDERING_ÅRSAK)
+
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        return håndterSteg(saksbehandling, årsakRevurderingSteg, data)
     }
 
     @Transactional
