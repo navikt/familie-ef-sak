@@ -795,7 +795,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         )
         val brevrequest = objectMapper.readTree("123")
         testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
-            stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
+            //stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
             stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
                 TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),

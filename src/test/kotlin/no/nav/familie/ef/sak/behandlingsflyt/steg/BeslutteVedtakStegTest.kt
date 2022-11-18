@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -59,6 +61,7 @@ internal class BeslutteVedtakStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(
         taskRepository = taskRepository,
@@ -69,7 +72,8 @@ internal class BeslutteVedtakStegTest {
         totrinnskontrollService = totrinnskontrollService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService
+        vedtaksbrevService = vedtaksbrevService,
+        årsakRevurderingService = årsakRevurderingService
     )
 
     private val innloggetBeslutter = "sign2"
@@ -91,6 +95,7 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
+        every { årsakRevurderingService.hentRevurderingsinformasjon(any()) } returns RevurderingsinformasjonDto()
         mockBrukerContext(innloggetBeslutter)
         taskSlot = mutableListOf()
         every {
