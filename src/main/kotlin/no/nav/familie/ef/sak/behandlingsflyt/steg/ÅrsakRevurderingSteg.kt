@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
@@ -9,11 +8,14 @@ import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import org.springframework.stereotype.Service
 
 @Service
 class ÅrsakRevurderingSteg(
-    private val årsakRevurderingService: ÅrsakRevurderingService
+    private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<RevurderingsinformasjonDto> {
 
     override fun stegType(): StegType {
@@ -22,6 +24,10 @@ class ÅrsakRevurderingSteg(
 
     override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: RevurderingsinformasjonDto): StegType {
         val (kravMottatt, årsakRevurdering) = data
+
+        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK)) {
+            "Feil gjør at denne funksjonaliten ikke skal vises ennå, vennligst relast siden"
+        }
 
         feilHvis(kravMottatt == null) {
             "Mangler kravMottatt"
