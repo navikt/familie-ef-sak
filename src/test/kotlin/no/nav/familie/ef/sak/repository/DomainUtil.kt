@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
@@ -85,7 +86,8 @@ fun behandling(
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
     eksternId: EksternBehandlingId = EksternBehandlingId(),
-    vedtakstidspunkt: LocalDateTime? = null
+    vedtakstidspunkt: LocalDateTime? = null,
+    kravMottatt: LocalDate? = null
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -100,7 +102,8 @@ fun behandling(
         henlagtÅrsak = henlagtÅrsak,
         eksternId = eksternId,
         vedtakstidspunkt = vedtakstidspunkt
-            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null
+            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
+        kravMottatt = kravMottatt
     )
 
 fun saksbehandling(
@@ -155,7 +158,8 @@ fun saksbehandling(
         migrert = fagsak.migrert,
         opprettetAv = behandling.sporbar.opprettetAv,
         opprettetTid = behandling.sporbar.opprettetTid,
-        endretTid = behandling.sporbar.endret.endretTid
+        endretTid = behandling.sporbar.endret.endretTid,
+        kravMottatt = behandling.kravMottatt
     )
 
 fun Behandling.innvilgetOgFerdigstilt() =
@@ -249,6 +253,19 @@ fun fagsakpersoner(identer: Set<String>): Set<PersonIdent> = identer.map {
 fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> = identer.map {
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
+
+fun årsakRevurdering(
+    behandlingId: UUID = UUID.randomUUID(),
+    opplysningskilde: Opplysningskilde = Opplysningskilde.MELDING_MODIA,
+    årsak: Revurderingsårsak = Revurderingsårsak.ANNET,
+    beskrivelse: String? = null
+) =
+    ÅrsakRevurdering(
+        behandlingId = behandlingId,
+        opplysningskilde = opplysningskilde,
+        årsak = årsak,
+        beskrivelse = beskrivelse
+    )
 
 fun revurderingsinformasjon() = RevurderingsinformasjonDto(
     LocalDate.now(),
