@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import org.assertj.core.api.Assertions.assertThat
@@ -71,6 +72,30 @@ internal class ÅrsakRevurderingServiceTest {
             assertThatThrownBy {
                 service.validerHarGyldigRevurderingsinformasjon(revurderingMedKravMottatt)
             }.hasMessageContaining("Behandlingen mangler årsak til revurdering.")
+        }
+
+        /**
+         * Hvis denne feiler må man vurdere om den nye [BehandlingÅrsak] skal valideres for at årsak revurdering finnes eller ikke
+         * Hvis den ikke skal valideres, som for eks for [BehandlingÅrsak.MIGRERING] så skal den legges inn i
+         * årsaker som filtres vekk i [ÅrsakRevurderingService]
+         *
+         * Uavhengig om den skal med eller ikke må den legges inn i [årsakerSomErTattStillingTil]
+         */
+        @Test
+        internal fun `validerHarGyldigRevurderingsinformasjon har tatt stilling til alle behandlingsårsaker`() {
+            val årsakerSomErTattStillingTil = setOf(
+                BehandlingÅrsak.KLAGE,
+                BehandlingÅrsak.NYE_OPPLYSNINGER,
+                BehandlingÅrsak.SANKSJON_1_MND,
+                BehandlingÅrsak.SØKNAD,
+                BehandlingÅrsak.MIGRERING,
+                BehandlingÅrsak.G_OMREGNING,
+                BehandlingÅrsak.KORRIGERING_UTEN_BREV,
+                BehandlingÅrsak.PAPIRSØKNAD,
+                BehandlingÅrsak.SATSENDRING,
+            )
+            val alleÅrsaker = BehandlingÅrsak.values().toSet()
+            assertThat(årsakerSomErTattStillingTil).containsExactlyInAnyOrderElementsOf(alleÅrsaker)
         }
     }
 
