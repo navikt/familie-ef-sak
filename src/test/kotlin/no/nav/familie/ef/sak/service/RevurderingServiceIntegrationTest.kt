@@ -31,6 +31,7 @@ import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -192,14 +193,8 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vedtak ved satsendring`() {
-        BrukerContextUtil.clearBrukerContext()
-        val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
-        revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
-
-        val behandling = behandling(fagsakBarnetilsyn)
-        behandlingRepository.insert(behandling)
-        val søknad = lagreSøknadForBarnetilsyn(behandling)
-        opprettVilkårForBarnetilsyn(behandling, søknad)
+        //BrukerContextUtil.clearBrukerContext()
+        val (fagsakBarnetilsyn, behandling) = opprettBarnetilsynBehandling()
         val vedtak = vedtakBarnetilsyn(
             behandlingId = behandling.id,
             barn = barnRepository.findByBehandlingId(behandling.id).map { it.id },
@@ -209,6 +204,25 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             tom = YearMonth.of(2022, 12)
         )
 
+        ferdigstillVedtak(vedtak, behandling, fagsakBarnetilsyn)
+
+        //BrukerContextUtil.mockBrukerContext("Heider")
+
+        val revurdering =
+            revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
+
+        val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
+
+        assertThat(nyttVedtak.barnetilsyn?.perioder?.size).isEqualTo(3)
+        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.utgifter).isEqualTo(8000)
+        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.barn?.size).isEqualTo(2)
+    }
+
+    private fun ferdigstillVedtak(
+        vedtak: Vedtak,
+        behandling: Behandling,
+        fagsakBarnetilsyn: Fagsak
+    ) {
         vedtakService.lagreVedtak(vedtak.tilVedtakDto(), behandling.id, StønadType.BARNETILSYN)
 
         beregnYtelseSteg.utførSteg(saksbehandling(fagsakBarnetilsyn, behandling), vedtak.tilVedtakDto())
@@ -219,17 +233,17 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                 vedtakstidspunkt = SporbarUtils.now()
             )
         )
+    }
 
-        BrukerContextUtil.mockBrukerContext("Heider")
+    private fun opprettBarnetilsynBehandling(): Pair<Fagsak, Behandling> {
+        val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
+        revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
 
-        val revurdering =
-            revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
-
-        val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
-
-        assertThat(nyttVedtak.barnetilsyn?.perioder?.size).isEqualTo(3)
-        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.utgifter).isEqualTo(8000)
-        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.barn?.size).isEqualTo(2)
+        val behandling = behandling(fagsakBarnetilsyn)
+        behandlingRepository.insert(behandling)
+        val søknad = lagreSøknadForBarnetilsyn(behandling)
+        opprettVilkårForBarnetilsyn(behandling, søknad)
+        return Pair(fagsakBarnetilsyn, behandling)
     }
 
     @Test
