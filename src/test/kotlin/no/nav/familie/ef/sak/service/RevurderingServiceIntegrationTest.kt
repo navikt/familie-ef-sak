@@ -214,7 +214,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
         val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
         val barnetilsynPerioder = nyttVedtak.barnetilsyn?.perioder
-        assertThat(barnetilsynPerioder?.size).isEqualTo(3) //3 perioder: Før, under og etter kontantstøtte-periode
+        assertThat(barnetilsynPerioder?.size).isEqualTo(3) // 3 perioder: Før, under og etter kontantstøtte-periode
         assertThat(barnetilsynPerioder?.first()?.utgifter).isEqualTo(8000)
         assertThat(barnetilsynPerioder?.first()?.barn?.size).isEqualTo(2)
     }
