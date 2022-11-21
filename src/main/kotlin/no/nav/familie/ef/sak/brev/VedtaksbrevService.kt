@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -30,8 +29,7 @@ class VedtaksbrevService(
     private val brevRepository: VedtaksbrevRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val brevsignaturService: BrevsignaturService,
-    private val familieDokumentClient: FamilieDokumentClient,
-    private val featureToggleService: FeatureToggleService
+    private val familieDokumentClient: FamilieDokumentClient
 ) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
@@ -107,12 +105,12 @@ class VedtaksbrevService(
         ).bytes
     }
 
-    fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling): Fil {
+    fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling, erVedtakUtenBeslutter: Boolean): Fil {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
         val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
         val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
-        validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent)
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent, erVedtakUtenBeslutter)
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, erVedtakUtenBeslutter)
         val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
         val besluttervedtaksbrev = vedtaksbrev.copy(
             besluttersignatur = signaturMedEnhet.navn,
@@ -137,7 +135,12 @@ class VedtaksbrevService(
         return vedtaksbrev.saksbehandlerHtml
     }
 
-    private fun validerKanLageBeslutterbrev(behandling: Saksbehandling, vedtaksbrev: Vedtaksbrev, beslutterIdent: String) {
+    private fun validerKanLageBeslutterbrev(
+        behandling: Saksbehandling,
+        vedtaksbrev: Vedtaksbrev,
+        beslutterIdent: String,
+        erVedtakUtenBeslutter: Boolean
+    ) {
         if (behandling.steg != StegType.BESLUTTE_VEDTAK || behandling.status != BehandlingStatus.FATTER_VEDTAK) {
             throw Feil(
                 "Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
@@ -148,7 +151,9 @@ class VedtaksbrevService(
         feilHvisIkke(vedtaksbrev.beslutterPdf == null) {
             "Det finnes allerede et beslutterbrev"
         }
-        validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
+        if (!erVedtakUtenBeslutter) {
+            validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
+        }
     }
 
     private fun lagBeslutterPdfMedSignatur(

@@ -121,7 +121,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any()) } returns Fil("123".toByteArray())
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), false) } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 

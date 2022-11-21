@@ -55,6 +55,14 @@ class StegService(
     }
 
     @Transactional
+    fun håndterFerdigstilleVedtakUtenBeslutter(saksbehandling: Saksbehandling): Behandling {
+        håndterSendTilBeslutter(saksbehandling)
+        val oppdatertBehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
+        val godkjentBesluttetVedtak = BeslutteVedtakDto(godkjent = true)
+        return håndterBeslutteVedtak(oppdatertBehandling, godkjentBesluttetVedtak)
+    }
+
+    @Transactional
     fun håndterSendTilBeslutter(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 

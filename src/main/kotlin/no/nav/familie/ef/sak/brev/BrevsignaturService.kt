@@ -21,6 +21,13 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
         return lagSignaturDto(fagsak.hentAktivIdent())
     }
 
+    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling, erVedtakUtenBeslutter: Boolean): SignaturDto {
+        if (erVedtakUtenBeslutter) {
+            return SignaturDto("", "", true)
+        }
+        return lagSignaturMedEnhet(saksbehandling)
+    }
+
     private fun lagSignaturDto(ident: String): SignaturDto {
         val harStrengtFortroligAdresse: Boolean =
             personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)

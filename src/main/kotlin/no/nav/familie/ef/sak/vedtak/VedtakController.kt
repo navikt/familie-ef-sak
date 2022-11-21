@@ -6,6 +6,9 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -45,7 +48,8 @@ class VedtakController(
     private val vurderingService: VurderingService,
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
-    private val nullstillVedtakService: NullstillVedtakService
+    private val nullstillVedtakService: NullstillVedtakService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -54,7 +58,16 @@ class VedtakController(
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+        val erVedtakUtenBeslutter = vedtakService.hentVedtak(behandlingId).erVedtakUtenBeslutter()
+
+        return if (erVedtakUtenBeslutter) {
+            feilHvis(!featureToggleService.isEnabled(Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER)) {
+                "Avslag pga mindre inntektsendringer er skrudd av"
+            }
+            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)
+        } else {
+            Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+        }
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")

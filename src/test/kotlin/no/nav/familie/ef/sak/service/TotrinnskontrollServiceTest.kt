@@ -18,7 +18,9 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
+import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -51,7 +53,8 @@ internal class TotrinnskontrollServiceTest {
         val response = totrinnskontrollService
             .lagreTotrinnskontrollOgReturnerBehandler(
                 saksbehandling(status = BehandlingStatus.UTREDES),
-                BeslutteVedtakDto(false, "")
+                BeslutteVedtakDto(false, ""),
+                Vedtak(UUID.randomUUID(), ResultatType.INNVILGE)
             )
         assertThat(response).isEqualTo(opprettetAv)
     }
