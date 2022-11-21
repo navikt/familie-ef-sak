@@ -203,9 +203,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             behandlingId = behandling.id,
             barn = barnRepository.findByBehandlingId(behandling.id).map { it.id },
             beløp = 8000,
-            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 4)), 1000))),
-            fom = YearMonth.of(2022, 1),
-            tom = YearMonth.of(2022, 12)
+            kontantstøtteWrapper = KontantstøtteWrapper(listOf(PeriodeMedBeløp(Månedsperiode(YearMonth.of(2023, 3), YearMonth.of(2023, 4)), 1000))),
+            fom = YearMonth.of(2022, 6),
+            tom = YearMonth.of(2023, 12)
         )
         ferdigstillVedtak(vedtak, behandling, fagsakBarnetilsyn)
 

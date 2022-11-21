@@ -83,6 +83,13 @@ class VedtakHistorikkService(
             .sortedBy { it.andel.periode.fom }
     }
 
+    fun hentAktivHistorikkFraMåned(fagsakId: UUID, fra: YearMonth): List<AndelHistorikkDto> {
+        return andelsHistorikkService.hentHistorikk(fagsakId, null)
+            .filter { it.erIkkeFjernet() }
+            .sortedBy { it.andel.periode.fom }
+            .fraDato(fra)
+    }
+
     private fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
         val dato = fra.atDay(1)
         return this.mapNotNull {

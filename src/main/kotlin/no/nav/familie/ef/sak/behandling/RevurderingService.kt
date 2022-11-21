@@ -37,6 +37,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -142,7 +143,8 @@ class RevurderingService(
     }
 
     fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
-        val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId)
+        val currentOrNextYear = if (YearMonth.now().month.value > 6) 1 else 0
+        val historikk = vedtakHistorikkService.hentAktivHistorikkFraMåned(fagsakId, YearMonth.of(YearMonth.now().year + currentOrNextYear, 1))
 
         return InnvilgelseBarnetilsyn(
             perioder = mapUtgiftsperioder(historikk, behandlingBarn),
