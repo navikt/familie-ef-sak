@@ -20,7 +20,8 @@ data class UtgiftsMåned(
 
 fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
+    brukIkkeVedtatteSatser: Boolean = false
 ): BeløpsperiodeBarnetilsynDto {
     val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
     val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
@@ -29,7 +30,8 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
         utgiftsperiode = this,
         kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
         tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
-        barn = this.barn
+        barn = this.barn,
+        brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
     )
 }
 

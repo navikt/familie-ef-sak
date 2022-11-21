@@ -114,12 +114,14 @@ fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =
 
 fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
+    brukIkkeVedtatteSatser: Boolean = false
 ) = this.map { it.split() }
     .flatten().associate { utgiftsMåned ->
         utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
             kontantstøttePerioder,
-            tilleggsstønadsperioder
+            tilleggsstønadsperioder,
+            brukIkkeVedtatteSatser
         )
     }
 

@@ -16,12 +16,8 @@ data class MaxbeløpBarnetilsynSats(
 
 object BeregningBarnetilsynUtil {
 
-    val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
+    private val eldreBarnetilsynsatser: List<MaxbeløpBarnetilsynSats> =
         listOf(
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
-            ),
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
                 maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)
@@ -32,11 +28,32 @@ object BeregningBarnetilsynUtil {
             )
         )
 
+    val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
+        listOf(
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
+            )
+        ) + eldreBarnetilsynsatser
+
+    val ikkeVedtatteSatserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
+        listOf(
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(LocalDate.of(2023, 1, 1), LocalDate.MAX),
+                maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460)
+            ),
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
+            )
+        ) + eldreBarnetilsynsatser
+
     fun lagBeløpsPeriodeBarnetilsyn(
         utgiftsperiode: UtgiftsMåned,
         kontantstøtteBeløp: BigDecimal,
         tilleggsstønadBeløp: BigDecimal,
-        barn: List<UUID>
+        barn: List<UUID>,
+        brukIkkeVedtatteSatser: Boolean = false
     ): BeløpsperiodeBarnetilsynDto {
         val beregnedeBeløp: BeregnedeBeløp =
             beregnPeriodeBeløp(
@@ -44,7 +61,8 @@ object BeregningBarnetilsynUtil {
                 kontantstøtteBeløp,
                 tilleggsstønadBeløp,
                 barn.size,
-                utgiftsperiode.årMåned
+                utgiftsperiode.årMåned,
+                brukIkkeVedtatteSatser
             )
 
         return BeløpsperiodeBarnetilsynDto(
@@ -69,19 +87,24 @@ object BeregningBarnetilsynUtil {
         kontantstøtteBeløp: BigDecimal,
         tilleggsstønadBeløp: BigDecimal,
         antallBarn: Int,
-        årMåned: YearMonth
+        årMåned: YearMonth,
+        brukIkkeVedtatteSatser: Boolean = false
     ): BeregnedeBeløp {
         val beløpFørFratrekkOgSatsjustering =
             kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)
-        val satsBeløp = satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
 
-        val beløpFørFratrekk = minOf(beløpFørFratrekkOgSatsjustering, satsBeløp)
+        val maxSatsBeløp = when (brukIkkeVedtatteSatser) {
+            true -> ikkeVedtatteSatserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
+            false -> satserForBarnetilsyn.hentSatsFor(antallBarn, årMåned).toBigDecimal()
+        }
+
+        val beløpFørFratrekk = minOf(beløpFørFratrekkOgSatsjustering, maxSatsBeløp)
         val utbetaltBeløp = beløpFørFratrekk - tilleggsstønadBeløp
 
         return BeregnedeBeløp(
             utbetaltBeløp = maxOf(ZERO, utbetaltBeløp),
             beløpFørFratrekkOgSatsjustering = beløpFørFratrekkOgSatsjustering,
-            satsBeløp.toInt()
+            maxSatsBeløp.toInt()
         )
     }
 

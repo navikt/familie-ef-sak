@@ -6,11 +6,14 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -34,8 +37,30 @@ class RevurderingService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val taskService: TaskService,
     private val barnService: BarnService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val stegService: StegService
 ) {
+
+    fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
+        return årsakRevurderingService.hentRevurderingsinformasjon(behandlingId)
+    }
+
+    fun lagreRevurderingsinformasjon(
+        behandlingId: UUID,
+        revurderingsinformasjonDto: RevurderingsinformasjonDto
+    ): RevurderingsinformasjonDto {
+        stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
+        return hentRevurderingsinformasjon(behandlingId)
+    }
+
+    @Transactional
+    fun slettRevurderingsinformasjon(behandlingId: UUID) {
+        brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke slette revurderingsinformasjon når behandlingen er låst"
+        }
+        årsakRevurderingService.slettRevurderingsinformasjon(behandlingId)
+    }
 
     @Transactional
     fun opprettRevurderingManuelt(revurderingInnhold: RevurderingDto): Behandling {
@@ -43,12 +68,12 @@ class RevurderingService(
         validerOpprettRevurdering(fagsak, revurderingInnhold)
 
         val revurdering = behandlingService.opprettBehandling(
-            BehandlingType.REVURDERING,
-            revurderingInnhold.fagsakId,
-            BehandlingStatus.UTREDES,
-            StegType.BEREGNE_YTELSE,
-            revurderingInnhold.behandlingsårsak,
-            revurderingInnhold.kravMottatt
+            behandlingType = BehandlingType.REVURDERING,
+            fagsakId = revurderingInnhold.fagsakId,
+            status = BehandlingStatus.UTREDES,
+            stegType = StegType.BEREGNE_YTELSE,
+            behandlingsårsak = revurderingInnhold.behandlingsårsak,
+            kravMottatt = revurderingInnhold.kravMottatt
         )
         val forrigeBehandlingId = forrigeBehandling(revurdering)
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
@@ -64,7 +89,12 @@ class RevurderingService(
             stønadstype = fagsak.stønadstype
         )
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(revurdering.id)
-        vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, revurdering.id, metadata, fagsak.stønadstype)
+        vurderingService.kopierVurderingerTilNyBehandling(
+            forrigeBehandlingId,
+            revurdering.id,
+            metadata,
+            fagsak.stønadstype
+        )
         val oppgaveId = oppgaveService.opprettOppgave(
             behandlingId = revurdering.id,
             oppgavetype = Oppgavetype.BehandleSak,
@@ -72,7 +102,9 @@ class RevurderingService(
             beskrivelse = "Revurdering i ny løsning"
         )
 
-        taskService.save(BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId))
+        taskService.save(
+            BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId)
+        )
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
         return revurdering
     }
@@ -83,6 +115,12 @@ class RevurderingService(
                 revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING
         ) {
             "Kan ikke opprette revurdering med årsak g-omregning for ${fagsak.stønadstype}"
+        }
+        feilHvis(
+            fagsak.stønadstype != StønadType.BARNETILSYN &&
+                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+        ) {
+            "Kan ikke opprette revurdering med årsak satsendring for ${fagsak.stønadstype}"
         }
     }
 

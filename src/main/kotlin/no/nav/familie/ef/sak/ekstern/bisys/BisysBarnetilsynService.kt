@@ -17,6 +17,7 @@ import no.nav.familie.eksterne.kontrakter.bisys.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BisysBarnetilsynService(
@@ -30,7 +31,32 @@ class BisysBarnetilsynService(
 ) {
 
     fun hentBarnetilsynperioderFraEfOgInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
-        return BarnetilsynBisysResponse(kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent, fomDato))
+        val barnetilsynBisysPerioder = kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent, fomDato)
+        return BarnetilsynBisysResponse(barnetilsynBisysPerioder.mergeSammenhengendePerioder())
+    }
+
+    fun List<BarnetilsynBisysPeriode>.mergeSammenhengendePerioder(): List<BarnetilsynBisysPeriode> {
+        val sortertPåDatoListe = this.sortedBy { it.periode.fom }
+        return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
+            val last = acc.lastOrNull()
+            if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpAntallBarnOgDatakilde(entry)) {
+                acc.removeLast()
+                acc.add(
+                    last.copy(
+                        periode = last.periode.union(entry.periode)
+                    )
+                )
+            } else {
+                acc.add(entry)
+            }
+            acc
+        }
+    }
+
+    fun BarnetilsynBisysPeriode.hengerSammenMed(other: BarnetilsynBisysPeriode): Boolean {
+        val tomNesteMåned = YearMonth.from(this.periode.tom.plusMonths(1))
+        val otherFom = YearMonth.from(other.periode.fom)
+        return tomNesteMåned == otherFom
     }
 
     private fun kombinerBarnetilsynperioderFraEfOgInfotrygd(
@@ -115,4 +141,12 @@ class BisysBarnetilsynService(
     }
 
     data class EfPerioder(val startdato: LocalDate, val perioder: List<BarnetilsynBisysPeriode>)
+}
+
+private fun Periode.union(periode: Periode): Periode {
+    return Periode(fom = minOf(this.fom, periode.fom), tom = maxOf(this.tom, periode.tom))
+}
+
+private fun BarnetilsynBisysPeriode.sammeBeløpAntallBarnOgDatakilde(entry: BarnetilsynBisysPeriode): Boolean {
+    return datakilde == entry.datakilde && this.månedsbeløp == entry.månedsbeløp && barnIdenter.toSet() == entry.barnIdenter.toSet()
 }

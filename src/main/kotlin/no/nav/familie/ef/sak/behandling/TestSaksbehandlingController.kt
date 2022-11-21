@@ -58,6 +58,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -147,6 +148,7 @@ class TestSaksbehandlingController(
         )
     )
 
+    @Transactional
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
         val personIdent = testFagsakRequest.personIdent

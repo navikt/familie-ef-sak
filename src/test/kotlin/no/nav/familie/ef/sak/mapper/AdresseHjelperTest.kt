@@ -275,12 +275,17 @@ internal class AdresseHjelperTest {
     inner class SorterAdresser {
 
         @Test
-        internal fun `sortering av adresser skal sortere de per type først, og sen per startdato`() {
-            val aktivBostedsadresse = lagAdresseDto(AdresseType.BOSTEDADRESSE, now().minusDays(5))
+        internal fun `sortering av adresser skal sortere de per type først, aktiv, og sen per startdato`() {
+            val gjeldendeBostedsadresse =
+                lagAdresseDto(AdresseType.BOSTEDADRESSE, now().minusDays(5), erGjeldende = true)
             val historiskBostedsadresse = lagAdresseDto(
                 AdresseType.BOSTEDADRESSE,
                 now().minusYears(1),
                 now().minusDays(5)
+            )
+            val historiskBostedsadresseEtterAktivAdresse = lagAdresseDto(
+                AdresseType.BOSTEDADRESSE,
+                now(),
             )
             val aktivOppholdsadresse = lagAdresseDto(AdresseType.OPPHOLDSADRESSE, now())
             val historiskKontaktadresse = lagAdresseDto(
@@ -292,14 +297,17 @@ internal class AdresseHjelperTest {
 
             val adresser = listOf(
                 historiskBostedsadresse,
+                historiskBostedsadresseEtterAktivAdresse,
                 historiskKontaktadresseUtland,
                 aktivOppholdsadresse,
                 historiskKontaktadresse,
-                aktivBostedsadresse
+                gjeldendeBostedsadresse
             )
-            assertThat(AdresseHjelper.sorterAdresser(adresser))
+            val sorterteAdresser = AdresseHjelper.sorterAdresser(adresser)
+            assertThat(sorterteAdresser)
                 .containsExactly(
-                    aktivBostedsadresse,
+                    gjeldendeBostedsadresse,
+                    historiskBostedsadresseEtterAktivAdresse,
                     historiskBostedsadresse,
                     aktivOppholdsadresse,
                     historiskKontaktadresse,
@@ -331,13 +339,15 @@ internal class AdresseHjelperTest {
     private fun lagAdresseDto(
         type: AdresseType,
         gyldigFraOgMed: LocalDate?,
-        gyldigTilOgMed: LocalDate? = null
+        gyldigTilOgMed: LocalDate? = null,
+        erGjeldende: Boolean = false
     ): AdresseDto {
         return AdresseDto(
             visningsadresse = "Oslogata 1",
             type = type,
             gyldigFraOgMed = gyldigFraOgMed,
-            gyldigTilOgMed = gyldigTilOgMed
+            gyldigTilOgMed = gyldigTilOgMed,
+            erGjeldende = erGjeldende
         )
     }
 }

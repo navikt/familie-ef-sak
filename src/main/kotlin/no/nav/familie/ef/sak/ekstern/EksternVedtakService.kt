@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
@@ -21,7 +22,7 @@ class EksternVedtakService(
     fun hentVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
         val ferdigstilteBehandlinger =
-            behandlingService.hentBehandlinger(fagsakId = fagsak.id).filter { it.erAvsluttet() }
+            behandlingService.hentBehandlinger(fagsakId = fagsak.id).filter { it.erAvsluttet() && it.resultat != BehandlingResultat.HENLAGT }
 
         return ferdigstilteBehandlinger.map { tilFagsystemVedtak(it) }
     }

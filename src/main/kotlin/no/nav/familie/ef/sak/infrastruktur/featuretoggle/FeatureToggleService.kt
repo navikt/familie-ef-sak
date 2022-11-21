@@ -12,6 +12,7 @@ interface FeatureToggleService : DisposableBean {
 }
 
 enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
+    WEBCLIENT("familie.ef.sak.webclient"),
     AUTOMATISK_MIGRERING("familie.ef.sak.automatisk-migrering"),
     MIGRERING("familie.ef.sak.migrering"),
     MIGRERING_BARNETILSYN("familie.ef.sak.migrering.barnetilsyn"),
@@ -25,13 +26,16 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     ERSTATTE_SANKSJON("familie.ef.sak.erstatte-sanksjon"),
 
+    REVURDERING_ÅRSAK("familie.ef.sak.revurdering-arsak"),
+
     FRONTEND_JOURNALFØRING_KLAGE("familie.ef.sak.frontend-journalforing-klage"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_OPPRETT_KLAGE("familie.ef.sak.frontend-vis-opprett-klage"),
     FRONTEND_VERGE_FRITTSTÅENDE_BREV("familie.ef.sak.frontend-verge-frittstaende-brev"),
-    FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse")
+    FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse"),
+    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring")
     ;
 
     companion object {

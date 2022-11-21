@@ -80,6 +80,9 @@ class FeatureToggleConfig(
         return object : FeatureToggleService {
             override fun isEnabled(toggle: Toggle, defaultValue: Boolean): Boolean {
                 if (unleash.environment == "local") {
+                    if (toggle == Toggle.REVURDERING_ÅRSAK) {
+                        return false
+                    }
                     return true
                 }
                 return defaultValue

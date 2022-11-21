@@ -50,7 +50,8 @@ class AdresseMapper(private val kodeverkService: KodeverkService) {
             type = AdresseType.BOSTEDADRESSE,
             gyldigFraOgMed = adresse.gyldigFraOgMed,
             gyldigTilOgMed = adresse.gyldigTilOgMed,
-            angittFlyttedato = angittFlyttedato(adresse.angittFlyttedato)
+            angittFlyttedato = angittFlyttedato(adresse.angittFlyttedato),
+            erGjeldende = !adresse.metadata.historisk
         )
     }
 

@@ -177,9 +177,9 @@ internal class VedtakHistorikkBeregnerTest {
                         it.firstOrNull()
                             ?.let {
                                 Inntektsperiode(
-                                    it.periode,
-                                    BigDecimal.ZERO,
-                                    BigDecimal.ZERO
+                                    periode = it.periode,
+                                    inntekt = BigDecimal.ZERO,
+                                    samordningsfradrag = BigDecimal.ZERO
                                 )
                             }
                     )

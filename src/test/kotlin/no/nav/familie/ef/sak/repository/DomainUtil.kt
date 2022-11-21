@@ -8,6 +8,8 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
@@ -47,6 +49,8 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -109,7 +113,8 @@ fun saksbehandling(
     opprettetTid: LocalDateTime = SporbarUtils.now(),
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
+    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
+    kravMottatt: LocalDate? = null
 ): Saksbehandling =
     saksbehandling(
         fagsak,
@@ -123,7 +128,8 @@ fun saksbehandling(
             resultat = resultat,
             sporbar = Sporbar(opprettetTid = opprettetTid),
             årsak = årsak,
-            henlagtÅrsak = henlagtÅrsak
+            henlagtÅrsak = henlagtÅrsak,
+            kravMottatt = kravMottatt
         )
     )
 
@@ -244,6 +250,11 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
 
+fun revurderingsinformasjon() = RevurderingsinformasjonDto(
+    LocalDate.now(),
+    ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse")
+)
+
 fun tilkjentYtelse(
     behandlingId: UUID,
     personIdent: String,
@@ -298,7 +309,7 @@ fun inntektsperiode(
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)
 ) =
-    Inntektsperiode(Månedsperiode(startDato, sluttDato), inntekt, samordningsfradrag)
+    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,

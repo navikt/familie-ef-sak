@@ -22,3 +22,7 @@ data class MigreringInfo(
     @get:JsonProperty
     val stønadTom: YearMonth? get() = stønadsperiode?.tom
 }
+
+data class MigrerOvergangsstønadDto(
+    val ignorerFeilISimulering: Boolean = false
+)

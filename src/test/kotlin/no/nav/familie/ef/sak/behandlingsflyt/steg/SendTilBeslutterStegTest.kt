@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -25,6 +26,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -66,6 +68,7 @@ internal class SendTilBeslutterStegTest {
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val vurderingService = mockk<VurderingService>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
     private val simuleringsoppsummering = Simuleringsoppsummering(
         perioder = listOf(),
         fomDatoNestePeriode = null,
@@ -89,7 +92,9 @@ internal class SendTilBeslutterStegTest {
             simuleringService,
             tilbakekrevingService,
             vurderingService,
-            validerOmregningService
+            validerOmregningService,
+            mockFeatureToggleService(),
+            årsakRevurderingService
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
@@ -159,6 +164,8 @@ internal class SendTilBeslutterStegTest {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         beslutteVedtakSteg.validerSteg(innvilgetBehandling)
+
+        verify(exactly = 1) { årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(any()) }
     }
 
     @Test
@@ -168,7 +175,8 @@ internal class SendTilBeslutterStegTest {
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val frontendFeilmelding =
             assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
-        val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
+        val forvetetFeilmelding =
+            "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
         assertThat(frontendFeilmelding).isEqualTo(forvetetFeilmelding)
     }
 

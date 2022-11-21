@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
+import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -244,21 +245,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
             assertThat(this[0].beløp).isEqualTo(0)
         }
-    }
-
-    @Test
-    internal fun `migrering feiler når man har etterbetaling`() {
-        mockSimulering(iverksettClient, etterbetaling = 1)
-        assertThatThrownBy { opprettOgIverksettMigrering() }
-            .hasMessageContaining("Etterbetaling er 1")
-    }
-
-    @Test
-    internal fun `migrering feiler når man har feilutbetaling`() {
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        mockSimulering(iverksettClient, feilutbetaling = 2)
-        assertThatThrownBy { opprettOgIverksettMigrering() }
-            .hasMessageContaining("Feilutbetaling er 2")
     }
 
     @Test
@@ -695,6 +681,31 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
+    inner class Simuleringssituasjoner {
+
+        @Test
+        internal fun `migrering feiler når man har etterbetaling`() {
+            mockSimulering(iverksettClient, etterbetaling = 1)
+            assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Etterbetaling er 1")
+        }
+
+        @Test
+        internal fun `migrering feiler når man har feilutbetaling`() {
+            @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+            mockSimulering(iverksettClient, feilutbetaling = 2)
+            assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Feilutbetaling er 2")
+        }
+
+        @Test
+        internal fun `skal ignorere etterbetaling hvis ignorerFeilISimulering=true`() {
+            mockSimulering(iverksettClient, etterbetaling = 1)
+            opprettOgIverksettMigrering(ignorerFeilISimulering = true)
+        }
+    }
+
+    @Nested
     inner class AutomatiskMigrering {
 
         @Test
@@ -784,6 +795,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         )
         val brevrequest = objectMapper.readTree("123")
         testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
+            //stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
             stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
                 TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
@@ -810,7 +822,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         migrerFraDato: YearMonth = this.migrerFraDato,
         migrerTilDato: YearMonth = til,
         erReellArbeidssøker: Boolean = false,
-        mockPerioder: () -> Unit = { mockPerioder(opphørsdato) }
+        mockPerioder: () -> Unit = { mockPerioder(opphørsdato) },
+        ignorerFeilISimulering: Boolean = false
     ): Behandling {
         mockPerioder()
 
@@ -821,7 +834,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                 Månedsperiode(migrerFraDato, migrerTilDato),
                 inntektsgrunnlag.toInt(),
                 samordningsfradrag.toInt(),
-                erReellArbeidssøker = erReellArbeidssøker
+                erReellArbeidssøker = erReellArbeidssøker,
+                ignorerFeilISimulering = ignorerFeilISimulering
             )
         }
 
