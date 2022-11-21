@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.familie.ef.sak.vedtak.historikk.fraDato
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -143,8 +144,7 @@ class RevurderingService(
     }
 
     fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
-        val currentOrNextYear = if (YearMonth.now().month.value > 6) 1 else 0
-        val historikk = vedtakHistorikkService.hentAktivHistorikkFraMåned(fagsakId, YearMonth.of(YearMonth.now().year + currentOrNextYear, 1))
+        val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId).fraDato(finnNærmesteFørsteJanuar())
 
         return InnvilgelseBarnetilsyn(
             perioder = mapUtgiftsperioder(historikk, behandlingBarn),
@@ -154,6 +154,11 @@ class RevurderingService(
             begrunnelse = "Satsendring barnetilsyn"
         )
     }
+
+    private fun finnNærmesteFørsteJanuar(): YearMonth =
+        if (YearMonth.now().month.value > 6) førsteJanuar().plusYears(1) else førsteJanuar()
+
+    private fun førsteJanuar(): YearMonth = YearMonth.of(YearMonth.now().year, 1)
 
     private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>, forrigeBehandlingId: UUID): TilleggsstønadDto {
         return TilleggsstønadDto(

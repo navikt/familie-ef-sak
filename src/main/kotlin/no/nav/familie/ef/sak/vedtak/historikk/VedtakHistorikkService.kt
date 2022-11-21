@@ -82,24 +82,16 @@ class VedtakHistorikkService(
             .filter { it.erIkkeFjernet() }
             .sortedBy { it.andel.periode.fom }
     }
+}
 
-    fun hentAktivHistorikkFraMåned(fagsakId: UUID, fra: YearMonth): List<AndelHistorikkDto> {
-        return andelsHistorikkService.hentHistorikk(fagsakId, null)
-            .filter { it.erIkkeFjernet() }
-            .sortedBy { it.andel.periode.fom }
-            .fraDato(fra)
-    }
-
-    private fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
-        val dato = fra.atDay(1)
-        return this.mapNotNull {
-            if (it.andel.periode.fom >= fra) {
-                it
-            } else if (it.andel.periode.tom >= fra) {
-                it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fom = fra)))
-            } else {
-                null
-            }
+fun List<AndelHistorikkDto>.fraDato(fra: YearMonth): List<AndelHistorikkDto> {
+    return this.mapNotNull {
+        if (it.andel.periode.fom >= fra) {
+            it
+        } else if (it.andel.periode.tom >= fra) {
+            it.copy(andel = it.andel.copy(periode = it.andel.periode.copy(fom = fra)))
+        } else {
+            null
         }
     }
 }
