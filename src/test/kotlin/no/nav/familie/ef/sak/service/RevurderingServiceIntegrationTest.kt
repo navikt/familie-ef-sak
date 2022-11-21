@@ -213,9 +213,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
 
         val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
-        assertThat(nyttVedtak.barnetilsyn?.perioder?.size).isEqualTo(3)
-        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.utgifter).isEqualTo(8000)
-        assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.barn?.size).isEqualTo(2)
+        val barnetilsynPerioder = nyttVedtak.barnetilsyn?.perioder
+        assertThat(barnetilsynPerioder?.size).isEqualTo(3) //3 perioder: Før, under og etter kontantstøtte-periode
+        assertThat(barnetilsynPerioder?.first()?.utgifter).isEqualTo(8000)
+        assertThat(barnetilsynPerioder?.first()?.barn?.size).isEqualTo(2)
     }
 
     private fun ferdigstillVedtak(

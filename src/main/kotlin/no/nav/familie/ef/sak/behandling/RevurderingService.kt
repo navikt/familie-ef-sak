@@ -190,8 +190,8 @@ class RevurderingService(
     }
 
     private fun finnBehandlingBarnIdsGittTidligereAndelBarn(andelBarn: List<UUID>, behandlingBarn: List<BehandlingBarn>): List<UUID> {
-        val tidligereValgteAndelBarn = barnRepository.findAllById(andelBarn)
-        return behandlingBarn.filter { it.personIdent in tidligereValgteAndelBarn.map { b -> b.personIdent } }.map { it.id }
+        val tidligereValgteAndelBarn = barnRepository.findAllById(andelBarn).map { it.personIdent }
+        return behandlingBarn.filter { it.personIdent in tidligereValgteAndelBarn }.map { it.id }
     }
 
     private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
