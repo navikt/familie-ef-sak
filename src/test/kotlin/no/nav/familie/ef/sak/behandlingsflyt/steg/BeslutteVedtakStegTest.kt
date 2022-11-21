@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -73,7 +74,8 @@ internal class BeslutteVedtakStegTest {
         behandlingService = behandlingService,
         vedtakService = vedtakService,
         vedtaksbrevService = vedtaksbrevService,
-        årsakRevurderingService = årsakRevurderingService
+        årsakRevurderingService = årsakRevurderingService,
+        mockFeatureToggleService()
     )
 
     private val innloggetBeslutter = "sign2"

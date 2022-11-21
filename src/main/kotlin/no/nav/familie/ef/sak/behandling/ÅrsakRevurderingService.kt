@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.tilDomene
 import no.nav.familie.ef.sak.behandling.dto.tilDto
@@ -38,6 +39,9 @@ class ÅrsakRevurderingService(
             }
         }
     }
+
+    fun hentÅrsakRevurdering(behandlingId: UUID): ÅrsakRevurdering? =
+        årsakRevurderingsRepository.findByIdOrNull(behandlingId)
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
         val kravMottatt = behandlingService.hentSaksbehandling(behandlingId).kravMottatt
