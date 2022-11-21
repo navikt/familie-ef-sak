@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,8 +20,19 @@ class ÅrsakRevurderingService(
     private val behandlingService: BehandlingService,
     private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 ) {
+
+    private val årsakerSomIkkeHarRevurderingsinformasjon = setOf(
+        BehandlingÅrsak.G_OMREGNING,
+        BehandlingÅrsak.SATSENDRING,
+        BehandlingÅrsak.MIGRERING,
+        BehandlingÅrsak.SANKSJON_1_MND
+    )
+
     fun validerHarGyldigRevurderingsinformasjon(saksbehandling: Saksbehandling) {
-        if (saksbehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
+        if (
+            saksbehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING &&
+            !årsakerSomIkkeHarRevurderingsinformasjon.contains(saksbehandling.årsak)
+        ) {
             val revurderingsinformasjon = hentRevurderingsinformasjon(saksbehandling.id)
             brukerfeilHvis(revurderingsinformasjon.kravMottatt == null || revurderingsinformasjon.årsakRevurdering == null) {
                 "Behandlingen mangler årsak til revurdering. fyll inn informasjonen i fanen for årsak revurdering"
