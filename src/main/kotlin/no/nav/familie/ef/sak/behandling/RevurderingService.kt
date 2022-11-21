@@ -175,7 +175,7 @@ class RevurderingService(
 
     private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
         return historikk.map {
-            feilHvis(vedtakService.hentVedtak(it.behandlingId).barnetilsyn?.perioder?.any { v -> v.erMidlertidigOpphør == true} ?: false) {
+            feilHvis(vedtakService.hentVedtak(it.behandlingId).barnetilsyn?.perioder?.any { v -> v.erMidlertidigOpphør == true } ?: false) {
                 "Ikke implementert: Kan ikke satsendre andeler med midlertidig opphør."
             }
             UtgiftsperiodeDto(

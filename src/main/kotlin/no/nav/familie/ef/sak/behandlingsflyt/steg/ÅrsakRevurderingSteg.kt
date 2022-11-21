@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto

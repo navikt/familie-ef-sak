@@ -70,7 +70,7 @@ class RevurderingsController(
 
     @GetMapping("informasjon/{behandlingId}")
     fun hentRevurderingsinformasjon(
-        @PathVariable behandlingId: UUID,
+        @PathVariable behandlingId: UUID
     ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))
