@@ -1,8 +1,8 @@
 package no.nav.familie.ef.sak.behandling.dto
 
-import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
-import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
