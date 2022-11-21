@@ -14,7 +14,9 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -79,6 +81,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var beregnYtelseSteg: BeregnYtelseSteg
 
+    @Autowired
+    private lateinit var rolleConfig: RolleConfig
+
     private lateinit var fagsak: Fagsak
     private val personIdent = "123456789012"
     private val behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER
@@ -88,7 +93,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     fun setUp() {
-        BrukerContextUtil.mockBrukerContext("Heider")
+        mockBrukerContext(preferredUsername = "Heider", groups = listOf(rolleConfig.saksbehandlerRolle))
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
         revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
     }
@@ -193,7 +198,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `revurdering - skal kopiere vedtak ved satsendring`() {
-        //BrukerContextUtil.clearBrukerContext()
         val (fagsakBarnetilsyn, behandling) = opprettBarnetilsynBehandling()
         val vedtak = vedtakBarnetilsyn(
             behandlingId = behandling.id,
@@ -203,16 +207,12 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             fom = YearMonth.of(2022, 1),
             tom = YearMonth.of(2022, 12)
         )
-
         ferdigstillVedtak(vedtak, behandling, fagsakBarnetilsyn)
-
-        //BrukerContextUtil.mockBrukerContext("Heider")
 
         val revurdering =
             revurderingService.opprettRevurderingManuelt(revurderingDto.copy(behandlingsårsak = BehandlingÅrsak.SATSENDRING))
 
         val nyttVedtak = vedtakService.hentVedtak(revurdering.id)
-
         assertThat(nyttVedtak.barnetilsyn?.perioder?.size).isEqualTo(3)
         assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.utgifter).isEqualTo(8000)
         assertThat(nyttVedtak.barnetilsyn?.perioder?.first()?.barn?.size).isEqualTo(2)
