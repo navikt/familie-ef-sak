@@ -107,7 +107,9 @@ class SendTilBeslutterSteg(
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
-        opprettGodkjennVedtakOppgave(saksbehandling)
+        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
+            opprettGodkjennVedtakOppgave(saksbehandling)
+        }
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleUnderkjentVedtak)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)

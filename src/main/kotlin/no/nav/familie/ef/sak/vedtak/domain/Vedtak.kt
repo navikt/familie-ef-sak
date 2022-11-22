@@ -38,7 +38,12 @@ data class Vedtak(
     @Column("sanksjon_arsak")
     val sanksjonsårsak: Sanksjonsårsak? = null,
     val internBegrunnelse: String? = null
-)
+) {
+    fun erVedtakUtenBeslutter(): Boolean = resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+    fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
+}
+
+data class VedtakErUtenBeslutter(val value: Boolean)
 
 data class Vedtaksperiode(
     val datoFra: LocalDate,
@@ -198,7 +203,8 @@ enum class AvslagÅrsak {
     VILKÅR_IKKE_OPPFYLT,
     BARN_OVER_ÅTTE_ÅR,
     STØNADSTID_OPPBRUKT,
-    MANGLENDE_OPPLYSNINGER
+    MANGLENDE_OPPLYSNINGER,
+    MINDRE_INNTEKTSENDRINGER
 }
 
 enum class SamordningsfradragType {
