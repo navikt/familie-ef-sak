@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.BrevClient
@@ -15,7 +14,6 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.brev.VedtaksbrevService.Companion.BESLUTTER_SIGNATUR_PLACEHOLDER
 import no.nav.familie.ef.sak.brev.domain.Vedtaksbrev
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
-import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
@@ -29,6 +27,8 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.UGRADERT
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +44,7 @@ internal class VedtaksbrevServiceTest {
     private val brevClient = mockk<BrevClient>()
     private val vedtaksbrevRepository = mockk<VedtaksbrevRepository>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
-    private val brevsignaturService = mockk<BrevsignaturService>()
+    private val brevsignaturService = BrevsignaturService(personopplysningerService)
     private val familieDokumentClient = mockk<FamilieDokumentClient>()
 
     private val vedtaksbrevService =
@@ -63,13 +63,42 @@ internal class VedtaksbrevServiceTest {
     @BeforeEach
     fun setUp() {
         mockBrukerContext(beslutterNavn)
-        val signaturDto = SignaturDto(beslutterNavn, "enhet", false)
-        every { brevsignaturService.lagSignaturMedEnhet(any<Saksbehandling>()) } returns signaturDto
+        every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns UGRADERT
     }
 
     @AfterEach
     fun tearDown() {
         clearBrukerContext()
+    }
+
+    @Test
+    internal fun `skal lage tom signatur hvis vedtak er uten beslutter`() {
+        val vedtaksbrevSlot = slot<Vedtaksbrev>()
+
+        val ident = "12345678910"
+        val gjeldendeNavn = "Navn Navnesen"
+        val navnMap = mapOf(ident to gjeldendeNavn)
+
+        every { personopplysningerService.hentGjeldeneNavn(any()) } returns navnMap
+        every { vedtaksbrevRepository.existsById(any()) } returns true
+        every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } returns vedtaksbrev
+        every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev
+        every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
+        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
+
+        vedtaksbrevService.lagEndeligBeslutterbrev(
+            saksbehandling(
+                fagsak = fagsak,
+                behandling = behandlingForBeslutter
+            ),
+            true
+        )
+
+        assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
+        assertThat(vedtaksbrevSlot.captured.beslutterident).isEqualTo(beslutterNavn)
+        assertThat(vedtaksbrevSlot.captured.besluttersignatur).isEqualTo("")
+        assertThat(vedtaksbrevSlot.captured.enhet).isEqualTo("")
+        assertThat(vedtaksbrevSlot.captured.beslutterPdf).isNotNull
     }
 
     @Test
@@ -245,9 +274,8 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `skal kunne signere brev som kode 6 uten at det inneholder BESLUTTER_SIGNATUR_PLACEHOLDER`() {
-        val signaturDto = SignaturDto(beslutterNavn, "enhet", true)
+        every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns STRENGT_FORTROLIG
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
-        every { brevsignaturService.lagSignaturMedEnhet(any<Saksbehandling>()) } returns signaturDto
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns
             vedtaksbrev.copy(saksbehandlerHtml = "html uten placeholder")
 
