@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.ekstern.bisys.lagAndelHistorikkDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -75,7 +76,7 @@ internal class RevurderingServiceTest {
         navn = "Ola",
         fødselTermindato = LocalDate.now()
     )
-
+    val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.ikkeVedtatteSatserForBarnetilsyn.maxOf { it.periode.fom })
     val år = if (YearMonth.now().month.value > 6) YearMonth.now().year else YearMonth.now().year - 1
     val førsteAndelFraOgMedDato = LocalDate.of(år, 11, 1)
     val førsteAndelTilOgMedDato = LocalDate.of(år + 1, 6, 30)
@@ -110,12 +111,7 @@ internal class RevurderingServiceTest {
 
         assertThat(vedtakSlot.captured.perioder).hasSize(1)
         assertThat(vedtakSlot.captured.perioder.first().utgifter).isEqualTo(1000)
-        assertThat(vedtakSlot.captured.perioder.first().periode.fom).isEqualTo(finnForventetFomYearMonth())
-    }
-
-    private fun finnForventetFomYearMonth(): YearMonth {
-        val currentOrNextYear = if (YearMonth.now().month.value > 6) 1 else 0
-        return YearMonth.of(YearMonth.now().year + currentOrNextYear, 1)
+        assertThat(vedtakSlot.captured.perioder.first().periode.fom).isEqualTo(forventetFomYearMonth)
     }
 
     @Test
@@ -138,7 +134,7 @@ internal class RevurderingServiceTest {
         val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
 
         assertThat(vedtakDto.perioder).hasSize(2)
-        assertThat(vedtakDto.perioder.find { it.periode.fom == YearMonth.from(finnForventetFomYearMonth()) }?.utgifter).isEqualTo(1000)
+        assertThat(vedtakDto.perioder.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.utgifter).isEqualTo(1000)
         assertThat(vedtakDto.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.utgifter).isEqualTo(2000)
     }
 
@@ -151,7 +147,7 @@ internal class RevurderingServiceTest {
         val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
 
         assertThat(vedtakDto.perioderKontantstøtte).hasSize(2)
-        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom == YearMonth.from(finnForventetFomYearMonth()) }?.beløp).isEqualTo(1000)
+        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.beløp).isEqualTo(1000)
         assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
     }
 
@@ -174,7 +170,7 @@ internal class RevurderingServiceTest {
         val vedtakDto = revurderingService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
 
         assertThat(vedtakDto.tilleggsstønad.perioder).hasSize(2)
-        assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.fom == YearMonth.from(finnForventetFomYearMonth()) }?.beløp).isEqualTo(1000)
+        assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.beløp).isEqualTo(1000)
         assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
     }
 }

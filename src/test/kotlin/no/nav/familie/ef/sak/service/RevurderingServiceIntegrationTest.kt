@@ -219,6 +219,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(barnetilsynPerioder?.size).isEqualTo(3) // 3 perioder: Før, under og etter kontantstøtte-periode
         assertThat(barnetilsynPerioder?.first()?.utgifter).isEqualTo(8000)
         assertThat(barnetilsynPerioder?.first()?.barn?.size).isEqualTo(2)
+        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2023,1))
     }
 
     private fun ferdigstillVedtak(
