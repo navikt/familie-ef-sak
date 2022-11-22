@@ -163,7 +163,6 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
         opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
 
-
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val sivilstandVilkårForBehandling =
             vilkårsvurderingRepository.findByBehandlingId(behandling.id).first { it.type == VilkårType.SIVILSTAND }
@@ -219,7 +218,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(barnetilsynPerioder?.size).isEqualTo(3) // 3 perioder: Før, under og etter kontantstøtte-periode
         assertThat(barnetilsynPerioder?.first()?.utgifter).isEqualTo(8000)
         assertThat(barnetilsynPerioder?.first()?.barn?.size).isEqualTo(2)
-        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2023,1))
+        assertThat(barnetilsynPerioder?.first()?.periode?.fom).isEqualTo(YearMonth.of(2023, 1))
     }
 
     private fun ferdigstillVedtak(
@@ -366,7 +365,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             lagSivilstandDelvilkår(sivilstand)
 
         val delvilkårsvurderingAleneomsorg =
-            lagDelvilkårsvurderingAleneomsorg( barn,sivilstand)
+            lagDelvilkårsvurderingAleneomsorg(barn, sivilstand)
         lagreVilkår(behandling, delvilkårsvurdering, barn, delvilkårsvurderingAleneomsorg)
     }
 

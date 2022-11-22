@@ -152,7 +152,6 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.periode.fomDato)
         assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.periode.tomDato)
         assertThat(bisysPeriode.barnIdenter.first()).isEqualTo(behandlingBarn.first().personIdent)
-
     }
 
     @Test
@@ -389,7 +388,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-
     }
 
     @Test
