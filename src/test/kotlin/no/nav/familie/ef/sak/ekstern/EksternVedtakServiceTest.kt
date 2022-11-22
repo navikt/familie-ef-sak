@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -63,7 +64,7 @@ internal class EksternVedtakServiceTest {
         val vedtakstidspunkt = LocalDateTime.now()
         val behandling = ferdigstiltBehandling(vedtakstidspunkt)
         every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(behandling)
-        every { tilbakekrevingClient.finnVedtak(eksternFagsakId) }
+        every { tilbakekrevingClient.finnVedtak(eksternFagsakId) } returns listOf(fagsystemVedtakTilbakekreving())
 
         val vedtak = service.hentVedtak(eksternFagsakId)
         assertThat(vedtak.map { it.fagsystemType }).containsExactly(FagsystemType.ORDNIÆR, FagsystemType.TILBAKEKREVING)
@@ -104,5 +105,13 @@ internal class EksternVedtakServiceTest {
         resultat = BehandlingResultat.AVSLÅTT,
         type = BehandlingType.FØRSTEGANGSBEHANDLING,
         status = BehandlingStatus.FERDIGSTILT
+    )
+
+    private fun fagsystemVedtakTilbakekreving() = FagsystemVedtak(
+        eksternBehandlingId = UUID.randomUUID().toString(),
+        behandlingstype = "Tilbakekreving",
+        resultat = "Delvis tilbakebetaling",
+        vedtakstidspunkt = LocalDateTime.now(),
+        fagsystemType = FagsystemType.TILBAKEKREVING,
     )
 }
