@@ -47,6 +47,7 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
@@ -216,6 +217,22 @@ internal class IverksettingDtoMapperTest {
         val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
 
         assertAlleFelter(iverksettDto as IverksettSkolepengerDto, behandlingId)
+    }
+
+    @Test
+    internal fun `skal mappe avslag og årsak til avslag`() {
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.AVSLÅTT)
+        val avslåttVedtak = Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.AVSLÅ,
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        )
+
+        every { vedtakService.hentVedtak(any()) } returns avslåttVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        assertThat(iverksettDto.vedtak.avslagÅrsak).isEqualTo(avslåttVedtak.avslåÅrsak)
     }
 
     @Test

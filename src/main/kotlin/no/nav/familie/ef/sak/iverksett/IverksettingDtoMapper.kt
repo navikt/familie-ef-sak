@@ -257,7 +257,8 @@ class IverksettingDtoMapper(
             vedtaksperioder = vedtak.perioder?.tilVedtaksperioder()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
-            brevmottakere = brevmottakere
+            brevmottakere = brevmottakere,
+            avslagÅrsak = vedtak.avslåÅrsak
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -281,7 +282,8 @@ class IverksettingDtoMapper(
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
-            tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder)
+            tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder),
+            avslagÅrsak = vedtak.avslåÅrsak
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -304,7 +306,8 @@ class IverksettingDtoMapper(
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
-            begrunnelse = vedtak.skolepenger?.begrunnelse
+            begrunnelse = vedtak.skolepenger?.begrunnelse,
+            avslagÅrsak = vedtak.avslåÅrsak
         )
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {
