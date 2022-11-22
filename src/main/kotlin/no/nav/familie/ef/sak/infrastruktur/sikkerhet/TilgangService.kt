@@ -119,7 +119,7 @@ class TilgangService(
 
     fun validerTilgangTilEksternFagsak(eksternFagsakId: Long, event: AuditLoggerEvent) {
         val fagsakId = cacheManager.getValue("eksternFagsakId", eksternFagsakId) {
-            fagsakService.hentFagsakPåEksternId(eksternFagsakId = eksternFagsakId).id
+            fagsakService.hentFagsakDtoPåEksternId(eksternFagsakId = eksternFagsakId).id
         }
         validerTilgangTilFagsak(fagsakId, event)
     }
