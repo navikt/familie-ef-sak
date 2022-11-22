@@ -5,6 +5,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
+import no.nav.familie.kontrakter.felles.klage.FagsystemType
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
@@ -40,6 +42,16 @@ class TilbakekrevingClientTestConfig {
                 status = Behandlingsstatus.OPPRETTET,
                 vedtaksdato = null,
                 resultat = null
+            )
+        )
+
+        every { tilbakekrevingClient.finnVedtak(any()) } returns listOf(
+            FagsystemVedtak(
+                eksternBehandlingId = UUID.randomUUID().toString(),
+                behandlingstype = "Tilbakekreving",
+                resultat = "Delvis tilbakebetaling",
+                vedtakstidspunkt = LocalDateTime.now(),
+                fagsystemType = FagsystemType.TILBAKEKREVING,
             )
         )
 
