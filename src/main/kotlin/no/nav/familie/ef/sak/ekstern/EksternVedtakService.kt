@@ -5,26 +5,37 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infotrygd.InfotrygdService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
+import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import org.springframework.stereotype.Service
 
 @Service
 class EksternVedtakService(
-    val tilkjentYtelseService: TilkjentYtelseService,
-    val behandlingService: BehandlingService,
-    val fagsakService: FagsakService,
-    val infotrygdService: InfotrygdService
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val tilbakekrevingClient: TilbakekrevingClient,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
-        val ferdigstilteBehandlinger =
-            behandlingService.hentBehandlinger(fagsakId = fagsak.id).filter { it.erAvsluttet() && it.resultat != BehandlingResultat.HENLAGT }
+        val vedtakTilbakekreving = if (featureToggleService.isEnabled(Toggle.KLAGE_TILBAKEKREVING)) {
+            tilbakekrevingClient.finnVedtak(fagsak.eksternId.id)
+        } else {
+            emptyList()
+        }
+        return hentFerdigstilteBehandlinger(fagsak) + vedtakTilbakekreving
+    }
 
-        return ferdigstilteBehandlinger.map { tilFagsystemVedtak(it) }
+    private fun hentFerdigstilteBehandlinger(fagsak: Fagsak): List<FagsystemVedtak> {
+        return behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+            .filter { it.erAvsluttet() && it.resultat != BehandlingResultat.HENLAGT }
+            .map { tilFagsystemVedtak(it) }
     }
 
     private fun tilFagsystemVedtak(behandling: Behandling) = FagsystemVedtak(
@@ -37,6 +48,7 @@ class EksternVedtakService(
             throw Feil(
                 "Kan ikke utlede vedtaksdato for behandling=${behandling.id} status=${behandling.status}"
             )
-        }
+        },
+        fagsystemType = FagsystemType.ORDNIÆR
     )
 }

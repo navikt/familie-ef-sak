@@ -6,6 +6,7 @@ import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
@@ -66,6 +67,11 @@ class TilbakekrevingClient(
         .build()
         .toUri()
 
+    private fun finnVedtakUri(eksternFagsakId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
+        .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/vedtak/v1")
+        .build()
+        .toUri()
+
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         return postForEntity(
             hentForhåndsvisningVarselbrevUri,
@@ -81,6 +87,11 @@ class TilbakekrevingClient(
 
     fun finnBehandlinger(eksternFagsakId: Long): List<Behandling> {
         val response: Ressurs<List<Behandling>> = getForEntity(finnBehandlingerUri(eksternFagsakId))
+        return response.getDataOrThrow()
+    }
+
+    fun finnVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
+        val response: Ressurs<List<FagsystemVedtak>> = getForEntity(finnVedtakUri(eksternFagsakId))
         return response.getDataOrThrow()
     }
 
