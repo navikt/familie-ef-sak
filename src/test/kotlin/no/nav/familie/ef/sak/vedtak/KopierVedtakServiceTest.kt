@@ -46,7 +46,7 @@ internal class KopierVedtakServiceTest {
 
     val fagsak = fagsak()
     val forrigeBehandling = behandling(fagsak)
-    val revurdering = behandling(fagsak = fagsak, forrigeBehandlingId = forrigeBehandling.id)
+    val revurdering = behandling(fagsak = fagsak, forrigeBehandlingId = forrigeBehandling.id, årsak = BehandlingÅrsak.SATSENDRING)
 
     val historiskBehandlingsbarn = behandlingBarn(
         id = UUID.randomUUID(),
