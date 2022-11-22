@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -154,5 +155,20 @@ internal class KopierVedtakServiceTest {
         assertThat(vedtakDto.tilleggsstønad.perioder).hasSize(2)
         assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.beløp).isEqualTo(1000)
         assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
+    }
+
+    @Test
+    fun `Skal kopiere vedtak innhold til ny behandling - legg til perioder uten stønad`() {
+        val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato, tilOgMed = førsteAndelTilOgMedDato, behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 7000, endring = null)
+        val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = førsteAndelTilOgMedDato.plusMonths(2), tilOgMed = sisteAndelTilOgMedDato.plusMonths(3), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 5000, endring = null)
+        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto, andelHistorikkDto2)
+
+        val vedtakDto = kopierVedtakService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
+
+        assertThat(vedtakDto.perioder).hasSize(3)
+        assertThat(vedtakDto.perioder[1].utgifter).isEqualTo(0)
+        assertThat(vedtakDto.perioder[1].barn).hasSize(0)
+        assertThat(vedtakDto.perioder[1].erMidlertidigOpphør).isEqualTo(true)
+        assertThat(vedtakDto.perioder.erSammenhengende()).isTrue
     }
 }

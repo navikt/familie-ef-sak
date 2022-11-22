@@ -179,7 +179,6 @@ internal class BehandlingsstatistikkTaskTest {
             .isEqualTo(behandling.sporbar.opprettetTid.atZone(ZoneId.of("Europe/Oslo")))
     }
 
-
     @Test
     internal fun `skal sende avslagsårsak dersom denne finnes`() {
         val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()

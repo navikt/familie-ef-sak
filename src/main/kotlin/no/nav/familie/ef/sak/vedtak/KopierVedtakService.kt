@@ -116,4 +116,6 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
             )
         }
     }
+
+    return (this + perioderUtenStønad).sortedBy { it.periode.fom }
 }
