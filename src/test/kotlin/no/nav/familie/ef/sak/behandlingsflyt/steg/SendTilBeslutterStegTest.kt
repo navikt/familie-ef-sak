@@ -26,7 +26,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -94,7 +93,6 @@ internal class SendTilBeslutterStegTest {
             tilbakekrevingService,
             vurderingService,
             validerOmregningService,
-            mockFeatureToggleService(),
             årsakRevurderingService
         )
     private val fagsak = fagsak(

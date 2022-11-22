@@ -12,8 +12,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
-import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -25,7 +23,6 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -65,7 +62,6 @@ internal class BeslutteVedtakStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(
         taskRepository = taskRepository,
@@ -76,9 +72,7 @@ internal class BeslutteVedtakStegTest {
         totrinnskontrollService = totrinnskontrollService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService,
-        årsakRevurderingService = årsakRevurderingService,
-        mockFeatureToggleService()
+        vedtaksbrevService = vedtaksbrevService
     )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -102,7 +96,6 @@ internal class BeslutteVedtakStegTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { årsakRevurderingService.hentRevurderingsinformasjon(any()) } returns RevurderingsinformasjonDto()
         mockBrukerContext(innloggetBeslutter)
         taskSlot = mutableListOf()
         every {

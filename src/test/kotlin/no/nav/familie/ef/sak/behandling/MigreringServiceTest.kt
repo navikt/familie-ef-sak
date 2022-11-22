@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
+import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -794,7 +795,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         )
         val brevrequest = objectMapper.readTree("123")
         testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
-            // stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
+            stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
             stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
                 TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
