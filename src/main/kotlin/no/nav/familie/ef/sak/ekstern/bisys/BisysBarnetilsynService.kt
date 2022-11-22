@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysResponse
-import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.eksterne.kontrakter.bisys.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
@@ -39,7 +38,7 @@ class BisysBarnetilsynService(
         val sortertPåDatoListe = this.sortedBy { it.periode.fom }
         return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
             val last = acc.lastOrNull()
-            if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpAntallBarnOgDatakilde(entry)) {
+            if (last != null && last.hengerSammenMed(entry) && last.harSammeBarn(entry)) {
                 acc.removeLast()
                 acc.add(
                     last.copy(
@@ -94,9 +93,7 @@ class BisysBarnetilsynService(
                 Periode(andel.andel.periode.fomDato, andel.andel.periode.tomDato),
                 andel.andel.barn.map {
                     barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
-                },
-                andel.andel.beløp,
-                Datakilde.EF
+                }
             )
         }
         return EfPerioder(startdato, barnetilsynBisysPerioder.sortedBy { it.periode.fom })
@@ -111,9 +108,7 @@ class BisysBarnetilsynService(
             .map { periode ->
                 BarnetilsynBisysPeriode(
                     periode = Periode(periode.stønadFom, periode.stønadTom),
-                    barnIdenter = periode.barnIdenter,
-                    månedsbeløp = periode.månedsbeløp,
-                    datakilde = Datakilde.INFOTRYGD
+                    barnIdenter = periode.barnIdenter
                 )
             }
     }
@@ -147,6 +142,6 @@ private fun Periode.union(periode: Periode): Periode {
     return Periode(fom = minOf(this.fom, periode.fom), tom = maxOf(this.tom, periode.tom))
 }
 
-private fun BarnetilsynBisysPeriode.sammeBeløpAntallBarnOgDatakilde(entry: BarnetilsynBisysPeriode): Boolean {
-    return datakilde == entry.datakilde && this.månedsbeløp == entry.månedsbeløp && barnIdenter.toSet() == entry.barnIdenter.toSet()
+private fun BarnetilsynBisysPeriode.harSammeBarn(entry: BarnetilsynBisysPeriode): Boolean {
+    return barnIdenter.toSet() == entry.barnIdenter.toSet()
 }
