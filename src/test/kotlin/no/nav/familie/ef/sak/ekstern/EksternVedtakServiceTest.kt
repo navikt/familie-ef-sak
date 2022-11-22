@@ -112,6 +112,6 @@ internal class EksternVedtakServiceTest {
         behandlingstype = "Tilbakekreving",
         resultat = "Delvis tilbakebetaling",
         vedtakstidspunkt = LocalDateTime.now(),
-        fagsystemType = FagsystemType.TILBAKEKREVING,
+        fagsystemType = FagsystemType.TILBAKEKREVING
     )
 }

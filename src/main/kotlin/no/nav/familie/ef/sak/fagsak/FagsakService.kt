@@ -156,7 +156,6 @@ class FagsakService(
             ?.tilFagsakMedPerson()
             ?: error("Finner ikke fagsak til eksternFagsakId=$eksternFagsakId")
 
-
     fun hentFagsakDtoPåEksternId(eksternFagsakId: Long): FagsakDto {
         return hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
             ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
