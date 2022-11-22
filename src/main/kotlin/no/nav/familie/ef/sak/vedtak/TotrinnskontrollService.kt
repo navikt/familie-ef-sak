@@ -16,7 +16,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.IKKE_AUTORISERT
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus.KAN_FATTE_VEDTAK
@@ -46,7 +46,7 @@ class TotrinnskontrollService(
     fun lagreTotrinnskontrollOgReturnerBehandler(
         saksbehandling: Saksbehandling,
         beslutteVedtak: BeslutteVedtakDto,
-        vedtak: Vedtak
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter
     ): String {
         val sisteBehandlingshistorikk =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
@@ -58,7 +58,7 @@ class TotrinnskontrollService(
             )
         }
 
-        if (!vedtak.erVedtakUtenBeslutter() && beslutterErLikBehandler(sisteBehandlingshistorikk)) {
+        if (!vedtakErUtenBeslutter.value && beslutterErLikBehandler(sisteBehandlingshistorikk)) {
             throw ApiFeil(
                 "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
                 HttpStatus.BAD_REQUEST

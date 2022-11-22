@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.UGRADERT
@@ -55,6 +56,9 @@ internal class VedtaksbrevServiceTest {
             brevsignaturService,
             familieDokumentClient
         )
+
+    private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
+    private val vedtakErUtenBeslutter = VedtakErUtenBeslutter(true)
 
     private val vedtaksbrev: Vedtaksbrev = lagVedtaksbrev("malnavn")
     private val beslutterNavn = "456"
@@ -91,7 +95,7 @@ internal class VedtaksbrevServiceTest {
                 fagsak = fagsak,
                 behandling = behandlingForBeslutter
             ),
-            true
+            vedtakErUtenBeslutter
         )
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isNotNull
@@ -140,7 +144,7 @@ internal class VedtaksbrevServiceTest {
                     fagsak,
                     behandlingForBeslutter.copy(steg = StegType.VILKÅR)
                 ),
-                false
+                vedtakKreverBeslutter
             )
         }
         assertThat(feil.message).contains("Behandling er i feil steg")
@@ -160,7 +164,7 @@ internal class VedtaksbrevServiceTest {
                         BehandlingStatus.FERDIGSTILT
                     )
                 ),
-                false
+                vedtakKreverBeslutter
             )
         }
         assertThat(feilFerdigstilt.httpStatus).isEqualTo(BAD_REQUEST)
@@ -172,7 +176,7 @@ internal class VedtaksbrevServiceTest {
                     fagsak,
                     behandling.copy(status = BehandlingStatus.UTREDES)
                 ),
-                false
+                vedtakKreverBeslutter
             )
         }
         assertThat(feilUtredes.httpStatus).isEqualTo(BAD_REQUEST)
@@ -189,7 +193,7 @@ internal class VedtaksbrevServiceTest {
                     fagsak,
                     behandlingForBeslutter
                 ),
-                false
+                vedtakKreverBeslutter
             )
         }
         assertThat(feil.message).isEqualTo("Det finnes allerede et beslutterbrev")
@@ -203,7 +207,7 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()
         // Når
-        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter), false)
+        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter), vedtakKreverBeslutter)
 
         assertThat(beslutterIdent).isNotNull()
         assertThat(brevSlot.captured.beslutterident).isEqualTo(beslutterIdent)

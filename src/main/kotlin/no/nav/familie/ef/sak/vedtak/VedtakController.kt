@@ -58,9 +58,9 @@ class VedtakController(
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
-        val erVedtakUtenBeslutter = vedtakService.hentVedtak(behandlingId).erVedtakUtenBeslutter()
+        val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
-        return if (erVedtakUtenBeslutter) {
+        return if (vedtakErUtenBeslutter.value) {
             feilHvis(!featureToggleService.isEnabled(Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER)) {
                 "Avslag pga mindre inntektsendringer er skrudd av"
             }

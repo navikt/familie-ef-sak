@@ -34,6 +34,7 @@ import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -74,6 +75,8 @@ internal class BeslutteVedtakStegTest {
         vedtaksbrevService = vedtaksbrevService
     )
 
+    private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
+    private val vedtakErUtenBeslutter = VedtakErUtenBeslutter(true)
     private val innloggetBeslutter = "sign2"
 
     private val fagsak = fagsak(
@@ -124,7 +127,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), false) } returns Fil("123".toByteArray())
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakKreverBeslutter) } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
@@ -172,7 +175,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
         every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), true) } returns Fil("123".toByteArray())
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter) } returns Fil("123".toByteArray())
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
 
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }

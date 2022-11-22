@@ -46,7 +46,9 @@ class BeslutteVedtakSteg(
     override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): StegType {
         fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId)
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
-        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtak)
+        val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
+        val saksbehandler =
+            totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
@@ -59,7 +61,7 @@ class BeslutteVedtakSteg(
             if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
-                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling, vedtak.erVedtakUtenBeslutter())
+                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling, vedtakErUtenBeslutter)
                 iverksettClient.iverksett(iverksettDto, fil)
             }
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT

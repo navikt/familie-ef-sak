@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
 import org.springframework.stereotype.Service
@@ -20,8 +21,8 @@ class BrevsignaturService(val personopplysningerService: PersonopplysningerServi
         return lagSignaturDto(fagsak.hentAktivIdent())
     }
 
-    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling, erVedtakUtenBeslutter: Boolean): SignaturDto {
-        if (erVedtakUtenBeslutter) {
+    fun lagSignaturMedEnhet(saksbehandling: Saksbehandling, vedtakErUtenBeslutter: VedtakErUtenBeslutter): SignaturDto {
+        if (vedtakErUtenBeslutter.value) {
             return SignaturDto("", "", true)
         }
         return lagSignaturMedEnhet(saksbehandling)

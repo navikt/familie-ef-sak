@@ -40,7 +40,10 @@ data class Vedtak(
     val internBegrunnelse: String? = null
 ) {
     fun erVedtakUtenBeslutter(): Boolean = resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+    fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
 }
+
+data class VedtakErUtenBeslutter(val value: Boolean)
 
 data class Vedtaksperiode(
     val datoFra: LocalDate,
