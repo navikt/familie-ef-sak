@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -11,6 +13,7 @@ import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
@@ -19,6 +22,16 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
+import no.nav.familie.ef.sak.vedtak.historikk.fraDato
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -26,6 +39,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 import java.util.UUID
 
 @Service
@@ -39,7 +53,10 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
-    private val stegService: StegService
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val vedtakHistorikkService: VedtakHistorikkService,
+    private val barnRepository: BarnRepository
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
@@ -109,7 +126,76 @@ class RevurderingService(
             )
         )
         taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+
+        kopierVedtakHvisSatsendring(revurderingInnhold.behandlingsårsak, fagsak, revurdering, forrigeBehandlingId)
         return revurdering
+    }
+
+    fun kopierVedtakHvisSatsendring(
+        behandlingsÅrsak: BehandlingÅrsak,
+        fagsak: Fagsak,
+        revurdering: Behandling,
+        forrigeBehandlingId: UUID
+    ) {
+        if (behandlingsÅrsak == BehandlingÅrsak.SATSENDRING) {
+            val behandlingBarn = barnRepository.findByBehandlingId(revurdering.id)
+            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, behandlingBarn, forrigeBehandlingId)
+            vedtakService.lagreVedtak(vedtakDto, revurdering.id, StønadType.BARNETILSYN)
+        }
+    }
+
+    fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
+        val fraDato = BeregningBarnetilsynUtil.ikkeVedtatteSatserForBarnetilsyn.maxOf { it.periode.fom }
+        val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId).fraDato(YearMonth.from(fraDato))
+
+        return InnvilgelseBarnetilsyn(
+            perioder = mapUtgiftsperioder(historikk, behandlingBarn),
+            resultatType = ResultatType.INNVILGE,
+            perioderKontantstøtte = mapPerioderKontantstøtte(historikk),
+            tilleggsstønad = mapTilleggsstønadDto(historikk, forrigeBehandlingId),
+            begrunnelse = "Satsendring barnetilsyn"
+        )
+    }
+
+    private fun mapTilleggsstønadDto(historikk: List<AndelHistorikkDto>, forrigeBehandlingId: UUID): TilleggsstønadDto {
+        return TilleggsstønadDto(
+            historikk.any { it.andel.tilleggsstønad > 0 },
+            historikk.filter { it.andel.tilleggsstønad > 0 }.map {
+                PeriodeMedBeløpDto(periode = it.andel.periode, beløp = it.andel.tilleggsstønad)
+            },
+            vedtakService.hentVedtak(forrigeBehandlingId).tilleggsstønad?.begrunnelse
+        )
+    }
+
+    private fun mapPerioderKontantstøtte(historikk: List<AndelHistorikkDto>): List<PeriodeMedBeløpDto> {
+        return historikk.filter { kontantstøtte -> kontantstøtte.andel.kontantstøtte > 0 }
+            .map {
+                PeriodeMedBeløpDto(
+                    periode = it.andel.periode,
+                    beløp = it.andel.kontantstøtte
+                )
+            }
+    }
+
+    private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
+        return historikk.map {
+            feilHvis(vedtakService.hentVedtak(it.behandlingId).barnetilsyn?.perioder?.any { v -> v.erMidlertidigOpphør == true } ?: false) {
+                "Ikke implementert: Kan ikke satsendre andeler med midlertidig opphør."
+            }
+            UtgiftsperiodeDto(
+                årMånedFra = it.andel.periode.fom,
+                årMånedTil = it.andel.periode.tom,
+                periode = it.andel.periode,
+                barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
+                utgifter = it.andel.utgifter.toInt(),
+                erMidlertidigOpphør = false
+            )
+        }
+    }
+
+    private fun finnBehandlingBarnIdsGittTidligereAndelBarn(andelBarn: List<UUID>, behandlingBarn: List<BehandlingBarn>): List<UUID> {
+        val tidligereValgteAndelBarn = barnRepository.findAllById(andelBarn).map { it.personIdent }
+        return behandlingBarn.filter { it.personIdent in tidligereValgteAndelBarn }.map { it.id }
     }
 
     private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {
