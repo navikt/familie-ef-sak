@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
-import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vedtak.historikk.fraDato
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -24,20 +23,23 @@ import java.util.UUID
 class KopierVedtakService(
     val barnRepository: BarnRepository,
     val vedtakService: VedtakService,
-    val vedtakHistorikkService: VedtakHistorikkService
+    val vedtakHistorikkService: VedtakHistorikkService,
+    val behandlingService: BehandlingService
 ) {
 
-    fun kopierOgLagreForrigeVedtakTilNyRevurderingHvisSatsendring(
-        behandlingsÅrsak: BehandlingÅrsak,
-        fagsak: Fagsak,
+    fun lagVedtakDtoBasertPåTidligereVedtaksperioder(
+        fagsakId: UUID,
         forrigeBehandlingId: UUID,
         revurderingId: UUID
-    ) {
-        if (behandlingsÅrsak == BehandlingÅrsak.SATSENDRING) {
-            val behandlingBarn = barnRepository.findByBehandlingId(revurderingId)
-            val vedtakDto = mapTilBarnetilsynVedtak(fagsak.id, behandlingBarn, forrigeBehandlingId)
-            vedtakService.lagreVedtak(vedtakDto, revurderingId, StønadType.BARNETILSYN)
-        }
+    ): VedtakDto {
+        validerRevurderingErSatsendring(revurderingId)
+        val behandlingBarn = barnRepository.findByBehandlingId(revurderingId)
+        return mapTilBarnetilsynVedtak(fagsakId, behandlingBarn, forrigeBehandlingId)
+    }
+
+    private fun validerRevurderingErSatsendring(revurderingId: UUID) {
+        val revurdering = behandlingService.hentBehandling(revurderingId)
+        feilHvis(revurdering.årsak != BehandlingÅrsak.SATSENDRING) { "Kan bare kopiere vedtak hvis behandlingsÅrsak er satsendring" }
     }
 
     fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {

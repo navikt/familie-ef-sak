@@ -2,8 +2,8 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import no.nav.familie.ef.sak.barn.BarnRepository
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.ekstern.bisys.lagAndelHistorikkDto
 import no.nav.familie.ef.sak.repository.behandling
@@ -35,10 +35,13 @@ internal class KopierVedtakServiceTest {
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val vedtakService = mockk<VedtakService>()
 
+    val behandlingService = mockk<BehandlingService>()
     val kopierVedtakService: KopierVedtakService = KopierVedtakService(
         barnRepository = barnRepository,
         vedtakService = vedtakService,
-        vedtakHistorikkService = vedtakHistorikkService
+        vedtakHistorikkService = vedtakHistorikkService,
+        behandlingService = behandlingService
+
     )
 
     val fagsak = fagsak()
@@ -90,14 +93,17 @@ internal class KopierVedtakServiceTest {
         val andelMedUtgift = andelHistorikkDto.andel.copy(utgifter = BigDecimal.valueOf(1000))
         val andelHistorikkDtos = listOf(andelHistorikkDto.copy(andel = andelMedUtgift))
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns andelHistorikkDtos
-        val vedtakSlot = slot<InnvilgelseBarnetilsyn>()
-        every { vedtakService.lagreVedtak(capture(vedtakSlot), revurdering.id, StønadType.BARNETILSYN) } answers { UUID.randomUUID() }
+        every { behandlingService.hentBehandling(revurdering.id) } returns revurdering
 
-        kopierVedtakService.kopierOgLagreForrigeVedtakTilNyRevurderingHvisSatsendring(BehandlingÅrsak.SATSENDRING, fagsak = fagsak, revurderingId = revurdering.id, forrigeBehandlingId = forrigeBehandling.id)
+        val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
+            fagsakId = fagsak.id,
+            revurderingId = revurdering.id,
+            forrigeBehandlingId = forrigeBehandling.id
+        ) as InnvilgelseBarnetilsyn
 
-        assertThat(vedtakSlot.captured.perioder).hasSize(1)
-        assertThat(vedtakSlot.captured.perioder.first().utgifter).isEqualTo(1000)
-        assertThat(vedtakSlot.captured.perioder.first().periode.fom).isEqualTo(forventetFomYearMonth)
+        assertThat(vedtakDto.perioder).hasSize(1)
+        assertThat(vedtakDto.perioder.first().utgifter).isEqualTo(1000)
+        assertThat(vedtakDto.perioder.first().periode.fom).isEqualTo(forventetFomYearMonth)
     }
 
     @Test
