@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vedtak.historikk.fraDato
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 import java.util.UUID
@@ -75,10 +76,7 @@ class KopierVedtakService(
     }
 
     private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
-        return historikk.map {
-            feilHvis(vedtakService.hentVedtak(it.behandlingId).barnetilsyn?.perioder?.any { v -> v.erMidlertidigOpphør == true } ?: false) {
-                "Ikke implementert: Kan ikke satsendre andeler med midlertidig opphør."
-            }
+        val map = historikk.map {
             UtgiftsperiodeDto(
                 årMånedFra = it.andel.periode.fom,
                 årMånedTil = it.andel.periode.tom,
@@ -88,10 +86,36 @@ class KopierVedtakService(
                 erMidlertidigOpphør = false
             )
         }
+        return map.fyllUtPerioderUtenStønad()
     }
 
     private fun finnBehandlingBarnIdsGittTidligereAndelBarn(andelBarn: List<UUID>, behandlingBarn: List<BehandlingBarn>): List<UUID> {
         val tidligereValgteAndelBarn = barnRepository.findAllById(andelBarn).map { it.personIdent }
         return behandlingBarn.filter { it.personIdent in tidligereValgteAndelBarn }.map { it.id }
     }
+}
+
+private fun Månedsperiode.ikkePåfølgesAv(periode: Månedsperiode): Boolean {
+    return !this.påfølgesAv(periode)
+}
+
+private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<UtgiftsperiodeDto> {
+    val perioderUtenStønad = mutableListOf<UtgiftsperiodeDto>()
+
+    this.sortedBy { it.periode.fom }.zipWithNext { denne, neste ->
+        if (denne.periode.ikkePåfølgesAv(neste.periode)) {
+            perioderUtenStønad.add(
+                UtgiftsperiodeDto(
+                    årMånedFra = denne.periode.tom.plusMonths(1),
+                    årMånedTil = neste.periode.fom.minusMonths(1),
+                    periode = Månedsperiode(fom = denne.periode.tom.plusMonths(1), tom = neste.periode.fom.minusMonths(1)),
+                    barn = emptyList(),
+                    utgifter = 0,
+                    erMidlertidigOpphør = true
+                )
+            )
+        }
+    }
+
+    return (this + perioderUtenStønad).sortedBy { it.periode.fom }
 }
