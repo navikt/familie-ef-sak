@@ -161,8 +161,8 @@ internal class KopierVedtakServiceTest {
 
     @Test
     fun `Skal kopiere vedtak innhold til ny behandling - legg til perioder uten stønad`() {
-        val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato, tilOgMed = førsteAndelTilOgMedDato, behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 7000, endring = null)
-        val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = førsteAndelTilOgMedDato.plusMonths(2), tilOgMed = sisteAndelTilOgMedDato.plusMonths(3), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 5000, endring = null)
+        val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato.atDay(1), tilOgMed = førsteAndelTilOgMedDato.atEndOfMonth(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 7000, endring = null)
+        val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = førsteAndelTilOgMedDato.plusMonths(2).atDay(1), tilOgMed = andreAndelTilOgMedDato.plusMonths(3).atEndOfMonth(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 5000, endring = null)
         every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto, andelHistorikkDto2)
 
         val vedtakDto = kopierVedtakService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
