@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningsgrunnlagBarnetilsynDto
@@ -23,7 +24,7 @@ import java.util.UUID
 
 class BeregningBarnetilsynServiceTest {
 
-    val service: BeregningBarnetilsynService = BeregningBarnetilsynService()
+    val service: BeregningBarnetilsynService = BeregningBarnetilsynService(mockk())
 
     val januar2022 = YearMonth.of(2022, 1)
     val februar2022 = YearMonth.of(2022, 2)

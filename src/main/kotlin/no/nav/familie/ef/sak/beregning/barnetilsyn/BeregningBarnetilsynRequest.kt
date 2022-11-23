@@ -21,7 +21,7 @@ data class UtgiftsMåned(
 fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
     tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
-    brukIkkeVedtatteSatser: Boolean = false
+    brukIkkeVedtatteSatser: Boolean
 ): BeløpsperiodeBarnetilsynDto {
     val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
     val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)

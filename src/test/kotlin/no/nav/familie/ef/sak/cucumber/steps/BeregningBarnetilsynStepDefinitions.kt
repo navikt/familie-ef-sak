@@ -4,6 +4,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
+import io.mockk.mockk
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBoolean
@@ -33,7 +34,7 @@ class BeregningBarnetilsynStepDefinitions {
     private var datoForKjøring: LocalDate? = null
     private var resultatHarFullførtFjerdetrinn: Boolean? = null
 
-    val beregningBarnetilsynService = BeregningBarnetilsynService()
+    val beregningBarnetilsynService = BeregningBarnetilsynService(mockk())
     val kontantStøtteperioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()

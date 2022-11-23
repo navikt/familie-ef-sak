@@ -78,7 +78,7 @@ class StepDefinitions {
     private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val beregningService = BeregningService()
-    private val beregningBarnetilsynService = BeregningBarnetilsynService()
+    private val beregningBarnetilsynService = BeregningBarnetilsynService(mockk())
     private val beregningSkolepengerService = BeregningSkolepengerService(
         behandlingService = behandlingService,
         vedtakService = vedtakService
@@ -214,7 +214,8 @@ class StepDefinitions {
             lagredeVedtak,
             saksbehandlinger.values.map { it.first }.toList(),
             null,
-            behandlingIdsToAktivitetArbeid
+            behandlingIdsToAktivitetArbeid,
+            false
         )
     }
 

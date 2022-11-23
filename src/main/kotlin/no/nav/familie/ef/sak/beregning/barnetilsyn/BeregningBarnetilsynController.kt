@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
@@ -23,7 +25,8 @@ class BeregningBarnetilsynController(
     private val beregningBarnetilsynService: BeregningBarnetilsynService,
     private val tilgangService: TilgangService,
     private val vedtakService: VedtakService,
-    private val tilkjentYtelseService: TilkjentYtelseService
+    private val tilkjentYtelseService: TilkjentYtelseService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @PostMapping
@@ -46,7 +49,12 @@ class BeregningBarnetilsynController(
         val vedtak = vedtakService.hentVedtakDto(behandlingId)
 
         if (vedtak is InnvilgelseBarnetilsyn) {
-            return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(vedtak))
+            val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
+
+            return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(
+                vedtak,
+                brukIkkeVedtatteSatser
+            ))
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }
