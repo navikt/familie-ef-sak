@@ -66,13 +66,15 @@ internal class KopierVedtakServiceTest {
         navn = "Ola",
         fødselTermindato = LocalDate.now()
     )
+
+
     val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.ikkeVedtatteSatserForBarnetilsyn.maxOf { it.periode.fom })
-    val år = if (YearMonth.now().month.value > 6) YearMonth.now().year else YearMonth.now().year - 1
-    val førsteAndelFraOgMedDato = LocalDate.of(år, 11, 1)
-    val førsteAndelTilOgMedDato = LocalDate.of(år + 1, 6, 30)
-    val sisteAndelTilOgMedDato = førsteAndelTilOgMedDato.plusMonths(3)
-    val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato, tilOgMed = førsteAndelTilOgMedDato, behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
-    val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = førsteAndelTilOgMedDato.plusMonths(1), tilOgMed = sisteAndelTilOgMedDato, behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 1, endring = null)
+    val førsteAndelFraOgMedDato = forventetFomYearMonth.minusMonths(2)
+    val førsteAndelTilOgMedDato = forventetFomYearMonth.plusMonths(6)
+    val andreAndelFraOgMed = førsteAndelTilOgMedDato.plusMonths(1)
+    val andreAndelTilOgMedDato = førsteAndelTilOgMedDato.plusMonths(3)
+    val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato.atDay(1), tilOgMed = førsteAndelTilOgMedDato.atEndOfMonth(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 0, endring = null)
+    val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = andreAndelFraOgMed.atDay(1), tilOgMed = andreAndelTilOgMedDato.atEndOfMonth(), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 1, endring = null)
 
     @BeforeEach
     fun setup() {
@@ -128,7 +130,7 @@ internal class KopierVedtakServiceTest {
 
         assertThat(vedtakDto.perioder).hasSize(2)
         assertThat(vedtakDto.perioder.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.utgifter).isEqualTo(1000)
-        assertThat(vedtakDto.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.utgifter).isEqualTo(2000)
+        assertThat(vedtakDto.perioder.find { it.periode.tom == YearMonth.from(andreAndelTilOgMedDato) }?.utgifter).isEqualTo(2000)
     }
 
     @Test
@@ -141,7 +143,7 @@ internal class KopierVedtakServiceTest {
 
         assertThat(vedtakDto.perioderKontantstøtte).hasSize(2)
         assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.beløp).isEqualTo(1000)
-        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
+        assertThat(vedtakDto.perioderKontantstøtte.find { it.periode.tom == YearMonth.from(andreAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
     }
 
     @Test
@@ -154,7 +156,22 @@ internal class KopierVedtakServiceTest {
 
         assertThat(vedtakDto.tilleggsstønad.perioder).hasSize(2)
         assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.fom == YearMonth.from(forventetFomYearMonth) }?.beløp).isEqualTo(1000)
-        assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.tom == YearMonth.from(sisteAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
+        assertThat(vedtakDto.tilleggsstønad.perioder.find { it.periode.tom == YearMonth.from(andreAndelTilOgMedDato) }?.beløp).isEqualTo(2000)
+    }
+
+    @Test
+    fun `Skal kopiere vedtak innhold til ny behandling - legg til perioder uten stønad`() {
+        val andelHistorikkDto = lagAndelHistorikkDto(fraOgMed = førsteAndelFraOgMedDato, tilOgMed = førsteAndelTilOgMedDato, behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 7000, endring = null)
+        val andelHistorikkDto2 = lagAndelHistorikkDto(fraOgMed = førsteAndelTilOgMedDato.plusMonths(2), tilOgMed = sisteAndelTilOgMedDato.plusMonths(3), behandlingBarn = listOf(historiskBehandlingsbarn), beløp = 5000, endring = null)
+        every { vedtakHistorikkService.hentAktivHistorikk(any()) } returns listOf(andelHistorikkDto, andelHistorikkDto2)
+
+        val vedtakDto = kopierVedtakService.mapTilBarnetilsynVedtak(fagsak.id, listOf(barn), forrigeBehandling.id) as InnvilgelseBarnetilsyn
+
+        assertThat(vedtakDto.perioder).hasSize(3)
+        assertThat(vedtakDto.perioder[1].utgifter).isEqualTo(0)
+        assertThat(vedtakDto.perioder[1].barn).hasSize(0)
+        assertThat(vedtakDto.perioder[1].erMidlertidigOpphør).isEqualTo(true)
+        assertThat(vedtakDto.perioder.erSammenhengende()).isTrue
     }
 
     @Test
