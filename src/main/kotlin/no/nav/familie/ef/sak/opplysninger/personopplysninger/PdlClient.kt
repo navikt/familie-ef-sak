@@ -131,7 +131,12 @@ class PdlClient(
             pdlIdentRequest,
             httpHeaders()
         )
-        return feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
+        val pdlIdenter = feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
+
+        if(pdlIdenter.identer.isEmpty()){
+            secureLogger.error("Finner ikke personidenter for personIdent i PDL $ident ")
+        }
+        return pdlIdenter
     }
 
     /**
