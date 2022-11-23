@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
@@ -8,10 +9,12 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.mergeSammenhengendePerioder
 import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,7 +27,8 @@ import java.util.UUID
 
 class BeregningBarnetilsynServiceTest {
 
-    val service: BeregningBarnetilsynService = BeregningBarnetilsynService(mockk())
+    val featureToggleService = mockk<FeatureToggleService>()
+    val service: BeregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
 
     val januar2022 = YearMonth.of(2022, 1)
     val februar2022 = YearMonth.of(2022, 2)
@@ -43,6 +47,11 @@ class BeregningBarnetilsynServiceTest {
     val januar2000 = YearMonth.of(2000, 1)
     val februar2000 = YearMonth.of(2000, 2)
     val mars2000 = YearMonth.of(2000, 3)
+
+    @BeforeEach
+    fun setup() {
+        every { featureToggleService.isEnabled(any()) } returns false
+    }
 
     @Nested
     inner class BeregningBarnetilsynValidering {

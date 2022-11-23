@@ -51,10 +51,12 @@ class BeregningBarnetilsynController(
         if (vedtak is InnvilgelseBarnetilsyn) {
             val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
 
-            return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(
-                vedtak,
-                brukIkkeVedtatteSatser
-            ))
+            return Ressurs.success(
+                tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiodeBarnetilsyn(
+                    vedtak,
+                    brukIkkeVedtatteSatser
+                )
+            )
         }
         error("Kan ikke hente beregning for vedtakstype ${vedtak._type}")
     }
