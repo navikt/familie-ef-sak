@@ -78,7 +78,8 @@ class StepDefinitions {
     private val andelsHistorikkService = mockk<AndelsHistorikkService>(relaxed = true)
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val beregningService = BeregningService()
-    private val beregningBarnetilsynService = BeregningBarnetilsynService(mockk())
+    private val featureToggleService = mockFeatureToggleService()
+    private val beregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
     private val beregningSkolepengerService = BeregningSkolepengerService(
         behandlingService = behandlingService,
         vedtakService = vedtakService
@@ -101,7 +102,7 @@ class StepDefinitions {
         barnService,
         fagsakService,
         validerOmregningService,
-        mockFeatureToggleService()
+        featureToggleService
     )
 
     private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, andelsHistorikkService)
