@@ -4,7 +4,6 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
-import io.mockk.mockk
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBoolean
@@ -12,6 +11,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.ANTALL_BARN
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.BELØP
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.FRA_MND
@@ -34,7 +34,8 @@ class BeregningBarnetilsynStepDefinitions {
     private var datoForKjøring: LocalDate? = null
     private var resultatHarFullførtFjerdetrinn: Boolean? = null
 
-    val beregningBarnetilsynService = BeregningBarnetilsynService(mockk())
+    val featureToggleService = mockFeatureToggleService()
+    val beregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
     val kontantStøtteperioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()
