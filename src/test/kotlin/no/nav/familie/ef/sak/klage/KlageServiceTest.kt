@@ -103,7 +103,6 @@ internal class KlageServiceTest {
 
             assertThat(request.ident).isEqualTo(personIdent)
             assertThat(request.eksternFagsakId).isEqualTo(eksternFagsakId.toString())
-            assertThat(request.eksternBehandlingId).isNull()
             assertThat(request.fagsystem).isEqualTo(Fagsystem.EF)
             assertThat(request.stønadstype).isEqualTo(Stønadstype.OVERGANGSSTØNAD)
             assertThat(request.klageMottatt).isEqualTo(LocalDate.now())
