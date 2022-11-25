@@ -133,7 +133,7 @@ class PdlClient(
         )
         val pdlIdenter = feilsjekkOgReturnerData(ident, pdlResponse) { it.hentIdenter }
 
-        if(pdlIdenter.identer.isEmpty()){
+        if (pdlIdenter.identer.isEmpty()) {
             secureLogger.error("Finner ikke personidenter for personIdent i PDL $ident ")
         }
         return pdlIdenter
