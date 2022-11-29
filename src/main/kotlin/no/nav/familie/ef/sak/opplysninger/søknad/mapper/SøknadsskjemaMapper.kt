@@ -30,9 +30,12 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Utenlandsopphold
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Virksomhet
+import no.nav.familie.kontrakter.ef.søknad.Adresse
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
+import no.nav.familie.kontrakter.ef.søknad.Personalia
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
+import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import java.time.YearMonth
 import kotlin.math.roundToInt
 import no.nav.familie.kontrakter.ef.søknad.Aksjeselskap as KontraktAksjeselskap
@@ -77,10 +80,9 @@ object SøknadsskjemaMapper {
             situasjon = tilDomene(kontraktsøknad.situasjon.verdi),
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
-            opplysningerOmAdresse = tilDomene(kontraktsøknad.opplysningerOmAdresse?.verdi)
+            opplysningerOmAdresse = tilDomene(kontraktsøknad.personalia, kontraktsøknad.opplysningerOmAdresse)
         )
     }
-
 
     fun tilDomene(kontraktsøknad: KontraktSøknadBarnetilsyn): SøknadsskjemaBarnetilsyn {
         return SøknadsskjemaBarnetilsyn(
@@ -97,7 +99,7 @@ object SøknadsskjemaMapper {
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
             dokumentasjon = tilDomene(kontraktsøknad.dokumentasjon),
-            opplysningerOmAdresse = tilDomene(kontraktsøknad.opplysningerOmAdresse?.verdi)
+            opplysningerOmAdresse = tilDomene(kontraktsøknad.personalia, kontraktsøknad.opplysningerOmAdresse)
         )
     }
 
@@ -115,7 +117,7 @@ object SøknadsskjemaMapper {
             utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,
             utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi),
             tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi),
-            opplysningerOmAdresse = tilDomene(kontraktsøknad.opplysningerOmAdresse?.verdi)
+            opplysningerOmAdresse = tilDomene(kontraktsøknad.personalia, kontraktsøknad.opplysningerOmAdresse)
         )
     }
 
@@ -376,11 +378,23 @@ object SøknadsskjemaMapper {
             oppsigelseDokumentasjon = tilDomene(situasjon.oppsigelseDokumentasjon?.verdi)
         )
 
-    private fun tilDomene(kontrakt: KontraktOpplysningerOmAdresse?) = OpplysningerOmAdresse(
-        søkerBorPåRegistrertAdresse = kontrakt?.søkerBorPåRegistrertAdresse?.verdi,
-        harMeldtFlytteendring = kontrakt?.harMeldtFlytteendring?.verdi,
-        dokumentasjonFlytteendring = tilDomene(kontrakt?.dokumentasjonFlytteendring?.verdi)
+    private fun tilDomene(
+        personalia: Søknadsfelt<Personalia>,
+        opplysningerOmAdresse: Søknadsfelt<KontraktOpplysningerOmAdresse>?
+    ) = OpplysningerOmAdresse(
+        adresse = mapAdresse(personalia.verdi.adresse.verdi),
+        søkerBorPåRegistrertAdresse = opplysningerOmAdresse?.verdi?.søkerBorPåRegistrertAdresse?.verdi,
+        harMeldtFlytteendring = opplysningerOmAdresse?.verdi?.harMeldtFlytteendring?.verdi,
+        dokumentasjonFlytteendring = tilDomene(opplysningerOmAdresse?.verdi?.dokumentasjonFlytteendring?.verdi)
     )
+
+    private fun mapAdresse(adresse: Adresse): String = adresse.let { adresse ->
+        listOfNotNull(
+            adresse.adresse,
+            "${adresse.postnummer}${adresse.poststedsnavn?.let { " $it" } ?: ""}",
+            adresse.land
+        ).joinToString(", ")
+    }
 
     private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? =
         stønadsstart.fraMåned?.verdi?.let { måned -> stønadsstart.fraÅr?.verdi?.let { år -> YearMonth.of(år, måned) } }
