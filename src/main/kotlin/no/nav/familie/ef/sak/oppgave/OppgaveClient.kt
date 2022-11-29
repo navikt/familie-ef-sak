@@ -99,7 +99,8 @@ class OppgaveClient(
     fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
         val uri = UriComponentsBuilder.fromUri(oppgaveUri)
             .pathSegment("mappe", "sok")
-            .queryParams(finnMappeRequest.toQueryParams())
+            .queryParam("enhetsnr", finnMappeRequest.enhetsnr)
+            .queryParam("limit", finnMappeRequest.limit)
             .build()
             .toUri()
         val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)
