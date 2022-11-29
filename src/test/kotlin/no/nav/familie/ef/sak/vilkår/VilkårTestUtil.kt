@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.vilkår.dto.AktivitetDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BosituasjonDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapDto
+import no.nav.familie.ef.sak.vilkår.dto.OpplysningerOmAdresseDto
 import no.nav.familie.ef.sak.vilkår.dto.SagtOppEllerRedusertStillingDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandsplanerDto
@@ -26,6 +27,7 @@ object VilkårTestUtil {
         sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto? = mockk(relaxed = true),
         lagtTilEtterFerdigstilling: Boolean = false,
         registeropplysningerOpprettetTid: LocalDateTime = mockk(relaxed = true),
+        opplysningerOmAdresse: OpplysningerOmAdresseDto = mockk(relaxed = true),
         dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true)
     ) =
         VilkårGrunnlagDto(
@@ -39,6 +41,7 @@ object VilkårTestUtil {
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             lagtTilEtterFerdigstilling = lagtTilEtterFerdigstilling,
             registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
+            opplysningerOmAdresse = opplysningerOmAdresse,
             dokumentasjon = dokumentasjon
         )
 }
