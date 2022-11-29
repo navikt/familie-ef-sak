@@ -35,7 +35,9 @@ data class SøknadsskjemaBarnetilsyn(
     @Column("soker_fra_bestemt_maned")
     val søkerFraBestemtMåned: Boolean,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "dokumentasjon_")
-    val dokumentasjon: BarnetilsynDokumentasjon
+    val dokumentasjon: BarnetilsynDokumentasjon,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY, prefix = "adresseopplysninger_")
+    val opplysningerOmAdresse: OpplysningerOmAdresse
 ) : ISøknadsskjema
 
 data class BarnetilsynDokumentasjon(
