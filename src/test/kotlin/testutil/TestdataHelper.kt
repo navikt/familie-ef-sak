@@ -10,6 +10,7 @@ import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.Bosituasjon
 import no.nav.familie.kontrakter.ef.søknad.Innsendingsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
+import no.nav.familie.kontrakter.ef.søknad.OpplysningerOmAdresse
 import no.nav.familie.kontrakter.ef.søknad.Personalia
 import no.nav.familie.kontrakter.ef.søknad.Situasjon
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
@@ -22,6 +23,7 @@ import java.util.UUID
 fun søknad(
     personalia: Søknadsfelt<Personalia> = mockk(),
     innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer> = mockk(),
+    opplysningerOmAdresse: Søknadsfelt<OpplysningerOmAdresse> = mockk(),
     sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer> = mockk(),
     medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer> = mockk(),
     bosituasjon: Søknadsfelt<Bosituasjon> = mockk(),
@@ -32,16 +34,17 @@ fun søknad(
     stønadsstart: Søknadsfelt<Stønadsstart> = mockk()
 ) =
     SøknadOvergangsstønad(
-        personalia,
-        innsendingsdetaljer,
-        sivilstandsdetaljer,
-        medlemskapsdetaljer,
-        bosituasjon,
-        sivilstandsplaner,
-        barn,
-        aktivitet,
-        situasjon,
-        stønadsstart
+        innsendingsdetaljer = innsendingsdetaljer,
+        personalia = personalia,
+        opplysningerOmAdresse = opplysningerOmAdresse,
+        sivilstandsdetaljer = sivilstandsdetaljer,
+        medlemskapsdetaljer = medlemskapsdetaljer,
+        bosituasjon = bosituasjon,
+        sivilstandsplaner = sivilstandsplaner,
+        barn = barn,
+        aktivitet = aktivitet,
+        situasjon = situasjon,
+        stønadsstart = stønadsstart,
     )
 
 fun søknadBarnTilBehandlingBarn(barn: Set<SøknadBarn>, behandlingId: UUID = UUID.randomUUID()): List<BehandlingBarn> = barn.map {
