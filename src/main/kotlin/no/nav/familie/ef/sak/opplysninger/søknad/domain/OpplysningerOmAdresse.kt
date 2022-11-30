@@ -6,6 +6,6 @@ data class OpplysningerOmAdresse(
     val adresse: String? = null,
     @Column("soker_bor_pa_adresse")
     val søkerBorPåRegistrertAdresse: Boolean? = null,
-    val harMeldtFlytteendring: Boolean? = null,
-    val dokumentasjonFlytteendring: Dokumentasjon? = null
+    val harMeldtAdresseendring: Boolean? = null,
+    val dokumentasjonAdresseendring: Dokumentasjon? = null
 )

@@ -101,6 +101,6 @@ object DokumentasjonMapper {
             oppsigelse = situasjon?.oppsigelseDokumentasjon?.tilDto(),
 
             utdanningsutgifter = utdanningsutgifter?.tilDto(),
-            meldtFlytteendring = opplysningerOmAdresse?.dokumentasjonFlytteendring?.tilDto()
+            meldtAdresseendring = opplysningerOmAdresse?.dokumentasjonAdresseendring?.tilDto()
         )
 }

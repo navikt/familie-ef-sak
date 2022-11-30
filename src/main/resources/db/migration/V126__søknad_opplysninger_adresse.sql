@@ -1,4 +1,4 @@
 ALTER TABLE soknadsskjema ADD COLUMN adresseopplysninger_adresse VARCHAR;
 ALTER TABLE soknadsskjema ADD COLUMN adresseopplysninger_soker_bor_pa_adresse BOOLEAN;
-ALTER TABLE soknadsskjema ADD COLUMN adresseopplysninger_har_meldt_flytteendring BOOLEAN;
-ALTER TABLE soknadsskjema ADD COLUMN adresseopplysninger_dokumentasjon_flytteendring VARCHAR;
+ALTER TABLE soknadsskjema ADD COLUMN adresseopplysninger_har_meldt_adresseendring BOOLEAN;
+ALTER TABLE soknadsskjema ADD COLUMN adresseopplysninger_dokumentasjon_adresseendring VARCHAR;

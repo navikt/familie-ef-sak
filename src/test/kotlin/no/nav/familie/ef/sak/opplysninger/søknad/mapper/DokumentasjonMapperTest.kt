@@ -102,8 +102,8 @@ internal class DokumentasjonMapperTest {
     )
 
     private val opplysningerOmAdresse = OpplysningerOmAdresse(
-        søkerBorPåRegistrertAdresse = false, harMeldtFlytteendring = true,
-        dokumentasjonFlytteendring = dokumentasjonMedVedlegg
+        søkerBorPåRegistrertAdresse = false, harMeldtAdresseendring = true,
+        dokumentasjonAdresseendring = dokumentasjonMedVedlegg
     )
 
     @Test
@@ -153,7 +153,7 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.reduksjonAvArbeidsforhold).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.oppsigelse).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.utdanningsutgifter).isEqualTo(null)
-        assertThat(dokumentasjon.meldtFlytteendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
+        assertThat(dokumentasjon.meldtAdresseendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
     }
 
     @Test
@@ -211,7 +211,7 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.reduksjonAvArbeidsforhold).isEqualTo(null)
         assertThat(dokumentasjon.oppsigelse).isEqualTo(null)
         assertThat(dokumentasjon.utdanningsutgifter).isEqualTo(null)
-        assertThat(dokumentasjon.meldtFlytteendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
+        assertThat(dokumentasjon.meldtAdresseendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
     }
 
     @Test
@@ -262,6 +262,6 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.reduksjonAvArbeidsforhold).isEqualTo(null)
         assertThat(dokumentasjon.oppsigelse).isEqualTo(null)
         assertThat(dokumentasjon.utdanningsutgifter).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
-        assertThat(dokumentasjon.meldtFlytteendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
+        assertThat(dokumentasjon.meldtAdresseendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
     }
 }
