@@ -391,9 +391,11 @@ object SøknadsskjemaMapper {
     private fun mapAdresse(adresse: Adresse): String = adresse.let { adresse ->
         listOfNotNull(
             adresse.adresse,
-            "${adresse.postnummer}${adresse.poststedsnavn?.let { " $it" } ?: ""}",
+            "${adresse.postnummer}${adresse.poststedsnavn?.takeIf { it.isNotBlank() }?.let { " $it" } ?: ""}",
             adresse.land
-        ).joinToString(", ")
+        )
+            .filter { it.isNotBlank() }
+            .joinToString(", ")
     }
 
     private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? =
