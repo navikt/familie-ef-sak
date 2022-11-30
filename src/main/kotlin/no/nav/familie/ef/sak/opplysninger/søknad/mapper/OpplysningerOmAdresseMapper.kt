@@ -1,16 +1,16 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.OpplysningerOmAdresse
-import no.nav.familie.ef.sak.vilkår.dto.OpplysningerOmAdresseDto
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
+import no.nav.familie.ef.sak.vilkår.dto.AdresseopplysningerDto
 
-object OpplysningerOmAdresseMapper {
+object AdresseopplysningerMapper {
 
-    fun tilDto(opplysningerOmAdresse: OpplysningerOmAdresse?): OpplysningerOmAdresseDto? =
-        opplysningerOmAdresse?.søkerBorPåRegistrertAdresse?.let {
-            OpplysningerOmAdresseDto(
-                søkerBorPåRegistrertAdresse = opplysningerOmAdresse.søkerBorPåRegistrertAdresse,
-                adresse = opplysningerOmAdresse.adresse,
-                harMeldtAdresseendring = opplysningerOmAdresse.harMeldtAdresseendring
+    fun tilDto(adresseopplysninger: Adresseopplysninger?): AdresseopplysningerDto? =
+        adresseopplysninger?.søkerBorPåRegistrertAdresse?.let {
+            AdresseopplysningerDto(
+                søkerBorPåRegistrertAdresse = adresseopplysninger.søkerBorPåRegistrertAdresse,
+                adresse = adresseopplysninger.adresse,
+                harMeldtAdresseendring = adresseopplysninger.harMeldtAdresseendring
             )
         }
 }

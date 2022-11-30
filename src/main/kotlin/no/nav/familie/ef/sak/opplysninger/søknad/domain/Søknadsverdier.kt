@@ -16,7 +16,7 @@ data class Søknadsverdier(
     val situasjon: Situasjon? = null, // Gjelder: OS
     val datoMottatt: LocalDateTime,
     val søkerFra: YearMonth? = null,
-    val opplysningerOmAdresse: OpplysningerOmAdresse?,
+    val adresseopplysninger: Adresseopplysninger?,
     val dokumentasjon: DokumentasjonFraSøknadDto
 )
 
@@ -62,7 +62,7 @@ fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
     bosituasjon = this.bosituasjon,
     situasjon = null,
     datoMottatt = this.datoMottatt,
-    opplysningerOmAdresse = this.opplysningerOmAdresse,
+    adresseopplysninger = this.adresseopplysninger,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
 )
 
@@ -77,7 +77,7 @@ fun SøknadsskjemaBarnetilsyn.tilSøknadsverdier() = Søknadsverdier(
     situasjon = null,
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
-    opplysningerOmAdresse = this.opplysningerOmAdresse,
+    adresseopplysninger = this.adresseopplysninger,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
 
 )
@@ -93,6 +93,6 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() = Søknadsverdier(
     situasjon = this.situasjon,
     datoMottatt = this.datoMottatt,
     søkerFra = this.søkerFra,
-    opplysningerOmAdresse = this.opplysningerOmAdresse,
+    adresseopplysninger = this.adresseopplysninger,
     dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this)
 )

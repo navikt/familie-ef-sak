@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
-import no.nav.familie.ef.sak.opplysninger.søknad.mapper.OpplysningerOmAdresseMapper
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AdresseopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
@@ -68,7 +68,7 @@ class VilkårGrunnlagService(
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling,
             registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt,
-            opplysningerOmAdresse = OpplysningerOmAdresseMapper.tilDto(søknad?.opplysningerOmAdresse),
+            adresseopplysninger = AdresseopplysningerMapper.tilDto(søknad?.adresseopplysninger),
             dokumentasjon = søknad?.dokumentasjon
         )
     }
