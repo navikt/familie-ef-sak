@@ -13,7 +13,7 @@ internal class OpplysningerOmAdresseMapperTest {
     }
 
     @Test
-    internal fun `mapper til null hvis man ikke besvart søkerBorPåRegistrertAdresse då det alltid besvares før harMeldtFlytteendring`() {
+    internal fun `mapper til null hvis man ikke besvart søkerBorPåRegistrertAdresse då det alltid besvares før harMeldtAdresseendring`() {
         val dto = OpplysningerOmAdresseMapper.tilDto(OpplysningerOmAdresse("", null, null))
         assertThat(dto).isNull()
     }
@@ -23,12 +23,12 @@ internal class OpplysningerOmAdresseMapperTest {
         val opplysningerOmAdresse = OpplysningerOmAdresse(
             adresse = "adresse",
             søkerBorPåRegistrertAdresse = false,
-            harMeldtFlytteendring = true,
-            dokumentasjonFlytteendring = null
+            harMeldtAdresseendring = true,
+            dokumentasjonAdresseendring = null
         )
         val dto = OpplysningerOmAdresseMapper.tilDto(opplysningerOmAdresse)!!
         assertThat(dto.adresse).isEqualTo("adresse")
         assertThat(dto.søkerBorPåRegistrertAdresse).isFalse
-        assertThat(dto.harMeldtFlytteendring).isTrue
+        assertThat(dto.harMeldtAdresseendring).isTrue
     }
 }

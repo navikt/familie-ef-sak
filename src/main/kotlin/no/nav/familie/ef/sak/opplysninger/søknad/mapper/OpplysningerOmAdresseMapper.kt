@@ -10,7 +10,7 @@ object OpplysningerOmAdresseMapper {
             OpplysningerOmAdresseDto(
                 søkerBorPåRegistrertAdresse = opplysningerOmAdresse.søkerBorPåRegistrertAdresse,
                 adresse = opplysningerOmAdresse.adresse,
-                harMeldtFlytteendring = opplysningerOmAdresse.harMeldtFlytteendring
+                harMeldtAdresseendring = opplysningerOmAdresse.harMeldtAdresseendring
             )
         }
 }

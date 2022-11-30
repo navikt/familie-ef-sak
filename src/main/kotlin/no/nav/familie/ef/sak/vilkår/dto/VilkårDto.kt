@@ -26,5 +26,5 @@ data class VilkårGrunnlagDto(
 data class OpplysningerOmAdresseDto(
     val søkerBorPåRegistrertAdresse: Boolean,
     val adresse: String?,
-    val harMeldtFlytteendring: Boolean?
+    val harMeldtAdresseendring: Boolean?
 )
