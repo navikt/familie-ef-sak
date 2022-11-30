@@ -19,12 +19,12 @@ data class VilkårGrunnlagDto(
     val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
     val lagtTilEtterFerdigstilling: Boolean,
     val registeropplysningerOpprettetTid: LocalDateTime,
-    val opplysningerOmAdresse: OpplysningerOmAdresseDto,
+    val opplysningerOmAdresse: OpplysningerOmAdresseDto?,
     val dokumentasjon: DokumentasjonFraSøknadDto?
 )
 
 data class OpplysningerOmAdresseDto(
+    val søkerBorPåRegistrertAdresse: Boolean,
     val adresse: String?,
-    val søkerBorPåRegistrertAdresse: Boolean?,
     val harMeldtFlytteendring: Boolean?
 )

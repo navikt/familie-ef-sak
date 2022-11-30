@@ -7,11 +7,15 @@ import org.junit.jupiter.api.Test
 internal class OpplysningerOmAdresseMapperTest {
 
     @Test
-    internal fun `mapper til tomt objekt hvis null`() {
+    internal fun `mapper til null hvis objektet er null`() {
         val dto = OpplysningerOmAdresseMapper.tilDto(null)
-        assertThat(dto.adresse).isNull()
-        assertThat(dto.søkerBorPåRegistrertAdresse).isNull()
-        assertThat(dto.harMeldtFlytteendring).isNull()
+        assertThat(dto).isNull()
+    }
+
+    @Test
+    internal fun `mapper til null hvis man ikke besvart søkerBorPåRegistrertAdresse då det alltid besvares før harMeldtFlytteendring`() {
+        val dto = OpplysningerOmAdresseMapper.tilDto(OpplysningerOmAdresse("", null, null))
+        assertThat(dto).isNull()
     }
 
     @Test
@@ -22,7 +26,7 @@ internal class OpplysningerOmAdresseMapperTest {
             harMeldtFlytteendring = true,
             dokumentasjonFlytteendring = null
         )
-        val dto = OpplysningerOmAdresseMapper.tilDto(opplysningerOmAdresse)
+        val dto = OpplysningerOmAdresseMapper.tilDto(opplysningerOmAdresse)!!
         assertThat(dto.adresse).isEqualTo("adresse")
         assertThat(dto.søkerBorPåRegistrertAdresse).isFalse
         assertThat(dto.harMeldtFlytteendring).isTrue

@@ -5,9 +5,12 @@ import no.nav.familie.ef.sak.vilkår.dto.OpplysningerOmAdresseDto
 
 object OpplysningerOmAdresseMapper {
 
-    fun tilDto(opplysningerOmAdresse: OpplysningerOmAdresse?) = OpplysningerOmAdresseDto(
-        opplysningerOmAdresse?.adresse,
-        opplysningerOmAdresse?.søkerBorPåRegistrertAdresse,
-        opplysningerOmAdresse?.harMeldtFlytteendring
-    )
+    fun tilDto(opplysningerOmAdresse: OpplysningerOmAdresse?): OpplysningerOmAdresseDto? =
+        opplysningerOmAdresse?.søkerBorPåRegistrertAdresse?.let {
+            OpplysningerOmAdresseDto(
+                søkerBorPåRegistrertAdresse = opplysningerOmAdresse.søkerBorPåRegistrertAdresse,
+                adresse = opplysningerOmAdresse.adresse,
+                harMeldtFlytteendring = opplysningerOmAdresse.harMeldtFlytteendring
+            )
+        }
 }
