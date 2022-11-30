@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokument
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.PersonMinimum
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Samvær
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
@@ -29,11 +30,15 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.TidligereUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.UnderUtdanning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Utenlandsopphold
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Virksomhet
+import no.nav.familie.kontrakter.ef.søknad.Adresse
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
+import no.nav.familie.kontrakter.ef.søknad.Personalia
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Stønadsstart
+import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import java.time.YearMonth
 import kotlin.math.roundToInt
+import no.nav.familie.kontrakter.ef.søknad.Adresseopplysninger as KontraktAdresseopplysninger
 import no.nav.familie.kontrakter.ef.søknad.Aksjeselskap as KontraktAksjeselskap
 import no.nav.familie.kontrakter.ef.søknad.Aktivitet as KontraktAktivitet
 import no.nav.familie.kontrakter.ef.søknad.AnnenForelder as KontraktAnnenForelder
@@ -74,7 +79,8 @@ object SøknadsskjemaMapper {
             aktivitet = tilDomene(kontraktsøknad.aktivitet.verdi),
             situasjon = tilDomene(kontraktsøknad.situasjon.verdi),
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
-            søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi
+            søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
         )
     }
 
@@ -92,7 +98,8 @@ object SøknadsskjemaMapper {
             aktivitet = tilDomene(kontraktsøknad.aktivitet.verdi),
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
-            dokumentasjon = tilDomene(kontraktsøknad.dokumentasjon)
+            dokumentasjon = tilDomene(kontraktsøknad.dokumentasjon),
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
         )
     }
 
@@ -109,7 +116,8 @@ object SøknadsskjemaMapper {
             barn = tilDomene(kontraktsøknad.barn.verdi),
             utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,
             utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi),
-            tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi)
+            tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi),
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
         )
     }
 
@@ -369,6 +377,24 @@ object SøknadsskjemaMapper {
             reduksjonAvArbeidsforholdDokumentasjon = tilDomene(situasjon.reduksjonAvArbeidsforholdDokumentasjon?.verdi),
             oppsigelseDokumentasjon = tilDomene(situasjon.oppsigelseDokumentasjon?.verdi)
         )
+
+    private fun tilDomene(
+        personalia: Søknadsfelt<Personalia>,
+        adresseopplysninger: Søknadsfelt<KontraktAdresseopplysninger>?
+    ) = Adresseopplysninger(
+        adresse = mapAdresse(personalia.verdi.adresse.verdi),
+        søkerBorPåRegistrertAdresse = adresseopplysninger?.verdi?.søkerBorPåRegistrertAdresse?.verdi,
+        harMeldtAdresseendring = adresseopplysninger?.verdi?.harMeldtAdresseendring?.verdi,
+        dokumentasjonAdresseendring = tilDomene(adresseopplysninger?.verdi?.dokumentasjonAdresseendring?.verdi)
+    )
+
+    private fun mapAdresse(adresse: Adresse): String = adresse.let { adresse ->
+        listOfNotNull(
+            adresse.adresse,
+            "${adresse.postnummer}${adresse.poststedsnavn?.let { " $it" } ?: ""}",
+            adresse.land
+        ).joinToString(", ")
+    }
 
     private fun tilDomene(stønadsstart: Stønadsstart): YearMonth? =
         stønadsstart.fraMåned?.verdi?.let { måned -> stønadsstart.fraÅr?.verdi?.let { år -> YearMonth.of(år, måned) } }

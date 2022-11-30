@@ -47,7 +47,8 @@ data class DokumentasjonFraSøknadDto(
     val utdanningstilbud: DokumentasjonDto? = null,
     val reduksjonAvArbeidsforhold: DokumentasjonDto? = null,
     val oppsigelse: DokumentasjonDto? = null,
-    val utdanningsutgifter: DokumentasjonDto? = null
+    val utdanningsutgifter: DokumentasjonDto? = null,
+    val meldtAdresseendring: DokumentasjonDto? = null
 )
 
 fun SøknadsskjemaSkolepenger.tilSøknadsverdier() = Søknadsverdier(
