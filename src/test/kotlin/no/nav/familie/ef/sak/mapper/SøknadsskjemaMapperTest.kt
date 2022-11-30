@@ -82,5 +82,17 @@ internal class SøknadsskjemaMapperTest {
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
             assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234, Land")
         }
+
+        @Test
+        internal fun `tomme element skal håndteres`() {
+            val adresse = Adresse(
+                adresse = "adresse",
+                postnummer = "",
+                poststedsnavn = null,
+                land = ""
+            )
+            val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
+            assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse")
+        }
     }
 }
