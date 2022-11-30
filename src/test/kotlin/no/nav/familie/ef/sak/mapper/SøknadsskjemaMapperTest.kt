@@ -68,7 +68,7 @@ internal class SøknadsskjemaMapperTest {
                 land = null
             )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
-            assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger.adresse).isEqualTo("adresse, 1234 Sted")
+            assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234 Sted")
         }
 
         @Test
@@ -80,7 +80,7 @@ internal class SøknadsskjemaMapperTest {
                 land = "Land"
             )
             val søknad = TestsøknadBuilder.Builder().setPersonalia(adresse = adresse).build().søknadOvergangsstønad
-            assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger.adresse).isEqualTo("adresse, 1234, Land")
+            assertThat(SøknadsskjemaMapper.tilDomene(søknad).adresseopplysninger?.adresse).isEqualTo("adresse, 1234, Land")
         }
     }
 }

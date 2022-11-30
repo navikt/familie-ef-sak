@@ -42,6 +42,7 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
 
         assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
+        assertThat(søknadFraDatabase.adresseopplysninger).isNotNull
     }
 
     @Test
@@ -52,7 +53,22 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
 
+        assertThat(søknadFraDatabase.adresseopplysninger).isNull()
+    }
+
+    @Test
+    internal fun `søknad om overgangsstønad uten opplysninger om adresse lagres korrekt 2`() {
+        val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
+            .copy(adresseopplysninger = null)
+
+        søknadOvergangsstønadRepository.insert(søknadTilLagring)
+        val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)
+
         assertThat(søknadFraDatabase).isEqualTo(søknadTilLagring)
+        assertThat(søknadFraDatabase.adresseopplysninger?.adresse).isNull()
+        assertThat(søknadFraDatabase.adresseopplysninger?.søkerBorPåRegistrertAdresse).isNull()
+        assertThat(søknadFraDatabase.adresseopplysninger?.harMeldtAdresseendring).isNull()
+        assertThat(søknadFraDatabase.adresseopplysninger?.dokumentasjonAdresseendring).isNull()
     }
 
     @Test
