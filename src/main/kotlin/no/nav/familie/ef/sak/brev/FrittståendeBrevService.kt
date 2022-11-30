@@ -93,5 +93,6 @@ class FrittståendeBrevService(
             FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> FrittståendeBrevType.VARSEL_OM_SANKSJON
             FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE
             FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE
+            FrittståendeBrevKategori.BREV_OM_SVARTID_KLAGE -> FrittståendeBrevType.INFORMASJONSBREV
         }
 }
