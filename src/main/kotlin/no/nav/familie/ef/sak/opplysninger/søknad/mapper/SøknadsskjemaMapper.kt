@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokument
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.OpplysningerOmAdresse
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.PersonMinimum
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Samvær
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig
@@ -80,7 +80,7 @@ object SøknadsskjemaMapper {
             situasjon = tilDomene(kontraktsøknad.situasjon.verdi),
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
-            opplysningerOmAdresse = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
         )
     }
 
@@ -99,7 +99,7 @@ object SøknadsskjemaMapper {
             søkerFra = tilDomene(kontraktsøknad.stønadsstart.verdi),
             søkerFraBestemtMåned = kontraktsøknad.stønadsstart.verdi.søkerFraBestemtMåned.verdi,
             dokumentasjon = tilDomene(kontraktsøknad.dokumentasjon),
-            opplysningerOmAdresse = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
         )
     }
 
@@ -117,7 +117,7 @@ object SøknadsskjemaMapper {
             utdanning = tilDomene(kontraktsøknad.utdanning.verdi)!!,
             utdanningsutgifter = tilDomene(kontraktsøknad.dokumentasjon.utdanningsutgifter?.verdi),
             tidligereUtdanninger = tilTidligereUtdanninger(kontraktsøknad.utdanning.verdi.tidligereUtdanninger?.verdi),
-            opplysningerOmAdresse = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
+            adresseopplysninger = tilDomene(kontraktsøknad.personalia, kontraktsøknad.adresseopplysninger)
         )
     }
 
@@ -380,12 +380,12 @@ object SøknadsskjemaMapper {
 
     private fun tilDomene(
         personalia: Søknadsfelt<Personalia>,
-        opplysningerOmAdresse: Søknadsfelt<KontraktAdresseopplysninger>?
-    ) = OpplysningerOmAdresse(
+        adresseopplysninger: Søknadsfelt<KontraktAdresseopplysninger>?
+    ) = Adresseopplysninger(
         adresse = mapAdresse(personalia.verdi.adresse.verdi),
-        søkerBorPåRegistrertAdresse = opplysningerOmAdresse?.verdi?.søkerBorPåRegistrertAdresse?.verdi,
-        harMeldtAdresseendring = opplysningerOmAdresse?.verdi?.harMeldtAdresseendring?.verdi,
-        dokumentasjonAdresseendring = tilDomene(opplysningerOmAdresse?.verdi?.dokumentasjonAdresseendring?.verdi)
+        søkerBorPåRegistrertAdresse = adresseopplysninger?.verdi?.søkerBorPåRegistrertAdresse?.verdi,
+        harMeldtAdresseendring = adresseopplysninger?.verdi?.harMeldtAdresseendring?.verdi,
+        dokumentasjonAdresseendring = tilDomene(adresseopplysninger?.verdi?.dokumentasjonAdresseendring?.verdi)
     )
 
     private fun mapAdresse(adresse: Adresse): String = adresse.let { adresse ->

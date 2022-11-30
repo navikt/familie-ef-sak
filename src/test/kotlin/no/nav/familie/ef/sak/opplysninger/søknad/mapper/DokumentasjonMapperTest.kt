@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokument
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.OpplysningerOmAdresse
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Samvær
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
@@ -101,7 +101,7 @@ internal class DokumentasjonMapperTest {
         eksamensgebyr = null
     )
 
-    private val opplysningerOmAdresse = OpplysningerOmAdresse(
+    private val adresseopplysninger = Adresseopplysninger(
         søkerBorPåRegistrertAdresse = false, harMeldtAdresseendring = true,
         dokumentasjonAdresseendring = dokumentasjonMedVedlegg
     )
@@ -119,7 +119,7 @@ internal class DokumentasjonMapperTest {
             aktivitet = aktivitet,
             situasjon = situasjon,
             søkerFra = null, søkerFraBestemtMåned = false,
-            opplysningerOmAdresse = opplysningerOmAdresse
+            adresseopplysninger = adresseopplysninger
         )
 
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadOvergangsstønad)
@@ -177,7 +177,7 @@ internal class DokumentasjonMapperTest {
             ),
             søkerFra = null,
             søkerFraBestemtMåned = false,
-            opplysningerOmAdresse = opplysningerOmAdresse
+            adresseopplysninger = adresseopplysninger
         )
 
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadBarnetilsyn)
@@ -229,7 +229,7 @@ internal class DokumentasjonMapperTest {
             utdanning = utdanning,
             utdanningsutgifter = dokumentasjonSendtInnTidligere,
             tidligereUtdanninger = setOf(),
-            opplysningerOmAdresse = opplysningerOmAdresse
+            adresseopplysninger = adresseopplysninger
         )
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadSkolepenger)
 

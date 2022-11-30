@@ -4,7 +4,7 @@ import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadBarnetilsynRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.OpplysningerOmAdresse
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.kontrakter.ef.søknad.Barnepass
@@ -47,7 +47,7 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
     @Test
     internal fun `søknad om overgangsstønad uten opplysninger om adresse lagres korrekt`() {
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(Testsøknad.søknadOvergangsstønad)
-            .copy(opplysningerOmAdresse = OpplysningerOmAdresse())
+            .copy(adresseopplysninger = Adresseopplysninger())
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
         val søknadFraDatabase = søknadOvergangsstønadRepository.findByIdOrThrow(søknadTilLagring.id)

@@ -38,7 +38,7 @@ data class SøknadsskjemaOvergangsstønad(
     @Column("soker_fra_bestemt_maned")
     val søkerFraBestemtMåned: Boolean,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY, prefix = "adresseopplysninger_")
-    val opplysningerOmAdresse: OpplysningerOmAdresse
+    val adresseopplysninger: Adresseopplysninger
 ) : ISøknadsskjema
 
 data class Situasjon(
