@@ -5,12 +5,12 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
+import no.nav.familie.kontrakter.ef.søknad.Adresseopplysninger
 import no.nav.familie.kontrakter.ef.søknad.Aktivitet
 import no.nav.familie.kontrakter.ef.søknad.Barn
 import no.nav.familie.kontrakter.ef.søknad.Bosituasjon
 import no.nav.familie.kontrakter.ef.søknad.Innsendingsdetaljer
 import no.nav.familie.kontrakter.ef.søknad.Medlemskapsdetaljer
-import no.nav.familie.kontrakter.ef.søknad.OpplysningerOmAdresse
 import no.nav.familie.kontrakter.ef.søknad.Personalia
 import no.nav.familie.kontrakter.ef.søknad.Situasjon
 import no.nav.familie.kontrakter.ef.søknad.Sivilstandsdetaljer
@@ -23,7 +23,7 @@ import java.util.UUID
 fun søknad(
     personalia: Søknadsfelt<Personalia> = mockk(),
     innsendingsdetaljer: Søknadsfelt<Innsendingsdetaljer> = mockk(),
-    opplysningerOmAdresse: Søknadsfelt<OpplysningerOmAdresse> = mockk(),
+    adresseopplysninger: Søknadsfelt<Adresseopplysninger> = mockk(),
     sivilstandsdetaljer: Søknadsfelt<Sivilstandsdetaljer> = mockk(),
     medlemskapsdetaljer: Søknadsfelt<Medlemskapsdetaljer> = mockk(),
     bosituasjon: Søknadsfelt<Bosituasjon> = mockk(),
@@ -36,7 +36,7 @@ fun søknad(
     SøknadOvergangsstønad(
         innsendingsdetaljer = innsendingsdetaljer,
         personalia = personalia,
-        opplysningerOmAdresse = opplysningerOmAdresse,
+        adresseopplysninger = adresseopplysninger,
         sivilstandsdetaljer = sivilstandsdetaljer,
         medlemskapsdetaljer = medlemskapsdetaljer,
         bosituasjon = bosituasjon,
