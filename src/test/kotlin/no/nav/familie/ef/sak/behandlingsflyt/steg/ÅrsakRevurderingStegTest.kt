@@ -3,14 +3,14 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
-import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -82,7 +82,7 @@ internal class ÅrsakRevurderingStegTest {
         internal fun `feiler hvis man man sender inn en årsak som ikke er gyldig for gitt stønadstype`() {
             val dto = RevurderingsinformasjonDto(
                 LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null)
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Årsak er ikke gyldig for stønadstype")

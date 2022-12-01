@@ -1,17 +1,17 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.ef.sak.behandling.domain.Opplysningskilde
-import no.nav.familie.ef.sak.behandling.domain.Revurderingsårsak
 import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class ÅrsakRevurderingsRepositoryTest: OppslagSpringRunnerTest() {
+internal class ÅrsakRevurderingsRepositoryTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository

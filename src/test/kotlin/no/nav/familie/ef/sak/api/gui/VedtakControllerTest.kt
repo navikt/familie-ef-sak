@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -223,10 +224,28 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         }
     }
 
+    @Test
+    internal fun `skal automatisk utføre besluttesteg når en behandling avslås pga mindre inntektsendringer`() {
+        opprettBehandling(
+            steg = StegType.SEND_TIL_BESLUTTER,
+            vedtakResultatType = ResultatType.AVSLÅ,
+            status = BehandlingStatus.UTREDES,
+            avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        )
+        sendTilBeslutter(BESLUTTER)
+
+        validerTotrinnskontrollUaktuelt(BESLUTTER)
+        validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)
+        validerTotrinnskontrollUaktuelt(BESLUTTER_2)
+
+        validerBehandlingIverksetter()
+    }
+
     private fun opprettBehandling(
         status: BehandlingStatus = BehandlingStatus.UTREDES,
         steg: StegType = StegType.SEND_TIL_BESLUTTER,
-        vedtakResultatType: ResultatType = ResultatType.AVSLÅ
+        vedtakResultatType: ResultatType = ResultatType.AVSLÅ,
+        avlsåÅrsak: AvslagÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT
     ): UUID {
         val lagretBehandling = behandlingRepository.insert(
             behandling.copy(
@@ -235,7 +254,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             )
         )
 
-        vedtakRepository.insert(vedtak(lagretBehandling.id, vedtakResultatType))
+        vedtakRepository.insert(vedtak(lagretBehandling.id, vedtakResultatType).copy(avslåÅrsak = avlsåÅrsak))
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, lagretBehandling.id, fagsak.id, "1")
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)

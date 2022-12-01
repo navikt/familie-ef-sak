@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -51,7 +52,8 @@ internal class TotrinnskontrollServiceTest {
         val response = totrinnskontrollService
             .lagreTotrinnskontrollOgReturnerBehandler(
                 saksbehandling(status = BehandlingStatus.UTREDES),
-                BeslutteVedtakDto(false, "")
+                BeslutteVedtakDto(false, ""),
+                VedtakErUtenBeslutter(false)
             )
         assertThat(response).isEqualTo(opprettetAv)
     }

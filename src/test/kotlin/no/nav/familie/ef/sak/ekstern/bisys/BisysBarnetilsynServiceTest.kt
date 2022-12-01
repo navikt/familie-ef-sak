@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
@@ -153,8 +152,6 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.periode.fomDato)
         assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.periode.tomDato)
         assertThat(bisysPeriode.barnIdenter.first()).isEqualTo(behandlingBarn.first().personIdent)
-        assertThat(bisysPeriode.månedsbeløp).isEqualTo(andelhistorikkDto.andel.beløp)
-        assertThat(bisysPeriode.datakilde).isEqualTo(Datakilde.EF)
     }
 
     @Test
@@ -281,55 +278,6 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `Skal ikke slå sammen sammenhengende perioder som ikke har like beløp`() {
-        mockTilkjentYtelse()
-
-        val førsteDato = YearMonth.from(LocalDate.now()).atDay(1)
-        val senesteDato = YearMonth.from(LocalDate.now().plusMonths(5)).atEndOfMonth()
-
-        val andelhistorikkDto1 =
-            lagAndelHistorikkDto(
-                beløp = 9999,
-                fraOgMed = førsteDato,
-                tilOgMed = LocalDate.now().plusMonths(1),
-                behandlingBarn = behandlingBarn
-            )
-
-        val andelhistorikkDto2 =
-            lagAndelHistorikkDto(
-                beløp = 9999,
-                fraOgMed = LocalDate.now().plusMonths(2),
-                tilOgMed = LocalDate.now().plusMonths(3),
-                behandlingBarn = behandlingBarn
-            )
-
-        val andelhistorikkDto3 =
-            lagAndelHistorikkDto(
-                beløp = 8888,
-                fraOgMed = LocalDate.now().plusMonths(4),
-                tilOgMed = senesteDato,
-                behandlingBarn = behandlingBarn
-            )
-
-        every {
-            andelsHistorikkService.hentHistorikk(any(), any())
-        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
-
-        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
-            personident,
-            LocalDate.now()
-        ).barnetilsynBisysPerioder
-
-        assertThat(perioder).hasSize(2)
-        // Periode 1 (to andeler med beløp 9999
-        assertThat(perioder.first().periode.fom).isEqualTo(førsteDato)
-        assertThat(YearMonth.from(perioder.first().periode.tom)).isEqualTo(andelhistorikkDto2.andel.periode.tom)
-        // Periode 2: andel med beløp = 8888
-        assertThat(YearMonth.from(perioder.last().periode.fom)).isEqualTo(andelhistorikkDto3.andel.periode.fom)
-        assertThat(YearMonth.from(perioder.last().periode.tom)).isEqualTo(andelhistorikkDto3.andel.periode.tom)
-    }
-
-    @Test
     fun `personident med to andelshistorikker der den ene er før fomDato, forvent en andelshistorikk`() {
         mockTilkjentYtelse()
         val andelhistorikkDto =
@@ -406,7 +354,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.EF)
     }
 
     /**
@@ -441,7 +388,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
     }
 
     @Test
@@ -470,7 +416,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
     }
 
     @Test
@@ -503,10 +448,8 @@ internal class BisysBarnetilsynServiceTest {
             ).barnetilsynBisysPerioder
         val infotrygdPeriode = perioder.first()
         val efPeriode = perioder.get(1)
-        assertThat(infotrygdPeriode.datakilde).isEqualTo(Datakilde.INFOTRYGD)
         assertThat(infotrygdPeriode.periode.fom).isEqualTo(LocalDate.MIN)
         assertThat(infotrygdPeriode.periode.tom).isEqualTo(startdato.minusDays(1))
-        assertThat(efPeriode.datakilde).isEqualTo(Datakilde.EF)
         assertThat(efPeriode.periode.fom).isEqualTo(efFom)
         assertThat(efPeriode.periode.tom).isEqualTo(efTom)
     }
@@ -542,7 +485,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.EF)
     }
 
     private fun mockTilkjentYtelse(startdato: LocalDate = LocalDate.now()) {

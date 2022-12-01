@@ -285,7 +285,7 @@ internal class AdresseHjelperTest {
             )
             val historiskBostedsadresseEtterAktivAdresse = lagAdresseDto(
                 AdresseType.BOSTEDADRESSE,
-                now(),
+                now()
             )
             val aktivOppholdsadresse = lagAdresseDto(AdresseType.OPPHOLDSADRESSE, now())
             val historiskKontaktadresse = lagAdresseDto(

@@ -53,7 +53,7 @@ object BeregningBarnetilsynUtil {
         kontantstøtteBeløp: BigDecimal,
         tilleggsstønadBeløp: BigDecimal,
         barn: List<UUID>,
-        brukIkkeVedtatteSatser: Boolean = false
+        brukIkkeVedtatteSatser: Boolean
     ): BeløpsperiodeBarnetilsynDto {
         val beregnedeBeløp: BeregnedeBeløp =
             beregnPeriodeBeløp(
@@ -88,7 +88,7 @@ object BeregningBarnetilsynUtil {
         tilleggsstønadBeløp: BigDecimal,
         antallBarn: Int,
         årMåned: YearMonth,
-        brukIkkeVedtatteSatser: Boolean = false
+        brukIkkeVedtatteSatser: Boolean
     ): BeregnedeBeløp {
         val beløpFørFratrekkOgSatsjustering =
             kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)

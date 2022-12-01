@@ -11,7 +11,9 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -45,7 +47,10 @@ import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
@@ -60,6 +65,7 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
+import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -95,6 +101,7 @@ internal class IverksettingDtoMapperTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
     private val barnMatcher = mockk<BarnMatcher>()
+    private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
 
     private val iverksettingDtoMapper =
         IverksettingDtoMapper(
@@ -107,7 +114,8 @@ internal class IverksettingDtoMapperTest {
             tilkjentYtelseService = tilkjentYtelseService,
             vedtakService = vedtakService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            brevmottakereRepository = brevmottakereRepository
+            brevmottakereRepository = brevmottakereRepository,
+            årsakRevurderingsRepository = årsakRevurderingsRepository
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -125,6 +133,12 @@ internal class IverksettingDtoMapperTest {
             )
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
+        every { årsakRevurderingsRepository.findByIdOrNull(any()) } returns ÅrsakRevurdering(
+            behandlingId = saksbehandling.id,
+            opplysningskilde = Opplysningskilde.MELDING_MODIA,
+            årsak = Revurderingsårsak.ENDRING_INNTEKT,
+            beskrivelse = "beskrivelse"
+        )
     }
 
     @Test
@@ -206,6 +220,22 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
+    internal fun `skal mappe avslag og årsak til avslag`() {
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.AVSLÅTT)
+        val avslåttVedtak = Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.AVSLÅ,
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        )
+
+        every { vedtakService.hentVedtak(any()) } returns avslåttVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        assertThat(iverksettDto.vedtak.avslagÅrsak).isEqualTo(avslåttVedtak.avslåÅrsak)
+    }
+
+    @Test
     internal fun `skal kunne mappe alle enums`() {
         BehandlingType.values().forEach { BehandlingTypeIverksett.valueOf(it.name) }
 
@@ -263,6 +293,8 @@ internal class IverksettingDtoMapperTest {
         assertThat(behandling.eksternId).isEqualTo(1)
         assertThat(behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
         assertThat(behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(behandling.årsakRevurdering!!)
+            .isEqualTo(ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ENDRING_INNTEKT))
         assertThat(behandling.vilkårsvurderinger.size).isEqualTo(1)
     }
 

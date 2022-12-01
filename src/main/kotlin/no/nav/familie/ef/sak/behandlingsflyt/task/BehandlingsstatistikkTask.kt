@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -20,6 +21,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -47,7 +49,8 @@ class BehandlingsstatistikkTask(
     private val søknadService: SøknadService,
     private val vedtakRepository: VedtakRepository,
     private val oppgaveService: OppgaveService,
-    private val grunnlagsdataService: GrunnlagsdataService
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) : AsyncTaskStep {
 
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
@@ -57,6 +60,7 @@ class BehandlingsstatistikkTask(
             objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
@@ -97,7 +101,12 @@ class BehandlingsstatistikkTask(
             relatertEksternBehandlingId = relatertEksternBehandlingId,
             relatertBehandlingId = null,
             behandlingMetode = behandlingMetode,
-            behandlingÅrsak = saksbehandling.årsak
+            behandlingÅrsak = saksbehandling.årsak,
+            kravMottatt = saksbehandling.kravMottatt,
+            årsakRevurdering = årsakRevurdering?.let {
+                ÅrsakRevurderingDto(it.opplysningskilde, it.årsak)
+            },
+            avslagÅrsak = vedtak?.avslåÅrsak
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)

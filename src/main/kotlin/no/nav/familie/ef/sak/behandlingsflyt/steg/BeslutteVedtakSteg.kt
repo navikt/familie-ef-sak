@@ -13,6 +13,8 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -37,7 +39,8 @@ class BeslutteVedtakSteg(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val årsakRevurderingService: ÅrsakRevurderingService
+    private val årsakRevurderingService: ÅrsakRevurderingService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -48,12 +51,18 @@ class BeslutteVedtakSteg(
 
     override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): StegType {
         fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId)
-        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data)
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+        val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
+        val saksbehandler =
+            totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
-            brukerfeilHvis(årsakRevurderingService.hentRevurderingsinformasjon(saksbehandling.id).årsakRevurdering != null) {
+            brukerfeilHvis(
+                !featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK) &&
+                    årsakRevurderingService.hentRevurderingsinformasjon(saksbehandling.id).årsakRevurdering != null
+            ) {
                 "Behandlingen inneholder årsak revurdering. " +
                     "Denne behandlingen må vente 1-2 dager med å godkjennes pga en feil vi skal fikse. " +
                     "Vi gir beskjed når saken kan godkjennes."
@@ -66,7 +75,7 @@ class BeslutteVedtakSteg(
             if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
-                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
+                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling, vedtakErUtenBeslutter)
                 iverksettClient.iverksett(iverksettDto, fil)
             }
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT

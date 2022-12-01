@@ -25,6 +25,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -32,10 +33,13 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -73,9 +77,12 @@ internal class BeslutteVedtakStegTest {
         behandlingService = behandlingService,
         vedtakService = vedtakService,
         vedtaksbrevService = vedtaksbrevService,
-        årsakRevurderingService = årsakRevurderingService
+        årsakRevurderingService = årsakRevurderingService,
+        mockFeatureToggleService()
     )
 
+    private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
+    private val vedtakErUtenBeslutter = VedtakErUtenBeslutter(true)
     private val innloggetBeslutter = "sign2"
 
     private val fagsak = fagsak(
@@ -112,6 +119,7 @@ internal class BeslutteVedtakStegTest {
         every { iverksett.iverksett(any(), any()) } just Runs
         every { iverksett.iverksettUtenBrev(any()) } just Runs
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId)
         every { vedtakService.oppdaterBeslutter(any(), any()) } just Runs
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, id = behandlingId, resultat = secondArg())
@@ -126,7 +134,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any()) } returns Fil("123".toByteArray())
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakKreverBeslutter) } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
@@ -169,6 +177,16 @@ internal class BeslutteVedtakStegTest {
 
         verify(exactly = 0) { iverksett.iverksett(any(), any()) }
         verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter) } returns Fil("123".toByteArray())
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
+
+        verify(exactly = 1) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
     }
 
     private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {

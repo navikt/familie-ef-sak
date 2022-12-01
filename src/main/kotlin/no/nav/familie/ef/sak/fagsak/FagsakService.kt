@@ -151,7 +151,12 @@ class FagsakService(
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
-    fun hentFagsakPåEksternId(eksternFagsakId: Long): FagsakDto {
+    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
+        fagsakRepository.finnMedEksternId(eksternFagsakId)
+            ?.tilFagsakMedPerson()
+            ?: error("Finner ikke fagsak til eksternFagsakId=$eksternFagsakId")
+
+    fun hentFagsakDtoPåEksternId(eksternFagsakId: Long): FagsakDto {
         return hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
             ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
     }
