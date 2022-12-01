@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevDto
-import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevKategori
 import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -12,7 +11,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
-import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevType
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
 import org.springframework.stereotype.Service
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as FrittståendeBrevDtoIverksetting
@@ -43,7 +41,7 @@ class FrittståendeBrevService(
                 personIdent = ident,
                 eksternFagsakId = fagsak.eksternId.id,
                 stønadType = fagsak.stønadstype,
-                brevtype = utledFrittståendeBrevtype(frittståendeBrevDto.brevType),
+                brevtype = frittståendeBrevDto.brevType.frittståendeBrevType,
                 fil = brev,
                 journalførendeEnhet = journalførendeEnhet,
                 saksbehandlerIdent = saksbehandlerIdent,
@@ -84,15 +82,4 @@ class FrittståendeBrevService(
         val signatur = brevsignaturService.lagSignaturMedEnhet(fagsak)
         return brevClient.genererBrev(request, signatur.navn, signatur.enhet)
     }
-
-    private fun utledFrittståendeBrevtype(brevKategori: FrittståendeBrevKategori): FrittståendeBrevType =
-        when (brevKategori) {
-            FrittståendeBrevKategori.INFORMASJONSBREV -> FrittståendeBrevType.INFORMASJONSBREV
-            FrittståendeBrevKategori.INNHENTING_AV_OPPLYSNINGER -> FrittståendeBrevType.INNHENTING_AV_OPPLYSNINGER
-            FrittståendeBrevKategori.VARSEL_OM_AKTIVITETSPLIKT -> FrittståendeBrevType.VARSEL_OM_AKTIVITETSPLIKT
-            FrittståendeBrevKategori.VARSEL_OM_SANKSJON -> FrittståendeBrevType.VARSEL_OM_SANKSJON
-            FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE
-            FrittståendeBrevKategori.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE -> FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE
-            FrittståendeBrevKategori.BREV_OM_SVARTID_KLAGE -> FrittståendeBrevType.INFORMASJONSBREV
-        }
 }
