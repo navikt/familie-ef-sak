@@ -10,7 +10,6 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -138,13 +137,7 @@ class OppgaveService(
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        val finnMappeRequest = FinnMappeRequest(
-            listOf(),
-            enhetsnummer,
-            null,
-            1000
-        )
-        val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+        val mapperResponse = oppgaveClient.finnMapper(enhetsnummer, 1000)
         val mappe = mapperResponse.mapper.find {
             it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
         }
@@ -282,12 +275,8 @@ class OppgaveService(
         return cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
             val mappeRespons = oppgaveClient.finnMapper(
-                FinnMappeRequest(
-                    tema = listOf(),
-                    enhetsnr = enhet,
-                    opprettetFom = null,
+                    enhetsnummer = enhet,
                     limit = 1000
-                )
             )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(

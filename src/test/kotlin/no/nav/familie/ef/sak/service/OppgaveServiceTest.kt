@@ -268,9 +268,9 @@ internal class OppgaveServiceTest {
         oppgaveService.finnMapper("4489")
         oppgaveService.finnMapper("4489")
 
-        verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+        verify(exactly = 1) { oppgaveClient.finnMapper(any(), any()) }
         oppgaveService.finnMapper("4483")
-        verify(exactly = 2) { oppgaveClient.finnMapper(any()) }
+        verify(exactly = 2) { oppgaveClient.finnMapper(any(), any()) }
     }
 
     @Test
@@ -281,7 +281,7 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.GodkjenneVedtak)
 
-        verify(exactly = 1) { oppgaveClient.finnMapper(any()) }
+        verify(exactly = 1) { oppgaveClient.finnMapper(any(), any()) }
     }
 
     @Test
