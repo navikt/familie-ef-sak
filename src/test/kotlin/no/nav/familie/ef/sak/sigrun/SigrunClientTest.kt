@@ -51,7 +51,7 @@ class SigrunClientTest {
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.get(urlEqualTo("/api/v1/beregnetskatt"))
+            WireMock.post(urlEqualTo("/api/v1/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -59,7 +59,7 @@ class SigrunClientTest {
                         .withBody(beregnetSkattRessursResponseJson)
                 )
         )
-        val beregnetSkatt = sigrunClient.hentBeregnetSkatt(1, 2022)
+        val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
         assertThat(beregnetSkatt.size).isEqualTo(7)
         assertThat(beregnetSkatt.first().verdi).isEqualTo("814952")
         assertThat(beregnetSkatt.first().tekniskNavn).isEqualTo("personinntektFiskeFangstFamiliebarnehage")
@@ -68,7 +68,7 @@ class SigrunClientTest {
     @Test
     fun `hent summertskattegrunnlag fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.get(urlEqualTo("/api/v1/summertskattegrunnlag?inntektsaar=2018"))
+            WireMock.post(urlEqualTo("/api/v1/summertskattegrunnlag?inntektsaar=2018"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -76,7 +76,7 @@ class SigrunClientTest {
                         .withBody(summertSkattegrunnlagJson)
                 )
         )
-        val summertSkattegrunnlag = sigrunClient.hentSummertSkattegrunnlag(1, 2018)
+        val summertSkattegrunnlag = sigrunClient.hentSummertSkattegrunnlag("123", 2018)
         assertThat(summertSkattegrunnlag.grunnlag.size).isEqualTo(4)
         assertThat(summertSkattegrunnlag.skatteoppgjoersdato).isEqualTo("2018-10-04")
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.size).isEqualTo(4)

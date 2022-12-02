@@ -2,9 +2,9 @@ package no.nav.familie.ef.sak.sigrun.ekstern
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.http.AbstractRestWebClient
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.web.client.RestOperations
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
@@ -17,24 +17,19 @@ class SigrunClient(
     featureToggleService: FeatureToggleService
 ) : AbstractRestWebClient(restOperations, webClient, "sigrun", featureToggleService) {
 
-    // Bruke API-key i stedet for å unngå proxy-repo?
-
-    fun hentSummertSkattegrunnlag(aktørId: Long, inntektsår: Int): SummertSkattegrunnlag {
+    fun hentSummertSkattegrunnlag(fødselsnummer: String, inntektsår: Int): SummertSkattegrunnlag {
         val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/summertskattegrunnlag")
             .queryParam("inntektsaar", inntektsår.toString())
             .build().toUri()
 
-        val headers = HttpHeaders()
-        headers.set("Nav-Personident", aktørId.toString())
-        return getForEntity(uri, headers)
+        return postForEntity(uri, PersonIdent(fødselsnummer))
     }
 
-    fun hentBeregnetSkatt(aktørId: Long, inntektsår: Int): List<BeregnetSkatt> {
-        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/beregnetskatt").build().toUri()
+    fun hentBeregnetSkatt(fødselsnummer: String, inntektsår: Int): List<BeregnetSkatt> {
+        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/beregnetskatt")
+            .queryParam("inntektsaar", inntektsår)
+            .build().toUri()
 
-        val headers = HttpHeaders()
-        headers.set("x-aktoerid", aktørId.toString())
-        headers.set("x-inntektsaar", inntektsår.toString())
-        return getForEntity(uri, headers)
+        return postForEntity(uri, PersonIdent(fødselsnummer))
     }
 }
