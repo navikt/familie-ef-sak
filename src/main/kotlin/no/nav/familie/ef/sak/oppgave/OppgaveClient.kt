@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.infrastruktur.http.AbstractPingableRestWebClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -96,11 +95,11 @@ class OppgaveClient(
         return response.getDataOrThrow().oppgaveId
     }
 
-    fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
+    fun finnMapper(enhetsnummer: String, limit: Int): FinnMappeResponseDto {
         val uri = UriComponentsBuilder.fromUri(oppgaveUri)
             .pathSegment("mappe", "sok")
-            .queryParam("enhetsnr", finnMappeRequest.enhetsnr)
-            .queryParam("limit", finnMappeRequest.limit)
+            .queryParam("enhetsnr", enhetsnummer)
+            .queryParam("limit", limit)
             .build()
             .toUri()
         val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)
