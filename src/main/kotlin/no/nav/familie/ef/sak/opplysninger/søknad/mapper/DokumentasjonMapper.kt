@@ -1,11 +1,11 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.DokumentasjonFraSøknadDto
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn

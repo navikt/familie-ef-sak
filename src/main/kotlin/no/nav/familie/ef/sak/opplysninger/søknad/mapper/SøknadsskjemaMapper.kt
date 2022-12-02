@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aksjeselskap
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
@@ -14,7 +15,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokument
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.GjelderDeg
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.PersonMinimum
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Samvær
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Selvstendig

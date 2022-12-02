@@ -15,7 +15,7 @@ class SigrunClient(
 
     // Bruke API-key i stedet for å unngå proxy-repo?
 
-    fun hentSummertSkattegrunnlag(aktørId: Long, inntektsår: Int): SummertSkattegrunnlagMap {
+    fun hentSummertSkattegrunnlag(aktørId: Long, inntektsår: Int): SummertSkattegrunnlag {
         val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/summertskattegrunnlag")
             .queryParam("inntektsfilter", "SummertSkattegrunnlagEnsligForsorger")
             .queryParam("inntektsaar", inntektsår.toString())
@@ -27,10 +27,10 @@ class SigrunClient(
     }
 
     fun hentBeregnetSkatt(aktørId: Long, inntektsår: Int): List<BeregnetSkatt> {
-        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/beregnetSkatt").build().toUri()
+        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/beregnetskatt").build().toUri()
 
         val headers = HttpHeaders()
-        headers.set("x-filter", "BeregnetSkattEnsligForsorger")
+        headers.set("x-filter", "BeregnetSkattPensjonsgivendeInntekt")
         headers.set("x-aktoerid", aktørId.toString())
         headers.set("x-inntektsaar", inntektsår.toString())
         return getForEntity(uri, headers)

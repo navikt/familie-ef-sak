@@ -2,17 +2,17 @@ package no.nav.familie.ef.sak.sigrun.ekstern
 
 import java.time.Year
 
-class SummertSkattegrunnlagMap(val summertSkattegrunnlagMap: Map<Year, SummertSkattegrunnlag?>)
+data class SummertSkattegrunnlagMap(val summertskattegrunnlagMap: Map<Year, SummertSkattegrunnlag?>)
 
-class SummertSkattegrunnlag(
-    val grunnlag: Grunnlag,
-    val svalbardGrunnlag: Grunnlag,
+data class SummertSkattegrunnlag(
+    val grunnlag: List<Grunnlag>,
+    val svalbardGrunnlag: List<Grunnlag>,
     val skatteoppgjoersdato: String
 )
 
-class Grunnlag(
+data class Grunnlag(
     val tekniskNavn: String,
-    val beloep: String
+    val beloep: Int
 )
 
-class BeregnetSkatt(val tekniskNavn: String, val verdi: String)
+data class BeregnetSkatt(val tekniskNavn: String, val verdi: String)

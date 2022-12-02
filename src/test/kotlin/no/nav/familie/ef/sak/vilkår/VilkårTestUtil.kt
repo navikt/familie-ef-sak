@@ -2,11 +2,11 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår
 
 import io.mockk.mockk
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.DokumentasjonFraSøknadDto
+import no.nav.familie.ef.sak.vilkår.dto.AdresseopplysningerDto
 import no.nav.familie.ef.sak.vilkår.dto.AktivitetDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BosituasjonDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapDto
-import no.nav.familie.ef.sak.vilkår.dto.AdresseopplysningerDto
 import no.nav.familie.ef.sak.vilkår.dto.SagtOppEllerRedusertStillingDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandsplanerDto
