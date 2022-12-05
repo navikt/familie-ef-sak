@@ -16,8 +16,6 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
@@ -47,7 +45,6 @@ class SendTilBeslutterSteg(
     private val tilbakekrevingService: TilbakekrevingService,
     private val vurderingService: VurderingService,
     private val validerOmregningService: ValiderOmregningService,
-    private val featureToggleService: FeatureToggleService,
     private val årsakRevurderingService: ÅrsakRevurderingService
 ) : BehandlingSteg<Void?> {
 
@@ -68,9 +65,7 @@ class SendTilBeslutterSteg(
         validerSaksbehandlersignatur(saksbehandling)
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
 
-        if (featureToggleService.isEnabled(Toggle.REVURDERING_ÅRSAK)) {
-            årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
-        }
+        årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
     }
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
