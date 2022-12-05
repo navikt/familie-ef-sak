@@ -55,8 +55,8 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
