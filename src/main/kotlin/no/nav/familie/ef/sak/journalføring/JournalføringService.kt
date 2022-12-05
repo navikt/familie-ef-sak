@@ -32,7 +32,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.stereotype.Service
@@ -47,7 +47,7 @@ class JournalføringService(
     private val vurderingService: VurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val iverksettService: IverksettService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val barnService: BarnService,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
@@ -256,7 +256,7 @@ class JournalføringService(
     }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long? = null) {
-        taskRepository.save(
+        taskService.save(
             BehandlingsstatistikkTask.opprettMottattTask(
                 behandlingId = behandlingId,
                 oppgaveId = oppgaveId

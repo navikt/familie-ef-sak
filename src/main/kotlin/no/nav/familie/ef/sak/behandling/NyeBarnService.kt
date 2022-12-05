@@ -20,7 +20,7 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
@@ -35,7 +35,7 @@ class NyeBarnService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val barnService: BarnService,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -66,7 +66,7 @@ class NyeBarnService(
     private fun opprettOppfølgningsoppgaveForBarn(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>) {
         if (fagsak.migrert) {
             try {
-                taskRepository.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
+                taskService.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
             } catch (e: DbActionExecutionException) {
                 if (e.cause is DuplicateKeyException) {
                     logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")

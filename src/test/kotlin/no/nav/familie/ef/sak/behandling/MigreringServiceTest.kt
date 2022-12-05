@@ -56,8 +56,8 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -94,7 +94,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var tilkjentYtelseService: TilkjentYtelseService
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -880,7 +880,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             if (erMigrering) SjekkMigrertStatusIInfotrygdTask.TYPE else null
         ).forEach { type ->
             try {
-                val task = taskRepository.findAll()
+                val task = taskService.findAll()
                     .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
                     .single { it.type == type }
                 taskWorker.markerPlukket(task.id)

@@ -45,7 +45,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -58,7 +58,7 @@ import java.util.UUID
 
 internal class SendTilBeslutterStegTest {
 
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
@@ -83,7 +83,7 @@ internal class SendTilBeslutterStegTest {
 
     private val beslutteVedtakSteg =
         SendTilBeslutterSteg(
-            taskRepository,
+            taskService,
             oppgaveService,
             fagsakService,
             behandlingService,
@@ -136,7 +136,7 @@ internal class SendTilBeslutterStegTest {
             fagsakService.hentAktivIdent(any())
         } returns "12345678901"
         every {
-            taskRepository.save(capture(taskSlot))
+            taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
 

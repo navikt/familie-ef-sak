@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -12,7 +14,7 @@ import java.time.Month
 import java.time.YearMonth
 
 @Service
-class BeregningBarnetilsynService {
+class BeregningBarnetilsynService(private val featureToggleService: FeatureToggleService) {
 
     fun beregnYtelseBarnetilsyn(
         utgiftsperioder: List<UtgiftsperiodeDto>,
@@ -22,7 +24,8 @@ class BeregningBarnetilsynService {
         validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
-        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(kontantstøttePerioder, tilleggsstønadsperioder)
+        val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
+        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(kontantstøttePerioder, tilleggsstønadsperioder, brukIkkeVedtatteSatser)
             .values.toList()
             .mergeSammenhengendePerioder()
     }
@@ -106,16 +109,17 @@ private fun List<Månedsperiode>.harPeriodeFør(årMåned: YearMonth): Boolean {
     return this.any { it.fom < årMåned }
 }
 
-fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =
+fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser: Boolean) =
     this.perioder.tilBeløpsperioderPerUtgiftsmåned(
         this.perioderKontantstøtte,
-        this.tilleggsstønad.perioder
+        this.tilleggsstønad.perioder,
+        brukIkkeVedtatteSatser
     )
 
 fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
     tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
-    brukIkkeVedtatteSatser: Boolean = false
+    brukIkkeVedtatteSatser: Boolean
 ) = this.map { it.split() }
     .flatten().associate { utgiftsMåned ->
         utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(

@@ -33,17 +33,17 @@ import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -53,7 +53,7 @@ import java.util.UUID
 
 internal class BeslutteVedtakStegTest {
 
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
@@ -64,7 +64,7 @@ internal class BeslutteVedtakStegTest {
     private val behandlingService = mockk<BehandlingService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(
-        taskRepository = taskRepository,
+        taskService = taskService,
         fagsakService = fagsakService,
         oppgaveService = oppgaveService,
         iverksettClient = iverksett,
@@ -105,7 +105,7 @@ internal class BeslutteVedtakStegTest {
             fagsakService.fagsakMedOppdatertPersonIdent(any())
         } returns fagsak
         every {
-            taskRepository.save(capture(taskSlot))
+            taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()

@@ -27,7 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -35,7 +35,7 @@ import java.util.UUID
 
 @Service
 class SendTilBeslutterSteg(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
@@ -111,12 +111,12 @@ class SendTilBeslutterSteg(
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
-        taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
+        taskService.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
 
     private fun ferdigstillOppgave(saksbehandling: Saksbehandling, oppgavetype: Oppgavetype) {
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
         oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskRepository.save(
+            taskService.save(
                 FerdigstillOppgaveTask.opprettTask(
                     behandlingId = saksbehandling.id,
                     oppgavetype,
@@ -128,7 +128,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {
-        taskRepository.save(
+        taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,

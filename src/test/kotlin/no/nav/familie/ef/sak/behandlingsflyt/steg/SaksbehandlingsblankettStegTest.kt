@@ -20,7 +20,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
 internal class SaksbehandlingsblankettStegTest {
 
     private val blankettServiceMock = mockk<BlankettService>()
-    private val taskRepositoryMock = mockk<TaskRepository>()
+    private val taskServiceMock = mockk<TaskService>()
     private val arbeidsfordelingServiceMock = mockk<ArbeidsfordelingService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val journalpostClientMock = mockk<JournalpostClient>()
@@ -37,7 +37,7 @@ internal class SaksbehandlingsblankettStegTest {
 
     private val saksbehandlingsblankettSteg = SaksbehandlingsblankettSteg(
         blankettService = blankettServiceMock,
-        taskRepository = taskRepositoryMock,
+        taskService = taskServiceMock,
         arbeidsfordelingService = arbeidsfordelingServiceMock,
         totrinnskontrollService = totrinnskontrollServiceMock,
         journalpostClient = journalpostClientMock,
@@ -61,7 +61,7 @@ internal class SaksbehandlingsblankettStegTest {
         every { arbeidsfordelingServiceMock.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
         every { totrinnskontrollServiceMock.hentBeslutter(any()) } returns "BeslutterPerson"
         every { behandlingServiceMock.leggTilBehandlingsjournalpost(any(), any(), any()) } just Runs
-        every { taskRepositoryMock.save(any()) } answers { firstArg() }
+        every { taskServiceMock.save(any()) } answers { firstArg() }
     }
 
     @Test

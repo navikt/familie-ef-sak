@@ -19,6 +19,10 @@ object BeregningBarnetilsynUtil {
     private val eldreBarnetilsynsatser: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
+                Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
+            ),
+            MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
                 maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)
             ),
@@ -31,8 +35,8 @@ object BeregningBarnetilsynUtil {
     val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
-                Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
+                Datoperiode(LocalDate.of(2023, 1, 1), LocalDate.MAX),
+                maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460)
             )
         ) + eldreBarnetilsynsatser
 
@@ -41,10 +45,6 @@ object BeregningBarnetilsynUtil {
             MaxbeløpBarnetilsynSats(
                 Datoperiode(LocalDate.of(2023, 1, 1), LocalDate.MAX),
                 maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460)
-            ),
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
-                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
             )
         ) + eldreBarnetilsynsatser
 
@@ -53,7 +53,7 @@ object BeregningBarnetilsynUtil {
         kontantstøtteBeløp: BigDecimal,
         tilleggsstønadBeløp: BigDecimal,
         barn: List<UUID>,
-        brukIkkeVedtatteSatser: Boolean = false
+        brukIkkeVedtatteSatser: Boolean
     ): BeløpsperiodeBarnetilsynDto {
         val beregnedeBeløp: BeregnedeBeløp =
             beregnPeriodeBeløp(
@@ -88,7 +88,7 @@ object BeregningBarnetilsynUtil {
         tilleggsstønadBeløp: BigDecimal,
         antallBarn: Int,
         årMåned: YearMonth,
-        brukIkkeVedtatteSatser: Boolean = false
+        brukIkkeVedtatteSatser: Boolean
     ): BeregnedeBeløp {
         val beløpFørFratrekkOgSatsjustering =
             kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)

@@ -70,6 +70,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-ereg",
     "mock-aareg",
     "mock-tilbakekreving",
+    "mock-sigrun",
     "mock-dokument"
 )
 @EnableMockOAuth2Server

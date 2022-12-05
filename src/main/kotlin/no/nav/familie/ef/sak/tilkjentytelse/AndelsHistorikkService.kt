@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.tilkjentytelse
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
@@ -19,7 +21,8 @@ class AndelsHistorikkService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vedtakService: VedtakService,
     private val vurderingService: VurderingService,
-    private val barnService: BarnService
+    private val barnService: BarnService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
@@ -33,12 +36,14 @@ class AndelsHistorikkService(
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
         // hent vilkår for viss type hvor behandlingIder sendes inn
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
+        val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
         return AndelHistorikkBeregner.lagHistorikk(
             tilkjenteYtelser,
             vedtakForBehandlinger,
             behandlinger,
             tilOgMedBehandlingId,
-            aktivitetArbeid
+            aktivitetArbeid,
+            brukIkkeVedtatteSatser
         )
     }
 
