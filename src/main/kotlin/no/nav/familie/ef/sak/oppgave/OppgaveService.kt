@@ -275,8 +275,8 @@ class OppgaveService(
         return cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
             val mappeRespons = oppgaveClient.finnMapper(
-                    enhetsnummer = enhet,
-                    limit = 1000
+                enhetsnummer = enhet,
+                limit = 1000
             )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(

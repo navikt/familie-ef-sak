@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
@@ -7,7 +8,6 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokument
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Dokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Medlemskap
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Samvær
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Situasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
@@ -102,7 +102,8 @@ internal class DokumentasjonMapperTest {
     )
 
     private val adresseopplysninger = Adresseopplysninger(
-        søkerBorPåRegistrertAdresse = false, harMeldtAdresseendring = true,
+        søkerBorPåRegistrertAdresse = false,
+        harMeldtAdresseendring = true,
         dokumentasjonAdresseendring = dokumentasjonMedVedlegg
     )
 
