@@ -46,7 +46,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -72,7 +72,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Autowired
-    lateinit var taskRepository: TaskRepository
+    lateinit var taskService: TaskService
 
     @Autowired
     lateinit var iverksettClient: IverksettClient
@@ -129,7 +129,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         omregningService.utførGOmregning(fagsakId)
         val nyBehandling = behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
 
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
+        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
 
@@ -161,7 +161,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
         omregningService.utførGOmregning(fagsak.id)
 
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
         verify(exactly = 0) { iverksettClient.simuler(any()) }
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
@@ -191,7 +191,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
         omregningService.utførGOmregning(fagsak.id)
 
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
         verify(exactly = 0) { iverksettClient.simuler(any()) }
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }

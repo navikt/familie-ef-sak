@@ -23,14 +23,13 @@ internal class RevurderingServiceTest {
         oppgaveService = mockk(),
         vurderingService = mockk(),
         grunnlagsdataService = mockk(),
-        taskRepository = mockk(),
+        taskService = mockk(),
         barnService = mockk(),
         fagsakService = fagsakService,
         stegService = mockk(),
         årsakRevurderingService = mockk(),
         kopierVedtakService = mockk(),
         vedtakService = mockk()
-
     )
 
     @Test

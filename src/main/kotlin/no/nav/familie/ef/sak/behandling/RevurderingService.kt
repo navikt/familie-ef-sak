@@ -25,7 +25,7 @@ import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -37,7 +37,7 @@ class RevurderingService(
     private val oppgaveService: OppgaveService,
     private val vurderingService: VurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
@@ -106,13 +106,10 @@ class RevurderingService(
             beskrivelse = "Revurdering i ny løsning"
         )
 
-        taskRepository.save(
-            BehandlingsstatistikkTask.opprettMottattTask(
-                behandlingId = revurdering.id,
-                oppgaveId = oppgaveId
-            )
+        taskService.save(
+            BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId)
         )
-        taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
         if (erSatsendring(revurderingInnhold)) {
             val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(

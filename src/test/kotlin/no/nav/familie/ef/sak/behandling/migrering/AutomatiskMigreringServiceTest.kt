@@ -8,8 +8,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
-import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,13 +19,13 @@ internal class AutomatiskMigreringServiceTest {
     private val migreringsstatusRepository = mockk<MigreringsstatusRepository>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
     private val migreringService = mockk<MigreringService>()
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
 
     private val service = AutomatiskMigreringService(
         migreringsstatusRepository,
         migreringService,
         infotrygdReplikaClient,
-        taskRepository
+        taskService
     )
 
     private val updateSlots = mutableListOf<Migreringsstatus>()
@@ -41,7 +40,7 @@ internal class AutomatiskMigreringServiceTest {
         mockFindById(MigreringResultat.IKKE_KONTROLLERT)
         every { migreringsstatusRepository.findAllByIdentIn(any()) } returns emptySet()
         every { migreringsstatusRepository.insertAll(capture(insertAllSlot)) } answers { firstArg() }
-        every { taskRepository.saveAll(any<Iterable<Task>>()) } answers { firstArg() }
+        every { taskService.saveAll(any()) } answers { firstArg() }
     }
 
     @Test
