@@ -10,6 +10,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -29,28 +30,33 @@ class SlettAdresserController(
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
-    @PostMapping
-    fun slettData(@RequestBody identer: Set<String>) {
+    @PostMapping("{dryRun}")
+    fun slettData(
+        @PathVariable dryRun: Boolean,
+        @RequestBody identer: Set<String>
+    ) {
         identer.forEach { aktørId ->
             val identer = pdlClient.hentPersonidenter(aktørId, true)
             val pdlData = pdlClient.hentSøker(identer.gjeldende().ident)
 
             if (pdlData.adressebeskyttelse.gjeldende()?.erStrengtFortrolig() == true) {
-                val fagsaker = fagsakService.finnFagsaker(identer.identer())
-                if (fagsaker.isNotEmpty()) {
-                    fagsaker.forEach { fagsak ->
-                        val behandlinger = fagsakService.fagsakTilDto(fagsak).behandlinger
-
-                        behandlinger.forEach { behandling -> fjernDataForBehandling(behandling.id) }
-                    }
-                }
+                fjernDataForIdenter(identer.identer(), dryRun)
             } else {
                 secureLogger.info("aktør=$aktørId er ikke strengt fortrolig")
             }
         }
     }
 
-    private fun fjernDataForBehandling(behandlingId: UUID) {
+    private fun fjernDataForIdenter(personIdenter: Set<String>, dryRun: Boolean) {
+        val fagsaker = fagsakService.finnFagsaker(personIdenter)
+        fagsaker.forEach { fagsak ->
+            fagsakService.fagsakTilDto(fagsak).behandlinger.forEach { behandling ->
+                fjernDataForBehandling(behandling.id, dryRun)
+            }
+        }
+    }
+
+    private fun fjernDataForBehandling(behandlingId: UUID, dryRun: Boolean) {
         val grunnlagsdata = grunnlagsdataRepository.findByIdOrNull(behandlingId)
         if (grunnlagsdata != null) {
             val søker = grunnlagsdata.data.søker
@@ -59,7 +65,7 @@ class SlettAdresserController(
                 søker.utflyttingFraNorge.isNotEmpty() ||
                 søker.innflyttingTilNorge.isNotEmpty()
             ) {
-                secureLogger.info("Sletter data for behandling=$behandlingId")
+                secureLogger.info("Sletter data for behandling=$behandlingId dryRun=$dryRun")
                 val oppdatertData = grunnlagsdata.data.copy(
                     søker = søker.copy(
                         bostedsadresse = emptyList(),
@@ -67,9 +73,11 @@ class SlettAdresserController(
                         utflyttingFraNorge = emptyList()
                     )
                 )
-                val antallOppdatert = grunnlagsdataRepository.oppdaterData(behandlingId, oppdatertData)
-                feilHvis(antallOppdatert != 1) {
-                    "Antall oppdatert for behandling=$behandlingId er $antallOppdatert"
+                if (!dryRun) {
+                    val antallOppdatert = grunnlagsdataRepository.oppdaterData(behandlingId, oppdatertData)
+                    feilHvis(antallOppdatert != 1) {
+                        "Antall oppdatert for behandling=$behandlingId er $antallOppdatert"
+                    }
                 }
             }
         }

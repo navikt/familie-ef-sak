@@ -48,7 +48,7 @@ internal class SlettAdresserControllerTest : OppslagSpringRunnerTest() {
         assertThat(opprinneligGrunnlagsdata.data.søker.utflyttingFraNorge).isNotEmpty
 
         Thread.sleep(500)
-        slettAdresserController.slettData(setOf(ident))
+        slettAdresserController.slettData(false, setOf(ident))
 
         val oppdatertGrunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
         val oppdatertSøker = oppdatertGrunnlagsdata.data.søker
@@ -61,12 +61,28 @@ internal class SlettAdresserControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `skal ikke slette data fra grunnlagsdata hvis dryrun`() {
+        testoppsettService.lagreFagsak(fagsak)
+        behandlingRepository.insert(behandling)
+        lagreData(behandling)
+
+        slettAdresserController.slettData(true, setOf(ident))
+
+        val oppdatertGrunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
+        val oppdatertSøker = oppdatertGrunnlagsdata.data.søker
+
+        assertThat(oppdatertSøker.bostedsadresse).isNotEmpty
+        assertThat(oppdatertSøker.innflyttingTilNorge).isNotEmpty
+        assertThat(oppdatertSøker.utflyttingFraNorge).isNotEmpty
+    }
+
+    @Test
     internal fun `skal ikke slette data fra grunnlagsdata hvis man sender inn aktørId for en person som ikke er kode 6`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("ident"))))
         val behandling = behandlingRepository.insert(behandling(fagsak))
         lagreData(behandling)
 
-        slettAdresserController.slettData(setOf(ident))
+        slettAdresserController.slettData(false, setOf(ident))
 
         val oppdatertGrunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
         val oppdatertSøker = oppdatertGrunnlagsdata.data.søker
