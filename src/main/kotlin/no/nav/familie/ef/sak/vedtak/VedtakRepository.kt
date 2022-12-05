@@ -14,8 +14,5 @@ import java.util.UUID
 interface VedtakRepository : RepositoryInterface<Vedtak, UUID>, InsertUpdateRepository<Vedtak> {
 
     fun findAllByResultatType(resultatType: ResultatType): List<Vedtak>
-
-    @Modifying
-    @Query("UPDATE vedtak SET perioder=:perioder WHERE behandling_id = :behandlingId")
-    fun oppdaterPerioder(behandlingId: UUID, perioder: PeriodeWrapper): Int
+    asd // kompileringsfeil sånn att denne ikke merges før vi har patchet data i prod
 }
