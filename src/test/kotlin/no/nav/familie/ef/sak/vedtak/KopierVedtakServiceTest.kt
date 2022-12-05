@@ -67,7 +67,7 @@ internal class KopierVedtakServiceTest {
         fødselTermindato = LocalDate.now()
     )
 
-    val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.ikkeVedtatteSatserForBarnetilsyn.maxOf { it.periode.fom })
+    val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.ikkeGjeldendeSatserForBarnetilsyn.maxOf { it.periode.fom })
     val førsteAndelFraOgMedDato = forventetFomYearMonth.minusMonths(2)
     val førsteAndelTilOgMedDato = forventetFomYearMonth.plusMonths(6)
     val andreAndelFraOgMed = førsteAndelTilOgMedDato.plusMonths(1)
