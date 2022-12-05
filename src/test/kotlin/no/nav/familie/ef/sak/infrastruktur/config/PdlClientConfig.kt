@@ -88,7 +88,15 @@ class PdlClientConfig {
             firstArg<List<String>>().associate { it to lagPersonKort(it) }
         }
 
-        every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
+        every { pdlClient.hentSøker(any()) } answers {
+            if (firstArg<String>() == "kode6") {
+                val adressebeskyttelse =
+                    Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadataGjeldende)
+                opprettPdlSøker().copy(adressebeskyttelse = listOf(adressebeskyttelse))
+            } else {
+                opprettPdlSøker()
+            }
+        }
 
         every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns barn()
 
@@ -324,6 +332,7 @@ class PdlClientConfig {
                     omraader = listOf()
                 )
             )
+
         val defaultKoordinater = Koordinater(x = 601372f, y = 6629367f, z = null, kvalitet = null)
         private fun bostedsadresse(koordinater: Koordinater = defaultKoordinater): List<Bostedsadresse> =
             listOf(
