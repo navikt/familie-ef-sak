@@ -44,7 +44,7 @@ class KopierVedtakService(
     }
 
     fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
-        val fraDato = BeregningBarnetilsynUtil.ikkeGjeldendeSatserForBarnetilsyn.maxOf { it.periode.fom }
+        val fraDato = BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom }
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId).fraDato(YearMonth.from(fraDato))
 
         return InnvilgelseBarnetilsyn(
