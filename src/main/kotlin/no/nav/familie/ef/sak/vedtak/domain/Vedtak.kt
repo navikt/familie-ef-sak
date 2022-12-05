@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
@@ -38,7 +39,12 @@ data class Vedtak(
     @Column("sanksjon_arsak")
     val sanksjonsårsak: Sanksjonsårsak? = null,
     val internBegrunnelse: String? = null
-)
+) {
+    fun erVedtakUtenBeslutter(): Boolean = resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+    fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
+}
+
+data class VedtakErUtenBeslutter(val value: Boolean)
 
 data class Vedtaksperiode(
     val datoFra: LocalDate,
@@ -192,13 +198,6 @@ enum class AktivitetType {
     FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING,
     FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
     FORLENGELSE_STØNAD_UT_SKOLEÅRET
-}
-
-enum class AvslagÅrsak {
-    VILKÅR_IKKE_OPPFYLT,
-    BARN_OVER_ÅTTE_ÅR,
-    STØNADSTID_OPPBRUKT,
-    MANGLENDE_OPPLYSNINGER
 }
 
 enum class SamordningsfradragType {

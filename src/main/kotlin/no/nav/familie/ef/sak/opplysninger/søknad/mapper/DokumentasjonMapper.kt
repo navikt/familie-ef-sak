@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Bosituasjon
@@ -22,7 +23,8 @@ object DokumentasjonMapper {
             barn = søknadsskjema.barn,
             situasjon = null,
             barnetilsynDokumentasjon = søknadsskjema.dokumentasjon,
-            utdanningsutgifter = null
+            utdanningsutgifter = null,
+            adresseopplysninger = søknadsskjema.adresseopplysninger
         )
 
     fun tilDokumentasjonDto(søknadsskjema: SøknadsskjemaOvergangsstønad): DokumentasjonFraSøknadDto =
@@ -33,7 +35,8 @@ object DokumentasjonMapper {
             barn = søknadsskjema.barn,
             situasjon = søknadsskjema.situasjon,
             barnetilsynDokumentasjon = null,
-            utdanningsutgifter = null
+            utdanningsutgifter = null,
+            adresseopplysninger = søknadsskjema.adresseopplysninger
         )
 
     fun tilDokumentasjonDto(søknadsskjema: SøknadsskjemaSkolepenger): DokumentasjonFraSøknadDto =
@@ -44,7 +47,8 @@ object DokumentasjonMapper {
             barn = søknadsskjema.barn,
             situasjon = null,
             barnetilsynDokumentasjon = null,
-            utdanningsutgifter = søknadsskjema.utdanningsutgifter
+            utdanningsutgifter = søknadsskjema.utdanningsutgifter,
+            adresseopplysninger = søknadsskjema.adresseopplysninger
         )
 
     fun tilDokumentasjonDto(
@@ -54,7 +58,8 @@ object DokumentasjonMapper {
         barn: Set<SøknadBarn>,
         situasjon: Situasjon?,
         barnetilsynDokumentasjon: BarnetilsynDokumentasjon?,
-        utdanningsutgifter: Dokumentasjon?
+        utdanningsutgifter: Dokumentasjon?,
+        adresseopplysninger: Adresseopplysninger?
 
     ): DokumentasjonFraSøknadDto =
         DokumentasjonFraSøknadDto(
@@ -95,6 +100,7 @@ object DokumentasjonMapper {
             reduksjonAvArbeidsforhold = situasjon?.reduksjonAvArbeidsforholdDokumentasjon?.tilDto(),
             oppsigelse = situasjon?.oppsigelseDokumentasjon?.tilDto(),
 
-            utdanningsutgifter = utdanningsutgifter?.tilDto()
+            utdanningsutgifter = utdanningsutgifter?.tilDto(),
+            meldtAdresseendring = adresseopplysninger?.dokumentasjonAdresseendring?.tilDto()
         )
 }

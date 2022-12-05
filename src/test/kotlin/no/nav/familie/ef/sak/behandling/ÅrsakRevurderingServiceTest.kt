@@ -92,7 +92,7 @@ internal class ÅrsakRevurderingServiceTest {
                 BehandlingÅrsak.G_OMREGNING,
                 BehandlingÅrsak.KORRIGERING_UTEN_BREV,
                 BehandlingÅrsak.PAPIRSØKNAD,
-                BehandlingÅrsak.SATSENDRING,
+                BehandlingÅrsak.SATSENDRING
             )
             val alleÅrsaker = BehandlingÅrsak.values().toSet()
             assertThat(årsakerSomErTattStillingTil).containsExactlyInAnyOrderElementsOf(alleÅrsaker)

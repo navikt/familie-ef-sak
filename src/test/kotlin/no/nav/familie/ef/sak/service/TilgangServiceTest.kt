@@ -220,7 +220,7 @@ internal class TilgangServiceTest {
     @Test
     internal fun `validerTilgangTilEksternFagsak `() {
         every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
-        every { fagsakService.hentFagsakPåEksternId(any()) } returns fagsak.tilDto(emptyList(), true)
+        every { fagsakService.hentFagsakDtoPåEksternId(any()) } returns fagsak.tilDto(emptyList(), true)
 
         tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId.id, AuditLoggerEvent.ACCESS)
     }

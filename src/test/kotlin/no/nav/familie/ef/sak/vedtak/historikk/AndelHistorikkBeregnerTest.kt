@@ -129,7 +129,14 @@ object AndelHistorikkRunner {
         }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId, mapOf())
+        val output = AndelHistorikkBeregner.lagHistorikk(
+            grupper.input,
+            grupper.vedtaksliste,
+            behandlinger,
+            behandlingId,
+            mapOf(),
+            false
+        )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }

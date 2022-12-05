@@ -82,7 +82,7 @@ internal class ÅrsakRevurderingStegTest {
         internal fun `feiler hvis man man sender inn en årsak som ikke er gyldig for gitt stønadstype`() {
             val dto = RevurderingsinformasjonDto(
                 LocalDate.now(),
-                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null),
+                ÅrsakRevurderingDto(Opplysningskilde.BESKJED_ANNEN_ENHET, ugyldigÅrsak, null)
             )
             assertThatThrownBy { utførOgReturnerNesteSteg(dto) }
                 .hasMessage("Årsak er ikke gyldig for stønadstype")

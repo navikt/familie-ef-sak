@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface ÅrsakRevurderingsRepository
-    : RepositoryInterface<ÅrsakRevurdering, UUID>, InsertUpdateRepository<ÅrsakRevurdering>
+interface ÅrsakRevurderingsRepository :
+    RepositoryInterface<ÅrsakRevurdering, UUID>, InsertUpdateRepository<ÅrsakRevurdering>

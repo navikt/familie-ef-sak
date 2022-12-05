@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
 import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
@@ -58,6 +59,13 @@ internal class BehandlingsstatistikkTaskTest {
         type = FØRSTEGANGSBEHANDLING,
         kravMottatt = LocalDate.of(2022, 3, 1)
     )
+    val avslåttBehandling = behandling(
+        fagsak,
+        resultat = BehandlingResultat.AVSLÅTT,
+        type = FØRSTEGANGSBEHANDLING,
+        kravMottatt = LocalDate.of(2022, 3, 1)
+    )
+    val avslåttSaksbehandling = saksbehandling(fagsak, avslåttBehandling)
     val saksbehandling = saksbehandling(fagsak, behandling)
     val hendelse = Hendelse.BESLUTTET
     val hendelseTidspunkt = ZonedDateTime.now()
@@ -169,6 +177,32 @@ internal class BehandlingsstatistikkTaskTest {
         val behandlingsstatistikk = behandlingsstatistikkSlot.captured
         assertThat(behandlingsstatistikk.henvendelseTidspunkt)
             .isEqualTo(behandling.sporbar.opprettetTid.atZone(ZoneId.of("Europe/Oslo")))
+    }
+
+    @Test
+    internal fun `skal sende avslagsårsak dersom denne finnes`() {
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
+        every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns avslåttSaksbehandling
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.AVSLÅ,
+            periodeBegrunnelse = periodeBegrunnelse,
+            inntektBegrunnelse = inntektBegrunnelse,
+            saksbehandlerIdent = saksbehandlerId,
+            beslutterIdent = beslutterId,
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        )
+        val task = Task(
+            type = "behandlingsstatistikkTask",
+            payload = objectMapper.writeValueAsString(payload)
+        )
+
+        behandlingsstatistikkTask.doTask(task)
+
+        val behandlingsstatistikk = behandlingsstatistikkSlot.captured
+        assertThat(behandlingsstatistikk.avslagÅrsak).isEqualTo(AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
+        assertThat(behandlingsstatistikk.behandlingResultat).isEqualTo(BehandlingResultat.AVSLÅTT.name)
     }
 
     @Test

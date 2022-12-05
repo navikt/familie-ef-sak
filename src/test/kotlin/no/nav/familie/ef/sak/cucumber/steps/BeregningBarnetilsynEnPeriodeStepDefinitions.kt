@@ -46,7 +46,8 @@ class BeregningBarnetilsynEnPeriodeStepDefinitions {
             kontantstøtteBeløp = periodeDataDto.kontantstøtteBeløp,
             tilleggsstønadBeløp = periodeDataDto.tillegstønadbeløp,
             antallBarn = periodeDataDto.antallBarn,
-            årMåned = periodeDataDto.årMåned
+            årMåned = periodeDataDto.årMåned,
+            false
         )
 
     @Så("forventer vi barnetilsyn periodebeløp")

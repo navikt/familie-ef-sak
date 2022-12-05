@@ -19,6 +19,8 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.vedtak.KopierVedtakService
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -39,7 +41,9 @@ class RevurderingService(
     private val barnService: BarnService,
     private val fagsakService: FagsakService,
     private val årsakRevurderingService: ÅrsakRevurderingService,
-    private val stegService: StegService
+    private val stegService: StegService,
+    private val kopierVedtakService: KopierVedtakService,
+    private val vedtakService: VedtakService
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
@@ -106,6 +110,20 @@ class RevurderingService(
             BehandlingsstatistikkTask.opprettMottattTask(behandlingId = revurdering.id, oppgaveId = oppgaveId)
         )
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
+
+        if (erSatsendring(revurderingInnhold)) {
+            val vedtakDto = kopierVedtakService.lagVedtakDtoBasertPåTidligereVedtaksperioder(
+                fagsakId = fagsak.id,
+                forrigeBehandlingId = forrigeBehandlingId,
+                revurderingId = revurdering.id
+            )
+            vedtakService.lagreVedtak(
+                vedtakDto = vedtakDto,
+                behandlingId = revurdering.id,
+                stønadstype = fagsak.stønadstype
+            )
+        }
+
         return revurdering
     }
 
@@ -118,11 +136,14 @@ class RevurderingService(
         }
         feilHvis(
             fagsak.stønadstype != StønadType.BARNETILSYN &&
-                revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
+                erSatsendring(revurderingInnhold)
         ) {
             "Kan ikke opprette revurdering med årsak satsendring for ${fagsak.stønadstype}"
         }
     }
+
+    private fun erSatsendring(revurderingInnhold: RevurderingDto) =
+        revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
 
     /**
      * Returnerer id til forrige behandling.

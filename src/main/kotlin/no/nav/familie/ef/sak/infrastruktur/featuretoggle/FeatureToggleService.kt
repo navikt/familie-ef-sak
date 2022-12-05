@@ -19,6 +19,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     G_BEREGNING("familie.ef.sak.g-beregning"),
     G_OMREGNING_REVURDER_HOPP_OVER_VALIDER_TIDLIGERE_VEDTAK("familie.ef.sak.revurder-g-omregning-hopp-over-valider-tidligere-vedtak"),
 
+    SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
+
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
 
@@ -28,6 +30,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     REVURDERING_ÅRSAK("familie.ef.sak.revurdering-arsak"),
 
+    KLAGE_TILBAKEKREVING("familie.ef.sak.klage-tilbakekreving"),
+
     FRONTEND_JOURNALFØRING_KLAGE("familie.ef.sak.frontend-journalforing-klage"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
@@ -35,7 +39,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_OPPRETT_KLAGE("familie.ef.sak.frontend-vis-opprett-klage"),
     FRONTEND_VERGE_FRITTSTÅENDE_BREV("familie.ef.sak.frontend-verge-frittstaende-brev"),
     FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse"),
-    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring")
+    FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
+    AVSLAG_MINDRE_INNTEKTSENDRINGER("familie.ef.sak.avslag-mindre-inntektsendringer")
     ;
 
     companion object {
