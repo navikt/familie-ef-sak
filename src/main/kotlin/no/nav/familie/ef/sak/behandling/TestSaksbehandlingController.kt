@@ -54,7 +54,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
@@ -81,7 +81,7 @@ class TestSaksbehandlingController(
     private val personService: PersonService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val barnService: BarnService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
     private val journalpostClient: JournalpostClient,
     private val migreringService: MigreringService,
@@ -185,8 +185,8 @@ class TestSaksbehandlingController(
                 SikkerhetContext.hentSaksbehandler(true),
                 "Dummy-oppgave opprettet i ny løsning"
             )
-            taskRepository.save(
-                taskRepository.save(
+            taskService.save(
+                taskService.save(
                     BehandlingsstatistikkTask.opprettMottattTask(
                         behandlingId = behandling.id,
                         oppgaveId = oppgaveId

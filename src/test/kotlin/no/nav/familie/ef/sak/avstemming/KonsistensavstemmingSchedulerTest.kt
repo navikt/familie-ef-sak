@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.avstemming
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
     private lateinit var repository: KonsistensavstemmingJobbRepository
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Autowired
     private lateinit var konsistensavstemmingScheduler: KonsistensavstemmingScheduler
@@ -41,7 +41,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
 
         konsistensavstemmingScheduler.opprettTasks()
 
-        assertThat(taskRepository.findAll()).isEmpty()
+        assertThat(taskService.findAll()).isEmpty()
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
 
         val oppdatertJobb = repository.findByIdOrThrow(jobb.id)
         assertThat(oppdatertJobb.opprettet).isTrue
-        val tasks = taskRepository.findAll().toList().sortedBy { it.triggerTid }
+        val tasks = taskService.findAll().toList().sortedBy { it.triggerTid }
         assertThat(tasks).hasSize(2)
         assertThat(tasks[0].triggerTid).isEqualTo(nesteJobb.atTime(22, 0))
         assertThat(tasks[1].triggerTid).isEqualTo(nesteJobb.atTime(22, 20))

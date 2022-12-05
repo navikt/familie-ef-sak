@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +17,7 @@ import java.util.UUID
 class BarnetilsynSatsendringService(
     val barnetilsynSatsendringRepository: BarnetilsynSatsendringRepository,
     val vedtakHistorikkService: VedtakHistorikkService,
-    val taskRepository: TaskRepository
+    val taskService: TaskService
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -96,10 +96,10 @@ class BarnetilsynSatsendringService(
 
     @Transactional
     fun opprettTask() {
-        val finnesTask = taskRepository.findByPayloadAndType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
+        val finnesTask = taskService.finnTaskMedPayloadOgType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
         if (finnesTask == null) {
             val task = BarnetilsynSatsendringTask.opprettTask()
-            taskRepository.save(task)
+            taskService.save(task)
         }
     }
 }

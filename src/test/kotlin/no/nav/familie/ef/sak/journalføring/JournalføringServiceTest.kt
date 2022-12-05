@@ -52,7 +52,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -72,7 +72,7 @@ internal class JournalføringServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val fagsakService = mockk<FagsakService>()
     private val vurderingService = mockk<VurderingService>()
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val barnService = mockk<BarnService>()
     private val iverksettService = mockk<IverksettService>(relaxed = true)
     private val featureToggleService = mockFeatureToggleService()
@@ -88,7 +88,7 @@ internal class JournalføringServiceTest {
             grunnlagsdataService = mockk(relaxed = true),
             iverksettService = iverksettService,
             oppgaveService = oppgaveService,
-            taskRepository = taskRepository,
+            taskService = taskService,
             barnService = barnService,
             featureToggleService = featureToggleService,
             journalpostService = journalpostService,
@@ -188,7 +188,7 @@ internal class JournalføringServiceTest {
             søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
-        every { taskRepository.save(any()) } answers { firstArg() }
+        every { taskService.save(any()) } answers { firstArg() }
 
         slotJournalpost.clear()
         every {

@@ -11,14 +11,14 @@ import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class SaksbehandlingsblankettSteg(
     private val blankettService: BlankettService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val journalpostClient: JournalpostClient,
@@ -73,6 +73,6 @@ class SaksbehandlingsblankettSteg(
     }
 
     private fun opprettFerdigstillBehandlingTask(saksbehandling: Saksbehandling) {
-        taskRepository.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))
+        taskService.save(FerdigstillBehandlingTask.opprettTask(saksbehandling))
     }
 }

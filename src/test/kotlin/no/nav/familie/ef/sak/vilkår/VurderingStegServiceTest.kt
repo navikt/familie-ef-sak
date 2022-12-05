@@ -42,7 +42,7 @@ import no.nav.familie.ef.sak.vilkår.regler.vilkårsreglerForStønad
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.AfterEach
@@ -61,7 +61,7 @@ internal class VurderingStegServiceTest {
     private val blankettRepository = mockk<BlankettRepository>()
     private val vilkårGrunnlagService = mockk<VilkårGrunnlagService>()
     private val stegService = mockk<StegService>()
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val grunnlagsdataService = mockk<GrunnlagsdataService>()
     private val fagsakService = mockk<FagsakService>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -81,7 +81,7 @@ internal class VurderingStegServiceTest {
         vilkårsvurderingRepository = vilkårsvurderingRepository,
         blankettRepository = blankettRepository,
         stegService = stegService,
-        taskRepository = taskRepository
+        taskService = taskService
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
@@ -105,7 +105,7 @@ internal class VurderingStegServiceTest {
         every { søknadService.hentSøknadsgrunnlag(any()) }.returns(søknad)
         every { blankettRepository.deleteById(any()) } just runs
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
-        every { taskRepository.save(any()) } answers { firstArg() }
+        every { taskService.save(any()) } answers { firstArg() }
         every { featureToggleService.isEnabled(any()) } returns true
         every { personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(any()) }
             .returns(

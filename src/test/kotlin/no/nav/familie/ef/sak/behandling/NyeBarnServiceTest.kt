@@ -21,7 +21,7 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -38,8 +38,8 @@ class NyeBarnServiceTest {
     val personService = mockk<PersonService>()
     val barnService = mockk<BarnService>()
     val pdlSøker = mockk<PdlSøker>(relaxed = true)
-    val taskRepository = mockk<TaskRepository>(relaxed = true)
-    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, taskRepository)
+    val taskService = mockk<TaskService>(relaxed = true)
+    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, taskService)
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
     val fagsak = fagsak()

@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,7 +18,7 @@ class AutomatiskMigreringService(
     private val migreringsstatusRepository: MigreringsstatusRepository,
     private val migreringService: MigreringService,
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -33,7 +33,7 @@ class AutomatiskMigreringService(
 
         logger.info("Oppretter ${filtrerteIdenter.size} tasks for å migrere automatisk")
         migreringsstatusRepository.insertAll(filtrerteIdenter.map { Migreringsstatus(it, MigreringResultat.IKKE_KONTROLLERT) })
-        taskRepository.saveAll(filtrerteIdenter.map { personIdent -> opprettTask(personIdent) })
+        taskService.saveAll(filtrerteIdenter.map { personIdent -> opprettTask(personIdent) })
     }
 
     private fun opprettTask(personIdent: String): Task {
@@ -44,12 +44,12 @@ class AutomatiskMigreringService(
     }
 
     fun rekjør(personIdent: String) {
-        taskRepository.save(opprettTask(personIdent))
+        taskService.save(opprettTask(personIdent))
     }
 
     fun rekjør(årsak: MigreringExceptionType) {
         val identer = migreringsstatusRepository.findAllByÅrsak(årsak).map { it.ident }
-        taskRepository.saveAll(identer.map { personIdent -> opprettTask(personIdent) })
+        taskService.saveAll(identer.map { personIdent -> opprettTask(personIdent) })
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
