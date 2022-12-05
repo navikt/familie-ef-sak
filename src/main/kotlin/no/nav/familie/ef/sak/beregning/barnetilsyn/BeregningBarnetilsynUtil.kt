@@ -44,7 +44,7 @@ object BeregningBarnetilsynUtil {
         listOf(
             MaxbeløpBarnetilsynSats(
                 Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4250, 2 to 5700, 3 to 6460)
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
             )
         ) + eldreBarnetilsynsatser
 
