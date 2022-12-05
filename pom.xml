@@ -31,9 +31,9 @@
         <java.version>17</java.version>
         <kotlin.version>1.6.21</kotlin.version>
         <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
-        <springdoc.version>1.6.12</springdoc.version>
-        <mockk.version>1.13.2</mockk.version>
-        <felles.version>1.20221107122251_cd3a0ff</felles.version>
+        <springdoc.version>1.6.13</springdoc.version>
+        <mockk.version>1.13.3</mockk.version>
+        <felles.version>1.20221202080911_bcf8f33</felles.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
         <kontrakter.version>2.0_20221202084337_d05f555</kontrakter.version>
@@ -212,13 +212,13 @@
         <dependency>
             <groupId>dev.akkinoc.spring.boot</groupId>
             <artifactId>logback-access-spring-boot-starter</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.17.5</version>
+            <version>1.17.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
