@@ -105,6 +105,9 @@ data class Barnetilsynperiode(
 
     init {
         validerSanksjon1Måned()
+        feilHvis(sanksjonsårsak != null && erMidlertidigOpphør != true) {
+            "MidlerTidigOpphør må settes hvis sanksjon"
+        }
     }
 
     constructor(

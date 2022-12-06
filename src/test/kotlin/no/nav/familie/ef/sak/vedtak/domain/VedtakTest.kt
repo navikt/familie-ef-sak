@@ -12,7 +12,6 @@ internal class VedtakTest {
 
     private val januar = YearMonth.of(2022, 1)
     private val febaruar = YearMonth.of(2022, 2)
-    private val mars = YearMonth.of(2022, 3)
     private val januarNesteÅr = YearMonth.of(2023, 1)
 
     private val periode = Månedsperiode(januar)
@@ -77,6 +76,7 @@ internal class VedtakTest {
                     Sanksjonsårsak.SAGT_OPP_STILLING
                 )
             }.hasMessageContaining("Sanksjon må være en måned")
+
             assertThatThrownBy {
                 Vedtaksperiode(
                     Månedsperiode(januar, januarNesteÅr),
@@ -85,6 +85,44 @@ internal class VedtakTest {
                     Sanksjonsårsak.SAGT_OPP_STILLING
                 )
             }.hasMessageContaining("Sanksjon må være en måned")
+        }
+    }
+
+    @Nested
+    inner class Barnetilsyn {
+
+        @Test
+        internal fun `gyldig sanksjon`() {
+            val periode = Barnetilsynperiode(
+                periode,
+                1,
+                emptyList(),
+                true,
+                Sanksjonsårsak.SAGT_OPP_STILLING
+            )
+            assertThat(periode).isNotNull
+        }
+
+        @Test
+        internal fun `skal sette erMidlertidigOpphør til true hvis sanksjon`() {
+            assertThatThrownBy {
+                Barnetilsynperiode(
+                    periode,
+                    1,
+                    emptyList(),
+                    null,
+                    Sanksjonsårsak.SAGT_OPP_STILLING
+                )
+            }.hasMessageContaining("MidlerTidigOpphør må settes hvis sanksjon")
+            assertThatThrownBy {
+                Barnetilsynperiode(
+                    periode,
+                    1,
+                    emptyList(),
+                    false,
+                    Sanksjonsårsak.SAGT_OPP_STILLING
+                )
+            }.hasMessageContaining("MidlerTidigOpphør må settes hvis sanksjon")
         }
     }
 }
