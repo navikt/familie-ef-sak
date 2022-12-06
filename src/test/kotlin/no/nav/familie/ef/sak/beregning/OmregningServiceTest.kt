@@ -51,6 +51,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -179,7 +180,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
-        val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
+        val vedtaksperiode = vedtaksperiode(
+            startDato = LocalDate.of(år, 1, 1),
+            sluttDato = LocalDate.of(år, 1, 31),
+            vedtaksperiodeType = VedtaksperiodeType.SANKSJON
+        )
         vedtakRepository.insert(
             vedtak(
                 behandlingId = behandling.id,
