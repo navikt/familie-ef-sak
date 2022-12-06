@@ -64,4 +64,6 @@ Testbrukeren som opprettes i IDA må ha minst en av følgende roller:
 
 ## Testdata
 - Registering av arbeidssøker - https://arbeidssokerregistrering.dev.nav.no/
-  
+
+## Manuell vedlikehold
+[Satsendring barnetilsyn](src/main/kotlin/no/nav/familie/ef/sak/beregning/barnetilsyn/satsendring/README.md)

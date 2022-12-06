@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
-import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
