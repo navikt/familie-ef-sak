@@ -10,8 +10,8 @@ JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
 JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
 WHERE aty.stonad_tom >= '<år som satsendres>-01-01' 
 AND gib.stonadstype = 'BARNETILSYN' 
-AND aty.belop in (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sats for 3 eller flere barn>);
-
+AND aty.belop IN (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sats for 3 eller flere barn>);
+```
 
 Det er laget en scheduler `BarnetilsynSatsendringScheduler` som oppretter task av type `barnetilsynSatsendring` hvis den ikke finnes fra før. 
 Scheduleren er ikke skrudd på nå, kommenter inn @Scheduled-annotasjonen i `BarnetilsynSatsendringScheduler`
@@ -31,11 +31,12 @@ Gjennomfør manuell revurdering type satsendring før utbetaling i januar, samme
 
 
 ```sql
-select b.id, v.barnetilsyn, aty.* from fagsak f
-join behandling b ON f.id=b.fagsak_id
-join tilkjent_ytelse ty ON b.id = ty.behandling_id
-join andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse=ty.id
-join vedtak v ON v.behandling_id = b.id
-where stonadstype='BARNETILSYN' AND status != 'FERDIGSTILT';
+SELECT b.id, v.barnetilsyn, aty.* FROM fagsak f
+JOIN behandling b ON f.id=b.fagsak_id
+JOIN tilkjent_ytelse ty ON b.id = ty.behandling_id
+JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse=ty.id
+JOIN vedtak v ON v.behandling_id = b.id
+WHERE stonadstype='BARNETILSYN' AND status != 'FERDIGSTILT';
+```
 
 PS: Sjekk antall som treffer max-sats for januar neste år i oktober, slik at man eventuelt har tid til å implementere en automatisk revurdering med satsendring som årsak.
