@@ -36,8 +36,6 @@ data class Vedtak(
     val tilleggsstønad: TilleggsstønadWrapper? = null,
     val skolepenger: SkolepengerWrapper? = null,
     val beslutterIdent: String? = null,
-    @Column("sanksjon_arsak")
-    val sanksjonsårsak: Sanksjonsårsak? = null,
     val internBegrunnelse: String? = null
 ) {
     fun erVedtakUtenBeslutter(): Boolean = resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
@@ -50,17 +48,25 @@ data class Vedtaksperiode(
     val datoFra: LocalDate,
     val datoTil: LocalDate,
     val aktivitet: AktivitetType,
-    val periodeType: VedtaksperiodeType
+    val periodeType: VedtaksperiodeType,
+    val sanksjonsårsak: Sanksjonsårsak? = null
 ) {
+
+    init {
+        // TODO validere at man ikke kan opprette sansjon uten årsak
+    }
+
     constructor(
         periode: Månedsperiode,
         aktivitet: AktivitetType,
-        periodeType: VedtaksperiodeType
+        periodeType: VedtaksperiodeType,
+        sanksjonsårsak: Sanksjonsårsak? = null
     ) : this(
         periode.fomDato,
         periode.tomDato,
         aktivitet,
-        periodeType
+        periodeType,
+        sanksjonsårsak
     )
 
     val periode get() = Månedsperiode(datoFra, datoTil)
@@ -72,19 +78,22 @@ data class Barnetilsynperiode(
     val datoTil: LocalDate,
     val utgifter: Int,
     val barn: List<UUID>,
-    val erMidlertidigOpphør: Boolean? = false
+    val erMidlertidigOpphør: Boolean? = false,
+    val sanksjonsårsak: Sanksjonsårsak? = null
 ) {
     constructor(
         periode: Månedsperiode,
         utgifter: Int,
         barn: List<UUID>,
-        erMidlertidigOpphør: Boolean? = false
+        erMidlertidigOpphør: Boolean? = false,
+        sanksjonsårsak: Sanksjonsårsak? = null
     ) : this(
         periode.fomDato,
         periode.tomDato,
         utgifter,
         barn,
-        erMidlertidigOpphør
+        erMidlertidigOpphør,
+        sanksjonsårsak
     )
 
     val periode get() = Månedsperiode(datoFra, datoTil)
