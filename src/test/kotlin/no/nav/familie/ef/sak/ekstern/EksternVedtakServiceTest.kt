@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
@@ -31,8 +30,7 @@ internal class EksternVedtakServiceTest {
     private val service = EksternVedtakService(
         fagsakService = fagsakService,
         behandlingService = behandlingService,
-        tilbakekrevingClient = tilbakekrevingClient,
-        featureToggleService = mockFeatureToggleService()
+        tilbakekrevingClient = tilbakekrevingClient
     )
 
     private val eksternFagsakId: Long = 10

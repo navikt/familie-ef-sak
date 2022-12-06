@@ -5,8 +5,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
@@ -16,17 +14,12 @@ import org.springframework.stereotype.Service
 class EksternVedtakService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
-    private val tilbakekrevingClient: TilbakekrevingClient,
-    private val featureToggleService: FeatureToggleService
+    private val tilbakekrevingClient: TilbakekrevingClient
 ) {
 
     fun hentVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
-        val vedtakTilbakekreving = if (featureToggleService.isEnabled(Toggle.KLAGE_TILBAKEKREVING)) {
-            tilbakekrevingClient.finnVedtak(fagsak.eksternId.id)
-        } else {
-            emptyList()
-        }
+        val vedtakTilbakekreving = tilbakekrevingClient.finnVedtak(fagsak.eksternId.id)
         return hentFerdigstilteBehandlinger(fagsak) + vedtakTilbakekreving
     }
 
