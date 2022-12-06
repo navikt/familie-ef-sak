@@ -1,12 +1,16 @@
 #Satsendringsrutine - barnetilsyn
 
 ## Finn fagsaker som er berørt av nye maks-satser
-SQL: `SELECT  gib.fagsak_id, v.*, gib.id behandling_id, v.behandling_id behandling_id_for_vedtak, v.barnetilsyn
+SQL: 
+```sql
+SELECT  gib.fagsak_id, v.*, gib.id behandling_id, v.behandling_id behandling_id_for_vedtak, v.barnetilsyn
 FROM gjeldende_iverksatte_behandlinger gib
 JOIN tilkjent_ytelse ty ON ty.behandling_id = gib.id
 JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
 JOIN vedtak v ON v.behandling_id = aty.kilde_behandling_id
-WHERE aty.stonad_tom >= '<år som satsendres>-01-01' AND gib.stonadstype = 'BARNETILSYN' AND aty.belop in (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sats for 3 eller flere barn>);`
+WHERE aty.stonad_tom >= '<år som satsendres>-01-01' 
+AND gib.stonadstype = 'BARNETILSYN' 
+AND aty.belop in (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sats for 3 eller flere barn>);
 
 
 Det er laget en scheduler `BarnetilsynSatsendringScheduler` som oppretter task av type `barnetilsynSatsendring` hvis den ikke finnes fra før. 
