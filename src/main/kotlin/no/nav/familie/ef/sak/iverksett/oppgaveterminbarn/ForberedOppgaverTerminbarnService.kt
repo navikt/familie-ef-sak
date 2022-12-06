@@ -45,7 +45,7 @@ class ForberedOppgaverTerminbarnService(
         personService.hentPersonMedBarn(fødselsnummerSøker).barn.values.toList()
 
     private fun opprettTaskerForOppgaver(oppgaver: List<OppgaveForBarn>) {
-        oppgaver.forEach { taskService.save(OpprettOppgaverTerminbarnTask.opprettTask(it)) }
+        oppgaver.forEach { taskService.save(OpprettOppgaveTerminbarnTask.opprettTask(it)) }
     }
 
     private fun lagreOgOpprettOppgaverForUgyldigeTerminbarn(

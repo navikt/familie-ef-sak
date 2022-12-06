@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = OpprettOppgaverTerminbarnTask.TYPE,
+    taskStepType = OpprettOppgaveTerminbarnTask.TYPE,
     beskrivelse = "Oppretter oppgave for terminbarn som ikke er født"
 )
-class OpprettOppgaverTerminbarnTask(
+class OpprettOppgaveTerminbarnTask(
     val taskService: TaskService,
     val opprettOppgaverForTerminbarnService: OpprettOppgaverTerminbarnService,
     val featureToggleService: FeatureToggleService
@@ -42,6 +42,6 @@ class OpprettOppgaverTerminbarnTask(
                 this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             }
         }
-        const val TYPE = "opprettOppgaverTerminbarnTask"
+        const val TYPE = "opprettOppgaveTerminbarnTask"
     }
 }
