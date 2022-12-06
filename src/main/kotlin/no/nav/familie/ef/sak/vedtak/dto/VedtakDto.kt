@@ -177,7 +177,8 @@ private fun Sanksjonert.sanksjonertTilVedtak(
             val vedtaksperiode = Vedtaksperiode(
                 periode.tilPeriode(),
                 AktivitetType.IKKE_AKTIVITETSPLIKT,
-                VedtaksperiodeType.SANKSJON
+                VedtaksperiodeType.SANKSJON,
+                this.sanksjonsårsak
             )
             Vedtak(
                 behandlingId = behandlingId,
@@ -192,7 +193,8 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 periode = periode.tilPeriode(),
                 utgifter = 0,
                 barn = emptyList(),
-                erMidlertidigOpphør = true
+                erMidlertidigOpphør = true,
+                this.sanksjonsårsak
             )
             Vedtak(
                 behandlingId = behandlingId,
