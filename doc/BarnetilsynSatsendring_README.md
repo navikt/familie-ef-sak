@@ -1,6 +1,6 @@
 #Satsendringsrutine - barnetilsyn
 
-## Finn fagsaker som er berørt av nye maks-satser
+## Finn mulige fagsaker som er berørt av nye maks-satser
 SQL: 
 ```sql
 SELECT  gib.fagsak_id, v.*, gib.id behandling_id, v.behandling_id behandling_id_for_vedtak, v.barnetilsyn
@@ -12,6 +12,9 @@ WHERE aty.stonad_tom >= '<år som satsendres>-01-01'
 AND gib.stonadstype = 'BARNETILSYN' 
 AND aty.belop IN (<gammel sats for 1 barn>, <gammel sats for 2 barn>, <gammel sats for 3 eller flere barn>);
 ```
+Det er verdt å merke seg at spørringen finner bare alle andeler med likt beløp som makssatser, og tar ikke hensyn til antall barn. 
+Dermed er det en sjanse for at det f.eks. gis match på en som treffer makssats for 1 barn, selv om det er en behandling med to barn.
+Spørringen egner seg derfor ikke til automatisering, og må forbedres dersom før den eventuelt brukes i en automatisert rutine.
 
 Det er laget en scheduler `BarnetilsynSatsendringScheduler` som oppretter task av type `barnetilsynSatsendring` hvis den ikke finnes fra før. 
 Scheduleren er ikke skrudd på nå, kommenter inn @Scheduled-annotasjonen i `BarnetilsynSatsendringScheduler`
