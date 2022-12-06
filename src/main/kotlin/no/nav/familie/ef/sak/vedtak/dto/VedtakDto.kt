@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeMedSanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
@@ -230,20 +231,26 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
             }
         }
         ResultatType.SANKSJONERE -> {
-            val vedtaksperiodeOvergangsstønad = this.perioder?.perioder?.single()
-            val barnetilsynperiode = this.barnetilsyn?.perioder?.single()
+            val periode: VedtaksperiodeMedSanksjonsårsak =
+                perioder?.perioder?.single()
+                    ?: barnetilsyn?.perioder?.single()
+                    ?: error("Mangler perioder for sanksjon")
             Sanksjonert(
-                sanksjonsårsak = vedtaksperiodeOvergangsstønad?.sanksjonsårsak
-                    ?: barnetilsynperiode?.sanksjonsårsak
-                    ?: error("Mangler perioder for sanksjon"),
-                periode = vedtaksperiodeOvergangsstønad?.fraDomeneForSanksjon()
-                    ?: barnetilsynperiode?.fraDomeneForSanksjon()
-                    ?: error("Mangler perioder for sanksjon"),
+                sanksjonsårsak = periode.sanksjonsårsak ?: error("Mangler perioder for sanksjon"),
+                periode = periode.fraDomeneForSanksjon(),
                 internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
             )
         }
         else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
     }
+
+private fun VedtaksperiodeMedSanksjonsårsak.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
+    SanksjonertPeriodeDto(
+        årMånedFra = YearMonth.from(this.datoFra),
+        årMånedTil = YearMonth.from(this.datoTil),
+        fom = YearMonth.from(this.datoFra),
+        tom = YearMonth.from(this.datoTil)
+    )
 
 fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
     feilHvis(this.perioder == null || this.inntekter == null) {

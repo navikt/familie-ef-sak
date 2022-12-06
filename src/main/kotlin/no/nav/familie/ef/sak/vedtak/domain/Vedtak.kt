@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
@@ -44,16 +45,31 @@ data class Vedtak(
 
 data class VedtakErUtenBeslutter(val value: Boolean)
 
+sealed interface VedtaksperiodeMedSanksjonsårsak {
+    val datoFra: LocalDate
+    val datoTil: LocalDate
+    val sanksjonsårsak: Sanksjonsårsak?
+
+    val periode get() = Månedsperiode(datoFra, datoTil)
+}
+
 data class Vedtaksperiode(
-    val datoFra: LocalDate,
-    val datoTil: LocalDate,
+    override val datoFra: LocalDate,
+    override val datoTil: LocalDate,
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
-    val sanksjonsårsak: Sanksjonsårsak? = null
-) {
+    override val sanksjonsårsak: Sanksjonsårsak? = null
+): VedtaksperiodeMedSanksjonsårsak {
 
     init {
-        // TODO validere at man ikke kan opprette sansjon uten årsak
+        feilHvis(
+            (periodeType != VedtaksperiodeType.SANKSJON && sanksjonsårsak != null) ||
+                (periodeType == VedtaksperiodeType.SANKSJON && sanksjonsårsak == null) ||
+                (periodeType == VedtaksperiodeType.SANKSJON && aktivitet != AktivitetType.IKKE_AKTIVITETSPLIKT)
+        ) {
+            "Ugyldig kombinasjon av sanksjon periodeType=$periodeType aktivitet=$aktivitet sanksjonsårsak=$sanksjonsårsak"
+        }
+        validerSanksjon1Måned()
     }
 
     constructor(
@@ -69,18 +85,31 @@ data class Vedtaksperiode(
         sanksjonsårsak
     )
 
-    val periode get() = Månedsperiode(datoFra, datoTil)
+}
+
+private fun VedtaksperiodeMedSanksjonsårsak.validerSanksjon1Måned() {
+    feilHvis(sanksjonsårsak != null && periode.lengdeIHeleMåneder() != 1L) {
+        "Sanksjon må være en måned, fra=$datoFra til=$datoTil"
+    }
 }
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
 data class Barnetilsynperiode(
-    val datoFra: LocalDate,
-    val datoTil: LocalDate,
+    override val datoFra: LocalDate,
+    override val datoTil: LocalDate,
     val utgifter: Int,
     val barn: List<UUID>,
     val erMidlertidigOpphør: Boolean? = false,
-    val sanksjonsårsak: Sanksjonsårsak? = null
-) {
+    override val sanksjonsårsak: Sanksjonsårsak? = null
+): VedtaksperiodeMedSanksjonsårsak {
+
+    init {
+        validerSanksjon1Måned()
+        feilHvis(sanksjonsårsak != null && erMidlertidigOpphør != true) {
+            "MidlerTidigOpphør må settes hvis sanksjon"
+        }
+    }
+
     constructor(
         periode: Månedsperiode,
         utgifter: Int,
@@ -96,7 +125,6 @@ data class Barnetilsynperiode(
         sanksjonsårsak
     )
 
-    val periode get() = Månedsperiode(datoFra, datoTil)
 }
 
 data class SkoleårsperiodeSkolepenger(

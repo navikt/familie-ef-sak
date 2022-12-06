@@ -197,7 +197,8 @@ object VedtakDomeneParser {
                 barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
                     IntRange(1, it).map { UUID.randomUUID() }
                 } ?: emptyList(),
-                erMidlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad),
+                erMidlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
+                    ?: (sanksjonsårsak != null),
                 sanksjonsårsak = sanksjonsårsak
             )
         }
