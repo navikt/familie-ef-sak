@@ -317,11 +317,9 @@ object AndelHistorikkParser {
                 val resultat: ResultatType
                 var periodeWrapper: PeriodeWrapper? = null
                 var opphørFom: YearMonth? = null
-                var sanksjonsårsak: Sanksjonsårsak? = null
                 if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
                     resultat = ResultatType.SANKSJONERE
-                    sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
-                    periodeWrapper = mapVedtaksperioder(vedtaksperioder)
+                    periodeWrapper = mapVedtaksperioder(vedtaksperioder, Sanksjonsårsak.SAGT_OPP_STILLING)
                 } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
                     resultat = ResultatType.INNVILGE
                     periodeWrapper = mapVedtaksperioder(vedtaksperioder)
@@ -353,20 +351,20 @@ object AndelHistorikkParser {
                     saksbehandlerIdent = null,
                     opphørFom = opphørFom,
                     beslutterIdent = null,
-                    sanksjonsårsak = sanksjonsårsak,
                     internBegrunnelse = ""
                 )
             }
     }
 
-    private fun mapVedtaksperioder(vedtaksperioder: List<AndelHistorikkData>) =
+    private fun mapVedtaksperioder(vedtaksperioder: List<AndelHistorikkData>, sanksjonsårsak: Sanksjonsårsak? = null) =
         PeriodeWrapper(
             vedtaksperioder.map {
                 Vedtaksperiode(
                     datoFra = it.stønadFom!!,
                     datoTil = it.stønadTom!!,
                     aktivitet = it.aktivitet!!,
-                    periodeType = it.periodeType!!
+                    periodeType = it.periodeType!!,
+                    sanksjonsårsak = sanksjonsårsak
                 )
             }
         )

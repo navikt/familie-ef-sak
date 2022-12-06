@@ -182,7 +182,6 @@ private fun Sanksjonert.sanksjonertTilVedtak(
             )
             Vedtak(
                 behandlingId = behandlingId,
-                sanksjonsårsak = this.sanksjonsårsak,
                 perioder = PeriodeWrapper(listOf(vedtaksperiode)),
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE
@@ -198,7 +197,6 @@ private fun Sanksjonert.sanksjonertTilVedtak(
             )
             Vedtak(
                 behandlingId = behandlingId,
-                sanksjonsårsak = this.sanksjonsårsak,
                 barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE
@@ -231,13 +229,19 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                 )
             }
         }
-        ResultatType.SANKSJONERE -> Sanksjonert(
-            sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
-            periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
-                ?: this.barnetilsyn?.perioder?.single()?.fraDomeneForSanksjon()
-                ?: error("Mangler perioder for sanksjon"),
-            internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
-        )
+        ResultatType.SANKSJONERE -> {
+            val vedtaksperiodeOvergangsstønad = this.perioder?.perioder?.single()
+            val barnetilsynperiode = this.barnetilsyn?.perioder?.single()
+            Sanksjonert(
+                sanksjonsårsak = vedtaksperiodeOvergangsstønad?.sanksjonsårsak
+                    ?: barnetilsynperiode?.sanksjonsårsak
+                    ?: error("Mangler perioder for sanksjon"),
+                periode = vedtaksperiodeOvergangsstønad?.fraDomeneForSanksjon()
+                    ?: barnetilsynperiode?.fraDomeneForSanksjon()
+                    ?: error("Mangler perioder for sanksjon"),
+                internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
+            )
+        }
         else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
     }
 

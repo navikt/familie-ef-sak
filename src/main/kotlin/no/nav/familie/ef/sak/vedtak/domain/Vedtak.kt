@@ -36,8 +36,6 @@ data class Vedtak(
     val tilleggsstønad: TilleggsstønadWrapper? = null,
     val skolepenger: SkolepengerWrapper? = null,
     val beslutterIdent: String? = null,
-    @Column("sanksjon_arsak")
-    val sanksjonsårsak: Sanksjonsårsak? = null,
     val internBegrunnelse: String? = null
 ) {
     fun erVedtakUtenBeslutter(): Boolean = resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
