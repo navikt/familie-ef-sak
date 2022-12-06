@@ -77,13 +77,17 @@ class KopierVedtakService(
 
     private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
         val map = historikk.map {
+            feilHvis(it.erSanksjon) {
+                "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+            }
             UtgiftsperiodeDto(
                 årMånedFra = it.andel.periode.fom,
                 årMånedTil = it.andel.periode.tom,
                 periode = it.andel.periode,
                 barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                sanksjonsårsak = null
             )
         }
         return map.fyllUtPerioderUtenStønad()
@@ -111,7 +115,8 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
                     periode = Månedsperiode(fom = denne.periode.tom.plusMonths(1), tom = neste.periode.fom.minusMonths(1)),
                     barn = emptyList(),
                     utgifter = 0,
-                    erMidlertidigOpphør = true
+                    erMidlertidigOpphør = true,
+                    sanksjonsårsak = null
                 )
             )
         }

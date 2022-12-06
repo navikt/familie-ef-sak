@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Opphør
 import no.nav.familie.ef.sak.vedtak.dto.OpphørSkolepenger
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonert
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
@@ -87,7 +88,8 @@ class BeregnYtelseSteg(
         when (data) {
             is InnvilgelseOvergangsstønad -> {
                 validerOmregningService.validerHarSammePerioderSomTidligereVedtak(data, saksbehandlingMedOppdatertIdent)
-                validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
+                validerSanksjoner(data, saksbehandlingMedOppdatertIdent)
+                // TODO sjekk att man ikke får stønad i sanksjonsperioder
                 opprettTilkjentYtelseForInnvilgetOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
@@ -121,18 +123,40 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
-        if (behandling.erOmregning) {
+    private fun validerSanksjoner(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
+        if (behandling.erMaskinellOmregning) {
             return
         }
-
         innvilget.perioder.firstOrNull()?.let {
             validerStartTidEtterSanksjon(it.periode.fom, behandling)
+        }
+
+        val nyeSanksjonsperioder = innvilget.perioder
+            .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
+            .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+        validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
+    }
+
+    private fun validerHarIkkeLagtTilSanksjonsperioder(
+        behandling: Saksbehandling,
+        nyeSanksjonsperioder: List<Pair<Månedsperiode, Sanksjonsårsak>>
+    ) {
+        val historikk = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+        val historiskeSanksjonsperioder = historikk
+            .filter { it.erIkkeFjernet() }
+            .filter { it.erSanksjon }
+            .map { it.andel.periode to it.sanksjonsårsak }
+            .toSet()
+
+        val nySanksjonsperiodeUtenTreff = nyeSanksjonsperioder.find { !historiskeSanksjonsperioder.contains(it) }
+        feilHvis(nySanksjonsperiodeUtenTreff != null) {
+            logger.error("Ny sanksjonsperiode uten treff=$nySanksjonsperiodeUtenTreff historikk=$historiskeSanksjonsperioder")
+            "Nye eller endrede sanksjonsperioder ($nySanksjonsperiodeUtenTreff) som ikke finnes i historikken"
         }
     }
 
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
-        if (featureToggleService.isEnabled(Toggle.ERSTATTE_SANKSJON)) {
+        if (featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON)) {
             logger.info("Ignorerer validerStartTidEtterSanksjon for behandling=${behandling.id}")
             return
         }
@@ -484,18 +508,25 @@ class BeregnYtelseSteg(
 
     private fun opprettTilkjentYtelseForSanksjonertBehandling(
         vedtak: Sanksjonert,
-        saksbehandling: Saksbehandling
+        behandling: Saksbehandling
     ) {
-        brukerfeilHvis(saksbehandling.forrigeBehandlingId == null) {
+        brukerfeilHvis(behandling.forrigeBehandlingId == null) {
             "Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling"
         }
-        val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(saksbehandling)
+        val erAlleredeSanksjonertOppgittMåned = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
+            .filter { it.erIkkeFjernet() }
+            .any { it.erSanksjon && it.andel.periode == vedtak.periode.tilPeriode() }
+        feilHvis(erAlleredeSanksjonertOppgittMåned) {
+            "Behandlingen er allerede sanksjonert ${vedtak.periode.fom}"
+        }
+
+        val forrigeTilkjenteYtelse = hentForrigeTilkjenteYtelse(behandling)
         val andelerTilkjentYtelse = andelerForSanksjonertRevurdering(forrigeTilkjenteYtelse, vedtak)
 
         tilkjentYtelseService.opprettTilkjentYtelse(
             TilkjentYtelse(
-                personident = saksbehandling.ident,
-                behandlingId = saksbehandling.id,
+                personident = behandling.ident,
+                behandlingId = behandling.id,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 startdato = forrigeTilkjenteYtelse.startdato
             )

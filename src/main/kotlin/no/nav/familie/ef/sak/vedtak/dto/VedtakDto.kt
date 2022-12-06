@@ -105,6 +105,7 @@ data class SanksjonertPeriodeDto(
     val fom: YearMonth = årMånedFra,
     @JsonIgnore
     val tom: YearMonth = årMånedTil
+// Legg inn sanksjonsårsak?
 ) {
 
     fun tilPeriode() = Månedsperiode(fom, tom)

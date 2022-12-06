@@ -16,7 +16,8 @@ data class VedtaksperiodeDto(
         årMånedTil ?: error("periode eller årMånedTil må ha verdi")
     ),
     val aktivitet: AktivitetType,
-    val periodeType: VedtaksperiodeType
+    val periodeType: VedtaksperiodeType,
+    val sanksjonsårsak: Sanksjonsårsak? = null
 )
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Månedsperiode> =
@@ -29,7 +30,8 @@ fun List<VedtaksperiodeDto>.tilDomene(): List<Vedtaksperiode> =
         Vedtaksperiode(
             periode = it.periode,
             aktivitet = it.aktivitet,
-            periodeType = it.periodeType
+            periodeType = it.periodeType,
+            sanksjonsårsak = it.sanksjonsårsak
         )
     }
 
@@ -40,6 +42,7 @@ fun List<Vedtaksperiode>.fraDomene(): List<VedtaksperiodeDto> =
             årMånedTil = it.periode.tom,
             periode = it.periode,
             aktivitet = it.aktivitet,
-            periodeType = it.periodeType
+            periodeType = it.periodeType,
+            sanksjonsårsak = it.sanksjonsårsak
         )
     }

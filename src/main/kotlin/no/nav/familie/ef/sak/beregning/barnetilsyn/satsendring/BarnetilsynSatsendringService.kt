@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn.satsendring
 
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
@@ -84,11 +85,15 @@ class BarnetilsynSatsendringService(
 
     private fun mapAndelerForNesteÅrTilUtgiftsperiodeDto(andeler2023: List<AndelHistorikkDto>): List<UtgiftsperiodeDto> {
         val utgiftsperiode = andeler2023.map {
+            feilHvis(it.erSanksjon) {
+                "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+            }
             UtgiftsperiodeDto(
                 periode = it.andel.periode,
                 barn = it.andel.barn,
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                sanksjonsårsak = null
             ) // TODO sjekk erMidlertidigOpphør???...
         }
         return utgiftsperiode
