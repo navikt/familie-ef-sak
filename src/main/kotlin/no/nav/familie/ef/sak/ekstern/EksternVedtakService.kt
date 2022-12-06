@@ -3,10 +3,8 @@ package no.nav.familie.ef.sak.ekstern
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
@@ -42,13 +40,8 @@ class EksternVedtakService(
         eksternBehandlingId = behandling.eksternId.id.toString(),
         behandlingstype = behandling.type.visningsnavn,
         resultat = behandling.resultat.displayName,
-        vedtakstidspunkt = if (behandling.status == BehandlingStatus.FERDIGSTILT) {
-            behandling.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}")
-        } else {
-            throw Feil(
-                "Kan ikke utlede vedtaksdato for behandling=${behandling.id} status=${behandling.status}"
-            )
-        },
+        vedtakstidspunkt = behandling.vedtakstidspunkt
+            ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
         fagsystemType = FagsystemType.ORDNIÆR
     )
 }
