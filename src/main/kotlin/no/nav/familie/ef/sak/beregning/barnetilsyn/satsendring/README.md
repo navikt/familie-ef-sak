@@ -30,11 +30,12 @@ Det kan potensielt bli feil dersom det lagres andre beløp på vedtak enn det sa
 Gjennomfør manuell revurdering type satsendring før utbetaling i januar, sammen med saksbehandlere.
 
 
-`select b.id, v.barnetilsyn, aty.* from fagsak f
+```sql
+select b.id, v.barnetilsyn, aty.* from fagsak f
 join behandling b ON f.id=b.fagsak_id
 join tilkjent_ytelse ty ON b.id = ty.behandling_id
 join andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse=ty.id
 join vedtak v ON v.behandling_id = b.id
-where stonadstype='BARNETILSYN' AND status != 'FERDIGSTILT';`
+where stonadstype='BARNETILSYN' AND status != 'FERDIGSTILT';
 
 PS: Sjekk antall som treffer max-sats for januar neste år i oktober, slik at man eventuelt har tid til å implementere en automatisk revurdering med satsendring som årsak.
