@@ -61,5 +61,5 @@ fun Saksbehandling.tilDto(): BehandlingDto =
         behandlingsårsak = this.årsak,
         henlagtÅrsak = this.henlagtÅrsak,
         stønadstype = stønadstype,
-        vedtaksdato = if (this.status == BehandlingStatus.FERDIGSTILT) this.endretTid else null
+        vedtaksdato = this.vedtakstidspunkt
     )
