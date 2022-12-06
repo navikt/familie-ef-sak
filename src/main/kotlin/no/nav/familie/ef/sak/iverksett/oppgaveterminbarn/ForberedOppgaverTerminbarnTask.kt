@@ -26,6 +26,7 @@ class ForberedOppgaverTerminbarnTask(
 
     override fun doTask(task: Task) {
         if (featureToggleService.isEnabled(Toggle.OPPRETT_OPPGAVER_TERMINBARN)) {
+            logger.info("Starter forbereding av oppgaver for ufødte terminbarn")
             forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
         } else {
             logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")
