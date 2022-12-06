@@ -14,5 +14,4 @@ import java.util.UUID
 interface VedtakRepository : RepositoryInterface<Vedtak, UUID>, InsertUpdateRepository<Vedtak> {
 
     fun findAllByResultatType(resultatType: ResultatType): List<Vedtak>
-    asd // kompileringsfeil sånn att denne ikke merges før vi har patchet data i prod
 }
