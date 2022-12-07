@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 class OppgaverTerminbarnDryrunController(private val forberedOppgaverTerminbarnService: ForberedOppgaverTerminbarnService) {
 
     @GetMapping("/dryrun")
-    fun opprettTask(): ResponseEntity<Unit> {
+    fun forberedOppgaverDryRun(): ResponseEntity<Unit> {
         forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = true)
         return ResponseEntity(HttpStatus.OK)
     }
