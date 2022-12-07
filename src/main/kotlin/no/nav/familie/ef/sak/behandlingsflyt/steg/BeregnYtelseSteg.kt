@@ -89,7 +89,6 @@ class BeregnYtelseSteg(
             is InnvilgelseOvergangsstønad -> {
                 validerOmregningService.validerHarSammePerioderSomTidligereVedtak(data, saksbehandlingMedOppdatertIdent)
                 validerSanksjoner(data, saksbehandlingMedOppdatertIdent)
-                // TODO sjekk att man ikke får stønad i sanksjonsperioder
                 opprettTilkjentYtelseForInnvilgetOvergangsstønad(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
