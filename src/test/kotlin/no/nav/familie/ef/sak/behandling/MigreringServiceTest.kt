@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
@@ -732,7 +733,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
             val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
             val behandlingId = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
-                migreringService.migrerBarnetilsyn(fagsak.fagsakPersonId)
+                migreringService.migrerBarnetilsyn(fagsak.fagsakPersonId, MigrerRequestDto())
             }
 
             kjørTasks()
