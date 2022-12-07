@@ -40,10 +40,8 @@ class ForberedOppgaverTerminbarnService(
         oppgaver.forEach { oppgave ->
             logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId}. Dryrun : $dryRun")
         }
-        if (oppgaver.isNotEmpty()) {
-            if (!dryRun) {
-                opprettTaskerForOppgaver(oppgaver)
-            }
+        if (!dryRun) {
+            opprettTaskerForOppgaver(oppgaver)
         }
     }
 
