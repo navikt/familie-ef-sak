@@ -59,7 +59,7 @@ data class Vedtaksperiode(
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
     override val sanksjonsårsak: Sanksjonsårsak? = null
-): VedtaksperiodeMedSanksjonsårsak {
+) : VedtaksperiodeMedSanksjonsårsak {
 
     init {
         feilHvis(
@@ -84,7 +84,6 @@ data class Vedtaksperiode(
         periodeType,
         sanksjonsårsak
     )
-
 }
 
 private fun VedtaksperiodeMedSanksjonsårsak.validerSanksjon1Måned() {
@@ -101,7 +100,7 @@ data class Barnetilsynperiode(
     val barn: List<UUID>,
     val erMidlertidigOpphør: Boolean? = false,
     override val sanksjonsårsak: Sanksjonsårsak? = null
-): VedtaksperiodeMedSanksjonsårsak {
+) : VedtaksperiodeMedSanksjonsårsak {
 
     init {
         validerSanksjon1Måned()
@@ -124,7 +123,6 @@ data class Barnetilsynperiode(
         erMidlertidigOpphør,
         sanksjonsårsak
     )
-
 }
 
 data class SkoleårsperiodeSkolepenger(
