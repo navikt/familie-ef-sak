@@ -24,7 +24,7 @@ class ForberedOppgaverTerminbarnService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun forberedOppgaverForUfødteTerminbarn() {
+    fun forberedOppgaverForUfødteTerminbarn(dryRun: Boolean) {
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
             .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
             .groupBy { it.behandlingId }
@@ -34,10 +34,13 @@ class ForberedOppgaverTerminbarnService(
             val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
             val pdlBarn = pdlBarn(fødselsnummerSøker)
             val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarn) }
-            lagreOgOpprettOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
+            lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker, dryRun)
         }.flatten()
+        logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn. Dryrun : $dryRun")
         if (oppgaver.isNotEmpty()) {
-            opprettTaskerForOppgaver(oppgaver)
+            if (!dryRun) {
+                opprettTaskerForOppgaver(oppgaver)
+            }
         }
     }
 
@@ -48,13 +51,16 @@ class ForberedOppgaverTerminbarnService(
         oppgaver.forEach { taskService.save(OpprettOppgaveTerminbarnTask.opprettTask(it)) }
     }
 
-    private fun lagreOgOpprettOppgaverForUgyldigeTerminbarn(
+    private fun lagreOgMapTilOppgaverForUgyldigeTerminbarn(
         barnTilUtplukkForOppgave: List<TerminbarnTilUtplukkForOppgave>,
-        fødselsnummerSøker: String
+        fødselsnummerSøker: String,
+        dryRun: Boolean
     ): List<OppgaveForBarn> {
         return barnTilUtplukkForOppgave
             .map {
-                terminbarnRepository.insert(it.tilTerminbarnOppgave())
+                if (!dryRun) {
+                    terminbarnRepository.insert(it.tilTerminbarnOppgave())
+                }
                 OppgaveForBarn(
                     it.behandlingId,
                     it.eksternFagsakId,

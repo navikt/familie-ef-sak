@@ -58,7 +58,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { taskService.save(any()) } returns mockk()
 
-        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
         verify(exactly = 1) { taskService.save(any()) }
         verify(exactly = 1) { terminbarnRepository.insert(any()) }
     }
@@ -72,7 +72,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminbarn
         every { taskService.save(capture(oppgaverForBarnSlot)) } returns mockk()
 
-        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
         val capture = objectMapper.readValue<OppgaveForBarn>(oppgaverForBarnSlot.captured.payload)
         assertThat(capture.behandlingId).isEqualTo(terminbarn.first().behandlingId)
         assertThat(capture.eksternFagsakId).isEqualTo(terminbarn.first().eksternFagsakId)
@@ -91,7 +91,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { taskService.save(any()) } returns mockk()
 
-        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
         verify(exactly = 1) { taskService.save(any()) }
         verify(exactly = 1) { terminbarnRepository.insert(any()) }
     }
@@ -107,7 +107,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { taskService.save(any()) } returns mockk()
 
-        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
         verify(exactly = 0) { taskService.save(any()) }
         verify(exactly = 0) { terminbarnRepository.insert(any()) }
     }
@@ -123,7 +123,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
         every { taskService.save(any()) } returns mockk()
 
-        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
         verify(exactly = 0) { taskService.save(any()) }
     }
 
