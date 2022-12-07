@@ -56,10 +56,6 @@ class IverksettClient(
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-barns-alder/opprett"), oppgaverForBarn)
     }
 
-    fun sendOppgaverForTerminBarn(oppgaverForBarn: OppgaverForBarnDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-terminbarn"), oppgaverForBarn)
-    }
-
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
     }
