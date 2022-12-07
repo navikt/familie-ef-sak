@@ -1,13 +1,12 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
-import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,13 +18,13 @@ class ForberedOppgaverTerminbarnService(
     private val personService: PersonService,
     private val fagsakService: FagsakService,
     private val terminbarnRepository: TerminbarnRepository,
-    private val iverksettClient: IverksettClient
+    private val taskService: TaskService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun forberedOppgaverForUfødteTerminbarn() {
+    fun forberedOppgaverForUfødteTerminbarn(dryRun: Boolean) {
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
             .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
             .groupBy { it.behandlingId }
@@ -35,27 +34,34 @@ class ForberedOppgaverTerminbarnService(
             val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
             val pdlBarn = pdlBarn(fødselsnummerSøker)
             val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarn) }
-            lagreOgLagOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
+            lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker, dryRun)
         }.flatten()
-        if (oppgaver.isNotEmpty()) {
-            sendOppgaverTilIverksett(oppgaver)
+        logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn. Dryrun : $dryRun")
+        oppgaver.forEach { oppgave ->
+            logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId}. Dryrun : $dryRun")
+        }
+        if (!dryRun) {
+            opprettTaskerForOppgaver(oppgaver)
         }
     }
 
     private fun pdlBarn(fødselsnummerSøker: String): List<PdlPersonForelderBarn> =
         personService.hentPersonMedBarn(fødselsnummerSøker).barn.values.toList()
 
-    private fun sendOppgaverTilIverksett(oppgaver: List<OppgaveForBarn>) {
-        iverksettClient.sendOppgaverForTerminBarn(OppgaverForBarnDto(oppgaver))
+    private fun opprettTaskerForOppgaver(oppgaver: List<OppgaveForBarn>) {
+        oppgaver.forEach { taskService.save(OpprettOppgaveTerminbarnTask.opprettTask(it)) }
     }
 
-    private fun lagreOgLagOppgaverForUgyldigeTerminbarn(
+    private fun lagreOgMapTilOppgaverForUgyldigeTerminbarn(
         barnTilUtplukkForOppgave: List<TerminbarnTilUtplukkForOppgave>,
-        fødselsnummerSøker: String
+        fødselsnummerSøker: String,
+        dryRun: Boolean
     ): List<OppgaveForBarn> {
         return barnTilUtplukkForOppgave
             .map {
-                terminbarnRepository.insert(it.tilTerminbarnOppgave())
+                if (!dryRun) {
+                    terminbarnRepository.insert(it.tilTerminbarnOppgave())
+                }
                 OppgaveForBarn(
                     it.behandlingId,
                     it.eksternFagsakId,
@@ -77,6 +83,13 @@ private fun TerminbarnTilUtplukkForOppgave.match(pdlPersonForelderBarn: List<Pdl
         .map { it.fødsel.gjeldende().fødselsdato }
         .any { matchBarn(this.termindatoBarn, it ?: error("Fødselsdato er null")) }
 }
+
+data class TerminbarnTilUtplukkForOppgave(
+    val behandlingId: UUID,
+    val fagsakId: UUID,
+    val eksternFagsakId: Long,
+    val termindatoBarn: LocalDate
+)
 
 private fun TerminbarnTilUtplukkForOppgave.tilTerminbarnOppgave(): TerminbarnOppgave {
     return TerminbarnOppgave(fagsakId = this.fagsakId, termindato = this.termindatoBarn)
