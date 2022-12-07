@@ -127,8 +127,10 @@ class BeregnYtelseSteg(
         if (behandling.erMaskinellOmregning) {
             return
         }
-        innvilget.perioder.firstOrNull()?.let {
-            validerStartTidEtterSanksjon(it.periode.fom, behandling)
+        if (!featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON)) {
+            innvilget.perioder.firstOrNull()?.let {
+                validerStartTidEtterSanksjon(it.periode.fom, behandling)
+            }
         }
 
         val nyeSanksjonsperioder = innvilget.perioder
@@ -156,10 +158,6 @@ class BeregnYtelseSteg(
     }
 
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
-        if (featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON)) {
-            logger.info("Ignorerer validerStartTidEtterSanksjon for behandling=${behandling.id}")
-            return
-        }
         val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
             .filter { it.erIkkeFjernet() }
             .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
