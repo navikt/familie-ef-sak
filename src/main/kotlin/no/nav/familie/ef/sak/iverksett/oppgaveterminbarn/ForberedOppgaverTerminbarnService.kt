@@ -37,6 +37,9 @@ class ForberedOppgaverTerminbarnService(
             lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker, dryRun)
         }.flatten()
         logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn. Dryrun : $dryRun")
+        oppgaver.forEach { oppgave ->
+            logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId}")
+        }
         if (oppgaver.isNotEmpty()) {
             if (!dryRun) {
                 opprettTaskerForOppgaver(oppgaver)

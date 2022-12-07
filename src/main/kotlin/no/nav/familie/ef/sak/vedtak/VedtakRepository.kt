@@ -11,5 +11,4 @@ import java.util.UUID
 interface VedtakRepository : RepositoryInterface<Vedtak, UUID>, InsertUpdateRepository<Vedtak> {
 
     fun findAllByResultatType(resultatType: ResultatType): List<Vedtak>
-
 }
