@@ -37,6 +37,7 @@ class BeregningController(
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
         val vedtaksperioder: List<Månedsperiode> = beregningRequest.vedtaksperioder
             .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
             .tilPerioder()
 
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()

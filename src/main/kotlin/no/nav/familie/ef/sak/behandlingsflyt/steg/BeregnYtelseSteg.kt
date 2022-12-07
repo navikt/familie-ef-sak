@@ -538,7 +538,10 @@ class BeregnYtelseSteg(
         vedtak.perioder.filter { it.utgifter == 0 }.tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseOvergangsstønad) =
-        vedtak.perioder.filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }.tilPerioder()
+        vedtak.perioder
+            .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
+            .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) =
         vedtak.perioder.filter { it.utgifter != 0 }.tilPerioder()
