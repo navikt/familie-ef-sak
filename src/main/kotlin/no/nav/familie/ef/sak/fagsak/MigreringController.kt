@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
-import no.nav.familie.ef.sak.fagsak.dto.MigrerOvergangsstønadDto
+import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -34,20 +34,23 @@ class MigreringController(
     @PostMapping("{fagsakPersonId}")
     fun migrerOvergangsstønad(
         @PathVariable fagsakPersonId: UUID,
-        @RequestBody request: MigrerOvergangsstønadDto?
+        @RequestBody request: MigrerRequestDto?
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
         return Ressurs.success(
             migreringService.migrerOvergangsstønad(
                 fagsakPersonId,
-                request ?: MigrerOvergangsstønadDto()
+                request ?: MigrerRequestDto()
             )
         )
     }
 
     @PostMapping("{fagsakPersonId}/barnetilsyn")
-    fun migrerBarnetilsyn(@PathVariable fagsakPersonId: UUID): Ressurs<UUID> {
+    fun migrerBarnetilsyn(
+        @PathVariable fagsakPersonId: UUID,
+        @RequestBody request: MigrerRequestDto?
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
-        return Ressurs.success(migreringService.migrerBarnetilsyn(fagsakPersonId))
+        return Ressurs.success(migreringService.migrerBarnetilsyn(fagsakPersonId, request ?: MigrerRequestDto()))
     }
 }
