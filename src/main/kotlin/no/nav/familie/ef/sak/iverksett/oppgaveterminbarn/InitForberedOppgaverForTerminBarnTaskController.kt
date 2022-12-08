@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping(path = ["/api/oppgaver-for-terminbarn"])
+@Unprotected
 class InitForberedOppgaverForTerminBarnTaskController(private val taskService: TaskService) {
 
     @PostMapping("/initialiser")
