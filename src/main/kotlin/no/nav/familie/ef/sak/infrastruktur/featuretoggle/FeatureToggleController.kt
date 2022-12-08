@@ -25,7 +25,8 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_JOURNALFØRING_KLAGE,
         Toggle.FRONTEND_UTESTENGELSE,
         Toggle.FRONTEND_SATSENDRING,
-        Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER
+        Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER,
+        Toggle.FØRSTEGANGSBEHANDLING
     )
 
     @GetMapping
