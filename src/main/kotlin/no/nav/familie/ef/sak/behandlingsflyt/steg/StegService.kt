@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
@@ -33,6 +34,7 @@ import java.util.UUID
 class StegService(
     private val behandlingSteg: List<BehandlingSteg<*>>,
     private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
     private val rolleConfig: RolleConfig,
     private val behandlingshistorikkService: BehandlingshistorikkService
 ) {
@@ -250,7 +252,9 @@ class StegService(
         stegType: StegType,
         saksbehandlerIdent: String
     ) {
-        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, saksbehandling.steg.tillattFor)
+        val rolleForSteg: BehandlerRolle = utledRolleForSteg(stegType, saksbehandling)
+
+        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, rolleForSteg)
 
         logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
         secureLogger.info(
@@ -261,6 +265,19 @@ class StegService(
         feilHvis(!harTilgangTilSteg) {
             "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."
         }
+    }
+
+    private fun utledRolleForSteg(
+        stegType: StegType,
+        saksbehandling: Saksbehandling
+    ): BehandlerRolle {
+        if (stegType == BESLUTTE_VEDTAK) {
+            val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+            if (vedtak.erVedtakUtenBeslutter()) {
+                return BehandlerRolle.SAKSBEHANDLER
+            }
+        }
+        return saksbehandling.steg.tillattFor
     }
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {
