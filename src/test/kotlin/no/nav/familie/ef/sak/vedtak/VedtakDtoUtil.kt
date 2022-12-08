@@ -142,8 +142,8 @@ object VedtakDtoUtil {
     fun sanksjonertPeriodeDto() =
         SanksjonertPeriodeDto(
             YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12),
             YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12)
+            YearMonth.of(2021, 1),
+            YearMonth.of(2021, 1)
         )
 }

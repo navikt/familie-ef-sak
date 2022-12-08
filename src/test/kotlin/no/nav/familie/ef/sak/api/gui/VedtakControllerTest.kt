@@ -225,6 +225,15 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `kan ikke sende til besluttning som saksbehandler`() {
+        opprettBehandling()
+        sendTilBeslutter(BESLUTTER)
+        godkjennTotrinnskontroll(SAKSBEHANDLER) {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @Test
     internal fun `skal automatisk utføre besluttesteg når en behandling avslås pga mindre inntektsendringer`() {
         opprettBehandling(
             steg = StegType.SEND_TIL_BESLUTTER,
@@ -232,7 +241,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             status = BehandlingStatus.UTREDES,
             avlsåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
         )
-        sendTilBeslutter(BESLUTTER)
+        sendTilBeslutter(SAKSBEHANDLER)
 
         validerTotrinnskontrollUaktuelt(BESLUTTER)
         validerTotrinnskontrollUaktuelt(SAKSBEHANDLER)

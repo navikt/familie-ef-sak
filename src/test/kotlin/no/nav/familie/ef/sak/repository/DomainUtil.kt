@@ -47,6 +47,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -360,10 +361,13 @@ fun vedtaksperiode(
     år: Int = 2021,
     startDato: LocalDate = LocalDate.of(år, 1, 1),
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
-    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitetstype: AktivitetType =
+        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) AktivitetType.IKKE_AKTIVITETSPLIKT else AktivitetType.BARN_UNDER_ETT_ÅR,
+    sanksjonsårsak: Sanksjonsårsak? =
+        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) Sanksjonsårsak.SAGT_OPP_STILLING else null
 ) =
-    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)
+    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
 
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),

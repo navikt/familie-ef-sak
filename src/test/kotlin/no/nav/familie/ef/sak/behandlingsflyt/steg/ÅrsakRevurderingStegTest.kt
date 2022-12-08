@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
@@ -22,7 +21,7 @@ internal class ÅrsakRevurderingStegTest {
 
     private val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
-    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService, mockFeatureToggleService(true))
+    private val steg = ÅrsakRevurderingSteg(årsakRevurderingService)
 
     private val saksbehandling = saksbehandling()
     private val stønadstype = saksbehandling.stønadstype

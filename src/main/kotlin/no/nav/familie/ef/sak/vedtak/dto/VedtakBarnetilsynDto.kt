@@ -97,11 +97,3 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
         }
     )
 }
-
-fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
-    SanksjonertPeriodeDto(
-        årMånedFra = YearMonth.from(datoFra),
-        årMånedTil = YearMonth.from(datoTil),
-        fom = YearMonth.from(datoFra),
-        tom = YearMonth.from(datoTil)
-    )
