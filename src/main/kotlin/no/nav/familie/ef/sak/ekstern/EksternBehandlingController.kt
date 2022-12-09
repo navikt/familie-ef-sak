@@ -1,10 +1,13 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -44,6 +47,9 @@ class EksternBehandlingController(
     fun opprettRevurderingKlage(@PathVariable eksternFagsakId: Long): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
+        feilHvis(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
+            "Kallet utføres ikke av en autorisert klient"
+        }
         return Ressurs.success(eksternBehandlingService.opprettRevurderingKlage(eksternFagsakId))
     }
 }

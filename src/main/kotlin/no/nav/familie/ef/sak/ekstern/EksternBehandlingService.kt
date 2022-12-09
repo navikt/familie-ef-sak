@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.Opprettet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.util.UUID
 
@@ -44,6 +45,7 @@ class EksternBehandlingService(
             .toSet()
     }
 
+    @Transactional
     fun opprettRevurderingKlage(eksternFagsakId: Long): OpprettRevurderingResponse {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
         val finnesÅpenBehandling = behandlingService.finnesÅpenBehandling(fagsak.id)
