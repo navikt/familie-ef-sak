@@ -52,6 +52,11 @@ class EksternBehandlingService(
         if (finnesÅpenBehandling) {
             return OpprettRevurderingResponse(IkkeOpprettet(årsak = IkkeOpprettetÅrsak.ÅPEN_BEHANDLING))
         }
+
+        if (behandlingService.finnSisteIverksatteBehandling(fagsak.id) == null) {
+            return OpprettRevurderingResponse(IkkeOpprettet(årsak = IkkeOpprettetÅrsak.INGEN_BEHANDLING))
+        }
+
         return try {
             val revurdering = RevurderingDto(
                 fagsakId = fagsak.id,

@@ -234,8 +234,8 @@ fun Fagsak.tilFagsakDomain() =
 
 fun vilkårsvurdering(
     behandlingId: UUID,
-    resultat: Vilkårsresultat,
-    type: VilkårType,
+    resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+    type: VilkårType = VilkårType.LOVLIG_OPPHOLD,
     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
     barnId: UUID? = null
 ): Vilkårsvurdering =

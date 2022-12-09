@@ -2,18 +2,22 @@ package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
+import no.nav.familie.ef.sak.repository.vilkårsvurdering
+import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.klage.IkkeOpprettetÅrsak
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class EksternBehandlingServiceTest: OppslagSpringRunnerTest() {
+internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
@@ -21,48 +25,71 @@ internal class EksternBehandlingServiceTest: OppslagSpringRunnerTest() {
     @Autowired
     lateinit var eksternBehandlingService: EksternBehandlingService
 
-    val fagsakUtenBehandling = fagsak(fagsakpersoner("1"))
-    val fagsakMedÅpenBehandling = fagsak(fagsakpersoner("2"))
-    val fagsakMedFerdigstiltBehandling = fagsak(fagsakpersoner("3"))
-
-    @BeforeEach
-    internal fun setUp() {
-        testoppsettService.lagreFagsak(fagsakUtenBehandling)
-        testoppsettService.lagreFagsak(fagsakMedÅpenBehandling)
-        testoppsettService.lagreFagsak(fagsakMedFerdigstiltBehandling)
-
-        behandlingRepository.insert(behandling(fagsakMedÅpenBehandling))
-        behandlingRepository.insert(behandling(fagsakMedFerdigstiltBehandling, status = BehandlingStatus.FERDIGSTILT))
-    }
+    @Autowired
+    lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
 
     @Nested
     inner class opprettRevurderingKlage {
 
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
-            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedFerdigstiltBehandling.eksternId.id)
+            val fagsakMedFerdigstiltBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("3")))
+            val førstegangsbehandling = behandlingRepository.insert(
+                behandling(
+                    fagsakMedFerdigstiltBehandling,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT
+                )
+            )
+            vilkårsvurderingRepository.insert(vilkårsvurdering(førstegangsbehandling.id))
+
+            val result = testWithBrukerContext {
+                eksternBehandlingService.opprettRevurderingKlage(fagsakMedFerdigstiltBehandling.eksternId.id)
+            }
 
             assertThat(result.opprettetBehandling).isTrue
 
             val behandling = behandlingRepository.finnMedEksternId(result.opprettet!!.eksternBehandlingId.toLong())
 
-            assertThat(behandling).isNotNull
+            assertThat(behandling!!.årsak).isEqualTo(BehandlingÅrsak.KLAGE)
         }
 
         @Test
-        internal fun `hva skal skje hvis det ikke finnes noen behandling`() {
-            TODO("Not yet implemented")
+        internal fun `mangler behandling skal feile`() {
+            val fagsakUtenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("1")))
+
+            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakUtenBehandling.eksternId.id)
+
+            assertThat(result.opprettetBehandling).isFalse
+            assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.INGEN_BEHANDLING)
+        }
+
+        @Test
+        internal fun `henlagt behandling skal feile`() {
+            val fagsakMedHenlagtBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("4")))
+            behandlingRepository.insert(
+                behandling(
+                    fagsakMedHenlagtBehandling,
+                    resultat = BehandlingResultat.HENLAGT,
+                    status = BehandlingStatus.FERDIGSTILT
+                )
+            )
+
+            val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedHenlagtBehandling.eksternId.id)
+
+            assertThat(result.opprettetBehandling).isFalse
+            assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.INGEN_BEHANDLING)
         }
 
         @Test
         internal fun `kan ikke opprette recvurdering hvis det finnes åpen behandling`() {
+            val fagsakMedÅpenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("2")))
+            behandlingRepository.insert(behandling(fagsakMedÅpenBehandling))
+
             val result = eksternBehandlingService.opprettRevurderingKlage(fagsakMedÅpenBehandling.eksternId.id)
+
             assertThat(result.opprettetBehandling).isFalse
             assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING)
         }
-
-
     }
-
-
 }
