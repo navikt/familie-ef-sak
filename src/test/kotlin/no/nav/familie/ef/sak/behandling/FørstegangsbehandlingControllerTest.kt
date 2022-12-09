@@ -1,17 +1,22 @@
 package no.nav.familie.ef.sak.behandling
 
+import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.FørstegangsbehandlingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
+import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +49,9 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
 
+    @Autowired
+    private lateinit var infotrygdReplikaClient: InfotrygdReplikaClient
+
     @BeforeEach
     fun setUp() {
         headers.setBearerAuth(lokalTestToken)
@@ -52,6 +60,16 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         testoppsettService.lagreFagsak(fagsakMedHenlagtBehandling)
         behandlingRepository.insert(eksisterendeBehandling)
         behandlingRepository.insert(henlagtBehandling)
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
+            emptyList(),
+            emptyList(),
+            emptyList()
+        )
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        InfotrygdReplikaMock.resetMock(infotrygdReplikaClient)
     }
 
     @Test

@@ -23,11 +23,11 @@ class InfotrygdPeriodeValideringService(
     private val behandlingService: BehandlingService
 ) {
 
-    fun validerKanJournalføresGittInfotrygdData(fagsak: Fagsak) {
+    fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
         if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
                 StønadType.OVERGANGSSTØNAD ->
-                    validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                    validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                         fagsak.hentAktivIdent(),
                         fagsak.stønadstype
                     )
@@ -37,7 +37,7 @@ class InfotrygdPeriodeValideringService(
         }
     }
 
-    fun validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
+    fun validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
         feilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
             "Har ikke støtte for å sjekke migrering av stønadstypen $stønadType"
         }

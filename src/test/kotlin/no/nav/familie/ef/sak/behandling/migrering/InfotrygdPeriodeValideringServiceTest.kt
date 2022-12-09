@@ -46,7 +46,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
         internal fun `skal kunne journalføre når personen ikke har noen saker i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns infotrygdPerioderDto(emptyList())
 
-            service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, StønadType.OVERGANGSSTØNAD)
         }
 
         @Test
@@ -62,7 +62,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         )
                     )
                 )
-            service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
 
         @Test
@@ -71,7 +71,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                 infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))
 
             assertThatThrownBy {
-                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
                     StønadType.OVERGANGSSTØNAD
                 )
@@ -90,7 +90,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                 )
 
             assertThatThrownBy {
-                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
                     StønadType.OVERGANGSSTØNAD
                 )

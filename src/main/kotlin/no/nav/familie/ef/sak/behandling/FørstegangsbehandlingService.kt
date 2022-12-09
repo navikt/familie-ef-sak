@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.FørstegangsbehandlingDto
+import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -32,6 +33,7 @@ class FørstegangsbehandlingService(
     private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
     private val iverksettService: IverksettService,
+    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
     private val featureToggleService: FeatureToggleService
 
 ) {
@@ -42,6 +44,7 @@ class FørstegangsbehandlingService(
         }
         validerGyldigÅrsak(førstegangsBehandlingRequest.behandlingsårsak)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
         val behandling = opprettBehandling(fagsakId, førstegangsBehandlingRequest)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
 
@@ -57,7 +60,6 @@ class FørstegangsbehandlingService(
         taskService.save(
             BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id, oppgaveId = oppgaveId)
         )
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = behandling.id))
     }
 
     private fun opprettOppgave(behandling: Behandling): Long {

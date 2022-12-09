@@ -25,7 +25,7 @@ class FørstegangsbehandlingController(
         @PathVariable fagsakId: UUID,
         @RequestBody førstegangsBehandlingRequest: FørstegangsbehandlingDto
     ): Ressurs<UUID> {
-        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
 
         val behandling = førstegangsbehandlingService.opprettFørstegangsbehandling(fagsakId, førstegangsBehandlingRequest)
