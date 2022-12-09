@@ -31,6 +31,8 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.søker
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
@@ -38,9 +40,13 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -64,6 +70,7 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerSkolepengerDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -236,6 +243,28 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
+    internal fun `skal ikke sende med sanksjon eller midlertidlig opphør`() {
+        val dato = LocalDate.of(2021, 1, 1)
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.INNVILGET)
+        val perioder = listOf(
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = SANKSJON),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = MIDLERTIDIG_OPPHØR),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE)
+        )
+        val innvilgetVedtak = vedtak(behandling.id, perioder = PeriodeWrapper(perioder))
+
+        every { vedtakService.hentVedtak(any()) } returns innvilgetVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        val periodetyper =
+            iverksettDto.vedtak.vedtaksperioder.map { it as VedtaksperiodeOvergangsstønadDto }.map { it.periodeType }
+        val hovedperiode = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.HOVEDPERIODE
+        assertThat(periodetyper).containsExactly(hovedperiode, hovedperiode)
+    }
+
+    @Test
     internal fun `skal kunne mappe alle enums`() {
         BehandlingType.values().forEach { BehandlingTypeIverksett.valueOf(it.name) }
 
@@ -246,7 +275,7 @@ internal class IverksettingDtoMapperTest {
 
         AktivitetType.values().forEach { AktivitetTypeIverksett.valueOf(it.name) }
         VedtaksperiodeType.values()
-            .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .filter { it != MIDLERTIDIG_OPPHØR }
             .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
 
         SkolepengerStudietype.values().forEach { SkolepengerStudietypeIverksett.valueOf(it.name) }
@@ -371,7 +400,7 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
         assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
         assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
-        assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
+        assertThat(vedtaksperiode.periodeType.name).isEqualTo(HOVEDPERIODE.name)
     }
 
     private fun assertVedtaksperiode(vedtak: VedtaksdetaljerBarnetilsynDto) {

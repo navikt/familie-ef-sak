@@ -18,7 +18,11 @@ data class VedtaksperiodeDto(
     val aktivitet: AktivitetType,
     val periodeType: VedtaksperiodeType,
     val sanksjonsårsak: Sanksjonsårsak? = null
-)
+) {
+
+    fun erMidlertidigOpphørEllerSanksjon(): Boolean = periodeType.midlertidigOpphørEllerSanksjon()
+
+}
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Månedsperiode> =
     this.map {

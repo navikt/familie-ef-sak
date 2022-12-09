@@ -170,7 +170,7 @@ class BeregnYtelseSteg(
     private fun validerGyldigeVedtaksperioder(saksbehandling: Saksbehandling, data: VedtakDto) {
         if (data is InnvilgelseOvergangsstønad) {
             val harOpphørsperioder = data.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-            val harInnvilgedePerioder = data.perioder.any { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            val harInnvilgedePerioder = data.perioder.any { !it.erMidlertidigOpphørEllerSanksjon() }
             brukerfeilHvis(harOpphørsperioder && !harInnvilgedePerioder) {
                 "Må ha innvilgelsesperioder i tillegg til opphørsperioder"
             }
@@ -538,8 +538,7 @@ class BeregnYtelseSteg(
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseOvergangsstønad) =
         vedtak.perioder
-            .filter { it.periodeType != VedtaksperiodeType.SANKSJON }
-            .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .filterNot { it.erMidlertidigOpphørEllerSanksjon() }
             .tilPerioder()
 
     private fun finnInnvilgedePerioder(vedtak: InnvilgelseBarnetilsyn) =

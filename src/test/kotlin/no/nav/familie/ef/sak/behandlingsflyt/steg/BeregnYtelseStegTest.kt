@@ -168,12 +168,7 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 forrigeBehandlingId = null,
                 vedtak = innvilget(
-                    listOf(
-                        vedtaksperiodeDto(
-                            årMånedFra = nyAndelFom,
-                            årMånedTil = nyAndelTom
-                        )
-                    ),
+                    listOf(vedtaksperiodeDto(årMånedFra = nyAndelFom, årMånedTil = nyAndelTom)),
                     listOf(inntekt(YearMonth.from(nyAndelFom)))
                 )
             )

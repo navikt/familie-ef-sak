@@ -365,7 +365,7 @@ fun Vilkårsvurdering.tilIverksettDto(): VilkårsvurderingDto = Vilkårsvurderin
 )
 
 fun PeriodeWrapper.tilVedtaksperioder(): List<VedtaksperiodeOvergangsstønadDto> = this.perioder
-    .filter { it.periodeType != no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+    .filterNot { it.periodeType.midlertidigOpphørEllerSanksjon() }
     .map {
         VedtaksperiodeOvergangsstønadDto(
             fraOgMed = it.datoFra,
