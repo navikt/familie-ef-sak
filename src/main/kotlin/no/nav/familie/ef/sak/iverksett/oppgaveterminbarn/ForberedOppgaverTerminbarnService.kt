@@ -33,7 +33,7 @@ class ForberedOppgaverTerminbarnService(
         val oppgaver = gjeldendeBarn.values.map { terminbarnPåSøknad ->
             val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
             val pdlBarn = pdlBarn(fødselsnummerSøker)
-            val ugyldigeTerminbarn = terminbarnPåSøknad.filter { !it.match(pdlBarn) }
+            val ugyldigeTerminbarn = terminbarnPåSøknad.filterNot { it.match(pdlBarn) }
             lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker, dryRun)
         }.flatten()
         logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn. Dryrun : $dryRun")
