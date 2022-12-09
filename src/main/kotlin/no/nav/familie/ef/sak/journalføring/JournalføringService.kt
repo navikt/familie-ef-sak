@@ -112,7 +112,7 @@ class JournalføringService(
             journalføringRequest
         )
 
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -187,7 +187,7 @@ class JournalføringService(
             "Journalfører ferdigstilt journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = journalføringRequest.behandlingstype,
