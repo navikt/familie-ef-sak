@@ -17,12 +17,12 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakService: FagsakSer
     fun hentInntektSisteTreÅr(fagsakId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
 
-        val beregnetSkattegrnnlagSisteTreÅr = listInntektsår.map { sigrunClient.hentBeregnetSkatt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
+        val beregnetSkattegrunnlagSisteTreÅr = listInntektsår.map { sigrunClient.hentBeregnetSkatt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
         val inntektFraSvalbard = hentInntektFraSvalbardSisteTreÅr(fagsakId)
-        beregnetSkattegrnnlagSisteTreÅr.forEach {
+        beregnetSkattegrunnlagSisteTreÅr.forEach {
             it.verdi += inntektFraSvalbard.find { svalbard -> svalbard.inntektsaar == it.inntektsaar }?.verdi ?: 0
         }
-        return beregnetSkattegrnnlagSisteTreÅr
+        return beregnetSkattegrunnlagSisteTreÅr
     }
 
     private fun hentInntektFraSvalbardSisteTreÅr(fagsakId: UUID): List<PensjonsgivendeInntektVisning> {
