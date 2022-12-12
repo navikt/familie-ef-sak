@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.OptimisticLockingFailureException
 import java.time.LocalDate
 
-internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
+internal class KonsistensavstemmingServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var repository: KonsistensavstemmingJobbRepository
@@ -20,7 +20,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
     private lateinit var taskService: TaskService
 
     @Autowired
-    private lateinit var konsistensavstemmingScheduler: KonsistensavstemmingScheduler
+    private lateinit var konsistensavstemmingService: KonsistensavstemmingService
 
     @BeforeEach
     internal fun setUp() {
@@ -39,7 +39,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
     internal fun `skal ikke oppdatere jobb som er satt til tre dager frem i tid`() {
         repository.insert(KonsistensavstemmingJobb(triggerdato = LocalDate.now().plusDays(3)))
 
-        konsistensavstemmingScheduler.opprettTasks()
+        konsistensavstemmingService.opprettTasks()
 
         assertThat(taskService.findAll()).isEmpty()
     }
@@ -49,7 +49,7 @@ internal class KonsistensavstemmingSchedulerTest : OppslagSpringRunnerTest() {
         val nesteJobb = LocalDate.now().plusDays(1)
         val jobb = repository.insert(KonsistensavstemmingJobb(triggerdato = nesteJobb))
 
-        konsistensavstemmingScheduler.opprettTasks()
+        konsistensavstemmingService.opprettTasks()
 
         val oppdatertJobb = repository.findByIdOrThrow(jobb.id)
         assertThat(oppdatertJobb.opprettet).isTrue
