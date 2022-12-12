@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
@@ -52,6 +53,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Dokumentvariantformat
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -147,6 +149,7 @@ internal class JournalføringServiceTest {
     private val ustrukturertJournalpost = journalpost.copy(dokumenter = emptyList())
 
     private val slotJournalpost = slot<OppdaterJournalpostRequest>()
+    private val slotOpprettedeTasks = mutableListOf<Task>()
 
     @BeforeEach
     fun setupMocks() {
@@ -155,17 +158,9 @@ internal class JournalføringServiceTest {
         every { fagsakService.hentEksternId(any()) } returns fagsakEksternId
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
 
-        every {
-            barnService.opprettBarnPåBehandlingMedSøknadsdata(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } just Runs
+        justRun {
+            barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any())
+        }
 
         every { behandlingService.finnesBehandlingForFagsak(any()) } returns true
 
@@ -188,7 +183,7 @@ internal class JournalføringServiceTest {
             søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any())
         } just Runs
 
-        every { taskService.save(any()) } answers { firstArg() }
+        every { taskService.save(capture(slotOpprettedeTasks)) } answers { firstArg() }
 
         slotJournalpost.clear()
         every {
@@ -222,6 +217,7 @@ internal class JournalføringServiceTest {
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
         assertThat(slotJournalpost.captured.dokumenter).hasSize(4)
+        assertThat(slotOpprettedeTasks).isEmpty()
         verify(exactly = 0) { søknadService.lagreSøknadForOvergangsstønad(any(), any(), any(), any()) }
         verify(exactly = 0) { iverksettService.startBehandling(any(), any()) }
         verify(exactly = 1) { journalpostClient.ferdigstillJournalpost(any(), any(), any()) }
@@ -256,6 +252,7 @@ internal class JournalføringServiceTest {
                 slotJournalpost.captured.dokumenter?.find { dokument -> dokument.dokumentInfoId === dokumentId }
             assertThat(oppdatertDokument?.tittel).isEqualTo(nyTittel)
         }
+        assertThat(slotOpprettedeTasks.map { it.type }).doesNotContain(OpprettOppgaveForOpprettetBehandlingTask.TYPE)
     }
 
     @Test
@@ -537,6 +534,7 @@ internal class JournalføringServiceTest {
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
             val res = journalføringService.automatiskJournalførFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
+
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
             verify { iverksettService.startBehandling(any(), fagsak) }
@@ -548,11 +546,11 @@ internal class JournalføringServiceTest {
                     behandlingsårsak = SØKNAD
                 )
             }
-            verify { oppgaveService.opprettOppgave(any(), any(), any(), JournalføringService.AUTOMATISK_JOURNALFØRING_BESKRIVELSE, mappeId) }
+            verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
             verify { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any()) }
             assertThat(res.behandlingId).isEqualTo(behandlingId)
             assertThat(res.fagsakId).isEqualTo(fagsakId)
-            assertThat(res.behandleSakOppgaveId).isEqualTo(nyOppgaveId)
+            assertThat(slotOpprettedeTasks.map { it.type }).containsExactly(OpprettOppgaveForOpprettetBehandlingTask.TYPE)
         }
     }
 
