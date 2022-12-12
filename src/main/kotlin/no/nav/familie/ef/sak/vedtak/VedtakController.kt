@@ -100,9 +100,18 @@ class VedtakController(
     fun hentVedtak(
         @PathVariable fagsakId: UUID,
         @PathVariable fra: YearMonth
-    ): Ressurs<VedtakDto> {
+    ): Ressurs<InnvilgelseOvergangsstønad> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(vedtakHistorikkService.hentVedtakFraDato(fagsakId, fra))
+        return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
+    }
+
+    @GetMapping("{behandlingId}/historikk/{fra}")
+    fun hentVedtakForBehandling(
+        @PathVariable behandlingId: UUID,
+        @PathVariable fra: YearMonth
+    ): Ressurs<VedtakDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(vedtakHistorikkService.hentVedtakFraDato(behandlingId, fra))
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")

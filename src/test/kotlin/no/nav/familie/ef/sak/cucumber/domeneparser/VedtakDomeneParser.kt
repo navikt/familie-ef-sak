@@ -188,20 +188,30 @@ object VedtakDomeneParser {
         rader: List<Map<String, String>>
     ): List<Barnetilsynperiode> {
         return rader.map { rad ->
+            val behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!
             val sanksjonsårsak =
                 if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null
+            val barn = mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
+                IntRange(1, it).map { UUID.randomUUID() }
+            } ?: emptyList()
             Barnetilsynperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
-                barn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
-                    IntRange(1, it).map { UUID.randomUUID() }
-                } ?: emptyList(),
+                barn = barn,
                 erMidlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
                     ?: (sanksjonsårsak != null),
                 sanksjonsårsak = sanksjonsårsak
             )
         }
+    }
+
+    fun mapBarn(behandlingId: UUID, rad: Map<String, String>): List<UUID> {
+        return parseValgfriString(VedtakDomenebegrep.BARN, rad)?.let { barnListeString ->
+            barnListeString.split(",")
+                .map { it.trim() }
+                .map {  IdTIlUUIDHolder.hentEllerOpprettBarn(behandlingId, it) }
+        } ?: emptyList()
     }
 
     private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<SkoleårsperiodeSkolepenger> {
@@ -373,6 +383,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     ENDRING_TYPE("Endringstype"),
     OPPHØRSDATO("Opphørsdato"),
     UTGIFTER("Utgifter"),
+    BARN("Barn"),
     ANTALL_BARN("Antall barn"),
     TILLEGGSSTØNAD("Tilleggsstønad"),
     KONTANTSTØTTE("Kontantstøtte"),

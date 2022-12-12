@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
+import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -24,14 +25,15 @@ import java.util.UUID
 @Service
 class VedtakHistorikkService(
     private val fagsakService: FagsakService,
-    private val andelsHistorikkService: AndelsHistorikkService
+    private val andelsHistorikkService: AndelsHistorikkService,
+    private val barnService: BarnService
 ) {
 
-    fun hentVedtakFraDato(fagsakId: UUID, fra: YearMonth): VedtakDto {
-        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
-        return when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> hentVedtakForOvergangsstønadFraDato(fagsakId, fra)
-            StønadType.BARNETILSYN -> hentVedtakForBarnetilsynFraDato(fagsakId, fra)
+    fun hentVedtakFraDato(behandlingId: UUID, fra: YearMonth): VedtakDto {
+        val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
+        return when (fagsak.stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> hentVedtakForOvergangsstønadFraDato(fagsak, fra)
+            StønadType.BARNETILSYN -> hentVedtakForBarnetilsynFraDato(fagsak, behandlingId, fra)
             StønadType.SKOLEPENGER -> error("Støtter ikke henting av skolepenger ")
         }
     }
@@ -55,14 +57,13 @@ class VedtakHistorikkService(
         )
     }
 
-    fun hentVedtakForBarnetilsynFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseBarnetilsyn {
-        return hentVedtakForBarnetilsynFraDato(fagsakService.hentFagsak(fagsakId), fra)
-    }
-
-    fun hentVedtakForBarnetilsynFraDato(fagsak: Fagsak, fra: YearMonth): InnvilgelseBarnetilsyn {
+    private fun hentVedtakForBarnetilsynFraDato(
+        fagsak: Fagsak,
+        behandlingId: UUID,
+        fra: YearMonth
+    ): InnvilgelseBarnetilsyn {
         val historikk = hentAktivHistorikk(fagsak, StønadType.BARNETILSYN)
-        val perioder = mapBarnetilsynPerioder(historikk, fra)
-        // TODO må mappe barn til siste behandlingen sine barn id'er
+        val perioder = mapBarnetilsynPerioder(historikk, fra, behandlingId)
         return InnvilgelseBarnetilsyn(
             begrunnelse = null,
             perioder = perioder,
@@ -79,49 +80,6 @@ class VedtakHistorikkService(
                 "men prøvde å hente for ${fagsak.stønadstype} fagsak=${fagsak.id}"
         }
         return hentAktivHistorikk(fagsak.id)
-    }
-
-    private fun mapUtgifterBarnetilsyn(
-        historikk: List<AndelHistorikkDto>,
-        fra: YearMonth,
-        utgift: (AndelMedGrunnlagDto) -> Int
-    ): List<PeriodeMedBeløpDto> {
-        return historikk
-            .filter { utgift(it.andel) > 0 } // riktig?
-            .slåSammen { a, b ->
-                sammenhengende(a, b) &&
-                    utgift(a.andel) == utgift(b.andel)
-            }
-            .fraDato(fra)
-            .map {
-                PeriodeMedBeløpDto(
-                    årMånedFra = it.andel.periode.fom,
-                    årMånedTil = it.andel.periode.tom,
-                    periode = it.andel.periode,
-                    utgift(it.andel)
-                )
-            }
-    }
-
-    fun mapBarnetilsynPerioder(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<UtgiftsperiodeDto> {
-        return historikk
-            .slåSammen { a, b ->
-                sammenhengende(a, b) &&
-                    a.andel.barn == b.andel.barn &&
-                    a.andel.utgifter.compareTo(b.andel.utgifter) == 0
-                // midlertidlig opphør?
-            }
-            .fraDato(fra)
-            .map {
-                UtgiftsperiodeDto(
-                    årMånedFra = it.andel.periode.fom,
-                    årMånedTil = it.andel.periode.tom,
-                    periode = it.andel.periode,
-                    barn = it.andel.barn,
-                    utgifter = it.andel.utgifter.toInt(),
-                    erMidlertidigOpphør = false
-                )
-            }
     }
 
     private fun mapPerioder(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<VedtaksperiodeDto> {
@@ -159,6 +117,61 @@ class VedtakHistorikkService(
                     BigDecimal(it.andel.samordningsfradrag)
                 )
             }
+    }
+
+    private fun mapUtgifterBarnetilsyn(
+        historikk: List<AndelHistorikkDto>,
+        fra: YearMonth,
+        beløp: (AndelMedGrunnlagDto) -> Int
+    ): List<PeriodeMedBeløpDto> {
+        return historikk
+            .filter { beløp(it.andel) > 0 } // riktig?
+            .slåSammen { a, b ->
+                sammenhengende(a, b) &&
+                    beløp(a.andel) == beløp(b.andel)
+            }
+            .fraDato(fra)
+            .map {
+                PeriodeMedBeløpDto(
+                    årMånedFra = it.andel.periode.fom,
+                    årMånedTil = it.andel.periode.tom,
+                    periode = it.andel.periode,
+                    beløp(it.andel)
+                )
+            }
+    }
+
+    private fun mapBarnetilsynPerioder(
+        historikk: List<AndelHistorikkDto>,
+        fra: YearMonth,
+        behandlingId: UUID
+    ): List<UtgiftsperiodeDto> {
+        val barnMap = mapHistoriskeBarn(behandlingId, historikk)
+        return historikk
+            .slåSammen { a, b ->
+                sammenhengende(a, b) &&
+                    a.andel.barn.toSet() == b.andel.barn.toSet() &&
+                    a.andel.utgifter.compareTo(b.andel.utgifter) == 0
+            }
+            .fraDato(fra)
+            .map {
+                UtgiftsperiodeDto(
+                    årMånedFra = it.andel.periode.fom,
+                    årMånedTil = it.andel.periode.tom,
+                    periode = it.andel.periode,
+                    barn = it.andel.barn.map { barnId -> barnMap[barnId] ?: error("Fant ikke match for barn=$barnId") },
+                    utgifter = it.andel.utgifter.toInt(),
+                    erMidlertidigOpphør = false
+                )
+            }
+    }
+
+    private fun mapHistoriskeBarn(
+        behandlingId: UUID,
+        historikk: List<AndelHistorikkDto>
+    ): Map<UUID, UUID> {
+        val historiskeBarnIder = historikk.flatMap { it.andel.barn }.toSet()
+        return barnService.kobleTidligereBarnTilNyBarnId(behandlingId, historiskeBarnIder)
     }
 
     fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {

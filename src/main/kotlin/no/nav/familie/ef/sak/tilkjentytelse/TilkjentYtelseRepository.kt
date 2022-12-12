@@ -5,9 +5,11 @@ import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.jdbc.repository.query.Query
+import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import java.util.UUID
 
+@Repository
 interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, InsertUpdateRepository<TilkjentYtelse> {
 
     fun findByPersonident(personident: String): TilkjentYtelse?
