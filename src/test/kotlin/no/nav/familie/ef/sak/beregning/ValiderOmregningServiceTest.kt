@@ -122,7 +122,7 @@ class ValiderOmregningServiceTest {
             val til = fra
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
@@ -138,7 +138,7 @@ class ValiderOmregningServiceTest {
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
 
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
                     VedtaksperiodeDto(
                         fra,
@@ -156,7 +156,7 @@ class ValiderOmregningServiceTest {
         @Test
         internal fun `skal ikke g-omregne behandlinger som ikke har perioder etter g-dato`() {
             val saksbehandling = manuellGOmregning()
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns innvilge()
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns innvilge()
 
             val vedtak = InnvilgelseOvergangsstønad(null, null, listOf())
 
@@ -172,7 +172,7 @@ class ValiderOmregningServiceTest {
             val til = fra
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
                     VedtaksperiodeDto(
                         fra,
@@ -197,7 +197,7 @@ class ValiderOmregningServiceTest {
             val til = fra
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
                     VedtaksperiodeDto(
                         fra,
@@ -223,7 +223,7 @@ class ValiderOmregningServiceTest {
             val revurderingTil = til.plusMonths(1)
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
                     VedtaksperiodeDto(
                         fra,
@@ -247,7 +247,7 @@ class ValiderOmregningServiceTest {
             val saksbehandling = manuellGOmregning()
             val fra = YearMonth.of(år, 5)
             val til = fra
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
                     VedtaksperiodeDto(
                         fra,
@@ -272,7 +272,7 @@ class ValiderOmregningServiceTest {
             val til = YearMonth.of(år, 8)
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
@@ -288,7 +288,7 @@ class ValiderOmregningServiceTest {
             val til = YearMonth.of(år, 8)
             val aktivitet = AktivitetType.BARNET_ER_SYKT
             val periodeType = VedtaksperiodeType.PERIODE_FØR_FØDSEL
-            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any<UUID>(), any()) } returns
+            every { vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(any(), any()) } returns
                 innvilge(
                     VedtaksperiodeDto(
                         fra,

@@ -46,7 +46,7 @@ class VedtakHistorikkService(
      * Slår sammen perioder som er sammenhengende, med samme aktivitet, og samme periodetype, unntatt sanksjoner
      * Slår sammen inntekter som er sammenhengende, med samme inntekt og samordningsfradrag
      */
-    fun hentVedtakForOvergangsstønadFraDato(fagsak: Fagsak, fra: YearMonth): InnvilgelseOvergangsstønad {
+    private fun hentVedtakForOvergangsstønadFraDato(fagsak: Fagsak, fra: YearMonth): InnvilgelseOvergangsstønad {
         val historikk = hentAktivHistorikk(fagsak, StønadType.OVERGANGSSTØNAD)
         return InnvilgelseOvergangsstønad(
             periodeBegrunnelse = null,
