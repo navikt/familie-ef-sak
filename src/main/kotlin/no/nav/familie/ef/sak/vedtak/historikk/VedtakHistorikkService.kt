@@ -125,7 +125,7 @@ class VedtakHistorikkService(
         beløp: (AndelMedGrunnlagDto) -> Int
     ): List<PeriodeMedBeløpDto> {
         return historikk
-            .filter { beløp(it.andel) > 0 } // riktig?
+            .filter { beløp(it.andel) > 0 }
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
                     beløp(a.andel) == beløp(b.andel)
