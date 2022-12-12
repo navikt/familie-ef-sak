@@ -190,9 +190,7 @@ class TestSaksbehandlingController(
                 taskService.save(
                     BehandlingsstatistikkTask.opprettMottattTask(
                         behandlingId = behandling.id,
-                        oppgaveId = oppgaveId,
-                        hendelseTidspunkt = LocalDateTime.now(),
-                        saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                        oppgaveId = oppgaveId
                     )
                 )
             )
