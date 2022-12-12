@@ -12,6 +12,19 @@ import org.springframework.stereotype.Service
 
 @Profile("!integrasjonstest")
 @Service
+class GOmregningTaskServiceScheduler(
+    private val gOmregningTaskService: GOmregningTaskService
+) {
+
+    val logger: Logger = LoggerFactory.getLogger(javaClass)
+
+    @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
+    fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
+        gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
+    }
+}
+
+@Service
 class GOmregningTaskService(
     private val fagsakRepository: FagsakRepository,
     private val gOmregningTask: GOmregningTask
@@ -19,7 +32,6 @@ class GOmregningTaskService(
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")
         val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed.atDay(1))
