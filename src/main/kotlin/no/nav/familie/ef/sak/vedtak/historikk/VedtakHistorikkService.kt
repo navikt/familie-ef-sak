@@ -2,10 +2,16 @@ package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
+import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
+import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.sammenhengende
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.slåSammen
@@ -21,16 +27,25 @@ class VedtakHistorikkService(
     private val andelsHistorikkService: AndelsHistorikkService
 ) {
 
+    fun hentVedtakFraDato(fagsakId: UUID, fra: YearMonth): VedtakDto {
+        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
+        return when (stønadstype) {
+            StønadType.OVERGANGSSTØNAD -> hentVedtakForOvergangsstønadFraDato(fagsakId, fra)
+            StønadType.BARNETILSYN -> hentVedtakForBarnetilsynFraDato(fagsakId, fra)
+            StønadType.SKOLEPENGER -> error("Støtter ikke henting av skolepenger ")
+        }
+    }
+
+    fun hentVedtakForOvergangsstønadFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseOvergangsstønad {
+        return hentVedtakForOvergangsstønadFraDato(fagsakService.hentFagsak(fagsakId), fra)
+    }
+
     /**
      * Slår sammen perioder som er sammenhengende, med samme aktivitet, og samme periodetype, unntatt sanksjoner
      * Slår sammen inntekter som er sammenhengende, med samme inntekt og samordningsfradrag
      */
-    fun hentVedtakForOvergangsstønadFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseOvergangsstønad {
-        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
-        feilHvis(stønadstype != StønadType.OVERGANGSSTØNAD) {
-            "Kan kun hente data for overgangsstønad fra denne, men prøvde å hente for $stønadstype fagsak=$fagsakId"
-        }
-        val historikk = hentAktivHistorikk(fagsakId)
+    fun hentVedtakForOvergangsstønadFraDato(fagsak: Fagsak, fra: YearMonth): InnvilgelseOvergangsstønad {
+        val historikk = hentAktivHistorikk(fagsak, StønadType.OVERGANGSSTØNAD)
         return InnvilgelseOvergangsstønad(
             periodeBegrunnelse = null,
             inntektBegrunnelse = null,
@@ -38,6 +53,75 @@ class VedtakHistorikkService(
             inntekter = mapInntekter(historikk, fra),
             samordningsfradragType = null
         )
+    }
+
+    fun hentVedtakForBarnetilsynFraDato(fagsakId: UUID, fra: YearMonth): InnvilgelseBarnetilsyn {
+        return hentVedtakForBarnetilsynFraDato(fagsakService.hentFagsak(fagsakId), fra)
+    }
+
+    fun hentVedtakForBarnetilsynFraDato(fagsak: Fagsak, fra: YearMonth): InnvilgelseBarnetilsyn {
+        val historikk = hentAktivHistorikk(fagsak, StønadType.BARNETILSYN)
+        val perioder = mapBarnetilsynPerioder(historikk, fra)
+        // TODO må mappe barn til siste behandlingen sine barn id'er
+        return InnvilgelseBarnetilsyn(
+            begrunnelse = null,
+            perioder = perioder,
+            perioderKontantstøtte = mapUtgifterBarnetilsyn(historikk, fra) { it.kontantstøtte },
+            tilleggsstønad = mapUtgifterBarnetilsyn(historikk, fra) { it.tilleggsstønad }.let {
+                TilleggsstønadDto(harTilleggsstønad = it.isNotEmpty(), it, null)
+            },
+        )
+    }
+
+    private fun hentAktivHistorikk(fagsak: Fagsak, forventetStønadstype: StønadType): List<AndelHistorikkDto> {
+        feilHvis(fagsak.stønadstype != forventetStønadstype) {
+            "Kan kun hente data for $forventetStønadstype fra denne, " +
+                "men prøvde å hente for ${fagsak.stønadstype} fagsak=${fagsak.id}"
+        }
+        return hentAktivHistorikk(fagsak.id)
+    }
+
+    private fun mapUtgifterBarnetilsyn(
+        historikk: List<AndelHistorikkDto>,
+        fra: YearMonth,
+        utgift: (AndelMedGrunnlagDto) -> Int
+    ): List<PeriodeMedBeløpDto> {
+        return historikk
+            .filter { utgift(it.andel) > 0 } // riktig?
+            .slåSammen { a, b ->
+                sammenhengende(a, b) &&
+                    utgift(a.andel) == utgift(b.andel)
+            }
+            .fraDato(fra)
+            .map {
+                PeriodeMedBeløpDto(
+                    årMånedFra = it.andel.periode.fom,
+                    årMånedTil = it.andel.periode.tom,
+                    periode = it.andel.periode,
+                    utgift(it.andel)
+                )
+            }
+    }
+
+    fun mapBarnetilsynPerioder(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<UtgiftsperiodeDto> {
+        return historikk
+            .slåSammen { a, b ->
+                sammenhengende(a, b) &&
+                    a.andel.barn == b.andel.barn &&
+                    a.andel.utgifter.compareTo(b.andel.utgifter) == 0
+                // midlertidlig opphør?
+            }
+            .fraDato(fra)
+            .map {
+                UtgiftsperiodeDto(
+                    årMånedFra = it.andel.periode.fom,
+                    årMånedTil = it.andel.periode.tom,
+                    periode = it.andel.periode,
+                    barn = it.andel.barn,
+                    utgifter = it.andel.utgifter.toInt(),
+                    erMidlertidigOpphør = false
+                )
+            }
     }
 
     private fun mapPerioder(historikk: List<AndelHistorikkDto>, fra: YearMonth): List<VedtaksperiodeDto> {

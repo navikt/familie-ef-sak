@@ -102,7 +102,7 @@ class VedtakController(
         @PathVariable fra: YearMonth
     ): Ressurs<VedtakDto> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
+        return Ressurs.success(vedtakHistorikkService.hentVedtakFraDato(fagsakId, fra))
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")

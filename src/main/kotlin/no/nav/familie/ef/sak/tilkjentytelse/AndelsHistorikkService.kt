@@ -35,6 +35,7 @@ class AndelsHistorikkService(
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
         // hent vilkår for viss type hvor behandlingIder sendes inn
+        // TODO må kanskje mappe barn her?
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
         val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
         return AndelHistorikkBeregner.lagHistorikk(
