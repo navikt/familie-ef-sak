@@ -206,12 +206,12 @@ object VedtakDomeneParser {
         }
     }
 
-    fun mapBarn(behandlingId: UUID, rad: Map<String, String>): List<UUID> {
+    fun mapBarn(behandlingId: UUID, rad: Map<String, String>): List<UUID>? {
         return parseValgfriString(VedtakDomenebegrep.BARN, rad)?.let { barnListeString ->
             barnListeString.split(",")
                 .map { it.trim() }
                 .map {  IdTIlUUIDHolder.hentEllerOpprettBarn(behandlingId, it) }
-        } ?: emptyList()
+        }
     }
 
     private fun mapPerioderForSkolepenger(rader: List<Map<String, String>>): List<SkoleårsperiodeSkolepenger> {

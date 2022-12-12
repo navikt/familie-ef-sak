@@ -5,7 +5,9 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -96,7 +98,7 @@ class StepDefinitions {
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnRepository = mockk<BarnRepository>()
-    private val barnService = BarnService(barnRepository, mockk(), behandlingService)
+    private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService))
     private val fagsakService = mockFagsakService()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
@@ -131,6 +133,7 @@ class StepDefinitions {
             pair.second
         }
         every { vedtakService.hentVedtak(any()) } answers { lagredeVedtak.single { it.behandlingId == firstArg() } }
+        justRun { barnService.validerBarnFinnesPåBehandling(any(), any()) }
         mockBarnRepository()
     }
 
