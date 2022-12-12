@@ -4,11 +4,13 @@ import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
+@Profile("!integrasjonstest")
 @Service
 class GOmregningTaskService(
     private val fagsakRepository: FagsakRepository,
