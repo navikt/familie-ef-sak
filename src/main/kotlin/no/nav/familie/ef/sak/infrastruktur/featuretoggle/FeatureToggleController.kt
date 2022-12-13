@@ -19,13 +19,12 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.MIGRERING,
         Toggle.MIGRERING_BARNETILSYN,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
-        Toggle.FRONTEND_OPPRETT_KLAGE,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_VERGE_FRITTSTÅENDE_BREV,
-        Toggle.FRONTEND_JOURNALFØRING_KLAGE,
         Toggle.FRONTEND_UTESTENGELSE,
         Toggle.FRONTEND_SATSENDRING,
-        Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER
+        Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER,
+        Toggle.FØRSTEGANGSBEHANDLING
     )
 
     @GetMapping

@@ -112,7 +112,7 @@ class JournalføringService(
             journalføringRequest
         )
 
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -165,10 +165,10 @@ class JournalføringService(
             mappeId = mappeId,
             beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
         )
+        logger.info("Opprettet oppgave=$oppgaveId for behandling=${behandling.id}")
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
-            behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId
+            behandlingId = behandling.id
         )
     }
 
@@ -187,7 +187,7 @@ class JournalføringService(
             "Journalfører ferdigstilt journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = journalføringRequest.behandlingstype,
