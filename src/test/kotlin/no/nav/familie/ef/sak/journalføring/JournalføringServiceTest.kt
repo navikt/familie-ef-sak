@@ -548,11 +548,9 @@ internal class JournalføringServiceTest {
                     behandlingsårsak = SØKNAD
                 )
             }
-            verify { oppgaveService.opprettOppgave(any(), any(), any(), JournalføringService.AUTOMATISK_JOURNALFØRING_BESKRIVELSE, mappeId) }
             verify { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any()) }
             assertThat(res.behandlingId).isEqualTo(behandlingId)
             assertThat(res.fagsakId).isEqualTo(fagsakId)
-            assertThat(res.behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         }
     }
 
