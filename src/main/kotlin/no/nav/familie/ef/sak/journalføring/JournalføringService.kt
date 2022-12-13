@@ -159,6 +159,13 @@ class JournalføringService(
 
         opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
 
+        val oppgaveId = oppgaveService.opprettOppgave(
+            behandlingId = behandling.id,
+            oppgavetype = Oppgavetype.BehandleSak,
+            mappeId = mappeId,
+            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
+        )
+        logger.info("Opprettet oppgave=$oppgaveId for behandling=${behandling.id}")
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id
