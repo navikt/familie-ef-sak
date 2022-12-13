@@ -243,14 +243,34 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
-    internal fun `skal ikke sende med sanksjon eller midlertidlig opphør`() {
+    internal fun `skal sende med sanksjonsperioder for innvilget vedtak`() {
         val dato = LocalDate.of(2021, 1, 1)
         mockReturnerObjekterMedAlleFelterFylt()
 
         val saksbehandling = saksbehandling(resultat = BehandlingResultat.INNVILGET)
         val perioder = listOf(
             vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
-            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = SANKSJON),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = SANKSJON)
+        )
+        val innvilgetVedtak = vedtak(behandling.id, perioder = PeriodeWrapper(perioder))
+
+        every { vedtakService.hentVedtak(any()) } returns innvilgetVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        val periodetyper =
+            iverksettDto.vedtak.vedtaksperioder.map { it as VedtaksperiodeOvergangsstønadDto }.map { it.periodeType }
+        val hovedperiode = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.HOVEDPERIODE
+        val sanksjon = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.SANKSJON
+        assertThat(periodetyper).containsExactly(hovedperiode, sanksjon)
+    }
+
+    @Test
+    internal fun `skal ikke sende med midlertidig opphør med sanksjonsperioder for innvilget vedtak`() {
+        val dato = LocalDate.of(2021, 1, 1)
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.INNVILGET)
+        val perioder = listOf(
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
             vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = MIDLERTIDIG_OPPHØR),
             vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE)
         )
