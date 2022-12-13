@@ -8,6 +8,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.util.isOptimisticLocking
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.scheduling.annotation.Scheduled
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import kotlin.random.Random
 
+@Profile("!integrasjonstest")
 @Service
 class KonsistensavstemmingScheduler(private val konsistensavstemmingService: KonsistensavstemmingService) {
 
