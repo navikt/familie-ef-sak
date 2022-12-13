@@ -5,6 +5,9 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -26,7 +29,8 @@ import java.util.UUID
 class VedtakHistorikkService(
     private val fagsakService: FagsakService,
     private val andelsHistorikkService: AndelsHistorikkService,
-    private val barnService: BarnService
+    private val barnService: BarnService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentVedtakFraDato(behandlingId: UUID, fra: YearMonth): VedtakDto {
@@ -62,6 +66,9 @@ class VedtakHistorikkService(
         behandlingId: UUID,
         fra: YearMonth
     ): InnvilgelseBarnetilsyn {
+        feilHvisIkke(featureToggleService.isEnabled(Toggle.BARNETILSYN_REVURDER_FRA)) {
+            "Feature toggle for revurder for barnetilsyn er slått av"
+        }
         val historikk = hentAktivHistorikk(fagsak, StønadType.BARNETILSYN)
         val perioder = mapBarnetilsynPerioder(historikk, fra, behandlingId)
         return InnvilgelseBarnetilsyn(
