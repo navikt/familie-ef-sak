@@ -166,12 +166,17 @@ class BehandlingsstatistikkTask(
 
     companion object {
 
-        fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long?): Task =
+        fun opprettMottattTask(
+            behandlingId: UUID,
+            hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
+            saksbehandler: String = SikkerhetContext.hentSaksbehandler(),
+            oppgaveId: Long?
+        ): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.MOTTATT,
-                hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
+                hendelseTidspunkt = hendelseTidspunkt,
+                gjeldendeSaksbehandler = saksbehandler,
                 oppgaveId = oppgaveId
             )
 
