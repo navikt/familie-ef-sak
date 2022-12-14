@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -157,15 +159,14 @@ class JournalføringService(
             fagsak = fagsak
         )
 
-        opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
-
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.BehandleSak,
-            mappeId = mappeId,
-            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
+        opprettBehandleSakOppgaveTask(
+            OpprettOppgaveTaskData(
+                behandlingId = behandling.id,
+                saksbehandler = SikkerhetContext.hentSaksbehandler(),
+                beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE,
+                mappeId = mappeId
+            )
         )
-        logger.info("Opprettet oppgave=$oppgaveId for behandling=${behandling.id}")
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
             behandlingId = behandling.id
@@ -270,6 +271,10 @@ class JournalføringService(
             oppgavetype = Oppgavetype.BehandleSak,
             tilordnetNavIdent = navIdent
         )
+    }
+
+    private fun opprettBehandleSakOppgaveTask(opprettOppgaveTaskData: OpprettOppgaveTaskData) {
+        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(opprettOppgaveTaskData))
     }
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {
