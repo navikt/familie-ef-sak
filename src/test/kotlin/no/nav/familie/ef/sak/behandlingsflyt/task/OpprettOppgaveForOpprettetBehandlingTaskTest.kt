@@ -16,7 +16,8 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
 
@@ -36,37 +37,44 @@ internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
         every { taskService.save(capture(opprettTaskSlot)) } answers { firstArg() }
     }
 
-    @Test
-    internal fun `Skal opprette oppgave hvis behandlingen har status opprettet eller utredes`() {
-        listOf(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES).forEach { behandlingStatus ->
-            val behandling = mockBehandling(behandlingStatus)
+    @EnumSource(
+        value = BehandlingStatus::class,
+        names = ["OPPRETTET", "UTREDES"],
+        mode = EnumSource.Mode.INCLUDE
+    )
+    @ParameterizedTest
+    internal fun `Skal opprette oppgave hvis behandlingen har status opprettet eller utredes`(behandlingStatus: BehandlingStatus) {
+        val behandling = mockBehandling(behandlingStatus)
 
-            opprettOppgaveForOpprettetBehandlingTask.doTask(
-                OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, ""))
-            )
+        opprettOppgaveForOpprettetBehandlingTask.doTask(
+            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, ""))
+        )
 
-            val opprettetTaskData =
-                objectMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
-            assertThat(opprettetTaskData.oppgaveId).isEqualTo(oppgaveId)
-            verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
-        }
+        val opprettetTaskData =
+            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
+        assertThat(opprettetTaskData.oppgaveId).isEqualTo(oppgaveId)
+
+        verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
     }
 
-    @Test
-    internal fun `Skal ikke opprette oppgave hvis behandlingen ikke har status opprettet eller utredes`() {
-        BehandlingStatus.values().filterNot { it == BehandlingStatus.OPPRETTET || it == BehandlingStatus.UTREDES }
-            .forEach { behandlingStatus ->
-                val behandling = mockBehandling(behandlingStatus)
+    @EnumSource(
+        value = BehandlingStatus::class,
+        names = ["OPPRETTET", "UTREDES"],
+        mode = EnumSource.Mode.EXCLUDE
+    )
+    @ParameterizedTest
+    internal fun `Skal ikke opprette oppgave hvis behandlingen ikke har status opprettet eller utredes`(behandlingStatus: BehandlingStatus) {
+        val behandling = mockBehandling(behandlingStatus)
 
-                opprettOppgaveForOpprettetBehandlingTask.doTask(
-                    OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, ""))
-                )
+        opprettOppgaveForOpprettetBehandlingTask.doTask(
+            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, ""))
+        )
 
-                val opprettetTaskData =
-                    objectMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
-                assertThat(opprettetTaskData.oppgaveId).isEqualTo(oppgaveId)
-                verify(exactly = 1) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
-            }
+        val opprettetTaskData =
+            objectMapper.readValue<BehandlingsstatistikkTaskPayload>(opprettTaskSlot.captured.payload)
+        assertThat(opprettetTaskData.oppgaveId).isNull()
+
+        verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
     }
 
     private fun mockBehandling(status: BehandlingStatus): Behandling {
