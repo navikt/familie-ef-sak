@@ -10,5 +10,6 @@ enum class FrittståendeBrevKategori(val frittståendeBrevType: FrittståendeBre
     INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE(frittståendeBrevType = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_HOVEDPERIODE),
     INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE(frittståendeBrevType = FrittståendeBrevType.INNHENTING_AV_KARAKTERUTSKRIFT_UTVIDET_PERIODE),
     BREV_OM_SVARTID_KLAGE(frittståendeBrevType = FrittståendeBrevType.BREV_OM_SVARTID_KLAGE),
+    BREV_OM_FORLENGET_SVARTID(frittståendeBrevType = FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID),
     BREV_OM_FORLENGET_SVARTID_KLAGE(frittståendeBrevType = FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID_KLAGE)
 }

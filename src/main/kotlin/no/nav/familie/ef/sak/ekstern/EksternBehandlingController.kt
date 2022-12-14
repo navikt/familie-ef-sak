@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.ekstern
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -47,7 +47,7 @@ class EksternBehandlingController(
     fun opprettRevurderingKlage(@PathVariable eksternFagsakId: Long): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        feilHvis(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
+        feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
             "Kallet utføres ikke av en autorisert klient"
         }
         return Ressurs.success(eksternBehandlingService.opprettRevurderingKlage(eksternFagsakId))

@@ -552,7 +552,6 @@ internal class JournalføringServiceTest {
             verify { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any()) }
             assertThat(res.behandlingId).isEqualTo(behandlingId)
             assertThat(res.fagsakId).isEqualTo(fagsakId)
-            assertThat(res.behandleSakOppgaveId).isEqualTo(nyOppgaveId)
         }
     }
 

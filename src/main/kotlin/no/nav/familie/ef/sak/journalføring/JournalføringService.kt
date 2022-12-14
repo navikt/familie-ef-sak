@@ -165,10 +165,10 @@ class JournalføringService(
             mappeId = mappeId,
             beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
         )
+        logger.info("Opprettet oppgave=$oppgaveId for behandling=${behandling.id}")
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
-            behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId
+            behandlingId = behandling.id
         )
     }
 
