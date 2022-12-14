@@ -61,9 +61,6 @@ class VedtakController(
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
-            feilHvis(!featureToggleService.isEnabled(Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER)) {
-                "Avslag pga mindre inntektsendringer er skrudd av"
-            }
             Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)
         } else {
             Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
