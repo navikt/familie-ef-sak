@@ -117,7 +117,8 @@ class StepDefinitions {
         featureToggleService
     )
 
-    private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, andelsHistorikkService, barnService)
+    private val vedtakHistorikkService =
+        VedtakHistorikkService(fagsakService, andelsHistorikkService, barnService, mockFeatureToggleService())
 
     private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
