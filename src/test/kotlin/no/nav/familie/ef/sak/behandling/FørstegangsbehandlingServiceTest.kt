@@ -23,6 +23,7 @@ internal class FørstegangsbehandlingServiceTest {
         mockk(),
         mockk(),
         mockk(),
+        mockk(),
         featureToggleService
     )
 
