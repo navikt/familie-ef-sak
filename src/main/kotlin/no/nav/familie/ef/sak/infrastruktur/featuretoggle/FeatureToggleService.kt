@@ -26,7 +26,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
-    ERSTATTE_SANKSJON("familie.ef.sak.erstatte-sanksjon"),
+    REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
 
     KLAGE_TILBAKEKREVING("familie.ef.sak.klage-tilbakekreving"),
 
@@ -34,7 +34,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
     FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
-    AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering")
+    AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
+    AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer")
     ;
 
     companion object {

@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.repository.vilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.klage.IkkeOpprettetÅrsak
+import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -90,6 +91,47 @@ internal class EksternBehandlingServiceTest : OppslagSpringRunnerTest() {
 
             assertThat(result.opprettetBehandling).isFalse
             assertThat(result.ikkeOpprettet!!.årsak).isEqualTo(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING)
+        }
+    }
+
+    @Nested
+    inner class kanOppretteRevurdering {
+
+        @Test
+        internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
+            val fagsakMedFerdigstiltBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("3")))
+            val førstegangsbehandling = behandlingRepository.insert(
+                behandling(
+                    fagsakMedFerdigstiltBehandling,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT
+                )
+            )
+            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedFerdigstiltBehandling.eksternId.id)
+
+            assertThat(result.kanOpprettes).isTrue
+            assertThat(result.årsak).isNull()
+        }
+
+        @Test
+        internal fun `kan ikke opprette recvurdering hvis det finnes åpen behandling`() {
+            val fagsakMedÅpenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("2")))
+            behandlingRepository.insert(behandling(fagsakMedÅpenBehandling))
+
+            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakMedÅpenBehandling.eksternId.id)
+
+            assertThat(result.kanOpprettes).isFalse
+            assertThat(result.årsak).isEqualTo(KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING)
+        }
+
+        @Test
+        internal fun `kan ikke opprette revurdering hvis det ikke finnes noen behandlinger`() {
+            val fagsakUtenBehandling = testoppsettService.lagreFagsak(fagsak(fagsakpersoner("1")))
+
+            val result = eksternBehandlingService.kanOppretteRevurdering(fagsakUtenBehandling.eksternId.id)
+
+            assertThat(result.kanOpprettes).isFalse
+            assertThat(result.årsak).isEqualTo(KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)
         }
     }
 }

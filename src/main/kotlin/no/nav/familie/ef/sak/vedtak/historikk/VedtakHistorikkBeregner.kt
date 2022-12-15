@@ -46,7 +46,8 @@ data class VedtakshistorikkperiodeOvergangsstønad(
         this(
             periode = periode.periode,
             aktivitet = periode.aktivitet,
-            periodeType = periode.periodeType
+            periodeType = periode.periodeType,
+            sanksjonsårsak = periode.sanksjonsårsak
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
