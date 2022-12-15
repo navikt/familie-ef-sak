@@ -130,12 +130,12 @@ class BeregnYtelseSteg(
             innvilget.perioder.firstOrNull()?.let {
                 validerStartTidEtterSanksjon(it.periode.fom, behandling)
             }
+        } else {
+            val nyeSanksjonsperioder = innvilget.perioder
+                .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
+                .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+            validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
         }
-
-        val nyeSanksjonsperioder = innvilget.perioder
-            .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
-            .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
-        validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
     }
 
     private fun validerHarIkkeLagtTilSanksjonsperioder(
