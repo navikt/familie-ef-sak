@@ -51,11 +51,11 @@ class EksternBehandlingService(
     @Transactional(readOnly = true)
     fun kanOppretteRevurdering(eksternFagsakId: Long): KanOppretteRevurderingResponse {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
-        val kanIkkeOppretteRevurdering = utledKanOppretteRevurdering(fagsak)
-        return when (kanIkkeOppretteRevurdering) {
+        val resultat = utledKanOppretteRevurdering(fagsak)
+        return when (resultat) {
             is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
             is KanIkkeOppretteRevurdering ->
-                KanOppretteRevurderingResponse(false, kanIkkeOppretteRevurdering.årsak.kanIkkeOppretteRevurderingÅrsak)
+                KanOppretteRevurderingResponse(false, resultat.årsak.kanIkkeOppretteRevurderingÅrsak)
         }
     }
 
@@ -63,11 +63,11 @@ class EksternBehandlingService(
     fun opprettRevurderingKlage(eksternFagsakId: Long): OpprettRevurderingResponse {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
 
-        val kanIkkeOppretteRevurdering = utledKanOppretteRevurdering(fagsak)
-        return when (kanIkkeOppretteRevurdering) {
+        val resultat = utledKanOppretteRevurdering(fagsak)
+        return when (resultat) {
             is KanOppretteRevurdering -> opprettRevurdering(fagsak)
             is KanIkkeOppretteRevurdering ->
-                OpprettRevurderingResponse(IkkeOpprettet(kanIkkeOppretteRevurdering.årsak.ikkeOpprettetÅrsak))
+                OpprettRevurderingResponse(IkkeOpprettet(resultat.årsak.ikkeOpprettetÅrsak))
         }
     }
 
@@ -98,9 +98,9 @@ class EksternBehandlingService(
     }
 }
 
-private sealed class KanOppretteRevurderingResultat
-private class KanOppretteRevurdering : KanOppretteRevurderingResultat()
-private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat()
+private sealed interface KanOppretteRevurderingResultat
+private class KanOppretteRevurdering : KanOppretteRevurderingResultat
+private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,
