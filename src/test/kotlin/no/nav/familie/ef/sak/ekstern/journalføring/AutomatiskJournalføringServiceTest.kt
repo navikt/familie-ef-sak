@@ -9,8 +9,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.AVSLÅTT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.OPPHØRT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.ekstern.journalføring.AutomatiskJournalføringService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
@@ -397,7 +399,7 @@ internal class AutomatiskJournalføringServiceTest {
 
     @Test
     internal fun `skal kunne automaitsk journalføre dersom det finnes behandlinger som er henlagte`() {
-        val henlagtBehandling = behandling(fagsak = fagsak, resultat = HENLAGT)
+        val henlagtBehandling = behandling(fagsak = fagsak, resultat = HENLAGT, status = BehandlingStatus.FERDIGSTILT)
         every { journalpostService.hentJournalpost(journalpostId) } returns journalpost
         every { fagsakService.finnFagsak(any(), any()) } returns fagsak
 
@@ -409,6 +411,24 @@ internal class AutomatiskJournalføringServiceTest {
             mappeId
         )
         verify { journalføringService.automatiskJournalfør(fagsak, journalpost, enhet, mappeId, FØRSTEGANGSBEHANDLING) }
+    }
+
+    @Test
+    internal fun `skal kunne automaitsk journalføre dersom det finnes behandlinger som er ferdigstilte`() {
+        val førstegangsbehandling = behandling(fagsak = fagsak, resultat = INNVILGET, type = FØRSTEGANGSBEHANDLING, status = BehandlingStatus.FERDIGSTILT)
+        val revurdering = behandling(fagsak = fagsak, resultat = OPPHØRT, type = REVURDERING, status = BehandlingStatus.FERDIGSTILT)
+        val henlagtBehandling = behandling(fagsak = fagsak, resultat = HENLAGT, type = REVURDERING, status = BehandlingStatus.FERDIGSTILT)
+        every { journalpostService.hentJournalpost(journalpostId) } returns journalpost
+        every { fagsakService.finnFagsak(any(), any()) } returns fagsak
+
+        every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(førstegangsbehandling, revurdering, henlagtBehandling)
+        automatiskJournalføringService.automatiskJournalførTilBehandling(
+            journalpostId,
+            personIdent,
+            StønadType.OVERGANGSSTØNAD,
+            mappeId
+        )
+        verify { journalføringService.automatiskJournalfør(fagsak, journalpost, enhet, mappeId, REVURDERING) }
     }
 
     @Test
