@@ -11,6 +11,11 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -34,7 +39,8 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService
+    private val vedtaksbrevService: VedtaksbrevService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -66,8 +72,18 @@ class BeslutteVedtakSteg(
             }
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
+            validerUnderkjentVedtak(data)
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
+        }
+    }
+
+    private fun validerUnderkjentVedtak(data: BeslutteVedtakDto) {
+        brukerfeilHvis(data.begrunnelse.isNullOrBlank()) {
+            "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
+        }
+        brukerfeilHvis(featureToggleService.isEnabled(Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL) && data.årsakerUnderkjent.isNullOrEmpty()) {
+            "Minst en årsak for underkjennelse av vedtak må velges"
         }
     }
 
