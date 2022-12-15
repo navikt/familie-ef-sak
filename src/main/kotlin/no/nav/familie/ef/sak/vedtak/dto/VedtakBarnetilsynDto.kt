@@ -46,7 +46,8 @@ data class UtgiftsperiodeDto(
     ),
     val barn: List<UUID>,
     val utgifter: Int,
-    val erMidlertidigOpphør: Boolean
+    val erMidlertidigOpphør: Boolean,
+    val sanksjonsårsak: Sanksjonsårsak? = null
 )
 
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
@@ -58,7 +59,8 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         periode = this.periode,
         utgifter = this.utgifter,
         barn = this.barn,
-        erMidlertidigOpphør = this.erMidlertidigOpphør
+        erMidlertidigOpphør = this.erMidlertidigOpphør,
+        sanksjonsårsak = this.sanksjonsårsak
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -80,7 +82,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 periode = it.periode,
                 utgifter = it.utgifter,
                 barn = it.barn,
-                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false
+                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false,
+                sanksjonsårsak = it.sanksjonsårsak
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },

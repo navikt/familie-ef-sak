@@ -215,7 +215,8 @@ class MigreringService(
                     årMånedTil = periode.stønadsperiode.tom,
                     barn = behandlingBarn.map { it.id },
                     utgifter = periode.utgifterBarnetilsyn,
-                    erMidlertidigOpphør = false
+                    erMidlertidigOpphør = false,
+                    sanksjonsårsak = null
                 )
             ),
             perioderKontantstøtte = emptyList(),
@@ -463,7 +464,8 @@ class MigreringService(
                 årMånedTil = periode.tom,
                 periode = periode,
                 aktivitet = aktivitet,
-                periodeType = VedtaksperiodeType.MIGRERING
+                periodeType = VedtaksperiodeType.MIGRERING,
+                sanksjonsårsak = null
             )
         )
     }
