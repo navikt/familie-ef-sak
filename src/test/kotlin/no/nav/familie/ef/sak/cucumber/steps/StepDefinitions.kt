@@ -207,17 +207,18 @@ class StepDefinitions {
 
         gittVedtak.map {
             beregnYtelseSteg.utførSteg(saksbehandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
+            // kan ikke beregne historikk ennå
+            if (stønadstype != StønadType.SKOLEPENGER) {
+                beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
+                    tilkjentYtelser.values.toList(),
+                    lagredeVedtak,
+                    saksbehandlinger.values.map { it.first }.toList(),
+                    null,
+                    behandlingIdsToAktivitetArbeid,
+                    false
+                )
+            }
         }
-        // kan ikke beregne historikk ennå
-        if (stønadstype == StønadType.SKOLEPENGER) return
-        beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
-            tilkjentYtelser.values.toList(),
-            lagredeVedtak,
-            saksbehandlinger.values.map { it.first }.toList(),
-            null,
-            behandlingIdsToAktivitetArbeid,
-            false
-        )
     }
 
     @Når("beregner ytelse kaster feil")
@@ -409,7 +410,8 @@ class StepDefinitions {
                             andel.andel.periode.fom.format(YEAR_MONTH_FORMAT_NORSK),
                             andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK),
                             andel.endring?.type ?: "",
-                            andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key } ?: ""
+                            andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key }
+                                ?: ""
                         ).joinToString("|", prefix = "|", postfix = "|")
                     )
                 }

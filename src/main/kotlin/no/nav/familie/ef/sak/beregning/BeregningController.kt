@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiode
 import no.nav.familie.ef.sak.vedtak.VedtakService
-import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -36,7 +35,7 @@ class BeregningController(
     @PostMapping
     fun beregnYtelserForRequest(@RequestBody beregningRequest: BeregningRequest): Ressurs<List<Beløpsperiode>> {
         val vedtaksperioder: List<Månedsperiode> = beregningRequest.vedtaksperioder
-            .filter { it.periodeType != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .filterNot { it.erMidlertidigOpphørEllerSanksjon() }
             .tilPerioder()
 
         val inntektsperioder = beregningRequest.inntekt.tilInntektsperioder()
