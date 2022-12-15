@@ -138,14 +138,15 @@ class JournalføringService(
     }
 
     @Transactional
-    fun automatiskJournalførFørstegangsbehandling(
+    fun automatiskJournalfør(
         fagsak: Fagsak,
         journalpost: Journalpost,
         journalførendeEnhet: String,
-        mappeId: Long?
+        mappeId: Long?,
+        behandlingstype: BehandlingType
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = emptyList()

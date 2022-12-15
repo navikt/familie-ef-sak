@@ -36,7 +36,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
     AVSLAG_MINDRE_INNTEKTSENDRINGER("familie.ef.sak.avslag-mindre-inntektsendringer"),
-    FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling")
+    FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
+    AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering")
     ;
 
     companion object {

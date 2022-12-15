@@ -2,12 +2,18 @@ package no.nav.familie.ef.sak.ekstern.journalføring
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -28,24 +34,28 @@ class AutomatiskJournalføringService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val journalpostService: JournalpostService,
     private val infotrygdService: InfotrygdService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
-    fun automatiskJournalførTilFørstegangsbehandling(
+    fun automatiskJournalførTilBehandling(
         journalpostId: String,
         personIdent: String,
         stønadstype: StønadType,
         mappeId: Long?
     ): AutomatiskJournalføringResponse {
         val journalpost = journalpostService.hentJournalpost(journalpostId)
-        validerKanAutomatiskJournalføre(personIdent, stønadstype, journalpost)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
+        val nesteBehandlingstype = utledNesteBehandlingstype(behandlingService.hentBehandlinger(fagsak.id))
         val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
 
-        return journalføringService.automatiskJournalførFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
+        validerKanAutomatiskJournalføre(personIdent, stønadstype, journalpost)
+
+        return journalføringService.automatiskJournalfør(fagsak, journalpost, journalførendeEnhet, mappeId, nesteBehandlingstype)
     }
 
+    @Deprecated("Kan slettes når mottak automatisk journalfører alle behandlinger")
     fun kanOppretteFørstegangsbehandling(ident: String, type: StønadType): Boolean {
         val allePersonIdenter = personService.hentPersonIdenter(ident).identer.map { it.ident }.toSet()
         val fagsak = fagsakService.finnFagsak(allePersonIdenter, type)
@@ -53,9 +63,29 @@ class AutomatiskJournalføringService(
         return harIngenReelleBehandlinger(fagsak) && harIngenInnslagIInfotrygd(ident, type)
     }
 
-    private fun validerKanAutomatiskJournalføre(personIdent: String, stønadstype: StønadType, journalpost: Journalpost) {
+    fun kanOppretteBehandling(ident: String, stønadstype: StønadType): Boolean {
+        val allePersonIdenter = personService.hentPersonIdenter(ident).identer.map { it.ident }.toSet()
+        val fagsak = fagsakService.finnFagsak(allePersonIdenter, stønadstype)
+        val behandlinger = fagsak?.let { behandlingService.hentBehandlinger(fagsak.id) } ?: emptyList()
+        val behandlingstype = utledNesteBehandlingstype(behandlinger)
+
+        return when (behandlingstype) {
+            FØRSTEGANGSBEHANDLING -> return when (stønadstype) {
+                StønadType.OVERGANGSSTØNAD -> harIngenInnslagIInfotrygd(ident, stønadstype)
+                else -> true
+            }
+            REVURDERING -> !harÅpenBehandling(behandlinger) && featureToggleService.isEnabled(Toggle.AUTOMATISK_JOURNALFØR_REVURDERING)
+        }
+    }
+
+    private fun validerKanAutomatiskJournalføre(
+        personIdent: String,
+        stønadstype: StønadType,
+        journalpost: Journalpost,
+    ) {
         val allePersonIdenter = personService.hentPersonIdenter(personIdent).identer.map { it.ident }.toSet()
-        feilHvisIkke(kanOppretteFørstegangsbehandling(personIdent, stønadstype)) {
+
+        feilHvisIkke(kanOppretteBehandling(personIdent, stønadstype)) {
             "Kan ikke opprette førstegangsbehandling for $stønadstype da det allerede finnes en behandling i infotrygd eller ny løsning"
         }
 
@@ -96,5 +126,13 @@ class AutomatiskJournalføringService(
         return fagsak?.let {
             behandlingService.hentBehandlinger(fagsak.id).none { it.resultat != BehandlingResultat.HENLAGT }
         } ?: true
+    }
+
+    private fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {
+        return if (behandlinger.none { it.resultat != BehandlingResultat.HENLAGT }) FØRSTEGANGSBEHANDLING else REVURDERING
+    }
+
+    private fun harÅpenBehandling(behandlinger: List<Behandling>): Boolean {
+        return behandlinger.any { !it.erAvsluttet() }
     }
 }
