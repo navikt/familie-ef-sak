@@ -33,8 +33,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
-    FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling")
-    ;
+    FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
+    AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }
