@@ -22,3 +22,5 @@ AZURE_APP_TENANT_ID: navq.onmicrosoft.com
 
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
+prosessering:
+  enabled: false
