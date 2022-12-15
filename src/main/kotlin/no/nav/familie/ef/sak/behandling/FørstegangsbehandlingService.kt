@@ -5,7 +5,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.FørstegangsbehandlingDto
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
-import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -15,13 +15,12 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -31,13 +30,12 @@ class FørstegangsbehandlingService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val barnService: BarnService,
     private val taskService: TaskService,
-    private val oppgaveService: OppgaveService,
     private val iverksettService: IverksettService,
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
     private val featureToggleService: FeatureToggleService
-
 ) {
 
+    @Transactional
     fun opprettFørstegangsbehandling(fagsakId: UUID, førstegangsBehandlingRequest: FørstegangsbehandlingDto): Behandling {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.FØRSTEGANGSBEHANDLING)) {
             "Opprettelse av førstegangsbehandling er skrudd av"
@@ -50,26 +48,15 @@ class FørstegangsbehandlingService(
 
         leggTilBarn(behandling, fagsak, førstegangsBehandlingRequest, grunnlagsdata)
 
-        val oppgaveId = opprettOppgave(behandling) // TODO: Gjør denne asynk når Johan har merget sin branch
+        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
+            OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
+                behandlingId = behandling.id,
+                saksbehandler = SikkerhetContext.hentSaksbehandler(true),
+                beskrivelse = "Førstegangsbehandling - manuelt opprettet"
+            )
+        ))
         iverksettService.startBehandling(behandling, fagsak)
-        lagStatistikkTasks(behandling, oppgaveId)
         return behandling
-    }
-
-    private fun lagStatistikkTasks(behandling: Behandling, oppgaveId: Long) {
-        taskService.save(
-            BehandlingsstatistikkTask.opprettMottattTask(behandlingId = behandling.id, oppgaveId = oppgaveId)
-        )
-    }
-
-    private fun opprettOppgave(behandling: Behandling): Long {
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.BehandleSak,
-            tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(true),
-            beskrivelse = "Førstegangsbehandling - manuelt opprettet"
-        )
-        return oppgaveId
     }
 
     private fun opprettBehandling(

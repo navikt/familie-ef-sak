@@ -57,12 +57,12 @@ class OppgaveService(
         } else {
             val opprettetOppgaveId =
                 opprettOppgaveUtenÅLagreIRepository(
-                    behandlingId,
-                    oppgavetype,
-                    null,
-                    lagOppgaveTekst(beskrivelse),
-                    tilordnetNavIdent,
-                    mappeId
+                    behandlingId = behandlingId,
+                    oppgavetype = oppgavetype,
+                    fristFerdigstillelse = null,
+                    beskrivelse = lagOppgaveTekst(beskrivelse),
+                    tilordnetNavIdent = tilordnetNavIdent,
+                    mappeId = mappeId
                 )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
@@ -85,6 +85,13 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
+        val settBehandlesAvApplikasjon = when (oppgavetype) {
+            Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.GodkjenneVedtak -> true
+            Oppgavetype.InnhentDokumentasjon -> false
+            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
+        }
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
         val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
@@ -98,7 +105,7 @@ class OppgaveService(
             enhetsnummer = enhetsnummer,
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
-            behandlesAvApplikasjon = "familie-ef-sak",
+            behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
             mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
         )
 
