@@ -51,17 +51,24 @@ class EksternBehandlingService(
     @Transactional(readOnly = true)
     fun kanOppretteRevurdering(eksternFagsakId: Long): KanOppretteRevurderingResponse {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
-        val årsak = kanIkkeOppretteRevurdering(fagsak)
-        return KanOppretteRevurderingResponse(årsak == null, årsak?.kanIkkeOppretteRevurderingÅrsak)
+        val kanIkkeOppretteRevurdering = utledKanOppretteRevurdering(fagsak)
+        return when (kanIkkeOppretteRevurdering) {
+            is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
+            is KanIkkeOppretteRevurdering ->
+                KanOppretteRevurderingResponse(false, kanIkkeOppretteRevurdering.årsak.kanIkkeOppretteRevurderingÅrsak)
+        }
     }
 
     @Transactional
     fun opprettRevurderingKlage(eksternFagsakId: Long): OpprettRevurderingResponse {
         val fagsak = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
 
-        return kanIkkeOppretteRevurdering(fagsak)
-            ?.let { OpprettRevurderingResponse(IkkeOpprettet(it.ikkeOpprettetÅrsak)) }
-            ?: opprettRevurdering(fagsak)
+        val kanIkkeOppretteRevurdering = utledKanOppretteRevurdering(fagsak)
+        return when (kanIkkeOppretteRevurdering) {
+            is KanOppretteRevurdering -> opprettRevurdering(fagsak)
+            is KanIkkeOppretteRevurdering ->
+                OpprettRevurderingResponse(IkkeOpprettet(kanIkkeOppretteRevurdering.årsak.ikkeOpprettetÅrsak))
+        }
     }
 
     private fun opprettRevurdering(fagsak: Fagsak) = try {
@@ -78,20 +85,24 @@ class EksternBehandlingService(
         OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
     }
 
-    private fun kanIkkeOppretteRevurdering(fagsak: Fagsak): KanIkkeOppretteRevurdering? {
+    private fun utledKanOppretteRevurdering(fagsak: Fagsak): KanOppretteRevurderingResultat {
         val finnesÅpenBehandling = behandlingService.finnesÅpenBehandling(fagsak.id)
         if (finnesÅpenBehandling) {
-            return KanIkkeOppretteRevurdering.ÅPEN_BEHANDLING
+            return KanIkkeOppretteRevurdering(Årsak.ÅPEN_BEHANDLING)
         }
 
         if (behandlingService.finnSisteIverksatteBehandling(fagsak.id) == null) {
-            return KanIkkeOppretteRevurdering.INGEN_BEHANDLING
+            return KanIkkeOppretteRevurdering(Årsak.INGEN_BEHANDLING)
         }
-        return null
+        return KanOppretteRevurdering()
     }
 }
 
-private enum class KanIkkeOppretteRevurdering(
+private sealed class KanOppretteRevurderingResultat
+private class KanOppretteRevurdering : KanOppretteRevurderingResultat()
+private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat()
+
+private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,
     val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak
 ) {
