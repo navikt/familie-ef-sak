@@ -81,7 +81,7 @@ class AutomatiskJournalføringService(
     private fun validerKanAutomatiskJournalføre(
         personIdent: String,
         stønadstype: StønadType,
-        journalpost: Journalpost,
+        journalpost: Journalpost
     ) {
         val allePersonIdenter = personService.hentPersonIdenter(personIdent).identer.map { it.ident }.toSet()
 

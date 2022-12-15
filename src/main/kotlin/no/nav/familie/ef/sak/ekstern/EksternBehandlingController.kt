@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class EksternBehandlingController(
     private val tilgangService: TilgangService,
-    private val eksternBehandlingService: EksternBehandlingService,
+    private val eksternBehandlingService: EksternBehandlingService
 ) {
 
     /**

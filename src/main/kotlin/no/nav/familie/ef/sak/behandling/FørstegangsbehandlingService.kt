@@ -48,13 +48,15 @@ class FørstegangsbehandlingService(
 
         leggTilBarn(behandling, fagsak, førstegangsBehandlingRequest, grunnlagsdata)
 
-        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
-            OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
-                behandlingId = behandling.id,
-                saksbehandler = SikkerhetContext.hentSaksbehandler(true),
-                beskrivelse = "Førstegangsbehandling - manuelt opprettet"
+        taskService.save(
+            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
+                OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
+                    behandlingId = behandling.id,
+                    saksbehandler = SikkerhetContext.hentSaksbehandler(true),
+                    beskrivelse = "Førstegangsbehandling - manuelt opprettet"
+                )
             )
-        ))
+        )
         iverksettService.startBehandling(behandling, fagsak)
         return behandling
     }
