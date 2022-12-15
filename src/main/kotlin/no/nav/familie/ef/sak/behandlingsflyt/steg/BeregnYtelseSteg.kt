@@ -513,7 +513,7 @@ class BeregnYtelseSteg(
         val erAlleredeSanksjonertOppgittMåned = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
             .filter { it.erIkkeFjernet() }
             .any { it.erSanksjon && it.andel.periode == vedtak.periode.tilPeriode() }
-        feilHvis(erAlleredeSanksjonertOppgittMåned) {
+        brukerfeilHvis(erAlleredeSanksjonertOppgittMåned) {
             "Behandlingen er allerede sanksjonert ${vedtak.periode.fom}"
         }
 
