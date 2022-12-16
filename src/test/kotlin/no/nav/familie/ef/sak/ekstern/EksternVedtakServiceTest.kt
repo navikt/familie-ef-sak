@@ -13,8 +13,10 @@ import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
+import no.nav.familie.kontrakter.felles.klage.VedtakType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -72,6 +74,21 @@ internal class EksternVedtakServiceTest {
     }
 
     @Test
+    internal fun `dersom behandlingstypen er sanksjon skal dette mappes til vedtakType`() {
+        val vedtakstidspunkt = LocalDateTime.now()
+        val behandling = ferdigstiltBehandling(vedtakstidspunkt).copy(årsak = BehandlingÅrsak.SANKSJON_1_MND)
+        every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(behandling)
+
+        val vedtak = service.hentVedtak(eksternFagsakId)
+        assertThat(vedtak.map { it.fagsystemType }).containsExactly(FagsystemType.ORDNIÆR)
+        assertThat(vedtak.map { it.vedtakType }).containsExactly(VedtakType.SANKSJON_1_MND)
+        assertThat(vedtak).hasSize(1)
+        assertThat(vedtak.first().resultat).isEqualTo("Sanksjon 1 måned")
+
+        verify(exactly = 1) { behandlingService.hentBehandlinger(fagsak.id) }
+    }
+
+    @Test
     internal fun `skal ikke returnere henlagte behandlinger`() {
         val henlagtBehandling = behandling(
             fagsak = fagsak,
@@ -110,6 +127,7 @@ internal class EksternVedtakServiceTest {
         behandlingstype = "Tilbakekreving",
         resultat = "Delvis tilbakebetaling",
         vedtakstidspunkt = LocalDateTime.now(),
-        fagsystemType = FagsystemType.TILBAKEKREVING
+        fagsystemType = FagsystemType.TILBAKEKREVING,
+        vedtakType = VedtakType.TILBAKEKREVING
     )
 }
