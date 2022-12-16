@@ -181,14 +181,11 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
-        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(
-            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
-        )
+        every { vedtakService.hentVedtak(any()) } returns 
+            vedtak(behandlingId, resultatType = ResultatType.AVSLÅ)
+                .copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
         every {
-            vedtaksbrevService.lagEndeligBeslutterbrev(
-                any(),
-                vedtakErUtenBeslutter
-            )
+            vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
         } returns Fil("123".toByteArray())
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
 
