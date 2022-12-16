@@ -82,7 +82,7 @@ class BeslutteVedtakSteg(
         brukerfeilHvis(data.begrunnelse.isNullOrBlank()) {
             "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
         }
-        brukerfeilHvis(featureToggleService.isEnabled(Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL) && data.årsakerUnderkjent.isNullOrEmpty()) {
+        brukerfeilHvis(featureToggleService.isEnabled(Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL) && data.årsakerUnderkjent.isEmpty()) {
             "Minst en årsak for underkjennelse av vedtak må velges"
         }
     }

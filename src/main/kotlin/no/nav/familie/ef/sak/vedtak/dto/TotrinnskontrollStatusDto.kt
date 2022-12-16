@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 data class BeslutteVedtakDto(
     val godkjent: Boolean,
     val begrunnelse: String? = null,
-    val årsakerUnderkjent: List<ÅrsakUnderkjent>? = null
+    val årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList()
 )
 
 data class TotrinnskontrollStatusDto(
@@ -18,7 +18,7 @@ data class TotrinnskontrollDto(
     val opprettetTid: LocalDateTime,
     val godkjent: Boolean? = null,
     val begrunnelse: String? = null,
-    val årsakerUnderkjent: List<ÅrsakUnderkjent>? = null
+    val årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList()
 )
 
 enum class TotrinnkontrollStatus {

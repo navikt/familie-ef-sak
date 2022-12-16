@@ -208,14 +208,13 @@ internal class BeslutteVedtakStegTest {
         every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
 
         assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
-        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = null) }
     }
 
     private fun utførTotrinnskontroll(
         godkjent: Boolean,
         saksbehandling: Saksbehandling = opprettSaksbehandling(),
         begrunnelse: String? = null,
-        årsakerUnderkjent: List<ÅrsakUnderkjent>? = null
+        årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList()
     ): StegType {
         return beslutteVedtakSteg.utførOgReturnerNesteSteg(
             saksbehandling,
