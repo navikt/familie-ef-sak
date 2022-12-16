@@ -34,8 +34,10 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
     FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
+    AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
     AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer"),
-    STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL("familie.ef.sak.totrinnskontroll.strukturerte-arsaker-underkjent");
+    STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL("familie.ef.sak.totrinnskontroll.strukturerte-arsaker-underkjent")
+    ;
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }

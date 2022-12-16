@@ -533,8 +533,7 @@ internal class JournalføringServiceTest {
 
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
-            val res = journalføringService.automatiskJournalførFørstegangsbehandling(fagsak, journalpost, journalførendeEnhet, mappeId)
-
+            val res = journalføringService.automatiskJournalfør(fagsak, journalpost, journalførendeEnhet, mappeId, FØRSTEGANGSBEHANDLING)
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
             verify { iverksettService.startBehandling(any(), fagsak) }

@@ -99,13 +99,15 @@ class RevurderingService(
             metadata,
             fagsak.stønadstype
         )
-        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
-            OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
-                behandlingId = revurdering.id,
-                saksbehandler = saksbehandler,
-                beskrivelse = "Revurdering i ny løsning"
+        taskService.save(
+            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
+                OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
+                    behandlingId = revurdering.id,
+                    saksbehandler = saksbehandler,
+                    beskrivelse = "Revurdering i ny løsning"
+                )
             )
-        ))
+        )
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = revurdering.id))
 
         if (erSatsendring(revurderingInnhold)) {
