@@ -23,7 +23,8 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FØRSTEGANGSBEHANDLING,
         Toggle.AUTOMATISKE_VEDTAKSDATOER_BREV,
-        Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL
+        Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL,
+        Toggle.BRUK_8_ÅR_HOVEDPERIODEVALIDERING
     )
 
     @GetMapping
