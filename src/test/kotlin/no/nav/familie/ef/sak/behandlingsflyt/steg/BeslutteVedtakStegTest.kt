@@ -124,6 +124,7 @@ internal class BeslutteVedtakStegTest {
             behandling(fagsak, id = behandlingId, resultat = secondArg())
         }
         every { featureToggleService.isEnabled(any()) } returns true
+        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
     }
 
     @AfterEach
@@ -151,8 +152,6 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
-
         val nesteSteg = utførTotrinnskontroll(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET))
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
@@ -181,9 +180,7 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
-        every { vedtakService.hentVedtak(any()) } returns 
-            vedtak(behandlingId, resultatType = ResultatType.AVSLÅ)
-                .copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
         every {
             vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
         } returns Fil("123".toByteArray())
@@ -195,14 +192,12 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal feile dersom vedtak underkjent og mangler begrunnelse`() {
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
 
         assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)) }
     }
 
     @Test
     internal fun `skal feile dersom vedtak underkjent og mangler årsaker til underkjennelse`() {
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
 
         assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
     }
