@@ -129,7 +129,7 @@ class AutomatiskJournalføringService(
     }
 
     private fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {
-        return if (behandlinger.isEmpty() || behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) FØRSTEGANGSBEHANDLING else REVURDERING
+        return if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) FØRSTEGANGSBEHANDLING else REVURDERING
     }
 
     private fun harÅpenBehandling(behandlinger: List<Behandling>): Boolean {
