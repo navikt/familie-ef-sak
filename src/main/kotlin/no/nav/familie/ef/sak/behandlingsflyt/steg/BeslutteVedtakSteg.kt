@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
@@ -59,6 +58,7 @@ class BeslutteVedtakSteg(
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
+            validerGodkjentVedtak(data)
             vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)
@@ -75,6 +75,12 @@ class BeslutteVedtakSteg(
             validerUnderkjentVedtak(data)
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
+        }
+    }
+
+    private fun validerGodkjentVedtak(data: BeslutteVedtakDto) {
+        feilHvisIkke(data.årsakerUnderkjent.isEmpty() && data.begrunnelse.isNullOrBlank()) {
+            "Årsaker til underkjennelse eller begrunnelse for underkjennelse kan ikke være valgt."
         }
     }
 
