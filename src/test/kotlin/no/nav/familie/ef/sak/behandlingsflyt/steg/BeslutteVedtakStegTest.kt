@@ -23,6 +23,8 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -36,6 +38,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
 import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
@@ -48,6 +51,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.Properties
 import java.util.UUID
 
@@ -62,6 +66,7 @@ internal class BeslutteVedtakStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(
         taskService = taskService,
@@ -72,7 +77,8 @@ internal class BeslutteVedtakStegTest {
         totrinnskontrollService = totrinnskontrollService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService
+        vedtaksbrevService = vedtaksbrevService,
+        featureToggleService = featureToggleService
     )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -117,6 +123,8 @@ internal class BeslutteVedtakStegTest {
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, id = behandlingId, resultat = secondArg())
         }
+        every { featureToggleService.isEnabled(any()) } returns true
+        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
     }
 
     @AfterEach
@@ -144,9 +152,7 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
-
-        val nesteSteg = utførTotrinnskontroll(godkjent = false)
+        val nesteSteg = utførTotrinnskontroll(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET))
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
 
@@ -175,17 +181,36 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
         every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter) } returns Fil("123".toByteArray())
+        every {
+            vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
+        } returns Fil("123".toByteArray())
         utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
 
         verify(exactly = 1) { iverksett.iverksett(any(), any()) }
         verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
     }
 
-    private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {
+    @Test
+    internal fun `skal feile dersom vedtak underkjent og mangler begrunnelse`() {
+
+        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)) }
+    }
+
+    @Test
+    internal fun `skal feile dersom vedtak underkjent og mangler årsaker til underkjennelse`() {
+
+        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
+    }
+
+    private fun utførTotrinnskontroll(
+        godkjent: Boolean,
+        saksbehandling: Saksbehandling = opprettSaksbehandling(),
+        begrunnelse: String? = null,
+        årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList()
+    ): StegType {
         return beslutteVedtakSteg.utførOgReturnerNesteSteg(
             saksbehandling,
-            BeslutteVedtakDto(godkjent = godkjent)
+            BeslutteVedtakDto(godkjent = godkjent, begrunnelse = begrunnelse, årsakerUnderkjent = årsakerUnderkjent)
         )
     }
 
