@@ -6,8 +6,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
+import no.nav.familie.kontrakter.felles.klage.VedtakType
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,12 +31,22 @@ class EksternVedtakService(
             .map { tilFagsystemVedtak(it) }
     }
 
-    private fun tilFagsystemVedtak(behandling: Behandling) = FagsystemVedtak(
-        eksternBehandlingId = behandling.eksternId.id.toString(),
-        behandlingstype = behandling.type.visningsnavn,
-        resultat = behandling.resultat.displayName,
-        vedtakstidspunkt = behandling.vedtakstidspunkt
-            ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
-        fagsystemType = FagsystemType.ORDNIÆR
-    )
+    private fun tilFagsystemVedtak(behandling: Behandling): FagsystemVedtak {
+        val (resultat, vedtakType) = utledReultatOgVedtakType(behandling)
+
+        return FagsystemVedtak(
+            eksternBehandlingId = behandling.eksternId.id.toString(),
+            behandlingstype = behandling.type.visningsnavn,
+            resultat = resultat,
+            vedtakstidspunkt = behandling.vedtakstidspunkt
+                ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
+            fagsystemType = FagsystemType.ORDNIÆR,
+            vedtakType = vedtakType
+        )
+    }
+
+    private fun utledReultatOgVedtakType(behandling: Behandling): Pair<String, VedtakType> = when (behandling.årsak) {
+        BehandlingÅrsak.SANKSJON_1_MND -> Pair("Sanksjon 1 måned", VedtakType.SANKSJON_1_MND)
+        else -> Pair(behandling.resultat.displayName, VedtakType.ORDINÆR)
+    }
 }
