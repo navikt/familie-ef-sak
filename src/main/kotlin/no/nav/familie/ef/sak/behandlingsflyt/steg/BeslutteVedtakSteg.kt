@@ -89,7 +89,7 @@ class BeslutteVedtakSteg(
             "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
         }
         brukerfeilHvis(featureToggleService.isEnabled(Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL) && data.årsakerUnderkjent.isEmpty()) {
-            "Minst en årsak for underkjennelse av vedtak må velges"
+            "Minst en årsak for underkjennelse av vedtak må velges. Hvis du ikke ser valg for årsak til undkjerkjennelse må du laste siden på nytt (Shift + F5)."
         }
     }
 
