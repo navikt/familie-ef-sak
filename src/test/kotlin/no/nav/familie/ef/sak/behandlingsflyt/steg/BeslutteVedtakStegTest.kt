@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -66,7 +65,6 @@ internal class BeslutteVedtakStegTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(
         taskService = taskService,
@@ -78,7 +76,6 @@ internal class BeslutteVedtakStegTest {
         behandlingService = behandlingService,
         vedtakService = vedtakService,
         vedtaksbrevService = vedtaksbrevService,
-        featureToggleService = featureToggleService
     )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -123,7 +120,6 @@ internal class BeslutteVedtakStegTest {
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, id = behandlingId, resultat = secondArg())
         }
-        every { featureToggleService.isEnabled(any()) } returns true
         every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
     }
 
