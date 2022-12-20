@@ -179,7 +179,7 @@ class VedtakHistorikkService(
         historikk: List<AndelHistorikkDto>
     ): Map<UUID, UUID> {
         val historiskeBarnIder = historikk.flatMap { it.andel.barn }.toSet()
-        return barnService.kobleTidligereBarnTilNyBarnId(behandlingId, historiskeBarnIder)
+        return barnService.kobleBarnForBarnetilsyn(behandlingId, historiskeBarnIder)
     }
 
     fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {

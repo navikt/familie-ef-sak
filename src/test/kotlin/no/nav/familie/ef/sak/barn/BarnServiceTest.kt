@@ -606,7 +606,7 @@ internal class BarnServiceTest {
             every { barnRepository.findByBehandlingId(any()) } returns listOf(barnA)
             every { barnRepository.findAllById(any()) } returns listOf(tidligereBarnA)
 
-            val map = barnService.kobleTidligereBarnTilNyBarnId(UUID.randomUUID(), setOf(tidligereBarnA.id))
+            val map = barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
             assertThat(map.toList()).containsExactly(tidligereBarnA.id to barnA.id)
         }
 
@@ -615,7 +615,7 @@ internal class BarnServiceTest {
             every { barnRepository.findByBehandlingId(any()) } returns listOf(barnA.copy(personIdent = null))
 
             assertThatThrownBy {
-                barnService.kobleTidligereBarnTilNyBarnId(UUID.randomUUID(), setOf(tidligereBarnA.id))
+                barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
             }.hasMessageContaining("Mangler ident for barn=${barnA.id}")
         }
 
@@ -625,7 +625,7 @@ internal class BarnServiceTest {
             every { barnRepository.findAllById(any()) } returns listOf(tidligereBarnA.copy(personIdent = null))
 
             assertThatThrownBy {
-                barnService.kobleTidligereBarnTilNyBarnId(UUID.randomUUID(), setOf(tidligereBarnA.id))
+                barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
             }.hasMessageContaining("Mangler ident for barn=${tidligereBarnA.id}")
         }
 
@@ -635,7 +635,7 @@ internal class BarnServiceTest {
             every { barnRepository.findAllById(any()) } returns listOf(tidligereBarnA.copy(personIdent = "abc"))
 
             assertThatThrownBy {
-                barnService.kobleTidligereBarnTilNyBarnId(UUID.randomUUID(), setOf(tidligereBarnA.id))
+                barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
             }.hasMessageContaining("Fant ikke match for barn med ident=abc")
         }
     }

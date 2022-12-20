@@ -293,9 +293,10 @@ class BarnService(
     }
 
     /**
-     * Kan strengt tatt kun brukes for barnetilsyn då den er avhengig av at personIdent finnes, som skal finnes på alle barn til barnetilsyn
+     * Kan strengt tatt kun brukes for barnetilsyn då den er avhengig av at personIdent finnes
+     * peronIdent skal finnes på alle barn på barnetilsyn
      */
-    fun kobleTidligereBarnTilNyBarnId(
+    fun kobleBarnForBarnetilsyn(
         behandlingId: UUID,
         tidligereBarnIder: Set<UUID>
     ): Map<UUID, UUID> {
