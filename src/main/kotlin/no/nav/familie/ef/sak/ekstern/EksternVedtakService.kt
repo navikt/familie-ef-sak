@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
-import no.nav.familie.kontrakter.felles.klage.VedtakType
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,7 +31,7 @@ class EksternVedtakService(
     }
 
     private fun tilFagsystemVedtak(behandling: Behandling): FagsystemVedtak {
-        val (resultat, vedtakType) = utledReultatOgVedtakType(behandling)
+        val (resultat, fagsystemType) = utledReultatOgFagsystemType(behandling)
 
         return FagsystemVedtak(
             eksternBehandlingId = behandling.eksternId.id.toString(),
@@ -40,13 +39,12 @@ class EksternVedtakService(
             resultat = resultat,
             vedtakstidspunkt = behandling.vedtakstidspunkt
                 ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
-            fagsystemType = FagsystemType.ORDNIÆR,
-            vedtakType = vedtakType
+            fagsystemType = fagsystemType,
         )
     }
 
-    private fun utledReultatOgVedtakType(behandling: Behandling): Pair<String, VedtakType> = when (behandling.årsak) {
-        BehandlingÅrsak.SANKSJON_1_MND -> Pair("Sanksjon 1 måned", VedtakType.SANKSJON_1_MND)
-        else -> Pair(behandling.resultat.displayName, VedtakType.ORDINÆR)
+    private fun utledReultatOgFagsystemType(behandling: Behandling): Pair<String, FagsystemType> = when (behandling.årsak) {
+        BehandlingÅrsak.SANKSJON_1_MND -> Pair("Sanksjon 1 måned", FagsystemType.SANKSJON_1_MND)
+        else -> Pair(behandling.resultat.displayName, FagsystemType.ORDNIÆR)
     }
 }
