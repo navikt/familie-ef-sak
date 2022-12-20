@@ -291,4 +291,24 @@ class BarnService(
     fun hentBehandlingBarnForBarnIder(barnId: List<UUID>): List<BehandlingBarn> {
         return barnRepository.findAllByIdOrThrow(barnId.toSet()) { it.id }
     }
+
+    /**
+     * Kan strengt tatt kun brukes for barnetilsyn då den er avhengig av at personIdent finnes
+     * peronIdent skal finnes på alle barn på barnetilsyn
+     */
+    fun kobleBarnForBarnetilsyn(
+        behandlingId: UUID,
+        tidligereBarnIder: Set<UUID>
+    ): Map<UUID, UUID> {
+        val behandlingBarn = barnRepository.findByBehandlingId(behandlingId).associate {
+            val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")
+            personIdent to it.id
+        }
+        val tidligereBarn = barnRepository.findAllByIdOrThrow(tidligereBarnIder) { it.id }
+        return tidligereBarn.associate {
+            val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")
+            val matchetBarn = behandlingBarn[personIdent]
+            it.id to (matchetBarn ?: error("Fant ikke match for barn med ident=$personIdent "))
+        }
+    }
 }

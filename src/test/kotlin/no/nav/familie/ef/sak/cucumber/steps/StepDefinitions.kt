@@ -5,8 +5,12 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.spyk
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -17,8 +21,11 @@ import no.nav.familie.ef.sak.beregning.ValiderOmregningService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
 import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenebegrep
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.barnIder
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
+import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser.mapBarn
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomenebegrep
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
@@ -33,6 +40,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.DatoFormat.YEAR_MONTH_FORMAT_NORSK
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.SaksbehandlingDomeneParser
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.sisteDagenIMånedenEllerDefault
 import no.nav.familie.ef.sak.repository.behandling
@@ -48,6 +56,9 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
@@ -86,7 +97,8 @@ class StepDefinitions {
     )
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
-    private val barnService = mockk<BarnService>(relaxed = true)
+    private val barnRepository = mockk<BarnRepository>()
+    private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService))
     private val fagsakService = mockFagsakService()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
@@ -105,7 +117,8 @@ class StepDefinitions {
         featureToggleService
     )
 
-    private val vedtakHistorikkService = VedtakHistorikkService(fagsakService, andelsHistorikkService)
+    private val vedtakHistorikkService =
+        VedtakHistorikkService(fagsakService, andelsHistorikkService, barnService, mockFeatureToggleService())
 
     private lateinit var stønadstype: StønadType
     private val behandlingIdsToAktivitetArbeid = mutableMapOf<UUID, SvarId?>()
@@ -121,6 +134,22 @@ class StepDefinitions {
             pair.second
         }
         every { vedtakService.hentVedtak(any()) } answers { lagredeVedtak.single { it.behandlingId == firstArg() } }
+        justRun { barnService.validerBarnFinnesPåBehandling(any(), any()) }
+        mockBarnRepository()
+    }
+
+    private fun mockBarnRepository() {
+        every { barnRepository.findAllById(any()) } answers {
+            barnIder.entries.flatMap { behandlingBarn ->
+                behandlingBarn.value.entries.map {
+                    BehandlingBarn(it.value, behandlingBarn.key, personIdent = it.key)
+                }
+            }.distinct()
+        }
+        every { barnRepository.findByBehandlingId(any()) } answers {
+            barnIder.getOrDefault(firstArg(), emptyMap())
+                .map { BehandlingBarn(it.value, firstArg(), personIdent = it.key) }
+        }
     }
 
     @Gitt("følgende behandlinger for {}")
@@ -241,22 +270,43 @@ class StepDefinitions {
 
     @Så("forvent følgende vedtaksperioder fra dato: {}")
     fun `forvent følgende vedtaksperiodene fra dato`(årMåned: String, dataTable: DataTable) {
-        val vedtak =
-            vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(UUID.randomUUID(), parseÅrMåned(årMåned))
-        val perioder = vedtak.perioder
-        dataTable.asMaps().mapIndexed { index, rad ->
-            val periode = perioder[index]
+        val behandlingId = UUID.randomUUID()
+        opprettBarnForNyBehandling(behandlingId)
+        val vedtak = vedtakHistorikkService.hentVedtakFraDato(behandlingId, parseÅrMåned(årMåned))
+        when (vedtak) {
+            is InnvilgelseOvergangsstønad -> {
+                val perioder = vedtak.perioder
+                dataTable.asMaps().mapIndexed { index, rad ->
+                    val periode = perioder[index]
 
-            val fraOgMed = parseÅrMåned(Domenebegrep.FRA_OG_MED_DATO, rad)
-            val tilOgMed = parseÅrMåned(Domenebegrep.TIL_OG_MED_DATO, rad)
-            assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
-            assertThat(periode.årMånedTil).isEqualTo(tilOgMed)
+                    assertThat(periode.periode.fom).isEqualTo(parseÅrMåned(Domenebegrep.FRA_OG_MED_DATO, rad))
+                    assertThat(periode.periode.tom).isEqualTo(parseÅrMåned(Domenebegrep.TIL_OG_MED_DATO, rad))
 
-            assertThat(periode.aktivitet).isEqualTo(parseAktivitetType(rad))
-            assertThat(periode.periodeType).isEqualTo(parseVedtaksperiodeType(rad))
+                    assertThat(periode.aktivitet).isEqualTo(parseAktivitetType(rad))
+                    assertThat(periode.periodeType).isEqualTo(parseVedtaksperiodeType(rad))
+                }
+                assertThat(dataTable.asMaps()).hasSize(perioder.size)
+            }
+            is InnvilgelseBarnetilsyn -> {
+                val perioder = vedtak.perioder
+                dataTable.asMaps().mapIndexed { index, rad ->
+                    val periode = perioder[index]
+
+                    assertThat(periode.periode.fom).isEqualTo(parseÅrMåned(Domenebegrep.FRA_OG_MED_DATO, rad))
+                    assertThat(periode.periode.tom).isEqualTo(parseÅrMåned(Domenebegrep.TIL_OG_MED_DATO, rad))
+
+                    assertThat(periode.barn).containsExactlyElementsOf(mapBarn(behandlingId, rad))
+                    assertThat(periode.utgifter).isEqualTo(parseInt(VedtakDomenebegrep.UTGIFTER, rad))
+                    assertThat(periode.erMidlertidigOpphør).isEqualTo(false)
+                }
+                assertThat(dataTable.asMaps()).hasSize(perioder.size)
+            }
+            else -> error("Støtter ikke ${vedtak.javaClass.simpleName}")
         }
-        assertThat(dataTable.asMaps()).hasSize(perioder.size)
     }
+
+    private fun opprettBarnForNyBehandling(behandlingId: UUID) =
+        barnIder.values.flatMap { it.keys }.forEach { IdTIlUUIDHolder.hentEllerOpprettBarn(behandlingId, it) }
 
     @Så("forvent følgende inntektsperioder fra dato: {}")
     fun `forvent følgende inntektsperioder fra dato`(årMåned: String, dataTable: DataTable) {
@@ -270,12 +320,41 @@ class StepDefinitions {
             assertThat(periode.årMånedFra).isEqualTo(fraOgMed)
 
             assertThat(periode.forventetInntekt?.toInt()).isEqualTo(parseInt(VedtakDomenebegrep.INNTEKT, rad))
-            assertThat(periode.samordningsfradrag?.toInt()).isEqualTo(
-                parseInt(
-                    VedtakDomenebegrep.SAMORDNINGSFRADRAG,
-                    rad
-                )
-            )
+            assertThat(periode.samordningsfradrag?.toInt())
+                .isEqualTo(parseInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad))
+        }
+        assertThat(dataTable.asMaps()).hasSize(perioder.size)
+    }
+
+    @Så("forvent følgende perioder for kontantstøtte fra dato: {}")
+    fun `forvent følgende perioder for kontantstøtte fra dato`(årMåned: String, dataTable: DataTable) {
+        forventFølgendeBeløpsperioder(årMåned, dataTable) { it.perioderKontantstøtte }
+    }
+
+    @Så("forvent følgende perioder for tilleggsstønad fra dato: {}")
+    fun `forvent følgende perioder for tilleggsstønad fra dato`(årMåned: String, dataTable: DataTable) {
+        forventFølgendeBeløpsperioder(årMåned, dataTable) { it.tilleggsstønad.perioder }
+    }
+
+    private fun forventFølgendeBeløpsperioder(
+        årMåned: String,
+        dataTable: DataTable,
+        perioder: (InnvilgelseBarnetilsyn) -> List<PeriodeMedBeløpDto>
+    ) {
+        val behandlingId = UUID.randomUUID()
+        opprettBarnForNyBehandling(behandlingId)
+        val vedtak = vedtakHistorikkService.hentVedtakFraDato(behandlingId, parseÅrMåned(årMåned))
+        feilHvisIkke(vedtak is InnvilgelseBarnetilsyn) {
+            "Må være vedtak av type barnetilsyn"
+        }
+        val perioder = perioder((vedtak as InnvilgelseBarnetilsyn))
+        dataTable.asMaps().mapIndexed { index, rad ->
+            val periode = perioder[index]
+
+            assertThat(periode.periode.fom).isEqualTo(parseÅrMåned(Domenebegrep.FRA_OG_MED_DATO, rad))
+            assertThat(periode.periode.tom).isEqualTo(parseÅrMåned(Domenebegrep.TIL_OG_MED_DATO, rad))
+
+            assertThat(periode.beløp).isEqualTo(parseInt(VedtakDomenebegrep.BELØP, rad))
         }
         assertThat(dataTable.asMaps()).hasSize(perioder.size)
     }
@@ -389,6 +468,7 @@ class StepDefinitions {
     private fun mockFagsakService(): FagsakService {
         val mock = mockk<FagsakService>(relaxed = true)
         every { mock.hentFagsak(any()) } answers { fagsak(stønadstype = stønadstype) }
+        every { mock.hentFagsakForBehandling(any()) } answers { fagsak(stønadstype = stønadstype) }
         return mock
     }
 

@@ -595,6 +595,51 @@ internal class BarnServiceTest {
         }
     }
 
+    @Nested
+    inner class mapTidligereBarnIdTilNårværende {
+
+        private val barnA = BehandlingBarn(behandlingId = UUID.randomUUID(), personIdent = fnrBarnA)
+        private val tidligereBarnA = BehandlingBarn(behandlingId = UUID.randomUUID(), personIdent = fnrBarnA)
+
+        @Test
+        internal fun `skal mappe tidligereBarnTilNåværende`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barnA)
+            every { barnRepository.findAllById(any()) } returns listOf(tidligereBarnA)
+
+            val map = barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
+            assertThat(map.toList()).containsExactly(tidligereBarnA.id to barnA.id)
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis barn på behandlingen mangler personIdent`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barnA.copy(personIdent = null))
+
+            assertThatThrownBy {
+                barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
+            }.hasMessageContaining("Mangler ident for barn=${barnA.id}")
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis tidligere barn mangler personIdent`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barnA)
+            every { barnRepository.findAllById(any()) } returns listOf(tidligereBarnA.copy(personIdent = null))
+
+            assertThatThrownBy {
+                barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
+            }.hasMessageContaining("Mangler ident for barn=${tidligereBarnA.id}")
+        }
+
+        @Test
+        internal fun `skal kaste feil hvis det ikke finnes en match`() {
+            every { barnRepository.findByBehandlingId(any()) } returns listOf(barnA)
+            every { barnRepository.findAllById(any()) } returns listOf(tidligereBarnA.copy(personIdent = "abc"))
+
+            assertThatThrownBy {
+                barnService.kobleBarnForBarnetilsyn(UUID.randomUUID(), setOf(tidligereBarnA.id))
+            }.hasMessageContaining("Fant ikke match for barn med ident=abc")
+        }
+    }
+
     val fnrBarnA = FnrGenerator.generer(Year.now().minusYears(1).value)
     val fnrBarnOver18 = FnrGenerator.generer(Year.now().minusYears(19).value)
     val fnrBarnB = FnrGenerator.generer(Year.now().minusYears(2).value)

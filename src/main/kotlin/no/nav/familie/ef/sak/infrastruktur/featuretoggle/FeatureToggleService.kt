@@ -26,6 +26,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
+    BARNETILSYN_REVURDER_FRA("familie.ef.sak.barnetilsyn-revurder-fra"),
+
     REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
 
     KLAGE_TILBAKEKREVING("familie.ef.sak.klage-tilbakekreving"),
