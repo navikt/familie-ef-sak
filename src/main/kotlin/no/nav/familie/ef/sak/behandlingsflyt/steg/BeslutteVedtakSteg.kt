@@ -86,7 +86,7 @@ class BeslutteVedtakSteg(
             "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
         }
         brukerfeilHvis(data.årsakerUnderkjent.isEmpty()) {
-            "Minst en årsak for underkjennelse av vedtak må velges. Hvis du ikke ser valg for årsak til undkjerkjennelse må du laste siden på nytt (Shift + F5)."
+            "Minst en årsak for underkjennelse av vedtak må velges."
         }
     }
 
