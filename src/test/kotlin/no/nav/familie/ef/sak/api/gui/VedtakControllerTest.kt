@@ -27,6 +27,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
+import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -308,7 +309,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         saksbehandler: Saksbehandler,
         validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
     ) {
-        beslutteVedtak(saksbehandler, BeslutteVedtakDto(false, "begrunnelse"), validator)
+        beslutteVedtak(saksbehandler, BeslutteVedtakDto(false, "begrunnelse", listOf(ÅrsakUnderkjent.TIDLIGERE_VEDTAKSPERIODER)), validator)
     }
 
     private fun beslutteVedtak(

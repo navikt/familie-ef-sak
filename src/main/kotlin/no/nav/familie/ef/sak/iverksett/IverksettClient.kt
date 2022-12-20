@@ -10,7 +10,6 @@ import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettDto
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
-import no.nav.familie.kontrakter.ef.iverksett.OppgaverForBarnDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
@@ -50,10 +49,6 @@ class IverksettClient(
 
     fun startBehandling(request: OpprettStartBehandlingHendelseDto) {
         postForEntity<Any>(URI.create("$familieEfIverksettUri/api/start-behandling"), request)
-    }
-
-    fun sendOppgaverForBarn(oppgaverForBarn: OppgaverForBarnDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/oppgave-for-barns-alder/opprett"), oppgaverForBarn)
     }
 
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {

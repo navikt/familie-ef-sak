@@ -236,17 +236,18 @@ class StepDefinitions {
 
         gittVedtak.map {
             beregnYtelseSteg.utførSteg(saksbehandlinger[it.behandlingId]!!.second, it.tilVedtakDto())
+            // kan ikke beregne historikk ennå
+            if (stønadstype != StønadType.SKOLEPENGER) {
+                beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
+                    tilkjentYtelser.values.toList(),
+                    lagredeVedtak,
+                    saksbehandlinger.values.map { it.first }.toList(),
+                    null,
+                    behandlingIdsToAktivitetArbeid,
+                    false
+                )
+            }
         }
-        // kan ikke beregne historikk ennå
-        if (stønadstype == StønadType.SKOLEPENGER) return
-        beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
-            tilkjentYtelser.values.toList(),
-            lagredeVedtak,
-            saksbehandlinger.values.map { it.first }.toList(),
-            null,
-            behandlingIdsToAktivitetArbeid,
-            false
-        )
     }
 
     @Når("beregner ytelse kaster feil")

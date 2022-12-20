@@ -209,7 +209,9 @@ enum class VedtaksperiodeType {
     PERIODE_FØR_FØDSEL,
     SANKSJON,
     UTVIDELSE,
-    NY_PERIODE_FOR_NYTT_BARN
+    NY_PERIODE_FOR_NYTT_BARN;
+
+    fun midlertidigOpphørEllerSanksjon() = this == MIDLERTIDIG_OPPHØR || this == SANKSJON
 }
 
 enum class AktivitetType {

@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -112,7 +114,7 @@ class JournalføringService(
             journalføringRequest
         )
 
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -138,14 +140,15 @@ class JournalføringService(
     }
 
     @Transactional
-    fun automatiskJournalførFørstegangsbehandling(
+    fun automatiskJournalfør(
         fagsak: Fagsak,
         journalpost: Journalpost,
         journalførendeEnhet: String,
-        mappeId: Long?
+        mappeId: Long?,
+        behandlingstype: BehandlingType
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = emptyList()
@@ -157,18 +160,17 @@ class JournalføringService(
             fagsak = fagsak
         )
 
-        opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
-
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.BehandleSak,
-            mappeId = mappeId,
-            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
+        opprettBehandleSakOppgaveTask(
+            OpprettOppgaveTaskData(
+                behandlingId = behandling.id,
+                saksbehandler = SikkerhetContext.hentSaksbehandler(),
+                beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE,
+                mappeId = mappeId
+            )
         )
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
-            behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId
+            behandlingId = behandling.id
         )
     }
 
@@ -187,7 +189,7 @@ class JournalføringService(
             "Journalfører ferdigstilt journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = journalføringRequest.behandlingstype,
@@ -270,6 +272,10 @@ class JournalføringService(
             oppgavetype = Oppgavetype.BehandleSak,
             tilordnetNavIdent = navIdent
         )
+    }
+
+    private fun opprettBehandleSakOppgaveTask(opprettOppgaveTaskData: OpprettOppgaveTaskData) {
+        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(opprettOppgaveTaskData))
     }
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {

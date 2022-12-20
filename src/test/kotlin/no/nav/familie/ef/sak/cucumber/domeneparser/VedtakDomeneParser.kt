@@ -171,8 +171,7 @@ object VedtakDomeneParser {
         rader: List<Map<String, String>>
     ): List<Vedtaksperiode> {
         return rader.map { rad ->
-            val sanksjonsårsak =
-                if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null
+            val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
             Vedtaksperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
@@ -183,14 +182,25 @@ object VedtakDomeneParser {
         }
     }
 
+    /**
+     * Bruker sanksjonsårsak hvis den er definiert
+     * Setter default årsak hvis ikke den er definiert og [resultatType] er [ResultatType.SANKSJONERE]
+     */
+    private fun sanksjonsårsak(
+        rad: Map<String, String>,
+        resultatType: ResultatType
+    ): Sanksjonsårsak? {
+        return parseSanksjonsårsak(rad)
+            ?: if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null
+    }
+
     private fun mapPerioderForBarnetilsyn(
         resultatType: ResultatType,
         rader: List<Map<String, String>>
     ): List<Barnetilsynperiode> {
         return rader.map { rad ->
             val behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!
-            val sanksjonsårsak =
-                if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null
+            val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
             val barn = mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
                 IntRange(1, it).map { UUID.randomUUID() }
             } ?: emptyList()

@@ -28,20 +28,18 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     BARNETILSYN_REVURDER_FRA("familie.ef.sak.barnetilsyn-revurder-fra"),
 
-    ERSTATTE_SANKSJON("familie.ef.sak.erstatte-sanksjon"),
+    REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
 
     KLAGE_TILBAKEKREVING("familie.ef.sak.klage-tilbakekreving"),
 
-    FRONTEND_JOURNALFØRING_KLAGE("familie.ef.sak.frontend-journalforing-klage"),
-
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
-    FRONTEND_OPPRETT_KLAGE("familie.ef.sak.frontend-vis-opprett-klage"),
-    FRONTEND_VERGE_FRITTSTÅENDE_BREV("familie.ef.sak.frontend-verge-frittstaende-brev"),
-    FRONTEND_UTESTENGELSE("familie.ef.sak.frontend-utestengelse"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
-    AVSLAG_MINDRE_INNTEKTSENDRINGER("familie.ef.sak.avslag-mindre-inntektsendringer")
-    ;
+    FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
+    AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
+    AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer"),
+    STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL("familie.ef.sak.totrinnskontroll.strukturerte-arsaker-underkjent"),
+    BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }

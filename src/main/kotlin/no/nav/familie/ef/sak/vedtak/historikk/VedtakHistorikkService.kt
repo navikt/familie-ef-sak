@@ -100,11 +100,12 @@ class VedtakHistorikkService(
             .fraDato(fra)
             .map {
                 VedtaksperiodeDto(
-                    it.andel.periode.fom,
-                    it.andel.periode.tom,
-                    it.andel.periode,
-                    it.aktivitet ?: error("Mangler aktivitet data=$it"),
-                    it.periodeType ?: error("Mangler periodetype data=$it")
+                    årMånedFra = it.andel.periode.fom,
+                    årMånedTil = it.andel.periode.tom,
+                    periode = it.andel.periode,
+                    aktivitet = it.aktivitet ?: error("Mangler aktivitet data=$it"),
+                    periodeType = it.periodeType ?: error("Mangler periodetype data=$it"),
+                    sanksjonsårsak = it.sanksjonsårsak
                 )
             }
     }

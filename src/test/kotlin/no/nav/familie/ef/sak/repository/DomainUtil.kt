@@ -234,8 +234,8 @@ fun Fagsak.tilFagsakDomain() =
 
 fun vilkårsvurdering(
     behandlingId: UUID,
-    resultat: Vilkårsresultat,
-    type: VilkårType,
+    resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+    type: VilkårType = VilkårType.LOVLIG_OPPHOLD,
     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
     barnId: UUID? = null
 ): Vilkårsvurdering =
@@ -372,21 +372,21 @@ fun vedtaksperiode(
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
     årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
 ) =
     vedtaksperiodeDto(
         årMånedFra = YearMonth.from(årMånedFra),
         årMånedTil = YearMonth.from(årMånedTil),
-        aktivitet = aktivitet,
-        periodeType = periodeType
+        periodeType = periodeType,
+        aktivitet = aktivitet
     )
 
 fun vedtaksperiodeDto(
     årMånedFra: YearMonth = YearMonth.of(2021, 1),
     årMånedTil: YearMonth = YearMonth.of(2021, 12),
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
 ) =
     VedtaksperiodeDto(
         årMånedFra = årMånedFra,
