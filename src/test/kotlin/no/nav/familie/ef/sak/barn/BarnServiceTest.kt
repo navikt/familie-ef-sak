@@ -340,7 +340,10 @@ internal class BarnServiceTest {
 
             val forrigeBehandlingId = UUID.randomUUID()
             val barnPåForrigeBehandling =
-                listOf(barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId), barnOver18.tilBehandlingBarn(forrigeBehandlingId))
+                listOf(
+                    barnPåSøknadA.tilBehandlingBarn(forrigeBehandlingId),
+                    barnOver18.tilBehandlingBarn(forrigeBehandlingId)
+                )
 
             every { barnRepository.findByBehandlingId(forrigeBehandlingId) } returns barnPåForrigeBehandling
             barnService.opprettBarnForRevurdering(
@@ -437,8 +440,18 @@ internal class BarnServiceTest {
         private val fødselTermindato = LocalDate.now().minusDays(1)
         private val tidligereBehandling = behandling()
         private val barnPåForrigeBehandling = listOf(
-            BehandlingBarn(behandlingId = tidligereBehandling.id, søknadBarnId = UUID.randomUUID(), personIdent = "1", navn = "1"),
-            BehandlingBarn(behandlingId = tidligereBehandling.id, søknadBarnId = UUID.randomUUID(), fødselTermindato = fødselTermindato, navn = "asd")
+            BehandlingBarn(
+                behandlingId = tidligereBehandling.id,
+                søknadBarnId = UUID.randomUUID(),
+                personIdent = "1",
+                navn = "1"
+            ),
+            BehandlingBarn(
+                behandlingId = tidligereBehandling.id,
+                søknadBarnId = UUID.randomUUID(),
+                fødselTermindato = fødselTermindato,
+                navn = "asd"
+            )
         )
 
         @BeforeEach
@@ -540,6 +553,22 @@ internal class BarnServiceTest {
         }
 
         @Test
+        internal fun `kan ikke velge IKKE_VILKÅRSBEHANDLE hvis det finnes barn på forrige behandlingen`() {
+            every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns barnPåForrigeBehandling
+
+            assertThatThrownBy {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    behandlingId,
+                    fagsakId,
+                    grunnlagsdataBarn,
+                    StønadType.OVERGANGSSTØNAD,
+                    UstrukturertDokumentasjonType.ETTERSENDING,
+                    vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+                )
+            }.hasMessage("Må behandle nye barn hvis det finnes barn på forrige behandling")
+        }
+
+        @Test
         internal fun `skal kaste feil hvis vilkårsbehandleNyeBarn ikke er valgt`() {
             assertThatThrownBy {
                 barnService.opprettBarnPåBehandlingMedSøknadsdata(
@@ -557,8 +586,10 @@ internal class BarnServiceTest {
     inner class ValiderBarnFinnesPåBehandling {
 
         private val barn = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
-        private val barn2 = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
-        private val barn3 = BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+        private val barn2 =
+            BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
+        private val barn3 =
+            BehandlingBarn(id = UUID.randomUUID(), behandlingId = UUID.randomUUID(), søknadBarnId = null)
 
         @Test
         internal fun `tom liste med barn validerer`() {

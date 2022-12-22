@@ -316,6 +316,17 @@ class NyeBarnServiceTest {
         }
 
         @Test
+        internal fun `har terminbarn fra før, som ikke er født`() {
+            val terminDato = LocalDate.of(2021, 3, 1)
+            every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(emptyMap())
+            every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fødselTermindato = terminDato))
+            val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
+
+            assertThat(dto.nyeBarn).isEmpty()
+            assertThat(dto.harBarnISisteIverksatteBehandling).isTrue
+        }
+
+        @Test
         internal fun `har terminbarn fra før, som nå er født`() {
             val terminDato = LocalDate.of(2021, 3, 1)
             val fnrForTerminbarn = FnrGenerator.generer(terminDato)
