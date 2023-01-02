@@ -132,7 +132,7 @@ class BarnService(
             }
             VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> {
                 feilHvis(barnFraForrigeBehandling.isNotEmpty()) {
-                    "Må behandle nye barn hvis det finnes barn på forrige behandling"
+                    "Må behandle nye barn hvis det finnes barn på forrige behandling fagsak=$fagsakId"
                 }
                 return emptyList()
             }
