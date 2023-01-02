@@ -435,7 +435,7 @@ internal class BarnServiceTest {
     inner class Ettersending {
 
         private val grunnlagsdataBarn = listOf(
-            barnMedIdent(FnrGenerator.generer(Year.now().minusYears(1).value), "J B")
+            barnMedIdent(FnrGenerator.generer(LocalDate.now().minusYears(1)), "J B")
         )
         private val fødselTermindato = LocalDate.now().minusDays(1)
         private val tidligereBehandling = behandling()
@@ -456,6 +456,8 @@ internal class BarnServiceTest {
 
         @BeforeEach
         internal fun setUp() {
+            println(grunnlagsdataBarn)
+            println(barnPåForrigeBehandling)
             every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId) } returns tidligereBehandling
             every { barnRepository.findByBehandlingId(tidligereBehandling.id) } returns emptyList()
         }
