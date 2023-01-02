@@ -13,8 +13,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -39,7 +37,6 @@ class BeslutteVedtakSteg(
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -88,8 +85,8 @@ class BeslutteVedtakSteg(
         brukerfeilHvis(data.begrunnelse.isNullOrBlank()) {
             "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
         }
-        brukerfeilHvis(featureToggleService.isEnabled(Toggle.STRUKTURERTE_ÅRSAKER_UNDKJENT_TOTRINNSKONTROLL) && data.årsakerUnderkjent.isEmpty()) {
-            "Minst en årsak for underkjennelse av vedtak må velges. Hvis du ikke ser valg for årsak til undkjerkjennelse må du laste siden på nytt (Shift + F5)."
+        brukerfeilHvis(data.årsakerUnderkjent.isEmpty()) {
+            "Minst en årsak for underkjennelse av vedtak må velges."
         }
     }
 
