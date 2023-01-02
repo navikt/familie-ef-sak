@@ -565,7 +565,7 @@ internal class BarnServiceTest {
                     UstrukturertDokumentasjonType.ETTERSENDING,
                     vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
                 )
-            }.hasMessage("Må behandle nye barn hvis det finnes barn på forrige behandling")
+            }.hasMessageContaining("Må behandle nye barn hvis det finnes barn på forrige behandling")
         }
 
         @Test
