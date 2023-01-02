@@ -28,6 +28,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     BARNETILSYN_REVURDER_FRA("familie.ef.sak.barnetilsyn-revurder-fra"),
 
+    BARN_OVER_18("familie.ef.sak.barn-over-18"),
+
     REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
 
     KLAGE_TILBAKEKREVING("familie.ef.sak.klage-tilbakekreving"),

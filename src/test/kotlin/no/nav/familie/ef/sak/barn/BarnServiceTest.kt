@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
@@ -36,7 +37,7 @@ internal class BarnServiceTest {
     val barnRepository = mockk<BarnRepository>()
     val søknadService = mockk<SøknadService>()
     val behandlingService = mockk<BehandlingService>()
-    val barnService = BarnService(barnRepository, søknadService, behandlingService)
+    val barnService = BarnService(barnRepository, søknadService, behandlingService, mockFeatureToggleService())
     val søknadMock = mockk<Søknadsverdier>()
     val fagsakId: UUID = UUID.randomUUID()
     val behandlingId: UUID = UUID.randomUUID()
