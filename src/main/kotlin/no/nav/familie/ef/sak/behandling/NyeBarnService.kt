@@ -100,11 +100,10 @@ class NyeBarnService(
 
     private fun finnKobledeBarn(forrigeBehandlingId: UUID, personIdent: String): NyeBarnData {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
-        val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
-            .filter { it.fødsel.gjeldende().erUnder18År() }
-        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarnUnder18år)
+        val pdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
+        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarn)
 
-        return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
+        return NyeBarnData(pdlBarn, kobledeBarn)
     }
 
     private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
@@ -128,12 +127,12 @@ class NyeBarnService(
     }
 
     private data class NyeBarnData(
-        val pdlBarnUnder18år: List<BarnMedIdent>,
+        val pdlBarn: List<BarnMedIdent>,
         val kobledeBarn: List<MatchetBehandlingBarn>
     )
 
     private fun filtrerNyeBarn(data: NyeBarnData) =
-        data.pdlBarnUnder18år
+        data.pdlBarn
             .filter { pdlBarn -> data.kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
             .map { barnMinimumDto(it) }
 

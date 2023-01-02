@@ -150,7 +150,7 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeEllerTidligereFødteBarn med ett ekstra voksent barn i PDL, forvent ingen treff`() {
+    fun `finnNyeEllerTidligereFødteBarn med ett ekstra voksent barn i PDL skal returnere det voksne barnet som nytt barn`() {
         val pdlBarn = mapOf(
             fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
             fnrForVoksentBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoVoksentBarn))
@@ -159,7 +159,8 @@ class NyeBarnServiceTest {
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn).hasSize(0)
+        assertThat(barn).hasSize(1)
+        assertThat(barn[0].personIdent).isEqualTo(fnrForVoksentBarn)
     }
 
     @Test
