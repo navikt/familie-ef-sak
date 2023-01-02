@@ -121,7 +121,11 @@ class BarnService(
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
         grunnlagsdataBarn: List<BarnMedIdent>
     ): List<BehandlingBarn> {
-        val barnFraForrigeBehandling = barnFraForrigeBehandling(fagsakId)
+        val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
+        feilHvis(forrigeBehandling == null) {
+            "Det finnes ingen iverksatte behandlinger for fagsak=$fagsakId"
+        }
+        val barnFraForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandling.id)
         return when (vilkårsbehandleNyeBarn) {
             VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> {
                 vilkårsbehandleBarnForEttersending(behandlingId, barnFraForrigeBehandling, grunnlagsdataBarn)
@@ -151,14 +155,6 @@ class BarnService(
             barnSomSkalFødesFraForrigeBehandling,
             grunnlagsdataBarn
         )
-    }
-
-    private fun barnFraForrigeBehandling(fagsakId: UUID): List<BehandlingBarn> {
-        val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
-        feilHvis(forrigeBehandling == null) {
-            "Kan ikke behandle ettersending når det ikke finnes en tidligere behandling"
-        }
-        return barnRepository.findByBehandlingId(forrigeBehandling.id)
     }
 
     /**
