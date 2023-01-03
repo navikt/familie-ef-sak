@@ -112,11 +112,14 @@ class BarnService(
                 vilkårsbehandleNyeBarn,
                 grunnlagsdataBarn
             )
-            UstrukturertDokumentasjonType.IKKE_VALGT -> kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
-                finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
-                grunnlagsdataBarn,
-                behandlingId
-            )
+            UstrukturertDokumentasjonType.IKKE_VALGT -> {
+                val kobledeBarn = kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
+                    finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
+                    grunnlagsdataBarn,
+                    behandlingId
+                )
+                kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
+            }
         }
     }
 
@@ -255,7 +258,7 @@ class BarnService(
     ) {
         val barnOver18Toggle = featureToggleService.isEnabled(Toggle.BARN_OVER_18)
         val grunnlagsdataBarnIdenter = grunnlagsdataBarn
-            .filter { barnOver18Toggle || it.fødsel.gjeldende().erUnder18År()}
+            .filter { barnOver18Toggle || it.fødsel.gjeldende().erUnder18År() }
             .map { it.personIdent }
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
 
