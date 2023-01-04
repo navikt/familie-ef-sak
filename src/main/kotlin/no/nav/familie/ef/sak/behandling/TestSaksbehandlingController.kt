@@ -14,8 +14,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
@@ -84,8 +82,7 @@ class TestSaksbehandlingController(
     private val journalpostClient: JournalpostClient,
     private val migreringService: MigreringService,
     private val vurderingService: VurderingService,
-    private val vurderingStegService: VurderingStegService,
-    private val featureToggleService: FeatureToggleService
+    private val vurderingStegService: VurderingStegService
 ) {
 
     @PostMapping("{behandlingId}/utfyll-vilkar")
@@ -255,10 +252,7 @@ class TestSaksbehandlingController(
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
-        val barnOver18Toggle = featureToggleService.isEnabled(Toggle.BARN_OVER_18)
-        val barneListe: List<Barn> = søkerMedBarn.barn
-            .filter { barnOver18Toggle || it.value.fødsel.gjeldende().erUnder18År() }
-            .map {
+        val barneListe: List<Barn> = søkerMedBarn.barn.filter { it.value.fødsel.gjeldende().erUnder18År() }.map {
             TestsøknadBuilder.Builder().defaultBarn(
                 navn = it.value.navn.gjeldende().visningsnavn(),
                 fødselsnummer = it.key,
