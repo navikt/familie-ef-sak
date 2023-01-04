@@ -26,7 +26,7 @@ class PatchPeriodetypeBarnetilsynController(
 
     @Transactional
     @PostMapping("{dryRun}")
-    fun patchPeriodetyperBarnetilsyn(@PathVariable(required = false) dryRun: Boolean? = true) {
+    fun patchPeriodetyperBarnetilsyn(@PathVariable dryRun: Boolean) {
 
         val barnetilsynSaker = vedtakRepository.findAll().filter { it.barnetilsyn != null }
 
@@ -36,7 +36,10 @@ class PatchPeriodetypeBarnetilsynController(
 
         val patchetSaker = barnetilsynSaker.map { vedtak ->
             val nyePerioder = vedtak.barnetilsyn?.perioder?.map { periode ->
-                periode.copy(periodetype = if (periode.erMidlertidigOpphør == true) Periodetype.OPPHØR else Periodetype.ORDINÆR)
+                val nyPeriode = periode.copy(periodetype = if (periode.erMidlertidigOpphør == true) Periodetype.OPPHØR else Periodetype.ORDINÆR)
+                logger.info("Periode: $periode")
+                logger.info("Patchet: $nyPeriode")
+                nyPeriode
             } ?: error("Fant ingen perioder")
 
             vedtak.copy(barnetilsyn = BarnetilsynWrapper(perioder = nyePerioder, begrunnelse = vedtak.barnetilsyn.begrunnelse))
@@ -44,7 +47,7 @@ class PatchPeriodetypeBarnetilsynController(
 
         logger.info("Fant ${patchetSaker.size} vedtak for patching")
 
-        if (dryRun != null && !dryRun) {
+        if (!dryRun) {
             vedtakRepository.updateAll(patchetSaker)
             logger.info("Patchet ${patchetSaker.size} vedtak")
         }
