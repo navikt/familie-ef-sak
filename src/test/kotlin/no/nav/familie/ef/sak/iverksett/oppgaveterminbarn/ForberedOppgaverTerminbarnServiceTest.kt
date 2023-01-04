@@ -41,7 +41,6 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         every { fagsakService.hentAktivIdent(any()) } returns ""
         every { personService.hentPersonMedBarn(any()).barn } returns mockk()
         every { terminbarnRepository.insert(any()) } returns mockk()
-        every { fødsel.erUnder18År() } returns true
         mockkObject(GrunnlagsdataMapper)
     }
 

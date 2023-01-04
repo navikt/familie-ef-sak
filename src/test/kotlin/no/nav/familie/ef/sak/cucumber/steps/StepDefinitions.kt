@@ -98,7 +98,7 @@ class StepDefinitions {
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val barnRepository = mockk<BarnRepository>()
-    private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService))
+    private val barnService = spyk(BarnService(barnRepository, mockk(), behandlingService, mockFeatureToggleService()))
     private val fagsakService = mockFagsakService()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
 
