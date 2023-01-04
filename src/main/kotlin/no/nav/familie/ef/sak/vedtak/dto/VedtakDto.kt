@@ -189,7 +189,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 utgifter = 0,
                 barn = emptyList(),
                 erMidlertidigOpphør = true,
-                this.sanksjonsårsak
+                sanksjonsårsak = this.sanksjonsårsak
             )
             Vedtak(
                 behandlingId = behandlingId,
