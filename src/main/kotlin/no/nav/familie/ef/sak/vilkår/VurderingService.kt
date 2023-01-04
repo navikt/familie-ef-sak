@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.vilkår
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -45,6 +47,16 @@ class VurderingService(
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+    }
+
+    @Transactional
+    fun hentOpprettEllerOppdaterVurderinger(behandlingId: UUID): VilkårDto {
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        if (erInitiellVurderingAvVilkår(behandling) && harRelevantGrunnlagsdataEndretSeg(behandlingId)) {
+            grunnlagsdataService.oppdaterOgHentNyGrunnlagsdata(behandlingId)
+            vilkårsvurderingRepository.deleteByBehandlingId(behandlingId)
+        }
+        return hentEllerOpprettVurderinger(behandlingId)
     }
 
     fun hentAlleVurderinger(behandlingId: UUID): List<VilkårsvurderingDto> {
@@ -132,6 +144,10 @@ class VurderingService(
         }
     }
 
+    private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {
+        return saksbehandling.status == BehandlingStatus.OPPRETTET
+    }
+
     private fun lagreNyeVilkårsvurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata
@@ -147,6 +163,12 @@ class VurderingService(
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
         behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
+    private fun harRelevantGrunnlagsdataEndretSeg(behandlingId: UUID): Boolean {
+        val oppdaterteGrunnlagsdata = grunnlagsdataService.hentOppdaterteGrunnlagsdataFraRegister(behandlingId)
+        val eksisterendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
+        return oppdaterteGrunnlagsdata.harRelevanteGrunnlagsdataEndretSegSiden(eksisterendeGrunnlagsdata)
+    }
 
     /**
      * Når en revurdering opprettes skal den kopiere de tidligere vilkårsvurderingene med lik verdi for endretTid.

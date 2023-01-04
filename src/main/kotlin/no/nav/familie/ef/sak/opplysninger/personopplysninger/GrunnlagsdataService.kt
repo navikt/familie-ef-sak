@@ -34,6 +34,16 @@ class GrunnlagsdataService(
         )
     }
 
+    fun hentOppdaterteGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataMedMetadata {
+        val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
+        val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
+        return GrunnlagsdataMedMetadata(
+            grunnlagsdata.data,
+            grunnlagsdata.lagtTilEtterFerdigstilling,
+            grunnlagsdata.sporbar.opprettetTid
+        )
+    }
+
     fun hentGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
         val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
         return GrunnlagsdataMedMetadata(

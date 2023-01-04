@@ -34,7 +34,32 @@ data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
     val lagtTilEtterFerdigstilling: Boolean,
     val opprettetTidspunkt: LocalDateTime
-)
+) {
+
+    fun harRelevanteGrunnlagsdataEndretSegSiden(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return erAdresserEndretSiden(tidligereGrunnlagsdata) ||
+            erSivilstandOppdatertSiden(tidligereGrunnlagsdata) ||
+            harBarnEndretSeg(tidligereGrunnlagsdata)
+    }
+
+    fun erAdresserEndretSiden(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        val harSøkerEndretAdresse =
+            tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
+        val harAnnenForelderEndretAdresse = tidligereGrunnlagsdata.grunnlagsdata.annenForelder.any { tidligereAnnenForelder ->
+            val annenForelder = this.grunnlagsdata.annenForelder.find { it.personIdent == tidligereAnnenForelder.personIdent }
+            tidligereAnnenForelder.bostedsadresse != annenForelder?.bostedsadresse
+        }
+        return harSøkerEndretAdresse || harAnnenForelderEndretAdresse
+    }
+
+    fun erSivilstandOppdatertSiden(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return this.grunnlagsdata.søker.sivilstand != tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
+    }
+
+    fun harBarnEndretSeg(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return this.grunnlagsdata.barn != tidligereGrunnlagsdata.grunnlagsdata.barn
+    }
+}
 
 data class GrunnlagsdataDomene(
     val søker: Søker,
