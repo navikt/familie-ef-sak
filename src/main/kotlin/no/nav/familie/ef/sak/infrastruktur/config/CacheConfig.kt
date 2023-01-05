@@ -51,6 +51,18 @@ class CacheConfig {
             return ConcurrentMapCache(name, concurrentMap, true)
         }
     }
+
+    @Bean("historiskPensjonCache")
+    fun historiskPensjonkCache(): CacheManager = object : ConcurrentMapCacheManager() {
+        override fun createConcurrentMapCache(name: String): Cache {
+            val concurrentMap = Caffeine
+                .newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(7, TimeUnit.DAYS)
+                .recordStats().build<Any, Any>().asMap()
+            return ConcurrentMapCache(name, concurrentMap, true)
+        }
+    }
 }
 
 /**

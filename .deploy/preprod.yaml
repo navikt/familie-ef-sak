@@ -7,7 +7,7 @@ metadata:
     team: teamfamilie
 
 spec:
-  image: {{ image }}
+  image: { { image } }
   ingresses:
     - https://familie-ef-sak.dev.intern.nav.no
   liveness:
@@ -76,6 +76,8 @@ spec:
         - application: familie-ef-iverksett
         - application: familie-dokument
         - application: familie-ef-proxy
+        - application: historisk-pensjon
+          namespace: historisk
           cluster: dev-fss
         - application: veilarbregistrering
           namespace: paw
