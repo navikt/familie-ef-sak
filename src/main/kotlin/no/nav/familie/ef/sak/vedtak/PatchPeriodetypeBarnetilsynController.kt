@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(path = ["/api/periodetype-barnetilsyn-patch"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Unprotected
-@Validated
 class PatchPeriodetypeBarnetilsynController(
     private val vedtakRepository: VedtakRepository
 ) {
