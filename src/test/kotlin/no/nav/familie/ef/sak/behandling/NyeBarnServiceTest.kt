@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -39,7 +40,7 @@ class NyeBarnServiceTest {
     val barnService = mockk<BarnService>()
     val pdlSøker = mockk<PdlSøker>(relaxed = true)
     val taskService = mockk<TaskService>(relaxed = true)
-    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, taskService)
+    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, taskService, mockFeatureToggleService())
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
     val fagsak = fagsak()
@@ -150,7 +151,7 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeEllerTidligereFødteBarn med ett ekstra voksent barn i PDL, forvent ingen treff`() {
+    fun `finnNyeEllerTidligereFødteBarn med ett ekstra voksent barn i PDL skal returnere det voksne barnet som nytt barn`() {
         val pdlBarn = mapOf(
             fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
             fnrForVoksentBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoVoksentBarn))
@@ -159,7 +160,8 @@ class NyeBarnServiceTest {
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn).hasSize(0)
+        assertThat(barn).hasSize(1)
+        assertThat(barn[0].personIdent).isEqualTo(fnrForVoksentBarn)
     }
 
     @Test

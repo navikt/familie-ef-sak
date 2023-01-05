@@ -48,10 +48,6 @@ import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -256,7 +252,7 @@ class TestSaksbehandlingController(
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
-        val barneListe: List<Barn> = søkerMedBarn.barn.map {
+        val barneListe: List<Barn> = søkerMedBarn.barn.filter { it.value.fødsel.gjeldende().erUnder18År() }.map {
             TestsøknadBuilder.Builder().defaultBarn(
                 navn = it.value.navn.gjeldende().visningsnavn(),
                 fødselsnummer = it.key,
@@ -312,27 +308,6 @@ class TestSaksbehandlingController(
             inntektsgrunnlag = 0,
             samordningsfradrag = 0
         )
-    }
-
-    private fun arkiver(fnr: String): String {
-        val arkiverDokumentRequest = ArkiverDokumentRequest(
-            fnr,
-            false,
-            listOf(
-                Dokument(
-                    "TEST".toByteArray(),
-                    Filtype.PDFA,
-                    null,
-                    null,
-                    Dokumenttype.OVERGANGSSTØNAD_SØKNAD
-                )
-            ),
-            emptyList()
-        )
-
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
-        val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest, saksbehandler)
-        return dokumentResponse.journalpostId
     }
 }
 
