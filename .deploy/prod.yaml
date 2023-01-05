@@ -106,5 +106,4 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
   envFrom:
-    - secret: familie
     - secret: familie-ef-sak

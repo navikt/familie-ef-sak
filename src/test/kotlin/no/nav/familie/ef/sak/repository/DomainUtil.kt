@@ -42,6 +42,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Periodetype
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -345,8 +346,17 @@ fun barnetilsynperiode(
     fom: YearMonth = YearMonth.of(år, 1),
     tom: YearMonth = YearMonth.of(år, 12),
     beløp: Int = 1000,
-    barn: List<UUID>
-) = Barnetilsynperiode(Månedsperiode(fom, tom), beløp, barn, false)
+    barn: List<UUID>,
+    sanksjonsårsak: Sanksjonsårsak? = null,
+    periodetype: Periodetype? = Periodetype.ORDINÆR
+) = Barnetilsynperiode(
+    periode = Månedsperiode(fom, tom),
+    utgifter = beløp,
+    barn = barn,
+    erMidlertidigOpphør = false,
+    sanksjonsårsak = sanksjonsårsak,
+    periodetype = periodetype
+)
 
 fun inntektsperiode(
     år: Int = 2021,

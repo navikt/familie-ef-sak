@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Periodetype
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
@@ -204,14 +205,16 @@ object VedtakDomeneParser {
             val barn = mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
                 IntRange(1, it).map { UUID.randomUUID() }
             } ?: emptyList()
+            val midlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
             Barnetilsynperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                 barn = barn,
-                erMidlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
+                erMidlertidigOpphør = midlertidigOpphør
                     ?: (sanksjonsårsak != null),
-                sanksjonsårsak = sanksjonsårsak
+                sanksjonsårsak = sanksjonsårsak,
+                periodetype = if (midlertidigOpphør == true) Periodetype.OPPHØR else Periodetype.ORDINÆR
             )
         }
     }
