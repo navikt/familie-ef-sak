@@ -8,7 +8,7 @@ Egenskap: Andelhistorikk: Opphør
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
       | 1            | 01.2021         | 01.2021         |                 |             |
-      | 2            | 01.2021         | 01.2021         | OPPHØRT         | 01.2021     |
+      | 2            |                 |                 | OPPHØRT         | 01.2021     |
 
     Når beregner ytelse
 
@@ -23,7 +23,7 @@ Egenskap: Andelhistorikk: Opphør
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
       | 1            | 01.2021         | 03.2021         |                 |             |
-      | 2            | 02.2021         | 02.2021         | OPPHØRT         | 02.2021     |
+      | 2            |                 |                 | OPPHØRT         | 02.2021     |
 
     Når beregner ytelse
 
@@ -38,8 +38,8 @@ Egenskap: Andelhistorikk: Opphør
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
       | 1            | 01.2021         | 03.2021         |                 |             |
-      | 2            | 03.2021         | 03.2021         | OPPHØRT         | 03.2021     |
-      | 3            | 02.2021         | 02.2021         | OPPHØRT         | 02.2021     |
+      | 2            |                 |                 | OPPHØRT         | 03.2021     |
+      | 3            |                 |                 | OPPHØRT         | 02.2021     |
 
     Når beregner ytelse
 
@@ -56,7 +56,7 @@ Egenskap: Andelhistorikk: Opphør
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
       | 1            | 01.2021         | 03.2021         |                 |             |
-      | 2            | 02.2021         | 02.2021         | OPPHØRT         | 02.2021     |
+      | 2            |                 |                 | OPPHØRT         | 02.2021     |
       | 3            | 03.2021         | 03.2021         |                 |             |
 
     Når beregner ytelse
@@ -75,9 +75,9 @@ Egenskap: Andelhistorikk: Opphør
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
       | 1            | 01.2021         | 03.2021         |                 |             |
-      | 2            | 03.2021         | 03.2021         | OPPHØRT         | 03.2021     |
+      | 2            |                 |                 | OPPHØRT         | 03.2021     |
       | 3            | 03.2021         | 04.2021         |                 |             |
-      | 4            | 04.2021         | 04.2021         | OPPHØRT         | 04.2021     |
+      | 4            |                 |                 | OPPHØRT         | 04.2021     |
       | 5            | 05.2021         | 05.2021         |                 |             |
 
     Når beregner ytelse
@@ -97,7 +97,7 @@ Egenskap: Andelhistorikk: Opphør
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
       | 1            | 01.2021         | 03.2021         |                 |             |
-      | 2            | 03.2021         | 03.2021         | OPPHØRT         | 03.2021     |
+      | 2            |                 |                 | OPPHØRT         | 03.2021     |
       | 3            | 02.2021         | 03.2021         |                 |             |
 
     Når beregner ytelse

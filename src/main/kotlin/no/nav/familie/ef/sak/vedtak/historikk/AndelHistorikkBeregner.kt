@@ -350,7 +350,7 @@ object AndelHistorikkBeregner {
      */
     private fun markerAndelerSomErFjernet(
         tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
-        historikk: MutableList<AndelHistorikkHolder>
+        historikk: List<AndelHistorikkHolder>
     ) {
         val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
         historikk.filterNot { erAlleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {

@@ -36,8 +36,8 @@ data class AndelHistorikkDto(
     val endring: HistorikkEndring?
 )
 
-fun AndelHistorikkDto.erIkkeFjernet() =
-    !this.erOpphør || this.endring?.type == null || this.endring.type == EndringType.SPLITTET
+fun AndelHistorikkDto.erAktivVedtaksperiode() =
+    (this.endring?.type == null || this.endring.type == EndringType.SPLITTET) && !erOpphør
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,

@@ -184,7 +184,7 @@ class VedtakHistorikkService(
 
     fun hentAktivHistorikk(fagsakId: UUID): List<AndelHistorikkDto> {
         return andelsHistorikkService.hentHistorikk(fagsakId, null)
-            .filter { it.erIkkeFjernet() }
+            .filter { it.erAktivVedtaksperiode() }
             .sortedBy { it.andel.periode.fom }
     }
 }
