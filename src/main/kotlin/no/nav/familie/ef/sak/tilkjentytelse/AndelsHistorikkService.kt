@@ -26,6 +26,7 @@ class AndelsHistorikkService(
 ) {
 
     fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
+        val fagsak = fagsakService.hentFagsak(fagsakId)
         val tilkjenteYtelser = tilkjentYtelseRepository.finnAlleIverksatteForFagsak(fagsakId)
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()
@@ -38,6 +39,7 @@ class AndelsHistorikkService(
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
         val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
         return AndelHistorikkBeregner.lagHistorikk(
+            fagsak.stønadstype,
             tilkjenteYtelser,
             vedtakForBehandlinger,
             behandlinger,

@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -138,7 +139,7 @@ internal class VedtakHistorikkBeregnerTest {
                 tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
             )
         }
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, false)
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(StønadType.OVERGANGSSTØNAD,behandlingHistorikkData, false)
             .map { it.key to it.value.perioder }
             .toMap()
     }

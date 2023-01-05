@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -31,6 +32,20 @@ sealed class Vedtakshistorikkperiode {
 
     abstract fun medFra(fra: YearMonth): Vedtakshistorikkperiode
     abstract fun medTil(til: YearMonth): Vedtakshistorikkperiode
+}
+
+data class Opphørsperiode(
+    override val periode: Månedsperiode,
+) : Vedtakshistorikkperiode() {
+    override val erSanksjon = false
+    override val sanksjonsårsak = null
+    override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
+        error("Kan ikke endre fra-dato på opphør")
+    }
+
+    override fun medTil(til: YearMonth): Vedtakshistorikkperiode {
+        error("Kan ikke endre til-dato på opphør")
+    }
 }
 
 data class VedtakshistorikkperiodeOvergangsstønad(
@@ -103,19 +118,26 @@ object VedtakHistorikkBeregner {
     /**
      * Lager totalbilde av vedtak per behandling
      */
-    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<BehandlingHistorikkData>, brukIkkeVedtatteSatser: Boolean): Map<UUID, Vedtaksdata> {
+    fun lagVedtaksperioderPerBehandling(
+        stønadstype: StønadType,
+        vedtaksliste: List<BehandlingHistorikkData>, brukIkkeVedtatteSatser: Boolean
+    ): Map<UUID, Vedtaksdata> {
         return vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
                 acc + Pair(
                     vedtak.behandlingId,
-                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, brukIkkeVedtatteSatser))
+                    Vedtaksdata(
+                        vedtak.vedtakstidspunkt,
+                        lagTotalbildeForNyttVedtak(stønadstype, vedtak, acc, brukIkkeVedtatteSatser)
+                    )
                 )
             }
             .toMap()
     }
 
     private fun lagTotalbildeForNyttVedtak(
+        stønadstype: StønadType,
         data: BehandlingHistorikkData,
         acc: List<Pair<UUID, Vedtaksdata>>,
         brukIkkeVedtatteSatser: Boolean
@@ -134,11 +156,11 @@ object VedtakHistorikkBeregner {
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder
             }
             is Sanksjonert -> {
-                splitOppPerioderSomErSanksjonert(acc, vedtak)
+                splitOppPerioderSomErSanksjonert(stønadstype, acc, vedtak)
             }
             is Opphør -> {
                 val opphørFom = vedtak.opphørFom
-                avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
+                avkortTidligerePerioder(acc.lastOrNull(), opphørFom) + Opphørsperiode(Månedsperiode(opphørFom))
             }
             else -> {
                 logger.error("Håndterer ikke ${vedtak::class.java.simpleName} behandling=${data.behandlingId}")
@@ -148,6 +170,7 @@ object VedtakHistorikkBeregner {
     }
 
     private fun splitOppPerioderSomErSanksjonert(
+        stønadstype: StønadType,
         acc: List<Pair<UUID, Vedtaksdata>>,
         vedtak: Sanksjonert
     ): List<Vedtakshistorikkperiode> {
@@ -155,15 +178,15 @@ object VedtakHistorikkBeregner {
         val perioder = acc.last().second.perioder
         return perioder.flatMap {
             if (!sanksjonsperiode.overlapper(it.periode)) {
-                return@flatMap listOf(it, lagSanksjonertPeriode(it, vedtak))
+                return@flatMap listOf(it, lagSanksjonertPeriode(stønadstype, vedtak))
             }
             val nyePerioder = mutableListOf<Vedtakshistorikkperiode>()
             if (sanksjonsperiode.fom <= it.periode.fom && sanksjonsperiode.tom < it.periode.tom) {
-                nyePerioder.add(lagSanksjonertPeriode(it, vedtak))
+                nyePerioder.add(lagSanksjonertPeriode(stønadstype, vedtak))
                 nyePerioder.add(it.medFra(fra = sanksjonsperiode.tom.plusMonths(1)))
             } else if (sanksjonsperiode.fomDato > it.periode.fomDato) {
                 nyePerioder.add(it.medTil(til = sanksjonsperiode.fom.minusMonths(1)))
-                nyePerioder.add(lagSanksjonertPeriode(it, vedtak))
+                nyePerioder.add(lagSanksjonertPeriode(stønadstype, vedtak))
                 if (sanksjonsperiode.tomDato < it.periode.tomDato) {
                     nyePerioder.add(it.medFra(fra = sanksjonsperiode.tom.plusMonths(1)))
                 }
@@ -172,16 +195,16 @@ object VedtakHistorikkBeregner {
         }
     }
 
-    private fun lagSanksjonertPeriode(vedtakshistorikkperiode: Vedtakshistorikkperiode, vedtak: Sanksjonert) =
-        when (vedtakshistorikkperiode) {
-            is VedtakshistorikkperiodeOvergangsstønad ->
+    private fun lagSanksjonertPeriode(stønadstype: StønadType, vedtak: Sanksjonert) =
+        when (stønadstype) {
+            StønadType.OVERGANGSSTØNAD ->
                 VedtakshistorikkperiodeOvergangsstønad(
                     periode = vedtak.periode.tilPeriode(),
                     aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
                     periodeType = VedtaksperiodeType.SANKSJON,
                     sanksjonsårsak = vedtak.sanksjonsårsak
                 )
-            is VedtakshistorikkperiodeBarnetilsyn ->
+            StønadType.BARNETILSYN ->
                 VedtakshistorikkperiodeBarnetilsyn(
                     periode = vedtak.periode.tilPeriode(),
                     kontantstøtte = 0,
@@ -195,6 +218,7 @@ object VedtakHistorikkBeregner {
                     beløpFørFratrekkOgSatsjustering = 0,
                     sanksjonsårsak = vedtak.sanksjonsårsak
                 )
+            else -> error("Støtter ikke $stønadstype")
         }
 
     /**

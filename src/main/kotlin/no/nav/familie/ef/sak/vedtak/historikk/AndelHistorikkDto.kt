@@ -32,11 +32,12 @@ data class AndelHistorikkDto(
     val periodeType: VedtaksperiodeType?,
     val erSanksjon: Boolean,
     val sanksjonsårsak: Sanksjonsårsak?,
+    val erOpphør: Boolean,
     val endring: HistorikkEndring?
 )
 
 fun AndelHistorikkDto.erIkkeFjernet() =
-    this.endring?.type == null || this.endring.type == EndringType.SPLITTET
+    !this.erOpphør || this.endring?.type == null || this.endring.type == EndringType.SPLITTET
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,

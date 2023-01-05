@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.historikk.BehandlingHistorikkUtil.lagBehandlingHistorikkData
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -31,6 +32,7 @@ object AndelHistorikkBeregner {
     )
 
     fun lagHistorikk(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         vedtaksliste: List<Vedtak>,
         behandlinger: List<Behandling>,
@@ -41,9 +43,9 @@ object AndelHistorikkBeregner {
         val behandlingHistorikkData =
             lagBehandlingHistorikkData(behandlinger, vedtaksliste, tilkjentYtelser, behandlingIdsTilAktivitetArbeid)
         return if (tilOgMedBehandlingId == null) {
-            lagHistorikk(tilkjentYtelser, behandlingHistorikkData, behandlinger, brukIkkeVedtatteSatser)
+            lagHistorikk(stønadstype, tilkjentYtelser, behandlingHistorikkData, behandlinger, brukIkkeVedtatteSatser)
         } else {
-            lagHistorikkTilBehandlingId(tilkjentYtelser, behandlingHistorikkData, behandlinger, tilOgMedBehandlingId, brukIkkeVedtatteSatser)
+            lagHistorikkTilBehandlingId(stønadstype, tilkjentYtelser, behandlingHistorikkData, behandlinger, tilOgMedBehandlingId, brukIkkeVedtatteSatser)
         }
     }
 
@@ -51,6 +53,7 @@ object AndelHistorikkBeregner {
      * Filtrerer vekk data som kommer etter behandlingen som man sender inn
      */
     private fun lagHistorikkTilBehandlingId(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         vedtaksliste: List<BehandlingHistorikkData>,
         behandlinger: List<Behandling>,
@@ -63,7 +66,13 @@ object AndelHistorikkBeregner {
         val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
         val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
 
-        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrerteBehandlinger, brukIkkeVedtatteSatser)
+        return lagHistorikk(
+            stønadstype,
+            filtrerteTilkjentYtelse,
+            filtrerteVedtak,
+            filtrerteBehandlinger,
+            brukIkkeVedtatteSatser
+        )
     }
 
     private fun filtrerBehandlinger(
@@ -78,12 +87,13 @@ object AndelHistorikkBeregner {
     }
 
     private fun lagHistorikk(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         behandlingHistorikkData: List<BehandlingHistorikkData>,
         behandlinger: List<Behandling>,
         brukIkkeVedtatteSatser: Boolean
     ): List<AndelHistorikkDto> {
-        val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData, brukIkkeVedtatteSatser)
+        val historikk = lagHistorikkHolders(stønadstype,sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData, brukIkkeVedtatteSatser)
         val behandlingerPåId = behandlinger.associateBy { it.id }
 
         return historikk.map {
@@ -105,27 +115,29 @@ object AndelHistorikkBeregner {
                 endring = it.endring,
                 aktivitetArbeid = barnetilsyn?.aktivitetArbeid,
                 erSanksjon = vedtaksperiode.erSanksjon,
-                sanksjonsårsak = vedtaksperiode.sanksjonsårsak
+                sanksjonsårsak = vedtaksperiode.sanksjonsårsak,
+                erOpphør = vedtaksperiode is Opphørsperiode
             )
         }
     }
 
     private fun lagHistorikkHolders(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         behandlingHistorikkData: List<BehandlingHistorikkData>,
         brukIkkeVedtatteSatser: Boolean
     ): List<AndelHistorikkHolder> {
         val historikk = mutableListOf<AndelHistorikkHolder>()
 
-        val vedtaksdataPerBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData, brukIkkeVedtatteSatser)
+        val vedtaksdataPerBehandling = lagVedtaksperioderPerBehandling(stønadstype, behandlingHistorikkData, brukIkkeVedtatteSatser)
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksdata = vedtaksdataPerBehandling.getValue(tilkjentYtelse.behandlingId)
             val vedtaksperioder = vedtaksdata.perioder
             val tilkjentYtelseMedVedtakstidspunkt = TilkjentYtelseMedVedtakstidspunkt(tilkjentYtelse, vedtaksdata.vedtakstidspunkt)
 
-            val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
-            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
+            val andelerFraSanksjonOgOpphør = lagAndelerFraSanksjonerOgOpphør(vedtaksperioder, tilkjentYtelse)
+            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjonOgOpphør).sortedBy { it.stønadFom }.forEach { andel ->
 
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
                 markerHistorikkEtterAndelSomFjernet(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode, historikk)
@@ -164,11 +176,11 @@ object AndelHistorikkBeregner {
         }
     }
 
-    private fun lagAndelerFraSanksjoner(
+    private fun lagAndelerFraSanksjonerOgOpphør(
         vedtaksperioder: List<Vedtakshistorikkperiode>,
         tilkjentYtelse: TilkjentYtelse
     ) =
-        vedtaksperioder.filter { it.erSanksjon }.map {
+        vedtaksperioder.filter { it.erSanksjon || it is Opphørsperiode }.map {
             AndelTilkjentYtelse(
                 beløp = 0,
                 periode = it.periode,
@@ -239,18 +251,20 @@ object AndelHistorikkBeregner {
         )
 
     private fun AndelHistorikkHolder.finnEndringstype(
-        tidligereAndel: AndelTilkjentYtelse,
-        tidligerePeriode: Vedtakshistorikkperiode
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
     ): EndringType? {
         return when {
-            erSanksjonMedSammePerioder(tidligereAndel, tidligerePeriode) -> null
-            aktivitetEllerPeriodeTypeHarEndretSeg(tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
-            this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
-            erEndringerForBarnetilsyn(this.vedtaksperiode, tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
-            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
-            this.andel.kildeBehandlingId != tidligereAndel.kildeBehandlingId -> EndringType.FJERNET
+            erOpphørMedSammePeriode(nyAndel, nyPeriode) -> null
+            nyPeriode is Opphørsperiode -> EndringType.FJERNET
+            erSanksjonMedSammePeriode(nyAndel, nyPeriode) -> null
+            aktivitetEllerPeriodeTypeHarEndretSeg(nyPeriode) -> EndringType.ERSTATTET
+            this.andel.beløp != nyAndel.beløp -> EndringType.ERSTATTET
+            this.andel.inntekt != nyAndel.inntekt -> EndringType.ERSTATTET
+            erEndringerForBarnetilsyn(this.vedtaksperiode, nyPeriode) -> EndringType.ERSTATTET
+            this.andel.stønadTom < nyAndel.stønadTom -> EndringType.ERSTATTET
+            this.andel.stønadTom > nyAndel.stønadTom -> EndringType.SPLITTET
+            this.andel.kildeBehandlingId != nyAndel.kildeBehandlingId -> EndringType.FJERNET
             else -> null // Uendret
         }
     }
@@ -270,18 +284,20 @@ object AndelHistorikkBeregner {
             first.tilleggsstønad != second.tilleggsstønad
     }
 
-    private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(
-        tidligereAndel: AndelTilkjentYtelse,
-        tidligerePeriode: Vedtakshistorikkperiode
+    private fun AndelHistorikkHolder.erSanksjonMedSammePeriode(
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
     ): Boolean {
-        val vedtaksperiode = this.vedtaksperiode
-        if (vedtaksperiode !is VedtakshistorikkperiodeOvergangsstønad ||
-            tidligerePeriode !is VedtakshistorikkperiodeOvergangsstønad
-        ) {
-            return false
-        }
-        return vedtaksperiode.erSanksjon && tidligerePeriode.erSanksjon &&
-            vedtaksperiode.periode == tidligereAndel.periode
+        return this.vedtaksperiode.erSanksjon && nyPeriode.erSanksjon &&
+            this.vedtaksperiode.periode == nyAndel.periode
+    }
+
+    private fun AndelHistorikkHolder.erOpphørMedSammePeriode(
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
+    ): Boolean {
+        return this.vedtaksperiode is Opphørsperiode && nyPeriode is Opphørsperiode &&
+            this.vedtaksperiode.periode == nyAndel.periode
     }
 
     private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(annenVedtaksperiode: Vedtakshistorikkperiode): Boolean {

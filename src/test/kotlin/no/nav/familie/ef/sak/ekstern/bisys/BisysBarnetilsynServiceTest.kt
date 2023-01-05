@@ -522,6 +522,7 @@ fun lagAndelHistorikkDto(
         erSanksjon = false,
         sanksjonsårsak = null,
         endring = endring,
-        behandlingÅrsak = BehandlingÅrsak.SØKNAD
+        behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+        erOpphør = false,
     )
 }
