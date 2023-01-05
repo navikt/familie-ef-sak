@@ -20,7 +20,7 @@ class HistoriskPensjonClient(
 ) : AbstractRestWebClient(restOperations, webClient, "pensjon", featureToggleService) {
 
     private fun lagHarPensjonUri() =
-        UriComponentsBuilder.fromUri(historiskPensjonUri).pathSegment("/api/ensligForsoerger/harPensjonsdata")
+        UriComponentsBuilder.fromUri(historiskPensjonUri).pathSegment("api/ensligForsoerger/harPensjonsdata")
             .build().toUri()
 
     fun harPensjon(personIdent: String): HistoriskPensjonResponse {
