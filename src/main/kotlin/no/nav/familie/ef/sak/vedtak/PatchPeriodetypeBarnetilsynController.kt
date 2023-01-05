@@ -21,7 +21,6 @@ class PatchPeriodetypeBarnetilsynController(
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     @PostMapping("{dryRun}")
@@ -46,8 +45,6 @@ class PatchPeriodetypeBarnetilsynController(
                     periode.copy(
                         periodetype = periodetype
                     )
-                secureLogger.info("Periode før patching: $periode")
-                secureLogger.info("Periode etter patching: $nyPeriode")
                 nyPeriode
             } ?: error("Fant ingen perioder")
 
