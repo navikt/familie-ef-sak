@@ -125,7 +125,7 @@ object AndelHistorikkBeregner {
             val tilkjentYtelseMedVedtakstidspunkt = TilkjentYtelseMedVedtakstidspunkt(tilkjentYtelse, vedtaksdata.vedtakstidspunkt)
 
             val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
-            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
+            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).sortedBy { it.stønadFom }.forEach { andel ->
 
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
                 markerHistorikkEtterAndelSomFjernet(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode, historikk)
@@ -239,18 +239,18 @@ object AndelHistorikkBeregner {
         )
 
     private fun AndelHistorikkHolder.finnEndringstype(
-        tidligereAndel: AndelTilkjentYtelse,
-        tidligerePeriode: Vedtakshistorikkperiode
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
     ): EndringType? {
         return when {
-            erSanksjonMedSammePerioder(tidligereAndel, tidligerePeriode) -> null
-            aktivitetEllerPeriodeTypeHarEndretSeg(tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
-            this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
-            erEndringerForBarnetilsyn(this.vedtaksperiode, tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
-            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
-            this.andel.kildeBehandlingId != tidligereAndel.kildeBehandlingId -> EndringType.FJERNET
+            erSanksjonMedSammePeriode(nyAndel, nyPeriode) -> null
+            aktivitetEllerPeriodeTypeHarEndretSeg(nyPeriode) -> EndringType.ERSTATTET
+            this.andel.beløp != nyAndel.beløp -> EndringType.ERSTATTET
+            this.andel.inntekt != nyAndel.inntekt -> EndringType.ERSTATTET
+            erEndringerForBarnetilsyn(this.vedtaksperiode, nyPeriode) -> EndringType.ERSTATTET
+            this.andel.stønadTom < nyAndel.stønadTom -> EndringType.ERSTATTET
+            this.andel.stønadTom > nyAndel.stønadTom -> EndringType.SPLITTET
+            this.andel.kildeBehandlingId != nyAndel.kildeBehandlingId -> EndringType.FJERNET
             else -> null // Uendret
         }
     }
@@ -270,18 +270,12 @@ object AndelHistorikkBeregner {
             first.tilleggsstønad != second.tilleggsstønad
     }
 
-    private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(
-        tidligereAndel: AndelTilkjentYtelse,
-        tidligerePeriode: Vedtakshistorikkperiode
+    private fun AndelHistorikkHolder.erSanksjonMedSammePeriode(
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
     ): Boolean {
-        val vedtaksperiode = this.vedtaksperiode
-        if (vedtaksperiode !is VedtakshistorikkperiodeOvergangsstønad ||
-            tidligerePeriode !is VedtakshistorikkperiodeOvergangsstønad
-        ) {
-            return false
-        }
-        return vedtaksperiode.erSanksjon && tidligerePeriode.erSanksjon &&
-            vedtaksperiode.periode == tidligereAndel.periode
+        return this.vedtaksperiode.erSanksjon && nyPeriode.erSanksjon &&
+            this.vedtaksperiode.periode == nyAndel.periode
     }
 
     private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(annenVedtaksperiode: Vedtakshistorikkperiode): Boolean {
