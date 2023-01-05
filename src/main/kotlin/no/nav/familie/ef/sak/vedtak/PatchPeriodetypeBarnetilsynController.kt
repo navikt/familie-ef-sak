@@ -22,7 +22,8 @@ class PatchPeriodetypeBarnetilsynController(
     private val vedtakRepository: VedtakRepository
 ) {
 
-    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     @PostMapping("{dryRun}")
@@ -36,9 +37,19 @@ class PatchPeriodetypeBarnetilsynController(
 
         val patchetSaker = barnetilsynSaker.map { vedtak ->
             val nyePerioder = vedtak.barnetilsyn?.perioder?.map { periode ->
-                val nyPeriode = periode.copy(periodetype = if (periode.erMidlertidigOpphør == true) Periodetype.OPPHØR else Periodetype.ORDINÆR)
-                logger.info("Periode: $periode")
-                logger.info("Patchet: $nyPeriode")
+                val periodetype = if (vedtak.resultatType == ResultatType.SANKSJONERE) {
+                    Periodetype.SANKSJON_1_MND
+                } else if (periode.erMidlertidigOpphør == true) {
+                    Periodetype.OPPHØR
+                } else {
+                    Periodetype.ORDINÆR
+                }
+                val nyPeriode =
+                    periode.copy(
+                        periodetype = periodetype
+                    )
+                secureLogger.info("Periode før patching: $periode")
+                secureLogger.info("Periode etter patching: $nyPeriode")
                 nyPeriode
             } ?: error("Fant ingen perioder")
 
