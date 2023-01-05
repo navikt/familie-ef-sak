@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.felles.util.EnvUtil
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Periodetype
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -28,8 +29,10 @@ class PatchPeriodetypeBarnetilsynController(
 
         val barnetilsynSaker = vedtakRepository.findAll().filter { it.barnetilsyn != null }
 
-        if (barnetilsynSaker.any { it.resultatType == ResultatType.SANKSJONERE }) {
-            error("Skal ikke finnes sanksjon av barnetilsyn")
+        if (!EnvUtil.erIDev()) {
+            if (barnetilsynSaker.any { it.resultatType == ResultatType.SANKSJONERE }) {
+                error("Skal ikke finnes sanksjon av barnetilsyn")
+            }
         }
 
         val patchetSaker = barnetilsynSaker.map { vedtak ->
@@ -48,7 +51,12 @@ class PatchPeriodetypeBarnetilsynController(
                 nyPeriode
             } ?: error("Fant ingen perioder")
 
-            vedtak.copy(barnetilsyn = BarnetilsynWrapper(perioder = nyePerioder, begrunnelse = vedtak.barnetilsyn.begrunnelse))
+            vedtak.copy(
+                barnetilsyn = BarnetilsynWrapper(
+                    perioder = nyePerioder,
+                    begrunnelse = vedtak.barnetilsyn.begrunnelse
+                )
+            )
         }
 
         logger.info("Fant ${patchetSaker.size} vedtak for patching")
