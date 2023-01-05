@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.Periodetype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -60,7 +61,8 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         utgifter = this.utgifter,
         barn = this.barn,
         erMidlertidigOpphør = this.erMidlertidigOpphør,
-        sanksjonsårsak = this.sanksjonsårsak
+        sanksjonsårsak = this.sanksjonsårsak,
+        periodetype = if (erMidlertidigOpphør) Periodetype.OPPHØR else Periodetype.ORDINÆR
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =

@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.Periodetype
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -77,7 +78,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     Barnetilsynperiode(
                         periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
-                        barn = utgiftsperiode.barn
+                        barn = utgiftsperiode.barn,
+                        periodetype = Periodetype.ORDINÆR
                     )
                 ),
                 begrunnelse = ""
@@ -118,7 +120,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     Barnetilsynperiode(
                         periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
-                        barn = utgiftsperiode.barn
+                        barn = utgiftsperiode.barn,
+                        periodetype = Periodetype.ORDINÆR
                     )
                 ),
                 begrunnelse = ""
