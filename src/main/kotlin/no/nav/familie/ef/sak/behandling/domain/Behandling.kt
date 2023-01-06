@@ -78,7 +78,7 @@ enum class BehandlingStatus {
     SATT_PÅ_VENT
     ;
 
-    fun visningsNavn(): String {
+    fun visningsnavn(): String {
         return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
     }
 
