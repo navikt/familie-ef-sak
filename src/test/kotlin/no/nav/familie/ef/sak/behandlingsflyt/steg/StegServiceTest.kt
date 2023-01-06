@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
-import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -176,10 +176,10 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         vedtakService.lagreVedtak(InnvilgelseOvergangsstønad("", ""), behandling.id, fagsak.stønadstype)
         BrukerContextUtil.mockBrukerContext("navIdent")
         val beslutteVedtakDto = BeslutteVedtakDto(true, "")
-        val feil = assertThrows<Feil> {
+        val feil = assertThrows<ApiFeil> {
             stegService.håndterBeslutteVedtak(saksbehandling(fagsak, behandling), beslutteVedtakDto)
         }
-        assertThat(feil.message).isEqualTo("Kan ikke utføre 'Beslutte vedtak' når behandlingstatus er Iverksetter vedtak")
+        assertThat(feil.message).isEqualTo("Behandlingen er allerede besluttet. Status på behandling er 'Iverksetter vedtak'")
 
     }
 
