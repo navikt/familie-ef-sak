@@ -1,10 +1,12 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
-import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.http.AbstractRestWebClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.getDataOrThrow
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.FinnesBehandlingResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
@@ -17,15 +19,18 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class TilbakekrevingClient(
     @Qualifier("azure") restOperations: RestOperations,
-    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI
+    @Qualifier("azureWebClient") webClient: WebClient,
+    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI,
+    featureToggleService: FeatureToggleService
 ) :
-    AbstractRestClient(restOperations, "familie.tilbakekreving") {
+    AbstractRestWebClient(restOperations, webClient, "familie.tilbakekreving", featureToggleService) {
 
     private val hentForhåndsvisningVarselbrevUri: URI = UriComponentsBuilder.fromUri(familieTilbakeUri)
         .pathSegment("api/dokument/forhandsvis-varselbrev")
@@ -62,6 +67,11 @@ class TilbakekrevingClient(
         .build()
         .toUri()
 
+    private fun finnVedtakUri(eksternFagsakId: Long) = UriComponentsBuilder.fromUri(familieTilbakeUri)
+        .pathSegment("api/fagsystem/${Fagsystem.EF}/fagsak/$eksternFagsakId/vedtak/v1")
+        .build()
+        .toUri()
+
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
         return postForEntity(
             hentForhåndsvisningVarselbrevUri,
@@ -77,6 +87,11 @@ class TilbakekrevingClient(
 
     fun finnBehandlinger(eksternFagsakId: Long): List<Behandling> {
         val response: Ressurs<List<Behandling>> = getForEntity(finnBehandlingerUri(eksternFagsakId))
+        return response.getDataOrThrow()
+    }
+
+    fun finnVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
+        val response: Ressurs<List<FagsystemVedtak>> = getForEntity(finnVedtakUri(eksternFagsakId))
         return response.getDataOrThrow()
     }
 

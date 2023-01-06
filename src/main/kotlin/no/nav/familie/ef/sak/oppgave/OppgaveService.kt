@@ -10,7 +10,6 @@ import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -58,12 +57,12 @@ class OppgaveService(
         } else {
             val opprettetOppgaveId =
                 opprettOppgaveUtenÅLagreIRepository(
-                    behandlingId,
-                    oppgavetype,
-                    null,
-                    lagOppgaveTekst(beskrivelse),
-                    tilordnetNavIdent,
-                    mappeId
+                    behandlingId = behandlingId,
+                    oppgavetype = oppgavetype,
+                    fristFerdigstillelse = null,
+                    beskrivelse = lagOppgaveTekst(beskrivelse),
+                    tilordnetNavIdent = tilordnetNavIdent,
+                    mappeId = mappeId
                 )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
@@ -86,6 +85,13 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
+        val settBehandlesAvApplikasjon = when (oppgavetype) {
+            Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.GodkjenneVedtak -> true
+            Oppgavetype.InnhentDokumentasjon -> false
+            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
+        }
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
         val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
@@ -99,7 +105,7 @@ class OppgaveService(
             enhetsnummer = enhetsnummer,
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
-            behandlesAvApplikasjon = "familie-ef-sak",
+            behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
             mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
         )
 
@@ -138,13 +144,7 @@ class OppgaveService(
     }
 
     fun finnHendelseMappeId(enhetsnummer: String): Long? {
-        val finnMappeRequest = FinnMappeRequest(
-            listOf(),
-            enhetsnummer,
-            null,
-            1000
-        )
-        val mapperResponse = oppgaveClient.finnMapper(finnMappeRequest)
+        val mapperResponse = oppgaveClient.finnMapper(enhetsnummer, 1000)
         val mappe = mapperResponse.mapper.find {
             it.navn.contains("62 Hendelser") && !it.navn.contains("EF Sak")
         }
@@ -282,12 +282,8 @@ class OppgaveService(
         return cacheManager.getValue("oppgave-mappe", enhet) {
             logger.info("Henter mapper på nytt")
             val mappeRespons = oppgaveClient.finnMapper(
-                FinnMappeRequest(
-                    tema = listOf(),
-                    enhetsnr = enhet,
-                    opprettetFom = null,
-                    limit = 1000
-                )
+                enhetsnummer = enhet,
+                limit = 1000
             )
             if (mappeRespons.antallTreffTotalt > mappeRespons.mapper.size) {
                 logger.error(

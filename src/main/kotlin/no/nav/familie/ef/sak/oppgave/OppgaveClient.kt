@@ -4,11 +4,11 @@ import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
-import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.http.AbstractPingableRestWebClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -20,15 +20,18 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class OppgaveClient(
     @Qualifier("azure") restOperations: RestOperations,
-    integrasjonerConfig: IntegrasjonerConfig
+    @Qualifier("azureWebClient") webClient: WebClient,
+    integrasjonerConfig: IntegrasjonerConfig,
+    featureToggleService: FeatureToggleService
 ) :
-    AbstractPingableRestClient(restOperations, "oppgave") {
+    AbstractPingableRestWebClient(restOperations, webClient, "oppgave", featureToggleService) {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
@@ -92,10 +95,11 @@ class OppgaveClient(
         return response.getDataOrThrow().oppgaveId
     }
 
-    fun finnMapper(finnMappeRequest: FinnMappeRequest): FinnMappeResponseDto {
+    fun finnMapper(enhetsnummer: String, limit: Int): FinnMappeResponseDto {
         val uri = UriComponentsBuilder.fromUri(oppgaveUri)
             .pathSegment("mappe", "sok")
-            .queryParams(finnMappeRequest.toQueryParams())
+            .queryParam("enhetsnr", enhetsnummer)
+            .queryParam("limit", limit)
             .build()
             .toUri()
         val respons = getForEntity<Ressurs<FinnMappeResponseDto>>(uri)

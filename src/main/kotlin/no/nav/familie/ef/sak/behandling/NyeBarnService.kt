@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtB
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -20,7 +22,7 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
@@ -35,7 +37,8 @@ class NyeBarnService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val barnService: BarnService,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -66,7 +69,7 @@ class NyeBarnService(
     private fun opprettOppfølgningsoppgaveForBarn(fagsak: Fagsak, nyeBarn: List<BarnMinimumDto>) {
         if (fagsak.migrert) {
             try {
-                taskRepository.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
+                taskService.save(OpprettOppgaveForMigrertFødtBarnTask.opprettOppgave(fagsak, nyeBarn))
             } catch (e: DbActionExecutionException) {
                 if (e.cause is DuplicateKeyException) {
                     logger.warn("DuplicateKeyException ved opprettelse av task, den er sannsynligvis allerede opprettet")
@@ -100,11 +103,12 @@ class NyeBarnService(
 
     private fun finnKobledeBarn(forrigeBehandlingId: UUID, personIdent: String): NyeBarnData {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
-        val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
-            .filter { it.fødsel.gjeldende().erUnder18År() }
-        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarnUnder18år)
+        val barnOver18Toggle = featureToggleService.isEnabled(Toggle.BARN_OVER_18)
+        val pdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
+            .filter { barnOver18Toggle || it.fødsel.gjeldende().erUnder18År() }
+        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarn)
 
-        return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
+        return NyeBarnData(pdlBarn, kobledeBarn)
     }
 
     private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
@@ -128,12 +132,12 @@ class NyeBarnService(
     }
 
     private data class NyeBarnData(
-        val pdlBarnUnder18år: List<BarnMedIdent>,
+        val pdlBarn: List<BarnMedIdent>,
         val kobledeBarn: List<MatchetBehandlingBarn>
     )
 
     private fun filtrerNyeBarn(data: NyeBarnData) =
-        data.pdlBarnUnder18år
+        data.pdlBarn
             .filter { pdlBarn -> data.kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
             .map { barnMinimumDto(it) }
 

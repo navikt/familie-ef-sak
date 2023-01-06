@@ -7,8 +7,8 @@ import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 internal class VentePåStatusFraIverksettTest {
 
     private val iverksettClient = mockk<IverksettClient>()
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
 
-    private val steg = VentePåStatusFraIverksett(iverksettClient, taskRepository)
+    private val steg = VentePåStatusFraIverksett(iverksettClient, taskService)
 
     @BeforeEach
     internal fun setUp() {
-        every { taskRepository.save(any()) } answers { firstArg() }
+        every { taskService.save(any()) } answers { firstArg() }
     }
 
     @Test
@@ -63,11 +63,11 @@ internal class VentePåStatusFraIverksettTest {
     }
 
     private fun verifyHarIkkeOpprettetTask() {
-        verify(exactly = 0) { taskRepository.save(any()) }
+        verify(exactly = 0) { taskService.save(any()) }
     }
 
     private fun verifyHarOpprettetTask() {
-        verify(exactly = 1) { taskRepository.save(any()) }
+        verify(exactly = 1) { taskService.save(any()) }
     }
 
     private fun mockIverksettStatus(status: IverksettStatus) {

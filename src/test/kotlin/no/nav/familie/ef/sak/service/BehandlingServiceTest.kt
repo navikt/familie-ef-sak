@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -75,6 +77,21 @@ internal class BehandlingServiceTest {
     @BeforeEach
     fun reset() {
         clearAllMocks(answers = false)
+    }
+
+    @Test
+    internal fun `skal feile hvis krav mottatt er frem i tid`() {
+        assertThrows<ApiFeil> {
+            behandlingService.opprettBehandling(
+                status = BehandlingStatus.OPPRETTET,
+                stegType = StegType.VILKÅR,
+                behandlingsårsak = BehandlingÅrsak.PAPIRSØKNAD,
+                kravMottatt = LocalDate.now().plusDays(1),
+                erMigrering = false,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsakId = UUID.randomUUID()
+            )
+        }
     }
 
     @Nested

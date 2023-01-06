@@ -49,9 +49,9 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
     }
 }
 
-fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
+fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, brukIkkeVedtatteSatser: Boolean): List<BeløpsperiodeBarnetilsynDto> {
     val startDato = vedtak.perioder.first().periode.fomDato
-    val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
+    val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser)
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
         val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))

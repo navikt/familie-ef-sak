@@ -5,7 +5,7 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
     beskrivelse = "Oppretter en task pr barn som har fylt 1/2 eller 1 år"
 )
 class OpprettTasksForBarnFyltÅrTask(
-    val taskRepository: TaskRepository,
+    val taskService: TaskService,
     val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
 ) : AsyncTaskStep {
 
@@ -25,7 +25,7 @@ class OpprettTasksForBarnFyltÅrTask(
     }
 
     override fun onCompletion(task: Task) {
-        taskRepository.save(opprettTask(LocalDate.now().plusDays(1)))
+        taskService.save(opprettTask(LocalDate.now().plusDays(1)))
     }
 
     companion object {

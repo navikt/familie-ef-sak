@@ -58,11 +58,21 @@ internal class AutomatiskJournalføringControllerTest {
     }
 
     @Test
+    internal fun `skal feile hvis en annen applikasjon enn familie-ef-mottak kaller på sjekk om behandling kan opprettes`() {
+        every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns false
+        val feil = assertThrows<Feil> {
+            automatiskJournalføringController.kanOppretteBehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
+        }
+
+        Assertions.assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+
+    @Test
     internal fun `skal automatisk journalføre hvis kallet kommer fra familie-ef-mottak`() {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns true
         automatiskJournalføringController.automatiskJournalfør(request)
 
-        verify { automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(any(), any(), any(), any()) }
+        verify { automatiskJournalføringService.automatiskJournalførTilBehandling(any(), any(), any(), any()) }
     }
 
     @Test
@@ -70,5 +80,7 @@ internal class AutomatiskJournalføringControllerTest {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns true
         automatiskJournalføringController.kanOppretteFørstegangsbehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
         verify { automatiskJournalføringService.kanOppretteFørstegangsbehandling(any(), any()) }
+        automatiskJournalføringController.kanOppretteBehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
+        verify { automatiskJournalføringService.kanOppretteBehandling(any(), any()) }
     }
 }

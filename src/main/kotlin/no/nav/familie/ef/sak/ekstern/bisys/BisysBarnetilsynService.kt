@@ -12,11 +12,11 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysResponse
-import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.eksterne.kontrakter.bisys.Periode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BisysBarnetilsynService(
@@ -30,7 +30,32 @@ class BisysBarnetilsynService(
 ) {
 
     fun hentBarnetilsynperioderFraEfOgInfotrygd(personIdent: String, fomDato: LocalDate): BarnetilsynBisysResponse {
-        return BarnetilsynBisysResponse(kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent, fomDato))
+        val barnetilsynBisysPerioder = kombinerBarnetilsynperioderFraEfOgInfotrygd(personIdent, fomDato)
+        return BarnetilsynBisysResponse(barnetilsynBisysPerioder.mergeSammenhengendePerioder())
+    }
+
+    fun List<BarnetilsynBisysPeriode>.mergeSammenhengendePerioder(): List<BarnetilsynBisysPeriode> {
+        val sortertPåDatoListe = this.sortedBy { it.periode.fom }
+        return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
+            val last = acc.lastOrNull()
+            if (last != null && last.hengerSammenMed(entry) && last.harSammeBarn(entry)) {
+                acc.removeLast()
+                acc.add(
+                    last.copy(
+                        periode = last.periode.union(entry.periode)
+                    )
+                )
+            } else {
+                acc.add(entry)
+            }
+            acc
+        }
+    }
+
+    fun BarnetilsynBisysPeriode.hengerSammenMed(other: BarnetilsynBisysPeriode): Boolean {
+        val tomNesteMåned = YearMonth.from(this.periode.tom.plusMonths(1))
+        val otherFom = YearMonth.from(other.periode.fom)
+        return tomNesteMåned == otherFom
     }
 
     private fun kombinerBarnetilsynperioderFraEfOgInfotrygd(
@@ -68,9 +93,7 @@ class BisysBarnetilsynService(
                 Periode(andel.andel.periode.fomDato, andel.andel.periode.tomDato),
                 andel.andel.barn.map {
                     barnIdenter[it] ?: error("Fant ingen personident for barn=$it")
-                },
-                andel.andel.beløp,
-                Datakilde.EF
+                }
             )
         }
         return EfPerioder(startdato, barnetilsynBisysPerioder.sortedBy { it.periode.fom })
@@ -85,9 +108,7 @@ class BisysBarnetilsynService(
             .map { periode ->
                 BarnetilsynBisysPeriode(
                     periode = Periode(periode.stønadFom, periode.stønadTom),
-                    barnIdenter = periode.barnIdenter,
-                    månedsbeløp = periode.månedsbeløp,
-                    datakilde = Datakilde.INFOTRYGD
+                    barnIdenter = periode.barnIdenter
                 )
             }
     }
@@ -115,4 +136,12 @@ class BisysBarnetilsynService(
     }
 
     data class EfPerioder(val startdato: LocalDate, val perioder: List<BarnetilsynBisysPeriode>)
+}
+
+private fun Periode.union(periode: Periode): Periode {
+    return Periode(fom = minOf(this.fom, periode.fom), tom = maxOf(this.tom, periode.tom))
+}
+
+private fun BarnetilsynBisysPeriode.harSammeBarn(entry: BarnetilsynBisysPeriode): Boolean {
+    return barnIdenter.toSet() == entry.barnIdenter.toSet()
 }

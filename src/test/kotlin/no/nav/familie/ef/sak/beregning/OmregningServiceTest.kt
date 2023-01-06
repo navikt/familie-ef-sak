@@ -46,11 +46,12 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.IverksettOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -72,7 +73,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Autowired
-    lateinit var taskRepository: TaskRepository
+    lateinit var taskService: TaskService
 
     @Autowired
     lateinit var iverksettClient: IverksettClient
@@ -129,7 +130,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         omregningService.utførGOmregning(fagsakId)
         val nyBehandling = behandlingRepository.findByFagsakId(fagsakId).single { it.årsak == BehandlingÅrsak.G_OMREGNING }
 
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
+        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNotNull
         val iverksettDtoSlot = slot<IverksettOvergangsstønadDto>()
         verify { iverksettClient.iverksettUtenBrev(capture(iverksettDtoSlot)) }
 
@@ -161,7 +162,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
         omregningService.utførGOmregning(fagsak.id)
 
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
         verify(exactly = 0) { iverksettClient.simuler(any()) }
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }
@@ -179,7 +180,11 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandling.id, "321", år, samordningsfradrag = 10))
         val inntektsperiode = inntektsperiode(år = år, samordningsfradrag = 100.toBigDecimal())
-        val vedtaksperiode = vedtaksperiode(år = år, vedtaksperiodeType = VedtaksperiodeType.SANKSJON)
+        val vedtaksperiode = vedtaksperiode(
+            startDato = LocalDate.of(år, 1, 1),
+            sluttDato = LocalDate.of(år, 1, 31),
+            vedtaksperiodeType = VedtaksperiodeType.SANKSJON
+        )
         vedtakRepository.insert(
             vedtak(
                 behandlingId = behandling.id,
@@ -191,7 +196,7 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
 
         omregningService.utførGOmregning(fagsak.id)
 
-        assertThat(taskRepository.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
+        assertThat(taskService.findAll().find { it.type == "pollerStatusFraIverksett" }).isNull()
         assertThat(behandlingRepository.findByFagsakId(fagsak.id).size).isEqualTo(1)
         verify(exactly = 0) { iverksettClient.simuler(any()) }
         verify(exactly = 0) { iverksettClient.iverksettUtenBrev(any()) }

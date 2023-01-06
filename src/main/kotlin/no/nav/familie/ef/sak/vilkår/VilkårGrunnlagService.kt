@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataServic
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
+import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AdresseopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AktivitetMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.BosituasjonMapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SagtOppEllerRedusertStillingMapper
@@ -67,6 +68,7 @@ class VilkårGrunnlagService(
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling,
             registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt,
+            adresseopplysninger = AdresseopplysningerMapper.tilDto(søknad?.adresseopplysninger),
             dokumentasjon = søknad?.dokumentasjon
         )
     }

@@ -191,16 +191,4 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         """
     )
     fun hentUferdigeBehandlingerFørDato(stønadstype: StønadType, opprettetTidFør: LocalDateTime): List<Behandling>
-
-    // language=PostgreSQL
-    @Query(
-        """
-        SELECT b.*, f.stonadstype
-        FROM behandling b
-        JOIN fagsak f ON f.id = b.fagsak_id
-        WHERE b.status = 'FERDIGSTILT'
-          AND b.resultat = 'HENLAGT'
-        """
-    )
-    fun finnHenlagteBehandlingerSomSkalOversendesTilDatavarehus(): List<Behandling>
 }

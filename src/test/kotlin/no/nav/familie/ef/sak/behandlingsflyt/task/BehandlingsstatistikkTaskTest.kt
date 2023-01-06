@@ -8,6 +8,7 @@ import io.mockk.slot
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -18,14 +19,19 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.årsakRevurdering
 import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingType
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -34,6 +40,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.TimeZone
@@ -46,7 +53,19 @@ internal class BehandlingsstatistikkTaskTest {
 
     val personIdent = "123456789012"
     val fagsak = fagsak(identer = fagsakpersoner(setOf(personIdent)))
-    val behandling = behandling(fagsak, resultat = BehandlingResultat.INNVILGET, type = FØRSTEGANGSBEHANDLING)
+    val behandling = behandling(
+        fagsak,
+        resultat = BehandlingResultat.INNVILGET,
+        type = FØRSTEGANGSBEHANDLING,
+        kravMottatt = LocalDate.of(2022, 3, 1)
+    )
+    val avslåttBehandling = behandling(
+        fagsak,
+        resultat = BehandlingResultat.AVSLÅTT,
+        type = FØRSTEGANGSBEHANDLING,
+        kravMottatt = LocalDate.of(2022, 3, 1)
+    )
+    val avslåttSaksbehandling = saksbehandling(fagsak, avslåttBehandling)
     val saksbehandling = saksbehandling(fagsak, behandling)
     val hendelse = Hendelse.BESLUTTET
     val hendelseTidspunkt = ZonedDateTime.now()
@@ -77,6 +96,7 @@ internal class BehandlingsstatistikkTaskTest {
     val grunnlagsdataService = mockk<GrunnlagsdataService>()
     val vedtakRepository = mockk<VedtakRepository>()
     val oppgaveService = mockk<OppgaveService>()
+    val årsakRevurderingService = mockk<ÅrsakRevurderingService>()
 
     val behandlingsstatistikkTask = BehandlingsstatistikkTask(
         iverksettClient = iverksettClient,
@@ -84,7 +104,8 @@ internal class BehandlingsstatistikkTaskTest {
         søknadService = søknadService,
         vedtakRepository = vedtakRepository,
         oppgaveService = oppgaveService,
-        grunnlagsdataService = grunnlagsdataService
+        grunnlagsdataService = grunnlagsdataService,
+        årsakRevurderingService = årsakRevurderingService
     )
 
     @BeforeEach
@@ -105,6 +126,7 @@ internal class BehandlingsstatistikkTaskTest {
         every { oppgaveMock.tildeltEnhetsnr } returns tildeltEnhet
         every { oppgaveMock.opprettetAvEnhetsnr } returns opprettetEnhet
         every { grunnlagsdataMock.grunnlagsdata.søker.adressebeskyttelse } returns null
+        every { årsakRevurderingService.hentÅrsakRevurdering(behandling.id) } returns årsakRevurdering()
     }
 
     @Test
@@ -133,6 +155,10 @@ internal class BehandlingsstatistikkTaskTest {
         assertThat(behandlingsstatistikk.behandlingstype).isEqualTo(BehandlingType.FØRSTEGANGSBEHANDLING)
         assertThat(behandlingsstatistikk.resultatBegrunnelse).isEqualTo(periodeBegrunnelse)
         assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(søknadstidspunkt)
+
+        assertThat(behandlingsstatistikk.kravMottatt).isEqualTo(behandling.kravMottatt)
+        assertThat(behandlingsstatistikk.årsakRevurdering)
+            .isEqualTo(ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET))
     }
 
     @Test
@@ -149,7 +175,34 @@ internal class BehandlingsstatistikkTaskTest {
         behandlingsstatistikkTask.doTask(task)
 
         val behandlingsstatistikk = behandlingsstatistikkSlot.captured
-        assertThat(behandlingsstatistikk.henvendelseTidspunkt).isEqualTo(behandling.sporbar.opprettetTid.atZone((ZoneId.of("Europe/Oslo"))))
+        assertThat(behandlingsstatistikk.henvendelseTidspunkt)
+            .isEqualTo(behandling.sporbar.opprettetTid.atZone(ZoneId.of("Europe/Oslo")))
+    }
+
+    @Test
+    internal fun `skal sende avslagsårsak dersom denne finnes`() {
+        val behandlingsstatistikkSlot = slot<BehandlingsstatistikkDto>()
+        every { iverksettClient.sendBehandlingsstatistikk(capture(behandlingsstatistikkSlot)) } just Runs
+        every { behandlingService.hentSaksbehandling(behandling.id) } returns avslåttSaksbehandling
+        every { vedtakRepository.findByIdOrNull(behandling.id) } returns Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.AVSLÅ,
+            periodeBegrunnelse = periodeBegrunnelse,
+            inntektBegrunnelse = inntektBegrunnelse,
+            saksbehandlerIdent = saksbehandlerId,
+            beslutterIdent = beslutterId,
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        )
+        val task = Task(
+            type = "behandlingsstatistikkTask",
+            payload = objectMapper.writeValueAsString(payload)
+        )
+
+        behandlingsstatistikkTask.doTask(task)
+
+        val behandlingsstatistikk = behandlingsstatistikkSlot.captured
+        assertThat(behandlingsstatistikk.avslagÅrsak).isEqualTo(AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
+        assertThat(behandlingsstatistikk.behandlingResultat).isEqualTo(BehandlingResultat.AVSLÅTT.name)
     }
 
     @Test

@@ -100,6 +100,9 @@ class BehandlingService(
         kravMottatt: LocalDate? = null,
         erMigrering: Boolean = false
     ): Behandling {
+        brukerfeilHvis(kravMottatt != null && kravMottatt.isAfter(LocalDate.now())) {
+            "Kan ikke sette krav mottattdato frem i tid"
+        }
         feilHvis(erMigrering && !featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
         }
@@ -172,6 +175,10 @@ class BehandlingService(
                 "fra ${behandling.steg} til $steg"
         )
         return behandlingRepository.update(behandling.copy(steg = steg))
+    }
+
+    fun oppdaterKravMottatt(behandlingId: UUID, kravMottatt: LocalDate?): Behandling {
+        return behandlingRepository.update(hentBehandling(behandlingId).copy(kravMottatt = kravMottatt))
     }
 
     fun finnesBehandlingForFagsak(fagsakId: UUID) =

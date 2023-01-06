@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.Periodetype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -46,7 +47,8 @@ data class UtgiftsperiodeDto(
     ),
     val barn: List<UUID>,
     val utgifter: Int,
-    val erMidlertidigOpphør: Boolean
+    val erMidlertidigOpphør: Boolean,
+    val sanksjonsårsak: Sanksjonsårsak? = null
 )
 
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
@@ -58,7 +60,9 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         periode = this.periode,
         utgifter = this.utgifter,
         barn = this.barn,
-        erMidlertidigOpphør = this.erMidlertidigOpphør
+        erMidlertidigOpphør = this.erMidlertidigOpphør,
+        sanksjonsårsak = this.sanksjonsårsak,
+        periodetype = if (erMidlertidigOpphør) Periodetype.OPPHØR else Periodetype.ORDINÆR
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -80,7 +84,8 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 periode = it.periode,
                 utgifter = it.utgifter,
                 barn = it.barn,
-                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false
+                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false,
+                sanksjonsårsak = it.sanksjonsårsak
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
@@ -97,11 +102,3 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
         }
     )
 }
-
-fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
-    SanksjonertPeriodeDto(
-        årMånedFra = YearMonth.from(datoFra),
-        årMånedTil = YearMonth.from(datoTil),
-        fom = YearMonth.from(datoFra),
-        tom = YearMonth.from(datoTil)
-    )

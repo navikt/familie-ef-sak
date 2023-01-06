@@ -17,7 +17,7 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.hentVilkårsregel
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +29,7 @@ class VurderingStegService(
     private val vurderingService: VurderingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val stegService: StegService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val blankettRepository: BlankettRepository
 ) {
 
@@ -103,7 +103,7 @@ class VurderingStegService(
     }
 
     private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
-        taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
+        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
     }
 
     private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {

@@ -46,7 +46,8 @@ data class VedtakshistorikkperiodeOvergangsstønad(
         this(
             periode = periode.periode,
             aktivitet = periode.aktivitet,
-            periodeType = periode.periodeType
+            periodeType = periode.periodeType,
+            sanksjonsårsak = periode.sanksjonsårsak
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -102,13 +103,13 @@ object VedtakHistorikkBeregner {
     /**
      * Lager totalbilde av vedtak per behandling
      */
-    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<BehandlingHistorikkData>): Map<UUID, Vedtaksdata> {
+    fun lagVedtaksperioderPerBehandling(vedtaksliste: List<BehandlingHistorikkData>, brukIkkeVedtatteSatser: Boolean): Map<UUID, Vedtaksdata> {
         return vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
                 acc + Pair(
                     vedtak.behandlingId,
-                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc))
+                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, brukIkkeVedtatteSatser))
                 )
             }
             .toMap()
@@ -116,7 +117,8 @@ object VedtakHistorikkBeregner {
 
     private fun lagTotalbildeForNyttVedtak(
         data: BehandlingHistorikkData,
-        acc: List<Pair<UUID, Vedtaksdata>>
+        acc: List<Pair<UUID, Vedtaksdata>>,
+        brukIkkeVedtatteSatser: Boolean
     ): List<Vedtakshistorikkperiode> {
         val vedtak = data.vedtakDto
         return when (vedtak) {
@@ -126,7 +128,7 @@ object VedtakHistorikkBeregner {
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
             is InnvilgelseBarnetilsyn -> {
-                val perioder = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak)
+                val perioder = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, brukIkkeVedtatteSatser)
                     .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
                 val førsteFomDato = perioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder

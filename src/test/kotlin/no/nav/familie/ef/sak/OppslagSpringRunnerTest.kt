@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
@@ -69,6 +70,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-ereg",
     "mock-aareg",
     "mock-tilbakekreving",
+    "mock-sigrun",
     "mock-dokument"
 )
 @EnableMockOAuth2Server
@@ -149,6 +151,7 @@ abstract class OppslagSpringRunnerTest {
             Behandlingsjournalpost::class,
             Grunnlagsdata::class,
             Tilbakekreving::class,
+            ÅrsakRevurdering::class,
             Behandling::class,
             TerminbarnOppgave::class,
             FagsakDomain::class,

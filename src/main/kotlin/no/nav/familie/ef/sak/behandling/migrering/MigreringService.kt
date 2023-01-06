@@ -18,7 +18,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
-import no.nav.familie.ef.sak.fagsak.dto.MigrerOvergangsstønadDto
+import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdStønadPerioderDto
@@ -53,7 +53,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -65,7 +65,7 @@ import java.util.UUID
 
 @Service
 class MigreringService(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
     private val behandlingService: BehandlingService,
@@ -124,7 +124,7 @@ class MigreringService(
      * Henter data fra infotrygd og oppretter migrering
      */
     @Transactional
-    fun migrerOvergangsstønad(fagsakPersonId: UUID, request: MigrerOvergangsstønadDto): UUID {
+    fun migrerOvergangsstønad(fagsakPersonId: UUID, request: MigrerRequestDto): UUID {
         try {
             return migrerFagsakPerson(
                 fagsakPersonId = fagsakPersonId,
@@ -142,12 +142,16 @@ class MigreringService(
      * Henter data fra infotrygd og oppretter migrering
      */
     @Transactional
-    fun migrerBarnetilsyn(fagsakPersonId: UUID): UUID {
+    fun migrerBarnetilsyn(fagsakPersonId: UUID, request: MigrerRequestDto): UUID {
         brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING_BARNETILSYN)) {
             "Feature toggle for migrering av barnetilsyn er ikke aktivert"
         }
         try {
-            return migrerFagsakPerson(fagsakPersonId, StønadType.BARNETILSYN)
+            return migrerFagsakPerson(
+                fagsakPersonId = fagsakPersonId,
+                stønadType = StønadType.BARNETILSYN,
+                ignorerFeilISimulering = request.ignorerFeilISimulering
+            )
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
             secureLogger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId - ${e.årsak}")
@@ -175,7 +179,7 @@ class MigreringService(
         }
         return when (stønadType) {
             StønadType.OVERGANGSSTØNAD -> opprettMigreringOvergangsstønad(fagsak, periode, ignorerFeilISimulering)
-            StønadType.BARNETILSYN -> opprettMigreringBarnetilsyn(fagsak, periode)
+            StønadType.BARNETILSYN -> opprettMigreringBarnetilsyn(fagsak, periode, ignorerFeilISimulering)
             StønadType.SKOLEPENGER -> error("Kan ikke migrere skolepenger")
         }.id
     }
@@ -195,8 +199,13 @@ class MigreringService(
 
     private fun opprettMigreringBarnetilsyn(
         fagsak: Fagsak,
-        periode: SummertInfotrygdPeriodeDto
-    ) = opprettMigrering(fagsak, periode.stønadsperiode) { saksbehandling, grunnlagsdata ->
+        periode: SummertInfotrygdPeriodeDto,
+        ignorerFeilISimulering: Boolean
+    ) = opprettMigrering(
+        fagsak = fagsak,
+        periode = periode.stønadsperiode,
+        ignorerFeilISimulering = ignorerFeilISimulering
+    ) { saksbehandling, grunnlagsdata ->
         val behandlingBarn = opprettBehandlingBarn(saksbehandling, grunnlagsdata, periode)
         InnvilgelseBarnetilsyn(
             begrunnelse = null,
@@ -206,7 +215,8 @@ class MigreringService(
                     årMånedTil = periode.stønadsperiode.tom,
                     barn = behandlingBarn.map { it.id },
                     utgifter = periode.utgifterBarnetilsyn,
-                    erMidlertidigOpphør = false
+                    erMidlertidigOpphør = false,
+                    sanksjonsårsak = null
                 )
             ),
             perioderKontantstøtte = emptyList(),
@@ -292,10 +302,10 @@ class MigreringService(
 
         val iverksettDto = iverksettingDtoMapper.tilDtoMaskineltBehandlet(saksbehandling)
         iverksettClient.iverksettUtenBrev(iverksettDto)
-        taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
+        taskService.save(PollStatusFraIverksettTask.opprettTask(behandling.id))
 
         if (periode.tom >= YearMonth.now()) {
-            taskRepository.save(
+            taskService.save(
                 SjekkMigrertStatusIInfotrygdTask.opprettTask(
                     behandling.id,
                     periode.fom.minusMonths(1),
@@ -454,7 +464,8 @@ class MigreringService(
                 årMånedTil = periode.tom,
                 periode = periode,
                 aktivitet = aktivitet,
-                periodeType = VedtaksperiodeType.MIGRERING
+                periodeType = VedtaksperiodeType.MIGRERING,
+                sanksjonsårsak = null
             )
         )
     }

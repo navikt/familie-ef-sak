@@ -18,13 +18,13 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER,
         Toggle.MIGRERING,
         Toggle.MIGRERING_BARNETILSYN,
+        Toggle.BARNETILSYN_REVURDER_FRA,
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
-        Toggle.FRONTEND_OPPRETT_KLAGE,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
-        Toggle.FRONTEND_VERGE_FRITTSTÅENDE_BREV,
-        Toggle.FRONTEND_JOURNALFØRING_KLAGE,
-        Toggle.FRONTEND_UTESTENGELSE,
-        Toggle.FRONTEND_SATSENDRING
+        Toggle.FRONTEND_SATSENDRING,
+        Toggle.FØRSTEGANGSBEHANDLING,
+        Toggle.AUTOMATISKE_VEDTAKSDATOER_BREV,
+        Toggle.BRUK_8_ÅR_HOVEDPERIODEVALIDERING
     )
 
     @GetMapping

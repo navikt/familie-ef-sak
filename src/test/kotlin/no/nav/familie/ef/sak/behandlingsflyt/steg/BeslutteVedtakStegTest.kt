@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -30,27 +31,32 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.Properties
 import java.util.UUID
 
 internal class BeslutteVedtakStegTest {
 
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
     private val totrinnskontrollService = mockk<TotrinnskontrollService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
@@ -61,7 +67,7 @@ internal class BeslutteVedtakStegTest {
     private val behandlingService = mockk<BehandlingService>()
 
     private val beslutteVedtakSteg = BeslutteVedtakSteg(
-        taskRepository = taskRepository,
+        taskService = taskService,
         fagsakService = fagsakService,
         oppgaveService = oppgaveService,
         iverksettClient = iverksett,
@@ -69,9 +75,11 @@ internal class BeslutteVedtakStegTest {
         totrinnskontrollService = totrinnskontrollService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService
+        vedtaksbrevService = vedtaksbrevService,
     )
 
+    private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
+    private val vedtakErUtenBeslutter = VedtakErUtenBeslutter(true)
     private val innloggetBeslutter = "sign2"
 
     private val fagsak = fagsak(
@@ -100,17 +108,19 @@ internal class BeslutteVedtakStegTest {
             fagsakService.fagsakMedOppdatertPersonIdent(any())
         } returns fagsak
         every {
-            taskRepository.save(capture(taskSlot))
+            taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns oppgave
         every { iverksettingDtoMapper.tilDto(any(), any()) } returns mockk()
         every { iverksett.iverksett(any(), any()) } just Runs
         every { iverksett.iverksettUtenBrev(any()) } just Runs
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId)
         every { vedtakService.oppdaterBeslutter(any(), any()) } just Runs
         every { behandlingService.oppdaterResultatPåBehandling(any(), any()) } answers {
             behandling(fagsak, id = behandlingId, resultat = secondArg())
         }
+        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
     }
 
     @AfterEach
@@ -121,7 +131,7 @@ internal class BeslutteVedtakStegTest {
     @Test
     internal fun `skal opprette iverksettMotOppdragTask etter beslutte vedtak hvis godkjent`() {
         every { vedtakService.hentVedtaksresultat(behandlingId) } returns ResultatType.INNVILGE
-        every { vedtaksbrevService.lagEndeligBeslutterbrev(any()) } returns Fil("123".toByteArray())
+        every { vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakKreverBeslutter) } returns Fil("123".toByteArray())
 
         val nesteSteg = utførTotrinnskontroll(godkjent = true)
 
@@ -138,9 +148,7 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal opprette opprettBehandleUnderkjentVedtakOppgave etter beslutte vedtak hvis underkjent`() {
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } just Runs
-
-        val nesteSteg = utførTotrinnskontroll(godkjent = false)
+        val nesteSteg = utførTotrinnskontroll(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET))
 
         val deserializedPayload = objectMapper.readValue<OpprettOppgaveTask.OpprettOppgaveTaskData>(taskSlot[1].payload)
 
@@ -166,10 +174,39 @@ internal class BeslutteVedtakStegTest {
         verify(exactly = 1) { iverksett.iverksettUtenBrev(any()) }
     }
 
-    private fun utførTotrinnskontroll(godkjent: Boolean, saksbehandling: Saksbehandling = opprettSaksbehandling()): StegType {
+    @Test
+    internal fun `skal ikke ha beslutter ved avslag og mindre inntektsendringer`() {
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandlingId, resultatType = ResultatType.AVSLÅ).copy(avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER)
+        every {
+            vedtaksbrevService.lagEndeligBeslutterbrev(any(), vedtakErUtenBeslutter)
+        } returns Fil("123".toByteArray())
+        utførTotrinnskontroll(true, opprettSaksbehandling(BehandlingÅrsak.NYE_OPPLYSNINGER))
+
+        verify(exactly = 1) { iverksett.iverksett(any(), any()) }
+        verify(exactly = 0) { iverksett.iverksettUtenBrev(any()) }
+    }
+
+    @Test
+    internal fun `skal feile dersom vedtak underkjent og mangler begrunnelse`() {
+
+        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)) }
+    }
+
+    @Test
+    internal fun `skal feile dersom vedtak underkjent og mangler årsaker til underkjennelse`() {
+
+        assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
+    }
+
+    private fun utførTotrinnskontroll(
+        godkjent: Boolean,
+        saksbehandling: Saksbehandling = opprettSaksbehandling(),
+        begrunnelse: String? = null,
+        årsakerUnderkjent: List<ÅrsakUnderkjent> = emptyList()
+    ): StegType {
         return beslutteVedtakSteg.utførOgReturnerNesteSteg(
             saksbehandling,
-            BeslutteVedtakDto(godkjent = godkjent)
+            BeslutteVedtakDto(godkjent = godkjent, begrunnelse = begrunnelse, årsakerUnderkjent = årsakerUnderkjent)
         )
     }
 

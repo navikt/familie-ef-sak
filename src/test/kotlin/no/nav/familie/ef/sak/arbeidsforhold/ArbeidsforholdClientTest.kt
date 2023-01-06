@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import org.apache.http.entity.ContentType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
@@ -15,6 +16,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.time.LocalDate
 
@@ -23,13 +25,19 @@ class ArbeidsforholdClientTest {
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val webClient: WebClient = WebClient.create()
         lateinit var arbeidsforholdClient: ArbeidsforholdClient
 
         @BeforeAll
         @JvmStatic
         fun start() {
             server.start()
-            arbeidsforholdClient = ArbeidsforholdClient(URI.create(server.baseUrl()), restOperations)
+            arbeidsforholdClient = ArbeidsforholdClient(
+                URI.create(server.baseUrl()),
+                restOperations,
+                webClient,
+                mockFeatureToggleService()
+            )
         }
 
         @AfterAll

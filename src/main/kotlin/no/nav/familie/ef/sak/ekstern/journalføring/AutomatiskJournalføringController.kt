@@ -31,6 +31,7 @@ class AutomatiskJournalføringController(
      * Skal bare brukes av familie-ef-mottak for å vurdere om en journalføring skal automatisk ferdigstilles
      * eller manuelt gjennomgås.
      */
+    @Deprecated("Kan slettes når mottak har gått over til å bruke kan-opprette-behandling")
     @PostMapping("kan-opprette-forstegangsbehandling")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
     fun kanOppretteFørstegangsbehandling(
@@ -42,6 +43,23 @@ class AutomatiskJournalføringController(
         }
         validerIdent(personIdent.ident)
         return Ressurs.success(automatiskJournalføringService.kanOppretteFørstegangsbehandling(personIdent.ident, type))
+    }
+
+    /**
+     * Skal bare brukes av familie-ef-mottak for å vurdere om en journalføring skal automatisk ferdigstilles
+     * eller manuelt gjennomgås.
+     */
+    @PostMapping("kan-opprette-behandling")
+    @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
+    fun kanOppretteBehandling(
+        @RequestBody personIdent: PersonIdent,
+        @RequestParam type: StønadType
+    ): Ressurs<Boolean> {
+        if (!SikkerhetContext.kallKommerFraFamilieEfMottak()) {
+            throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
+        }
+        validerIdent(personIdent.ident)
+        return Ressurs.success(automatiskJournalføringService.kanOppretteBehandling(personIdent.ident, type))
     }
 
     /**
@@ -57,7 +75,7 @@ class AutomatiskJournalføringController(
         }
         validerIdent(request.personIdent)
         return Ressurs.success(
-            automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
+            automatiskJournalføringService.automatiskJournalførTilBehandling(
                 journalpostId = request.journalpostId,
                 personIdent = request.personIdent,
                 stønadstype = request.stønadstype,

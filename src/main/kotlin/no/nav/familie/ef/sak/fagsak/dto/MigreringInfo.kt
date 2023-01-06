@@ -23,6 +23,6 @@ data class MigreringInfo(
     val stønadTom: YearMonth? get() = stønadsperiode?.tom
 }
 
-data class MigrerOvergangsstønadDto(
+data class MigrerRequestDto(
     val ignorerFeilISimulering: Boolean = false
 )

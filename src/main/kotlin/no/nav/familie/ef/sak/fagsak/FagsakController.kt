@@ -39,7 +39,7 @@ class FagsakController(private val fagsakService: FagsakService, private val til
 
     @GetMapping("/ekstern/{eksternFagsakId}")
     fun hentFagsak(@PathVariable eksternFagsakId: Long): Ressurs<FagsakDto> {
-        val fagsakDto = fagsakService.hentFagsakPåEksternId(eksternFagsakId)
+        val fagsakDto = fagsakService.hentFagsakDtoPåEksternId(eksternFagsakId)
         tilgangService.validerTilgangTilFagsak(fagsakDto.id, AuditLoggerEvent.ACCESS)
         return Ressurs.success(fagsakDto)
     }

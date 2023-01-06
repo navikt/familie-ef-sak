@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -22,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.dto.SkoleårsperiodeSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -142,8 +142,8 @@ object VedtakDtoUtil {
     fun sanksjonertPeriodeDto() =
         SanksjonertPeriodeDto(
             YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12),
             YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12)
+            YearMonth.of(2021, 1),
+            YearMonth.of(2021, 1)
         )
 }

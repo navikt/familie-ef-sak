@@ -2,11 +2,12 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn.satsendring
 
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +18,7 @@ import java.util.UUID
 class BarnetilsynSatsendringService(
     val barnetilsynSatsendringRepository: BarnetilsynSatsendringRepository,
     val vedtakHistorikkService: VedtakHistorikkService,
-    val taskRepository: TaskRepository
+    val taskService: TaskService
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -84,11 +85,15 @@ class BarnetilsynSatsendringService(
 
     private fun mapAndelerForNesteÅrTilUtgiftsperiodeDto(andeler2023: List<AndelHistorikkDto>): List<UtgiftsperiodeDto> {
         val utgiftsperiode = andeler2023.map {
+            feilHvis(it.erSanksjon) {
+                "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+            }
             UtgiftsperiodeDto(
                 periode = it.andel.periode,
                 barn = it.andel.barn,
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                sanksjonsårsak = null
             ) // TODO sjekk erMidlertidigOpphør???...
         }
         return utgiftsperiode
@@ -96,10 +101,11 @@ class BarnetilsynSatsendringService(
 
     @Transactional
     fun opprettTask() {
-        val finnesTask = taskRepository.findByPayloadAndType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
+        val finnesTask = taskService.finnTaskMedPayloadOgType("barnetilsynSatsendring", BarnetilsynSatsendringTask.TYPE)
         if (finnesTask == null) {
+            logger.info("Oppretter satsendring-task, da den ikke finnes fra før")
             val task = BarnetilsynSatsendringTask.opprettTask()
-            taskRepository.save(task)
+            taskService.save(task)
         }
     }
 }

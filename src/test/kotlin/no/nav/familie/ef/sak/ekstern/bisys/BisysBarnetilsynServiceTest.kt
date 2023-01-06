@@ -23,7 +23,6 @@ import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
-import no.nav.familie.eksterne.kontrakter.bisys.Datakilde
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
@@ -153,8 +152,129 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(bisysPeriode.periode.fom).isEqualTo(andelhistorikkDto.andel.periode.fomDato)
         assertThat(bisysPeriode.periode.tom).isEqualTo(andelhistorikkDto.andel.periode.tomDato)
         assertThat(bisysPeriode.barnIdenter.first()).isEqualTo(behandlingBarn.first().personIdent)
-        assertThat(bisysPeriode.månedsbeløp).isEqualTo(andelhistorikkDto.andel.beløp)
-        assertThat(bisysPeriode.datakilde).isEqualTo(Datakilde.EF)
+    }
+
+    @Test
+    fun `Skal ikke slå sammen perioder som ikke er sammenhengende`() {
+        mockTilkjentYtelse()
+
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now(),
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(3),
+                tilOgMed = LocalDate.now().plusMonths(4),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(6),
+                tilOgMed = LocalDate.now().plusMonths(7),
+                behandlingBarn = behandlingBarn
+            )
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        assertThat(
+            barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+                personident,
+                LocalDate.now()
+            ).barnetilsynBisysPerioder
+        ).hasSize(3)
+    }
+
+    @Test
+    fun `Skal slå sammen perioder som er sammenhengende`() {
+        mockTilkjentYtelse()
+
+        val førsteDato = YearMonth.from(LocalDate.now()).atDay(1)
+        val senesteDato = YearMonth.from(LocalDate.now().plusMonths(5)).atEndOfMonth()
+
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                fraOgMed = førsteDato,
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(2),
+                tilOgMed = LocalDate.now().plusMonths(3),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(4),
+                tilOgMed = senesteDato,
+                behandlingBarn = behandlingBarn
+            )
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+            personident,
+            LocalDate.now()
+        ).barnetilsynBisysPerioder
+
+        assertThat(perioder).hasSize(1)
+        assertThat(perioder.first().periode.fom).isEqualTo(førsteDato)
+        assertThat(perioder.first().periode.tom).isEqualTo(senesteDato)
+    }
+
+    @Test
+    fun `Skal ikke slå sammen perioder som er sammenhengende hvis antall barn er ulike`() {
+        mockTilkjentYtelse()
+
+        val førsteDato = YearMonth.from(LocalDate.now()).atDay(1)
+        val senesteDato = YearMonth.from(LocalDate.now().plusMonths(5)).atEndOfMonth()
+
+        val behandlingBarnListe = behandlingBarn + behandlingBarn.first()
+            .copy(personIdent = "14041385481", søknadBarnId = UUID.randomUUID(), id = UUID.randomUUID())
+        val andelhistorikkDto1 =
+            lagAndelHistorikkDto(
+                fraOgMed = førsteDato,
+                tilOgMed = LocalDate.now().plusMonths(1),
+                behandlingBarn = behandlingBarnListe
+            )
+
+        val andelhistorikkDto2 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(2),
+                tilOgMed = LocalDate.now().plusMonths(3),
+                behandlingBarn = behandlingBarn
+            )
+
+        val andelhistorikkDto3 =
+            lagAndelHistorikkDto(
+                fraOgMed = LocalDate.now().plusMonths(4),
+                tilOgMed = senesteDato,
+                behandlingBarn = behandlingBarn
+            )
+
+        every { barnService.hentBehandlingBarnForBarnIder(any()) } returns behandlingBarnListe andThen behandlingBarn
+
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(andelhistorikkDto1, andelhistorikkDto2, andelhistorikkDto3)
+
+        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+            personident,
+            LocalDate.now()
+        ).barnetilsynBisysPerioder
+
+        assertThat(perioder).hasSize(2)
     }
 
     @Test
@@ -234,7 +354,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.EF)
     }
 
     /**
@@ -269,7 +388,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
     }
 
     @Test
@@ -298,7 +416,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.INFOTRYGD)
     }
 
     @Test
@@ -331,10 +448,8 @@ internal class BisysBarnetilsynServiceTest {
             ).barnetilsynBisysPerioder
         val infotrygdPeriode = perioder.first()
         val efPeriode = perioder.get(1)
-        assertThat(infotrygdPeriode.datakilde).isEqualTo(Datakilde.INFOTRYGD)
         assertThat(infotrygdPeriode.periode.fom).isEqualTo(LocalDate.MIN)
         assertThat(infotrygdPeriode.periode.tom).isEqualTo(startdato.minusDays(1))
-        assertThat(efPeriode.datakilde).isEqualTo(Datakilde.EF)
         assertThat(efPeriode.periode.fom).isEqualTo(efFom)
         assertThat(efPeriode.periode.tom).isEqualTo(efTom)
     }
@@ -370,7 +485,6 @@ internal class BisysBarnetilsynServiceTest {
                 fomDato
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(1)
-        assertThat(perioder.first().datakilde).isEqualTo(Datakilde.EF)
     }
 
     private fun mockTilkjentYtelse(startdato: LocalDate = LocalDate.now()) {

@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.oppgave.FinnMappeRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -52,9 +51,9 @@ class OppgaveClientMock {
             oppgaver[oppgaveId] ?: error("Finner ikke oppgave med oppgaveId=$oppgaveId")
         }
 
-        every { oppgaveClient.finnMapper(any()) } answers {
-            val mappeRequest: FinnMappeRequest = firstArg()
-            if (mappeRequest.enhetsnr == "4489") {
+        every { oppgaveClient.finnMapper(any(), any()) } answers {
+            val enhetsnr = firstArg<String>()
+            if (enhetsnr == "4489") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
                     mapper = listOf(
@@ -85,7 +84,7 @@ class OppgaveClientMock {
                         )
                     )
                 )
-            } else if (mappeRequest.enhetsnr == "4483") {
+            } else if (enhetsnr == "4483") {
                 FinnMappeResponseDto(
                     antallTreffTotalt = 2,
                     mapper = listOf(

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.iverksett
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.beregning.skolepenger.SkolepengerMaksbeløp
@@ -64,6 +65,7 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeSkolepengerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
 import no.nav.familie.kontrakter.ef.iverksett.VurderingDto
+import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.data.repository.findByIdOrNull
@@ -88,7 +90,8 @@ class IverksettingDtoMapper(
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val brevmottakereRepository: BrevmottakereRepository
+    private val brevmottakereRepository: BrevmottakereRepository,
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
 ) {
 
     fun tilDto(saksbehandling: Saksbehandling, beslutter: String): IverksettDto {
@@ -227,8 +230,13 @@ class IverksettingDtoMapper(
             eksternId = saksbehandling.eksternId,
             vilkårsvurderinger = vilkårsvurderinger.map { it.tilIverksettDto() },
             forrigeBehandlingId = saksbehandling.forrigeBehandlingId,
-            kravMottatt = saksbehandling.kravMottatt
+            kravMottatt = saksbehandling.kravMottatt,
+            årsakRevurdering = mapÅrsakRevurdering(saksbehandling)
         )
+
+    private fun mapÅrsakRevurdering(saksbehandling: Saksbehandling): ÅrsakRevurderingDto? =
+        årsakRevurderingsRepository.findByIdOrNull(saksbehandling.id)
+            ?.let { ÅrsakRevurderingDto(it.opplysningskilde, it.årsak) }
 
     @Improvement("Opphørårsak må utledes ved revurdering")
     private fun mapVedtaksdetaljerOvergangsstønadDto(
@@ -249,7 +257,8 @@ class IverksettingDtoMapper(
             vedtaksperioder = vedtak.perioder?.tilVedtaksperioder()
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
-            brevmottakere = brevmottakere
+            brevmottakere = brevmottakere,
+            avslagÅrsak = vedtak.avslåÅrsak
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -273,7 +282,8 @@ class IverksettingDtoMapper(
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
             kontantstøtte = mapPerioderMedBeløp(vedtak.kontantstøtte?.perioder),
-            tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder)
+            tilleggsstønad = mapPerioderMedBeløp(vedtak.tilleggsstønad?.perioder),
+            avslagÅrsak = vedtak.avslåÅrsak
         )
 
     @Improvement("Opphørårsak må utledes ved revurdering")
@@ -296,7 +306,8 @@ class IverksettingDtoMapper(
                 ?: emptyList(),
             tilbakekreving = tilbakekreving,
             brevmottakere = brevmottakere,
-            begrunnelse = vedtak.skolepenger?.begrunnelse
+            begrunnelse = vedtak.skolepenger?.begrunnelse,
+            avslagÅrsak = vedtak.avslåÅrsak
         )
 
     private fun mapSøkerDto(saksbehandling: Saksbehandling): SøkerDto {

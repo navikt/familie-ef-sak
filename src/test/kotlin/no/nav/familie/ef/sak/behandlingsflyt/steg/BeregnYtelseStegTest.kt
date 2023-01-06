@@ -22,6 +22,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -36,7 +37,6 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -56,6 +56,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.EndringType
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -107,6 +108,7 @@ internal class BeregnYtelseStegTest {
 
     @BeforeEach
     internal fun setUp() {
+        every { featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS) } returns false
         every { featureToggleService.isEnabled(any()) } returns true
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak(fagsakpersoner(setOf("123")))
         every { simuleringService.hentOgLagreSimuleringsresultat(any()) }
@@ -166,12 +168,7 @@ internal class BeregnYtelseStegTest {
                 BehandlingType.REVURDERING,
                 forrigeBehandlingId = null,
                 vedtak = innvilget(
-                    listOf(
-                        vedtaksperiodeDto(
-                            årMånedFra = nyAndelFom,
-                            årMånedTil = nyAndelTom
-                        )
-                    ),
+                    listOf(vedtaksperiodeDto(årMånedFra = nyAndelFom, årMånedTil = nyAndelTom)),
                     listOf(inntekt(YearMonth.from(nyAndelFom)))
                 )
             )
@@ -1409,17 +1406,27 @@ internal class BeregnYtelseStegTest {
     @Nested
     inner class Sanksjonsrevurdering {
 
+        val startMåned = YearMonth.of(2021, 6)
+        val sluttMåned = YearMonth.of(2021, 12)
+        val opphørFom = YearMonth.of(2021, 6)
+        val sankskjonsMåned = YearMonth.of(2021, 8)
+
+        @BeforeEach
+        internal fun setUp() {
+            every { beregningService.beregnYtelse(any(), any()) } answers {
+                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
+            }
+            every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
+                listOf(
+                    lagAndelTilkjentYtelse(100, startMåned.plusMonths(1).atDay(1), sluttMåned.atEndOfMonth())
+                )
+            )
+        }
+
         @Test
         internal fun `skal ikke kunne opphøre før forrige sanksjonsbehandling`() {
-            every { featureToggleService.isEnabled(any()) } returns false
-            val startMåned = YearMonth.of(2021, 6)
-            val sluttMåned = YearMonth.of(2021, 12)
-            val opphørFom = YearMonth.of(2021, 6)
-            val sankskjonsMåned = YearMonth.of(2021, 8)
-
-            every {
-                andelsHistorikkService.hentHistorikk(any(), any())
-            } returns listOf(
+            every { featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON) } returns false
+            mockHistorikk(
                 andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
                 andelhistorikkSanksjon(sankskjonsMåned),
                 andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
@@ -1437,14 +1444,8 @@ internal class BeregnYtelseStegTest {
 
         @Test
         internal fun `skal ikke kunne innvilge med periode før forrige sanksjonsbehandling`() {
-            every { featureToggleService.isEnabled(any()) } returns false
-            val startMåned = YearMonth.of(2021, 6)
-            val sluttMåned = YearMonth.of(2021, 12)
-            val sankskjonsMåned = YearMonth.of(2021, 8)
-
-            every {
-                andelsHistorikkService.hentHistorikk(any(), any())
-            } returns listOf(
+            every { featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON) } returns false
+            mockHistorikk(
                 andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
                 andelhistorikkSanksjon(sankskjonsMåned),
                 andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
@@ -1461,27 +1462,30 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `tidligere sanksjon er fjernet, skal få revurdere som vanlig`() {
-            every { featureToggleService.isEnabled(any()) } returns false
-            val startMåned = YearMonth.of(2021, 6)
-            val sluttMåned = YearMonth.of(2021, 12)
-            val sankskjonsMåned = YearMonth.of(2021, 8)
+        internal fun `skal ikke kunne sanksjonere når periode allerede er sanksjonert`() {
+            mockHistorikk(
+                andelhistorikkInnvilget(startMåned, startMåned),
+                andelhistorikkSanksjon(sankskjonsMåned)
+            )
 
-            every {
-                andelsHistorikkService.hentHistorikk(any(), any())
-            } returns listOf(
+            assertThatThrownBy {
+                utførSteg(
+                    BehandlingType.REVURDERING,
+                    sanksjon(sankskjonsMåned),
+                    forrigeBehandlingId = UUID.randomUUID()
+                )
+            }.hasMessageContaining("Behandlingen er allerede sanksjonert")
+
+            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
+        }
+
+        @Test
+        internal fun `tidligere sanksjon er fjernet, skal få revurdere som vanlig`() {
+            mockHistorikk(
                 andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
                 andelhistorikkSanksjon(sankskjonsMåned, fjernetHistorikkEndring),
                 andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
             )
-            every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
-                listOf(
-                    lagAndelTilkjentYtelse(100, startMåned.plusMonths(1).atDay(1), sluttMåned.atEndOfMonth())
-                )
-            )
-            every { beregningService.beregnYtelse(any(), any()) } answers {
-                firstArg<List<Månedsperiode>>().map { lagBeløpsperiode(it.fomDato, it.tomDato) }
-            }
 
             utførSteg(
                 BehandlingType.REVURDERING,
@@ -1492,6 +1496,83 @@ internal class BeregnYtelseStegTest {
             assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
             verify { tilkjentYtelseService.opprettTilkjentYtelse(any()) }
             verify { andelsHistorikkService.hentHistorikk(any(), any()) }
+        }
+
+        @Test
+        internal fun `skal kunne revurdere med sanksjoner`() {
+            val periodeSluttMåned = sankskjonsMåned.minusMonths(1)
+            mockHistorikk(
+                andelhistorikkInnvilget(startMåned, periodeSluttMåned),
+                andelhistorikkSanksjon(sankskjonsMåned)
+            )
+
+            utførSteg(
+                BehandlingType.REVURDERING,
+                innvilget(listOf(innvilgetPeriode(startMåned, periodeSluttMåned), vedtaksperiodeSanksjon(sankskjonsMåned)), listOf(inntekt(startMåned))),
+                forrigeBehandlingId = UUID.randomUUID()
+            )
+
+            assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
+            verify { tilkjentYtelseService.opprettTilkjentYtelse(any()) }
+            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
+        }
+
+        @Test
+        internal fun `skal kunne slette sanksjon i revurdering`() {
+            mockHistorikk(
+                andelhistorikkInnvilget(startMåned, startMåned),
+                andelhistorikkSanksjon(sankskjonsMåned)
+            )
+
+            utførSteg(
+                BehandlingType.REVURDERING,
+                innvilget(listOf(innvilgetPeriode(startMåned, startMåned)), listOf(inntekt(startMåned))),
+                forrigeBehandlingId = UUID.randomUUID()
+            )
+
+            assertThat(slot.captured.startdato).isEqualTo(startMåned.atDay(1))
+            verify { tilkjentYtelseService.opprettTilkjentYtelse(any()) }
+            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
+        }
+
+        @Test
+        internal fun `kan ikke innvilge nye sanksjonsperioder`() {
+            mockHistorikk(
+                andelhistorikkInnvilget(startMåned, startMåned),
+                andelhistorikkSanksjon(sankskjonsMåned)
+            )
+
+            assertThatThrownBy {
+                utførSteg(
+                    BehandlingType.REVURDERING,
+                    innvilget(
+                        listOf(innvilgetPeriode(startMåned, startMåned), vedtaksperiodeSanksjon(sankskjonsMåned.plusMonths(1))),
+                        listOf(inntekt(startMåned))
+                    ),
+                    forrigeBehandlingId = UUID.randomUUID()
+                )
+            }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
+        }
+
+        @Test
+        internal fun `må sende inn lik sanksjonsårsak`() {
+            mockHistorikk(
+                andelhistorikkInnvilget(startMåned, startMåned),
+                andelhistorikkSanksjon(sankskjonsMåned)
+            )
+
+            val sanksjon =
+                vedtaksperiodeSanksjon(sankskjonsMåned).copy(sanksjonsårsak = Sanksjonsårsak.NEKTET_TILBUDT_ARBEID)
+            assertThatThrownBy {
+                utførSteg(
+                    BehandlingType.REVURDERING,
+                    innvilget(
+                        listOf(innvilgetPeriode(startMåned, startMåned), sanksjon),
+                        listOf(inntekt(startMåned))
+                    ),
+                    forrigeBehandlingId = UUID.randomUUID()
+                )
+            }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
         }
     }
 
@@ -1754,6 +1835,12 @@ internal class BeregnYtelseStegTest {
         assertThat(feil.feil).contains("Periodene må være sammenhengende")
     }
 
+    private fun mockHistorikk(vararg andelHistorikkDto: AndelHistorikkDto) {
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns andelHistorikkDto.toList()
+    }
+
     private fun identerTilBehandlingBarn(identer: List<UUID>) = identer.map { BehandlingBarn(it, UUID.randomUUID()) }
 
     private fun innvilget(
@@ -1898,6 +1985,16 @@ internal class BeregnYtelseStegTest {
             periode = Månedsperiode(andelFom, andelTom),
             aktivitet = AktivitetType.FORLENGELSE_STØNAD_PÅVENTE_ARBEID,
             periodeType = VedtaksperiodeType.HOVEDPERIODE
+        )
+
+    private fun vedtaksperiodeSanksjon(sanksjonsmåned: YearMonth) =
+        VedtaksperiodeDto(
+            årMånedFra = sanksjonsmåned,
+            årMånedTil = sanksjonsmåned,
+            periode = Månedsperiode(sanksjonsmåned),
+            aktivitet = AktivitetType.IKKE_AKTIVITETSPLIKT,
+            periodeType = VedtaksperiodeType.SANKSJON,
+            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
         )
 
     private fun inntekt(andelTom: YearMonth) =

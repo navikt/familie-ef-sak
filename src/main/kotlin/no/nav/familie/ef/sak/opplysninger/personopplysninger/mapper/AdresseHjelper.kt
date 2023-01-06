@@ -11,6 +11,7 @@ object AdresseHjelper {
     fun sorterAdresser(adresser: List<AdresseDto>): List<AdresseDto> {
         return adresser.sortedWith(
             compareBy<AdresseDto> { it.type.rekkefølge }
+                .thenByDescending { it.erGjeldende }
                 .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed }
         )
     }

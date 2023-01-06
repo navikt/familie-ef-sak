@@ -5,16 +5,23 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 
-fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
+fun opprettGrunnlagsdata(
+    bostedsadresse: List<Bostedsadresse> = emptyList(),
+    innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
+    utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList()
+) = GrunnlagsdataDomene(
     Søker(
         adressebeskyttelse = null,
-        bostedsadresse = emptyList(),
+        bostedsadresse = bostedsadresse,
         dødsfall = null,
         forelderBarnRelasjon = emptyList(),
         fødsel = emptyList(),
@@ -29,8 +36,8 @@ fun opprettGrunnlagsdata() = GrunnlagsdataDomene(
         statsborgerskap = emptyList(),
         telefonnummer = emptyList(),
         tilrettelagtKommunikasjon = emptyList(),
-        innflyttingTilNorge = emptyList(),
-        utflyttingFraNorge = emptyList(),
+        innflyttingTilNorge = innflyttingTilNorge,
+        utflyttingFraNorge = utflyttingFraNorge,
         vergemaalEllerFremtidsfullmakt = emptyList(),
         folkeregisteridentifikator = emptyList()
     ),

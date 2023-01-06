@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -20,13 +22,13 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class BeslutteVedtakSteg(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val fagsakService: FagsakService,
     private val oppgaveService: OppgaveService,
     private val iverksettClient: IverksettClient,
@@ -34,7 +36,7 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService
+    private val vedtaksbrevService: VedtaksbrevService,
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -45,11 +47,15 @@ class BeslutteVedtakSteg(
 
     override fun utførOgReturnerNesteSteg(saksbehandling: Saksbehandling, data: BeslutteVedtakDto): StegType {
         fagsakService.fagsakMedOppdatertPersonIdent(saksbehandling.fagsakId)
-        val saksbehandler = totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data)
+        val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+        val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
+        val saksbehandler =
+            totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
         val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
+            validerGodkjentVedtak(data)
             vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)
@@ -58,18 +64,34 @@ class BeslutteVedtakSteg(
             if (saksbehandling.skalIkkeSendeBrev) {
                 iverksettClient.iverksettUtenBrev(iverksettDto)
             } else {
-                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling)
+                val fil = vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling, vedtakErUtenBeslutter)
                 iverksettClient.iverksett(iverksettDto, fil)
             }
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
+            validerUnderkjentVedtak(data)
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
         }
     }
 
+    private fun validerGodkjentVedtak(data: BeslutteVedtakDto) {
+        feilHvisIkke(data.årsakerUnderkjent.isEmpty() && data.begrunnelse.isNullOrBlank()) {
+            "Årsaker til underkjennelse eller begrunnelse for underkjennelse kan ikke være valgt."
+        }
+    }
+
+    private fun validerUnderkjentVedtak(data: BeslutteVedtakDto) {
+        brukerfeilHvis(data.begrunnelse.isNullOrBlank()) {
+            "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
+        }
+        brukerfeilHvis(data.årsakerUnderkjent.isEmpty()) {
+            "Minst en årsak for underkjennelse av vedtak må velges."
+        }
+    }
+
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID, oppgaveId: Long?) =
-        taskRepository.save(
+        taskService.save(
             BehandlingsstatistikkTask.opprettBesluttetTask(
                 behandlingId = behandlingId,
                 oppgaveId = oppgaveId
@@ -94,7 +116,7 @@ class BeslutteVedtakSteg(
         val oppgavetype = Oppgavetype.GodkjenneVedtak
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
         return oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskRepository.save(
+            taskService.save(
                 FerdigstillOppgaveTask.opprettTask(
                     behandlingId = saksbehandling.id,
                     oppgavetype = oppgavetype,
@@ -107,7 +129,7 @@ class BeslutteVedtakSteg(
     }
 
     private fun opprettBehandleUnderkjentVedtakOppgave(saksbehandling: Saksbehandling, navIdent: String) {
-        taskRepository.save(
+        taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
@@ -119,7 +141,7 @@ class BeslutteVedtakSteg(
     }
 
     private fun opprettPollForStatusOppgave(behandlingId: UUID) {
-        taskRepository.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
+        taskService.save(PollStatusFraIverksettTask.opprettTask(behandlingId))
     }
 
     override fun stegType(): StegType {
