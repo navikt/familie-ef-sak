@@ -189,9 +189,7 @@ class StegService(
         behandlingSteg: BehandlingSteg<T>
     ) {
         validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
-
         validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
-
         utførBehandlingsvalidering(behandlingSteg, saksbehandling)
     }
 
@@ -253,7 +251,6 @@ class StegService(
         saksbehandlerIdent: String
     ) {
         val rolleForSteg: BehandlerRolle = utledRolleForSteg(stegType, saksbehandling)
-
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, rolleForSteg)
 
         logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
@@ -261,6 +258,10 @@ class StegService(
             "Starter håndtering av $stegType på behandling " +
                 "${saksbehandling.id} med saksbehandler=[$saksbehandlerIdent]"
         )
+
+        feilHvis(rolleForSteg == BehandlerRolle.SYSTEM && !harTilgangTilSteg) {
+            "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' - behandlingen har status: ${saksbehandling.status.visningsNavn()}"
+        }
 
         feilHvis(!harTilgangTilSteg) {
             "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."

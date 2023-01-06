@@ -2,24 +2,35 @@ package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.log.mdc.MDCConstants
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -37,6 +48,15 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var vedtakService: VedtakService
+
+    @AfterEach
+    internal fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
+        MDC.remove(MDCConstants.MDC_CALL_ID)
+    }
 
     @Test
     internal fun `skal håndtere en ny søknad`() {
@@ -148,5 +168,23 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         assertThrows<IllegalStateException> {
             stegService.håndterVilkår(saksbehandling(fagsak, behandling))
         }
+    }
+
+    @Test
+    internal fun `skal feile hvis behandling iverksettes og man prøver godkjenne saksbehandling`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingSomIverksettes(fagsak)
+        vedtakService.lagreVedtak(InnvilgelseOvergangsstønad("", ""), behandling.id, fagsak.stønadstype)
+        BrukerContextUtil.mockBrukerContext("navIdent")
+        val beslutteVedtakDto = BeslutteVedtakDto(true, "")
+        val assertThrows = assertThrows<Feil> {
+            stegService.håndterBeslutteVedtak(saksbehandling(fagsak, behandling), beslutteVedtakDto)
+        }
+        assertThat(assertThrows.message).isEqualTo("navIdent kan ikke utføre steg 'Beslutte vedtak' - behandlingen har status: Iverksetter vedtak")
+    }
+
+    private fun behandlingSomIverksettes(fagsak: Fagsak): Behandling {
+        val nyBehandling = behandling(fagsak, IVERKSETTER_VEDTAK, VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        return behandlingRepository.insert(nyBehandling)
     }
 }
