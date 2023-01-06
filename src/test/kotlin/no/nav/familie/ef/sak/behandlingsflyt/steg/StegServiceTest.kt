@@ -55,7 +55,6 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
     @AfterEach
     internal fun tearDown() {
         BrukerContextUtil.clearBrukerContext()
-        MDC.remove(MDCConstants.MDC_CALL_ID)
     }
 
     @Test
