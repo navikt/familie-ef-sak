@@ -188,9 +188,9 @@ class StegService(
         saksbehandlerIdent: String,
         behandlingSteg: BehandlingSteg<T>
     ) {
+        utførBehandlingsvalidering(behandlingSteg, saksbehandling)
         validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
         validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
-        utførBehandlingsvalidering(behandlingSteg, saksbehandling)
     }
 
     private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
@@ -218,8 +218,8 @@ class StegService(
         behandlingSteg: BehandlingSteg<T>,
         saksbehandling: Saksbehandling
     ) {
-        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
-            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${saksbehandling.status}")
+        feilHvis (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
+           "Kan ikke utføre '${behandlingSteg.stegType().displayName()}' når behandlingstatus er ${saksbehandling.status.visningsNavn()}"
         }
         behandlingSteg.validerSteg(saksbehandling)
     }
@@ -258,10 +258,6 @@ class StegService(
             "Starter håndtering av $stegType på behandling " +
                 "${saksbehandling.id} med saksbehandler=[$saksbehandlerIdent]"
         )
-
-        feilHvis(rolleForSteg == BehandlerRolle.SYSTEM && !harTilgangTilSteg) {
-            "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' - behandlingen har status: ${saksbehandling.status.visningsNavn()}"
-        }
 
         feilHvis(!harTilgangTilSteg) {
             "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."

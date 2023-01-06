@@ -177,10 +177,11 @@ internal class StegServiceTest : OppslagSpringRunnerTest() {
         vedtakService.lagreVedtak(InnvilgelseOvergangsstønad("", ""), behandling.id, fagsak.stønadstype)
         BrukerContextUtil.mockBrukerContext("navIdent")
         val beslutteVedtakDto = BeslutteVedtakDto(true, "")
-        val assertThrows = assertThrows<Feil> {
+        val feil = assertThrows<Feil> {
             stegService.håndterBeslutteVedtak(saksbehandling(fagsak, behandling), beslutteVedtakDto)
         }
-        assertThat(assertThrows.message).isEqualTo("navIdent kan ikke utføre steg 'Beslutte vedtak' - behandlingen har status: Iverksetter vedtak")
+        assertThat(feil.message).isEqualTo("Kan ikke utføre 'Beslutte vedtak' når behandlingstatus er Iverksetter vedtak")
+
     }
 
     private fun behandlingSomIverksettes(fagsak: Fagsak): Behandling {
