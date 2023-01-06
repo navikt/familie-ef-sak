@@ -78,7 +78,6 @@ spec:
         - application: familie-ef-proxy
         - application: historisk-pensjon
           namespace: historisk
-          cluster: dev-fss
         - application: veilarbregistrering
           namespace: paw
       external:
