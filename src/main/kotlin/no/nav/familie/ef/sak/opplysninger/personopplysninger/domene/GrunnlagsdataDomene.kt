@@ -36,7 +36,7 @@ data class GrunnlagsdataMedMetadata(
     val opprettetTidspunkt: LocalDateTime
 ) {
 
-    fun harRelevanteGrunnlagsdataEndretSegSiden(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+    fun erRelevanteGrunnlagsdataForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
         return erAdresserEndretSiden(tidligereGrunnlagsdata) ||
             erSivilstandOppdatertSiden(tidligereGrunnlagsdata) ||
             harBarnEndretSeg(tidligereGrunnlagsdata)

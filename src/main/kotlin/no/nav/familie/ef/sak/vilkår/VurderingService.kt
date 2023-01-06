@@ -52,7 +52,7 @@ class VurderingService(
     @Transactional
     fun hentOpprettEllerOppdaterVurderinger(behandlingId: UUID): VilkårDto {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        if (erInitiellVurderingAvVilkår(behandling) && harRelevantGrunnlagsdataEndretSeg(behandlingId)) {
+        if (behandling.harStatusOpprettet && harRelevantGrunnlagsdataEndretSeg(behandlingId)) {
             grunnlagsdataService.oppdaterOgHentNyGrunnlagsdata(behandlingId)
             vilkårsvurderingRepository.deleteByBehandlingId(behandlingId)
         }
@@ -144,10 +144,6 @@ class VurderingService(
         }
     }
 
-    private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {
-        return saksbehandling.status == BehandlingStatus.OPPRETTET
-    }
-
     private fun lagreNyeVilkårsvurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata
@@ -167,7 +163,7 @@ class VurderingService(
     private fun harRelevantGrunnlagsdataEndretSeg(behandlingId: UUID): Boolean {
         val oppdaterteGrunnlagsdata = grunnlagsdataService.hentOppdaterteGrunnlagsdataFraRegister(behandlingId)
         val eksisterendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
-        return oppdaterteGrunnlagsdata.harRelevanteGrunnlagsdataEndretSegSiden(eksisterendeGrunnlagsdata)
+        return oppdaterteGrunnlagsdata.erRelevanteGrunnlagsdataForskjelligMed(eksisterendeGrunnlagsdata)
     }
 
     /**

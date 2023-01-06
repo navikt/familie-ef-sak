@@ -96,7 +96,7 @@ class VurderingStegService(
             stegService.håndterVilkår(behandling).id
         } else if (behandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)
-        } else if (erInitiellVurderingAvVilkår(behandling)) {
+        } else if (behandling.harStatusOpprettet) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
             opprettBehandlingsstatistikkTask(behandling)
         }
@@ -104,10 +104,6 @@ class VurderingStegService(
 
     private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
-    }
-
-    private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {
-        return saksbehandling.status == BehandlingStatus.OPPRETTET
     }
 
     private fun nullstillVilkårMedNyeHovedregler(
