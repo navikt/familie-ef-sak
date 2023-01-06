@@ -142,7 +142,6 @@ PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
 FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
-FAMILIE_OPPDRAG_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-oppdrag/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
 ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.veilarbregistrering/.default
