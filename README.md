@@ -16,7 +16,7 @@ secret kan hentes fra cluster med
 
 * `AZURE_APP_CLIENT_ID` (fra secret)
 * `AZURE_APP_CLIENT_SECRET` (fra secret)
-* Scope for den aktuelle tjenesten (`FAMILIE_INTEGRASJONER_SCOPE`, `FAMILIE_OPPDRAG_SCOPE`, ...)
+* Scope for den aktuelle tjenesten (`FAMILIE_INTEGRASJONER_SCOPE`, ...)
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss på vault. Merk at client id og client secret har andre navn i applikasjonens mappe. 
 Disse kan alternativt hentes fra azure-mappen i vault, der vil de ha riktig navn. Variablene legges inn under ApplicationLocal -> Edit Configurations -> Environment Variables. 
