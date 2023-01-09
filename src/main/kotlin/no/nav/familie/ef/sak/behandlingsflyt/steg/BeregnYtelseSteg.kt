@@ -39,7 +39,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
 import no.nav.familie.ef.sak.vedtak.dto.erSammenhengende
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
-import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
+import no.nav.familie.ef.sak.vedtak.historikk.erAktivVedtaksperiode
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -144,7 +144,7 @@ class BeregnYtelseSteg(
     ) {
         val historikk = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
         val historiskeSanksjonsperioder = historikk
-            .filter { it.erIkkeFjernet() }
+            .filter { it.erAktivVedtaksperiode() }
             .filter { it.erSanksjon }
             .map { it.andel.periode to it.sanksjonsårsak }
             .toSet()
@@ -158,7 +158,7 @@ class BeregnYtelseSteg(
 
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
         val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
-            .filter { it.erIkkeFjernet() }
+            .filter { it.erAktivVedtaksperiode() }
             .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
         nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
             feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
@@ -511,7 +511,7 @@ class BeregnYtelseSteg(
             "Kan ikke opprette sanksjon når det ikke finnes en tidligere behandling"
         }
         val erAlleredeSanksjonertOppgittMåned = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
-            .filter { it.erIkkeFjernet() }
+            .filter { it.erAktivVedtaksperiode() }
             .any { it.erSanksjon && it.andel.periode == vedtak.periode.tilPeriode() }
         brukerfeilHvis(erAlleredeSanksjonertOppgittMåned) {
             "Behandlingen er allerede sanksjonert ${vedtak.periode.fom}"

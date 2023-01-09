@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
-import no.nav.familie.ef.sak.vedtak.historikk.erIkkeFjernet
+import no.nav.familie.ef.sak.vedtak.historikk.erAktivVedtaksperiode
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysPeriode
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetilsynBisysResponse
 import no.nav.familie.eksterne.kontrakter.bisys.Periode
@@ -80,7 +80,7 @@ class BisysBarnetilsynService(
         val startdato = tilkjentYtelseService.hentForBehandling(sisteGjeldendeBehandling.id).startdato
 
         val historikk = andelsHistorikkService.hentHistorikk(fagsak.id, null)
-            .filter { it.erIkkeFjernet() }
+            .filter { it.erAktivVedtaksperiode() }
             .filter { it.andel.beløp > 0 && it.andel.periode.tomDato >= fomDato }
 
         val barnIdenter = historikk.flatMap { it.andel.barn }

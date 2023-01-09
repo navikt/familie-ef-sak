@@ -35,7 +35,11 @@ data class AndelHistorikkDto(
     val endring: HistorikkEndring?
 )
 
-fun AndelHistorikkDto.erIkkeFjernet() =
+/**
+ * AndelHistorikk kan inneholde andeler som er fjernet eller erstatte,
+ * disse skal ikke tas med når man skal plukke ut alle aktive andelene
+ */
+fun AndelHistorikkDto.erAktivVedtaksperiode() =
     this.endring?.type == null || this.endring.type == EndringType.SPLITTET
 
 data class AndelMedGrunnlagDto(
