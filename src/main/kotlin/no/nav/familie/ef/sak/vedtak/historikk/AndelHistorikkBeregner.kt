@@ -182,8 +182,7 @@ object AndelHistorikkBeregner {
         historikk: MutableList<AndelHistorikkHolder>
     ) {
         val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
-        // TODO opphør??
-        if (vedtaksperiode !is Sanksjonsperiode && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
+        if (vedtaksperiode !is Sanksjonsperiode && vedtaksperiode !is Opphørsperiode && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
             historikk.filter { it.andel.stønadFom > andel.stønadFom }
                 .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
                 .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelseMedVedtakstidspunkt) }
