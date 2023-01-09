@@ -127,18 +127,18 @@ Egenskap: Andelhistorikk: Opphør
 
     Gitt følgende vedtak
       | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Opphørsdato |
-      | 1            | 01.2021         | 03.2021         |                 |             |
-      | 2            | 04.2021         | 05.2021         |                 |             |
-      | 3            |                 |                 | OPPHØRT         | 05.2021     |
+      | 1            | 01.2021         | 02.2021         |                 |             |
+      | 2            | 03.2021         | 04.2021         |                 |             |
+      | 3            |                 |                 | OPPHØRT         | 04.2021     |
 
     Når beregner ytelse
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Er opphør |
-      | 1            | 01.2021         | 03.2021         |              |                       |           |
-      | 2            | 04.2021         | 04.2021         | SPLITTET     | 3                     |           |
-      | 2            | 05.2021         | 05.2021         | FJERNET      | 3                     |           |
-      | 3            | 05.2021         | 05.2021         |              |                       | Ja        |
+      | 1            | 01.2021         | 02.2021         |              |                       |           |
+      | 2            | 03.2021         | 03.2021         | SPLITTET     | 3                     |           |
+      | 2            | 04.2021         | 04.2021         | FJERNET      | 3                     |           |
+      | 3            | 04.2021         | 04.2021         |              |                       | Ja        |
 
   Scenario: Opphør innvilget periode, innvilger en ny periode og opphører den andre innvilgede perioden på nytt
 
