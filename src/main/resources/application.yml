@@ -140,7 +140,7 @@ no.nav.security.jwt:
       historisk-pensjon-onbehalfof:
         resource-url: ${HISTORISK_PENSJON_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${HISTORISK_PENSJON_SCOPE}
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
