@@ -129,10 +129,7 @@ object VedtakHistorikkBeregner {
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
                 acc + Pair(
                     vedtak.behandlingId,
-                    Vedtaksdata(
-                        vedtak.vedtakstidspunkt,
-                        lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon)
-                    )
+                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon))
                 )
             }
             .toMap()
