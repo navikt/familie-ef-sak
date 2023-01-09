@@ -30,6 +30,7 @@ internal class AndelHistorikkDtoKtTest {
         assertThat(andel.medOpphør().medEndring(EndringType.SPLITTET).erAktivVedtaksperiode()).isFalse
     }
 
+
     private fun AndelHistorikkDto.medOpphør() = this.copy(erOpphør = true)
 
     private fun AndelHistorikkDto.medEndring(endringType: EndringType) =
