@@ -98,7 +98,8 @@ internal class VedtakTest {
                 1,
                 emptyList(),
                 true,
-                Sanksjonsårsak.SAGT_OPP_STILLING
+                Sanksjonsårsak.SAGT_OPP_STILLING,
+                PeriodetypeBarnetilsyn.SANKSJON_1_MND
             )
             assertThat(periode).isNotNull
         }
@@ -111,7 +112,8 @@ internal class VedtakTest {
                     1,
                     emptyList(),
                     null,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
                 )
             }.hasMessageContaining("MidlerTidigOpphør må settes hvis sanksjon")
             assertThatThrownBy {
@@ -120,7 +122,8 @@ internal class VedtakTest {
                     1,
                     emptyList(),
                     false,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
                 )
             }.hasMessageContaining("MidlerTidigOpphør må settes hvis sanksjon")
         }

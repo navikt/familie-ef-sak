@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.felles.util.EnvUtil
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Periodetype
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.Logger
@@ -38,11 +38,11 @@ class PatchPeriodetypeBarnetilsynController(
         val patchetSaker = barnetilsynSaker.map { vedtak ->
             val nyePerioder = vedtak.barnetilsyn?.perioder?.map { periode ->
                 val periodetype = if (vedtak.resultatType == ResultatType.SANKSJONERE) {
-                    Periodetype.SANKSJON_1_MND
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
                 } else if (periode.erMidlertidigOpphør == true) {
-                    Periodetype.OPPHØR
+                    PeriodetypeBarnetilsyn.OPPHØR
                 } else {
-                    Periodetype.ORDINÆR
+                    PeriodetypeBarnetilsyn.ORDINÆR
                 }
                 val nyPeriode =
                     periode.copy(

@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -90,7 +92,10 @@ object VedtakDtoUtil {
             Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
             listOf(barnId),
             500,
-            false
+            false,
+            null,
+            PeriodetypeBarnetilsyn.ORDINÆR,
+            AktivitetstypeBarnetilsyn.I_ARBEID,
         )
 
     fun periodeMedBeløpDto() =
@@ -98,7 +103,7 @@ object VedtakDtoUtil {
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
             Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
-            1000
+            1000,
         )
 
     fun tilleggsstønadDto() =

@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
-import no.nav.familie.ef.sak.vedtak.domain.Periodetype
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.assertj.core.api.Assertions.assertThat
@@ -29,7 +29,7 @@ internal class PatchPeriodetypeBarnetilsynControllerTest : OppslagSpringRunnerTe
     private lateinit var patchPeriodetypeBarnetilsynController: PatchPeriodetypeBarnetilsynController
 
     @Test
-    internal fun `skal oppdatere sanksjoner`() {
+    internal fun `skal patche vedtak`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
 
@@ -42,19 +42,22 @@ internal class PatchPeriodetypeBarnetilsynControllerTest : OppslagSpringRunnerTe
                 datoTil = LocalDate.of(2023, Month.JANUARY, 31),
                 utgifter = 5000,
                 barn = listOf(barn1, barn2),
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             ),
             Barnetilsynperiode(
                 datoFra = LocalDate.of(2023, Month.FEBRUARY, 1),
                 datoTil = LocalDate.of(2023, Month.FEBRUARY, 28),
                 utgifter = 5000,
                 barn = listOf(barn2),
-                erMidlertidigOpphør = true
+                erMidlertidigOpphør = true,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             ),
             Barnetilsynperiode(
                 datoFra = LocalDate.of(2023, Month.MARCH, 1),
                 datoTil = LocalDate.of(2023, Month.MARCH, 31),
                 utgifter = 7000,
                 barn = listOf(barn1),
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             )
         )
         val vedtakBarnetilsyn = BarnetilsynWrapper(perioder = barnetilsynPerioder, begrunnelse = "begrunnelse")
@@ -75,7 +78,7 @@ internal class PatchPeriodetypeBarnetilsynControllerTest : OppslagSpringRunnerTe
                 datoTil = LocalDate.of(2023, Month.JANUARY, 31),
                 utgifter = 5000,
                 barn = listOf(barn1, barn2),
-                periodetype = Periodetype.ORDINÆR
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR
             )
         )
         assertThat(patchetVedtak.barnetilsyn?.perioder?.get(1)).isEqualTo(
@@ -85,7 +88,7 @@ internal class PatchPeriodetypeBarnetilsynControllerTest : OppslagSpringRunnerTe
                 utgifter = 5000,
                 barn = listOf(barn2),
                 erMidlertidigOpphør = true,
-                periodetype = Periodetype.OPPHØR
+                periodetype = PeriodetypeBarnetilsyn.OPPHØR
             )
         )
         assertThat(patchetVedtak.barnetilsyn?.perioder?.get(2)).isEqualTo(
@@ -94,7 +97,7 @@ internal class PatchPeriodetypeBarnetilsynControllerTest : OppslagSpringRunnerTe
                 datoTil = LocalDate.of(2023, Month.MARCH, 31),
                 utgifter = 7000,
                 barn = listOf(barn1),
-                periodetype = Periodetype.ORDINÆR
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR
             )
         )
     }

@@ -2,9 +2,10 @@ package no.nav.familie.ef.sak.vedtak.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
-import no.nav.familie.ef.sak.vedtak.domain.Periodetype
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -48,7 +49,9 @@ data class UtgiftsperiodeDto(
     val barn: List<UUID>,
     val utgifter: Int,
     val erMidlertidigOpphør: Boolean,
-    val sanksjonsårsak: Sanksjonsårsak? = null
+    val sanksjonsårsak: Sanksjonsårsak? = null,
+    val periodetype: PeriodetypeBarnetilsyn? = null, // Skal bli non-nullable
+    val aktivitetstype: AktivitetstypeBarnetilsyn? = null
 )
 
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
@@ -62,7 +65,8 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         barn = this.barn,
         erMidlertidigOpphør = this.erMidlertidigOpphør,
         sanksjonsårsak = this.sanksjonsårsak,
-        periodetype = if (erMidlertidigOpphør) Periodetype.OPPHØR else Periodetype.ORDINÆR
+        periodetype = this.periodetype ?: if (erMidlertidigOpphør) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitet = this.aktivitetstype
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -85,7 +89,9 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 utgifter = it.utgifter,
                 barn = it.barn,
                 erMidlertidigOpphør = it.erMidlertidigOpphør ?: false,
-                sanksjonsårsak = it.sanksjonsårsak
+                sanksjonsårsak = it.sanksjonsårsak,
+                periodetype = it.periodetype,
+                aktivitetstype = it.aktivitetstype
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },

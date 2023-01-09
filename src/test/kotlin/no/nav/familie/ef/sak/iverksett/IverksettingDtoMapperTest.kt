@@ -617,7 +617,8 @@ internal class IverksettingDtoMapperTest {
                     "datoFra": "2022-03-27",
                     "datoTil": "2022-03-28",
                     "utgifter": 10,
-                    "barn": ["d1d105bb-a573-4870-932e-21def0226cfa"]
+                    "barn": ["d1d105bb-a573-4870-932e-21def0226cfa"],
+                    "periodetype": "ORDINÆR"
                 }] 
             },
             "kontantstøtte": {
