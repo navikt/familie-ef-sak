@@ -3,7 +3,9 @@ package no.nav.familie.ef.sak.vedtak.historikk
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.historikk.BehandlingHistorikkUtil.lagBehandlingHistorikkData
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -91,6 +93,7 @@ object AndelHistorikkBeregner {
             val aktivitet = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
             val periodeType = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
             val barnetilsyn = if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) vedtaksperiode else null
+            val sanksjon = if(vedtaksperiode is Sanksjonsperiode) vedtaksperiode else null
             val behandling = behandlingerPåId.getValue(it.behandlingId)
 
             AndelHistorikkDto(
@@ -100,12 +103,12 @@ object AndelHistorikkBeregner {
                 vedtakstidspunkt = it.vedtakstidspunkt,
                 saksbehandler = it.saksbehandler,
                 andel = AndelMedGrunnlagDto(andel = it.andel, barnetilsyn),
-                aktivitet = aktivitet,
-                periodeType = periodeType,
+                aktivitet = aktivitet ?: sanksjon?.let { AktivitetType.IKKE_AKTIVITETSPLIKT },
+                periodeType = periodeType ?: sanksjon?.let { VedtaksperiodeType.SANKSJON },
                 endring = it.endring,
                 aktivitetArbeid = barnetilsyn?.aktivitetArbeid,
-                erSanksjon = vedtaksperiode.erSanksjon,
-                sanksjonsårsak = vedtaksperiode.sanksjonsårsak
+                erSanksjon = sanksjon != null,
+                sanksjonsårsak = sanksjon?.sanksjonsårsak
             )
         }
     }
@@ -157,7 +160,7 @@ object AndelHistorikkBeregner {
         historikk: MutableList<AndelHistorikkHolder>
     ) {
         val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
-        if (!vedtaksperiode.erSanksjon && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
+        if (vedtaksperiode !is Sanksjonsperiode && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
             historikk.filter { it.andel.stønadFom > andel.stønadFom }
                 .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
                 .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelseMedVedtakstidspunkt) }
@@ -168,7 +171,7 @@ object AndelHistorikkBeregner {
         vedtaksperioder: List<Vedtakshistorikkperiode>,
         tilkjentYtelse: TilkjentYtelse
     ) =
-        vedtaksperioder.filter { it.erSanksjon }.map {
+        vedtaksperioder.filter { it is Sanksjonsperiode }.map {
             AndelTilkjentYtelse(
                 beløp = 0,
                 periode = it.periode,
@@ -274,7 +277,7 @@ object AndelHistorikkBeregner {
         nyAndel: AndelTilkjentYtelse,
         nyPeriode: Vedtakshistorikkperiode
     ): Boolean {
-        return this.vedtaksperiode.erSanksjon && nyPeriode.erSanksjon &&
+        return this.vedtaksperiode is Sanksjonsperiode && nyPeriode is Sanksjonsperiode &&
             this.vedtaksperiode.periode == nyAndel.periode
     }
 
