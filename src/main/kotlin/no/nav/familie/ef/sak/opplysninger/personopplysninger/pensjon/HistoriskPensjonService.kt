@@ -15,4 +15,4 @@ class HistoriskPensjonService(private val historiskPensjonClient: HistoriskPensj
 }
 
 data class HistoriskPensjonResponse(val harPensjonsdata: Boolean, val webAppUrl: String)
-data class HistoriskPensjonRequest(val personIdent: String)
+data class HistoriskPensjonRequest(val fnr: String)
