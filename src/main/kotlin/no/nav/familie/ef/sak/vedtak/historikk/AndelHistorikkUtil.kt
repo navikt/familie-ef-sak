@@ -21,3 +21,8 @@ object AndelHistorikkUtil {
     ) =
         first.andel.periode.påfølgesAv(second.andel.periode)
 }
+
+data class HistorikkKonfigurasjon(
+    val brukIkkeVedtatteSatser: Boolean,
+    val lagOpphørsperiode: Boolean
+)

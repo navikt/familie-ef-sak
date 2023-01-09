@@ -38,14 +38,20 @@ object AndelHistorikkBeregner {
         behandlinger: List<Behandling>,
         tilOgMedBehandlingId: UUID?,
         behandlingIdsTilAktivitetArbeid: Map<UUID, SvarId?>,
-        brukIkkeVedtatteSatser: Boolean
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkDto> {
         val behandlingHistorikkData =
             lagBehandlingHistorikkData(behandlinger, vedtaksliste, tilkjentYtelser, behandlingIdsTilAktivitetArbeid)
         return if (tilOgMedBehandlingId == null) {
-            lagHistorikk(tilkjentYtelser, behandlingHistorikkData, behandlinger, brukIkkeVedtatteSatser)
+            lagHistorikk(tilkjentYtelser, behandlingHistorikkData, behandlinger, konfigurasjon)
         } else {
-            lagHistorikkTilBehandlingId(tilkjentYtelser, behandlingHistorikkData, behandlinger, tilOgMedBehandlingId, brukIkkeVedtatteSatser)
+            lagHistorikkTilBehandlingId(
+                tilkjentYtelser,
+                behandlingHistorikkData,
+                behandlinger,
+                tilOgMedBehandlingId,
+                konfigurasjon
+            )
         }
     }
 
@@ -57,7 +63,7 @@ object AndelHistorikkBeregner {
         vedtaksliste: List<BehandlingHistorikkData>,
         behandlinger: List<Behandling>,
         tilOgMedBehandlingId: UUID?,
-        brukIkkeVedtatteSatser: Boolean
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkDto> {
         val filtrerteBehandlinger = filtrerBehandlinger(behandlinger, tilOgMedBehandlingId)
 
@@ -65,7 +71,7 @@ object AndelHistorikkBeregner {
         val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
         val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
 
-        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrerteBehandlinger, brukIkkeVedtatteSatser)
+        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrerteBehandlinger, konfigurasjon)
     }
 
     private fun filtrerBehandlinger(
@@ -83,17 +89,20 @@ object AndelHistorikkBeregner {
         tilkjentYtelser: List<TilkjentYtelse>,
         behandlingHistorikkData: List<BehandlingHistorikkData>,
         behandlinger: List<Behandling>,
-        brukIkkeVedtatteSatser: Boolean
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkDto> {
-        val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData, brukIkkeVedtatteSatser)
+        val historikk =
+            lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData, konfigurasjon)
         val behandlingerPåId = behandlinger.associateBy { it.id }
 
         return historikk.map {
             val vedtaksperiode = it.vedtaksperiode
-            val aktivitet = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
-            val periodeType = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
+            val aktivitet =
+                if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
+            val periodeType =
+                if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
             val barnetilsyn = if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) vedtaksperiode else null
-            val sanksjon = if(vedtaksperiode is Sanksjonsperiode) vedtaksperiode else null
+            val sanksjon = if (vedtaksperiode is Sanksjonsperiode) vedtaksperiode else null
             val behandling = behandlingerPåId.getValue(it.behandlingId)
 
             AndelHistorikkDto(
@@ -117,32 +126,44 @@ object AndelHistorikkBeregner {
     private fun lagHistorikkHolders(
         tilkjentYtelser: List<TilkjentYtelse>,
         behandlingHistorikkData: List<BehandlingHistorikkData>,
-        brukIkkeVedtatteSatser: Boolean
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkHolder> {
         val historikk = mutableListOf<AndelHistorikkHolder>()
 
-        val vedtaksdataPerBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData, brukIkkeVedtatteSatser)
+        val vedtaksdataPerBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
             val vedtaksdata = vedtaksdataPerBehandling.getValue(tilkjentYtelse.behandlingId)
             val vedtaksperioder = vedtaksdata.perioder
-            val tilkjentYtelseMedVedtakstidspunkt = TilkjentYtelseMedVedtakstidspunkt(tilkjentYtelse, vedtaksdata.vedtakstidspunkt)
+            val tilkjentYtelseMedVedtakstidspunkt =
+                TilkjentYtelseMedVedtakstidspunkt(tilkjentYtelse, vedtaksdata.vedtakstidspunkt)
 
             val andelerFraSanksjonOgOpphør = lagAndelerFraSanksjonerOgOpphør(vedtaksperioder, tilkjentYtelse)
-            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjonOgOpphør).sortedBy { it.stønadFom }.forEach { andel ->
+            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjonOgOpphør).sortedBy { it.stønadFom }
+                .forEach { andel ->
 
-                val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
-                markerHistorikkEtterAndelSomFjernet(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode, historikk)
+                    val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
+                    markerHistorikkEtterAndelSomFjernet(
+                        tilkjentYtelseMedVedtakstidspunkt,
+                        andel,
+                        vedtaksperiode,
+                        historikk
+                    )
 
-                val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
-                val index = finnIndeksForNyAndel(historikk, andel)
-                if (andelFraHistorikk == null) {
-                    historikk.add(index, lagNyAndel(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode))
-                } else {
-                    markerTidligereMedEndringOgReturnerNyAndel(tilkjentYtelseMedVedtakstidspunkt, andel, andelFraHistorikk, vedtaksperiode)
-                        ?.let { historikk.add(index, it) }
+                    val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
+                    val index = finnIndeksForNyAndel(historikk, andel)
+                    if (andelFraHistorikk == null) {
+                        historikk.add(index, lagNyAndel(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode))
+                    } else {
+                        markerTidligereMedEndringOgReturnerNyAndel(
+                            tilkjentYtelseMedVedtakstidspunkt,
+                            andel,
+                            andelFraHistorikk,
+                            vedtaksperiode
+                        )
+                            ?.let { historikk.add(index, it) }
+                    }
                 }
-            }
 
             markerAndelerSomErFjernet(tilkjentYtelseMedVedtakstidspunkt, historikk)
         }
