@@ -111,7 +111,7 @@ data class Barnetilsynperiode(
     val barn: List<UUID>,
     val erMidlertidigOpphør: Boolean? = false,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
-    val periodetype: PeriodetypeBarnetilsyn,
+    val periodetype: PeriodetypeBarnetilsyn? = null,
     val aktivitetstype: AktivitetstypeBarnetilsyn? = null
 ) : VedtaksperiodeMedSanksjonsårsak {
 
