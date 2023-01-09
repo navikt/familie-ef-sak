@@ -17,12 +17,14 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringResponse
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -37,6 +39,7 @@ class AutomatiskJournalføringService(
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService
 ) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun automatiskJournalførTilBehandling(
@@ -74,7 +77,18 @@ class AutomatiskJournalføringService(
                 StønadType.OVERGANGSSTØNAD -> harIngenInnslagIInfotrygd(ident, stønadstype)
                 else -> true
             }
-            REVURDERING -> !harÅpenBehandling(behandlinger) && featureToggleService.isEnabled(Toggle.AUTOMATISK_JOURNALFØR_REVURDERING)
+
+            REVURDERING -> kanAutomatiskJournalføreRevurdering(behandlinger, fagsak)
+        }
+    }
+
+    private fun kanAutomatiskJournalføreRevurdering(behandlinger: List<Behandling>, fagsak: Fagsak?): Boolean {
+        return if (!harÅpenBehandling(behandlinger)) {
+            secureLogger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
+            featureToggleService.isEnabled(Toggle.AUTOMATISK_JOURNALFØR_REVURDERING)
+        } else {
+            secureLogger.info("Kan ikke automatisk journalføre for fagsak: ${fagsak?.id}")
+            false
         }
     }
 
