@@ -15,10 +15,10 @@ Egenskap: Andelhistorikk: Opphør og sanksjon
 
     Så forvent følgende historikk
       | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Vedtaksperiode | Er opphør |
-      | 1            | 01.2021         | 01.2021         | SPLITTET     | 3                     |                |           |
+      | 1            | 01.2021         | 01.2021         | SPLITTET     | 2                     |                |           |
       | 1            | 02.2021         | 02.2021         | FJERNET      | 2                     |                |           |
-      | 2            | 01.2021         | 01.2021         | FJERNET      | 3                     |                | Ja        |
-      | 3            | 01.2021         | 01.2021         |              |                       | SANKSJON       |           |
+      | 2            | 02.2021         | 02.2021         | ERSTATTET    | 3                     |                | Ja        |
+      | 3            | 02.2021         | 02.2021         |              |                       | SANKSJON       |           |
 
   Scenario: Sanksjonerer før tidligere opphør
 
