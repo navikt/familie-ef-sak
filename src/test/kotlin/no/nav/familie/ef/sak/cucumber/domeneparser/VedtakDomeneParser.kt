@@ -30,7 +30,6 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Månedsperiode
-import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -177,15 +176,23 @@ object VedtakDomeneParser {
     ): List<Vedtaksperiode> {
         return rader.map { rad ->
             val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
+            val vedtaksperiodeType = parseVedtaksperiodeType(rad)
             Vedtaksperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
-                aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
-                periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE,
+                aktivitet = parseAktivitetType(rad) ?: defaultAktivitet(vedtaksperiodeType),
+                periodeType = vedtaksperiodeType ?: VedtaksperiodeType.HOVEDPERIODE,
                 sanksjonsårsak = sanksjonsårsak
             )
         }
     }
+
+    private fun defaultAktivitet(vedtaksperiodeType: VedtaksperiodeType?): AktivitetType =
+        if(vedtaksperiodeType == VedtaksperiodeType.SANKSJON) {
+            AktivitetType.IKKE_AKTIVITETSPLIKT
+        } else {
+            AktivitetType.BARN_UNDER_ETT_ÅR
+        }
 
     /**
      * Bruker sanksjonsårsak hvis den er definiert

@@ -68,8 +68,6 @@ Egenskap: Andelhistorikk: Opphør
       | 2            | 02.2021         | 02.2021         |              |                       | Ja        |
       | 3            | 03.2021         | 03.2021         |              |                       |           |
 
-    # TODO sanksjon
-
   Scenario: Flere innvilget/opphør
 
     Gitt følgende vedtak
