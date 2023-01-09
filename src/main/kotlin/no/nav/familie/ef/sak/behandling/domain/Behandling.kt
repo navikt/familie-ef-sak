@@ -78,6 +78,10 @@ enum class BehandlingStatus {
     SATT_PÅ_VENT
     ;
 
+    fun visningsnavn(): String {
+        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
+    }
+
     fun behandlingErLåstForVidereRedigering(): Boolean =
         setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
 }
