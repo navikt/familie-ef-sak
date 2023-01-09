@@ -126,7 +126,6 @@ object AndelHistorikkRunner {
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
         val output = AndelHistorikkBeregner.lagHistorikk(
-            stønadstype = StønadType.OVERGANGSSTØNAD,
             grupper.input,
             grupper.vedtaksliste,
             behandlinger,

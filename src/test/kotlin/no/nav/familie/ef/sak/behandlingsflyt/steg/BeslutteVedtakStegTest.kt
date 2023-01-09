@@ -198,6 +198,14 @@ internal class BeslutteVedtakStegTest {
         assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
     }
 
+    @Test
+    internal fun `Skal kaste feil når behandling allerede er iverksatt `() {
+        val behandling = behandling(fagsak, BehandlingStatus.IVERKSETTER_VEDTAK, StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT)
+        val apiFeil =
+            assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(saksbehandling(behandling = behandling)) }
+        assertThat(apiFeil.message).isEqualTo("Behandlingen er allerede besluttet. Status på behandling er 'Iverksetter vedtak'")
+    }
+
     private fun utførTotrinnskontroll(
         godkjent: Boolean,
         saksbehandling: Saksbehandling = opprettSaksbehandling(),

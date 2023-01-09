@@ -30,6 +30,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.historikk.HistorikkEndring
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -331,9 +332,9 @@ object VedtakDomeneParser {
         }.toMap()
     }
 
-    fun mapBehandlingForHistorikkEndring(dataTable: DataTable): List<ForventetHistorikk> {
+    fun mapBehandlingForHistorikkEndring(dataTable: DataTable, stønadstype: StønadType): List<ForventetHistorikk> {
         return dataTable.asMaps().map {
-            BehandlingForHistorikkEndringMapper().mapRad(it)
+            BehandlingForHistorikkEndringMapper().mapRad(it, stønadstype)
         }
     }
 
@@ -359,8 +360,9 @@ object VedtakDomeneParser {
 
     class BehandlingForHistorikkEndringMapper {
 
-        fun mapRad(rad: Map<String, String>): ForventetHistorikk {
-            val aktivitetType = parseAktivitetType(rad)
+        fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
+            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
+            val aktivitetType = parseAktivitetType(rad) ?: defaultAktivitetsType(stønadstype, erSanksjon)
             return ForventetHistorikk(
                 behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                 historikkEndring = parseEndringType(rad)?.let { endringType ->
@@ -384,11 +386,20 @@ object VedtakDomeneParser {
                 antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
                 arbeidAktivitet = parseArbeidAktivitet(rad),
-                erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad),
+                erSanksjon = erSanksjon,
                 sanksjonsårsak = parseSanksjonsårsak(rad),
                 vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad),
                 erOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_OPPHØR, rad) ?: false
             )
+        }
+
+        private fun defaultAktivitetsType(
+            stønadstype: StønadType,
+            erSanksjon: Boolean?
+        ) = when {
+            erSanksjon == true -> AktivitetType.IKKE_AKTIVITETSPLIKT
+            stønadstype == StønadType.OVERGANGSSTØNAD -> AktivitetType.BARN_UNDER_ETT_ÅR
+            else -> null
         }
     }
 }

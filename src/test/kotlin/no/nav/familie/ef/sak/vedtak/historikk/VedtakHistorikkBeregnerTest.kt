@@ -142,7 +142,7 @@ internal class VedtakHistorikkBeregnerTest {
                 tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
             )
         }
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(StønadType.OVERGANGSSTØNAD,behandlingHistorikkData, false)
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, false)
             .map { it.key to it.value.perioder }
             .toMap()
     }
@@ -157,7 +157,6 @@ internal class VedtakHistorikkBeregnerTest {
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
         Månedsperiode(this.datoFra, this.datoTil),
-        sanksjonsårsak = null,
         this.aktivitet,
         this.periodeType
     )

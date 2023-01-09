@@ -188,11 +188,9 @@ class StegService(
         saksbehandlerIdent: String,
         behandlingSteg: BehandlingSteg<T>
     ) {
-        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
-
-        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
-
         utførBehandlingsvalidering(behandlingSteg, saksbehandling)
+        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
+        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
     }
 
     private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
@@ -220,10 +218,10 @@ class StegService(
         behandlingSteg: BehandlingSteg<T>,
         saksbehandling: Saksbehandling
     ) {
-        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
-            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${saksbehandling.status}")
-        }
         behandlingSteg.validerSteg(saksbehandling)
+        feilHvis (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
+           "Kan ikke utføre '${behandlingSteg.stegType().displayName()}' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
+        }
     }
 
     private fun validerGyldigTilstand(
@@ -253,7 +251,6 @@ class StegService(
         saksbehandlerIdent: String
     ) {
         val rolleForSteg: BehandlerRolle = utledRolleForSteg(stegType, saksbehandling)
-
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, rolleForSteg)
 
         logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
