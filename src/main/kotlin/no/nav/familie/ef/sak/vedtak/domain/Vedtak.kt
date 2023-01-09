@@ -92,10 +92,15 @@ private fun VedtaksperiodeMedSanksjonsårsak.validerSanksjon1Måned() {
     }
 }
 
-enum class Periodetype {
+enum class PeriodetypeBarnetilsyn {
     ORDINÆR,
     OPPHØR,
     SANKSJON_1_MND
+}
+
+enum class AktivitetstypeBarnetilsyn {
+    I_ARBEID,
+    FORBIGÅENDE_SYKDOM
 }
 
 @Improvement("Kan barnetilsynperiode og vedtaksperiode sees på som én ting?")
@@ -106,7 +111,8 @@ data class Barnetilsynperiode(
     val barn: List<UUID>,
     val erMidlertidigOpphør: Boolean? = false,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
-    val periodetype: Periodetype? = null
+    val periodetype: PeriodetypeBarnetilsyn,
+    val aktivitetstype: AktivitetstypeBarnetilsyn? = null
 ) : VedtaksperiodeMedSanksjonsårsak {
 
     init {
@@ -122,7 +128,8 @@ data class Barnetilsynperiode(
         barn: List<UUID>,
         erMidlertidigOpphør: Boolean? = false,
         sanksjonsårsak: Sanksjonsårsak? = null,
-        periodetype: Periodetype? = null
+        periodetype: PeriodetypeBarnetilsyn,
+        aktivitet: AktivitetstypeBarnetilsyn? = null
     ) : this(
         datoFra = periode.fomDato,
         datoTil = periode.tomDato,
@@ -130,7 +137,8 @@ data class Barnetilsynperiode(
         barn = barn,
         periodetype = periodetype,
         erMidlertidigOpphør = erMidlertidigOpphør,
-        sanksjonsårsak = sanksjonsårsak
+        sanksjonsårsak = sanksjonsårsak,
+        aktivitetstype = aktivitet
     )
 }
 

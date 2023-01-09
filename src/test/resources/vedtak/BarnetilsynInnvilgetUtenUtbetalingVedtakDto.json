@@ -8,7 +8,9 @@
       "barn": [
         "4ab497b2-a19c-4415-bf00-556ff8e9ce86"
       ],
-      "erMidlertidigOpphør": false
+      "erMidlertidigOpphør": false,
+      "periodetype": "ORDINÆR",
+      "aktivitetstype": "I_ARBEID"
     }
   ],
   "perioderKontantstøtte": [

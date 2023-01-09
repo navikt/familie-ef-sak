@@ -42,7 +42,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Periodetype
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -348,7 +348,7 @@ fun barnetilsynperiode(
     beløp: Int = 1000,
     barn: List<UUID>,
     sanksjonsårsak: Sanksjonsårsak? = null,
-    periodetype: Periodetype? = Periodetype.ORDINÆR
+    periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR
 ) = Barnetilsynperiode(
     periode = Månedsperiode(fom, tom),
     utgifter = beløp,

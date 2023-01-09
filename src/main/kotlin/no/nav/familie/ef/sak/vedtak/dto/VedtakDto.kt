@@ -17,7 +17,7 @@ import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Periodetype
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
@@ -191,7 +191,7 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 barn = emptyList(),
                 erMidlertidigOpphør = true,
                 sanksjonsårsak = this.sanksjonsårsak,
-                periodetype = Periodetype.SANKSJON_1_MND
+                periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND
             )
             Vedtak(
                 behandlingId = behandlingId,

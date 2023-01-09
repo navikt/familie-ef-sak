@@ -17,7 +17,7 @@ import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.ef.sak.vedtak.domain.Periodetype
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerUtgift
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkoleårsperiodeSkolepenger
@@ -214,7 +214,7 @@ object VedtakDomeneParser {
                 erMidlertidigOpphør = midlertidigOpphør
                     ?: (sanksjonsårsak != null),
                 sanksjonsårsak = sanksjonsårsak,
-                periodetype = if (midlertidigOpphør == true) Periodetype.OPPHØR else Periodetype.ORDINÆR
+                periodetype = if (midlertidigOpphør == true) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR
             )
         }
     }
