@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -24,7 +25,7 @@ class GrunnlagsdataService(
 ) {
 
     fun opprettGrunnlagsdata(behandlingId: UUID): GrunnlagsdataMedMetadata {
-        val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
+        val grunnlagsdataDomene = hentFraRegisterMedSøknadsdata(behandlingId)
         val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
         grunnlagsdataRepository.insert(grunnlagsdata)
         return GrunnlagsdataMedMetadata(
@@ -34,13 +35,12 @@ class GrunnlagsdataService(
         )
     }
 
-    fun hentOppdaterteGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataMedMetadata {
-        val grunnlagsdataDomene = hentGrunnlagsdataFraRegister(behandlingId)
-        val grunnlagsdata = Grunnlagsdata(behandlingId = behandlingId, data = grunnlagsdataDomene)
+    fun hentFraRegister(behandlingId: UUID): GrunnlagsdataMedMetadata {
+        val grunnlagsdata = hentFraRegisterMedSøknadsdata(behandlingId)
         return GrunnlagsdataMedMetadata(
-            grunnlagsdata.data,
-            grunnlagsdata.lagtTilEtterFerdigstilling,
-            grunnlagsdata.sporbar.opprettetTid
+            grunnlagsdata = grunnlagsdata,
+            lagtTilEtterFerdigstilling = false,
+            opprettetTidspunkt = LocalDateTime.now()
         )
     }
 
@@ -72,7 +72,7 @@ class GrunnlagsdataService(
         return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
     }
 
-    private fun hentGrunnlagsdataFraRegister(behandlingId: UUID): GrunnlagsdataDomene {
+    private fun hentFraRegisterMedSøknadsdata(behandlingId: UUID): GrunnlagsdataDomene {
         val stønadstype = fagsakService.hentFagsakForBehandling(behandlingId).stønadstype
         val søknad = when (stønadstype) {
             StønadType.OVERGANGSSTØNAD -> søknadService.hentOvergangsstønad(behandlingId)
@@ -81,15 +81,15 @@ class GrunnlagsdataService(
         }
 
         return if (søknad == null) {
-            hentGrunnlagsdataFraRegister(behandlingService.hentAktivIdent(behandlingId), emptyList())
+            hentFraRegisterForPersonOgAndreForeldre(behandlingService.hentAktivIdent(behandlingId), emptyList())
         } else {
             val personIdent = søknad.fødselsnummer
             val barneforeldreFraSøknad = søknad.barn.mapNotNull { it.annenForelder?.person?.fødselsnummer }
-            hentGrunnlagsdataFraRegister(personIdent, barneforeldreFraSøknad)
+            hentFraRegisterForPersonOgAndreForeldre(personIdent, barneforeldreFraSøknad)
         }
     }
 
-    fun hentGrunnlagsdataFraRegister(
+    fun hentFraRegisterForPersonOgAndreForeldre(
         personIdent: String,
         barneforeldreFraSøknad: List<String>
     ): GrunnlagsdataDomene {

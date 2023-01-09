@@ -36,27 +36,34 @@ data class GrunnlagsdataMedMetadata(
     val opprettetTidspunkt: LocalDateTime
 ) {
 
-    fun erRelevanteGrunnlagsdataForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
-        return erAdresserEndretSiden(tidligereGrunnlagsdata) ||
-            erSivilstandOppdatertSiden(tidligereGrunnlagsdata) ||
-            harBarnEndretSeg(tidligereGrunnlagsdata)
+    fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> {
+        return GrunnlagsdataEndring.values().filter {
+            when (it) {
+                GrunnlagsdataEndring.BARN -> erBarnForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.SIVILSTAND -> erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.ADRESSE_SØKER -> erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.ADRESSE_ANNEN_FORELDER -> erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata)
+            }
+        }
     }
 
-    fun erAdresserEndretSiden(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
-        val harSøkerEndretAdresse =
-            tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
+    private fun erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
+    }
+
+    private fun erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
         val harAnnenForelderEndretAdresse = tidligereGrunnlagsdata.grunnlagsdata.annenForelder.any { tidligereAnnenForelder ->
             val annenForelder = this.grunnlagsdata.annenForelder.find { it.personIdent == tidligereAnnenForelder.personIdent }
             tidligereAnnenForelder.bostedsadresse != annenForelder?.bostedsadresse
         }
-        return harSøkerEndretAdresse || harAnnenForelderEndretAdresse
+        return harAnnenForelderEndretAdresse
     }
 
-    fun erSivilstandOppdatertSiden(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+    private fun erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
         return this.grunnlagsdata.søker.sivilstand != tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
     }
 
-    fun harBarnEndretSeg(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+    private fun erBarnForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
         return this.grunnlagsdata.barn != tidligereGrunnlagsdata.grunnlagsdata.barn
     }
 }
@@ -154,3 +161,10 @@ data class TidligereInnvilgetVedtak(
     val harTidligereBarnetilsyn: Boolean = false,
     val harTidligereSkolepenger: Boolean = false
 )
+
+enum class GrunnlagsdataEndring {
+    BARN,
+    ADRESSE_ANNEN_FORELDER,
+    ADRESSE_SØKER,
+    SIVILSTAND,
+}
