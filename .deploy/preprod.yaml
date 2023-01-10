@@ -76,6 +76,7 @@ spec:
         - application: familie-ef-iverksett
         - application: familie-dokument
         - application: familie-ef-proxy
+          cluster: dev-fss
         - application: historisk-pensjon
           namespace: historisk
         - application: veilarbregistrering
