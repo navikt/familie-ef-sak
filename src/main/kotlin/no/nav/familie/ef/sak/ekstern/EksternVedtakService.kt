@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import org.springframework.stereotype.Service
@@ -40,6 +41,7 @@ class EksternVedtakService(
             vedtakstidspunkt = behandling.vedtakstidspunkt
                 ?: error("Mangler vedtakstidspunkt for behandling=${behandling.id}"),
             fagsystemType = fagsystemType,
+            regelverk = Regelverk.NASJONAL
         )
     }
 

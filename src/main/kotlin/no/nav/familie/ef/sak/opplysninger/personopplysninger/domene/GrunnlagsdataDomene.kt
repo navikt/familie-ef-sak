@@ -34,7 +34,39 @@ data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
     val lagtTilEtterFerdigstilling: Boolean,
     val opprettetTidspunkt: LocalDateTime
-)
+) {
+
+    fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> {
+        return GrunnlagsdataEndring.values().filter {
+            when (it) {
+                GrunnlagsdataEndring.BARN -> erBarnForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.SIVILSTAND -> erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.ADRESSE_SØKER -> erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.ADRESSE_ANNEN_FORELDER -> erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata)
+            }
+        }
+    }
+
+    private fun erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
+    }
+
+    private fun erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        val harAnnenForelderEndretAdresse = tidligereGrunnlagsdata.grunnlagsdata.annenForelder.any { tidligereAnnenForelder ->
+            val annenForelder = this.grunnlagsdata.annenForelder.find { it.personIdent == tidligereAnnenForelder.personIdent }
+            tidligereAnnenForelder.bostedsadresse != annenForelder?.bostedsadresse
+        }
+        return harAnnenForelderEndretAdresse
+    }
+
+    private fun erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return this.grunnlagsdata.søker.sivilstand != tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
+    }
+
+    private fun erBarnForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return this.grunnlagsdata.barn != tidligereGrunnlagsdata.grunnlagsdata.barn
+    }
+}
 
 data class GrunnlagsdataDomene(
     val søker: Søker,
@@ -129,3 +161,10 @@ data class TidligereInnvilgetVedtak(
     val harTidligereBarnetilsyn: Boolean = false,
     val harTidligereSkolepenger: Boolean = false
 )
+
+enum class GrunnlagsdataEndring {
+    BARN,
+    ADRESSE_ANNEN_FORELDER,
+    ADRESSE_SØKER,
+    SIVILSTAND,
+}

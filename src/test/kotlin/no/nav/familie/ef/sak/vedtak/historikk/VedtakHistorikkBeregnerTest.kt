@@ -153,7 +153,6 @@ internal class VedtakHistorikkBeregnerTest {
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
         Månedsperiode(this.datoFra, this.datoTil),
-        sanksjonsårsak = null,
         this.aktivitet,
         this.periodeType
     )
