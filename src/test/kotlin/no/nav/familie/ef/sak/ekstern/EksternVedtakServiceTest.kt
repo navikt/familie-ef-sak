@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingClient
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.Regelverk
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import org.assertj.core.api.Assertions.assertThat
@@ -126,5 +127,6 @@ internal class EksternVedtakServiceTest {
         resultat = "Delvis tilbakebetaling",
         vedtakstidspunkt = LocalDateTime.now(),
         fagsystemType = FagsystemType.TILBAKEKREVING,
+        regelverk = Regelverk.NASJONAL
     )
 }
