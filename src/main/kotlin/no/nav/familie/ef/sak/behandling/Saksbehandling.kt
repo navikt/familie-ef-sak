@@ -46,4 +46,6 @@ data class Saksbehandling(
     val erOmregning get() = årsak == BehandlingÅrsak.G_OMREGNING
 
     val erMaskinellOmregning get() = erOmregning && opprettetAv == SYSTEM_FORKORTELSE
+
+    val harStatusOpprettet get() = status == BehandlingStatus.OPPRETTET
 }

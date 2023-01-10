@@ -108,14 +108,14 @@ internal class VilkårGrunnlagServiceTest {
 
     @Test
     internal fun `mapping går ok`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
         service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
     }
 
     @Test
     internal fun `sortering av barnMedSamvær`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
 
         val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
@@ -127,7 +127,7 @@ internal class VilkårGrunnlagServiceTest {
 
     @Test
     internal fun `skal ikke ha barnepass for overgangsstønad`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
 
         val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
@@ -139,7 +139,7 @@ internal class VilkårGrunnlagServiceTest {
 
     @Test
     internal fun `skal ha barnepass for barnetilsyn`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak.copy(stønadstype = StønadType.BARNETILSYN)
 

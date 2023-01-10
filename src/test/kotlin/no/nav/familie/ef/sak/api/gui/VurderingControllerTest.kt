@@ -3,14 +3,21 @@ package no.nav.familie.ef.sak.api.gui
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Koordinater
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
+import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.OppdaterVilkårsvurderingDto
 import no.nav.familie.ef.sak.vilkår.dto.SvarPåVurderingerDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -43,10 +50,16 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     lateinit var grunnlagsdataService: GrunnlagsdataService
 
     @Autowired
+    lateinit var grunnlagsdataRepository: GrunnlagsdataRepository
+
+    @Autowired
     lateinit var søknadService: SøknadService
 
     @Autowired
     lateinit var barnService: BarnService
+
+    @Autowired
+    lateinit var vurderingService: VurderingService
 
     @BeforeEach
     fun setUp() {
@@ -55,7 +68,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Henter vilkår og sjekker initiering av nære boforhold`() {
-        val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettInngangsvilkår()
+        val respons: ResponseEntity<Ressurs<VilkårDto>> = opprettVilkår()
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -69,8 +82,53 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `Vilkår og grunnlagsdata skal oppdateres dersom adressen til en av de involverte er endret`() {
+        // Opprett behandling og inngangsvilkår
+        val behandling = opprettBehandlingMedGrunnlagsdata()
+        val vurderinger = hentVilkår(behandling).body?.data?.vurderinger ?: error("Mangler vurderinger")
+
+        // Endre grunnlagsdata - slik at dette nå er forskjellig fra ef-sak og pdl
+        val grunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
+        val endretGrunnlagsdata = endreVegadresseForGrunnlagsdata(grunnlagsdata)
+        grunnlagsdataRepository.update(endretGrunnlagsdata)
+
+        // Hent inngangsvilkår - skal nå oppdatere grunnlagsdataene og nullstille vilkårene
+        val oppdaterteVurderinger = hentVilkår(behandling).body?.data?.vurderinger ?: error("Mangler nye vurderinger")
+        val oppdatertGrunnlagsdata = grunnlagsdataRepository.findByIdOrThrow(behandling.id)
+
+        assertThat(oppdatertGrunnlagsdata.data).isNotEqualTo(endretGrunnlagsdata.data)
+        assertThat(oppdatertGrunnlagsdata.data).isEqualTo(grunnlagsdata.data)
+        assertThat(vurderinger).isNotEqualTo(oppdaterteVurderinger)
+    }
+
+    private fun endreVegadresseForGrunnlagsdata(grunnlagsdata: Grunnlagsdata) =
+        grunnlagsdata.copy(
+            data = grunnlagsdata.data.copy(
+                søker = grunnlagsdata.data.søker.copy(
+                    bostedsadresse = listOf(
+                        grunnlagsdata.data.søker.bostedsadresse.first().copy(
+                            vegadresse = nyVegadresse()
+                        )
+                    )
+                )
+            )
+        )
+
+    private fun nyVegadresse() = Vegadresse(
+        husnummer = "13",
+        husbokstav = "b",
+        adressenavn = "Viktors vei",
+        kommunenummer = "0301",
+        postnummer = "0575",
+        bruksenhetsnummer = "",
+        tilleggsnavn = null,
+        koordinater = Koordinater(x = 601371f, y = 6629367f, z = null, kvalitet = null),
+        matrikkelId = 0
+    )
+
+    @Test
     internal fun `oppdaterVilkår - skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
-        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
+        val opprettetVurdering = opprettVilkår().body?.data!!
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", StønadType.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
@@ -86,7 +144,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `nullstillVilkår skal sjekke att behandlingId som blir sendt inn er lik den som finnes i vilkårsvurderingen`() {
-        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
+        val opprettetVurdering = opprettVilkår().body?.data!!
 
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger("0", StønadType.OVERGANGSSTØNAD)
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
@@ -114,7 +172,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal oppdatere vurderingen for FORUTGÅENDE_MEDLEMSKAP som har ett spørsmål som vi setter til JA`() {
-        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
+        val opprettetVurdering = opprettVilkår().body?.data!!
         val oppdatertVilkårsvarMedJa = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
             restTemplate.exchange(
@@ -130,7 +188,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `skal nullstille vurderingen for TIDLIGERE VEDTAKSPERIODER og initiere delvilkårsvurderingene med riktig resultattype`() {
-        val opprettetVurdering = opprettInngangsvilkår().body?.data!!
+        val opprettetVurdering = opprettVilkår().body?.data!!
         val oppdatertVilkårsvarMedJa = OppdaterVilkårsvurderingDto(
             opprettetVurdering.vurderinger.first { it.vilkårType == VilkårType.TIDLIGERE_VEDTAKSPERIODER }.id,
             opprettetVurdering.vurderinger.first().behandlingId
@@ -172,7 +230,19 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             }
         )
 
-    private fun opprettInngangsvilkår(): ResponseEntity<Ressurs<VilkårDto>> {
+    private fun opprettVilkår(): ResponseEntity<Ressurs<VilkårDto>> {
+        val behandling = opprettBehandlingMedGrunnlagsdata()
+        return hentVilkår(behandling)
+    }
+
+    private fun hentVilkår(behandling: Behandling): ResponseEntity<Ressurs<VilkårDto>> =
+        restTemplate.exchange(
+            localhost("/api/vurdering/${behandling.id}/vilkar"),
+            HttpMethod.GET,
+            HttpEntity<Any>(headers)
+        )
+
+    private fun opprettBehandlingMedGrunnlagsdata(): Behandling {
         val søknad = TestsøknadBuilder.Builder()
             .setBarn(
                 listOf(
@@ -205,11 +275,6 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             barnSomSkalFødes = listOf(),
             vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
         )
-
-        return restTemplate.exchange(
-            localhost("/api/vurdering/${behandling.id}/vilkar"),
-            HttpMethod.GET,
-            HttpEntity<Any>(headers)
-        )
+        return behandling
     }
 }

@@ -45,7 +45,7 @@ class PersonopplysningerService(
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
-        val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdataFraRegister(personIdent, emptyList())
+        val grunnlagsdata = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre(personIdent, emptyList())
         val egenAnsatt = egenAnsatt(personIdent)
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
