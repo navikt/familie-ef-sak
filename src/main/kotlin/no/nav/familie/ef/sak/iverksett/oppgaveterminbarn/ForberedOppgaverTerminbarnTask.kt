@@ -25,12 +25,8 @@ class ForberedOppgaverTerminbarnTask(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
-        if (featureToggleService.isEnabled(Toggle.OPPRETT_OPPGAVER_TERMINBARN)) {
             logger.info("Starter forbereding av oppgaver for ufødte terminbarn")
-            forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
-        } else {
-            logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")
-        }
+            forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
     }
 
     override fun onCompletion(task: Task) {
