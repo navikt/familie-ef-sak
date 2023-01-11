@@ -38,7 +38,7 @@ class ForberedOppgaverTerminbarnService(
         }.flatten()
         logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn.")
         oppgaver.forEach { oppgave ->
-            logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId}.")
+            logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId} for ugyldige terminbarn")
         }
         opprettTaskerForOppgaver(oppgaver)
     }
