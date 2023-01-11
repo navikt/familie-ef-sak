@@ -77,10 +77,10 @@ class TestController {
     @GetMapping( path = ["{exception}"])
     fun kastTimeoutException(@PathVariable exception: TestExceptionType): Ressurs<String> {
         throw when (exception) {
-            TIMEOUT -> TimeoutException("")
-            SOCKET_TIMEOUT -> SocketTimeoutException("")
+            TIMEOUT -> TimeoutException()
+            SOCKET_TIMEOUT -> SocketTimeoutException()
             MANGLERTILGANG -> ManglerTilgang("manglertilgang123", "feil til den som mangler tilgang")
-            RUNTIME -> RuntimeException("")
+            RUNTIME -> RuntimeException()
         }
     }
 }
