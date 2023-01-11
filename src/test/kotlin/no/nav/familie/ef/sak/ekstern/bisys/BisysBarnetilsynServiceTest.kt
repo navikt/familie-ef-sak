@@ -27,7 +27,6 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -356,38 +355,38 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(perioder).hasSize(1)
     }
 
-    /**
-     * Denne testen er ikke gyldig og skjønner ikke hvordan den har virket tidligere
-     * * Vi har aldri noen perioder i infotrygd som er gyldige etter perioder i ny løsning?
-     * * Anbefaler å sette opp periodene sånn at de gir et reellt case, her så er det en andel med fom=MIN,
-     *    mens startdato er satt til dagens dato
-     */
-    @Disabled
     @Test
-    fun `en infotrygdperiode etter, og en andelshistorikk før fraOgMedDato i oppslag, forvent kun infotrygdperiode`() {
-        mockTilkjentYtelse()
-        val andelhistorikkDto =
-            lagAndelHistorikkDto(tilOgMed = LocalDate.now().minusMonths(1), behandlingBarn = behandlingBarn)
+    fun `Infotrygdperiode går ut over startdato - Infotrygdperioden skal kuttes når ef overtar (startdato)`() {
+        val start = LocalDate.of(2022, 1, 1)
+        mockTilkjentYtelse(start)
         every {
             infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
-                stønadTom = LocalDate.now().minusMonths(1),
+                stønadFom = LocalDate.of(2021,6,1),
+                stønadTom = LocalDate.of(2022,6,1),
                 beløp = 10
             )
         )
         every {
             andelsHistorikkService.hentHistorikk(any(), any())
-        } returns listOf(andelhistorikkDto)
-
-        val fomDato = LocalDate.now()
+        } returns listOf(
+            lagAndelHistorikkDto(
+                fraOgMed = start,
+                tilOgMed = LocalDate.of(2022, 12, 1),
+                behandlingBarn = behandlingBarn
+            )
+        )
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                fomDato
+                LocalDate.of(2020,1,1)
             ).barnetilsynBisysPerioder
-        assertThat(perioder).hasSize(1)
+        assertThat(perioder).hasSize(2)
+        assertThat(perioder.first().periode.tom).isEqualTo(start.minusDays(1))
+        assertThat(perioder.last().periode.fom).isEqualTo(start)
+
     }
 
     @Test
