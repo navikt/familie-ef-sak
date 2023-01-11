@@ -364,8 +364,8 @@ internal class BisysBarnetilsynServiceTest {
         } returns listOf(
             lagInfotrygdPeriode(
                 vedtakId = 1,
-                stønadFom = LocalDate.of(2021,6,1),
-                stønadTom = LocalDate.of(2022,6,1),
+                stønadFom = LocalDate.of(2021, 6, 1),
+                stønadTom = LocalDate.of(2022, 6, 1),
                 beløp = 10
             )
         )
@@ -381,12 +381,11 @@ internal class BisysBarnetilsynServiceTest {
         val perioder =
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
                 personident,
-                LocalDate.of(2020,1,1)
+                LocalDate.of(2020, 1, 1)
             ).barnetilsynBisysPerioder
         assertThat(perioder).hasSize(2)
         assertThat(perioder.first().periode.tom).isEqualTo(start.minusDays(1))
         assertThat(perioder.last().periode.fom).isEqualTo(start)
-
     }
 
     @Test
