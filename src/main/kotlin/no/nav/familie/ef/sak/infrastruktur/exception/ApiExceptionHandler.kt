@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeoutException
 
 @Suppress("unused")
 @ControllerAdvice
@@ -111,6 +113,17 @@ class ApiExceptionHandler {
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
+    }
+
+    @ExceptionHandler(TimeoutException::class, SocketTimeoutException::class)
+    fun handleTimeout(timeoutException: Throwable): ResponseEntity<Ressurs<Nothing>> {
+        val metodeSomFeiler = finnMetodeSomFeiler(timeoutException)
+        secureLogger.warn("Timeout feil: $metodeSomFeiler ${rootCause(timeoutException)}", timeoutException)
+        logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(timeoutException)} ")
+
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Timeout feil - prøv igjen senere"))
     }
 
     fun finnMetodeSomFeiler(e: Throwable): String {
