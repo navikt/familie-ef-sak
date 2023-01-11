@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
 
-internal class ApiExceptionHandlerTest: OppslagSpringRunnerTest(){
+internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
 
     @Test
     internal fun `Skal håndtere timeout exception`() {
@@ -56,8 +56,8 @@ internal class ApiExceptionHandlerTest: OppslagSpringRunnerTest(){
         assertThat(response.body?.melding).contains("manglertilgang123")
     }
 
-    private fun gjørKallSomKaster(feil : TestExceptionType) = restTemplate.exchange<Ressurs<String>>(
-        localhost("/api/testfeil/${feil}"),
+    private fun gjørKallSomKaster(feil: TestExceptionType) = restTemplate.exchange<Ressurs<String>>(
+        localhost("/api/testfeil/$feil"),
         HttpMethod.GET,
         HttpEntity<Ressurs<String>>(headers)
     )
@@ -74,7 +74,7 @@ enum class TestExceptionType {
 @RequestMapping("/api/testfeil/")
 @Unprotected
 class TestController {
-    @GetMapping( path = ["{exception}"])
+    @GetMapping(path = ["{exception}"])
     fun kastTimeoutException(@PathVariable exception: TestExceptionType): Ressurs<String> {
         throw when (exception) {
             TIMEOUT -> TimeoutException()
