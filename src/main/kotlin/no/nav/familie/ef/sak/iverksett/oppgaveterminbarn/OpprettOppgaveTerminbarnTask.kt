@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.iverksett.OppgaveForBarn
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
@@ -25,15 +24,9 @@ class OpprettOppgaveTerminbarnTask(
     val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
-
     override fun doTask(task: Task) {
-        if (featureToggleService.isEnabled(Toggle.OPPRETT_OPPGAVER_TERMINBARN)) {
-            val oppgaveForBarn = objectMapper.readValue<OppgaveForBarn>(task.payload)
-            opprettOppgaverForTerminbarnService.opprettOppgaveForTerminbarn(oppgaveForBarn)
-        } else {
-            logger.warn("Feature toggle opprett-oppgaver-ugyldigeterminbarn er ikke enablet. TaskID=${task.id}")
-        }
+        val oppgaveForBarn = objectMapper.readValue<OppgaveForBarn>(task.payload)
+        opprettOppgaverForTerminbarnService.opprettOppgaveForTerminbarn(oppgaveForBarn)
     }
 
     companion object {
@@ -42,6 +35,7 @@ class OpprettOppgaveTerminbarnTask(
                 this.metadata[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
             }
         }
+
         const val TYPE = "opprettOppgaveTerminbarnTask"
     }
 }
