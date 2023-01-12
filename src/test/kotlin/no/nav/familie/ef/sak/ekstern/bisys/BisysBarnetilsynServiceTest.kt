@@ -297,13 +297,16 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `en infotrygdperiode og en andelshistorikk etter fraOgMedDato i oppslag, forvent sammenslåtte perioder`() {
-        mockTilkjentYtelse()
+    fun `en infotrygdperiode som strekker seg forbi ef-perioder, forvent perioder ikke varer lenger enn ef-perioder`() {
+        val fraOgMed = YearMonth.now().atDay(1).minusMonths(1)
+        mockTilkjentYtelse(fraOgMed)
+        val tilOgMedDato = YearMonth.now().atEndOfMonth().plusMonths(2)
         val andelhistorikkDto =
             lagAndelHistorikkDto(
-                fraOgMed = LocalDate.MIN.plusDays(1),
-                tilOgMed = LocalDate.now().plusMonths(2),
-                behandlingBarn = behandlingBarn
+                fraOgMed = fraOgMed,
+                tilOgMed = tilOgMedDato,
+                behandlingBarn = behandlingBarn,
+                beløp = 10
             )
         every {
             infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
@@ -311,7 +314,7 @@ internal class BisysBarnetilsynServiceTest {
             lagInfotrygdPeriode(
                 vedtakId = 1,
                 stønadFom = LocalDate.MIN,
-                stønadTom = LocalDate.now().plusMonths(1),
+                stønadTom = LocalDate.now().plusMonths(6),
                 beløp = 10
             )
         )
@@ -319,13 +322,16 @@ internal class BisysBarnetilsynServiceTest {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(andelhistorikkDto)
 
-        val fomDato = LocalDate.now()
-        assertThat(
-            barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
-                personident,
-                fomDato
-            ).barnetilsynBisysPerioder
-        ).hasSize(2)
+        val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
+            personident,
+            LocalDate.MIN
+        ).barnetilsynBisysPerioder
+        assertThat(perioder).hasSize(2)
+        // Sjekk at overgang fra infotrygperiode til ny løsning blir riktig
+        assertThat(perioder.last().periode.fom).isEqualTo(fraOgMed)
+        assertThat(perioder.first().periode.tom).isEqualTo(fraOgMed.minusDays(1))
+        // selv om infotrygdperioden varer lenger har ny løsning tatt over og sier vi er ferdige her:
+        assertThat(perioder.last().periode.tom).isEqualTo(tilOgMedDato)
     }
 
     @Test
