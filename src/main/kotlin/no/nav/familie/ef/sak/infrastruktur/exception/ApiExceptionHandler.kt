@@ -25,17 +25,14 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
         val metodeSomFeiler = finnMetodeSomFeiler(throwable)
 
         val mostSpecificCause = throwable.getMostSpecificCause()
-
         if (mostSpecificCause is SocketTimeoutException || mostSpecificCause is TimeoutException){
-            logger.warn("Treff på SocketTimeoutException. Message: ${mostSpecificCause.message}")
-            secureLogger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
+            secureLogger.warn("Timeout feil: ${mostSpecificCause.message}, $metodeSomFeiler ${rootCause(throwable)}", throwable)
             logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
             if(featureToggleService.isEnabled(Toggle.LOGG_WARN_TIMEOUTS)){
                  return ResponseEntity
                      .status(HttpStatus.INTERNAL_SERVER_ERROR)
                      .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen senere"))
             }
-
         }
 
         secureLogger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)

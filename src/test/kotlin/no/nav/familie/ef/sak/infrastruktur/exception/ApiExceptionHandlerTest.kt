@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.ResourceAccessException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
 
@@ -77,10 +78,10 @@ class TestController {
     @GetMapping(path = ["{exception}"])
     fun kastTimeoutException(@PathVariable exception: TestExceptionType): Ressurs<String> {
         throw when (exception) {
-            TIMEOUT -> RuntimeException(TimeoutException())
-            SOCKET_TIMEOUT -> RuntimeException(SocketTimeoutException())
+            TIMEOUT -> RuntimeException(TimeoutException(""))
+            SOCKET_TIMEOUT -> RuntimeException(ResourceAccessException(" ", SocketTimeoutException("Read timed out")))
             MANGLERTILGANG -> ManglerTilgang("manglertilgang123", "feil til den som mangler tilgang")
-            RUNTIME -> RuntimeException()
+            RUNTIME -> RuntimeException("")
         }
     }
 }
