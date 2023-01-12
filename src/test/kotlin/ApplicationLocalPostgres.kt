@@ -32,7 +32,8 @@ fun main(args: Array<String>) {
             "mock-dokument",
             "mock-tilbakekreving",
             "mock-klage",
-            "mock-sigrun"
+            "mock-sigrun",
+            "mock-historiskpensjon"
         )
         .properties(properties)
         .run(*args)
