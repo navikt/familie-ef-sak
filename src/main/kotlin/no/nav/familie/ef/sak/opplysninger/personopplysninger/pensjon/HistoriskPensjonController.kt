@@ -16,7 +16,7 @@ class HistoriskPensjonController(val historiskPensjonService: HistoriskPensjonSe
 
     @GetMapping("{fagsakPersonId}")
     @Cacheable("historisk_pensjon")
-    fun hentFagsak(@PathVariable fagsakPersonId: UUID): Ressurs<HistoriskPensjonResponse> {
+    fun hentHistoriskPensjon(@PathVariable fagsakPersonId: UUID): Ressurs<HistoriskPensjonResponse> {
         return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
     }
 }
