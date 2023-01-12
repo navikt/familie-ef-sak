@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.vedtak.historikk
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.tilkjentytelse.tilBeløpsperiodeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -76,7 +78,9 @@ data class VedtakshistorikkperiodeBarnetilsyn(
     val aktivitetArbeid: SvarId?,
     val barn: List<UUID>,
     val sats: Int,
-    val beløpFørFratrekkOgSatsjustering: Int
+    val beløpFørFratrekkOgSatsjustering: Int,
+    val aktivitetstype: AktivitetstypeBarnetilsyn? = null, //TODO: Skal bli non-nullable
+    val periodetype: PeriodetypeBarnetilsyn? = null
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
@@ -89,7 +93,9 @@ data class VedtakshistorikkperiodeBarnetilsyn(
             aktivitetArbeid = aktivitetArbeid,
             barn = periode.beregningsgrunnlag.barn,
             sats = periode.sats,
-            beløpFørFratrekkOgSatsjustering = periode.beløpFørFratrekkOgSatsjustering
+            beløpFørFratrekkOgSatsjustering = periode.beløpFørFratrekkOgSatsjustering,
+            aktivitetstype = periode.aktivitetstype,
+            periodetype = periode.periodetype
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {

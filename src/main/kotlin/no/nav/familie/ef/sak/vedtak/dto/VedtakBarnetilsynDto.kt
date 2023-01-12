@@ -50,8 +50,8 @@ data class UtgiftsperiodeDto(
     val utgifter: Int,
     val erMidlertidigOpphør: Boolean,
     val sanksjonsårsak: Sanksjonsårsak? = null,
-    val periodetype: PeriodetypeBarnetilsyn? = null, // Skal bli non-nullable
-    val aktivitetstype: AktivitetstypeBarnetilsyn? = null
+    val periodetype: PeriodetypeBarnetilsyn?, // TODO: Skal bli non-nullable
+    val aktivitetstype: AktivitetstypeBarnetilsyn?
 )
 
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)

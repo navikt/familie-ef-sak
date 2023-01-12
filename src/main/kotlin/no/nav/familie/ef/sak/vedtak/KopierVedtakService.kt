@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -87,7 +89,9 @@ class KopierVedtakService(
                 barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
                 utgifter = it.andel.utgifter.toInt(),
                 erMidlertidigOpphør = false,
-                sanksjonsårsak = null
+                sanksjonsårsak = null,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         }
         return map.fyllUtPerioderUtenStønad()
@@ -116,7 +120,9 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
                     barn = emptyList(),
                     utgifter = 0,
                     erMidlertidigOpphør = true,
-                    sanksjonsårsak = null
+                    sanksjonsårsak = null,
+                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                    aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
                 )
             )
         }

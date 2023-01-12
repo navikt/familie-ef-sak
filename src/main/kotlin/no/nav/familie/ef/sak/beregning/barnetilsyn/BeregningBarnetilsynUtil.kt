@@ -76,7 +76,9 @@ object BeregningBarnetilsynUtil {
                 tilleggsstønadsbeløp = tilleggsstønadBeløp,
                 antallBarn = barn.size,
                 barn = barn
-            )
+            ),
+            aktivitetstype = utgiftsperiode.aktivitetstype,
+            periodetype = utgiftsperiode.periodetype
         )
     }
 

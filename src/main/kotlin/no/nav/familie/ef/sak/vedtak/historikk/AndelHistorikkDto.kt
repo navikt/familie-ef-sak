@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
@@ -28,8 +30,10 @@ data class AndelHistorikkDto(
     val saksbehandler: String,
     val andel: AndelMedGrunnlagDto,
     val aktivitet: AktivitetType?,
+    val aktivitetBarnetilsyn: AktivitetstypeBarnetilsyn?, //TODO: Skal bli non-nullable
     val aktivitetArbeid: SvarId?,
     val periodeType: VedtaksperiodeType?,
+    val periodetypeBarnetilsyn: PeriodetypeBarnetilsyn?,
     val erSanksjon: Boolean,
     val sanksjonsårsak: Sanksjonsårsak?,
     val endring: HistorikkEndring?

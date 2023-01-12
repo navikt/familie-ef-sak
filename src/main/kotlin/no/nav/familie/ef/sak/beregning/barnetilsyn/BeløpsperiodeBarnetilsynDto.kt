@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.util.UUID
@@ -11,7 +13,9 @@ data class BeløpsperiodeBarnetilsynDto(
     val beløp: Int,
     val beløpFørFratrekkOgSatsjustering: Int,
     val sats: Int,
-    val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto
+    val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
+    val aktivitetstype: AktivitetstypeBarnetilsyn?, //TODO: Skal bli non-nullable
+    val periodetype: PeriodetypeBarnetilsyn?
 ) {
     @Deprecated("Bruk periode", ReplaceWith("periode"))
     @get:JsonProperty("periode")

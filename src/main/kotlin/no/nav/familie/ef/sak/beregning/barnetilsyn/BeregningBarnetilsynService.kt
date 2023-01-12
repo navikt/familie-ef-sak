@@ -138,20 +138,20 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.periode.fom
     while (måned <= this.periode.tom) {
-        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal()))
+        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal(), this.aktivitetstype, this.periodetype))
         måned = måned.plusMonths(1)
     }
     return perioder
 }
 
 /**
- * Merger sammenhengende perioder hvor beløp og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
+ * Merger sammenhengende perioder hvor beløp, aktivitetstype, periodetype og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     val sortertPåDatoListe = this.sortedBy { it.periode }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
-        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
+        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry) && last.sammeAktivitetstypeOgPeriodetype(entry)) {
             acc.removeLast()
             acc.add(
                 last.copy(
@@ -165,10 +165,11 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     }
 }
 
-fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto): Boolean {
-    return this.periode påfølgesAv other.periode
-}
+fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto) = this.periode påfølgesAv other.periode
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
     this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
+
+fun BeløpsperiodeBarnetilsynDto.sammeAktivitetstypeOgPeriodetype(other: BeløpsperiodeBarnetilsynDto) =
+    this.aktivitetstype == other.aktivitetstype && this.periodetype == other.periodetype
