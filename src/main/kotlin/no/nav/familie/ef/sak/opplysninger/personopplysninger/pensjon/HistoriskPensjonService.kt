@@ -1,16 +1,20 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
+import no.nav.familie.ef.sak.fagsak.FagsakService
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 @CacheConfig(cacheManager = "historiskPensjonCache")
-class HistoriskPensjonService(private val historiskPensjonClient: HistoriskPensjonClient) {
+class HistoriskPensjonService(private val historiskPensjonClient: HistoriskPensjonClient, val fagsakPersonService: FagsakPersonService) {
 
     @Cacheable("historisk_pensjon")
-    fun hentHistoriskPensjon(personIdent: String): HistoriskPensjonResponse {
-        return historiskPensjonClient.harPensjon(personIdent)
+    fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonResponse {
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
+        return historiskPensjonClient.harPensjon(aktivIdent)
     }
 }
 
