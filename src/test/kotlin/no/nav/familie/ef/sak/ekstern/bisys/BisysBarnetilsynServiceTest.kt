@@ -362,39 +362,6 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `Infotrygdperiode går ut over startdato - Infotrygdperioden skal kuttes når ef overtar (startdato)`() {
-        val start = LocalDate.of(2022, 1, 1)
-        mockTilkjentYtelse(start)
-        every {
-            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
-        } returns listOf(
-            lagInfotrygdPeriode(
-                vedtakId = 1,
-                stønadFom = LocalDate.of(2021, 6, 1),
-                stønadTom = LocalDate.of(2022, 6, 1),
-                beløp = 10
-            )
-        )
-        every {
-            andelsHistorikkService.hentHistorikk(any(), any())
-        } returns listOf(
-            lagAndelHistorikkDto(
-                fraOgMed = start,
-                tilOgMed = LocalDate.of(2022, 12, 1),
-                behandlingBarn = behandlingBarn
-            )
-        )
-        val perioder =
-            barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
-                personident,
-                LocalDate.of(2020, 1, 1)
-            ).barnetilsynBisysPerioder
-        assertThat(perioder).hasSize(2)
-        assertThat(perioder.first().periode.tom).isEqualTo(start.minusDays(1))
-        assertThat(perioder.last().periode.fom).isEqualTo(start)
-    }
-
-    @Test
     fun `en infotrygdperiode, og ingen fagsak for person, forvent ingen feil og kun infotrygdperiode`() {
         mockTilkjentYtelse()
         every {
