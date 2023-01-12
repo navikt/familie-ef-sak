@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-@CacheConfig(cacheManager = "historiskPensjonCache")
+@CacheConfig(cacheManager = "longCache")
 class HistoriskPensjonService(private val historiskPensjonClient: HistoriskPensjonClient, val fagsakPersonService: FagsakPersonService) {
 
     @Cacheable("historisk_pensjon")

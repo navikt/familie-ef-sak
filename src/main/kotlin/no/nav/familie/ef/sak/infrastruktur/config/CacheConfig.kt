@@ -52,8 +52,8 @@ class CacheConfig {
         }
     }
 
-    @Bean("historiskPensjonCache")
-    fun historiskPensjonkCache(): CacheManager = object : ConcurrentMapCacheManager() {
+    @Bean("longCache")
+    fun longCache(): CacheManager = object : ConcurrentMapCacheManager() {
         override fun createConcurrentMapCache(name: String): Cache {
             val concurrentMap = Caffeine
                 .newBuilder()
