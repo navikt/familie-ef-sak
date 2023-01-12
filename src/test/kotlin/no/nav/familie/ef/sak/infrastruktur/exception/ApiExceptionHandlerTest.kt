@@ -30,7 +30,7 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
         val response = gjørKallSomKaster(TIMEOUT)
         assertThat(response.body?.status).isEqualTo(FEILET)
         assertThat(response.body?.melding).contains("Timeout feil")
-        assertThat(response.body?.frontendFeilmelding).contains("Kommunikasjonsproblemer med andre systemer - prøv igjen senere")
+        assertThat(response.body?.frontendFeilmelding).contains("Kommunikasjonsproblemer med andre systemer - prøv igjen")
     }
 
     @Test
@@ -38,7 +38,7 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
         val response = gjørKallSomKaster(SOCKET_TIMEOUT)
         assertThat(response.body?.status).isEqualTo(FEILET)
         assertThat(response.body?.melding).contains("Timeout feil")
-        assertThat(response.body?.frontendFeilmelding).contains("Kommunikasjonsproblemer med andre systemer - prøv igjen senere")
+        assertThat(response.body?.frontendFeilmelding).contains("Kommunikasjonsproblemer med andre systemer - prøv igjen")
     }
 
     @Test

@@ -31,7 +31,7 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
             if(featureToggleService.isEnabled(Toggle.LOGG_WARN_TIMEOUTS)){
                  return ResponseEntity
                      .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                     .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen senere"))
+                     .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen"))
             }
         }
 
