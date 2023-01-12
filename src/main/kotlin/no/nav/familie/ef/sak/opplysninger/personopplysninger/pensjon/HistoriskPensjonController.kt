@@ -15,7 +15,6 @@ import java.util.UUID
 class HistoriskPensjonController(val historiskPensjonService: HistoriskPensjonService) {
 
     @GetMapping("{fagsakPersonId}")
-    @Cacheable("historisk_pensjon")
     fun hentHistoriskPensjon(@PathVariable fagsakPersonId: UUID): Ressurs<HistoriskPensjonResponse> {
         return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
     }
