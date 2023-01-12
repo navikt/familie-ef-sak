@@ -29,7 +29,7 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
         val response = gjørKallSomKaster(TIMEOUT)
         assertThat(response.body?.status).isEqualTo(FEILET)
         assertThat(response.body?.melding).contains("Timeout feil")
-        assertThat(response.body?.frontendFeilmelding).contains("Timeout feil")
+        assertThat(response.body?.frontendFeilmelding).contains("Kommunikasjonsproblemer med andre systemer - prøv igjen senere")
     }
 
     @Test
@@ -37,7 +37,7 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
         val response = gjørKallSomKaster(SOCKET_TIMEOUT)
         assertThat(response.body?.status).isEqualTo(FEILET)
         assertThat(response.body?.melding).contains("Timeout feil")
-        assertThat(response.body?.frontendFeilmelding).contains("Timeout feil")
+        assertThat(response.body?.frontendFeilmelding).contains("Kommunikasjonsproblemer med andre systemer - prøv igjen senere")
     }
 
     @Test
@@ -77,8 +77,8 @@ class TestController {
     @GetMapping(path = ["{exception}"])
     fun kastTimeoutException(@PathVariable exception: TestExceptionType): Ressurs<String> {
         throw when (exception) {
-            TIMEOUT -> TimeoutException()
-            SOCKET_TIMEOUT -> SocketTimeoutException()
+            TIMEOUT -> RuntimeException(TimeoutException())
+            SOCKET_TIMEOUT -> RuntimeException(SocketTimeoutException())
             MANGLERTILGANG -> ManglerTilgang("manglertilgang123", "feil til den som mangler tilgang")
             RUNTIME -> RuntimeException()
         }

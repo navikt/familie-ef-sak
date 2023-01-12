@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import org.slf4j.LoggerFactory
@@ -13,18 +15,29 @@ import java.util.concurrent.TimeoutException
 
 @Suppress("unused")
 @ControllerAdvice
-class ApiExceptionHandler {
+class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
 
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    private fun rootCause(throwable: Throwable): String {
-        return NestedExceptionUtils.getMostSpecificCause(throwable).javaClass.simpleName
-    }
-
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(throwable)
+
+        val mostSpecificCause = throwable.getMostSpecificCause()
+
+        if (mostSpecificCause is SocketTimeoutException || mostSpecificCause is TimeoutException){
+            logger.warn("Treff på SocketTimeoutException. Message: ${mostSpecificCause.message}")
+            secureLogger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
+            logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
+            if(featureToggleService.isEnabled(Toggle.LOGG_WARN_TIMEOUTS)){
+                 return ResponseEntity
+                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                     .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen senere"))
+            }
+
+        }
+
         secureLogger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
         logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
@@ -115,17 +128,6 @@ class ApiExceptionHandler {
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
-    @ExceptionHandler(TimeoutException::class, SocketTimeoutException::class)
-    fun handleTimeout(timeoutException: Throwable): ResponseEntity<Ressurs<Nothing>> {
-        val metodeSomFeiler = finnMetodeSomFeiler(timeoutException)
-        secureLogger.warn("Timeout feil: $metodeSomFeiler ${rootCause(timeoutException)}", timeoutException)
-        logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(timeoutException)} ")
-
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Timeout feil - prøv igjen senere"))
-    }
-
     fun finnMetodeSomFeiler(e: Throwable): String {
         val firstElement = e.stackTrace.firstOrNull {
             it.className.startsWith("no.nav.familie.ef.sak") &&
@@ -138,4 +140,15 @@ class ApiExceptionHandler {
         }
         return e.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
     }
+
+    private fun rootCause(throwable: Throwable): String {
+        return throwable.getMostSpecificCause().javaClass.simpleName
+    }
+
+    private fun Throwable.getMostSpecificCause(): Throwable {
+        return NestedExceptionUtils.getMostSpecificCause(this)
+    }
+
 }
+
+
