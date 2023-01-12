@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
+import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -54,6 +55,13 @@ class BehandlingController(
         tilgangService.validerHarSaksbehandlerrolle()
         behandlingService.settPåVent(behandlingId)
         return Ressurs.success(behandlingId)
+    }
+
+    @GetMapping("{behandlingId}/aktiver")
+    fun kanTaAvVent(@PathVariable behandlingId: UUID): Ressurs<TaAvVentStatusDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(TaAvVentStatusDto(behandlingService.kanTaAvVent(behandlingId)))
     }
 
     @PostMapping("{behandlingId}/aktiver")
