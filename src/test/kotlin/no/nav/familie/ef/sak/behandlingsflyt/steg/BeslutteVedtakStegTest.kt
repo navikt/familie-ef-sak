@@ -75,7 +75,7 @@ internal class BeslutteVedtakStegTest {
         totrinnskontrollService = totrinnskontrollService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        vedtaksbrevService = vedtaksbrevService,
+        vedtaksbrevService = vedtaksbrevService
     )
 
     private val vedtakKreverBeslutter = VedtakErUtenBeslutter(false)
@@ -188,13 +188,11 @@ internal class BeslutteVedtakStegTest {
 
     @Test
     internal fun `skal feile dersom vedtak underkjent og mangler begrunnelse`() {
-
         assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, årsakerUnderkjent = listOf(ÅrsakUnderkjent.AKTIVITET)) }
     }
 
     @Test
     internal fun `skal feile dersom vedtak underkjent og mangler årsaker til underkjennelse`() {
-
         assertThrows<ApiFeil> { utførTotrinnskontroll(godkjent = false, begrunnelse = "bergrunnelse", årsakerUnderkjent = emptyList()) }
     }
 

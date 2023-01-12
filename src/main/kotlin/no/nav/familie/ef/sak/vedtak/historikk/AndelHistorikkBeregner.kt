@@ -93,7 +93,7 @@ object AndelHistorikkBeregner {
             val aktivitet = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
             val periodeType = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
             val barnetilsyn = if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) vedtaksperiode else null
-            val sanksjon = if(vedtaksperiode is Sanksjonsperiode) vedtaksperiode else null
+            val sanksjon = if (vedtaksperiode is Sanksjonsperiode) vedtaksperiode else null
             val behandling = behandlingerPåId.getValue(it.behandlingId)
 
             AndelHistorikkDto(
