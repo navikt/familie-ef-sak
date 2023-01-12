@@ -183,7 +183,7 @@ internal class TotrinnskontrollServiceTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = "Noe",
-                beslutt = BeslutteVedtakDto(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET)),
+                beslutt = BeslutteVedtakDto(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET))
 
             )
 
