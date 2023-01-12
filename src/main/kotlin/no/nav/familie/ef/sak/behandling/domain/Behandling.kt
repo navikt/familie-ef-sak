@@ -83,5 +83,5 @@ enum class BehandlingStatus {
     }
 
     fun behandlingErLåstForVidereRedigering(): Boolean =
-        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
+        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)
 }
