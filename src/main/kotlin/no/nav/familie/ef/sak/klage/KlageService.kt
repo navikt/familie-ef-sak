@@ -55,14 +55,18 @@ class KlageService(
         )
     }
 
-    fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
+    @Deprecated("Kan fjernes når frontend tatt i bruk opprettKlage")
+    fun opprettKlageBehandling(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        opprettKlage(behandling.fagsakId, opprettKlageDto)
+    }
+
+    fun opprettKlage(fagsakId: UUID, opprettKlageDto: OpprettKlageDto) {
         val klageMottatt = opprettKlageDto.mottattDato
         brukerfeilHvis(klageMottatt.isAfter(LocalDate.now())) {
-            "Kan ikke opprette klage med krav mottatt frem i tid for behandling med id=$behandlingId"
+            "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=$fagsakId"
         }
-        val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        opprettKlage(fagsak, klageMottatt)
+        opprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto.mottattDato)
     }
 
     fun opprettKlage(fagsak: Fagsak, klageMottatt: LocalDate) {
