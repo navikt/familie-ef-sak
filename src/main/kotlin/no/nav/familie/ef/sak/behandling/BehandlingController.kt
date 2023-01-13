@@ -64,6 +64,13 @@ class BehandlingController(
         return Ressurs.success(behandlingId)
     }
 
+    @GetMapping("{behandlingId}/har-nyere-vedtak")
+    fun harNyereVedtak(@PathVariable behandlingId: UUID): Ressurs<Boolean> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(behandlingService.harNyereVedtak(behandlingId))
+    }
+
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(@PathVariable behandlingId: UUID, @RequestBody henlagt: HenlagtDto): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)

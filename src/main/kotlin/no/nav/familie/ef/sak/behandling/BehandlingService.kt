@@ -278,4 +278,11 @@ class BehandlingService(
         behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
+
+    fun harNyereVedtak(behandlingId: UUID): Boolean {
+        val saksbehandling = behandlingRepository.finnSaksbehandling(behandlingId)
+        val behandlinger = hentBehandlinger(saksbehandling.fagsakId)
+
+        return behandlinger.any { return it.vedtakstidspunkt != null && it.vedtakstidspunkt > saksbehandling.opprettetTid }
+    }
 }
