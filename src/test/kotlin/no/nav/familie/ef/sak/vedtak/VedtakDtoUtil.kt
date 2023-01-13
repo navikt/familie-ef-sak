@@ -95,7 +95,7 @@ object VedtakDtoUtil {
             false,
             null,
             PeriodetypeBarnetilsyn.ORDINÆR,
-            AktivitetstypeBarnetilsyn.I_ARBEID,
+            AktivitetstypeBarnetilsyn.I_ARBEID
         )
 
     fun periodeMedBeløpDto() =
@@ -103,7 +103,7 @@ object VedtakDtoUtil {
             YearMonth.of(2021, 1),
             YearMonth.of(2021, 12),
             Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
-            1000,
+            1000
         )
 
     fun tilleggsstønadDto() =
