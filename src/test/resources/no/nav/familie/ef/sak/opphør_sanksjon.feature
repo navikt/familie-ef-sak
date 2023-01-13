@@ -48,12 +48,4 @@ Egenskap: Andelhistorikk: Opphør og sanksjon
 
     Når beregner ytelse kaster feil med innehold Systemet støtter ikke revurdering før sanksjonsperioden
 
-#    Så forvent følgende historikk
-#      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Vedtaksperiode | Er opphør |
-#      | 1            | 01.2021         | 01.2021         |              |                       |                |           |
-#      | 1            | 02.2021         | 02.2021         | FJERNET      | 3                     |                |           |
-#      | 3            | 02.2021         | 02.2021         |              |                       |                | Ja        |
-#      | 1            | 03.2021         | 03.2021         | FJERNET      | 2                     |                |           |
-#      | 3            | 03.2021         | 03.2021         | FJERNET      |                       | SANKSJON       |           |
-
 
