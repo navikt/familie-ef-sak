@@ -318,18 +318,6 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(perioder.last().periode.tom).isEqualTo(erPeriodeTom)
     }
 
-    private fun mockHentPerioderFraReplika(periodeFom: LocalDate, periodeTom: LocalDate) {
-        every {
-            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
-        } returns listOf(
-            lagInfotrygdPeriode(
-                vedtakId = 1,
-                stønadFom = periodeFom,
-                stønadTom = periodeTom,
-            )
-        )
-    }
-
     @Test
     fun `en infotrygdperiode før, og en andelshistorikk etter fraOgMedDato i oppslag, forvent kun andelshistorikk`() {
         mockTilkjentYtelse()
@@ -475,6 +463,18 @@ internal class BisysBarnetilsynServiceTest {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
             startdato = startdato,
             andelerTilkjentYtelse = emptyList()
+        )
+    }
+
+    private fun mockHentPerioderFraReplika(periodeFom: LocalDate, periodeTom: LocalDate) {
+        every {
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadFom = periodeFom,
+                stønadTom = periodeTom,
+            )
         )
     }
 }
