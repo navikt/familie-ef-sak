@@ -40,7 +40,7 @@ class BeslutteVedtakSteg(
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
-        brukerfeilHvis (saksbehandling.steg.kommerEtter(stegType())) {
+        brukerfeilHvis(saksbehandling.steg.kommerEtter(stegType())) {
             "Behandlingen er allerede besluttet. Status på behandling er '${saksbehandling.status.visningsnavn()}'"
         }
         if (saksbehandling.steg != stegType()) {
