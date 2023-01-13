@@ -112,7 +112,7 @@ internal class BisysBarnetilsynServiceTest {
     @Test
     fun `personident med andelhistorikk som har beløp lik null, forvent tom liste med barntilsynBisysPerioder`() {
         mockTilkjentYtelse()
-        mockHistorikkMedEnAndel(efPeriodeTom= LocalDate.now().plusDays(1), beløp = 0)
+        mockHistorikkMedEnAndel(efPeriodeTom = LocalDate.now().plusDays(1), beløp = 0)
 
         assertThat(
             barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
@@ -325,7 +325,7 @@ internal class BisysBarnetilsynServiceTest {
         val infotrygdPeriodeTom = LocalDate.now().minusMonths(1)
 
         mockTilkjentYtelse()
-        mockHentEnInfotrygdperiode(infotrygdPeriodeTom= infotrygdPeriodeTom, beløp = 10)
+        mockHentEnInfotrygdperiode(infotrygdPeriodeTom = infotrygdPeriodeTom, beløp = 10)
         mockHistorikkMedEnAndel(efPeriodeTom = efTilOgMed, barn = behandlingBarn)
 
         val perioder =
