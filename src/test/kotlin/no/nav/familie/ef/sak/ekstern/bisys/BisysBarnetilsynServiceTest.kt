@@ -296,7 +296,6 @@ internal class BisysBarnetilsynServiceTest {
 
     @Test
     fun `Perioder skal stoppe etter ef-perioder selv om infotrygdperioder varer lenger`() {
-
         val efPeriodeFom = JAN_2023.atDay(1)
         val erPeriodeTom = JAN_2023.plusMonths(4).atEndOfMonth()
 
@@ -320,7 +319,6 @@ internal class BisysBarnetilsynServiceTest {
 
     @Test
     fun `en infotrygdperiode før, og en andelshistorikk etter fraOgMedDato i oppslag, forvent kun andelshistorikk`() {
-
         val efTilOgMed = LocalDate.now().plusMonths(2)
         val infotrygdPeriodeTom = LocalDate.now().minusMonths(1)
 
