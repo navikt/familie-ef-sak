@@ -63,6 +63,7 @@ internal class BisysBarnetilsynServiceTest {
             personIdent = personIdentBarnAndelHistorikk
         )
     )
+    val JAN_2023 = YearMonth.of(2023, 1)
 
     @BeforeEach
     fun setup() {
@@ -297,22 +298,24 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `en infotrygdperiode som strekker seg forbi ef-perioder, forvent perioder ikke varer lenger enn ef-perioder`() {
-        val fraOgMed = LocalDate.of(2023, 1, 1)
-        val tilOgMedDato = YearMonth.from(fraOgMed).plusMonths(4).atEndOfMonth()
-        mockTilkjentYtelse(fraOgMed)
-        mockHentPerioderFraReplika(LocalDate.MIN, LocalDate.MAX)
-        mockHentHistorikk(fraOgMed, tilOgMedDato)
+    fun `Perioder skal stoppe etter ef-perioder selv om infotrygdperioder varer lenger`() {
+        val efPeriodeFom = JAN_2023.atDay(1)
+        val erPeriodeTom = JAN_2023.plusMonths(4).atEndOfMonth()
+        val infotrygdPeriodeFom = LocalDate.MIN
+        val infotrygdPeriodeTom = LocalDate.MAX
+        mockTilkjentYtelse(efPeriodeFom)
+        mockHentPerioderFraReplika(infotrygdPeriodeFom, infotrygdPeriodeTom)
+        mockHentHistorikk(efPeriodeFom, erPeriodeTom)
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
             LocalDate.MIN
         ).barnetilsynBisysPerioder
 
-        assertThat(perioder).hasSize(2)
-        assertThat(perioder.last().periode.fom).isEqualTo(fraOgMed)
-        assertThat(perioder.first().periode.tom).isEqualTo(fraOgMed.minusDays(1))
-        assertThat(perioder.last().periode.tom).isEqualTo(tilOgMedDato)
+        assertThat(perioder.first().periode.fom).isEqualTo(infotrygdPeriodeFom)
+        assertThat(perioder.first().periode.tom).isEqualTo(efPeriodeFom.minusDays(1))
+        assertThat(perioder.last().periode.fom).isEqualTo(efPeriodeFom)
+        assertThat(perioder.last().periode.tom).isEqualTo(erPeriodeTom)
     }
 
     private fun mockHentPerioderFraReplika(periodeFom: LocalDate, periodeTom: LocalDate) {
