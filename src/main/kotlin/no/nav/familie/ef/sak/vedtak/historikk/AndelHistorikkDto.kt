@@ -41,7 +41,7 @@ data class AndelHistorikkDto(
  * disse skal ikke tas med når man skal plukke ut alle aktive andelene
  */
 fun AndelHistorikkDto.erAktivVedtaksperiode() =
-    (this.endring?.type == null || this.endring.type == EndringType.SPLITTET) && !erOpphør
+    !erOpphør && (this.endring?.type == null || this.endring.type == EndringType.SPLITTET)
 
 data class AndelMedGrunnlagDto(
     val beløp: Int,
