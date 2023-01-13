@@ -299,39 +299,32 @@ internal class BisysBarnetilsynServiceTest {
     @Test
     fun `en infotrygdperiode som strekker seg forbi ef-perioder, forvent perioder ikke varer lenger enn ef-perioder`() {
         val fraOgMed = YearMonth.now().atDay(1).minusMonths(1)
-        mockTilkjentYtelse(fraOgMed)
         val tilOgMedDato = YearMonth.now().atEndOfMonth().plusMonths(2)
-        val andelhistorikkDto =
-            lagAndelHistorikkDto(
-                fraOgMed = fraOgMed,
-                tilOgMed = tilOgMedDato,
-                behandlingBarn = behandlingBarn,
-                beløp = 10
-            )
-        every {
-            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
-        } returns listOf(
-            lagInfotrygdPeriode(
-                vedtakId = 1,
-                stønadFom = LocalDate.MIN,
-                stønadTom = LocalDate.now().plusMonths(6),
-                beløp = 10
-            )
-        )
-        every {
-            andelsHistorikkService.hentHistorikk(any(), any())
-        } returns listOf(andelhistorikkDto)
+        mockTilkjentYtelse(fraOgMed)
+        mockHentPerioderFraReplika(LocalDate.MIN, LocalDate.MAX)
+        mockHentHistorikk(fraOgMed, tilOgMedDato)
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
             LocalDate.MIN
         ).barnetilsynBisysPerioder
+        
         assertThat(perioder).hasSize(2)
-        // Sjekk at overgang fra infotrygperiode til ny løsning blir riktig
         assertThat(perioder.last().periode.fom).isEqualTo(fraOgMed)
         assertThat(perioder.first().periode.tom).isEqualTo(fraOgMed.minusDays(1))
-        // selv om infotrygdperioden varer lenger har ny løsning tatt over og sier vi er ferdige her:
         assertThat(perioder.last().periode.tom).isEqualTo(tilOgMedDato)
+    }
+
+    private fun mockHentPerioderFraReplika(periodeFom: LocalDate, periodeTom: LocalDate) {
+        every {
+            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
+        } returns listOf(
+            lagInfotrygdPeriode(
+                vedtakId = 1,
+                stønadFom = periodeFom,
+                stønadTom = periodeTom,
+            )
+        )
     }
 
     @Test
@@ -458,6 +451,17 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(perioder).hasSize(1)
     }
 
+    private fun mockHentHistorikk(fraOgMed: LocalDate, tilOgMedDato: LocalDate) {
+        every {
+            andelsHistorikkService.hentHistorikk(any(), any())
+        } returns listOf(
+            lagAndelHistorikkDto(
+                fraOgMed = fraOgMed,
+                tilOgMed = tilOgMedDato,
+            )
+        )
+    }
+
     private fun mockTilkjentYtelse(startdato: LocalDate = LocalDate.now()) {
         every { tilkjentYtelseService.hentForBehandling(any()) } returns lagTilkjentYtelse(
             startdato = startdato,
@@ -469,7 +473,7 @@ internal class BisysBarnetilsynServiceTest {
 fun lagAndelHistorikkDto(
     fraOgMed: LocalDate = LocalDate.MIN,
     tilOgMed: LocalDate,
-    behandlingBarn: List<BehandlingBarn>,
+    behandlingBarn: List<BehandlingBarn> = emptyList(),
     beløp: Int = 1,
     endring: HistorikkEndring? = null
 ): AndelHistorikkDto {
