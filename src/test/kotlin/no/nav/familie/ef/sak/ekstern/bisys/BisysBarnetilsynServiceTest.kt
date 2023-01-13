@@ -298,11 +298,11 @@ internal class BisysBarnetilsynServiceTest {
 
     @Test
     fun `en infotrygdperiode som strekker seg forbi ef-perioder, forvent perioder ikke varer lenger enn ef-perioder`() {
-        val fraOgMed = YearMonth.now().atDay(1).minusMonths(1)
-        val tilOgMedDato = YearMonth.now().atEndOfMonth().plusMonths(2)
+        val fraOgMed = LocalDate.of(2023, 1, 1)
+        val tilOgMedDato = YearMonth.from(fraOgMed).plusMonths(4).atEndOfMonth()
         mockTilkjentYtelse(fraOgMed)
         mockHentPerioderFraReplika(LocalDate.MIN, LocalDate.MAX)
-        mockHentHistorikk(fraOgMed, tilOgMedDato)
+        mockHentHistorikk(fraOgMed, tilOgMedDato,)
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
@@ -451,13 +451,15 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(perioder).hasSize(1)
     }
 
-    private fun mockHentHistorikk(fraOgMed: LocalDate, tilOgMedDato: LocalDate) {
+    private fun mockHentHistorikk(fraOgMed: LocalDate, tilOgMedDato: LocalDate, barn: List<BehandlingBarn> = behandlingBarn) {
         every {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(
             lagAndelHistorikkDto(
                 fraOgMed = fraOgMed,
                 tilOgMed = tilOgMedDato,
+                behandlingBarn = barn
+
             )
         )
     }
