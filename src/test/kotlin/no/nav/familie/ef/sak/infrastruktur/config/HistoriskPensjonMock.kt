@@ -17,7 +17,7 @@ class HistoriskPensjonMock {
     @Primary
     fun historiskPensjonClient(): HistoriskPensjonClient {
         val mockk = mockk<HistoriskPensjonClient>()
-        every { mockk.harPensjon(any()) } returns HistoriskPensjonResponse(true, "")
+        every { mockk.harPensjon(any(), any()) } returns HistoriskPensjonResponse(true, "")
         return mockk
     }
 }

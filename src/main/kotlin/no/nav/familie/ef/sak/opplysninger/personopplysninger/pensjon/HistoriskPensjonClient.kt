@@ -23,10 +23,10 @@ class HistoriskPensjonClient(
         UriComponentsBuilder.fromUri(historiskPensjonUri).pathSegment("api/ensligForsoerger/harPensjonsdata")
             .build().toUri()
 
-    fun harPensjon(aktivIdent: String): HistoriskPensjonResponse {
+    fun harPensjon(aktivIdent: String, alleRelaterteFoedselsnummer : List<String>): HistoriskPensjonResponse {
         return postForEntity(
             lagHarPensjonUri(),
-            HistoriskPensjonRequest(aktivIdent)
+            EnsligForsoergerRequest(aktivIdent, alleRelaterteFoedselsnummer)
         )
     }
 }

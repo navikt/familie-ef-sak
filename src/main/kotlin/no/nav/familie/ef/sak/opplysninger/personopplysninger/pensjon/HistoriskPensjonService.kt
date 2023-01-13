@@ -14,9 +14,13 @@ class HistoriskPensjonService(private val historiskPensjonClient: HistoriskPensj
     @Cacheable("historisk_pensjon")
     fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonResponse {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return historiskPensjonClient.harPensjon(aktivIdent)
+        val identer = fagsakPersonService.hentIdenter(fagsakPersonId)
+        return historiskPensjonClient.harPensjon(aktivIdent, identer.map { ident -> ident.ident })
     }
 }
 
 data class HistoriskPensjonResponse(val harPensjonsdata: Boolean, val webAppUrl: String)
-data class HistoriskPensjonRequest(val fnr: String)
+data class EnsligForsoergerRequest(
+    val aktivtFoedselsnummer: String,
+    val alleRelaterteFoedselsnummer: List<String>
+)
