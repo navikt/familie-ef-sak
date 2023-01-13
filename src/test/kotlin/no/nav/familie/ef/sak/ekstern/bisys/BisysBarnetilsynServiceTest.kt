@@ -302,13 +302,13 @@ internal class BisysBarnetilsynServiceTest {
         val tilOgMedDato = YearMonth.from(fraOgMed).plusMonths(4).atEndOfMonth()
         mockTilkjentYtelse(fraOgMed)
         mockHentPerioderFraReplika(LocalDate.MIN, LocalDate.MAX)
-        mockHentHistorikk(fraOgMed, tilOgMedDato,)
+        mockHentHistorikk(fraOgMed, tilOgMedDato)
 
         val perioder = barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
             personident,
             LocalDate.MIN
         ).barnetilsynBisysPerioder
-        
+
         assertThat(perioder).hasSize(2)
         assertThat(perioder.last().periode.fom).isEqualTo(fraOgMed)
         assertThat(perioder.first().periode.tom).isEqualTo(fraOgMed.minusDays(1))
@@ -451,7 +451,11 @@ internal class BisysBarnetilsynServiceTest {
         assertThat(perioder).hasSize(1)
     }
 
-    private fun mockHentHistorikk(fraOgMed: LocalDate, tilOgMedDato: LocalDate, barn: List<BehandlingBarn> = behandlingBarn) {
+    private fun mockHentHistorikk(
+        fraOgMed: LocalDate,
+        tilOgMedDato: LocalDate,
+        barn: List<BehandlingBarn> = behandlingBarn
+    ) {
         every {
             andelsHistorikkService.hentHistorikk(any(), any())
         } returns listOf(
