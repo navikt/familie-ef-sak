@@ -283,6 +283,6 @@ class BehandlingService(
         val saksbehandling = behandlingRepository.finnSaksbehandling(behandlingId)
         val behandlinger = hentBehandlinger(saksbehandling.fagsakId)
 
-        return behandlinger.any { return it.vedtakstidspunkt != null && it.vedtakstidspunkt > saksbehandling.opprettetTid }
+        return behandlinger.any { it.vedtakstidspunkt != null && it.vedtakstidspunkt > saksbehandling.opprettetTid }
     }
 }

@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.internal.TaskService
@@ -40,6 +41,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -232,6 +234,37 @@ internal class BehandlingServiceTest {
             val feil: ApiFeil = assertThrows { behandlingService.taAvVent(UUID.randomUUID()) }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `skal returnere false dersom det ikke er vedtak nyere enn gjeldende behandling`() {
+            val saksbehandling = saksbehandling()
+
+            every {
+                behandlingRepository.finnSaksbehandling(saksbehandling.id)
+            } returns saksbehandling
+
+            every {
+                behandlingRepository.findByFagsakId(saksbehandling.fagsakId)
+            } returns listOf(behandling(id = saksbehandling.id))
+
+            assertThat(behandlingService.harNyereVedtak(saksbehandling.id)).isFalse
+        }
+
+        @Test
+        fun `skal returnere true dersom det er vedtak nyere enn gjeldende behandling`() {
+            val fagsak = fagsak()
+            val saksbehandling = saksbehandling(fagsak, opprettetTid = LocalDate.of(2023, 1, 1).atStartOfDay())
+
+            every {
+                behandlingRepository.finnSaksbehandling(saksbehandling.id)
+            } returns saksbehandling
+
+            every {
+                behandlingRepository.findByFagsakId(saksbehandling.fagsakId)
+            } returns listOf(behandling(id = saksbehandling.id, opprettetTid = LocalDate.of(2023, 1, 1).atStartOfDay()), behandling(fagsak, vedtakstidspunkt = LocalDateTime.now()))
+
+            assertThat(behandlingService.harNyereVedtak(saksbehandling.id)).isTrue
         }
     }
 
