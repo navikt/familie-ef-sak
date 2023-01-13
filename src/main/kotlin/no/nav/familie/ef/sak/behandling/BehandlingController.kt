@@ -27,6 +27,7 @@ import java.util.UUID
 @Validated
 class BehandlingController(
     private val behandlingService: BehandlingService,
+    private val behandlingPåVentService: BehandlingPåVentService,
     private val fagsakService: FagsakService,
     private val henleggService: HenleggService,
     private val tilgangService: TilgangService,
@@ -53,7 +54,7 @@ class BehandlingController(
     fun settPåVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        behandlingService.settPåVent(behandlingId)
+        behandlingPåVentService.settPåVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
 
@@ -61,14 +62,14 @@ class BehandlingController(
     fun kanTaAvVent(@PathVariable behandlingId: UUID): Ressurs<TaAvVentStatusDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(TaAvVentStatusDto(behandlingService.kanTaAvVent(behandlingId)))
+        return Ressurs.success(TaAvVentStatusDto(behandlingPåVentService.kanTaAvVent(behandlingId)))
     }
 
     @PostMapping("{behandlingId}/aktiver")
     fun taAvVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        behandlingService.taAvVent(behandlingId)
+        behandlingPåVentService.taAvVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
 

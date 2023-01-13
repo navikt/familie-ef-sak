@@ -9,7 +9,6 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
-import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VILKÅR
@@ -259,42 +258,5 @@ class BehandlingService(
         )
     }
 
-    @Transactional
-    fun settPåVent(behandlingId: UUID) {
-        val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
-            "Kan ikke sette behandling med status ${behandling.status} på vent"
-        }
 
-        behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
-        taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
-    }
-
-    @Transactional
-    fun taAvVent(behandlingId: UUID) {
-        val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
-            "Kan ikke ta behandling med status ${behandling.status} av vent"
-        }
-        behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
-    }
-
-    fun kanTaAvVent(behandlingId: UUID): TaAvVentStatus {
-        val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
-            "Kan ikke ta behandling med status ${behandling.status} av vent"
-        }
-
-        val behandlinger = hentBehandlinger(behandling.fagsakId).sortedByDescending { it.sporbar.endret.endretTid }
-        if (behandlinger.any { it.id != behandlingId && it.erAvsluttet() }) {
-            return TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES
-        }
-        val sisteIverksatte = finnSisteIverksatteBehandling(behandling.fagsakId)
-        return if (sisteIverksatte == null || sisteIverksatte.id == behandling.forrigeBehandlingId) {
-            TaAvVentStatus.OK
-        } else {
-            TaAvVentStatus.MÅ_OPPDATERES
-        }
-    }
 }
