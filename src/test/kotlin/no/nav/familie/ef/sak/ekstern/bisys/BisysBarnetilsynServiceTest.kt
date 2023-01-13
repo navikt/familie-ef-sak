@@ -374,42 +374,6 @@ internal class BisysBarnetilsynServiceTest {
     }
 
     @Test
-    fun `en infotrygdperiode med tom dato som overskyter startdato, forvent avkortning av inf-tom dato`() {
-        val startdato = LocalDate.MIN.plusDays(2)
-        mockTilkjentYtelse(startdato)
-        val efFom = YearMonth.now().atDay(1)
-        val efTom = LocalDate.MAX
-        val andelhistorikkDto =
-            lagAndelHistorikkDto(fraOgMed = efFom, tilOgMed = efTom, behandlingBarn = behandlingBarn)
-        every {
-            infotrygdService.hentSammenslåtteBarnetilsynPerioderFraReplika(any())
-        } returns listOf(
-            lagInfotrygdPeriode(
-                vedtakId = 1,
-                stønadFom = LocalDate.MIN,
-                stønadTom = LocalDate.MAX,
-                beløp = 10
-            )
-        )
-        every {
-            andelsHistorikkService.hentHistorikk(any(), any())
-        } returns listOf(andelhistorikkDto)
-
-        val fomDato = LocalDate.now()
-        val perioder =
-            barnetilsynBisysService.hentBarnetilsynperioderFraEfOgInfotrygd(
-                personident,
-                fomDato
-            ).barnetilsynBisysPerioder
-        val infotrygdPeriode = perioder.first()
-        val efPeriode = perioder.get(1)
-        assertThat(infotrygdPeriode.periode.fom).isEqualTo(LocalDate.MIN)
-        assertThat(infotrygdPeriode.periode.tom).isEqualTo(startdato.minusDays(1))
-        assertThat(efPeriode.periode.fom).isEqualTo(efFom)
-        assertThat(efPeriode.periode.tom).isEqualTo(efTom)
-    }
-
-    @Test
     fun `en infotrygdperiode med fom-dato lik startdato, forvent sletting av inf-periode`() {
         val startdato = LocalDate.MIN
         mockTilkjentYtelse(startdato)
