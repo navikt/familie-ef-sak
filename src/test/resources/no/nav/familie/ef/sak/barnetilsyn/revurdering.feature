@@ -6,9 +6,9 @@ Egenskap: Andelhistorikk: Revurdering av barnetilsyn
   Scenario: Revurdering uten endringer men fra samma dato skriver over tidligere rad
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter |
-      | 1            | INNVILGE        | 1           | 200      |
-      | 2            | INNVILGE        | 1           | 200      |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Antall barn | Utgifter |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 1           | 200      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 1           | 200      |
 
     Og følgende kontantstøtte
       | BehandlingId | Beløp |
@@ -31,9 +31,9 @@ Egenskap: Andelhistorikk: Revurdering av barnetilsyn
   Scenario: Revurdering med endring i tillegsstønad oh kontantstøtte blir markert som erstattet, fordi det fører til likt stønadsbeløp
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter |
-      | 1            | INNVILGE        | 1           | 200      |
-      | 2            | INNVILGE        | 1           | 200      |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Antall barn | Utgifter |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 1           | 200      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 1           | 200      |
 
     Og følgende kontantstøtte
       | BehandlingId | Beløp |
@@ -56,9 +56,9 @@ Egenskap: Andelhistorikk: Revurdering av barnetilsyn
   Scenario: Revurdering med endringer
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Antall barn | Utgifter |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | 1           | 200      |
-      | 2            | INNVILGE        | 02.2021         | 03.2021         | 1           | 200      |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Antall barn | Utgifter |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 01.2021         | 03.2021         | 1           | 200      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 02.2021         | 03.2021         | 1           | 200      |
 
     Og følgende kontantstøtte
       | BehandlingId | Fra og med dato | Til og med dato | Beløp |

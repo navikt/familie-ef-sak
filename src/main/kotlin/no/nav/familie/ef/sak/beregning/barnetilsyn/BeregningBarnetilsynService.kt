@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
+import no.nav.familie.ef.sak.vedtak.dto.erOpphørEllerSanksjon
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.harOverlappende
@@ -91,6 +92,15 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         brukerfeilHvis((kontantstøttePerioder.harPeriodeFør(innføringsMndKontantstøttefradrag))) {
             "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
         }
+
+        brukerfeilHvis(utgiftsperioderDto.any { it.periodetype == null }) {
+            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
+        }
+
+        brukerfeilHvis(utgiftsperioderDto.any{ it.aktivitetstype == null && it.erOpphørEllerSanksjon().not()}) {
+            "Utgiftsperioder $utgiftsperioderDto kan ikke ha en periode uten aktivitetstype dersom periodetypen ikke er opphør eller sanksjon"
+        }
+
     }
 
     private fun harUrelevantReduksjonsPeriode(

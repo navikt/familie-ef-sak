@@ -6,10 +6,10 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
   Scenario: Innvilgede perioder for barnetilsyn skal opphøres dersom
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør |
-      | 1            | INNVILGE        | 1           | 200      | 01.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
-      | 2            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    |
-      | 2            | INNVILGE        | 1           | 100      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 1           | 200      | 01.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 1           | 100      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
 
     Når beregner ytelse
 
@@ -27,10 +27,10 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
   Scenario: Førstegangsbehandling med midlertidlig opphør
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør |
-      | 1            | INNVILGE        | 1           | 200      | 01.2021         | 01.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
-      | 1            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    |
-      | 1            | INNVILGE        | 1           | 200      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 1           | 200      | 01.2021         | 01.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 1           | 200      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       |
 
     Når beregner ytelse
 

@@ -6,8 +6,8 @@ Egenskap: hentVedtakForBarnetilsynFraDato
   Scenario: Barnetilsyn behandling med 2 perioder
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter | Arbeid aktivitet          |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      | ETABLERER_EGEN_VIRKSOMHET |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter | Arbeid aktivitet          |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      | ETABLERER_EGEN_VIRKSOMHET |
 
     Og følgende kontantstøtte
       | BehandlingId | Fra og med dato | Til og med dato | Beløp |
@@ -81,10 +81,10 @@ Egenskap: hentVedtakForBarnetilsynFraDato
 
   Scenario: Barnetilsyn med oppsplittet historikk
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      |
-      | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1  | 100      |
-      | 2            | INNVILGE        | 04.2021         | 04.2021         | Id1  | 50       |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1  | 100      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 04.2021         | 04.2021         | Id1  | 50       |
 
     Når beregner ytelse
 
@@ -105,10 +105,10 @@ Egenskap: hentVedtakForBarnetilsynFraDato
 
   Scenario: Barnetilsyn med ulike barn historikk
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn    | Utgifter |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1     | 200      |
-      | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1,Id2 | 100      |
-      | 2            | INNVILGE        | 04.2021         | 04.2021         | Id2     | 50       |
+      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn    | Utgifter |
+      | ordinær        | i_arbeid          | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1     | 200      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1,Id2 | 100      |
+      | ordinær        | i_arbeid          | 2            | INNVILGE        | 04.2021         | 04.2021         | Id2     | 50       |
 
     Når beregner ytelse
 

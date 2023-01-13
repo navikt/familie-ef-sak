@@ -206,6 +206,9 @@ object VedtakDomeneParser {
                 IntRange(1, it).map { UUID.randomUUID() }
             } ?: emptyList()
             val midlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
+            val periodetype = parsePeriodetypeBarnetilsyn(rad)
+            val aktivitetstype = parseAktivitetstypeBarnetilsyn(rad)
+
             Barnetilsynperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
@@ -214,7 +217,8 @@ object VedtakDomeneParser {
                 erMidlertidigOpphør = midlertidigOpphør
                     ?: (sanksjonsårsak != null),
                 sanksjonsårsak = sanksjonsårsak,
-                periodetype = if (midlertidigOpphør == true) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR
+                periodetype = periodetype,
+                aktivitetstype = aktivitetstype
             )
         }
     }
@@ -418,7 +422,9 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIEBELASTNING("Studiebelastning"),
     ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     VEDTAKSDATO("Vedtaksdato"),
-    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato")
+    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato"),
+    PeriodetypeBarnetilsyn("Periodetype BT"),
+    AktivitetstypeBarnetilsyn("Aktivitetstype BT")
     ;
 
     override fun nøkkel(): String {

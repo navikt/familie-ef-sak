@@ -54,6 +54,7 @@ data class UtgiftsperiodeDto(
     val aktivitetstype: AktivitetstypeBarnetilsyn?
 )
 
+fun UtgiftsperiodeDto.erOpphørEllerSanksjon(): Boolean = this.periodetype == PeriodetypeBarnetilsyn.OPPHØR || this.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
 
 fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = map(UtgiftsperiodeDto::periode).erSammenhengende()

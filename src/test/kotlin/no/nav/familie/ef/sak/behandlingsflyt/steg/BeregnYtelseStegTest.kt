@@ -37,6 +37,8 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -1588,7 +1590,9 @@ internal class BeregnYtelseStegTest {
                         beløp = 1,
                         beløpFørFratrekkOgSatsjustering = 1,
                         sats = 6284,
-                        beregningsgrunnlag = grunnlag()
+                        beregningsgrunnlag = grunnlag(),
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 )
         }
@@ -1619,7 +1623,9 @@ internal class BeregnYtelseStegTest {
                         beløp = 1,
                         beløpFørFratrekkOgSatsjustering = 1,
                         sats = 6284,
-                        beregningsgrunnlag = grunnlag()
+                        beregningsgrunnlag = grunnlag(),
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 )
 
@@ -1659,7 +1665,9 @@ internal class BeregnYtelseStegTest {
                         beløp = 1,
                         beløpFørFratrekkOgSatsjustering = 1,
                         sats = 6284,
-                        beregningsgrunnlag = grunnlag()
+                        beregningsgrunnlag = grunnlag(),
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 )
 
@@ -1701,7 +1709,9 @@ internal class BeregnYtelseStegTest {
                             tilleggsstønadsbeløp = BigDecimal.ZERO,
                             1,
                             emptyList()
-                        )
+                        ),
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 )
 
@@ -1869,7 +1879,9 @@ internal class BeregnYtelseStegTest {
                     periode = Månedsperiode(YearMonth.from(startDato), YearMonth.from(sluttDato)),
                     barn = barn ?: emptyList(),
                     utgifter = utgifter ?: 2500,
-                    erMidlertidigOpphør = erMidlertidigOpphør ?: false
+                    erMidlertidigOpphør = erMidlertidigOpphør ?: false,
+                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                    aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
                 )
             ),
             perioderKontantstøtte = emptyList(),
@@ -1887,7 +1899,9 @@ internal class BeregnYtelseStegTest {
                 periode = Månedsperiode(YearMonth.from(it.andelFom), YearMonth.from(it.andelTom)),
                 barn = if (it.utgifter > 0) it.barn else emptyList(),
                 utgifter = it.utgifter,
-                erMidlertidigOpphør = if (it.utgifter > 0) false else true
+                erMidlertidigOpphør = if (it.utgifter > 0) false else true,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         },
         perioderKontantstøtte = emptyList(),
@@ -1924,7 +1938,9 @@ internal class BeregnYtelseStegTest {
             endring = null,
             aktivitetArbeid = null,
             erSanksjon = false,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
+            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
         )
 
     private val fjernetHistorikkEndring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
@@ -1942,7 +1958,9 @@ internal class BeregnYtelseStegTest {
             endring = endring,
             aktivitetArbeid = null,
             erSanksjon = true,
-            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
+            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
         )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =

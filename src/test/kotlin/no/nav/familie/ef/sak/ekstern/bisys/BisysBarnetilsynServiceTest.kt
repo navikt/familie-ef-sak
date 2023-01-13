@@ -17,6 +17,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelMedGrunnlagDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
@@ -522,6 +524,8 @@ fun lagAndelHistorikkDto(
         erSanksjon = false,
         sanksjonsårsak = null,
         endring = endring,
-        behandlingÅrsak = BehandlingÅrsak.SØKNAD
+        behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
     )
 }

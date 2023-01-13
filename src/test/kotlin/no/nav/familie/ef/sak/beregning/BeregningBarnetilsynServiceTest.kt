@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.beregning.barnetilsyn.roundUp
 import no.nav.familie.ef.sak.beregning.barnetilsyn.split
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
@@ -163,7 +165,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, april2022),
                 barn = listOf(UUID.randomUUID()),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
             val utgiftsperiode2 = UtgiftsperiodeDto(
                 mars2022,
@@ -171,7 +175,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(mars2000, juli2022),
                 barn = listOf(UUID.randomUUID()),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
             val feil = assertThrows<ApiFeil> {
                 service.beregnYtelseBarnetilsyn(
@@ -210,6 +216,33 @@ class BeregningBarnetilsynServiceTest {
             }
             assertThat(feil.message).contains("Tilleggsstønadsperioder")
         }
+
+        @Test
+        internal fun `Skal kaste feil dersom periodetype ikke er valgt`() {
+            val utgiftsperiode = listeMedEnUtgiftsperiode(aktivitetstype = null, periodetype = null)
+            val ugyldigUtgiftsperiode = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(
+                    utgiftsperioder = utgiftsperiode,
+                    kontantstøttePerioder = listOf(),
+                    tilleggsstønadsperioder = listOf()
+                )
+            }
+            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperiode mangler en eller flere aktivitetstyper")
+        }
+
+        @Test
+        internal fun `Skal kaste feil dersom aktivitetstype ikke er valgt og periodetype ikke er opphør eller sanksjon`() {
+            val utgiftsperioder = listeMedEnUtgiftsperiode(aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, periodetype = PeriodetypeBarnetilsyn.ORDINÆR) +
+                listeMedEnUtgiftsperiode(fra = mars2022, til = april2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = null)
+            val ugyldigUtgiftsperiode = assertThrows<ApiFeil> {
+                service.beregnYtelseBarnetilsyn(
+                    utgiftsperioder = utgiftsperioder,
+                    kontantstøttePerioder = listOf(),
+                    tilleggsstønadsperioder = listOf()
+                )
+            }
+            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperioder kan ikke ha en periode uten aktivitetstype dersom periodetypen ikke er opphør eller sanksjon")
+        }
     }
 
     @Test
@@ -222,7 +255,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, mars2022),
                 barn = listOf(barnUUID),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode2 =
             UtgiftsperiodeDto(
@@ -231,7 +266,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(april2022, juli2022),
                 barn = listOf(barnUUID),
                 utgifter = 1,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode3 =
             UtgiftsperiodeDto(
@@ -240,9 +277,10 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(august2022, desember2022),
                 barn = listOf(barnUUID),
                 utgifter = 20,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
-
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(
                 utgiftsperiode1,
@@ -268,7 +306,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, mars2022),
                 barn = listOf(barnUUID),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode2 =
             UtgiftsperiodeDto(
@@ -277,7 +317,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(april2022, juli2022),
                 barn = listOf(barnUUID),
                 utgifter = 1,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode3 =
             UtgiftsperiodeDto(
@@ -286,7 +328,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(august2022, desember),
                 barn = listOf(barnUUID),
                 utgifter = 20,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
 
         val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(
@@ -336,7 +380,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, juli2022),
                 barn = listOf(barnUUID),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode2 =
             UtgiftsperiodeDto(
@@ -345,7 +391,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(august2022, desember2022),
                 barn = listOf(barnUUID),
                 utgifter = 1,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
 
         val kontantStøtteperiodeJanuar =
@@ -374,7 +422,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, juli2022),
                 barn = listOf(barnUUID),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode2 =
             UtgiftsperiodeDto(
@@ -383,7 +433,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(august2022, desember2022),
                 barn = listOf(barnUUID),
                 utgifter = 1,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
 
         val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(
@@ -422,7 +474,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, mars2022),
                 barn = listOf(barnUUID),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode2 =
             UtgiftsperiodeDto(
@@ -431,7 +485,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(april2022, juli2022),
                 barn = listOf(barnUUID),
                 utgifter = 1,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val utgiftsperiode3 =
             UtgiftsperiodeDto(
@@ -440,7 +496,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(august2022, desember2022),
                 barn = listOf(barnUUID),
                 utgifter = 20,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
 
         val kontantStøtteperiodeJanuar = PeriodeMedBeløpDto(
@@ -503,7 +561,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2021, desember2022),
                 barn = listOf(UUID.randomUUID()),
                 utgifter = 39000,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = listOf(utgiftsperiode),
@@ -525,7 +585,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2021, desember2021),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 39000,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
@@ -533,7 +595,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2022, desember2022),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 39000,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val beregnYtelseBarnetilsyn =
             service.beregnYtelseBarnetilsyn(
@@ -553,7 +617,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2021, desember2021),
             barn = listeAvBarn,
             utgifter = 1,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
@@ -561,7 +627,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2022, desember2022),
             barn = listeAvBarn,
             utgifter = 1,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val beregnYtelseBarnetilsyn =
             service.beregnYtelseBarnetilsyn(
@@ -580,7 +648,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2021, desember2021),
             barn = listOf(UUID.randomUUID()),
             utgifter = 1,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
@@ -588,7 +658,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2022, desember2022),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 1,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val beregnYtelseBarnetilsyn =
             service.beregnYtelseBarnetilsyn(
@@ -607,7 +679,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2021, desember2021),
             barn = listOf(UUID.randomUUID()),
             utgifter = 39000,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val utgiftsperiode22 = UtgiftsperiodeDto(
             januar2022,
@@ -615,7 +689,9 @@ class BeregningBarnetilsynServiceTest {
             Månedsperiode(januar2022, desember2022),
             barn = listOf(UUID.randomUUID(), UUID.randomUUID()),
             utgifter = 1,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         val beregnYtelseBarnetilsyn =
             service.beregnYtelseBarnetilsyn(
@@ -635,7 +711,9 @@ class BeregningBarnetilsynServiceTest {
                 Månedsperiode(januar2022, desember2022),
                 barn = listOf(),
                 utgifter = 10,
-                erMidlertidigOpphør = false
+                erMidlertidigOpphør = false,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
             )
         val resultat = utgiftsperiodeDto.split()
         assertThat(resultat).hasSize(12)
@@ -720,6 +798,23 @@ class BeregningBarnetilsynServiceTest {
         assertThat(beløpsperioder.mergeSammenhengendePerioder()).hasSize(2)
     }
 
+    @Test
+    fun `Skal lage tre utgiftsperioder når etterfølgende perioder differ på periodetype`() {
+        val barnUUID = listOf(UUID.randomUUID())
+        val utgiftsperioder =
+            listeMedEnUtgiftsperiode(fra = januar2022, til = mars2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID) +
+            listeMedEnUtgiftsperiode(fra = april2022, til = juli2022, periodetype = PeriodetypeBarnetilsyn.OPPHØR, aktivitetstype = null, barn = barnUUID) +
+            listeMedEnUtgiftsperiode(fra = august2022, til = desember2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID)
+
+        val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
+            utgiftsperioder = utgiftsperioder,
+            kontantstøttePerioder = listOf(),
+            tilleggsstønadsperioder = listOf()
+        )
+
+        assertThat(beregnYtelseBarnetilsyn).hasSize(3)
+    }
+
     private fun lagBeløpsperiode(
         fraDato: LocalDate,
         tilDato: LocalDate,
@@ -736,7 +831,9 @@ class BeregningBarnetilsynServiceTest {
                 tilleggsstønadsbeløp = ZERO,
                 antallBarn = 1,
                 barn = emptyList()
-            )
+            ),
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
     }
 
@@ -758,8 +855,11 @@ class BeregningBarnetilsynServiceTest {
     private fun listeMedEnUtgiftsperiode(
         fra: YearMonth = januar2022,
         til: YearMonth = februar2022,
-        beløp: Int = 10
+        beløp: Int = 10,
+        periodetype: PeriodetypeBarnetilsyn? = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
+        barn: List<UUID>? = null
     ): List<UtgiftsperiodeDto> {
-        return listOf(UtgiftsperiodeDto(fra, til, Månedsperiode(fra, til), listOf(UUID.randomUUID()), beløp, false))
+        return listOf(UtgiftsperiodeDto(fra, til, Månedsperiode(fra, til), barn ?: listOf(UUID.randomUUID()), beløp, false, null, periodetype, aktivitetstype))
     }
 }

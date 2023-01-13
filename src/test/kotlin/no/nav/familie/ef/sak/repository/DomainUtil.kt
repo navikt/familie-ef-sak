@@ -37,6 +37,7 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
@@ -348,14 +349,16 @@ fun barnetilsynperiode(
     beløp: Int = 1000,
     barn: List<UUID>,
     sanksjonsårsak: Sanksjonsårsak? = null,
-    periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR
+    periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
 ) = Barnetilsynperiode(
     periode = Månedsperiode(fom, tom),
     utgifter = beløp,
     barn = barn,
     erMidlertidigOpphør = false,
     sanksjonsårsak = sanksjonsårsak,
-    periodetype = periodetype
+    periodetype = periodetype,
+    aktivitet = aktivitetstype
 )
 
 fun inntektsperiode(

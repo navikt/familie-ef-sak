@@ -1,6 +1,8 @@
 package no.nav.familie.ef.sak.vedtak.historikk
 
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -38,7 +40,9 @@ internal class AndelHistorikkDtoKtTest {
         periodeType = null,
         erSanksjon = false,
         sanksjonsårsak = null,
-        endring = null
+        endring = null,
+        periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
     )
 
     private fun andelMedGrunnlagDto() = AndelMedGrunnlagDto(
