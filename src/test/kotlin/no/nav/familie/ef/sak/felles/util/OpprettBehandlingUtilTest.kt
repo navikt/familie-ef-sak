@@ -82,6 +82,21 @@ internal class OpprettBehandlingUtilTest {
         }
 
         @Test
+        internal fun `skal kunne opprette en ny behandling hvis en tidligere behandling er satt på vent`() {
+            val behandlinger = listOf(
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.FERDIGSTILT
+                ),
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.SATT_PÅ_VENT
+                )
+            )
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger)
+        }
+
+        @Test
         fun `det skal være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
             val behandling = behandling(
                 fagsak = fagsak,

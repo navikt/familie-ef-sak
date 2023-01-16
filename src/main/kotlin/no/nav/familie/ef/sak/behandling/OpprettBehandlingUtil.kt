@@ -39,7 +39,7 @@ object OpprettBehandlingUtil {
     }
 
     private fun validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger: List<Behandling>) {
-        if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+        if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT && it.status != BehandlingStatus.SATT_PÅ_VENT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
         }
     }
