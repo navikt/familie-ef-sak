@@ -26,8 +26,7 @@ class VedtakService(
     }
 
     fun slettVedtakHvisFinnes(behandlingId: UUID) {
-        vedtakRepository.findByIdOrNull(behandlingId)
-            ?.let { vedtakRepository.deleteById(behandlingId) }
+        vedtakRepository.deleteById(behandlingId)
     }
 
     fun hentVedtak(behandlingId: UUID): Vedtak {

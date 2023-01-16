@@ -168,6 +168,18 @@ class BehandlingService(
         return behandlingRepository.update(behandling.copy(status = status))
     }
 
+    fun oppdaterForrigeBehandlingId(behandlingId: UUID, forrigeBehandlingId: UUID): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke endre forrigeBehandlingId når behandlingen er låst"
+        }
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandler()} endrer forrigeBehandlingId på behandling $behandlingId " +
+                "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId"
+        )
+        return behandlingRepository.update(behandling.copy(forrigeBehandlingId = forrigeBehandlingId))
+    }
+
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(

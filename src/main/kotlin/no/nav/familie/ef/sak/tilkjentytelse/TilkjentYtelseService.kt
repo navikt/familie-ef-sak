@@ -79,6 +79,6 @@ class TilkjentYtelseService(
         brukerfeilHvis(behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()) {
             "Kan ikke reberegne tilkjent ytelse for en behandling som er låst for videre redigering"
         }
-        tilkjentYtelseRepository.findByBehandlingId(behandlingId)?.let { tilkjentYtelseRepository.deleteById(it.id) }
+        tilkjentYtelseRepository.deleteById(behandlingId)
     }
 }

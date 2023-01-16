@@ -5,14 +5,17 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
@@ -28,10 +31,13 @@ internal class BehandlingPåVentServiceTest {
 
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val taskService = mockk<TaskService>(relaxed = true)
+    private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
     private val behandlingPåVentService =
         BehandlingPåVentService(
             behandlingService,
             taskService,
+            nullstillVedtakService,
+            mockFeatureToggleService()
         )
     val fagsak = fagsak()
     val tidligereIverksattBehandling = behandling(fagsak)
@@ -92,7 +98,9 @@ internal class BehandlingPåVentServiceTest {
         internal fun `kan ta av vent når det ikke finnes andre behandlinger`() {
             every { behandlingService.hentBehandlinger(fagsak.id) } returns emptyList()
 
-            assertThat(behandlingPåVentService.kanTaAvVent(behandlingId)).isEqualTo(TaAvVentStatus.OK)
+            val kanTaAvVent = behandlingPåVentService.kanTaAvVent(behandlingId)
+            assertThat(kanTaAvVent.status).isEqualTo(TaAvVentStatus.OK)
+            assertThat(kanTaAvVent.nyForrigeBehandlingId).isEqualTo(null)
         }
 
         @Test
@@ -109,7 +117,9 @@ internal class BehandlingPåVentServiceTest {
             mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT, forrigeBehandlingId = tidligereIverksattBehandling.id)
             mockFinnSisteIverksatteBehandling(tidligereIverksattBehandling)
 
-            assertThat(behandlingPåVentService.kanTaAvVent(behandlingId)).isEqualTo(TaAvVentStatus.OK)
+            val kanTaAvVent = behandlingPåVentService.kanTaAvVent(behandlingId)
+            assertThat(kanTaAvVent.status).isEqualTo(TaAvVentStatus.OK)
+            assertThat(kanTaAvVent.nyForrigeBehandlingId).isEqualTo(null)
         }
 
         @Test
@@ -117,7 +127,9 @@ internal class BehandlingPåVentServiceTest {
             mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT, forrigeBehandlingId = UUID.randomUUID())
             mockFinnSisteIverksatteBehandling(tidligereIverksattBehandling)
 
-            assertThat(behandlingPåVentService.kanTaAvVent(behandlingId)).isEqualTo(TaAvVentStatus.MÅ_NULSTILLE_VEDTAK)
+            val kanTaAvVent = behandlingPåVentService.kanTaAvVent(behandlingId)
+            assertThat(kanTaAvVent.status).isEqualTo(TaAvVentStatus.MÅ_NULSTILLE_VEDTAK)
+            assertThat(kanTaAvVent.nyForrigeBehandlingId).isEqualTo(tidligereIverksattBehandling.id)
         }
 
         @Test
@@ -125,8 +137,9 @@ internal class BehandlingPåVentServiceTest {
             mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT, forrigeBehandlingId = UUID.randomUUID())
             mockHentBehandlinger(behandling(fagsak, status = BehandlingStatus.IVERKSETTER_VEDTAK))
 
-            assertThat(behandlingPåVentService.kanTaAvVent(behandlingId))
-                .isEqualTo(TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
+            val kanTaAvVent = behandlingPåVentService.kanTaAvVent(behandlingId)
+            assertThat(kanTaAvVent.status).isEqualTo(TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
+            assertThat(kanTaAvVent.nyForrigeBehandlingId).isEqualTo(null)
         }
     }
 
@@ -151,6 +164,8 @@ internal class BehandlingPåVentServiceTest {
                     }
                 )
             }
+            verify(exactly = 0) { nullstillVedtakService.nullstillVedtak(any()) }
+            verify(exactly = 0) { behandlingService.oppdaterForrigeBehandlingId(any(), any()) }
         }
 
         @Test
@@ -172,12 +187,16 @@ internal class BehandlingPåVentServiceTest {
         }
 
         @Test
-        internal fun `skal oppdateres hvis behandlingen ikke peker till forrige iverksatte behandling`() {
+        internal fun `skal oppdatere nullstille vedtak og oppdatere forrigeBehandlingId hvis man må nullstille vedtaket`() {
             mockFinnSisteIverksatteBehandling(tidligereIverksattBehandling)
 
-            val feil: IllegalStateException = assertThrows { behandlingPåVentService.taAvVent(behandlingId) }
+            behandlingPåVentService.taAvVent(behandlingId)
 
-            assertThat(feil).hasMessageContaining("Har ikke støtte for dette ennå")
+            verifyOrder {
+                behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+                behandlingService.oppdaterForrigeBehandlingId(behandlingId, tidligereIverksattBehandling.id)
+                nullstillVedtakService.nullstillVedtak(behandlingId)
+            }
         }
     }
 

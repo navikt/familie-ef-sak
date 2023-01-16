@@ -62,7 +62,7 @@ class BehandlingController(
     fun kanTaAvVent(@PathVariable behandlingId: UUID): Ressurs<TaAvVentStatusDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(TaAvVentStatusDto(behandlingPåVentService.kanTaAvVent(behandlingId)))
+        return Ressurs.success(behandlingPåVentService.kanTaAvVent(behandlingId))
     }
 
     @PostMapping("{behandlingId}/aktiver")
