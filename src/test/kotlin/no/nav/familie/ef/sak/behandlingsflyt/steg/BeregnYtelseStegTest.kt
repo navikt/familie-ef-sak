@@ -1924,7 +1924,8 @@ internal class BeregnYtelseStegTest {
             endring = null,
             aktivitetArbeid = null,
             erSanksjon = false,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
+            erOpphør = false
         )
 
     private val fjernetHistorikkEndring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
@@ -1942,7 +1943,8 @@ internal class BeregnYtelseStegTest {
             endring = endring,
             aktivitetArbeid = null,
             erSanksjon = true,
-            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
+            sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+            erOpphør = false
         )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =

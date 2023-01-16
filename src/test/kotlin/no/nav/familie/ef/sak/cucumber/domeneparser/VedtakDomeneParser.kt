@@ -41,11 +41,15 @@ object VedtakDomeneParser {
 
     fun mapVedtakOvergangsstønad(dataTable: DataTable): List<Vedtak> {
         return mapVedtak(dataTable) { vedtak, rader ->
-            val perioder = mapPerioderForOvergangsstønad(vedtak.resultatType, rader)
-            vedtak.copy(
-                perioder = PeriodeWrapper(perioder),
-                inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder))
-            )
+            if (vedtak.resultatType != ResultatType.OPPHØRT) {
+                val perioder = mapPerioderForOvergangsstønad(vedtak.resultatType, rader)
+                vedtak.copy(
+                    perioder = PeriodeWrapper(perioder),
+                    inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder))
+                )
+            } else {
+                vedtak
+            }
         }
     }
 
@@ -173,15 +177,23 @@ object VedtakDomeneParser {
     ): List<Vedtaksperiode> {
         return rader.map { rad ->
             val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
+            val vedtaksperiodeType = parseVedtaksperiodeType(rad)
             Vedtaksperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
-                aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
-                periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE,
+                aktivitet = parseAktivitetType(rad) ?: defaultAktivitet(vedtaksperiodeType),
+                periodeType = vedtaksperiodeType ?: VedtaksperiodeType.HOVEDPERIODE,
                 sanksjonsårsak = sanksjonsårsak
             )
         }
     }
+
+    private fun defaultAktivitet(vedtaksperiodeType: VedtaksperiodeType?): AktivitetType =
+        if(vedtaksperiodeType == VedtaksperiodeType.SANKSJON) {
+            AktivitetType.IKKE_AKTIVITETSPLIKT
+        } else {
+            AktivitetType.BARN_UNDER_ETT_ÅR
+        }
 
     /**
      * Bruker sanksjonsårsak hvis den er definiert
@@ -192,7 +204,7 @@ object VedtakDomeneParser {
         resultatType: ResultatType
     ): Sanksjonsårsak? {
         return parseSanksjonsårsak(rad)
-            ?: if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null
+            ?: if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.SAGT_OPP_STILLING else null
     }
 
     private fun mapPerioderForBarnetilsyn(
@@ -310,7 +322,8 @@ object VedtakDomeneParser {
                     Inntektsperiode(
                         periode = Månedsperiode(datoFra, LocalDate.MAX),
                         inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
-                        samordningsfradrag = BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)
+                        samordningsfradrag = BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0
+                        )
                     )
                 )
                 acc
@@ -341,14 +354,17 @@ object VedtakDomeneParser {
         val arbeidAktivitet: SvarId?,
         val erSanksjon: Boolean?,
         val sanksjonsårsak: Sanksjonsårsak?,
-        val vedtaksdato: LocalDate?
+        val vedtaksdato: LocalDate?,
+        val erOpphør: Boolean
     )
 
     class BehandlingForHistorikkEndringMapper {
 
         fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
-            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
-            val aktivitetType = parseAktivitetType(rad) ?: defaultAktivitetsType(stønadstype, erSanksjon)
+            val periodeType = parseVedtaksperiodeType(rad)
+            val erSanksjon = periodeType == VedtaksperiodeType.SANKSJON
+            val erOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_OPPHØR, rad) ?: false
+            val aktivitetType = parseAktivitetType(rad) ?: defaultAktivitetsType(stønadstype, erSanksjon, erOpphør)
             return ForventetHistorikk(
                 behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                 historikkEndring = parseEndringType(rad)?.let { endringType ->
@@ -365,7 +381,7 @@ object VedtakDomeneParser {
                 stønadTil = parseTilOgMed(rad),
                 inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                 beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
-                periodeType = parseVedtaksperiodeType(rad),
+                periodeType = periodeType,
                 aktivitetType = aktivitetType,
                 kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
                 tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
@@ -373,15 +389,18 @@ object VedtakDomeneParser {
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
                 arbeidAktivitet = parseArbeidAktivitet(rad),
                 erSanksjon = erSanksjon,
-                sanksjonsårsak = parseSanksjonsårsak(rad),
-                vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad)
+                sanksjonsårsak = parseSanksjonsårsak(rad) ?: if(erSanksjon) Sanksjonsårsak.SAGT_OPP_STILLING else null,
+                vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad),
+                erOpphør = erOpphør
             )
         }
 
         private fun defaultAktivitetsType(
             stønadstype: StønadType,
-            erSanksjon: Boolean?
+            erSanksjon: Boolean?,
+            erOpphør: Boolean
         ) = when {
+            erOpphør -> null
             erSanksjon == true -> AktivitetType.IKKE_AKTIVITETSPLIKT
             stønadstype == StønadType.OVERGANGSSTØNAD -> AktivitetType.BARN_UNDER_ETT_ÅR
             else -> null
@@ -418,7 +437,8 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIEBELASTNING("Studiebelastning"),
     ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     VEDTAKSDATO("Vedtaksdato"),
-    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato")
+    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato"),
+    ER_OPPHØR("Er opphør")
     ;
 
     override fun nøkkel(): String {

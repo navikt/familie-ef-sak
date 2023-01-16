@@ -36,11 +36,11 @@ class BeslutteVedtakSteg(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val vedtaksbrevService: VedtaksbrevService,
+    private val vedtaksbrevService: VedtaksbrevService
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
-        brukerfeilHvis (saksbehandling.steg.kommerEtter(stegType())) {
+        brukerfeilHvis(saksbehandling.steg.kommerEtter(stegType())) {
             "Behandlingen er allerede besluttet. Status på behandling er '${saksbehandling.status.visningsnavn()}'"
         }
         if (saksbehandling.steg != stegType()) {

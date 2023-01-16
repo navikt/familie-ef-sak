@@ -66,6 +66,23 @@ internal class InfotrygdPeriodeValideringServiceTest {
         }
 
         @Test
+        internal fun `kan journalføre hvis det kun finnes perioder bak i tiden med 0-beløp`() {
+            val dato = YearMonth.now().minusYears(1)
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                            beløp = 0
+                        )
+                    )
+                )
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
+        }
+
+        @Test
         internal fun `kan ikke journalføre når personen har periode`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns
                 infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))

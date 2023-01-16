@@ -21,7 +21,6 @@ data class VedtaksperiodeDto(
 ) {
 
     fun erMidlertidigOpphørEllerSanksjon(): Boolean = periodeType.midlertidigOpphørEllerSanksjon()
-
 }
 
 fun List<VedtaksperiodeDto>.tilPerioder(): List<Månedsperiode> =

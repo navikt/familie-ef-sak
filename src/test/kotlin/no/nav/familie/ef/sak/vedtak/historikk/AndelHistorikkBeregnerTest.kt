@@ -130,7 +130,7 @@ object AndelHistorikkRunner {
             behandlinger,
             behandlingId,
             mapOf(),
-            false
+            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true, lagOpphørsperiode = true)
         )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
@@ -384,7 +384,8 @@ object AndelHistorikkParser {
             },
             aktivitetArbeid = null,
             erSanksjon = false,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
+            erOpphør = false
         )
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
