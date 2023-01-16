@@ -1,8 +1,7 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verifyAll
@@ -12,13 +11,14 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.brev.MellomlagringBrevService
+import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
-import no.nav.familie.ef.sak.vedtak.VedtakRepository
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -26,7 +26,7 @@ import java.util.UUID
 
 class NullstillVedtakServiceTest {
 
-    private val vedtakRepository = mockk<VedtakRepository>()
+    private val vedtakService = mockk<VedtakService>()
 
     private val stegService = mockk<StegService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>()
@@ -34,15 +34,17 @@ class NullstillVedtakServiceTest {
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
     private val mellomlagringBrevService = mockk<MellomlagringBrevService>(relaxed = true)
+    private val vedtaksbrevService = mockk<VedtaksbrevService>(relaxed = true)
 
     private val nullstillVedtakService = NullstillVedtakService(
-        vedtakRepository,
+        vedtakService,
         stegService,
         behandlingService,
         simuleringService,
         tilkjentYtelseService,
         tilbakekrevingService,
-        mellomlagringBrevService
+        mellomlagringBrevService,
+        vedtaksbrevService
     )
     private val behandlingId = UUID.randomUUID()
 
@@ -53,7 +55,7 @@ class NullstillVedtakServiceTest {
             id = behandlingId,
             steg = StegType.BEHANDLING_FERDIGSTILT
         )
-        every { vedtakRepository.deleteById(behandlingId) } just Runs
+        justRun { vedtakService.slettVedtakHvisFinnes(behandlingId) }
 
         nullstillVedtakService.nullstillVedtak(behandlingId)
 
@@ -62,6 +64,7 @@ class NullstillVedtakServiceTest {
             simuleringService.slettSimuleringForBehandling(capture(saksbehandling))
             tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
             tilbakekrevingService.slettTilbakekreving(behandlingId)
+            vedtaksbrevService.slettVedtaksbrev(any())
             stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
         }
 
