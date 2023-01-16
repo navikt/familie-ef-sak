@@ -2,9 +2,14 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
+import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -14,7 +19,9 @@ import java.util.UUID
 @Service
 class BehandlingPåVentService(
     private val behandlingService: BehandlingService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
+    private val nullstillVedtakService: NullstillVedtakService,
+    private val featureToggleService: FeatureToggleService
 ) {
     @Transactional
     fun settPåVent(behandlingId: UUID) {
@@ -29,7 +36,9 @@ class BehandlingPåVentService(
 
     @Transactional
     fun taAvVent(behandlingId: UUID) {
-        when (kanTaAvVent(behandlingId)) {
+        val kanTaAvVent = kanTaAvVent(behandlingId)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+        when (kanTaAvVent.status) {
             TaAvVentStatus.OK -> {}
             TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES ->
                 throw ApiFeil(
@@ -37,14 +46,18 @@ class BehandlingPåVentService(
                     HttpStatus.BAD_REQUEST
                 )
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
-                error("Har ikke støtte for dette ennå")
+                feilHvisIkke(featureToggleService.isEnabled(Toggle.PÅ_VENT_NULLSTILL_VEDTAK)) {
+                    "Toggle 'På vent - Nullstill vedtak' er ikke aktivert"
+                }
+                val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")
+                behandlingService.oppdaterForrigeBehandlingId(behandlingId, nyForrigeBehandlingId)
+                nullstillVedtakService.nullstillVedtak(behandlingId)
             }
         }
-        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
 
-    fun kanTaAvVent(behandlingId: UUID): TaAvVentStatus {
+    fun kanTaAvVent(behandlingId: UUID): TaAvVentStatusDto {
         val behandling = behandlingService.hentBehandling(behandlingId)
         brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
             "Kan ikke ta behandling med status ${behandling.status} av vent"
@@ -52,14 +65,14 @@ class BehandlingPåVentService(
 
         val behandlinger = behandlingService.hentBehandlinger(behandling.fagsakId)
             .sortedByDescending { it.sporbar.endret.endretTid }
-        if (behandlinger.any { it.id != behandlingId && !it.erAvsluttet() }) {
-            return TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES
+        if (behandlinger.any { it.id != behandling.id && !it.erAvsluttet() }) {
+            return TaAvVentStatusDto(TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
         }
         val sisteIverksatte = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
         return if (sisteIverksatte == null || sisteIverksatte.id == behandling.forrigeBehandlingId) {
-            TaAvVentStatus.OK
+            TaAvVentStatusDto(TaAvVentStatus.OK)
         } else {
-            TaAvVentStatus.MÅ_NULSTILLE_VEDTAK
+            TaAvVentStatusDto(TaAvVentStatus.MÅ_NULSTILLE_VEDTAK, sisteIverksatte.id)
         }
     }
 }

@@ -24,6 +24,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     VEDTAKSHISTORIKK_OPPHØR("familie.ef.sak.vedtakshistorikk-opphor"),
 
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
+
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
@@ -31,6 +32,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     BARNETILSYN_REVURDER_FRA("familie.ef.sak.barnetilsyn-revurder-fra"),
 
     BARN_OVER_18("familie.ef.sak.barn-over-18"),
+
+    PÅ_VENT_NULLSTILL_VEDTAK("familie.ef.sak.paa-vent-nullstill-vedtak"),
 
     REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
     LOGG_WARN_TIMEOUTS("familie.ef.sak.logg-timeout-som-warn"),
@@ -42,7 +45,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
     AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer"),
     BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode"),
-    VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp");
+    VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp"),
+    HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }

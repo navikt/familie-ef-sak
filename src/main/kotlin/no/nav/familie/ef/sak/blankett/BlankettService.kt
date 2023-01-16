@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.dto.tilDto
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.felles.domain.Fil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
@@ -20,13 +22,18 @@ class BlankettService(
     private val behandlingService: BehandlingService,
     private val søknadService: SøknadService,
     private val personopplysningerService: PersonopplysningerService,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) {
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         val blankettPdfRequest = BlankettPdfRequest(
-            BlankettPdfBehandling(årsak = behandling.årsak, stønadstype = behandling.stønadstype),
+            BlankettPdfBehandling(
+                årsak = behandling.årsak,
+                stønadstype = behandling.stønadstype,
+                årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)?.tilDto()
+            ),
             lagPersonopplysningerDto(behandling),
             vurderingService.hentEllerOpprettVurderinger(behandlingId),
             hentVedtak(behandlingId),
