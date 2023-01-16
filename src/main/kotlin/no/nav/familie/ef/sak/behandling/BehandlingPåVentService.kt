@@ -36,7 +36,7 @@ class BehandlingPåVentService(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
                     HttpStatus.BAD_REQUEST
                 )
-            TaAvVentStatus.MÅ_OPPDATERES -> {
+            TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 error("Har ikke støtte for dette ennå")
             }
         }
@@ -59,7 +59,7 @@ class BehandlingPåVentService(
         return if (sisteIverksatte == null || sisteIverksatte.id == behandling.forrigeBehandlingId) {
             TaAvVentStatus.OK
         } else {
-            TaAvVentStatus.MÅ_OPPDATERES
+            TaAvVentStatus.MÅ_NULSTILLE_VEDTAK
         }
     }
 }

@@ -7,5 +7,5 @@ data class TaAvVentStatusDto(
 enum class TaAvVentStatus {
     OK,
     ANNEN_BEHANDLING_MÅ_FERDIGSTILLES,
-    MÅ_OPPDATERES
+    MÅ_NULSTILLE_VEDTAK
 }

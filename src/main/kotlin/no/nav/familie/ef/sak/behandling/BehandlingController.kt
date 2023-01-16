@@ -58,7 +58,7 @@ class BehandlingController(
         return Ressurs.success(behandlingId)
     }
 
-    @GetMapping("{behandlingId}/aktiver")
+    @GetMapping("{behandlingId}/kan-ta-av-vent")
     fun kanTaAvVent(@PathVariable behandlingId: UUID): Ressurs<TaAvVentStatusDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         tilgangService.validerHarSaksbehandlerrolle()

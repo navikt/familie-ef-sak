@@ -117,7 +117,7 @@ internal class BehandlingPåVentServiceTest {
             mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT, forrigeBehandlingId = UUID.randomUUID())
             mockFinnSisteIverksatteBehandling(tidligereIverksattBehandling)
 
-            assertThat(behandlingPåVentService.kanTaAvVent(behandlingId)).isEqualTo(TaAvVentStatus.MÅ_OPPDATERES)
+            assertThat(behandlingPåVentService.kanTaAvVent(behandlingId)).isEqualTo(TaAvVentStatus.MÅ_NULSTILLE_VEDTAK)
         }
 
         @Test
