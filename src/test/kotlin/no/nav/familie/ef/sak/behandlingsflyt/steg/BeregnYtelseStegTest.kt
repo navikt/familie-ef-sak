@@ -1879,9 +1879,9 @@ internal class BeregnYtelseStegTest {
                     periode = Månedsperiode(YearMonth.from(startDato), YearMonth.from(sluttDato)),
                     barn = barn ?: emptyList(),
                     utgifter = utgifter ?: 2500,
-                    erMidlertidigOpphør = erMidlertidigOpphør ?: false,
-                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                    aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+                    erMidlertidigOpphør = utgifter == 0,
+                    periodetype = if (utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
+                    aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
                 )
             ),
             perioderKontantstøtte = emptyList(),
@@ -1899,9 +1899,9 @@ internal class BeregnYtelseStegTest {
                 periode = Månedsperiode(YearMonth.from(it.andelFom), YearMonth.from(it.andelTom)),
                 barn = if (it.utgifter > 0) it.barn else emptyList(),
                 utgifter = it.utgifter,
-                erMidlertidigOpphør = if (it.utgifter > 0) false else true,
-                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+                erMidlertidigOpphør = it.utgifter == 0,
+                periodetype = if (it.utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = if (it.utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
             )
         },
         perioderKontantstøtte = emptyList(),
@@ -1959,8 +1959,8 @@ internal class BeregnYtelseStegTest {
             aktivitetArbeid = null,
             erSanksjon = true,
             sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
-            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+            periodetypeBarnetilsyn = null,
+            aktivitetBarnetilsyn = null
         )
 
     private fun andelDto(beløp: Int, fom: YearMonth, tom: YearMonth) =

@@ -90,8 +90,8 @@ class KopierVedtakService(
                 utgifter = it.andel.utgifter.toInt(),
                 erMidlertidigOpphør = false,
                 sanksjonsårsak = null,
-                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+                periodetype = it.periodetypeBarnetilsyn,
+                aktivitetstype = it.aktivitetBarnetilsyn
             )
         }
         return map.fyllUtPerioderUtenStønad()
@@ -121,8 +121,8 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
                     utgifter = 0,
                     erMidlertidigOpphør = true,
                     sanksjonsårsak = null,
-                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                    aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+                    periodetype = PeriodetypeBarnetilsyn.OPPHØR,
+                    aktivitetstype = null
                 )
             )
         }

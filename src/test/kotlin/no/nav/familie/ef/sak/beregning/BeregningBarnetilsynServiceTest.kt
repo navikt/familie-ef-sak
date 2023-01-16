@@ -212,7 +212,7 @@ class BeregningBarnetilsynServiceTest {
                     tilleggsstønadsperioder = listOf()
                 )
             }
-            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperiode mangler en eller flere aktivitetstyper")
+            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperiode mangler en eller flere periodetyper")
         }
 
         @Test
@@ -226,7 +226,7 @@ class BeregningBarnetilsynServiceTest {
                     tilleggsstønadsperioder = listOf()
                 )
             }
-            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperioder kan ikke ha en periode uten aktivitetstype dersom periodetypen ikke er opphør eller sanksjon")
+            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperioder mangler en eller flere aktivitetstyper")
         }
     }
 

@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -94,11 +95,11 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         }
 
         brukerfeilHvis(utgiftsperioderDto.any { it.periodetype == null }) {
-            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
+            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere periodetyper"
         }
 
-        brukerfeilHvis(utgiftsperioderDto.any{ it.aktivitetstype == null && it.erOpphørEllerSanksjon().not()}) {
-            "Utgiftsperioder $utgiftsperioderDto kan ikke ha en periode uten aktivitetstype dersom periodetypen ikke er opphør eller sanksjon"
+        brukerfeilHvis(utgiftsperioderDto.any{ it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR && it.aktivitetstype == null }) {
+            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
         }
 
     }
@@ -155,7 +156,8 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
 }
 
 /**
- * Merger sammenhengende perioder hvor beløp, aktivitetstype, periodetype og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
+ * Merger sammenhengende perioder hvor beløp, aktivitetstype, periodetype og
+ * @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     val sortertPåDatoListe = this.sortedBy { it.periode }

@@ -79,8 +79,8 @@ data class VedtakshistorikkperiodeBarnetilsyn(
     val barn: List<UUID>,
     val sats: Int,
     val beløpFørFratrekkOgSatsjustering: Int,
-    val aktivitetstype: AktivitetstypeBarnetilsyn? = null, //TODO: Skal bli non-nullable
-    val periodetype: PeriodetypeBarnetilsyn? = null
+    val aktivitetstype: AktivitetstypeBarnetilsyn? = null,
+    val periodetype: PeriodetypeBarnetilsyn? = null //TODO: Skal bli non-nullable
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :

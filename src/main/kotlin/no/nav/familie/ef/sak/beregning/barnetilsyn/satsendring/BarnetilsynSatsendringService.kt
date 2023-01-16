@@ -96,8 +96,8 @@ class BarnetilsynSatsendringService(
                 utgifter = it.andel.utgifter.toInt(),
                 erMidlertidigOpphør = false,
                 sanksjonsårsak = null,
-                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+                periodetype = it.periodetypeBarnetilsyn,
+                aktivitetstype = it.aktivitetBarnetilsyn
             ) // TODO sjekk erMidlertidigOpphør???...
         }
         return utgiftsperiode

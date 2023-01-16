@@ -220,7 +220,7 @@ class MigreringService(
                     erMidlertidigOpphør = false,
                     sanksjonsårsak = null,
                     periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                    aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+                    aktivitetstype = null
                 )
             ),
             perioderKontantstøtte = emptyList(),
