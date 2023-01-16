@@ -18,8 +18,8 @@ class HistoriskPensjonService(
     @Cacheable("historisk_pensjon")
     fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonResponse {
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        val identer = personService.hentPersonIdenter(aktivIdent)
-        return historiskPensjonClient.harPensjon(aktivIdent, identer.identer.map { pdlIdent -> pdlIdent.ident })
+        val identer = personService.hentPersonIdenter(aktivIdent).identer()
+        return historiskPensjonClient.harPensjon(aktivIdent, identer)
     }
 }
 
