@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
@@ -31,8 +32,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -289,23 +288,20 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Nested
     inner class Maks1UtredesPerFagsak {
 
-        @EnumSource(
-            value = BehandlingStatus::class,
-            names = ["UTREDES", "OPPRETTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK"],
-            mode = EnumSource.Mode.INCLUDE
-        )
-        @ParameterizedTest
-        fun `skal ikke kunne ha flere behandlinger på samma fagsak med annen status enn ferdigstilt`(status: BehandlingStatus) {
+        @Test
+        fun `skal ikke kunne ha flere behandlinger på samma fagsak med annen status enn ferdigstilt`() {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
             behandlingRepository.insert(behandling(fagsak, status = UTREDES))
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
 
-            val cause = assertThatThrownBy {
-                behandlingRepository.insert(behandling(fagsak, status = status))
-            }.cause
-            cause.isInstanceOf(DuplicateKeyException::class.java)
-            cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
+            listOf(UTREDES, OPPRETTET, FATTER_VEDTAK, IVERKSETTER_VEDTAK).forEach { status ->
+                val cause = assertThatThrownBy {
+                    behandlingRepository.insert(behandling(fagsak, status = status))
+                }.cause
+                cause.isInstanceOf(DuplicateKeyException::class.java)
+                cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
+            }
         }
 
         @Test
