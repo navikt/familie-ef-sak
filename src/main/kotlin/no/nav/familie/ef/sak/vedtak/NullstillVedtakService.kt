@@ -37,7 +37,9 @@ class NullstillVedtakService(
         simuleringService.slettSimuleringForBehandling(saksbehandling)
         tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
         tilbakekrevingService.slettTilbakekreving(behandlingId)
-        stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+        if (saksbehandling.steg.kommerEtter(StegType.BEREGNE_YTELSE)) {
+            stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
+        }
         vedtakService.slettVedtakHvisFinnes(behandlingId)
         vedtaksbrevService.slettVedtaksbrev(saksbehandling)
     }
