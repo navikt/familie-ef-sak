@@ -298,7 +298,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     behandlingRepository.insert(behandling(fagsak, status = it))
                 }.cause
                 cause.isInstanceOf(DuplicateKeyException::class.java)
-                cause.hasMessageContaining("duplicate key value violates unique constraint \"behandlinger_i_arbeid\"")
+                cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
             }
         }
 
