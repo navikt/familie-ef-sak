@@ -8,9 +8,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.HENLAGT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.IKKE_SATT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -30,6 +31,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
@@ -286,20 +289,47 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
     @Nested
     inner class Maks1UtredesPerFagsak {
 
-        @Test
-        fun `skal ikke kunne ha flere behandlinger på samma fagsak med annen status enn ferdigstilt`() {
+        @EnumSource(
+            value = BehandlingStatus::class,
+            names = ["UTREDES", "OPPRETTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK"],
+            mode = EnumSource.Mode.INCLUDE
+        )
+        @ParameterizedTest
+        fun `skal ikke kunne ha flere behandlinger på samma fagsak med annen status enn ferdigstilt`(status: BehandlingStatus) {
             val fagsak = testoppsettService.lagreFagsak(fagsak())
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
             behandlingRepository.insert(behandling(fagsak, status = UTREDES))
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
 
-            listOf(UTREDES, OPPRETTET, FATTER_VEDTAK).forEach {
-                val cause = assertThatThrownBy {
-                    behandlingRepository.insert(behandling(fagsak, status = it))
-                }.cause
-                cause.isInstanceOf(DuplicateKeyException::class.java)
-                cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
-            }
+            val cause = assertThatThrownBy {
+                behandlingRepository.insert(behandling(fagsak, status = status))
+            }.cause
+            cause.isInstanceOf(DuplicateKeyException::class.java)
+            cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
+        }
+
+        @Test
+        fun `skal kunne ha en behandling som utredes når det finnes en behandling satt på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
+            behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
+            behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
+
+            behandlingRepository.insert(behandling(fagsak, status = UTREDES))
+        }
+
+        @Test
+        fun `kan ikke endre en behandling fra satt på vent til utredes når det allerede finnes en behandling som ikke er ferdigstilt`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
+            val påVent = behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
+            behandlingRepository.insert(behandling(fagsak, status = IVERKSETTER_VEDTAK))
+
+            val cause = assertThatThrownBy {
+                behandlingRepository.update(påVent.copy(status = UTREDES))
+            }.cause
+            cause.isInstanceOf(DuplicateKeyException::class.java)
+            cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
         }
 
         @Test
@@ -397,14 +427,24 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `kan ikke sette vedtakstidspunkt uten resultat`() {
             assertThatThrownBy {
-                behandlingRepository.insert(behandling(fagsak, resultat = IKKE_SATT).copy(vedtakstidspunkt = SporbarUtils.now()))
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        resultat = IKKE_SATT
+                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                )
             }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
         }
 
         @Test
         internal fun `kan ikke sette resultat IKKE_SATT med vedtakstidspunkt`() {
             assertThatThrownBy {
-                behandlingRepository.insert(behandling(fagsak, resultat = IKKE_SATT).copy(vedtakstidspunkt = SporbarUtils.now()))
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        resultat = IKKE_SATT
+                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                )
             }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
         }
     }
