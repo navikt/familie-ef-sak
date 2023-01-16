@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import java.util.UUID
 
 @Service
@@ -26,5 +27,5 @@ class HistoriskPensjonService(
 data class HistoriskPensjonResponse(val harPensjonsdata: Boolean, val webAppUrl: String)
 data class EnsligForsoergerRequest(
     val aktivtFoedselsnummer: String,
-    val alleRelaterteFoedselsnummer: List<String>
+    val alleRelaterteFoedselsnummer: Set<String>
 )
