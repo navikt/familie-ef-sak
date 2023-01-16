@@ -9,6 +9,8 @@ object IdTIlUUIDHolder {
 
     private val utgiftIder = mutableMapOf<Int, UUID>()
 
+    fun behandlingIdFraUUID(id: UUID) = behandlingIdTilUUID.entries.single { it.value == id }.key
+
     /**
      * behandlingId to ident, to barnId
      */
