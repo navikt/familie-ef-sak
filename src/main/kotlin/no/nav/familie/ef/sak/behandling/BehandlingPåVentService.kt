@@ -64,7 +64,6 @@ class BehandlingPåVentService(
         }
 
         val behandlinger = behandlingService.hentBehandlinger(behandling.fagsakId)
-            .sortedByDescending { it.sporbar.endret.endretTid }
         if (behandlinger.any { it.id != behandling.id && !it.erAvsluttet() }) {
             return TaAvVentStatusDto(TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
         }
