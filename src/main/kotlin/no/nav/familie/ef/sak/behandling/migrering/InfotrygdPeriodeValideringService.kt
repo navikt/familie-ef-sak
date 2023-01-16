@@ -129,7 +129,7 @@ class InfotrygdPeriodeValideringService(
         if (periode.månedsbeløp < 1) {
             throw MigreringException(
                 "Kan ikke migrere perioder frem i tiden med månedsbløp=${periode.månedsbeløp}",
-                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP
+                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP_FREM_I_TIDEN
             )
         }
         return periode.copy(
