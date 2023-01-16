@@ -71,7 +71,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-aareg",
     "mock-tilbakekreving",
     "mock-sigrun",
-    "mock-dokument"
+    "mock-dokument",
+    "mock-historiskpensjon"
 )
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
