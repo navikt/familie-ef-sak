@@ -49,7 +49,12 @@ object VedtakDtoUtil {
     fun innvilgelseBarnetilsynDto(barnId: UUID = UUID.randomUUID()) =
         InnvilgelseBarnetilsyn(
             "begrunnelse",
-            listOf(barnetilsynperiodeDto(barnId)),
+            listOf(
+                barnetilsynperiodeDto(
+                    fom = YearMonth.of(2021, 1),
+                    tom = YearMonth.of(2021, 12), barn = listOf(barnId)
+                )
+            ),
             listOf(periodeMedBeløpDto()),
             tilleggsstønadDto()
         )
@@ -85,17 +90,25 @@ object VedtakDtoUtil {
     ) =
         Sanksjonert(årsak, periode, begrunnelse)
 
-    fun barnetilsynperiodeDto(barnId: UUID) =
+    fun barnetilsynperiodeDto(
+        fom: YearMonth,
+        tom: YearMonth,
+        barn: List<UUID>,
+        utgifter: Int = 500,
+        periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetType: AktivitetstypeBarnetilsyn? = if (periodetype == PeriodetypeBarnetilsyn.ORDINÆR) AktivitetstypeBarnetilsyn.I_ARBEID else null,
+        sanksjonsårsak: Sanksjonsårsak? = null
+    ) =
         UtgiftsperiodeDto(
-            YearMonth.of(2021, 1),
-            YearMonth.of(2021, 12),
-            Månedsperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
-            listOf(barnId),
-            500,
-            false,
-            null,
-            PeriodetypeBarnetilsyn.ORDINÆR,
-            AktivitetstypeBarnetilsyn.I_ARBEID,
+            årMånedFra = fom,
+            årMånedTil = tom,
+            periode = Månedsperiode(fom, tom),
+            barn = barn,
+            utgifter = utgifter,
+            erMidlertidigOpphør = periodetype == PeriodetypeBarnetilsyn.OPPHØR,
+            sanksjonsårsak = sanksjonsårsak,
+            periodetype = periodetype,
+            aktivitetstype = aktivitetType
         )
 
     fun periodeMedBeløpDto() =

@@ -14,8 +14,8 @@ data class BeløpsperiodeBarnetilsynDto(
     val beløpFørFratrekkOgSatsjustering: Int,
     val sats: Int,
     val beregningsgrunnlag: BeregningsgrunnlagBarnetilsynDto,
-    val aktivitetstype: AktivitetstypeBarnetilsyn?, //TODO: Skal bli non-nullable
-    val periodetype: PeriodetypeBarnetilsyn?
+    val periodetype: PeriodetypeBarnetilsyn?, //TODO: Skal bli non-nullable
+    val aktivitetstype: AktivitetstypeBarnetilsyn?,
 ) {
     @Deprecated("Bruk periode", ReplaceWith("periode"))
     @get:JsonProperty("periode")
