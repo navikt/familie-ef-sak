@@ -152,7 +152,7 @@ class RevurderingService(
         val sisteBehandling = behandlingService.hentBehandlinger(revurdering.fagsakId)
             .filter { it.id != revurdering.id }
             .filter { it.resultat != BehandlingResultat.HENLAGT }
-            .maxByOrNull { it.sporbar.opprettetTid }
+            .maxByOrNull { it.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt på behandling=${it.id}") }
         return revurdering.forrigeBehandlingId
             ?: sisteBehandling?.id
             ?: error("Revurdering må ha eksisterende iverksatt behandling")

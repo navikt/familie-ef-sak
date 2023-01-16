@@ -18,6 +18,8 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.felles.domain.Endret
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -37,6 +39,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -189,5 +192,35 @@ internal class BehandlingServiceTest {
                 behandlingService.oppdaterResultatPåBehandling(UUID.randomUUID(), BehandlingResultat.IKKE_SATT)
             }.hasMessageContaining("Må sette et endelig resultat")
         }
+    }
+
+    @Nested
+    inner class hentBehandlinger {
+
+        @Test
+        internal fun `skal sortere behandlinger etter vedtakstidspunkt og til sist uten vedtakstidspunkt`() {
+            val tiDagerSiden = LocalDateTime.now().minusDays(10)
+            val femFagerSiden = LocalDateTime.now().minusDays(5)
+            val behandling1 = opprettBehandling(femFagerSiden, tiDagerSiden, tiDagerSiden)
+            val behandling2 = opprettBehandling(null, femFagerSiden, femFagerSiden)
+            val behandling3 = opprettBehandling(tiDagerSiden, LocalDateTime.now(), LocalDateTime.now())
+            every {
+                behandlingRepository.findByFagsakId(any())
+            } returns listOf(behandling1, behandling2, behandling3)
+
+            assertThat(behandlingService.hentBehandlinger(UUID.randomUUID()))
+                .containsExactly(behandling3, behandling1, behandling2)
+        }
+
+        private fun opprettBehandling(
+            vedtakstidspunkt: LocalDateTime?,
+            opprettetTid: LocalDateTime,
+            endretTid: LocalDateTime
+        ) = behandling(vedtakstidspunkt = vedtakstidspunkt).copy(
+            sporbar = Sporbar(
+                opprettetTid = opprettetTid,
+                endret = Endret(endretTid = endretTid)
+            )
+        )
     }
 }
