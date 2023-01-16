@@ -6,8 +6,8 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
   Scenario: Innvilget barnetilsyn skal gi informasjon om antall barn, utgifter, kontantstøtte
 
     Gitt følgende vedtak for barnetilsyn
-      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          |
-      | ordinær        | i_arbeid          | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Periodetype BT | Aktivitetstype BT |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | ordinær        | i_arbeid          |
 
     Og følgende kontantstøtte
       | BehandlingId | Beløp |
@@ -27,8 +27,8 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
   Scenario: Innvilget barnetilsyn med 0 barn gir 0 i stønadsbeløp
 
     Gitt følgende vedtak for barnetilsyn
-      | Periodetype BT | Aktivitetstype BT | BehandlingId | Vedtaksresultat | Antall barn | Utgifter |
-      | ordinær        | i_arbeid          | 1            | INNVILGE        | 0           | 200      |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Periodetype BT | Aktivitetstype BT |
+      | 1            | INNVILGE        | 0           | 200      | ordinær        | i_arbeid          |
 
     Og følgende kontantstøtte
       | BehandlingId | Beløp |

@@ -8,11 +8,11 @@ Egenskap: Beregning av barnetilsyn med forskjellige periodetyper og aktivitetsty
   Scenario: Varierende aktivitetstyper
 
     Gitt utgiftsperioder
-      | Periodetype BT | Aktivitetstype BT  | Fra måned | Til og med måned | Beløp | Antall barn |
-      | ordinær        | i_arbeid           | 01.2022   | 03.2022          | 100   | 1           |
-      | ordinær        | i_arbeid           | 04.2022   | 06.2022          | 100   | 1           |
-      | ordinær        | forbigående_sykdom | 07.2022   | 08.2022          | 100   | 1           |
-      | ordinær        | i_arbeid           | 09.2022   | 12.2022          | 100   | 1           |
+      | Fra måned | Til og med måned | Beløp | Antall barn | Periodetype BT | Aktivitetstype BT  |
+      | 01.2022   | 03.2022          | 100   | 1           | ordinær        | i_arbeid           |
+      | 04.2022   | 06.2022          | 100   | 1           | ordinær        | i_arbeid           |
+      | 07.2022   | 08.2022          | 100   | 1           | ordinær        | forbigående_sykdom |
+      | 09.2022   | 12.2022          | 100   | 1           | ordinær        | i_arbeid           |
 
     Når vi beregner perioder med barnetilsyn
 
@@ -26,11 +26,11 @@ Egenskap: Beregning av barnetilsyn med forskjellige periodetyper og aktivitetsty
   Scenario: Varierende periodetyper
 
     Gitt utgiftsperioder
-      | Periodetype BT | Aktivitetstype BT | Fra måned | Til og med måned | Beløp | Antall barn |
-      | ordinær        | i_arbeid          | 01.2022   | 03.2022          | 100   | 1           |
-      | opphør         |                   | 04.2022   | 06.2022          | 0     | 1           |
-      | ordinær        | i_arbeid          | 07.2022   | 08.2022          | 100   | 1           |
-      | sanksjon_1_mnd |                   | 09.2022   | 12.2022          | 0     | 1           |
+      | Fra måned | Til og med måned | Beløp | Antall barn | Periodetype BT | Aktivitetstype BT |
+      | 01.2022   | 03.2022          | 100   | 1           | ordinær        | i_arbeid          |
+      | 04.2022   | 06.2022          | 0     | 1           | opphør         |                   |
+      | 07.2022   | 08.2022          | 100   | 1           | ordinær        | i_arbeid          |
+      | 09.2022   | 12.2022          | 0     | 1           | sanksjon_1_mnd |                   |
 
     Når vi beregner perioder med barnetilsyn
 
