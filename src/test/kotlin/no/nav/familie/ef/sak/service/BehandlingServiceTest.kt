@@ -201,14 +201,16 @@ internal class BehandlingServiceTest {
         internal fun `skal sortere behandlinger etter vedtakstidspunkt og til sist uten vedtakstidspunkt`() {
             val tiDagerSiden = LocalDateTime.now().minusDays(10)
             val femFagerSiden = LocalDateTime.now().minusDays(5)
+            val now = LocalDateTime.now()
             val behandling1 = opprettBehandling(femFagerSiden, tiDagerSiden, tiDagerSiden)
             val behandling2 = opprettBehandling(null, femFagerSiden, femFagerSiden)
-            val behandling3 = opprettBehandling(tiDagerSiden, LocalDateTime.now(), LocalDateTime.now())
+            val behandling3 = opprettBehandling(tiDagerSiden, now, now)
             every {
                 behandlingRepository.findByFagsakId(any())
             } returns listOf(behandling1, behandling2, behandling3)
 
-            assertThat(behandlingService.hentBehandlinger(UUID.randomUUID()))
+            val hentBehandlinger = behandlingService.hentBehandlinger(UUID.randomUUID())
+            assertThat(hentBehandlinger)
                 .containsExactly(behandling3, behandling1, behandling2)
         }
 

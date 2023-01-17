@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunkt
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunktEllerEndretTid
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -79,6 +80,8 @@ class BehandlingService(
 
     fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
         return behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+            .sortertEtterVedtakstidspunktEllerEndretTid()
+            .reversed()
     }
 
     @Transactional
