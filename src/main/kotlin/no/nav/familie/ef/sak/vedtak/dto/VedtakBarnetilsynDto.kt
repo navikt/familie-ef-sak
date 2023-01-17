@@ -52,7 +52,16 @@ data class UtgiftsperiodeDto(
     val sanksjonsårsak: Sanksjonsårsak? = null,
     val periodetype: PeriodetypeBarnetilsyn?, // TODO: Skal bli non-nullable
     val aktivitetstype: AktivitetstypeBarnetilsyn?
-)
+) {
+    /**
+     * TODO slett default verdi på PERIODETYPE og init
+     */
+    init {
+        feilHvis(periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND || sanksjonsårsak != null) {
+            "Har ikke støtte for sanksjon i utgiftsperiode ennå"
+        }
+    }
+}
 
 fun UtgiftsperiodeDto.erOpphørEllerSanksjon(): Boolean = this.periodetype == PeriodetypeBarnetilsyn.OPPHØR || this.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)

@@ -94,6 +94,8 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
             "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
         }
 
+        /*
+        TODO legg till etter at frontend er merget
         brukerfeilHvis(utgiftsperioderDto.any { it.periodetype == null }) {
             "Utgiftsperioder $utgiftsperioderDto mangler en eller flere periodetyper"
         }
@@ -101,6 +103,7 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         brukerfeilHvis(utgiftsperioderDto.any{ it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR && it.aktivitetstype == null }) {
             "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
         }
+        */
 
     }
 
