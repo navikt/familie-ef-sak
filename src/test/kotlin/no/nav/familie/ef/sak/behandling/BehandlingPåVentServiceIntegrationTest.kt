@@ -58,13 +58,20 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
     }
 
     @Test
-    internal fun `behandling settes på vent og det gjøres et vedtak på en annen behandling i mellomtiden`() {
+    internal fun `revurdering med behandling på vent skal peke til førstegangsbehandling`() {
         val behandling2 = opprettRevurdering()
         behandlingPåVentService.settPåVent(behandling2.id)
         val behandling3 = opprettRevurdering()
 
         assertThat(behandling2.forrigeBehandlingId).isEqualTo(behandling.id)
         assertThat(behandling3.forrigeBehandlingId).isEqualTo(behandling.id)
+    }
+
+    @Test
+    internal fun `behandling2 settes på vent og det gjøres et vedtak på behandling3 i mellomtiden`() {
+        val behandling2 = opprettRevurdering()
+        behandlingPåVentService.settPåVent(behandling2.id)
+        val behandling3 = opprettRevurdering()
 
         assertKanTaAvVent(behandling2, TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
 
@@ -72,16 +79,18 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
         assertKanTaAvVent(behandling2, TaAvVentStatus.MÅ_NULSTILLE_VEDTAK)
 
         behandlingPåVentService.taAvVent(behandling2.id)
-        val nyForrigeBehandlingId = behandlingRepository.findByIdOrThrow(behandling2.id).forrigeBehandlingId
-        assertThat(nyForrigeBehandlingId).isEqualTo(behandling3.id)
+        assertThat(behandlingRepository.findByIdOrThrow(behandling2.id).forrigeBehandlingId)
+            .`as`("Behandling 2 sin forrigeBehandlingId skal pekes om til behandling3 sin id")
+            .isEqualTo(behandling3.id)
 
         assertSisteIverksatteBehandling(behandling3)
 
         behandlingRepository.update(behandling2.ferdigstill())
         assertSisteIverksatteBehandling(behandling2)
 
-        val revurdering = opprettRevurdering()
-        assertThat(revurdering.forrigeBehandlingId).isEqualTo(behandling2.id)
+        assertThat(opprettRevurdering().forrigeBehandlingId)
+            .`as`("Ny revurdering skal peke til behandling2 som er den sist iverksatte behandlingen")
+            .isEqualTo(behandling2.id)
     }
 
     private fun assertSisteIverksatteBehandling(behandling: Behandling) {
