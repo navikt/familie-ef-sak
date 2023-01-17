@@ -27,10 +27,10 @@ Egenskap: Beregning av beløp og perioder når utgifter-reduksjon er større enn
   Scenario: Tre utgiftsperioder (beveger seg fra 1-3 barn) og strekker seg over to år (to satsperioder).
 
     Gitt utgiftsperioder
-      | Fra måned | Til og med måned | Beløp | Antall barn | Periodetype BT | Aktivitetstype BT |
-      | 01.2021   | 07.2021          | 39000 | 1           | ordinær        | i_arbeid          |
-      | 09.2021   | 07.2022          | 39000 | 2           | ordinær        | i_arbeid          |
-      | 08.2022   | 12.2022          | 39000 | 3           | ordinær        | i_arbeid          |
+      | Fra måned | Til og med måned | Beløp | Antall barn | Vedtaksperiode | Aktivitet |
+      | 01.2021   | 07.2021          | 39000 | 1           | ORDINÆR        | I_ARBEID  |
+      | 09.2021   | 07.2022          | 39000 | 2           | ORDINÆR        | I_ARBEID  |
+      | 08.2022   | 12.2022          | 39000 | 3           | ORDINÆR        | I_ARBEID  |
 
     Og kontantstøtteperioder
       | Fra måned | Til og med måned | Beløp |

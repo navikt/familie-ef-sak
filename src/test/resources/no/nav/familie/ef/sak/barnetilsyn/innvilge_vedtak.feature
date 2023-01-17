@@ -10,8 +10,8 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 1            | FØRSTEGANGSBEHANDLING |
 
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 
@@ -26,9 +26,9 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
       | 1            | REVURDERING     |
 
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ordinær        | i_arbeid          |
-      | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ORDINÆR        | I_ARBEID  |
+      | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 
@@ -40,9 +40,9 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget førstegangsbehandling med to perioder med reduksjon
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ordinær        | i_arbeid          |
-      | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ORDINÆR        | I_ARBEID  |
+      | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         | ORDINÆR        | I_ARBEID  |
 
     Og følgende tilleggsstønad
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |
@@ -58,9 +58,9 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget førstegangsbehandling med to perioder med reduksjon og kontantstøtte
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ordinær        | i_arbeid          |
-      | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ORDINÆR        | I_ARBEID  |
+      | 1            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 04.2021         | 07.2021         | ORDINÆR        | I_ARBEID  |
 
     Og følgende tilleggsstønad
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |
@@ -81,9 +81,9 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget revurdering
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 07.2021         | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 03.2021         | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 07.2021         | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 
@@ -99,10 +99,10 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget revurdering med periode med reduserte utgifter
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Er midlertidig opphør | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 07.2021         | Nei                   | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        |             |          | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 02.2021         | Ja                    | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 03.2021         | 07.2021         | Nei                   | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Er midlertidig opphør | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 07.2021         | Nei                   | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        |             |          | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 02.2021         | Ja                    | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 03.2021         | 07.2021         | Nei                   | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 
@@ -118,10 +118,10 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget opphør og revurdering
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Opphørsdato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 04.2021         |             | ordinær        | i_arbeid          |
-      | 2            | OPPHØRT         |             |          |                           |                 |                 | 02.2021     | ordinær        | i_arbeid          |
-      | 3            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 05.2021         | 07.2021         |             | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Opphørsdato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 04.2021         |             | ORDINÆR        | I_ARBEID  |
+      | 2            | OPPHØRT         |             |          |                           |                 |                 | 02.2021     | ORDINÆR        | I_ARBEID  |
+      | 3            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 05.2021         | 07.2021         |             | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 

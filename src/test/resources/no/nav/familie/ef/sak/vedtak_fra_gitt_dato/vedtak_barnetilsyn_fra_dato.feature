@@ -6,8 +6,8 @@ Egenskap: hentVedtakForBarnetilsynFraDato
   Scenario: Barnetilsyn behandling med 2 perioder
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter | Arbeid aktivitet          | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      | ETABLERER_EGEN_VIRKSOMHET | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter | Arbeid aktivitet          | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      | ETABLERER_EGEN_VIRKSOMHET | ORDINÆR        | I_ARBEID  |
 
     Og følgende kontantstøtte
       | BehandlingId | Fra og med dato | Til og med dato | Beløp |
@@ -81,10 +81,10 @@ Egenskap: hentVedtakForBarnetilsynFraDato
 
   Scenario: Barnetilsyn med oppsplittet historikk
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1  | 100      | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        | 04.2021         | 04.2021         | Id1  | 50       | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn | Utgifter | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1  | 200      | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1  | 100      | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        | 04.2021         | 04.2021         | Id1  | 50       | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 
@@ -105,10 +105,10 @@ Egenskap: hentVedtakForBarnetilsynFraDato
 
   Scenario: Barnetilsyn med ulike barn historikk
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn    | Utgifter | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1     | 200      | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1,Id2 | 100      | ordinær        | i_arbeid          |
-      | 2            | INNVILGE        | 04.2021         | 04.2021         | Id2     | 50       | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Fra og med dato | Til og med dato | Barn    | Utgifter | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 01.2021         | 03.2021         | Id1     | 200      | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        | 02.2021         | 03.2021         | Id1,Id2 | 100      | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        | 04.2021         | 04.2021         | Id2     | 50       | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 

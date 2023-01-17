@@ -6,9 +6,9 @@ Egenskap: Andelhistorikk: Sanksjon av barnetilsyn
   Scenario: Sanksjon mellom 2 måneder
 
     Gitt følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Periodetype BT | Aktivitetstype BT |
-      | 1            | INNVILGE        | 1           | 200      | 01.2021         | 03.2021         | ordinær        | i_arbeid          |
-      | 2            | SANKSJONERE     | 0           | 0        | 02.2021         | 02.2021         | ordinær        | i_arbeid          |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | 01.2021         | 03.2021         | ORDINÆR        | I_ARBEID  |
+      | 2            | SANKSJONERE     | 0           | 0        | 02.2021         | 02.2021         | ORDINÆR        | I_ARBEID  |
 
     Og følgende kontantstøtte
       | BehandlingId | Beløp | Fra og med dato | Til og med dato |

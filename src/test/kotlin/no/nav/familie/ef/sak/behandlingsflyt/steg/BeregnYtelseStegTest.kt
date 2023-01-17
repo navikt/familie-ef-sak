@@ -1750,7 +1750,7 @@ internal class BeregnYtelseStegTest {
     }
 
     @Test
-    internal fun `skal ikke kunne lagre andel som er midlertidig opphør det finnes en utgift større enn null på andelen`() {
+    internal fun `skal ikke kunne lagre andel som er midlertidig opphør dersom det finnes en utgift større enn null på andelen`() {
         val andelFom = LocalDate.of(2022, 1, 1)
         val andelTom = LocalDate.of(2022, 1, 31)
 
@@ -1869,7 +1869,7 @@ internal class BeregnYtelseStegTest {
         sluttDato: LocalDate,
         barn: List<UUID>? = null,
         utgifter: Int? = null,
-        erMidlertidigOpphør: Boolean? = null
+        erMidlertidigOpphør: Boolean = false
     ) =
         InnvilgelseBarnetilsyn(
             perioder = listOf(
@@ -1879,7 +1879,7 @@ internal class BeregnYtelseStegTest {
                     periode = Månedsperiode(YearMonth.from(startDato), YearMonth.from(sluttDato)),
                     barn = barn ?: emptyList(),
                     utgifter = utgifter ?: 2500,
-                    erMidlertidigOpphør = utgifter == 0,
+                    erMidlertidigOpphør = erMidlertidigOpphør || utgifter == 0,
                     periodetype = if (utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
                     aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
                 )

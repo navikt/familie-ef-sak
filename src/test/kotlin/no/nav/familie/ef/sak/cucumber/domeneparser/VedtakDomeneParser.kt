@@ -422,9 +422,7 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIEBELASTNING("Studiebelastning"),
     ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     VEDTAKSDATO("Vedtaksdato"),
-    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato"),
-    PeriodetypeBarnetilsyn("Periodetype BT"),
-    AktivitetstypeBarnetilsyn("Aktivitetstype BT")
+    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato")
     ;
 
     override fun nøkkel(): String {
