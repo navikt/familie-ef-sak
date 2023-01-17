@@ -166,5 +166,5 @@ enum class GrunnlagsdataEndring {
     BARN,
     ADRESSE_ANNEN_FORELDER,
     ADRESSE_SØKER,
-    SIVILSTAND,
+    SIVILSTAND
 }

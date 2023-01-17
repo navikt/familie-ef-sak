@@ -21,7 +21,10 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
+    VEDTAKSHISTORIKK_OPPHØR("familie.ef.sak.vedtakshistorikk-opphor"),
+
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
+
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
@@ -30,7 +33,10 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     BARN_OVER_18("familie.ef.sak.barn-over-18"),
 
+    PÅ_VENT_NULLSTILL_VEDTAK("familie.ef.sak.paa-vent-nullstill-vedtak"),
+
     REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
+    LOGG_WARN_TIMEOUTS("familie.ef.sak.logg-timeout-som-warn"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
@@ -38,7 +44,9 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
     AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
     AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer"),
-    BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode");
+    BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode"),
+    VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp"),
+    HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }

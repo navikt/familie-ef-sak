@@ -47,6 +47,18 @@ data class Sanksjonsperiode(
     }
 }
 
+data class Opphørsperiode(
+    override val periode: Månedsperiode,
+) : Vedtakshistorikkperiode() {
+    override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
+        error("Kan ikke endre fra-dato på opphør")
+    }
+
+    override fun medTil(til: YearMonth): Vedtakshistorikkperiode {
+        error("Kan ikke endre til-dato på opphør")
+    }
+}
+
 data class VedtakshistorikkperiodeOvergangsstønad(
     override val periode: Månedsperiode,
     val aktivitet: AktivitetType,
@@ -116,14 +128,14 @@ object VedtakHistorikkBeregner {
      */
     fun lagVedtaksperioderPerBehandling(
         vedtaksliste: List<BehandlingHistorikkData>,
-        brukIkkeVedtatteSatser: Boolean
+        konfigurasjon: HistorikkKonfigurasjon
     ): Map<UUID, Vedtaksdata> {
         return vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
                 acc + Pair(
                     vedtak.behandlingId,
-                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, brukIkkeVedtatteSatser))
+                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon))
                 )
             }
             .toMap()
@@ -132,7 +144,7 @@ object VedtakHistorikkBeregner {
     private fun lagTotalbildeForNyttVedtak(
         data: BehandlingHistorikkData,
         acc: List<Pair<UUID, Vedtaksdata>>,
-        brukIkkeVedtatteSatser: Boolean
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<Vedtakshistorikkperiode> {
         val vedtak = data.vedtakDto
         return when (vedtak) {
@@ -148,8 +160,9 @@ object VedtakHistorikkBeregner {
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
             is InnvilgelseBarnetilsyn -> {
-                val perioder = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, brukIkkeVedtatteSatser)
-                    .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
+                val perioder =
+                    data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, konfigurasjon.brukIkkeVedtatteSatser)
+                        .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
                 val førsteFomDato = perioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder
             }
@@ -158,7 +171,12 @@ object VedtakHistorikkBeregner {
             }
             is Opphør -> {
                 val opphørFom = vedtak.opphørFom
-                avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
+                val avkortedePerioder = avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
+                if (konfigurasjon.lagOpphørsperiode) {
+                    avkortedePerioder + Opphørsperiode(Månedsperiode(opphørFom))
+                } else {
+                    avkortedePerioder
+                }
             }
             else -> {
                 logger.error("Håndterer ikke ${vedtak::class.java.simpleName} behandling=${data.behandlingId}")

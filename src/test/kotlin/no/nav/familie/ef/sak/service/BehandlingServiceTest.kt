@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
-import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -18,7 +17,6 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -27,7 +25,6 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
-import no.nav.familie.kontrakter.ef.iverksett.Hendelse
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -158,78 +155,6 @@ internal class BehandlingServiceTest {
             val feil: ApiFeil = assertThrows {
                 behandlingService.henleggBehandling(behandling.id, HenlagtDto(henlagtÅrsak))
             }
-
-            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @Nested
-    inner class SettPåVent {
-
-        private val behandling = behandling()
-
-        @Test
-        fun `skal sette behandling på vent hvis den kan redigeres og sende melding til DVH`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.UTREDES)
-
-            behandlingService.settPåVent(UUID.randomUUID())
-
-            assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
-            verify {
-                taskService.save(
-                    coWithArg {
-                        assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-                        assertThat(it.payload).contains(Hendelse.VENTER.name)
-                    }
-                )
-            }
-        }
-
-        @Test
-        fun `skal ikke sette behandling på vent hvis den er sperret for redigering`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.FATTER_VEDTAK)
-
-            val feil: ApiFeil = assertThrows { behandlingService.settPåVent(UUID.randomUUID()) }
-
-            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @Nested
-    inner class TaAvVent {
-
-        private val behandling = behandling()
-
-        @Test
-        fun `skal ta behandling av vent og sende melding til DVH`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT)
-
-            behandlingService.taAvVent(UUID.randomUUID())
-
-            assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.UTREDES)
-            verify {
-                taskService.save(
-                    coWithArg {
-                        assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-                        assertThat(it.payload).contains(Hendelse.PÅBEGYNT.name)
-                    }
-                )
-            }
-        }
-
-        @Test
-        fun `skal feile hvis behandling ikke er på vent`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.FATTER_VEDTAK)
-
-            val feil: ApiFeil = assertThrows { behandlingService.taAvVent(UUID.randomUUID()) }
 
             assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
         }

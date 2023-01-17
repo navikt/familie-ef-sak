@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.behandling
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.BehandlingDto
 import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
+import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -26,6 +27,7 @@ import java.util.UUID
 @Validated
 class BehandlingController(
     private val behandlingService: BehandlingService,
+    private val behandlingPåVentService: BehandlingPåVentService,
     private val fagsakService: FagsakService,
     private val henleggService: HenleggService,
     private val tilgangService: TilgangService,
@@ -52,15 +54,22 @@ class BehandlingController(
     fun settPåVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        behandlingService.settPåVent(behandlingId)
+        behandlingPåVentService.settPåVent(behandlingId)
         return Ressurs.success(behandlingId)
+    }
+
+    @GetMapping("{behandlingId}/kan-ta-av-vent")
+    fun kanTaAvVent(@PathVariable behandlingId: UUID): Ressurs<TaAvVentStatusDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerHarSaksbehandlerrolle()
+        return Ressurs.success(behandlingPåVentService.kanTaAvVent(behandlingId))
     }
 
     @PostMapping("{behandlingId}/aktiver")
     fun taAvVent(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        behandlingService.taAvVent(behandlingId)
+        behandlingPåVentService.taAvVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
 

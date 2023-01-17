@@ -25,6 +25,16 @@ internal class AndelHistorikkDtoKtTest {
         assertThat(andel.medEndring(EndringType.ERSTATTET).erAktivVedtaksperiode()).isFalse
     }
 
+    @Test
+    internal fun `andel er ikke aktiv hvis den inneholder opphør`() {
+        assertThat(andel.medOpphør().erAktivVedtaksperiode()).isFalse
+        assertThat(andel.medOpphør().medEndring(EndringType.FJERNET).erAktivVedtaksperiode()).isFalse
+        assertThat(andel.medOpphør().medEndring(EndringType.SPLITTET).erAktivVedtaksperiode()).isFalse
+    }
+
+
+    private fun AndelHistorikkDto.medOpphør() = this.copy(erOpphør = true)
+
     private fun AndelHistorikkDto.medEndring(endringType: EndringType) =
         this.copy(endring = HistorikkEndring(endringType, UUID.randomUUID(), LocalDateTime.now()))
 
@@ -40,9 +50,10 @@ internal class AndelHistorikkDtoKtTest {
         periodeType = null,
         erSanksjon = false,
         sanksjonsårsak = null,
-        endring = null,
+        erOpphør = false,
         periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+        aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+        endring = null
     )
 
     private fun andelMedGrunnlagDto() = AndelMedGrunnlagDto(

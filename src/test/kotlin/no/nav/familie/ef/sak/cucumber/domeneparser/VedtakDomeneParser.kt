@@ -42,11 +42,15 @@ object VedtakDomeneParser {
 
     fun mapVedtakOvergangsstønad(dataTable: DataTable): List<Vedtak> {
         return mapVedtak(dataTable) { vedtak, rader ->
-            val perioder = mapPerioderForOvergangsstønad(vedtak.resultatType, rader)
-            vedtak.copy(
-                perioder = PeriodeWrapper(perioder),
-                inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder))
-            )
+            if (vedtak.resultatType != ResultatType.OPPHØRT) {
+                val perioder = mapPerioderForOvergangsstønad(vedtak.resultatType, rader)
+                vedtak.copy(
+                    perioder = PeriodeWrapper(perioder),
+                    inntekter = InntektWrapper(lagDefaultInntektsperiode(perioder))
+                )
+            } else {
+                vedtak
+            }
         }
     }
 
@@ -177,15 +181,23 @@ object VedtakDomeneParser {
     ): List<Vedtaksperiode> {
         return rader.map { rad ->
             val sanksjonsårsak = sanksjonsårsak(rad, resultatType)
+            val vedtaksperiodeType = parseVedtaksperiodeType(rad)
             Vedtaksperiode(
                 datoFra = parseFraOgMed(rad),
                 datoTil = parseTilOgMed(rad),
-                aktivitet = parseAktivitetType(rad) ?: AktivitetType.BARN_UNDER_ETT_ÅR,
-                periodeType = parseVedtaksperiodeType(rad) ?: VedtaksperiodeType.HOVEDPERIODE,
+                aktivitet = parseAktivitetType(rad) ?: defaultAktivitet(vedtaksperiodeType),
+                periodeType = vedtaksperiodeType ?: VedtaksperiodeType.HOVEDPERIODE,
                 sanksjonsårsak = sanksjonsårsak
             )
         }
     }
+
+    private fun defaultAktivitet(vedtaksperiodeType: VedtaksperiodeType?): AktivitetType =
+        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) {
+            AktivitetType.IKKE_AKTIVITETSPLIKT
+        } else {
+            AktivitetType.BARN_UNDER_ETT_ÅR
+        }
 
     /**
      * Bruker sanksjonsårsak hvis den er definiert
@@ -196,7 +208,7 @@ object VedtakDomeneParser {
         resultatType: ResultatType
     ): Sanksjonsårsak? {
         return parseSanksjonsårsak(rad)
-            ?: if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.NEKTET_TILBUDT_ARBEID else null
+            ?: if (resultatType == ResultatType.SANKSJONERE) Sanksjonsårsak.SAGT_OPP_STILLING else null
     }
 
     private fun mapPerioderForBarnetilsyn(
@@ -358,12 +370,15 @@ object VedtakDomeneParser {
         val arbeidAktivitet: SvarId?,
         val erSanksjon: Boolean?,
         val sanksjonsårsak: Sanksjonsårsak?,
-        val vedtaksdato: LocalDate?
+        val vedtaksdato: LocalDate?,
+        val erOpphør: Boolean
     )
 
     class BehandlingForHistorikkEndringMapper {
 
         fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
+            val erOpphør = erOpphør(stønadstype, rad)
+            val erSanksjon = erSanksjon(stønadstype, rad)
             return ForventetHistorikk(
                 behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                 historikkEndring = parseEndringType(rad)?.let { endringType ->
@@ -381,44 +396,77 @@ object VedtakDomeneParser {
                 inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                 beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
                 periodeType = if (stønadstype == StønadType.OVERGANGSSTØNAD) parseVedtaksperiodeType(rad) else null,
-                periodeTypeBarnetilsyn = periodeTypeBarnetilsyn(stønadstype, rad),
-                aktivitetType = aktivitetstype(stønadstype, rad),
-                aktivitetTypeBarnetilsyn = aktivitetstypeBarnetilsyn(stønadstype, rad),
+                periodeTypeBarnetilsyn = periodeTypeBarnetilsyn(stønadstype, rad, erSanksjon),
+                aktivitetType = aktivitetstype(stønadstype, rad, erSanksjon, erOpphør),
+                aktivitetTypeBarnetilsyn = aktivitetstypeBarnetilsyn(stønadstype, rad, erSanksjon, erOpphør),
                 kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
                 tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
                 antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
                 arbeidAktivitet = parseArbeidAktivitet(rad),
                 erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad),
-                sanksjonsårsak = parseSanksjonsårsak(rad),
-                vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad)
+                sanksjonsårsak = parseSanksjonsårsak(rad) ?: if (erSanksjon) Sanksjonsårsak.SAGT_OPP_STILLING else null,
+                vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad),
+                erOpphør = erOpphør
             )
+        }
+
+        private fun erSanksjon(stønadstype: StønadType, rad: Map<String, String>): Boolean {
+            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
+            return when {
+                erSanksjon != null -> erSanksjon
+                stønadstype == StønadType.OVERGANGSSTØNAD -> parseVedtaksperiodeType(rad) == VedtaksperiodeType.SANKSJON
+                stønadstype == StønadType.BARNETILSYN -> parsePeriodetypeBarnetilsyn(rad) == PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                else -> false
+            }
+        }
+
+        private fun erOpphør(stønadstype: StønadType, rad: Map<String, String>): Boolean {
+            val erOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_OPPHØR, rad)
+            return when {
+                erOpphør != null -> erOpphør
+                stønadstype == StønadType.OVERGANGSSTØNAD -> parseVedtaksperiodeType(rad) == VedtaksperiodeType.MIDLERTIDIG_OPPHØR
+                stønadstype == StønadType.BARNETILSYN -> parsePeriodetypeBarnetilsyn(rad) == PeriodetypeBarnetilsyn.OPPHØR
+                else -> false
+            }
         }
 
         private fun periodeTypeBarnetilsyn(
             stønadstype: StønadType,
-            rad: Map<String, String>
-        ) = if (stønadstype == StønadType.BARNETILSYN)
-            (parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR) else null
+            rad: Map<String, String>,
+            erSanksjon: Boolean
+        ): PeriodetypeBarnetilsyn? = when {
+            stønadstype != StønadType.BARNETILSYN -> null
+            erSanksjon -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
+            else -> parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
+        }
 
-        private fun aktivitetstype(stønadstype: StønadType, rad: Map<String, String>): AktivitetType? {
+        private fun aktivitetstype(
+            stønadstype: StønadType,
+            rad: Map<String, String>,
+            erSanksjon: Boolean,
+            erOpphør: Boolean
+        ): AktivitetType? {
             if (stønadstype != StønadType.OVERGANGSSTØNAD) return null
             val aktivitet = parseAktivitetType(rad)
-            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
             return when {
                 aktivitet != null -> aktivitet
-                erSanksjon == true -> AktivitetType.IKKE_AKTIVITETSPLIKT
+                erSanksjon || erOpphør -> AktivitetType.IKKE_AKTIVITETSPLIKT
                 else -> AktivitetType.BARN_UNDER_ETT_ÅR
             }
         }
 
-        private fun aktivitetstypeBarnetilsyn(stønadstype: StønadType, rad: Map<String, String>): AktivitetstypeBarnetilsyn? {
+        private fun aktivitetstypeBarnetilsyn(
+            stønadstype: StønadType,
+            rad: Map<String, String>,
+            erSanksjon: Boolean,
+            erOpphør: Boolean
+        ): AktivitetstypeBarnetilsyn? {
             if (stønadstype != StønadType.BARNETILSYN) return null
             val aktivitet = parseAktivitetstypeBarnetilsyn(rad)
-            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
             return when {
                 aktivitet != null -> aktivitet
-                erSanksjon == true -> null
+                erSanksjon || erOpphør -> null
                 else -> AktivitetstypeBarnetilsyn.I_ARBEID
             }
         }
@@ -454,7 +502,8 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIEBELASTNING("Studiebelastning"),
     ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     VEDTAKSDATO("Vedtaksdato"),
-    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato")
+    ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato"),
+    ER_OPPHØR("Er opphør")
     ;
 
     override fun nøkkel(): String {

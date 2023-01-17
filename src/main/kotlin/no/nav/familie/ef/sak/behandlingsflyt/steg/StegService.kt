@@ -219,8 +219,8 @@ class StegService(
         saksbehandling: Saksbehandling
     ) {
         behandlingSteg.validerSteg(saksbehandling)
-        feilHvis (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
-           "Kan ikke utføre '${behandlingSteg.stegType().displayName()}' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
+        feilHvis(!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
+            "Kan ikke utføre '${behandlingSteg.stegType().displayName()}' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
         }
     }
 

@@ -5,6 +5,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageBehandling
@@ -62,7 +63,7 @@ internal class JournalføringKlageServiceTest {
         every { klageService.hentBehandlinger(fagsak.fagsakPersonId) } returns
             KlagebehandlingerDto(listOf(klagebehandling), emptyList(), emptyList())
 
-        justRun { klageService.opprettKlage(any(), any<LocalDate>()) }
+        justRun { klageService.opprettKlage(any<Fagsak>(), any()) }
         justRun { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         justRun { oppgaveService.ferdigstillOppgave(any()) }
         mockBrukerContext()
@@ -118,7 +119,7 @@ internal class JournalføringKlageServiceTest {
     }
 
     private fun verifyKall(opprettKlageKall: Int = 1) {
-        verify(exactly = opprettKlageKall) { klageService.opprettKlage(any(), any<LocalDate>()) }
+        verify(exactly = opprettKlageKall) { klageService.opprettKlage(any<Fagsak>(), any()) }
         verify { journalpostService.oppdaterOgFerdigstillJournalpost(any(), any(), any(), any(), any()) }
         verify { oppgaveService.ferdigstillOppgave(any()) }
     }

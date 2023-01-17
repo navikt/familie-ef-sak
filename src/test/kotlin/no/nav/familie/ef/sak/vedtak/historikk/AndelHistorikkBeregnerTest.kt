@@ -134,7 +134,7 @@ object AndelHistorikkRunner {
             behandlinger,
             behandlingId,
             mapOf(),
-            false
+            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true, lagOpphørsperiode = true)
         )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
@@ -389,6 +389,7 @@ object AndelHistorikkParser {
             aktivitetArbeid = null,
             erSanksjon = false,
             sanksjonsårsak = null,
+            erOpphør = false,
             periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
             aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
         )

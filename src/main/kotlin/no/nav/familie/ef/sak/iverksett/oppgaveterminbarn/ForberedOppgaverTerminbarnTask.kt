@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.oppgaveterminbarn
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -25,12 +24,8 @@ class ForberedOppgaverTerminbarnTask(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun doTask(task: Task) {
-        if (featureToggleService.isEnabled(Toggle.OPPRETT_OPPGAVER_TERMINBARN)) {
-            logger.info("Starter forbereding av oppgaver for ufødte terminbarn")
-            forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn(dryRun = false)
-        } else {
-            logger.warn("Feature toggle opprett-oppgaver-barnsomfylleraar er ikke enablet")
-        }
+        logger.info("Starter forbereding av oppgaver for ufødte terminbarn")
+        forberedOppgaverTerminbarnService.forberedOppgaverForUfødteTerminbarn()
     }
 
     override fun onCompletion(task: Task) {

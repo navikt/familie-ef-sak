@@ -1940,7 +1940,8 @@ internal class BeregnYtelseStegTest {
             erSanksjon = false,
             sanksjonsårsak = null,
             periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+            erOpphør = false
         )
 
     private val fjernetHistorikkEndring = HistorikkEndring(EndringType.FJERNET, UUID.randomUUID(), LocalDateTime.now())
@@ -1959,6 +1960,7 @@ internal class BeregnYtelseStegTest {
             aktivitetArbeid = null,
             erSanksjon = true,
             sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
+            erOpphør = false,
             periodetypeBarnetilsyn = null,
             aktivitetBarnetilsyn = null
         )

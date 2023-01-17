@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
+import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -36,7 +37,6 @@ class AndelsHistorikkService(
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
         // hent vilkår for viss type hvor behandlingIder sendes inn
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
-        val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
         return AndelHistorikkBeregner.lagHistorikk(
             stønadstype,
             tilkjenteYtelser,
@@ -44,7 +44,10 @@ class AndelsHistorikkService(
             behandlinger,
             tilOgMedBehandlingId,
             aktivitetArbeid,
-            brukIkkeVedtatteSatser
+            HistorikkKonfigurasjon(
+                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
+                lagOpphørsperiode = featureToggleService.isEnabled(Toggle.VEDTAKSHISTORIKK_OPPHØR)
+            )
         )
     }
 

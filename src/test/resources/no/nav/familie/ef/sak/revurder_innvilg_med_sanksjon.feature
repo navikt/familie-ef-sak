@@ -19,11 +19,11 @@ Egenskap: Andelhistorikk: Sanksjon
       | 19950 | 01.2022         | 02.2022         | 3               |
 
     Så forvent følgende historikk
-      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
-      | 1            | ERSTATTET    | 3                     | 0       | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
-      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 01.2022         | 02.2022         |
-      | 2            | FJERNET      | 3                     | 0       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
+      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato |
+      | 1            | ERSTATTET    | 3                     | 0       | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
+      | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 01.2022         | 02.2022         |
+      | 2            | FJERNET      | 3                     | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
+      | 3            |              |                       | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
 
   Scenario: Revurderer en periode som inneholder sanksjon, med innvilget periode etterpå
 
@@ -43,9 +43,9 @@ Egenskap: Andelhistorikk: Sanksjon
       | 19950 | 04.2022         | 04.2022         | 3               |
 
     Så forvent følgende historikk
-      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Aktivitet            | Fra og med dato | Til og med dato |
-      | 1            | ERSTATTET    | 3                     | 0       | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
-      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 01.2022         | 02.2022         |
-      | 2            | FJERNET      | 3                     | 0       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | FORSØRGER_I_ARBEID   | 04.2022         | 04.2022         |
+      | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato |
+      | 1            | ERSTATTET    | 3                     | 0       | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
+      | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 01.2022         | 02.2022         |
+      | 2            | FJERNET      | 3                     | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
+      | 3            |              |                       | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
+      | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 04.2022         |

@@ -33,7 +33,8 @@ object AndelHistorikkUtil {
         stønadstype != StønadType.OVERGANGSSTØNAD -> null
         vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.periodeType
         vedtaksperiode is Sanksjonsperiode -> VedtaksperiodeType.SANKSJON
-        else -> null
+        vedtaksperiode is Opphørsperiode -> null
+        else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
     }
 
     fun periodeTypeBarnetilsyn(
@@ -43,7 +44,8 @@ object AndelHistorikkUtil {
         stønadstype != StønadType.BARNETILSYN -> null
         vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn -> vedtaksperiode.periodetype
         vedtaksperiode is Sanksjonsperiode -> PeriodetypeBarnetilsyn.SANKSJON_1_MND
-        else -> null
+        vedtaksperiode is Opphørsperiode -> null
+        else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
     }
 
     fun aktivitetOvergangsstønad(
@@ -53,6 +55,12 @@ object AndelHistorikkUtil {
         stønadstype != StønadType.OVERGANGSSTØNAD -> null
         vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad -> vedtaksperiode.aktivitet
         vedtaksperiode is Sanksjonsperiode -> AktivitetType.IKKE_AKTIVITETSPLIKT
-        else -> null
+        vedtaksperiode is Opphørsperiode -> AktivitetType.IKKE_AKTIVITETSPLIKT
+        else -> error("Kan ikke mappe ${vedtaksperiode.javaClass.simpleName}")
     }
 }
+
+data class HistorikkKonfigurasjon(
+    val brukIkkeVedtatteSatser: Boolean,
+    val lagOpphørsperiode: Boolean
+)

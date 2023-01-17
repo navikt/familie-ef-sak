@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.beregning.skolepenger.BeregningSkolepengerService
 import no.nav.familie.ef.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.barnIder
+import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdFraUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.IdTIlUUIDHolder.behandlingIdTilUUID
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser
 import no.nav.familie.ef.sak.cucumber.domeneparser.VedtakDomeneParser.mapBarn
@@ -64,6 +65,7 @@ import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
+import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -245,7 +247,7 @@ class StepDefinitions {
                     saksbehandlinger.values.map { it.first }.toList(),
                     null,
                     behandlingIdsToAktivitetArbeid,
-                    false
+                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true, lagOpphørsperiode = true)
                 )
             }
         }
@@ -492,7 +494,8 @@ class StepDefinitions {
                             andel.andel.periode.tom.format(YEAR_MONTH_FORMAT_NORSK),
                             andel.endring?.type ?: "",
                             andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key }
-                                ?: ""
+                                ?: "",
+                            "opphør=${andel.erOpphør}"
                         ).joinToString("|", prefix = "|", postfix = "|")
                     )
                 }
@@ -500,6 +503,7 @@ class StepDefinitions {
                 throw Throwable("Feilet rad $index", e)
             }
         }
+        assertThat(dataTable.asMaps()).hasSize(forventetHistorikkEndringer.size)
     }
 
     private fun assertBeregnetAndel(
@@ -509,20 +513,21 @@ class StepDefinitions {
         andelHistorikkDto: AndelHistorikkDto
     ) {
         val endringType = parseEndringType(it)
-        val endretIBehandlingId =
-            behandlingIdTilUUID[parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)]
+        val endretIBehandlingId = parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)
         val beregnetAndelHistorikk = andelHistorikkDto
         val forventetHistorikkEndring = forventetHistorikkEndringer[index]
 
         assertThat(beregnetAndelHistorikk).isNotNull
         assertThat(beregnetAndelHistorikk.andel.stønadFra).isEqualTo(forventetHistorikkEndring.stønadFra)
         assertThat(beregnetAndelHistorikk.andel.stønadTil).isEqualTo(forventetHistorikkEndring.stønadTil)
-        assertThat(beregnetAndelHistorikk.behandlingId).isEqualTo(forventetHistorikkEndring.behandlingId)
+        assertThat(behandlingIdFraUUID(beregnetAndelHistorikk.behandlingId))
+            .isEqualTo(behandlingIdFraUUID(forventetHistorikkEndring.behandlingId))
         if (endringType == null) {
             assertThat(beregnetAndelHistorikk.endring).isNull()
         } else {
             assertThat(beregnetAndelHistorikk.endring!!.type).isEqualTo(endringType)
-            assertThat(beregnetAndelHistorikk.endring?.behandlingId).isEqualTo(endretIBehandlingId)
+            assertThat(beregnetAndelHistorikk.endring?.let { behandlingIdFraUUID(it.behandlingId) })
+                .isEqualTo(endretIBehandlingId)
         }
         forventetHistorikkEndring.inntekt?.let {
             assertThat(beregnetAndelHistorikk.andel.inntekt).isEqualTo(it)
@@ -562,6 +567,8 @@ class StepDefinitions {
         forventetHistorikkEndring.vedtaksdato?.let {
             assertThat(beregnetAndelHistorikk.vedtakstidspunkt.toLocalDate()).isEqualTo(it)
         }
+
+        assertThat(beregnetAndelHistorikk.erOpphør).isEqualTo(forventetHistorikkEndring.erOpphør)
 
         if (beregnetAndelHistorikk.endring != null || forventetHistorikkEndring.historikkEndring != null) {
             assertThat(beregnetAndelHistorikk.endring?.type).isEqualTo(forventetHistorikkEndring.historikkEndring?.type)
