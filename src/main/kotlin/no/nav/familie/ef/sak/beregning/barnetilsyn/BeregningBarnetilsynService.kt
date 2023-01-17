@@ -160,10 +160,10 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  * @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
-    val sortertPåDatoListe = this.sortedBy { it.periode }
+    val sortertPåDatoListe = this.sortedBy { it.periode }.filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
-        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry) && last.sammeAktivitetstypeOgPeriodetype(entry)) {
+        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
             acc.removeLast()
             acc.add(
                 last.copy(
@@ -182,6 +182,3 @@ fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsy
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
     this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
-
-fun BeløpsperiodeBarnetilsynDto.sammeAktivitetstypeOgPeriodetype(other: BeløpsperiodeBarnetilsynDto) =
-    this.aktivitetstype == other.aktivitetstype && this.periodetype == other.periodetype

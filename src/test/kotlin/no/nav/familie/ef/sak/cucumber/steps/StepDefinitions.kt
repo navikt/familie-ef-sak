@@ -554,7 +554,9 @@ class StepDefinitions {
         forventetHistorikkEndring.periodeType?.let {
             assertThat(beregnetAndelHistorikk.periodeType).isEqualTo(it)
         }
+        assertThat(beregnetAndelHistorikk.periodetypeBarnetilsyn).isEqualTo(forventetHistorikkEndring.periodeTypeBarnetilsyn)
         assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+        assertThat(beregnetAndelHistorikk.aktivitetBarnetilsyn).isEqualTo(forventetHistorikkEndring.aktivitetTypeBarnetilsyn)
 
         forventetHistorikkEndring.vedtaksdato?.let {
             assertThat(beregnetAndelHistorikk.vedtakstidspunkt.toLocalDate()).isEqualTo(it)

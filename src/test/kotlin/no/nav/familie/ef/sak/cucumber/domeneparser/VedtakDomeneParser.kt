@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.DataTableUtil.forHverBehandling
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.førsteDagenIMånedenEllerDefault
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.DelårsperiodeSkoleårSkolepenger
@@ -66,6 +67,7 @@ object VedtakDomeneParser {
                     validerSanksjon(perioderForBarnetilsyn)
                     perioderForBarnetilsyn
                 }
+
                 else -> emptyList()
             }
             vedtak.copy(
@@ -99,11 +101,13 @@ object VedtakDomeneParser {
             val perioder = when (vedtak.resultatType) {
                 ResultatType.OPPHØRT,
                 ResultatType.INNVILGE -> mapPerioderForSkolepenger(rader)
+
                 ResultatType.SANKSJONERE -> {
                     val perioderForBarnetilsyn = mapPerioderForSkolepenger(rader)
                     validerSanksjonSkolepenger(perioderForBarnetilsyn)
                     perioderForBarnetilsyn
                 }
+
                 else -> emptyList()
             }
             vedtak.copy(skolepenger = SkolepengerWrapper(perioder, null))
@@ -314,7 +318,9 @@ object VedtakDomeneParser {
                     Inntektsperiode(
                         periode = Månedsperiode(datoFra, LocalDate.MAX),
                         inntekt = BigDecimal(parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad) ?: 0),
-                        samordningsfradrag = BigDecimal(parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0)
+                        samordningsfradrag = BigDecimal(
+                            parseValgfriInt(VedtakDomenebegrep.SAMORDNINGSFRADRAG, rad) ?: 0
+                        )
                     )
                 )
                 acc
@@ -337,7 +343,9 @@ object VedtakDomeneParser {
         val inntekt: Int?,
         val beløp: Int?,
         val periodeType: VedtaksperiodeType?,
+        val periodeTypeBarnetilsyn: PeriodetypeBarnetilsyn?,
         val aktivitetType: AktivitetType?,
+        val aktivitetTypeBarnetilsyn: AktivitetstypeBarnetilsyn?,
         val kontantstøtte: Int?,
         val tilleggsstønad: Int?,
         val antallBarn: Int?,
@@ -351,8 +359,6 @@ object VedtakDomeneParser {
     class BehandlingForHistorikkEndringMapper {
 
         fun mapRad(rad: Map<String, String>, stønadstype: StønadType): ForventetHistorikk {
-            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
-            val aktivitetType = parseAktivitetType(rad) ?: defaultAktivitetsType(stønadstype, erSanksjon)
             return ForventetHistorikk(
                 behandlingId = behandlingIdTilUUID[parseInt(Domenebegrep.BEHANDLING_ID, rad)]!!,
                 historikkEndring = parseEndringType(rad)?.let { endringType ->
@@ -369,26 +375,30 @@ object VedtakDomeneParser {
                 stønadTil = parseTilOgMed(rad),
                 inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                 beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
-                periodeType = parseVedtaksperiodeType(rad),
-                aktivitetType = aktivitetType,
+                periodeType = if (stønadstype == StønadType.OVERGANGSSTØNAD) parseVedtaksperiodeType(rad) else null,
+                periodeTypeBarnetilsyn = if (stønadstype == StønadType.BARNETILSYN) parsePeriodetypeBarnetilsyn(rad) else null,
+                aktivitetType = aktivitetstype(stønadstype, rad),
+                aktivitetTypeBarnetilsyn = if (stønadstype == StønadType.BARNETILSYN) parseAktivitetstypeBarnetilsyn(rad) else null,
                 kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
                 tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
                 antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad),
                 arbeidAktivitet = parseArbeidAktivitet(rad),
-                erSanksjon = erSanksjon,
+                erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad),
                 sanksjonsårsak = parseSanksjonsårsak(rad),
                 vedtaksdato = parseValgfriDato(VedtakDomenebegrep.VEDTAKSDATO, rad)
             )
         }
 
-        private fun defaultAktivitetsType(
-            stønadstype: StønadType,
-            erSanksjon: Boolean?
-        ) = when {
-            erSanksjon == true -> AktivitetType.IKKE_AKTIVITETSPLIKT
-            stønadstype == StønadType.OVERGANGSSTØNAD -> AktivitetType.BARN_UNDER_ETT_ÅR
-            else -> null
+        private fun aktivitetstype(stønadstype: StønadType, rad: Map<String, String>): AktivitetType? {
+            if (stønadstype != StønadType.OVERGANGSSTØNAD) return null
+            val aktivitet = parseAktivitetType(rad)
+            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
+            return when {
+                aktivitet != null -> aktivitet
+                erSanksjon == true -> AktivitetType.IKKE_AKTIVITETSPLIKT
+                else -> AktivitetType.BARN_UNDER_ETT_ÅR
+            }
         }
     }
 }
