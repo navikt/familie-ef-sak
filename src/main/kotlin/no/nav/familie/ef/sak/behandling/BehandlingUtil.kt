@@ -9,5 +9,5 @@ object BehandlingUtil {
 
     fun List<Behandling>.sisteFerdigstilteBehandling() =
         this.filter { it.erAvsluttet() }
-            .maxByOrNull { it.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt på behandling=${it.id}") }
+            .maxByOrNull { it.vedtakstidspunktEllerFeil() }
 }
