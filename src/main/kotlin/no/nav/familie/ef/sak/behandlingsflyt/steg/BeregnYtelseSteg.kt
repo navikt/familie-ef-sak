@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.Avslå
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -566,7 +567,8 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
         val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
-            vedtak.perioder.filterNot { it.erMidlertidigOpphør },
+            vedtak.perioder
+                .filter { !it.erMidlertidigOpphør || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR },
             vedtak.perioderKontantstøtte,
             vedtak.tilleggsstønad.perioder
         )

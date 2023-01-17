@@ -7,7 +7,6 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
-import no.nav.familie.ef.sak.vedtak.dto.erOpphørEllerSanksjon
 import no.nav.familie.ef.sak.vedtak.dto.tilPerioder
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.harOverlappende
@@ -163,7 +162,8 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  * @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
-    val sortertPåDatoListe = this.sortedBy { it.periode }.filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
+    val sortertPåDatoListe = this.sortedBy { it.periode }
+        .filter { it.periodetype == null || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
