@@ -209,8 +209,8 @@ fun parseAktivitetType(rad: Map<String, String>): AktivitetType? {
     return parseValgfriEnum<AktivitetType>(VedtakDomenebegrep.AKTIVITET_TYPE, rad)
 }
 
-fun parsePeriodetypeBarnetilsyn(rad: Map<String, String>): PeriodetypeBarnetilsyn {
-    return parseEnum(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
+fun parsePeriodetypeBarnetilsyn(rad: Map<String, String>): PeriodetypeBarnetilsyn? {
+    return parseValgfriEnum<PeriodetypeBarnetilsyn>(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
 }
 
 fun parseAktivitetstypeBarnetilsyn(rad: Map<String, String>): AktivitetstypeBarnetilsyn? {

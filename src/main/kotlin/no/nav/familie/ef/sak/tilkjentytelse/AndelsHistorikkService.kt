@@ -30,7 +30,7 @@ class AndelsHistorikkService(
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()
         }
-
+        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
         val behandlingIder = tilkjenteYtelser.map { it.behandlingId }.toSet()
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
@@ -38,6 +38,7 @@ class AndelsHistorikkService(
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
         val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
         return AndelHistorikkBeregner.lagHistorikk(
+            stønadstype,
             tilkjenteYtelser,
             vedtakForBehandlinger,
             behandlinger,

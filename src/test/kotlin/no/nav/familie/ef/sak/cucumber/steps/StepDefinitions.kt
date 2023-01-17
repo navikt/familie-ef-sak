@@ -239,6 +239,7 @@ class StepDefinitions {
             // kan ikke beregne historikk ennå
             if (stønadstype != StønadType.SKOLEPENGER) {
                 beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
+                    stønadstype,
                     tilkjentYtelser.values.toList(),
                     lagredeVedtak,
                     saksbehandlinger.values.map { it.first }.toList(),

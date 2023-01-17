@@ -212,6 +212,11 @@ object VedtakDomeneParser {
             val midlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
             val periodetype = parsePeriodetypeBarnetilsyn(rad)
             val aktivitetstype = parseAktivitetstypeBarnetilsyn(rad)
+            if (resultatType == ResultatType.SANKSJONERE) {
+                feilHvis(periodetype != PeriodetypeBarnetilsyn.SANKSJON_1_MND) {
+                    "Periodetype for sanksjon må være SANKSJON_1_MND"
+                }
+            }
 
             Barnetilsynperiode(
                 datoFra = parseFraOgMed(rad),
@@ -221,7 +226,7 @@ object VedtakDomeneParser {
                 erMidlertidigOpphør = midlertidigOpphør
                     ?: (sanksjonsårsak != null),
                 sanksjonsårsak = sanksjonsårsak,
-                periodetype = periodetype,
+                periodetype = periodetype ?: error("Mangler periodetype"),
                 aktivitetstype = aktivitetstype
             )
         }
@@ -376,9 +381,9 @@ object VedtakDomeneParser {
                 inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad),
                 beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad),
                 periodeType = if (stønadstype == StønadType.OVERGANGSSTØNAD) parseVedtaksperiodeType(rad) else null,
-                periodeTypeBarnetilsyn = if (stønadstype == StønadType.BARNETILSYN) parsePeriodetypeBarnetilsyn(rad) else null,
+                periodeTypeBarnetilsyn = periodeTypeBarnetilsyn(stønadstype, rad),
                 aktivitetType = aktivitetstype(stønadstype, rad),
-                aktivitetTypeBarnetilsyn = if (stønadstype == StønadType.BARNETILSYN) parseAktivitetstypeBarnetilsyn(rad) else null,
+                aktivitetTypeBarnetilsyn = aktivitetstypeBarnetilsyn(stønadstype, rad),
                 kontantstøtte = parseValgfriInt(VedtakDomenebegrep.KONTANTSTØTTE, rad),
                 tilleggsstønad = parseValgfriInt(VedtakDomenebegrep.TILLEGGSSTØNAD, rad),
                 antallBarn = parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad),
@@ -390,6 +395,12 @@ object VedtakDomeneParser {
             )
         }
 
+        private fun periodeTypeBarnetilsyn(
+            stønadstype: StønadType,
+            rad: Map<String, String>
+        ) = if (stønadstype == StønadType.BARNETILSYN)
+            (parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR) else null
+
         private fun aktivitetstype(stønadstype: StønadType, rad: Map<String, String>): AktivitetType? {
             if (stønadstype != StønadType.OVERGANGSSTØNAD) return null
             val aktivitet = parseAktivitetType(rad)
@@ -398,6 +409,17 @@ object VedtakDomeneParser {
                 aktivitet != null -> aktivitet
                 erSanksjon == true -> AktivitetType.IKKE_AKTIVITETSPLIKT
                 else -> AktivitetType.BARN_UNDER_ETT_ÅR
+            }
+        }
+
+        private fun aktivitetstypeBarnetilsyn(stønadstype: StønadType, rad: Map<String, String>): AktivitetstypeBarnetilsyn? {
+            if (stønadstype != StønadType.BARNETILSYN) return null
+            val aktivitet = parseAktivitetstypeBarnetilsyn(rad)
+            val erSanksjon = parseValgfriBoolean(VedtakDomenebegrep.ER_SANKSJON, rad)
+            return when {
+                aktivitet != null -> aktivitet
+                erSanksjon == true -> null
+                else -> AktivitetstypeBarnetilsyn.I_ARBEID
             }
         }
     }
