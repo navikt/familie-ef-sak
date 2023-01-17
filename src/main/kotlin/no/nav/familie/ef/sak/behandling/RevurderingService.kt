@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sisteFerdigstilteBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -152,7 +153,7 @@ class RevurderingService(
         val sisteBehandling = behandlingService.hentBehandlinger(revurdering.fagsakId)
             .filter { it.id != revurdering.id }
             .filter { it.resultat != BehandlingResultat.HENLAGT }
-            .maxByOrNull { it.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt på behandling=${it.id}") }
+            .sisteFerdigstilteBehandling()
         return revurdering.forrigeBehandlingId
             ?: sisteBehandling?.id
             ?: error("Revurdering må ha eksisterende iverksatt behandling")
