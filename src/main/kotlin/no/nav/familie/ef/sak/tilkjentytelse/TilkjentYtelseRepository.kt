@@ -25,7 +25,7 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
         WHERE b.fagsak_id = :fagsakId
          AND b.status = 'FERDIGSTILT'
          AND b.resultat IN ('OPPHØRT', 'INNVILGET') 
-        ORDER BY b.opprettet_tid ASC"""
+        """
     )
     fun finnAlleIverksatteForFagsak(fagsakId: UUID): List<TilkjentYtelse>
 
