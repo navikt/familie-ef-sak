@@ -24,7 +24,7 @@ class ForberedOppgaverTerminbarnService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun forberedOppgaverForUfødteTerminbarn(dryRun: Boolean) {
+    fun forberedOppgaverForUfødteTerminbarn() {
         val gjeldendeBarn: Map<UUID, List<TerminbarnTilUtplukkForOppgave>> = terminbarnRepository
             .finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD)
             .groupBy { it.behandlingId }
@@ -34,15 +34,13 @@ class ForberedOppgaverTerminbarnService(
             val fødselsnummerSøker = fagsakService.hentAktivIdent(terminbarnPåSøknad.first().fagsakId)
             val pdlBarn = pdlBarn(fødselsnummerSøker)
             val ugyldigeTerminbarn = terminbarnPåSøknad.filterNot { it.match(pdlBarn) }
-            lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker, dryRun)
+            lagreOgMapTilOppgaverForUgyldigeTerminbarn(ugyldigeTerminbarn, fødselsnummerSøker)
         }.flatten()
-        logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn. Dryrun : $dryRun")
+        logger.info("Fant ${oppgaver.size} oppgaver for ugyldige terminbarn.")
         oppgaver.forEach { oppgave ->
-            logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId}. Dryrun : $dryRun")
+            logger.info("Laget oppgave for behandlingID=${oppgave.behandlingId} for ugyldige terminbarn")
         }
-        if (!dryRun) {
-            opprettTaskerForOppgaver(oppgaver)
-        }
+        opprettTaskerForOppgaver(oppgaver)
     }
 
     private fun pdlBarn(fødselsnummerSøker: String): List<PdlPersonForelderBarn> =
@@ -54,14 +52,11 @@ class ForberedOppgaverTerminbarnService(
 
     private fun lagreOgMapTilOppgaverForUgyldigeTerminbarn(
         barnTilUtplukkForOppgave: List<TerminbarnTilUtplukkForOppgave>,
-        fødselsnummerSøker: String,
-        dryRun: Boolean
+        fødselsnummerSøker: String
     ): List<OppgaveForBarn> {
         return barnTilUtplukkForOppgave
             .map {
-                if (!dryRun) {
-                    terminbarnRepository.insert(it.tilTerminbarnOppgave())
-                }
+                terminbarnRepository.insert(it.tilTerminbarnOppgave())
                 OppgaveForBarn(
                     it.behandlingId,
                     it.eksternFagsakId,
