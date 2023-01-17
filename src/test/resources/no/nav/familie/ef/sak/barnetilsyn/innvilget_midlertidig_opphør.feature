@@ -8,7 +8,7 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
     Gitt følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør | Vedtaksperiode | Aktivitet |
       | 1            | INNVILGE        | 1           | 200      | 01.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       | ORDINÆR        | I_ARBEID  |
-      | 2            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    | opphør         |           |
+      | 2            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    | OPPHØR         |           |
       | 2            | INNVILGE        | 1           | 100      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
@@ -29,7 +29,7 @@ Egenskap: Andelhistorikk: Enkel innvilget behandling av typen barnetilsyn
     Gitt følgende vedtak for barnetilsyn
       | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Fra og med dato | Til og med dato | Arbeid aktivitet          | Er midlertidig opphør | Vedtaksperiode | Aktivitet |
       | 1            | INNVILGE        | 1           | 200      | 01.2021         | 01.2021         | ETABLERER_EGEN_VIRKSOMHET |                       | ORDINÆR        | I_ARBEID  |
-      | 1            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    | opphør         |           |
+      | 1            | INNVILGE        |             | 0        | 02.2021         | 02.2021         | ETABLERER_EGEN_VIRKSOMHET | Ja                    | OPPHØR         |           |
       | 1            | INNVILGE        | 1           | 200      | 03.2021         | 03.2021         | ETABLERER_EGEN_VIRKSOMHET |                       | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse

@@ -166,7 +166,11 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
         .filter { it.periodetype == null || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
-        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
+        if (
+            last != null && last.hengerSammenMed(entry) &&
+            last.sammeBeløpOgBeregningsgrunnlag(entry) &&
+            last.sammeAktivitet(entry)
+        ) {
             acc.removeLast()
             acc.add(
                 last.copy(
@@ -185,3 +189,6 @@ fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsy
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
     this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
+
+fun BeløpsperiodeBarnetilsynDto.sammeAktivitet(other: BeløpsperiodeBarnetilsynDto) =
+    this.aktivitetstype == other.aktivitetstype

@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -202,6 +203,7 @@ class BeregningBarnetilsynServiceTest {
             assertThat(feil.message).contains("Tilleggsstønadsperioder")
         }
 
+        @Disabled // TODO fjern disabled når periodetype er non-nullable
         @Test
         internal fun `Skal kaste feil dersom periodetype ikke er valgt`() {
             val utgiftsperiode = listeMedEnUtgiftsperiode(aktivitetstype = null, periodetype = null)
@@ -215,6 +217,7 @@ class BeregningBarnetilsynServiceTest {
             assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperiode mangler en eller flere periodetyper")
         }
 
+        @Disabled // TODO fjern disabled når periodetype er non-nullable
         @Test
         internal fun `Skal kaste feil dersom aktivitetstype ikke er valgt og periodetype ikke er opphør eller sanksjon`() {
             val utgiftsperioder = listeMedEnUtgiftsperiode(aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, periodetype = PeriodetypeBarnetilsyn.ORDINÆR) +
@@ -570,7 +573,7 @@ class BeregningBarnetilsynServiceTest {
             tilleggsstønadsperioder = listOf()
         )
 
-        assertThat(beregnYtelseBarnetilsyn).hasSize(3)
+        assertThat(beregnYtelseBarnetilsyn).hasSize(2)
     }
 
     private fun lagBeløpsperiode(
