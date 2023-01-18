@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -28,13 +30,13 @@ object OpprettBehandlingUtil {
         validerMigreringErRevurdering(behandlingType, erMigrering)
 
         when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> validerKanOppretteFørstegangsbehandling(sisteBehandling)
-            BehandlingType.REVURDERING -> validerKanOppretteRevurdering(sisteBehandling, erMigrering)
+            FØRSTEGANGSBEHANDLING -> validerKanOppretteFørstegangsbehandling(sisteBehandling)
+            REVURDERING -> validerKanOppretteRevurdering(sisteBehandling, erMigrering)
         }
     }
 
     private fun validerMigreringErRevurdering(behandlingType: BehandlingType, erMigrering: Boolean) {
-        feilHvis(erMigrering && behandlingType != BehandlingType.REVURDERING) {
+        feilHvis(erMigrering && behandlingType != REVURDERING) {
             "Det er ikke mulig å lage en migrering av annet enn revurdering"
         }
     }
@@ -43,11 +45,14 @@ object OpprettBehandlingUtil {
         if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT && it.status != BehandlingStatus.SATT_PÅ_VENT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
         }
+        feilHvis(tidligereBehandlinger.any { it.type == FØRSTEGANGSBEHANDLING && it.status == BehandlingStatus.SATT_PÅ_VENT }) {
+            "Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent"
+        }
     }
 
     private fun validerKanOppretteFørstegangsbehandling(sisteBehandling: Behandling?) {
         if (sisteBehandling == null) return
-        brukerfeilHvis(sisteBehandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
+        brukerfeilHvis(sisteBehandling.type != FØRSTEGANGSBEHANDLING) {
             "Kan ikke opprette en førstegangsbehandling når forrige behandling ikke er en førstegangsbehandling"
         }
         brukerfeilHvis(sisteBehandling.resultat != BehandlingResultat.HENLAGT) {

@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -148,5 +149,48 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
         val behandlingerForVilkårsgjenbrukkLagret = listOf(revurderingUnderArbeidSP, førstegangSp, førstegangBt)
         assertThat(behandlingerForVilkårsgjenbrukHentet).isEqualTo(behandlingerForVilkårsgjenbrukkLagret)
+    }
+
+    @Nested
+    inner class BehandlingPåVent {
+        @Test
+        internal fun `opprettBehandling av førstegangsbehandling er ikke mulig hvis det finnes en førstegangsbehandling på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, BehandlingStatus.SATT_PÅ_VENT))
+            assertThatThrownBy {
+                behandlingService.opprettBehandling(
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
+                    fagsak.id,
+                    behandlingsårsak = behandlingÅrsak
+                )
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
+
+        @Test
+        internal fun `opprettBehandling av revurdering er ikke mulig hvis det finnes en førstegangsbehandling på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, BehandlingStatus.SATT_PÅ_VENT))
+            assertThatThrownBy {
+                behandlingService.opprettBehandling(
+                    BehandlingType.REVURDERING,
+                    fagsak.id,
+                    behandlingsårsak = behandlingÅrsak
+                )
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
+
+        @Test
+        internal fun `opprettBehandling er mulig hvis det finnes en revurdering på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, BehandlingStatus.FERDIGSTILT))
+            behandlingRepository.insert(
+                behandling(fagsak, BehandlingStatus.SATT_PÅ_VENT, type = BehandlingType.REVURDERING)
+            )
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsak.id,
+                behandlingsårsak = behandlingÅrsak
+            )
+        }
     }
 }
