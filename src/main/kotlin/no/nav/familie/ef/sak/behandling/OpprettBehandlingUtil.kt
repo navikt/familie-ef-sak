@@ -20,12 +20,12 @@ object OpprettBehandlingUtil {
         tidligereBehandlinger: List<Behandling>,
         erMigrering: Boolean = false
     ) {
-        validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
-        validerMigreringErRevurdering(behandlingType, erMigrering)
-
         val sisteBehandling = tidligereBehandlinger
             .filter { it.resultat != BehandlingResultat.HENLAGT }
             .sisteFerdigstilteBehandling()
+
+        validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
+        validerMigreringErRevurdering(behandlingType, erMigrering)
 
         when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> validerKanOppretteFørstegangsbehandling(sisteBehandling)

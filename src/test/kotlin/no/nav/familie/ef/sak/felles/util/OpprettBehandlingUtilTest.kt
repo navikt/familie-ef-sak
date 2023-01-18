@@ -66,7 +66,8 @@ internal class OpprettBehandlingUtilTest {
             val behandlinger = listOf(
                 behandling(
                     fagsak = fagsak,
-                    status = BehandlingStatus.FERDIGSTILT
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET
                 ),
                 behandling(
                     fagsak = fagsak,
@@ -74,7 +75,8 @@ internal class OpprettBehandlingUtilTest {
                 ),
                 behandling(
                     fagsak = fagsak,
-                    status = BehandlingStatus.FERDIGSTILT
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET
                 )
             )
             assertThatThrownBy { validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger) }
