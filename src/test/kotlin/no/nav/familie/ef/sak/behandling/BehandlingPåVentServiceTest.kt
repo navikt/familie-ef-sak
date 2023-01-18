@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
@@ -32,9 +34,12 @@ internal class BehandlingPåVentServiceTest {
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
     private val taskService = mockk<TaskService>(relaxed = true)
     private val nullstillVedtakService = mockk<NullstillVedtakService>(relaxed = true)
+    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
+
     private val behandlingPåVentService =
         BehandlingPåVentService(
             behandlingService,
+            behandlingshistorikkService,
             taskService,
             nullstillVedtakService,
             mockFeatureToggleService()
@@ -66,6 +71,7 @@ internal class BehandlingPåVentServiceTest {
             behandlingPåVentService.settPåVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.SATT_PÅ_VENT) }
+            verify { behandlingshistorikkService.opprettHistorikkInnslag(behandlingId, any(), StegUtfall.SATT_PÅ_VENT, null) }
             verify {
                 taskService.save(
                     coWithArg {
@@ -156,6 +162,7 @@ internal class BehandlingPåVentServiceTest {
             behandlingPåVentService.taAvVent(behandlingId)
 
             verify { behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES) }
+            verify { behandlingshistorikkService.opprettHistorikkInnslag(behandlingId, any(), StegUtfall.TATT_AV_VENT, null) }
             verify {
                 taskService.save(
                     coWithArg {

@@ -13,6 +13,8 @@ data class HendelseshistorikkDto(
 
 enum class Hendelse {
     OPPRETTET,
+    SATT_PÅ_VENT,
+    TATT_AV_VENT,
     SENDT_TIL_BESLUTTER,
     VEDTAK_GODKJENT,
     VEDTAK_UNDERKJENT,
