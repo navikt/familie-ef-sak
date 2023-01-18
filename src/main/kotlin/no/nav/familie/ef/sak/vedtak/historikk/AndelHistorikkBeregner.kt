@@ -92,7 +92,7 @@ object AndelHistorikkBeregner {
         val tilOgMedBehandling = behandlinger.firstOrNull { it.id == tilOgMedBehandlingId }
             ?: error("Finner ikke behandling $tilOgMedBehandlingId")
         return tilOgMedBehandling.let { tomBehandling ->
-            behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
+            behandlinger.filter { it.vedtakstidspunktEllerFeil() < tomBehandling.vedtakstidspunktEllerFeil() } + tomBehandling
         }
     }
 

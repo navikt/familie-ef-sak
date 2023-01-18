@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunkt
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunktEllerEndretTid
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -78,6 +80,8 @@ class BehandlingService(
 
     fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
         return behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+            .sortertEtterVedtakstidspunktEllerEndretTid()
+            .reversed()
     }
 
     @Transactional
@@ -197,7 +201,7 @@ class BehandlingService(
         behandlingRepository.existsByFagsakId(fagsakId)
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
-        return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }
+        return behandlingRepository.findByFagsakId(fagsakId).sortertEtterVedtakstidspunkt()
     }
 
     fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {

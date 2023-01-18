@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sisteFerdigstilteBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -20,8 +21,8 @@ object OpprettBehandlingUtil {
         erMigrering: Boolean = false
     ) {
         val sisteBehandling = tidligereBehandlinger
-            .filter { it.resultat != BehandlingResultat.HENLAGT && it.status == BehandlingStatus.FERDIGSTILT }
-            .maxByOrNull { it.sporbar.opprettetTid }
+            .filter { it.resultat != BehandlingResultat.HENLAGT }
+            .sisteFerdigstilteBehandling()
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
         validerMigreringErRevurdering(behandlingType, erMigrering)
@@ -39,7 +40,7 @@ object OpprettBehandlingUtil {
     }
 
     private fun validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger: List<Behandling>) {
-        if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT }) {
+        if (tidligereBehandlinger.any { it.status != BehandlingStatus.FERDIGSTILT && it.status != BehandlingStatus.SATT_PÅ_VENT }) {
             throw ApiFeil("Det finnes en behandling på fagsaken som ikke er ferdigstilt", HttpStatus.BAD_REQUEST)
         }
     }

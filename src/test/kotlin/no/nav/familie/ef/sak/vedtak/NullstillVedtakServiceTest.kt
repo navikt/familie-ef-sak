@@ -1,9 +1,9 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.vedtak
 
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import io.mockk.verifyAll
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
@@ -26,7 +26,7 @@ import java.util.UUID
 
 class NullstillVedtakServiceTest {
 
-    private val vedtakService = mockk<VedtakService>()
+    private val vedtakService = mockk<VedtakService>(relaxed = true)
 
     private val stegService = mockk<StegService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>()
@@ -55,7 +55,6 @@ class NullstillVedtakServiceTest {
             id = behandlingId,
             steg = StegType.BEHANDLING_FERDIGSTILT
         )
-        justRun { vedtakService.slettVedtakHvisFinnes(behandlingId) }
 
         nullstillVedtakService.nullstillVedtak(behandlingId)
 
@@ -65,10 +64,26 @@ class NullstillVedtakServiceTest {
             tilkjentYtelseService.slettTilkjentYtelseForBehandling(behandlingId)
             tilbakekrevingService.slettTilbakekreving(behandlingId)
             vedtaksbrevService.slettVedtaksbrev(any())
+            vedtakService.slettVedtakHvisFinnes(behandlingId)
             stegService.resetSteg(behandlingId, StegType.BEREGNE_YTELSE)
         }
 
         Assertions.assertThat(saksbehandling.captured.id).isEqualTo(behandlingId)
+    }
+
+    @Test
+    internal fun `skal ikke resette steg hvis steget ikke er etter vedtak`() {
+        every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
+            id = behandlingId,
+            steg = StegType.VILKÅR
+        )
+        nullstillVedtakService.nullstillVedtak(behandlingId)
+        verify(exactly = 0) {
+            stegService.resetSteg(any(), any())
+        }
+        verify {
+            vedtakService.slettVedtakHvisFinnes(behandlingId)
+        }
     }
 
     @Test
