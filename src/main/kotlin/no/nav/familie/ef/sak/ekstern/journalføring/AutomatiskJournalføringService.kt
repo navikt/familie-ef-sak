@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringResponse
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -51,19 +50,18 @@ class AutomatiskJournalføringService(
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, stønadstype)
         val nesteBehandlingstype = utledNesteBehandlingstype(behandlingService.hentBehandlinger(fagsak.id))
-        val journalførendeEnhet = arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
+        val journalførendeEnhet =
+            arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(fagsak.hentAktivIdent())
 
         validerKanAutomatiskJournalføre(personIdent, stønadstype, journalpost)
 
-        return journalføringService.automatiskJournalfør(fagsak, journalpost, journalførendeEnhet, mappeId, nesteBehandlingstype)
-    }
-
-    @Deprecated("Kan slettes når mottak automatisk journalfører alle behandlinger")
-    fun kanOppretteFørstegangsbehandling(ident: String, type: StønadType): Boolean {
-        val allePersonIdenter = personService.hentPersonIdenter(ident).identer.map { it.ident }.toSet()
-        val fagsak = fagsakService.finnFagsak(allePersonIdenter, type)
-
-        return harIngenReelleBehandlinger(fagsak) && harIngenInnslagIInfotrygd(ident, type)
+        return journalføringService.automatiskJournalfør(
+            fagsak,
+            journalpost,
+            journalførendeEnhet,
+            mappeId,
+            nesteBehandlingstype
+        )
     }
 
     fun kanOppretteBehandling(ident: String, stønadstype: StønadType): Boolean {
@@ -135,12 +133,6 @@ class AutomatiskJournalføringService(
         ident: String,
         type: StønadType
     ) = !infotrygdService.eksisterer(ident, setOf(type))
-
-    private fun harIngenReelleBehandlinger(fagsak: Fagsak?): Boolean {
-        return fagsak?.let {
-            behandlingService.hentBehandlinger(fagsak.id).none { it.resultat != BehandlingResultat.HENLAGT }
-        } ?: true
-    }
 
     private fun utledNesteBehandlingstype(behandlinger: List<Behandling>): BehandlingType {
         return if (behandlinger.all { it.resultat == BehandlingResultat.HENLAGT }) FØRSTEGANGSBEHANDLING else REVURDERING
