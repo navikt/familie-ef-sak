@@ -31,13 +31,14 @@ class AndelsHistorikkService(
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()
         }
-
+        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
         val behandlingIder = tilkjenteYtelser.map { it.behandlingId }.toSet()
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
         // hent vilkår for viss type hvor behandlingIder sendes inn
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
         return AndelHistorikkBeregner.lagHistorikk(
+            stønadstype,
             tilkjenteYtelser,
             vedtakForBehandlinger,
             behandlinger,

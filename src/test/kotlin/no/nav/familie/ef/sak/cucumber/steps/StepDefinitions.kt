@@ -241,6 +241,7 @@ class StepDefinitions {
             // kan ikke beregne historikk ennå
             if (stønadstype != StønadType.SKOLEPENGER) {
                 beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
+                    stønadstype,
                     tilkjentYtelser.values.toList(),
                     lagredeVedtak,
                     saksbehandlinger.values.map { it.first }.toList(),
@@ -558,9 +559,9 @@ class StepDefinitions {
         forventetHistorikkEndring.periodeType?.let {
             assertThat(beregnetAndelHistorikk.periodeType).isEqualTo(it)
         }
-        forventetHistorikkEndring.aktivitetType?.let {
-            assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(it)
-        }
+        assertThat(beregnetAndelHistorikk.periodetypeBarnetilsyn).isEqualTo(forventetHistorikkEndring.periodeTypeBarnetilsyn)
+        assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+        assertThat(beregnetAndelHistorikk.aktivitetBarnetilsyn).isEqualTo(forventetHistorikkEndring.aktivitetTypeBarnetilsyn)
 
         forventetHistorikkEndring.vedtaksdato?.let {
             assertThat(beregnetAndelHistorikk.vedtakstidspunkt.toLocalDate()).isEqualTo(it)

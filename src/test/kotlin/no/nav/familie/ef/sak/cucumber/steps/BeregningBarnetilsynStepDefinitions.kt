@@ -6,10 +6,12 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parsePeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.ANTALL_BARN
@@ -40,22 +42,29 @@ class BeregningBarnetilsynStepDefinitions {
     val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()
     val utgiftsperioder: MutableList<UtgiftsperiodeDto> = mutableListOf()
+    val barnPåIndex = List(10) { UUID.randomUUID()}
 
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {
         dataTable.asMaps().map {
+            val periodetype = parsePeriodetypeBarnetilsyn(it)
+            val aktivitetstype = parseAktivitetstypeBarnetilsyn(it)
             val fraÅrMåned = parseÅrMåned(FRA_MND, it)
             val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
             val beløp = parseInt(BELØP, it)
-            val barn = parseInt(ANTALL_BARN, it)
+            val antallBarn = parseInt(ANTALL_BARN, it)
+            val barn = barnPåIndex.take(antallBarn)
             utgiftsperioder.add(
                 UtgiftsperiodeDto(
                     fraÅrMåned,
                     tilÅrMåned,
                     Månedsperiode(fraÅrMåned, tilÅrMåned),
-                    List(barn) { UUID.randomUUID() },
+                    barn,
                     beløp,
-                    false
+                    false,
+                    null,
+                    periodetype,
+                    aktivitetstype
                 )
             )
         }

@@ -16,9 +16,9 @@ Egenskap: Beregning av barnetilsyn med flere perioder
   Scenario: Varierende utgifter og inntekter, satsperiode og antall barn for 2022
 
     Gitt utgiftsperioder
-      | Fra måned | Til og med måned | Beløp | Antall barn |
-      | 01.2022   | 07.2022          | 100   | 1           |
-      | 08.2022   | 12.2022          | 20    | 1           |
+      | Fra måned | Til og med måned | Beløp | Antall barn | Vedtaksperiode | Aktivitet |
+      | 01.2022   | 07.2022          | 100   | 1           | ORDINÆR        | I_ARBEID  |
+      | 08.2022   | 12.2022          | 20    | 1           | ORDINÆR        | I_ARBEID  |
 
     Og kontantstøtteperioder
       | Fra måned | Til og med måned | Beløp |

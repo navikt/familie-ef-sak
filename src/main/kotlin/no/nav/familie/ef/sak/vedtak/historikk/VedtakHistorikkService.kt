@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
@@ -159,7 +160,10 @@ class VedtakHistorikkService(
             .slåSammen { a, b ->
                 sammenhengende(a, b) &&
                     a.andel.barn.toSet() == b.andel.barn.toSet() &&
-                    a.andel.utgifter.compareTo(b.andel.utgifter) == 0
+                    a.andel.utgifter.compareTo(b.andel.utgifter) == 0 &&
+                    a.aktivitetBarnetilsyn == b.aktivitetBarnetilsyn &&
+                    a.periodetypeBarnetilsyn == b.periodetypeBarnetilsyn &&
+                    a.periodetypeBarnetilsyn != PeriodetypeBarnetilsyn.SANKSJON_1_MND
             }
             .fraDato(fra)
             .map {
@@ -169,7 +173,9 @@ class VedtakHistorikkService(
                     periode = it.andel.periode,
                     barn = it.andel.barn.map { barnId -> barnMap[barnId] ?: error("Fant ikke match for barn=$barnId") },
                     utgifter = it.andel.utgifter.toInt(),
-                    erMidlertidigOpphør = false
+                    erMidlertidigOpphør = false,
+                    aktivitetstype = it.aktivitetBarnetilsyn,
+                    periodetype = it.periodetypeBarnetilsyn
                 )
             }
     }

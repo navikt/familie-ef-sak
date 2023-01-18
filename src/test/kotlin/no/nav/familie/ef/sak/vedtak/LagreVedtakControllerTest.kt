@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
@@ -79,7 +80,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                         periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn,
-                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 ),
                 begrunnelse = ""
@@ -121,7 +123,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                         periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn,
-                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 ),
                 begrunnelse = ""
@@ -207,7 +210,9 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
             barn = listOf(barn.id),
             utgifter = 2500,
-            erMidlertidigOpphør = false
+            erMidlertidigOpphør = false,
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
         )
         return utgiftsperiode
     }
