@@ -377,8 +377,7 @@ class StepDefinitions {
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 
-            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
-                ?: error("Fant ingen andel med startdato $fraOgMed, forventer: $gjeldendeAndelerTilkjentYtelse")
+            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse[index]
 
             try {
                 assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
