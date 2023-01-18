@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
@@ -19,6 +22,7 @@ import java.util.UUID
 @Service
 class BehandlingPåVentService(
     private val behandlingService: BehandlingService,
+    private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
     private val nullstillVedtakService: NullstillVedtakService,
     private val featureToggleService: FeatureToggleService
@@ -31,13 +35,16 @@ class BehandlingPåVentService(
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.SATT_PÅ_VENT)
+        opprettHistorikkInnslag(behandling, StegUtfall.SATT_PÅ_VENT)
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
     }
 
     @Transactional
     fun taAvVent(behandlingId: UUID) {
-        val kanTaAvVent = kanTaAvVent(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val kanTaAvVent = kanTaAvVent(behandling)
         behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+        opprettHistorikkInnslag(behandling, StegUtfall.TATT_AV_VENT)
         when (kanTaAvVent.status) {
             TaAvVentStatus.OK -> {}
             TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES ->
@@ -57,8 +64,17 @@ class BehandlingPåVentService(
         taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
 
+    private fun opprettHistorikkInnslag(behandling: Behandling, stegUtfall: StegUtfall) {
+        behandlingshistorikkService.opprettHistorikkInnslag(behandling.id, behandling.steg, stegUtfall, null)
+    }
+
     fun kanTaAvVent(behandlingId: UUID): TaAvVentStatusDto {
         val behandling = behandlingService.hentBehandling(behandlingId)
+        return kanTaAvVent(behandling)
+    }
+
+    private fun kanTaAvVent(behandling: Behandling): TaAvVentStatusDto {
+
         brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
             "Kan ikke ta behandling med status ${behandling.status} av vent"
         }
