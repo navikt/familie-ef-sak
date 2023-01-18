@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -91,6 +92,18 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         brukerfeilHvis((kontantstøttePerioder.harPeriodeFør(innføringsMndKontantstøttefradrag))) {
             "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
         }
+
+        /*
+        TODO legg till etter at frontend er merget
+        brukerfeilHvis(utgiftsperioderDto.any { it.periodetype == null }) {
+            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere periodetyper"
+        }
+
+        brukerfeilHvis(utgiftsperioderDto.any{ it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR && it.aktivitetstype == null }) {
+            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
+        }
+        */
+
     }
 
     private fun harUrelevantReduksjonsPeriode(
@@ -138,20 +151,26 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.periode.fom
     while (måned <= this.periode.tom) {
-        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal()))
+        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal(), this.aktivitetstype, this.periodetype))
         måned = måned.plusMonths(1)
     }
     return perioder
 }
 
 /**
- * Merger sammenhengende perioder hvor beløp og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
+ * Merger sammenhengende perioder hvor beløp, aktivitetstype, periodetype og
+ * @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     val sortertPåDatoListe = this.sortedBy { it.periode }
+        .filter { it.periodetype == null || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
-        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
+        if (
+            last != null && last.hengerSammenMed(entry) &&
+            last.sammeBeløpOgBeregningsgrunnlag(entry) &&
+            last.sammeAktivitet(entry)
+        ) {
             acc.removeLast()
             acc.add(
                 last.copy(
@@ -165,10 +184,11 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     }
 }
 
-fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto): Boolean {
-    return this.periode påfølgesAv other.periode
-}
+fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto) = this.periode påfølgesAv other.periode
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
     this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
+
+fun BeløpsperiodeBarnetilsynDto.sammeAktivitet(other: BeløpsperiodeBarnetilsynDto) =
+    this.aktivitetstype == other.aktivitetstype

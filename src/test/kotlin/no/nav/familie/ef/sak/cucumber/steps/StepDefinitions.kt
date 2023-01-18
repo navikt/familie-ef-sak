@@ -241,6 +241,7 @@ class StepDefinitions {
             // kan ikke beregne historikk ennå
             if (stønadstype != StønadType.SKOLEPENGER) {
                 beregnetAndelHistorikkList = AndelHistorikkBeregner.lagHistorikk(
+                    stønadstype,
                     tilkjentYtelser.values.toList(),
                     lagredeVedtak,
                     saksbehandlinger.values.map { it.first }.toList(),
@@ -377,22 +378,21 @@ class StepDefinitions {
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
 
-            val gjelendeAndel = gjeldendeAndelerTilkjentYtelse.find { it.stønadFom == fraOgMed }
-                ?: error("Fant ingen andel med startdato $fraOgMed, forventer: $gjeldendeAndelerTilkjentYtelse")
+            val gjeldendeAndel = gjeldendeAndelerTilkjentYtelse[index]
 
             try {
-                assertThat(fraOgMed).isEqualTo(gjelendeAndel.stønadFom)
-                assertThat(tilOgMed).isEqualTo(gjelendeAndel.stønadTom)
+                assertThat(fraOgMed).isEqualTo(gjeldendeAndel.stønadFom)
+                assertThat(tilOgMed).isEqualTo(gjeldendeAndel.stønadTom)
                 beløpMellom?.let {
-                    assertThat(gjelendeAndel.beløp)
+                    assertThat(gjeldendeAndel.beløp)
                         .isGreaterThanOrEqualTo(it.first)
                         .isLessThanOrEqualTo(it.second)
                 }
-                beløp?.let { assertThat(gjelendeAndel.beløp).isEqualTo(it) }
-                assertThat(kildeBehandlingId).isEqualTo(gjelendeAndel.kildeBehandlingId)
+                beløp?.let { assertThat(gjeldendeAndel.beløp).isEqualTo(it) }
+                assertThat(kildeBehandlingId).isEqualTo(gjeldendeAndel.kildeBehandlingId)
             } catch (e: Throwable) {
                 logger.info("Expected: {}", rad)
-                logger.info("Actual: {}", gjelendeAndel)
+                logger.info("Actual: {}", gjeldendeAndel)
                 throw Throwable("Feilet rad $index", e)
             }
         }
@@ -559,9 +559,9 @@ class StepDefinitions {
         forventetHistorikkEndring.periodeType?.let {
             assertThat(beregnetAndelHistorikk.periodeType).isEqualTo(it)
         }
-        forventetHistorikkEndring.aktivitetType?.let {
-            assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(it)
-        }
+        assertThat(beregnetAndelHistorikk.periodetypeBarnetilsyn).isEqualTo(forventetHistorikkEndring.periodeTypeBarnetilsyn)
+        assertThat(beregnetAndelHistorikk.aktivitet).isEqualTo(forventetHistorikkEndring.aktivitetType)
+        assertThat(beregnetAndelHistorikk.aktivitetBarnetilsyn).isEqualTo(forventetHistorikkEndring.aktivitetTypeBarnetilsyn)
 
         forventetHistorikkEndring.vedtaksdato?.let {
             assertThat(beregnetAndelHistorikk.vedtakstidspunkt.toLocalDate()).isEqualTo(it)

@@ -50,10 +50,20 @@ data class UtgiftsperiodeDto(
     val utgifter: Int,
     val erMidlertidigOpphør: Boolean,
     val sanksjonsårsak: Sanksjonsårsak? = null,
-    val periodetype: PeriodetypeBarnetilsyn? = null, // Skal bli non-nullable
-    val aktivitetstype: AktivitetstypeBarnetilsyn? = null
-)
+    val periodetype: PeriodetypeBarnetilsyn?, // TODO: Skal bli non-nullable
+    val aktivitetstype: AktivitetstypeBarnetilsyn?
+) {
+    /**
+     * TODO slett default verdi på PERIODETYPE og init
+     */
+    init {
+        feilHvis(periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND || sanksjonsårsak != null) {
+            "Har ikke støtte for sanksjon i utgiftsperiode ennå"
+        }
+    }
+}
 
+fun UtgiftsperiodeDto.erOpphørEllerSanksjon(): Boolean = this.periodetype == PeriodetypeBarnetilsyn.OPPHØR || this.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
 
 fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = map(UtgiftsperiodeDto::periode).erSammenhengende()
