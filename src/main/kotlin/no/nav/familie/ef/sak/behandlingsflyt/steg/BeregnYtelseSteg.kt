@@ -570,7 +570,8 @@ class BeregnYtelseSteg(
             vedtak.perioder
                 .filter { !it.erMidlertidigOpphør || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR },
             vedtak.perioderKontantstøtte,
-            vedtak.tilleggsstønad.perioder
+            vedtak.tilleggsstønad.perioder,
+            saksbehandling.erMigrering
         )
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
         return beløpsperioder

@@ -56,6 +56,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -301,7 +302,8 @@ class StepDefinitions {
 
                     assertThat(periode.barn).containsExactlyElementsOf(mapBarn(behandlingId, rad))
                     assertThat(periode.utgifter).isEqualTo(parseInt(VedtakDomenebegrep.UTGIFTER, rad))
-                    assertThat(periode.periodetype).isEqualTo(parsePeriodetypeBarnetilsyn(rad))
+                    val forventetPeriodetype = parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
+                    assertThat(periode.periodetype).isEqualTo(forventetPeriodetype)
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }

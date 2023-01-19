@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -215,6 +214,23 @@ class BeregningBarnetilsynServiceTest {
                 )
             }
             assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperioder mangler en eller flere aktivitetstyper")
+        }
+
+        @Test
+        internal fun `Migrering skal ikke kaste feil dersom aktivitetstype mangler`() {
+            val utgiftsperioder = listeMedEnUtgiftsperiode(
+                fra = mars2022,
+                til = april2022,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = null
+            )
+            val perioder = service.beregnYtelseBarnetilsyn(
+                utgiftsperioder = utgiftsperioder,
+                kontantstøttePerioder = listOf(),
+                tilleggsstønadsperioder = listOf(),
+                erMigrering = true
+            )
+            assertThat(perioder).hasSize(1)
         }
     }
 

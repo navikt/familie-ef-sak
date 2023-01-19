@@ -20,9 +20,10 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
     fun beregnYtelseBarnetilsyn(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
+        erMigrering: Boolean = false
     ): List<BeløpsperiodeBarnetilsynDto> {
-        validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
+        validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder, erMigrering)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
         val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
@@ -62,7 +63,8 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
     private fun validerGyldigePerioder(
         utgiftsperioderDto: List<UtgiftsperiodeDto>,
         kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
-        tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>
+        tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>,
+        erMigrering: Boolean
     ) {
         val utgiftsperioder = utgiftsperioderDto.tilPerioder()
         val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
@@ -97,7 +99,9 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
             "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
         }
 
-        brukerfeilHvis(utgiftsperioderDto.any { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR && it.aktivitetstype == null }) {
+        val manglerAktivitetstype =
+            utgiftsperioderDto.any { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR && it.aktivitetstype == null }
+        brukerfeilHvis(!erMigrering && manglerAktivitetstype) {
             "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
         }
     }
@@ -160,7 +164,7 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     val sortertPåDatoListe = this.sortedBy { it.periode }
-        .filter { it.periodetype == null || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
+        .filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
         if (
