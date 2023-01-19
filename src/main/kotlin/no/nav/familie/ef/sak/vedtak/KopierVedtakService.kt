@@ -88,9 +88,8 @@ class KopierVedtakService(
                 periode = it.andel.periode,
                 barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false,
                 sanksjonsårsak = null,
-                periodetype = it.periodetypeBarnetilsyn,
+                periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
                 aktivitetstype = it.aktivitetBarnetilsyn
             )
         }
@@ -119,7 +118,6 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
                     periode = Månedsperiode(fom = denne.periode.tom.plusMonths(1), tom = neste.periode.fom.minusMonths(1)),
                     barn = emptyList(),
                     utgifter = 0,
-                    erMidlertidigOpphør = true,
                     sanksjonsårsak = null,
                     periodetype = PeriodetypeBarnetilsyn.OPPHØR,
                     aktivitetstype = null

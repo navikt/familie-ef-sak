@@ -36,7 +36,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -217,7 +216,6 @@ class MigreringService(
                     årMånedTil = periode.stønadsperiode.tom,
                     barn = behandlingBarn.map { it.id },
                     utgifter = periode.utgifterBarnetilsyn,
-                    erMidlertidigOpphør = false,
                     sanksjonsårsak = null,
                     periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
                     aktivitetstype = null

@@ -355,7 +355,6 @@ fun barnetilsynperiode(
     periode = Månedsperiode(fom, tom),
     utgifter = beløp,
     barn = barn,
-    erMidlertidigOpphør = false,
     sanksjonsårsak = sanksjonsårsak,
     periodetype = periodetype,
     aktivitet = aktivitetstype

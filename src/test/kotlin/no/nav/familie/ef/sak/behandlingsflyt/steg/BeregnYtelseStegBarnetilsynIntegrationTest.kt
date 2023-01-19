@@ -141,7 +141,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         til: YearMonth,
         barnId: List<UUID>,
         beløp: BigDecimal,
-        periodetype: PeriodetypeBarnetilsyn? = PeriodetypeBarnetilsyn.ORDINÆR,
+        periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID
     ) =
         UtgiftsperiodeDto(
@@ -150,7 +150,6 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
             Månedsperiode(fra, til),
             barnId,
             beløp.toInt(),
-            false,
             null,
             periodetype,
             aktivitetstype

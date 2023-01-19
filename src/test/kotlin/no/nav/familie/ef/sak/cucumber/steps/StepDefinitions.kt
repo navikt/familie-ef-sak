@@ -32,6 +32,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseFraOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parsePeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDato
@@ -300,7 +301,7 @@ class StepDefinitions {
 
                     assertThat(periode.barn).containsExactlyElementsOf(mapBarn(behandlingId, rad))
                     assertThat(periode.utgifter).isEqualTo(parseInt(VedtakDomenebegrep.UTGIFTER, rad))
-                    assertThat(periode.erMidlertidigOpphør).isEqualTo(false)
+                    assertThat(periode.periodetype).isEqualTo(parsePeriodetypeBarnetilsyn(rad))
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }

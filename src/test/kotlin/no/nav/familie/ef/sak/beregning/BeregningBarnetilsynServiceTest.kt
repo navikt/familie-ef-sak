@@ -203,21 +203,6 @@ class BeregningBarnetilsynServiceTest {
             assertThat(feil.message).contains("Tilleggsstønadsperioder")
         }
 
-        @Disabled // TODO fjern disabled når periodetype er non-nullable
-        @Test
-        internal fun `Skal kaste feil dersom periodetype ikke er valgt`() {
-            val utgiftsperiode = listeMedEnUtgiftsperiode(aktivitetstype = null, periodetype = null)
-            val ugyldigUtgiftsperiode = assertThrows<ApiFeil> {
-                service.beregnYtelseBarnetilsyn(
-                    utgiftsperioder = utgiftsperiode,
-                    kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = listOf()
-                )
-            }
-            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperiode mangler en eller flere periodetyper")
-        }
-
-        @Disabled // TODO fjern disabled når periodetype er non-nullable
         @Test
         internal fun `Skal kaste feil dersom aktivitetstype ikke er valgt og periodetype ikke er opphør eller sanksjon`() {
             val utgiftsperioder = listeMedEnUtgiftsperiode(aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, periodetype = PeriodetypeBarnetilsyn.ORDINÆR) +
@@ -617,10 +602,21 @@ class BeregningBarnetilsynServiceTest {
         fra: YearMonth = januar2022,
         til: YearMonth = februar2022,
         beløp: Int = 10,
-        periodetype: PeriodetypeBarnetilsyn? = PeriodetypeBarnetilsyn.ORDINÆR,
+        periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
         barn: List<UUID>? = null
     ): List<UtgiftsperiodeDto> {
-        return listOf(UtgiftsperiodeDto(fra, til, Månedsperiode(fra, til), barn ?: listOf(UUID.randomUUID()), beløp, false, null, periodetype, aktivitetstype))
+        return listOf(
+            UtgiftsperiodeDto(
+                årMånedFra = fra,
+                årMånedTil = til,
+                periode = Månedsperiode(fra, til),
+                barn = barn ?: listOf(UUID.randomUUID()),
+                utgifter = beløp,
+                sanksjonsårsak = null,
+                periodetype = periodetype,
+                aktivitetstype = aktivitetstype
+            )
+        )
     }
 }

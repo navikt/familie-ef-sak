@@ -83,12 +83,15 @@ internal class KopierVedtakServiceTest {
         every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf(historiskBehandlingsbarn)
         every { vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN) } returns revurdering.id
         every { vedtakService.hentVedtak(forrigeBehandling.id) } returns vedtak(forrigeBehandling.id, ResultatType.INNVILGE).copy(tilleggsstønad = TilleggsstønadWrapper(false, listOf(), "Testbegrunnelse tilleggsstønad"))
-        every { vedtakService.hentVedtak(not(forrigeBehandling.id)) } returns vedtak(UUID.randomUUID(), ResultatType.INNVILGE).copy(
-            barnetilsyn = BarnetilsynWrapper(
-                listOf(Barnetilsynperiode(periode = Månedsperiode(YearMonth.now()), erMidlertidigOpphør = false, utgifter = 1000, barn = listOf(), periodetype = PeriodetypeBarnetilsyn.ORDINÆR)),
-                "begrunnelse"
-            )
+        val barnetilsynperiode = Barnetilsynperiode(
+            periode = Månedsperiode(YearMonth.now()),
+            utgifter = 1000,
+            barn = listOf(),
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR
         )
+        every { vedtakService.hentVedtak(not(forrigeBehandling.id)) } returns
+            vedtak(UUID.randomUUID(), ResultatType.INNVILGE)
+                .copy(barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode), "begrunnelse"))
     }
 
     @Test
@@ -170,7 +173,7 @@ internal class KopierVedtakServiceTest {
         assertThat(vedtakDto.perioder).hasSize(3)
         assertThat(vedtakDto.perioder[1].utgifter).isEqualTo(0)
         assertThat(vedtakDto.perioder[1].barn).hasSize(0)
-        assertThat(vedtakDto.perioder[1].erMidlertidigOpphør).isEqualTo(true)
+        assertThat(vedtakDto.perioder[1].periodetype).isEqualTo(PeriodetypeBarnetilsyn.OPPHØR)
         assertThat(vedtakDto.perioder.erSammenhengende()).isTrue
     }
 }

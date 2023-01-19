@@ -99,10 +99,10 @@ Egenskap: Beregn ytelse steg for innvilget vedtak for barnetilsyn
 
   Scenario: Innvilget revurdering med periode med reduserte utgifter
     Og følgende vedtak for barnetilsyn
-      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Er midlertidig opphør | Vedtaksperiode | Aktivitet |
-      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 07.2021         | Nei                   | ORDINÆR        | I_ARBEID  |
-      | 2            | INNVILGE        |             |          | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 02.2021         | Ja                    | ORDINÆR        | I_ARBEID  |
-      | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 03.2021         | 07.2021         | Nei                   | ORDINÆR        | I_ARBEID  |
+      | BehandlingId | Vedtaksresultat | Antall barn | Utgifter | Arbeid aktivitet          | Fra og med dato | Til og med dato | Vedtaksperiode | Aktivitet |
+      | 1            | INNVILGE        | 1           | 200      | ETABLERER_EGEN_VIRKSOMHET | 01.2021         | 07.2021         | ORDINÆR        | I_ARBEID  |
+      | 2            | INNVILGE        |             |          | ETABLERER_EGEN_VIRKSOMHET | 02.2021         | 02.2021         | OPPHØR         | I_ARBEID  |
+      | 2            | INNVILGE        | 2           | 350      | ETABLERER_EGEN_VIRKSOMHET | 03.2021         | 07.2021         | ORDINÆR        | I_ARBEID  |
 
     Når beregner ytelse
 

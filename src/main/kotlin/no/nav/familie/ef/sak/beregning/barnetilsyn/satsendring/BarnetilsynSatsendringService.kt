@@ -3,8 +3,6 @@ package no.nav.familie.ef.sak.beregning.barnetilsyn.satsendring
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.tilBeløpsperioderPerUtgiftsmåned
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
-import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
@@ -94,9 +92,8 @@ class BarnetilsynSatsendringService(
                 periode = it.andel.periode,
                 barn = it.andel.barn,
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false,
                 sanksjonsårsak = null,
-                periodetype = it.periodetypeBarnetilsyn,
+                periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
                 aktivitetstype = it.aktivitetBarnetilsyn
             ) // TODO sjekk erMidlertidigOpphør???...
         }
