@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringReque
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,17 +45,7 @@ internal class AutomatiskJournalføringControllerTest {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns false
         val feil = assertThrows<Feil> { automatiskJournalføringController.automatiskJournalfør(request) }
 
-        Assertions.assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
-    }
-
-    @Test
-    internal fun `skal feile hvis en annen applikasjon enn familie-ef-mottak kaller på sjekk av førstegangsbehandling kan opprettes`() {
-        every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns false
-        val feil = assertThrows<Feil> {
-            automatiskJournalføringController.kanOppretteFørstegangsbehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
-        }
-
-        Assertions.assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
+        assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
     @Test
@@ -64,7 +55,7 @@ internal class AutomatiskJournalføringControllerTest {
             automatiskJournalføringController.kanOppretteBehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
         }
 
-        Assertions.assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
+        assertThat(feil.httpStatus).isEqualTo(HttpStatus.UNAUTHORIZED)
     }
 
     @Test
@@ -78,8 +69,6 @@ internal class AutomatiskJournalføringControllerTest {
     @Test
     internal fun `skal kunne sjekke om førstegangsbehandling kan opprettes hvis kallet kommer fra familie-ef-mottak`() {
         every { SikkerhetContext.kallKommerFraFamilieEfMottak() } returns true
-        automatiskJournalføringController.kanOppretteFørstegangsbehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
-        verify { automatiskJournalføringService.kanOppretteFørstegangsbehandling(any(), any()) }
         automatiskJournalføringController.kanOppretteBehandling(PersonIdent("12345678901"), OVERGANGSSTØNAD)
         verify { automatiskJournalføringService.kanOppretteBehandling(any(), any()) }
     }
