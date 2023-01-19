@@ -164,3 +164,104 @@ Egenskap: Andelhistorikk: Sanksjon
       | 2            | 02.2021         | 02.2021         |              |                       | SANKSJON       | 01.02.2021  |
       | 2            | 03.2021         | 03.2021         | FJERNET      | 3                     |                | 01.02.2021  |
       | 3            | 03.2021         | 03.2021         |              |                       |                | 01.03.2021  |
+
+  Scenario: 2 sanksjoner revurderer før begge og begge fjernes
+
+    Gitt følgende behandlinger for Overgangsstønad
+      | BehandlingId | Behandlingstype       | Vedtaksdato |
+      | 1            | FØRSTEGANGSBEHANDLING | 01.01.2021  |
+      | 2            | REVURDERING           | 01.02.2021  |
+      | 3            | REVURDERING           | 01.03.2021  |
+      | 4            | REVURDERING           | 01.04.2021  |
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Vedtaksperiode | Sanksjonsårsak    |
+      | 1            | 01.2021         | 01.2021         | INNVILGE        |                |                   |
+      | 2            | 02.2021         | 02.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 3            | 03.2021         | 03.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 4            | 01.2021         | 01.2021         | INNVILGE        |                |                   |
+
+    Når beregner ytelse
+
+    Så forvent følgende historikk
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Vedtaksperiode | Vedtaksdato |
+      | 1            | 01.2021         | 01.2021         | FJERNET      | 4                     |                | 01.01.2021  |
+      | 4            | 01.2021         | 01.2021         |              |                       |                | 01.04.2021  |
+      | 2            | 02.2021         | 02.2021         | FJERNET      | 4                     | SANKSJON       | 01.02.2021  |
+      | 3            | 03.2021         | 03.2021         | FJERNET      | 4                     | SANKSJON       | 01.03.2021  |
+
+  Scenario: 2 sanksjoner der siste blir revurder og fjernet
+
+    Gitt følgende behandlinger for Overgangsstønad
+      | BehandlingId | Behandlingstype       | Vedtaksdato |
+      | 1            | FØRSTEGANGSBEHANDLING | 01.01.2021  |
+      | 2            | REVURDERING           | 01.02.2021  |
+      | 3            | REVURDERING           | 01.03.2021  |
+      | 4            | REVURDERING           | 01.04.2021  |
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Vedtaksperiode | Sanksjonsårsak    |
+      | 1            | 01.2021         | 01.2021         | INNVILGE        |                |                   |
+      | 2            | 02.2021         | 02.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 3            | 03.2021         | 03.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 4            | 03.2021         | 03.2021         | INNVILGE        |                |                   |
+
+    Når beregner ytelse
+
+    Så forvent følgende historikk
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Vedtaksperiode | Vedtaksdato |
+      | 1            | 01.2021         | 01.2021         |              |                       |                | 01.01.2021  |
+      | 2            | 02.2021         | 02.2021         |              |                       | SANKSJON       | 01.02.2021  |
+      | 3            | 03.2021         | 03.2021         | ERSTATTET    | 4                     | SANKSJON       | 01.03.2021  |
+      | 4            | 03.2021         | 03.2021         |              |                       |                | 01.04.2021  |
+
+  Scenario: 2 sanksjoner, revurderer fra datot på første sanksjonen og begge fjernes
+
+    Gitt følgende behandlinger for Overgangsstønad
+      | BehandlingId | Behandlingstype       | Vedtaksdato |
+      | 1            | FØRSTEGANGSBEHANDLING | 01.01.2021  |
+      | 2            | REVURDERING           | 01.02.2021  |
+      | 3            | REVURDERING           | 01.03.2021  |
+      | 4            | REVURDERING           | 01.04.2021  |
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Vedtaksperiode | Sanksjonsårsak    |
+      | 1            | 01.2021         | 01.2021         | INNVILGE        |                |                   |
+      | 2            | 02.2021         | 02.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 3            | 03.2021         | 03.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 4            | 02.2021         | 02.2021         | INNVILGE        |                |                   |
+
+    Når beregner ytelse
+
+    Så forvent følgende historikk
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Vedtaksperiode | Vedtaksdato |
+      | 1            | 01.2021         | 01.2021         |              |                       |                | 01.01.2021  |
+      | 2            | 02.2021         | 02.2021         | ERSTATTET    | 4                     | SANKSJON       | 01.02.2021  |
+      | 4            | 02.2021         | 02.2021         |              |                       |                | 01.04.2021  |
+      | 3            | 03.2021         | 03.2021         | FJERNET      | 4                     | SANKSJON       | 01.03.2021  |
+
+  Scenario: 2 sanksjoner med revurdering fra første der andre beholdes
+
+    Gitt følgende behandlinger for Overgangsstønad
+      | BehandlingId | Behandlingstype       | Vedtaksdato |
+      | 1            | FØRSTEGANGSBEHANDLING | 01.01.2021  |
+      | 2            | REVURDERING           | 01.02.2021  |
+      | 3            | REVURDERING           | 01.03.2021  |
+      | 4            | REVURDERING           | 01.04.2021  |
+
+    Gitt følgende vedtak
+      | BehandlingId | Fra og med dato | Til og med dato | Vedtaksresultat | Vedtaksperiode | Sanksjonsårsak    |
+      | 1            | 01.2021         | 01.2021         | INNVILGE        |                |                   |
+      | 2            | 02.2021         | 02.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 3            | 03.2021         | 03.2021         | SANKSJONERE     | SANKSJON       | SAGT_OPP_STILLING |
+      | 4            | 02.2021         | 02.2021         | INNVILGE        |                |                   |
+      | 4            | 03.2021         | 03.2021         | INNVILGE        | SANKSJON       | SAGT_OPP_STILLING |
+
+    Når beregner ytelse
+
+    Så forvent følgende historikk
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Vedtaksperiode | Vedtaksdato |
+      | 1            | 01.2021         | 01.2021         |              |                       |                | 01.01.2021  |
+      | 2            | 02.2021         | 02.2021         | ERSTATTET    | 4                     | SANKSJON       | 01.02.2021  |
+      | 4            | 02.2021         | 02.2021         |              |                       |                | 01.04.2021  |
+      | 3            | 03.2021         | 03.2021         |              |                       | SANKSJON       | 01.03.2021  |
