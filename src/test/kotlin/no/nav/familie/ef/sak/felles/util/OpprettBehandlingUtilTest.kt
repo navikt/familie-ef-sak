@@ -57,6 +57,32 @@ internal class OpprettBehandlingUtilTest {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
             }.hasMessage("Kan ikke opprette en førstegangsbehandling når siste behandling ikke er henlagt")
         }
+
+        @Test
+        fun `det skal ikke være mulig å opprette en førstegangsbehandling når det finnes en behandling på vent`() {
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.IKKE_SATT,
+                status = BehandlingStatus.SATT_PÅ_VENT
+            )
+
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
+
+        @Test
+        fun `det skal ikke være mulig å opprette en revurdering når det finnes en førstegangsbehandling på vent`() {
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.IKKE_SATT,
+                status = BehandlingStatus.SATT_PÅ_VENT
+            )
+
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
     }
 
     @Nested
@@ -92,7 +118,8 @@ internal class OpprettBehandlingUtilTest {
                 ),
                 behandling(
                     fagsak = fagsak,
-                    status = BehandlingStatus.SATT_PÅ_VENT
+                    status = BehandlingStatus.SATT_PÅ_VENT,
+                    type = BehandlingType.REVURDERING
                 )
             )
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger)
