@@ -188,6 +188,7 @@ object AndelHistorikkBeregner {
         val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
         if (vedtaksperiode !is Sanksjonsperiode && vedtaksperiode !is Opphørsperiode && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
             historikk.filter { it.andel.stønadFom > andel.stønadFom }
+                .filterNot { it.vedtaksperiode is Sanksjonsperiode }
                 .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
                 .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelseMedVedtakstidspunkt) }
         }
