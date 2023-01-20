@@ -22,8 +22,7 @@ Egenskap: Andelhistorikk: Sanksjon
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato |
       | 1            | ERSTATTET    | 3                     | 0       | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
       | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 01.2022         | 02.2022         |
-      | 2            | FJERNET      | 3                     | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
+      | 2            |              |                       | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
 
   Scenario: Revurderer en periode som inneholder sanksjon, med innvilget periode etterpå
 
@@ -46,6 +45,5 @@ Egenskap: Andelhistorikk: Sanksjon
       | BehandlingId | Endringstype | Endret i behandlingId | Inntekt | Vedtaksperiode | Aktivitet            | Fra og med dato | Til og med dato |
       | 1            | ERSTATTET    | 3                     | 0       | HOVEDPERIODE   | BARN_UNDER_ETT_ÅR    | 01.2022         | 02.2022         |
       | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 01.2022         | 02.2022         |
-      | 2            | FJERNET      | 3                     | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
-      | 3            |              |                       | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
+      | 2            |              |                       | 0       | SANKSJON       | IKKE_AKTIVITETSPLIKT | 03.2022         | 03.2022         |
       | 3            |              |                       | 0       | HOVEDPERIODE   | FORSØRGER_I_ARBEID   | 04.2022         | 04.2022         |

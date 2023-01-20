@@ -147,6 +147,17 @@ internal class BehandlingPåVentServiceTest {
             assertThat(kanTaAvVent.status).isEqualTo(TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
             assertThat(kanTaAvVent.nyForrigeBehandlingId).isEqualTo(null)
         }
+
+        @Test
+        internal fun `skal kunne ta av vent når en annen behandling er på vent`() {
+            mockHentBehandling(BehandlingStatus.SATT_PÅ_VENT, forrigeBehandlingId = UUID.randomUUID())
+            mockHentBehandlinger(behandling(fagsak, status = BehandlingStatus.SATT_PÅ_VENT))
+
+            val kanTaAvVent = behandlingPåVentService.kanTaAvVent(behandlingId)
+
+            assertThat(kanTaAvVent.status).isEqualTo(TaAvVentStatus.OK)
+            assertThat(kanTaAvVent.nyForrigeBehandlingId).isEqualTo(null)
+        }
     }
 
     @Nested

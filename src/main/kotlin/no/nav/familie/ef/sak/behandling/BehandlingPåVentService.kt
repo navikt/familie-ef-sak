@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatus
 import no.nav.familie.ef.sak.behandling.dto.TaAvVentStatusDto
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
@@ -34,7 +35,7 @@ class BehandlingPåVentService(
             "Kan ikke sette behandling med status ${behandling.status} på vent"
         }
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.SATT_PÅ_VENT)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId, SATT_PÅ_VENT)
         opprettHistorikkInnslag(behandling, StegUtfall.SATT_PÅ_VENT)
         taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
     }
@@ -75,12 +76,12 @@ class BehandlingPåVentService(
 
     private fun kanTaAvVent(behandling: Behandling): TaAvVentStatusDto {
 
-        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+        brukerfeilHvis(behandling.status != SATT_PÅ_VENT) {
             "Kan ikke ta behandling med status ${behandling.status} av vent"
         }
 
         val behandlinger = behandlingService.hentBehandlinger(behandling.fagsakId)
-        if (behandlinger.any { it.id != behandling.id && !it.erAvsluttet() }) {
+        if (behandlinger.any { it.id != behandling.id && it.status != SATT_PÅ_VENT && !it.erAvsluttet() }) {
             return TaAvVentStatusDto(TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES)
         }
         val sisteIverksatte = behandlingService.finnSisteIverksatteBehandling(behandling.fagsakId)
