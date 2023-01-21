@@ -30,7 +30,7 @@ data class AndelHistorikkDto(
     val saksbehandler: String,
     val andel: AndelMedGrunnlagDto,
     val aktivitet: AktivitetType?,
-    val aktivitetBarnetilsyn: AktivitetstypeBarnetilsyn?, //TODO: Skal bli non-nullable
+    val aktivitetBarnetilsyn: AktivitetstypeBarnetilsyn?, // TODO: Skal bli non-nullable
     val aktivitetArbeid: SvarId?,
     val periodeType: VedtaksperiodeType?,
     val periodetypeBarnetilsyn: PeriodetypeBarnetilsyn?,
