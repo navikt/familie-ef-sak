@@ -103,7 +103,6 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
             "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
         }
         */
-
     }
 
     private fun harUrelevantReduksjonsPeriode(

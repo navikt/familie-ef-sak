@@ -41,7 +41,7 @@ internal class VedtakHistorikkBeregnerTest {
             andreVedtak.behandlingId,
             listOf(
                 førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk(),
-                Opphørsperiode(Månedsperiode(opphørFom)),
+                Opphørsperiode(Månedsperiode(opphørFom))
             )
         )
     }

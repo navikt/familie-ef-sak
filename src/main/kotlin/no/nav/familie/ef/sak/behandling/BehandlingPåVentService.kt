@@ -75,7 +75,6 @@ class BehandlingPåVentService(
     }
 
     private fun kanTaAvVent(behandling: Behandling): TaAvVentStatusDto {
-
         brukerfeilHvis(behandling.status != SATT_PÅ_VENT) {
             "Kan ikke ta behandling med status ${behandling.status} av vent"
         }
