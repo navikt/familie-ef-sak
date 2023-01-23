@@ -54,6 +54,7 @@ data class UtgiftsperiodeDto(
 ) {
 
     val erMidlertidigOpphør get() = periodetype == PeriodetypeBarnetilsyn.OPPHØR
+
     /**
      * TODO slett default verdi på PERIODETYPE og init
      */
