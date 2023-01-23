@@ -1951,7 +1951,8 @@ internal class BeregnYtelseStegTest {
                 barn = if (it.utgifter > 0) it.barn else emptyList(),
                 utgifter = it.utgifter,
                 periodetype = if (it.utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
-                aktivitetstype = if (it.utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
+                aktivitetstype = if (it.utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID,
+                sanksjonsårsak = null
             )
         },
         perioderKontantstøtte = emptyList(),

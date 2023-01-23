@@ -48,7 +48,7 @@ data class UtgiftsperiodeDto(
     ),
     val barn: List<UUID>,
     val utgifter: Int,
-    val sanksjonsårsak: Sanksjonsårsak? = null, // TODO IKKE SETT DEFAULT NULL?
+    val sanksjonsårsak: Sanksjonsårsak?,
     val periodetype: PeriodetypeBarnetilsyn,
     val aktivitetstype: AktivitetstypeBarnetilsyn?
 ) {

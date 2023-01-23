@@ -211,7 +211,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             barn = listOf(barn.id),
             utgifter = 2500,
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+            sanksjonsårsak = null
         )
         return utgiftsperiode
     }
