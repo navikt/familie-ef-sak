@@ -97,7 +97,9 @@ private fun VedtaksperiodeMedSanksjonsårsak.validerSanksjon1Måned() {
 enum class PeriodetypeBarnetilsyn {
     ORDINÆR,
     OPPHØR,
-    SANKSJON_1_MND
+    SANKSJON_1_MND;
+
+    fun midlertidigOpphørEllerSanksjon() = this == OPPHØR || this == SANKSJON_1_MND
 }
 
 enum class AktivitetstypeBarnetilsyn {

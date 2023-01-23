@@ -1576,6 +1576,27 @@ internal class BeregnYtelseStegTest {
                 )
             }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
         }
+
+        @Test
+        internal fun `må sende inn lik sanksjonsårsak for barnetilsyn`() {
+            mockHistorikk(
+                andelhistorikkInnvilget(startMåned, startMåned),
+                andelhistorikkSanksjon(sankskjonsMåned)
+            )
+
+            assertThatThrownBy {
+                utførSteg(
+                    lagSaksbehandling(stønadType = StønadType.BARNETILSYN, type = BehandlingType.REVURDERING),
+                    innvilgetBarnetilsyn(
+                        startMåned,
+                        startMåned,
+                        utgifter = 0,
+                        periodeType = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
+                        sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
+                    )
+                )
+            }.hasMessageContaining("Nye eller endrede sanksjonsperioder ")
+        }
     }
 
     @Nested
@@ -1746,7 +1767,7 @@ internal class BeregnYtelseStegTest {
                 innvilgetBarnetilsyn(andelFom, andelTom, barn, utgifter = 0, PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
-        assertThat(feil.feil).contains("Kan ikke ta med barn på en periode som er et midlertidig opphør, på behandling=")
+        assertThat(feil.feil).contains("Kan ikke ta med barn på en periode som er et midlertidig opphør eller sanksjon, på behandling=")
     }
 
     @Test
@@ -1766,7 +1787,27 @@ internal class BeregnYtelseStegTest {
                 innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
-        assertThat(feil.feil).contains("kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør, på behandling=")
+        assertThat(feil.feil).contains("Kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør eller sanksjon, på behandling=")
+    }
+
+    @Test
+    internal fun `skal ikke kunne lagre andel som er sanksjon dersom det finnes en utgift større enn null på andelen`() {
+        val andelFom = LocalDate.of(2022, 1, 1)
+        val andelTom = LocalDate.of(2022, 1, 31)
+
+        every { barnService.finnBarnPåBehandling(any()) } returns identerTilBehandlingBarn(emptyList())
+
+        val feil: ApiFeil = assertThrows {
+            utførSteg(
+                saksbehandling(
+                    fagsak = fagsak(stønadstype = StønadType.BARNETILSYN),
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    forrigeBehandlingId = null
+                ),
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.SANKSJON_1_MND)
+            )
+        }
+        assertThat(feil.feil).contains("Kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør eller sanksjon, på behandling=")
     }
 
     @Test
@@ -1786,7 +1827,7 @@ internal class BeregnYtelseStegTest {
                 innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
-        assertThat(feil.feil).contains("Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=")
+        assertThat(feil.feil).contains("Første periode kan ikke være en opphørsperiode, på førstegangsbehandling=")
     }
 
     @Test
@@ -1864,23 +1905,34 @@ internal class BeregnYtelseStegTest {
             periodeBegrunnelse = "null"
         )
 
+    @Deprecated("Bruk metode med YearMonth")
     private fun innvilgetBarnetilsyn(
         startDato: LocalDate,
         sluttDato: LocalDate,
         barn: List<UUID>? = null,
         utgifter: Int? = null,
         periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR
+    ) = innvilgetBarnetilsyn(YearMonth.from(startDato), YearMonth.from(sluttDato), barn, utgifter, periodeType)
+
+    private fun innvilgetBarnetilsyn(
+        startDato: YearMonth,
+        sluttDato: YearMonth,
+        barn: List<UUID>? = null,
+        utgifter: Int? = 2500,
+        periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        sanksjonsårsak: Sanksjonsårsak? = null
     ) =
         InnvilgelseBarnetilsyn(
             perioder = listOf(
                 UtgiftsperiodeDto(
-                    årMånedFra = YearMonth.from(startDato),
-                    årMånedTil = YearMonth.from(sluttDato),
-                    periode = Månedsperiode(YearMonth.from(startDato), YearMonth.from(sluttDato)),
+                    årMånedFra = startDato,
+                    årMånedTil = sluttDato,
+                    periode = Månedsperiode(startDato, sluttDato),
                     barn = barn ?: emptyList(),
                     utgifter = utgifter ?: 2500,
                     periodetype = periodeType,
-                    aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
+                    aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID,
+                    sanksjonsårsak = sanksjonsårsak
                 )
             ),
             perioderKontantstøtte = emptyList(),
@@ -1959,7 +2011,7 @@ internal class BeregnYtelseStegTest {
             erSanksjon = true,
             sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING,
             erOpphør = false,
-            periodetypeBarnetilsyn = null,
+            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.SANKSJON_1_MND,
             aktivitetBarnetilsyn = null
         )
 

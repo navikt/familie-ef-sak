@@ -120,7 +120,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val feil: ApiFeil = assertThrows {
             innvilge(saksbehandling, listOf(utgiftsperiode))
         }
-        assertThat(feil.feil).contains("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør, på behandling=")
+        assertThat(feil.feil).contains("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon, på behandling=")
     }
 
     fun settBehandlingTilIverksatt(behandling: Behandling) {
