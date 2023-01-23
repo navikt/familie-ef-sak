@@ -23,7 +23,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FØRSTEGANGSBEHANDLING,
-        Toggle.AUTOMATISKE_VEDTAKSDATOER_BREV,
         Toggle.BRUK_8_ÅR_HOVEDPERIODEVALIDERING,
         Toggle.VIS_SETT_PÅ_VENT_KNAPP
     )
