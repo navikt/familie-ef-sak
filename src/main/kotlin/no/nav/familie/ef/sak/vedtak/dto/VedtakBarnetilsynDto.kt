@@ -54,7 +54,6 @@ data class UtgiftsperiodeDto(
 ) {
 
     val erMidlertidigOpphørEllerSanksjon get() = periodetype.midlertidigOpphørEllerSanksjon()
-
 }
 
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
