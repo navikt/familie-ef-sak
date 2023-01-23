@@ -18,7 +18,6 @@ import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -203,21 +202,6 @@ class BeregningBarnetilsynServiceTest {
             assertThat(feil.message).contains("Tilleggsstønadsperioder")
         }
 
-        @Disabled // TODO fjern disabled når periodetype er non-nullable
-        @Test
-        internal fun `Skal kaste feil dersom periodetype ikke er valgt`() {
-            val utgiftsperiode = listeMedEnUtgiftsperiode(aktivitetstype = null, periodetype = null)
-            val ugyldigUtgiftsperiode = assertThrows<ApiFeil> {
-                service.beregnYtelseBarnetilsyn(
-                    utgiftsperioder = utgiftsperiode,
-                    kontantstøttePerioder = listOf(),
-                    tilleggsstønadsperioder = listOf()
-                )
-            }
-            assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperiode mangler en eller flere periodetyper")
-        }
-
-        @Disabled // TODO fjern disabled når periodetype er non-nullable
         @Test
         internal fun `Skal kaste feil dersom aktivitetstype ikke er valgt og periodetype ikke er opphør eller sanksjon`() {
             val utgiftsperioder = listeMedEnUtgiftsperiode(aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, periodetype = PeriodetypeBarnetilsyn.ORDINÆR) +
@@ -230,6 +214,23 @@ class BeregningBarnetilsynServiceTest {
                 )
             }
             assertThat(ugyldigUtgiftsperiode.message).isEqualTo("Utgiftsperioder $utgiftsperioder mangler en eller flere aktivitetstyper")
+        }
+
+        @Test
+        internal fun `Migrering skal ikke kaste feil dersom aktivitetstype mangler`() {
+            val utgiftsperioder = listeMedEnUtgiftsperiode(
+                fra = mars2022,
+                til = april2022,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = null
+            )
+            val perioder = service.beregnYtelseBarnetilsyn(
+                utgiftsperioder = utgiftsperioder,
+                kontantstøttePerioder = listOf(),
+                tilleggsstønadsperioder = listOf(),
+                erMigrering = true
+            )
+            assertThat(perioder).hasSize(1)
         }
     }
 
@@ -617,10 +618,21 @@ class BeregningBarnetilsynServiceTest {
         fra: YearMonth = januar2022,
         til: YearMonth = februar2022,
         beløp: Int = 10,
-        periodetype: PeriodetypeBarnetilsyn? = PeriodetypeBarnetilsyn.ORDINÆR,
+        periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
         barn: List<UUID>? = null
     ): List<UtgiftsperiodeDto> {
-        return listOf(UtgiftsperiodeDto(fra, til, Månedsperiode(fra, til), barn ?: listOf(UUID.randomUUID()), beløp, false, null, periodetype, aktivitetstype))
+        return listOf(
+            UtgiftsperiodeDto(
+                årMånedFra = fra,
+                årMånedTil = til,
+                periode = Månedsperiode(fra, til),
+                barn = barn ?: listOf(UUID.randomUUID()),
+                utgifter = beløp,
+                sanksjonsårsak = null,
+                periodetype = periodetype,
+                aktivitetstype = aktivitetstype
+            )
+        )
     }
 }

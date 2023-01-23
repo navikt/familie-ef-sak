@@ -92,9 +92,8 @@ class BarnetilsynSatsendringService(
                 periode = it.andel.periode,
                 barn = it.andel.barn,
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false,
                 sanksjonsårsak = null,
-                periodetype = it.periodetypeBarnetilsyn,
+                periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
                 aktivitetstype = it.aktivitetBarnetilsyn
             ) // TODO sjekk erMidlertidigOpphør???...
         }

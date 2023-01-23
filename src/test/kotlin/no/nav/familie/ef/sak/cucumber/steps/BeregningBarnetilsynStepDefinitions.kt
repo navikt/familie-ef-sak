@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.Beregni
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.HAR_KONTANTSTØTTE
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.HAR_TILLEGGSSTØNAD
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.TIL_OG_MED_MND
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
@@ -47,7 +48,7 @@ class BeregningBarnetilsynStepDefinitions {
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {
         dataTable.asMaps().map {
-            val periodetype = parsePeriodetypeBarnetilsyn(it)
+            val periodetype = parsePeriodetypeBarnetilsyn(it) ?: PeriodetypeBarnetilsyn.ORDINÆR
             val aktivitetstype = parseAktivitetstypeBarnetilsyn(it)
             val fraÅrMåned = parseÅrMåned(FRA_MND, it)
             val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
@@ -56,15 +57,14 @@ class BeregningBarnetilsynStepDefinitions {
             val barn = barnPåIndex.take(antallBarn)
             utgiftsperioder.add(
                 UtgiftsperiodeDto(
-                    fraÅrMåned,
-                    tilÅrMåned,
-                    Månedsperiode(fraÅrMåned, tilÅrMåned),
-                    barn,
-                    beløp,
-                    false,
-                    null,
-                    periodetype,
-                    aktivitetstype
+                    årMånedFra = fraÅrMåned,
+                    årMånedTil = tilÅrMåned,
+                    periode = Månedsperiode(fraÅrMåned, tilÅrMåned),
+                    barn = barn,
+                    utgifter = beløp,
+                    sanksjonsårsak = null,
+                    periodetype = periodetype,
+                    aktivitetstype = aktivitetstype
                 )
             )
         }

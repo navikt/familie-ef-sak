@@ -189,7 +189,6 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 periode = periode.tilPeriode(),
                 utgifter = 0,
                 barn = emptyList(),
-                erMidlertidigOpphør = true,
                 sanksjonsårsak = this.sanksjonsårsak,
                 periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND
             )

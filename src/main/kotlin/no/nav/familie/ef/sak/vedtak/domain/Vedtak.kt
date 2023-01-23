@@ -39,7 +39,9 @@ data class Vedtak(
     val beslutterIdent: String? = null,
     val internBegrunnelse: String? = null
 ) {
-    fun erVedtakUtenBeslutter(): Boolean = resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+    fun erVedtakUtenBeslutter(): Boolean =
+        resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+
     fun utledVedtakErUtenBeslutter(): VedtakErUtenBeslutter = VedtakErUtenBeslutter(erVedtakUtenBeslutter())
 }
 
@@ -109,7 +111,6 @@ data class Barnetilsynperiode(
     override val datoTil: LocalDate,
     val utgifter: Int,
     val barn: List<UUID>,
-    val erMidlertidigOpphør: Boolean? = false,
     override val sanksjonsårsak: Sanksjonsårsak? = null,
     val periodetype: PeriodetypeBarnetilsyn,
     val aktivitetstype: AktivitetstypeBarnetilsyn? = null
@@ -117,8 +118,11 @@ data class Barnetilsynperiode(
 
     init {
         validerSanksjon1Måned()
-        feilHvis(sanksjonsårsak != null && erMidlertidigOpphør != true) {
-            "MidlerTidigOpphør må settes hvis sanksjon"
+        feilHvis(
+            (periodetype != PeriodetypeBarnetilsyn.SANKSJON_1_MND && sanksjonsårsak != null) ||
+                (periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND && sanksjonsårsak == null)
+        ) {
+            "Ugyldig kombinasjon av sanksjon periodeType=$periodetype sanksjonsårsak=$sanksjonsårsak"
         }
     }
 
@@ -126,7 +130,6 @@ data class Barnetilsynperiode(
         periode: Månedsperiode,
         utgifter: Int,
         barn: List<UUID>,
-        erMidlertidigOpphør: Boolean? = false,
         sanksjonsårsak: Sanksjonsårsak? = null,
         periodetype: PeriodetypeBarnetilsyn,
         aktivitet: AktivitetstypeBarnetilsyn? = null
@@ -136,7 +139,6 @@ data class Barnetilsynperiode(
         utgifter = utgifter,
         barn = barn,
         periodetype = periodetype,
-        erMidlertidigOpphør = erMidlertidigOpphør,
         sanksjonsårsak = sanksjonsårsak,
         aktivitetstype = aktivitet
     )

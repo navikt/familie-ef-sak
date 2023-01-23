@@ -32,6 +32,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseEndringType
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseFraOgMed
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parsePeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriInt
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriIntRange
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseValgfriÅrMånedEllerDato
@@ -55,6 +56,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -300,7 +302,8 @@ class StepDefinitions {
 
                     assertThat(periode.barn).containsExactlyElementsOf(mapBarn(behandlingId, rad))
                     assertThat(periode.utgifter).isEqualTo(parseInt(VedtakDomenebegrep.UTGIFTER, rad))
-                    assertThat(periode.erMidlertidigOpphør).isEqualTo(false)
+                    val forventetPeriodetype = parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
+                    assertThat(periode.periodetype).isEqualTo(forventetPeriodetype)
                 }
                 assertThat(dataTable.asMaps()).hasSize(perioder.size)
             }

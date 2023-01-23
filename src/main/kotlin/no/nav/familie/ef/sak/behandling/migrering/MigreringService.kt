@@ -216,7 +216,6 @@ class MigreringService(
                     årMånedTil = periode.stønadsperiode.tom,
                     barn = behandlingBarn.map { it.id },
                     utgifter = periode.utgifterBarnetilsyn,
-                    erMidlertidigOpphør = false,
                     sanksjonsårsak = null,
                     periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
                     aktivitetstype = null

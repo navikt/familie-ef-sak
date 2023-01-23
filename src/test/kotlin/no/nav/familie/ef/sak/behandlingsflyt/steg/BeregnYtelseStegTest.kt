@@ -1743,7 +1743,7 @@ internal class BeregnYtelseStegTest {
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     forrigeBehandlingId = null
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, barn, utgifter = 0, erMidlertidigOpphør = true)
+                innvilgetBarnetilsyn(andelFom, andelTom, barn, utgifter = 0, PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
         assertThat(feil.feil).contains("Kan ikke ta med barn på en periode som er et midlertidig opphør, på behandling=")
@@ -1763,7 +1763,7 @@ internal class BeregnYtelseStegTest {
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     forrigeBehandlingId = null
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, erMidlertidigOpphør = true)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 2500, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
         assertThat(feil.feil).contains("kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør, på behandling=")
@@ -1783,7 +1783,7 @@ internal class BeregnYtelseStegTest {
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     forrigeBehandlingId = null
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, erMidlertidigOpphør = true)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
         assertThat(feil.feil).contains("Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=")
@@ -1809,7 +1809,7 @@ internal class BeregnYtelseStegTest {
                     type = BehandlingType.REVURDERING,
                     forrigeBehandlingId = UUID.randomUUID()
                 ),
-                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, erMidlertidigOpphør = true)
+                innvilgetBarnetilsyn(andelFom, andelTom, utgifter = 0, periodeType = PeriodetypeBarnetilsyn.OPPHØR)
             )
         }
         assertThat(feil.feil).contains("Første periode kan ikke ha et nullbeløp dersom det ikke har blitt innvilget beløp på et tidligere vedtak, på behandling=")
@@ -1869,7 +1869,7 @@ internal class BeregnYtelseStegTest {
         sluttDato: LocalDate,
         barn: List<UUID>? = null,
         utgifter: Int? = null,
-        erMidlertidigOpphør: Boolean = false
+        periodeType: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR
     ) =
         InnvilgelseBarnetilsyn(
             perioder = listOf(
@@ -1879,8 +1879,7 @@ internal class BeregnYtelseStegTest {
                     periode = Månedsperiode(YearMonth.from(startDato), YearMonth.from(sluttDato)),
                     barn = barn ?: emptyList(),
                     utgifter = utgifter ?: 2500,
-                    erMidlertidigOpphør = erMidlertidigOpphør || utgifter == 0,
-                    periodetype = if (utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
+                    periodetype = periodeType,
                     aktivitetstype = if (utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
                 )
             ),
@@ -1899,7 +1898,6 @@ internal class BeregnYtelseStegTest {
                 periode = Månedsperiode(YearMonth.from(it.andelFom), YearMonth.from(it.andelTom)),
                 barn = if (it.utgifter > 0) it.barn else emptyList(),
                 utgifter = it.utgifter,
-                erMidlertidigOpphør = it.utgifter == 0,
                 periodetype = if (it.utgifter == 0) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
                 aktivitetstype = if (it.utgifter == 0) null else AktivitetstypeBarnetilsyn.I_ARBEID
             )

@@ -48,11 +48,13 @@ data class UtgiftsperiodeDto(
     ),
     val barn: List<UUID>,
     val utgifter: Int,
-    val erMidlertidigOpphør: Boolean,
     val sanksjonsårsak: Sanksjonsårsak? = null,
-    val periodetype: PeriodetypeBarnetilsyn?, // TODO: Skal bli non-nullable
+    val periodetype: PeriodetypeBarnetilsyn,
     val aktivitetstype: AktivitetstypeBarnetilsyn?
 ) {
+
+    val erMidlertidigOpphør get() = periodetype == PeriodetypeBarnetilsyn.OPPHØR
+
     /**
      * TODO slett default verdi på PERIODETYPE og init
      */
@@ -73,9 +75,8 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         periode = this.periode,
         utgifter = this.utgifter,
         barn = this.barn,
-        erMidlertidigOpphør = this.erMidlertidigOpphør,
         sanksjonsårsak = this.sanksjonsårsak,
-        periodetype = this.periodetype ?: if (erMidlertidigOpphør) PeriodetypeBarnetilsyn.OPPHØR else PeriodetypeBarnetilsyn.ORDINÆR,
+        periodetype = this.periodetype,
         aktivitet = this.aktivitetstype
     )
 
@@ -98,7 +99,6 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 periode = it.periode,
                 utgifter = it.utgifter,
                 barn = it.barn,
-                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false,
                 sanksjonsårsak = it.sanksjonsårsak,
                 periodetype = it.periodetype,
                 aktivitetstype = it.aktivitetstype

@@ -221,7 +221,6 @@ object VedtakDomeneParser {
             val barn = mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
                 IntRange(1, it).map { UUID.randomUUID() }
             } ?: emptyList()
-            val midlertidigOpphør = parseValgfriBoolean(VedtakDomenebegrep.ER_MIDLERTIDIG_OPPHØR, rad)
             val periodetype = parsePeriodetypeBarnetilsyn(rad)
             val aktivitetstype = parseAktivitetstypeBarnetilsyn(rad)
             if (resultatType == ResultatType.SANKSJONERE) {
@@ -235,8 +234,6 @@ object VedtakDomeneParser {
                 datoTil = parseTilOgMed(rad),
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                 barn = barn,
-                erMidlertidigOpphør = midlertidigOpphør
-                    ?: (sanksjonsårsak != null),
                 sanksjonsårsak = sanksjonsårsak,
                 periodetype = periodetype ?: error("Mangler periodetype"),
                 aktivitetstype = aktivitetstype
@@ -500,7 +497,6 @@ enum class VedtakDomenebegrep(val nøkkel: String) : Domenenøkkel {
     STUDIETYPE("Studietype"),
     DATO_FAKTURA("Dato faktura"),
     STUDIEBELASTNING("Studiebelastning"),
-    ER_MIDLERTIDIG_OPPHØR("Er midlertidig opphør"),
     VEDTAKSDATO("Vedtaksdato"),
     ENDRET_I_VEDTAKSDATO("Endret i vedtaksdato"),
     ER_OPPHØR("Er opphør")

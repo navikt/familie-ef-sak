@@ -569,8 +569,9 @@ class BeregnYtelseSteg(
         val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
             vedtak.perioder
                 .filter { !it.erMidlertidigOpphør || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR },
-            vedtak.perioderKontantstøtte,
-            vedtak.tilleggsstønad.perioder
+            kontantstøttePerioder = vedtak.perioderKontantstøtte,
+            tilleggsstønadsperioder = vedtak.tilleggsstønad.perioder,
+            erMigrering = saksbehandling.erMigrering
         )
         validerRiktigResultattypeForInnvilgetBarnetilsyn(beløpsperioder, vedtak)
         return beløpsperioder

@@ -19,7 +19,7 @@ data class UtgiftsMåned(
     val barn: List<UUID>,
     val utgifter: BigDecimal,
     val aktivitetstype: AktivitetstypeBarnetilsyn?,
-    val periodetype: PeriodetypeBarnetilsyn?
+    val periodetype: PeriodetypeBarnetilsyn
 )
 
 fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(

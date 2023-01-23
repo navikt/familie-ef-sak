@@ -173,9 +173,8 @@ class VedtakHistorikkService(
                     periode = it.andel.periode,
                     barn = it.andel.barn.map { barnId -> barnMap[barnId] ?: error("Fant ikke match for barn=$barnId") },
                     utgifter = it.andel.utgifter.toInt(),
-                    erMidlertidigOpphør = false,
                     aktivitetstype = it.aktivitetBarnetilsyn,
-                    periodetype = it.periodetypeBarnetilsyn
+                    periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it")
                 )
             }
     }

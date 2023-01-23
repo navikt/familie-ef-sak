@@ -106,7 +106,6 @@ object VedtakDtoUtil {
             periode = Månedsperiode(fom, tom),
             barn = barn,
             utgifter = utgifter,
-            erMidlertidigOpphør = periodetype == PeriodetypeBarnetilsyn.OPPHØR,
             sanksjonsårsak = sanksjonsårsak,
             periodetype = periodetype,
             aktivitetstype = aktivitetType
