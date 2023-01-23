@@ -2,10 +2,10 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import java.util.UUID
 
 @Service

@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto

@@ -43,7 +43,7 @@ class BeregningBarnetilsynStepDefinitions {
     val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()
     val utgiftsperioder: MutableList<UtgiftsperiodeDto> = mutableListOf()
-    val barnPåIndex = List(10) { UUID.randomUUID()}
+    val barnPåIndex = List(10) { UUID.randomUUID() }
 
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {

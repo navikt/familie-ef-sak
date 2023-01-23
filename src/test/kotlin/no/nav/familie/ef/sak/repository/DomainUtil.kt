@@ -350,7 +350,7 @@ fun barnetilsynperiode(
     barn: List<UUID>,
     sanksjonsårsak: Sanksjonsårsak? = null,
     periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
+    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
 ) = Barnetilsynperiode(
     periode = Månedsperiode(fom, tom),
     utgifter = beløp,

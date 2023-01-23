@@ -86,7 +86,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
             Hendelse.SENDT_TIL_BESLUTTER,
             Hendelse.VEDTAK_UNDERKJENT,
             Hendelse.SENDT_TIL_BESLUTTER,
-            Hendelse.OPPRETTET,
+            Hendelse.OPPRETTET
         )
     }
 
@@ -106,7 +106,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
             Hendelse.SATT_PÅ_VENT,
             Hendelse.TATT_AV_VENT,
             Hendelse.SATT_PÅ_VENT,
-            Hendelse.OPPRETTET,
+            Hendelse.OPPRETTET
         )
     }
 

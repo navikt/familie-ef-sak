@@ -410,7 +410,7 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal lage 2 perioder når vi går over to satser over to år med 2 barn når man overskyter maksbeløp`() {
-        val barn = List(2){ UUID.randomUUID()}
+        val barn = List(2) { UUID.randomUUID() }
         val periode1 = barnetilsynperiodeDto(januar2021, desember2021, barn, 39000)
         val periode2 = barnetilsynperiodeDto(januar2022, desember2022, barn, 39000)
         val perioder = listOf(periode1, periode2)
@@ -426,7 +426,7 @@ class BeregningBarnetilsynServiceTest {
 
     @Test
     fun `Skal lage 1 perioder når vi går over to satser over to år med 2 barn når man ikke overskyter maksbeløp`() {
-        val barn = List(2){ UUID.randomUUID()}
+        val barn = List(2) { UUID.randomUUID() }
         val periode1 = barnetilsynperiodeDto(januar2021, desember2021, barn, 1)
         val periode2 = barnetilsynperiodeDto(januar2022, desember2022, barn, 1)
         val perioder = listOf(periode1, periode2)
@@ -565,8 +565,8 @@ class BeregningBarnetilsynServiceTest {
         val barnUUID = listOf(UUID.randomUUID())
         val utgiftsperioder =
             listeMedEnUtgiftsperiode(fra = januar2022, til = mars2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID) +
-            listeMedEnUtgiftsperiode(fra = april2022, til = juli2022, periodetype = PeriodetypeBarnetilsyn.OPPHØR, aktivitetstype = null, barn = barnUUID) +
-            listeMedEnUtgiftsperiode(fra = august2022, til = desember2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID)
+                listeMedEnUtgiftsperiode(fra = april2022, til = juli2022, periodetype = PeriodetypeBarnetilsyn.OPPHØR, aktivitetstype = null, barn = barnUUID) +
+                listeMedEnUtgiftsperiode(fra = august2022, til = desember2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = utgiftsperioder,

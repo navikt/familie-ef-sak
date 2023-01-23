@@ -52,7 +52,8 @@ object VedtakDtoUtil {
             listOf(
                 barnetilsynperiodeDto(
                     fom = YearMonth.of(2021, 1),
-                    tom = YearMonth.of(2021, 12), barn = listOf(barnId)
+                    tom = YearMonth.of(2021, 12),
+                    barn = listOf(barnId)
                 )
             ),
             listOf(periodeMedBeløpDto()),

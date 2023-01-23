@@ -48,7 +48,7 @@ data class Sanksjonsperiode(
 }
 
 data class Opphørsperiode(
-    override val periode: Månedsperiode,
+    override val periode: Månedsperiode
 ) : Vedtakshistorikkperiode() {
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
         error("Kan ikke endre fra-dato på opphør")
