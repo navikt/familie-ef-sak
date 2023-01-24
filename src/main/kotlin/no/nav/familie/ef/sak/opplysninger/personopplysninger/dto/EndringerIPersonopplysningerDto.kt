@@ -56,5 +56,5 @@ fun finnEndringer(tidligere: PersonopplysningerDto, nye: PersonopplysningerDto) 
         vergemål = utledEndringer(tidligere.vergemål, nye.vergemål),
     )
 
-fun <T> utledEndringer(tidligere: T, nye: T) =
+private fun <T> utledEndringer(tidligere: T, nye: T) =
     Endring(tidligere != nye)
