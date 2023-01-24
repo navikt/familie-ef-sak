@@ -46,7 +46,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     AUTOMATISKE_VEDTAKSDATOER_BREV("familie.ef.sak.frontend.automatiskeVedtaksdatoer"),
     BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode"),
     VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp"),
-    HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon");
+    HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon"),
+    AUTOMATISKE_HJEMLER_BREV("familie.ef.sak.frontend.automatiske-hjemler-brev");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }
