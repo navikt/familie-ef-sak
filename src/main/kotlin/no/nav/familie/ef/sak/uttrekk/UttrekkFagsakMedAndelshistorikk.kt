@@ -16,11 +16,11 @@ data class UttrekkFagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistori
 
     fun antallMånederMedManglendeTilsynSomErAvsluttet(år: Int): Long =
         andelshistorikk.filter { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
-            .map { it.andel.periode.lengdeIHeleMåneder() }.sum()
+            .sumOf { it.andel.periode.lengdeIHeleMåneder() }
 
     fun beløpForManglendeTilsynSomErAvsluttet(år: Int): Long =
         andelshistorikk.filter { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
-            .map { it.andel.beløp * it.andel.periode.lengdeIHeleMåneder() }.sum()
+            .sumOf { it.andel.beløp * it.andel.periode.lengdeIHeleMåneder() }
 }
 
 private fun Månedsperiode.harPeriodeI(år: Int): Boolean {
