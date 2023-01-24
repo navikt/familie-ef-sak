@@ -11,16 +11,22 @@ data class UttrekkFagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistori
         andelshistorikk.any { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
 
     fun harAvsluttetPeriodeMedManglendeTilsyn(år: Int): Boolean =
-        andelshistorikk.filter { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
+        andelshistorikk.filter {  it.aktivitet?.manglerTilsyn() ?: false }
             .all { it.andel.periode.tom <= YearMonth.now() }
 
     fun antallMånederMedManglendeTilsynSomErAvsluttet(år: Int): Long =
-        andelshistorikk.filter { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
+        andelshistorikk.filter {  it.aktivitet?.manglerTilsyn() ?: false }
             .sumOf { it.andel.periode.lengdeIHeleMåneder() }
 
     fun beløpForManglendeTilsynSomErAvsluttet(år: Int): Long =
-        andelshistorikk.filter { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
+        andelshistorikk.filter { it.aktivitet?.manglerTilsyn() ?: false }
             .sumOf { it.andel.beløp * it.andel.periode.lengdeIHeleMåneder() }
+
+    fun tidligsteFom(år: Int): YearMonth {
+        val andeler =
+            andelshistorikk.filter {  it.aktivitet?.manglerTilsyn() ?: false }
+        return andeler.sortedBy { it.andel.periode.fom }.first().andel.periode.fom
+    }
 }
 
 private fun Månedsperiode.harPeriodeI(år: Int): Boolean {
