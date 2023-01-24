@@ -65,6 +65,7 @@ class PersonopplysningerService(
         }
         val endringer = sjekkEndringer(grunnlagsdata, egenAnsatt, søkerIdenter, nyGrunnlagsdata)
         if (skalSjekkeDataFraRegisteret) {
+            // TODO skal ikke oppdatere hvis behandlingen er låst
             grunnlagsdataService.oppdaterEndringer(
                 grunnlagsdata.copy(
                     endringerSjekket = LocalDateTime.now(),

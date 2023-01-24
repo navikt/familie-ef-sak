@@ -86,13 +86,6 @@ class VurderingController(
         return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
     }
 
-    @GetMapping("{behandlingId}/grunnlagsendringer")
-    fun oppdaterRegisterdata(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
-    }
-
     @PostMapping("gjenbruk")
     fun gjenbrukVilkår(@RequestBody request: GjenbrukVilkårsvurderingerDto): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(request.kopierBehandlingId, AuditLoggerEvent.ACCESS)
