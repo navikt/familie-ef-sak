@@ -38,13 +38,13 @@ class AndelshistorikkUttrekkController(
         val alleSomManglerTilsynForÅr = fagsakerMedAndelshistorikk.filter { it.harAndelOgManglerTilsyn(2022) }
 
         val alleAvsluttedeMedBeløpOgAntallMåneder: List<ResultatPerFagsak> = alleSomManglerTilsynForÅr
-            .filter { it.harAvsluttetPeriodeMedManglendeTilsyn(2022) }
+            .filter { it.harAvsluttetPeriodeMedManglendeTilsyn() }
             .map {
                 val resultatPerFagsak = ResultatPerFagsak(
                     it.fagsakId,
-                    it.antallMånederMedManglendeTilsynSomErAvsluttet(2022),
-                    it.beløpForManglendeTilsynSomErAvsluttet(2022),
-                    it.tidligsteFom(2022),
+                    it.antallMånederMedManglendeTilsynSomErAvsluttet(),
+                    it.beløpForManglendeTilsynSomErAvsluttet(),
+                    it.tidligsteFom(),
                 )
                 secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
                 resultatPerFagsak
