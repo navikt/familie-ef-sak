@@ -102,6 +102,7 @@ class TotrinnskontrollService(
     private fun behandlingErGodkjentEllerOpprettet(behandlingStatus: BehandlingStatus) =
         behandlingStatus == BehandlingStatus.FERDIGSTILT ||
             behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK ||
+            behandlingStatus == BehandlingStatus.SATT_PÅ_VENT ||
             behandlingStatus == BehandlingStatus.OPPRETTET
 
     /**
