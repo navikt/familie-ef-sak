@@ -150,25 +150,25 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                 listOf(
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
                             LocalDate.of(2021, 4, 30)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     ),
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
                             LocalDate.of(2021, 12, 31)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     )
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2022, 5, 1),
+                YearMonth.of(2022, 5),
                 inntektsperioder
             )
 
@@ -180,25 +180,25 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                 listOf(
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
                             LocalDate.of(2021, 4, 30)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     ),
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
                             LocalDate.of(2021, 12, 31)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     )
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                nyesteGrunnbeløp.periode.fomDato,
+                nyesteGrunnbeløp.periode.fom,
                 inntektsperioder
             )
 
@@ -210,25 +210,25 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                 listOf(
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
                             LocalDate.of(2021, 4, 30)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     ),
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
                             LocalDate.of(2021, 12, 31)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     )
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2020, 5, 1),
+                YearMonth.of(2020, 5),
                 inntektsperioder
             )
 
@@ -243,25 +243,25 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                 listOf(
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2020, 1, 1),
                             LocalDate.of(2020, 4, 30)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     ),
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2020, 5, 1),
                             LocalDate.of(2021, 12, 31)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     )
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2020, 5, 1),
+                YearMonth.of(2020, 5),
                 inntektsperioder
             )
 
@@ -281,25 +281,25 @@ internal class BeregningUtilsTest {
             val inntektsperioder: List<Inntektsperiode> =
                 listOf(
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 1, 1),
                             LocalDate.of(2021, 4, 30)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     ),
                     Inntektsperiode(
-                        Månedsperiode(
+                        periode = Månedsperiode(
                             LocalDate.of(2021, 5, 1),
                             LocalDate.of(2021, 12, 31)
                         ),
-                        200_000.toBigDecimal(),
-                        BigDecimal(10)
+                        inntekt = 200_000.toBigDecimal(),
+                        samordningsfradrag = BigDecimal(10)
                     )
                 )
 
             val indeksjusterInntekt = BeregningUtils.indeksjusterInntekt(
-                LocalDate.of(2019, 5, 1),
+                YearMonth.of(2019, 5),
                 inntektsperioder
             )
 

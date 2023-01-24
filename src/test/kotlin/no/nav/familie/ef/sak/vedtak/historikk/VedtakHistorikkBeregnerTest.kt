@@ -16,6 +16,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal class VedtakHistorikkBeregnerTest {
@@ -27,8 +29,9 @@ internal class VedtakHistorikkBeregnerTest {
     private val førsteVedtak = lagVedtak(perioder = listOf(førstePeriode))
 
     @Test
-    internal fun `opphør har ikke periodeWrapper inne på vedtak`() {
-        val andreVedtak = lagVedtak(perioder = null, opphørFom = LocalDate.of(2021, 2, 1))
+    internal fun `opphør avkorter tidligere vedtak og lager egen opphørsperiode`() {
+        val opphørFom = YearMonth.of(2021, 2)
+        val andreVedtak = lagVedtak(perioder = null, opphørFom = opphørFom)
 
         val vedtaksperioderPerBehandling = lagVedtaksperioderPerBehandling(listOf(førsteVedtak, andreVedtak))
 
@@ -36,7 +39,10 @@ internal class VedtakHistorikkBeregnerTest {
         validerPeriode(
             vedtaksperioderPerBehandling,
             andreVedtak.behandlingId,
-            listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk())
+            listOf(
+                førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk(),
+                Opphørsperiode(Månedsperiode(opphørFom))
+            )
         )
     }
 
@@ -128,13 +134,17 @@ internal class VedtakHistorikkBeregnerTest {
         }
         val behandlingHistorikkData = vedtak.map {
             BehandlingHistorikkData(
-                it.behandlingId,
-                it.tilVedtakDto(),
-                null,
-                tilkjenteytelser.getValue(it.behandlingId)
+                behandlingId = it.behandlingId,
+                vedtakstidspunkt = LocalDateTime.now(),
+                vedtakDto = it.tilVedtakDto(),
+                aktivitetArbeid = null,
+                tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
             )
         }
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData)
+        val konfigurasjon = HistorikkKonfigurasjon(true, true)
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
+            .map { it.key to it.value.perioder }
+            .toMap()
     }
 
     private fun lagVedtaksperiode(fra: LocalDate, til: LocalDate): Vedtaksperiode =
@@ -147,7 +157,6 @@ internal class VedtakHistorikkBeregnerTest {
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
         Månedsperiode(this.datoFra, this.datoTil),
-        sanksjonsårsak = null,
         this.aktivitet,
         this.periodeType
     )
@@ -155,7 +164,7 @@ internal class VedtakHistorikkBeregnerTest {
     private fun lagVedtak(
         behandlingId: UUID = UUID.randomUUID(),
         perioder: List<Vedtaksperiode>?,
-        opphørFom: LocalDate? = null
+        opphørFom: YearMonth? = null
     ): Vedtak {
         require((perioder == null) xor (opphørFom == null)) { "Må definiere perioder eller opphørFom" }
         return Vedtak(
@@ -171,9 +180,9 @@ internal class VedtakHistorikkBeregnerTest {
                         it.firstOrNull()
                             ?.let {
                                 Inntektsperiode(
-                                    it.periode,
-                                    BigDecimal.ZERO,
-                                    BigDecimal.ZERO
+                                    periode = it.periode,
+                                    inntekt = BigDecimal.ZERO,
+                                    samordningsfradrag = BigDecimal.ZERO
                                 )
                             }
                     )

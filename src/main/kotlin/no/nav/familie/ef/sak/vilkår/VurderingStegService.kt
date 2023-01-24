@@ -17,7 +17,7 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.utledResultatForVilkårSomGjelderFlereBarn
 import no.nav.familie.ef.sak.vilkår.regler.hentVilkårsregel
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +29,7 @@ class VurderingStegService(
     private val vurderingService: VurderingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val stegService: StegService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val blankettRepository: BlankettRepository
 ) {
 
@@ -96,18 +96,14 @@ class VurderingStegService(
             stegService.håndterVilkår(behandling).id
         } else if (behandling.steg != StegType.VILKÅR && vilkårsresultat.any { it == Vilkårsresultat.IKKE_TATT_STILLING_TIL }) {
             stegService.resetSteg(behandling.id, StegType.VILKÅR)
-        } else if (erInitiellVurderingAvVilkår(behandling)) {
+        } else if (behandling.harStatusOpprettet) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
             opprettBehandlingsstatistikkTask(behandling)
         }
     }
 
     private fun opprettBehandlingsstatistikkTask(saksbehandling: Saksbehandling) {
-        taskRepository.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
-    }
-
-    private fun erInitiellVurderingAvVilkår(saksbehandling: Saksbehandling): Boolean {
-        return saksbehandling.status == BehandlingStatus.OPPRETTET
+        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId = saksbehandling.id))
     }
 
     private fun nullstillVilkårMedNyeHovedregler(
@@ -115,7 +111,7 @@ class VurderingStegService(
         vilkårsvurdering: Vilkårsvurdering
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(metadata)
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(
             vilkårsvurdering.copy(
@@ -130,7 +126,7 @@ class VurderingStegService(
         vilkårsvurdering: Vilkårsvurdering
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
-        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initereDelvilkårsvurdering(
+        val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(
             metadata,
             Vilkårsresultat.SKAL_IKKE_VURDERES
         )

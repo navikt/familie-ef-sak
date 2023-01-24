@@ -46,7 +46,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
         internal fun `skal kunne journalføre når personen ikke har noen saker i infotrygd`() {
             every { infotrygdService.hentDtoPerioder(personIdent) } returns infotrygdPerioderDto(emptyList())
 
-            service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, StønadType.OVERGANGSSTØNAD)
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, StønadType.OVERGANGSSTØNAD)
         }
 
         @Test
@@ -62,7 +62,24 @@ internal class InfotrygdPeriodeValideringServiceTest {
                         )
                     )
                 )
-            service.validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
+        }
+
+        @Test
+        internal fun `kan journalføre hvis det kun finnes perioder bak i tiden med 0-beløp`() {
+            val dato = YearMonth.now().minusYears(1)
+            every { infotrygdService.hentDtoPerioder(personIdent) } returns
+                infotrygdPerioderDto(
+                    listOf(
+                        lagInfotrygdPeriode(
+                            personIdent = "1",
+                            stønadFom = dato.atDay(1),
+                            stønadTom = dato.atEndOfMonth(),
+                            beløp = 0
+                        )
+                    )
+                )
+            service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent, OVERGANGSSTØNAD)
         }
 
         @Test
@@ -71,7 +88,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                 infotrygdPerioderDto(listOf(lagInfotrygdPeriode()))
 
             assertThatThrownBy {
-                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
                     StønadType.OVERGANGSSTØNAD
                 )
@@ -90,7 +107,7 @@ internal class InfotrygdPeriodeValideringServiceTest {
                 )
 
             assertThatThrownBy {
-                service.validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                service.validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                     personIdent,
                     StønadType.OVERGANGSSTØNAD
                 )

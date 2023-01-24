@@ -21,8 +21,9 @@ Egenskap: Andelhistorikk: Samme periode blir lagt til på nytt
     Når beregner ytelse
 
     Så forvent følgende historikk
-      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId |
-      | 1            | 01.2021         | 01.2021         |              |                       |
-      | 1            | 02.2021         | 02.2021         | FJERNET      | 2                     |
-      | 3            | 02.2021         | 02.2021         |              |                       |
-      | 3            | 03.2021         | 03.2021         |              |                       |
+      | BehandlingId | Fra og med dato | Til og med dato | Endringstype | Endret i behandlingId | Er opphør |
+      | 1            | 01.2021         | 01.2021         |              |                       |           |
+      | 1            | 02.2021         | 02.2021         | FJERNET      | 2                     |           |
+      | 2            | 02.2021         | 02.2021         | ERSTATTET    | 3                     | Ja        |
+      | 3            | 02.2021         | 02.2021         |              |                       |           |
+      | 3            | 03.2021         | 03.2021         |              |                       |           |

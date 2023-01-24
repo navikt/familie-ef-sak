@@ -6,12 +6,13 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.JournalføringHelper.validerJournalføringNyBehandling
@@ -33,7 +34,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.stereotype.Service
@@ -48,7 +49,7 @@ class JournalføringService(
     private val vurderingService: VurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val iverksettService: IverksettService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val barnService: BarnService,
     private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
@@ -101,7 +102,7 @@ class JournalføringService(
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
-        val fagsak = fagsakService.hentFagsak(journalføringRequest.fagsakId)
+        val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         logger.info(
             "Journalfører journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} " +
@@ -110,11 +111,10 @@ class JournalføringService(
         )
         validerJournalføringNyBehandling(
             journalpost,
-            journalføringRequest,
-            featureToggleService.isEnabled(Toggle.FRONTEND_JOURNALFØRING_ETTERSENDING_NY_BEHANDLING)
+            journalføringRequest
         )
 
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -140,14 +140,15 @@ class JournalføringService(
     }
 
     @Transactional
-    fun automatiskJournalførFørstegangsbehandling(
+    fun automatiskJournalfør(
         fagsak: Fagsak,
         journalpost: Journalpost,
         journalførendeEnhet: String,
-        mappeId: Long?
+        mappeId: Long?,
+        behandlingstype: BehandlingType
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = emptyList()
@@ -159,18 +160,17 @@ class JournalføringService(
             fagsak = fagsak
         )
 
-        opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
-
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.BehandleSak,
-            mappeId = mappeId,
-            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
+        opprettBehandleSakOppgaveTask(
+            OpprettOppgaveTaskData(
+                behandlingId = behandling.id,
+                saksbehandler = SikkerhetContext.hentSaksbehandler(),
+                beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE,
+                mappeId = mappeId
+            )
         )
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
-            behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId
+            behandlingId = behandling.id
         )
     }
 
@@ -189,7 +189,7 @@ class JournalføringService(
             "Journalfører ferdigstilt journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = journalføringRequest.behandlingstype,
@@ -258,7 +258,7 @@ class JournalføringService(
     }
 
     private fun opprettBehandlingsstatistikkTask(behandlingId: UUID, oppgaveId: Long? = null) {
-        taskRepository.save(
+        taskService.save(
             BehandlingsstatistikkTask.opprettMottattTask(
                 behandlingId = behandlingId,
                 oppgaveId = oppgaveId
@@ -272,6 +272,10 @@ class JournalføringService(
             oppgavetype = Oppgavetype.BehandleSak,
             tilordnetNavIdent = navIdent
         )
+    }
+
+    private fun opprettBehandleSakOppgaveTask(opprettOppgaveTaskData: OpprettOppgaveTaskData) {
+        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(opprettOppgaveTaskData))
     }
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {

@@ -5,9 +5,10 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingTask
 import no.nav.familie.ef.sak.repository.InsertUpdateRepository
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.util.isOptimisticLocking
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.scheduling.annotation.Scheduled
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import kotlin.random.Random
 
+@Profile("!integrasjonstest")
 @Service
 class KonsistensavstemmingScheduler(private val konsistensavstemmingService: KonsistensavstemmingService) {
 
@@ -40,7 +42,7 @@ class KonsistensavstemmingScheduler(private val konsistensavstemmingService: Kon
 @Service
 class KonsistensavstemmingService(
     private val repository: KonsistensavstemmingJobbRepository,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -52,7 +54,7 @@ class KonsistensavstemmingService(
         jobber.forEach {
             val triggerdato = it.triggerdato
             logger.info("Oppretter tasks for konsistensavstemming for dato=$triggerdato")
-            taskRepository.saveAll(
+            taskService.saveAll(
                 listOf(
                     KonsistensavstemmingTask.opprettTask(
                         KonsistensavstemmingPayload(StønadType.OVERGANGSSTØNAD, triggerdato),

@@ -22,10 +22,18 @@ object SikkerhetContext {
     }
 
     fun kallKommerFraFamilieEfMottak(): Boolean {
+        return kallKommerFra("teamfamilie:familie-ef-mottak")
+    }
+
+    fun kallKommerFraKlage(): Boolean {
+        return kallKommerFra("teamfamilie:familie-klage")
+    }
+
+    private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         val applikasjonsnavn = claims.get("azp_name")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
         secureLogger.info("Applikasjonsnavn: $applikasjonsnavn")
-        return applikasjonsnavn.endsWith("teamfamilie:familie-ef-mottak")
+        return applikasjonsnavn.endsWith(forventetApplikasjonsSuffix)
     }
 
     /**
@@ -56,14 +64,15 @@ object SikkerhetContext {
             )
     }
 
-    fun hentGrupperFraToken(): List<String> {
+    fun hentGrupperFraToken(): Set<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
-                    it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
+                    val groups = it.getClaims("azuread")?.get("groups") as List<String>?
+                    groups?.toSet() ?: emptySet()
                 },
-                onFailure = { emptyList() }
+                onFailure = { emptySet() }
             )
     }
 

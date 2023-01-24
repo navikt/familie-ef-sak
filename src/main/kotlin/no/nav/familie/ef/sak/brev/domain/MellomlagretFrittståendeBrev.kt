@@ -8,7 +8,8 @@ import java.util.UUID
 
 @Table("mellomlagret_frittstaende_brev")
 data class MellomlagretFrittståendeBrev(
-    @Id val id: UUID = UUID.randomUUID(),
+    @Id
+    val id: UUID = UUID.randomUUID(),
     val fagsakId: UUID,
     val brev: Fritekstbrev,
     val brevType: FrittståendeBrevKategori,

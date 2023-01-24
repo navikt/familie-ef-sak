@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelseType
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
+import java.time.YearMonth
 import java.util.UUID
 
 fun lagTilkjentYtelse(
@@ -14,20 +14,18 @@ fun lagTilkjentYtelse(
     id: UUID = UUID.randomUUID(),
     behandlingId: UUID = UUID.randomUUID(),
     personident: String = "123",
-    vedtaksdato: LocalDate = LocalDate.now(),
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
-    grunnbeløpsdato: LocalDate = nyesteGrunnbeløp.periode.fomDato
+    grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom
 ) =
     TilkjentYtelse(
         id = id,
         behandlingId = behandlingId,
         personident = personident,
-        vedtakstidspunkt = vedtaksdato.atStartOfDay().truncatedTo(ChronoUnit.MILLIS),
         type = type,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
         startdato = startdato,
-        grunnbeløpsdato = grunnbeløpsdato
+        grunnbeløpsmåned = grunnbeløpsmåned
     )
 
 fun lagAndelTilkjentYtelse(

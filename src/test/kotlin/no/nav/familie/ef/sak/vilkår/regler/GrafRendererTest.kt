@@ -55,7 +55,7 @@ internal class GrafRendererTest {
     internal fun `print sivilstand`() {
         val regel = SivilstandRegel()
         val sivilstandregler = SivilstandData.values().map {
-            val initereDelvilkårsvurdering = regel.initereDelvilkårsvurdering(
+            val initereDelvilkårsvurdering = regel.initiereDelvilkårsvurdering(
                 HovedregelMetadata(
                     it.søknad.sivilstand,
                     it.sivilstandstype,

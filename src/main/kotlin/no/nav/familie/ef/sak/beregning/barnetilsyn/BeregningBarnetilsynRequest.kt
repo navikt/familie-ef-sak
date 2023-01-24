@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import java.math.BigDecimal
@@ -15,12 +17,15 @@ data class BeregningBarnetilsynRequest(
 data class UtgiftsMåned(
     val årMåned: YearMonth,
     val barn: List<UUID>,
-    val utgifter: BigDecimal
+    val utgifter: BigDecimal,
+    val aktivitetstype: AktivitetstypeBarnetilsyn?,
+    val periodetype: PeriodetypeBarnetilsyn
 )
 
 fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
+    brukIkkeVedtatteSatser: Boolean
 ): BeløpsperiodeBarnetilsynDto {
     val kontantStøtteBeløp = kontantstøttePerioder.finnPeriodeBeløp(this)
     val tilleggsstønadsperiodeBeløp = tilleggsstønadsperioder.finnPeriodeBeløp(this)
@@ -29,7 +34,8 @@ fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
         utgiftsperiode = this,
         kontantstøtteBeløp = BigDecimal(kontantStøtteBeløp),
         tilleggsstønadBeløp = BigDecimal(tilleggsstønadsperiodeBeløp),
-        barn = this.barn
+        barn = this.barn,
+        brukIkkeVedtatteSatser = brukIkkeVedtatteSatser
     )
 }
 

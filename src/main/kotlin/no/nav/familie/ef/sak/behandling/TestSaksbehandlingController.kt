@@ -48,16 +48,13 @@ import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -80,7 +77,7 @@ class TestSaksbehandlingController(
     private val personService: PersonService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val barnService: BarnService,
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
     private val journalpostClient: JournalpostClient,
     private val migreringService: MigreringService,
@@ -147,6 +144,7 @@ class TestSaksbehandlingController(
         )
     )
 
+    @Transactional
     @PostMapping(path = ["fagsak"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettFagsakForTestperson(@RequestBody testFagsakRequest: TestFagsakRequest): Ressurs<UUID> {
         val personIdent = testFagsakRequest.personIdent
@@ -183,8 +181,8 @@ class TestSaksbehandlingController(
                 SikkerhetContext.hentSaksbehandler(true),
                 "Dummy-oppgave opprettet i ny løsning"
             )
-            taskRepository.save(
-                taskRepository.save(
+            taskService.save(
+                taskService.save(
                     BehandlingsstatistikkTask.opprettMottattTask(
                         behandlingId = behandling.id,
                         oppgaveId = oppgaveId
@@ -254,7 +252,7 @@ class TestSaksbehandlingController(
     }
 
     private fun mapSøkersBarn(søkerMedBarn: SøkerMedBarn): List<Barn> {
-        val barneListe: List<Barn> = søkerMedBarn.barn.map {
+        val barneListe: List<Barn> = søkerMedBarn.barn.filter { it.value.fødsel.gjeldende().erUnder18År() }.map {
             TestsøknadBuilder.Builder().defaultBarn(
                 navn = it.value.navn.gjeldende().visningsnavn(),
                 fødselsnummer = it.key,
@@ -310,27 +308,6 @@ class TestSaksbehandlingController(
             inntektsgrunnlag = 0,
             samordningsfradrag = 0
         )
-    }
-
-    private fun arkiver(fnr: String): String {
-        val arkiverDokumentRequest = ArkiverDokumentRequest(
-            fnr,
-            false,
-            listOf(
-                Dokument(
-                    "TEST".toByteArray(),
-                    Filtype.PDFA,
-                    null,
-                    null,
-                    Dokumenttype.OVERGANGSSTØNAD_SØKNAD
-                )
-            ),
-            emptyList()
-        )
-
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
-        val dokumentResponse = journalpostClient.arkiverDokument(arkiverDokumentRequest, saksbehandler)
-        return dokumentResponse.journalpostId
     }
 }
 

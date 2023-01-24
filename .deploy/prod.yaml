@@ -53,6 +53,7 @@ spec:
       rules:
         - application: familie-ef-sak-frontend
         - application: familie-prosessering
+        - application: familie-klage
         - application: familie-ef-personhendelse
         - application: familie-ef-mottak
         - application: familie-ef-proxy
@@ -70,8 +71,12 @@ spec:
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
         - application: familie-dokument
+        - application: historisk-pensjon
+          namespace: historisk
         - application: familie-ef-proxy
           cluster: prod-fss
+        - application: veilarbregistrering
+          namespace: paw
       external:
         - host: api-gw.oera.no
         - host: unleash.nais.io
@@ -93,6 +98,7 @@ spec:
           - id: "7a271f87-39fb-468b-a9ee-6cf3c070f548" # 0000-GA-Barnetrygd-Beslutter # Brukes for å hente perioder til utvidet barnetrygd
           - id: "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
+          - id: "73ff0e76-f2b1-4586-8387-b33f15617381" # 0000-GA-GOSYS_UTVIDET egen ansatt
         extra:
           - "NAVident"
           - "azp_name"
@@ -100,5 +106,4 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
   envFrom:
-    - secret: familie
     - secret: familie-ef-sak

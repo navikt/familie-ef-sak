@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -12,17 +15,23 @@ import java.time.Month
 import java.time.YearMonth
 
 @Service
-class BeregningBarnetilsynService {
+class BeregningBarnetilsynService(private val featureToggleService: FeatureToggleService) {
 
     fun beregnYtelseBarnetilsyn(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
+        erMigrering: Boolean = false
     ): List<BeløpsperiodeBarnetilsynDto> {
-        validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
+        validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder, erMigrering)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
 
-        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(kontantstøttePerioder, tilleggsstønadsperioder)
+        val brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
+        return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(
+            kontantstøttePerioder,
+            tilleggsstønadsperioder,
+            brukIkkeVedtatteSatser
+        )
             .values.toList()
             .mergeSammenhengendePerioder()
     }
@@ -54,7 +63,8 @@ class BeregningBarnetilsynService {
     private fun validerGyldigePerioder(
         utgiftsperioderDto: List<UtgiftsperiodeDto>,
         kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
-        tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>
+        tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>,
+        erMigrering: Boolean
     ) {
         val utgiftsperioder = utgiftsperioderDto.tilPerioder()
         val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
@@ -88,6 +98,12 @@ class BeregningBarnetilsynService {
         brukerfeilHvis((kontantstøttePerioder.harPeriodeFør(innføringsMndKontantstøttefradrag))) {
             "Fradrag for innvilget kontantstøtte trår i kraft: $innføringsMndKontantstøttefradrag"
         }
+
+        val manglerAktivitetstype =
+            utgiftsperioderDto.any { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR && it.aktivitetstype == null }
+        brukerfeilHvis(!erMigrering && manglerAktivitetstype) {
+            "Utgiftsperioder $utgiftsperioderDto mangler en eller flere aktivitetstyper"
+        }
     }
 
     private fun harUrelevantReduksjonsPeriode(
@@ -106,20 +122,23 @@ private fun List<Månedsperiode>.harPeriodeFør(årMåned: YearMonth): Boolean {
     return this.any { it.fom < årMåned }
 }
 
-fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned() =
+fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser: Boolean) =
     this.perioder.tilBeløpsperioderPerUtgiftsmåned(
         this.perioderKontantstøtte,
-        this.tilleggsstønad.perioder
+        this.tilleggsstønad.perioder,
+        brukIkkeVedtatteSatser
     )
 
 fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+    tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
+    brukIkkeVedtatteSatser: Boolean
 ) = this.map { it.split() }
     .flatten().associate { utgiftsMåned ->
         utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
             kontantstøttePerioder,
-            tilleggsstønadsperioder
+            tilleggsstønadsperioder,
+            brukIkkeVedtatteSatser
         )
     }
 
@@ -132,20 +151,27 @@ fun UtgiftsperiodeDto.split(): List<UtgiftsMåned> {
     val perioder = mutableListOf<UtgiftsMåned>()
     var måned = this.periode.fom
     while (måned <= this.periode.tom) {
-        perioder.add(UtgiftsMåned(måned, this.barn, this.utgifter.toBigDecimal()))
+        val utgifter = this.utgifter.toBigDecimal()
+        perioder.add(UtgiftsMåned(måned, this.barn, utgifter, this.aktivitetstype, this.periodetype))
         måned = måned.plusMonths(1)
     }
     return perioder
 }
 
 /**
- * Merger sammenhengende perioder hvor beløp og @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
+ * Merger sammenhengende perioder hvor beløp, aktivitetstype, periodetype og
+ * @BeløpsperiodeBarnetilsynDto#beregningsgrunnlag (it.toKey()) er like.
  */
 fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<BeløpsperiodeBarnetilsynDto> {
     val sortertPåDatoListe = this.sortedBy { it.periode }
+        .filter { it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR }
     return sortertPåDatoListe.fold(mutableListOf()) { acc, entry ->
         val last = acc.lastOrNull()
-        if (last != null && last.hengerSammenMed(entry) && last.sammeBeløpOgBeregningsgrunnlag(entry)) {
+        if (
+            last != null && last.hengerSammenMed(entry) &&
+            last.sammeBeløpOgBeregningsgrunnlag(entry) &&
+            last.sammeAktivitet(entry)
+        ) {
             acc.removeLast()
             acc.add(
                 last.copy(
@@ -159,10 +185,12 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
     }
 }
 
-fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto): Boolean {
-    return this.periode påfølgesAv other.periode
-}
+fun BeløpsperiodeBarnetilsynDto.hengerSammenMed(other: BeløpsperiodeBarnetilsynDto) =
+    this.periode påfølgesAv other.periode
 
 fun BeløpsperiodeBarnetilsynDto.sammeBeløpOgBeregningsgrunnlag(other: BeløpsperiodeBarnetilsynDto) =
     this.beløp == other.beløp &&
         this.beregningsgrunnlag == other.beregningsgrunnlag
+
+fun BeløpsperiodeBarnetilsynDto.sammeAktivitet(other: BeløpsperiodeBarnetilsynDto) =
+    this.aktivitetstype == other.aktivitetstype

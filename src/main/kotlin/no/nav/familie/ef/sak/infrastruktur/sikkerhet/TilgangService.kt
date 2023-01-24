@@ -117,6 +117,13 @@ class TilgangService(
         }
     }
 
+    fun validerTilgangTilEksternFagsak(eksternFagsakId: Long, event: AuditLoggerEvent) {
+        val fagsakId = cacheManager.getValue("eksternFagsakId", eksternFagsakId) {
+            fagsakService.hentFagsakDtoPåEksternId(eksternFagsakId = eksternFagsakId).id
+        }
+        validerTilgangTilFagsak(fagsakId, event)
+    }
+
     fun validerTilgangTilFagsakPerson(fagsakPersonId: UUID, event: AuditLoggerEvent) {
         val personIdent = cacheManager.getValue("fagsakPersonIdent", fagsakPersonId) {
             fagsakPersonService.hentAktivIdent(fagsakPersonId)
@@ -166,6 +173,9 @@ class TilgangService(
     fun harTilgangTilRolle(minimumsrolle: BehandlerRolle): Boolean {
         return SikkerhetContext.harTilgangTilGittRolle(rolleConfig, minimumsrolle)
     }
+
+    fun harEgenAnsattRolle(): Boolean =
+        hentGrupperFraToken().contains(rolleConfig.egenAnsatt)
 
     /**
      * Filtrerer data basert på om man har tilgang til den eller ikke

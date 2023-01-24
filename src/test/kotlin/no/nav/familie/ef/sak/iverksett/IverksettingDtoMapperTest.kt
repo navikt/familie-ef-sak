@@ -11,7 +11,9 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingsRepository
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
@@ -29,6 +31,8 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.repository.søker
 import no.nav.familie.ef.sak.repository.tilkjentYtelse
+import no.nav.familie.ef.sak.repository.vedtak
+import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
@@ -36,16 +40,23 @@ import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekrevingsvalg
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerStudietype
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.HOVEDPERIODE
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.MIDLERTIDIG_OPPHØR
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType.SANKSJON
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.Brevmottaker
@@ -59,7 +70,9 @@ import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerBarnetilsynDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VedtaksdetaljerSkolepengerDto
+import no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeOvergangsstønadDto
 import no.nav.familie.kontrakter.ef.iverksett.VilkårsvurderingDto
+import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -95,6 +108,7 @@ internal class IverksettingDtoMapperTest {
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>(relaxed = true)
     private val barnMatcher = mockk<BarnMatcher>()
+    private val årsakRevurderingsRepository = mockk<ÅrsakRevurderingsRepository>()
 
     private val iverksettingDtoMapper =
         IverksettingDtoMapper(
@@ -107,7 +121,8 @@ internal class IverksettingDtoMapperTest {
             tilkjentYtelseService = tilkjentYtelseService,
             vedtakService = vedtakService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
-            brevmottakereRepository = brevmottakereRepository
+            brevmottakereRepository = brevmottakereRepository,
+            årsakRevurderingsRepository = årsakRevurderingsRepository
         )
 
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
@@ -125,6 +140,12 @@ internal class IverksettingDtoMapperTest {
             )
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns behandlingshistorikk
         every { brevmottakereRepository.findByIdOrNull(any()) } returns null
+        every { årsakRevurderingsRepository.findByIdOrNull(any()) } returns ÅrsakRevurdering(
+            behandlingId = saksbehandling.id,
+            opplysningskilde = Opplysningskilde.MELDING_MODIA,
+            årsak = Revurderingsårsak.ENDRING_INNTEKT,
+            beskrivelse = "beskrivelse"
+        )
     }
 
     @Test
@@ -162,11 +183,8 @@ internal class IverksettingDtoMapperTest {
     @Test
     internal fun `tilDto - skal kunne mappe person uten barn`() {
         every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
-            opprettGrunnlagsdata(),
-            false,
-            LocalDateTime.now()
-        )
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+            GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(UUID.randomUUID(), personIdent = "132")
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
@@ -206,6 +224,64 @@ internal class IverksettingDtoMapperTest {
     }
 
     @Test
+    internal fun `skal mappe avslag og årsak til avslag`() {
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.AVSLÅTT)
+        val avslåttVedtak = Vedtak(
+            behandlingId = behandling.id,
+            resultatType = ResultatType.AVSLÅ,
+            avslåÅrsak = AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
+        )
+
+        every { vedtakService.hentVedtak(any()) } returns avslåttVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        assertThat(iverksettDto.vedtak.avslagÅrsak).isEqualTo(avslåttVedtak.avslåÅrsak)
+    }
+
+    @Test
+    internal fun `skal sende med sanksjonsperioder for innvilget vedtak`() {
+        val dato = LocalDate.of(2021, 1, 1)
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.INNVILGET)
+        val perioder = listOf(
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = SANKSJON)
+        )
+        val innvilgetVedtak = vedtak(behandling.id, perioder = PeriodeWrapper(perioder))
+
+        every { vedtakService.hentVedtak(any()) } returns innvilgetVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        val periodetyper =
+            iverksettDto.vedtak.vedtaksperioder.map { it as VedtaksperiodeOvergangsstønadDto }.map { it.periodeType }
+        val hovedperiode = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.HOVEDPERIODE
+        val sanksjon = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.SANKSJON
+        assertThat(periodetyper).containsExactly(hovedperiode, sanksjon)
+    }
+
+    @Test
+    internal fun `skal ikke sende med midlertidig opphør med sanksjonsperioder for innvilget vedtak`() {
+        val dato = LocalDate.of(2021, 1, 1)
+        mockReturnerObjekterMedAlleFelterFylt()
+
+        val saksbehandling = saksbehandling(resultat = BehandlingResultat.INNVILGET)
+        val perioder = listOf(
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = MIDLERTIDIG_OPPHØR),
+            vedtaksperiode(startDato = dato, sluttDato = dato, vedtaksperiodeType = HOVEDPERIODE)
+        )
+        val innvilgetVedtak = vedtak(behandling.id, perioder = PeriodeWrapper(perioder))
+
+        every { vedtakService.hentVedtak(any()) } returns innvilgetVedtak
+        val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, "beslutter")
+        val periodetyper =
+            iverksettDto.vedtak.vedtaksperioder.map { it as VedtaksperiodeOvergangsstønadDto }.map { it.periodeType }
+        val hovedperiode = no.nav.familie.kontrakter.ef.iverksett.VedtaksperiodeType.HOVEDPERIODE
+        assertThat(periodetyper).containsExactly(hovedperiode, hovedperiode)
+    }
+
+    @Test
     internal fun `skal kunne mappe alle enums`() {
         BehandlingType.values().forEach { BehandlingTypeIverksett.valueOf(it.name) }
 
@@ -216,7 +292,7 @@ internal class IverksettingDtoMapperTest {
 
         AktivitetType.values().forEach { AktivitetTypeIverksett.valueOf(it.name) }
         VedtaksperiodeType.values()
-            .filter { it != VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
+            .filter { it != MIDLERTIDIG_OPPHØR }
             .forEach { VedtaksperiodeTypeIverksett.valueOf(it.name) }
 
         SkolepengerStudietype.values().forEach { SkolepengerStudietypeIverksett.valueOf(it.name) }
@@ -263,6 +339,8 @@ internal class IverksettingDtoMapperTest {
         assertThat(behandling.eksternId).isEqualTo(1)
         assertThat(behandling.aktivitetspliktInntrefferDato).isNull() // Ikke i bruk?
         assertThat(behandling.kravMottatt).isEqualTo(LocalDate.of(2022, 3, 1))
+        assertThat(behandling.årsakRevurdering!!)
+            .isEqualTo(ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ENDRING_INNTEKT))
         assertThat(behandling.vilkårsvurderinger.size).isEqualTo(1)
     }
 
@@ -339,7 +417,7 @@ internal class IverksettingDtoMapperTest {
         assertThat(vedtaksperiode.fraOgMed).isEqualTo(LocalDate.of(2022, 3, 27))
         assertThat(vedtaksperiode.tilOgMed).isEqualTo(LocalDate.of(2022, 3, 28))
         assertThat(vedtaksperiode.aktivitet.name).isEqualTo(AktivitetType.BARN_UNDER_ETT_ÅR.name)
-        assertThat(vedtaksperiode.periodeType.name).isEqualTo(VedtaksperiodeType.HOVEDPERIODE.name)
+        assertThat(vedtaksperiode.periodeType.name).isEqualTo(HOVEDPERIODE.name)
     }
 
     private fun assertVedtaksperiode(vedtak: VedtaksdetaljerBarnetilsynDto) {
@@ -385,11 +463,8 @@ internal class IverksettingDtoMapperTest {
                 søker = søker(),
                 barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn"))
             )
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
-            grunnlagsdata,
-            false,
-            LocalDateTime.parse("2022-03-25T05:51:31.439")
-        )
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+            GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.parse("2022-03-25T05:51:31.439"))
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
         val behandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb")
 
@@ -435,7 +510,8 @@ internal class IverksettingDtoMapperTest {
         migrert = false,
         opprettetAv = "z094239",
         opprettetTid = LocalDateTime.parse("2022-03-02T05:36:39.553"),
-        endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556")
+        endretTid = LocalDateTime.parse("2022-03-03T05:36:39.556"),
+        vedtakstidspunkt = LocalDateTime.parse("2022-03-03T05:36:39.556")
     )
 
     private val behandlingBarnJson = """
@@ -535,7 +611,8 @@ internal class IverksettingDtoMapperTest {
                     "datoFra": "2022-03-27",
                     "datoTil": "2022-03-28",
                     "utgifter": 10,
-                    "barn": ["d1d105bb-a573-4870-932e-21def0226cfa"]
+                    "barn": ["d1d105bb-a573-4870-932e-21def0226cfa"],
+                    "periodetype": "ORDINÆR"
                 }] 
             },
             "kontantstøtte": {
@@ -555,7 +632,7 @@ internal class IverksettingDtoMapperTest {
             "skolepenger": $vedtakSkolepengerJson,
             "samordningsfradragType": "UFØRETRYGD",
             "saksbehandlerIdent": "saksbehandlerIdent",
-            "opphørFom": "2022-03-27",
+            "opphørFom": "2022-03",
             "beslutterIdent": "beslutter",
             "sanksjonsårsak": "SAGT_OPP_STILLING",
             "internBegrunnelse": "internBegrunnelse"

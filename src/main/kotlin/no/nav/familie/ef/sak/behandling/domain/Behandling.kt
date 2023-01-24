@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.MappedCollection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -35,7 +36,8 @@ data class Behandling(
     val sporbar: Sporbar = Sporbar(),
     val resultat: BehandlingResultat,
     @Column("henlagt_arsak")
-    val henlagtÅrsak: HenlagtÅrsak? = null
+    val henlagtÅrsak: HenlagtÅrsak? = null,
+    val vedtakstidspunkt: LocalDateTime? = null
 ) {
 
     fun kanHenlegges(): Boolean = !status.behandlingErLåstForVidereRedigering()
@@ -43,6 +45,9 @@ data class Behandling(
     fun erMigrering(): Boolean = årsak == BehandlingÅrsak.MIGRERING
 
     fun erAvsluttet(): Boolean = status == BehandlingStatus.FERDIGSTILT
+
+    fun vedtakstidspunktEllerFeil(): LocalDateTime =
+        this.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=$id")
 
     init {
         if (resultat == BehandlingResultat.HENLAGT) {
@@ -56,6 +61,9 @@ enum class BehandlingType(val visningsnavn: String) {
     REVURDERING("Revurdering")
 }
 
+/**
+ * Sjekkes sammen med vedtakstidspunkt i [behandling_resultat_vedtakstidspunkt_check]
+ */
 enum class BehandlingResultat(val displayName: String) {
     INNVILGET(displayName = "Innvilget"),
     OPPHØRT(displayName = "Opphørt"),
@@ -73,6 +81,10 @@ enum class BehandlingStatus {
     SATT_PÅ_VENT
     ;
 
+    fun visningsnavn(): String {
+        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
+    }
+
     fun behandlingErLåstForVidereRedigering(): Boolean =
-        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
+        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)
 }

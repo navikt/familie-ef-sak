@@ -12,6 +12,8 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakType
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
+import no.nav.familie.kontrakter.ef.infotrygd.Vedtakstreff
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -40,24 +42,37 @@ class InfotrygdReplikaMock {
             every { client.hentSammenslåttePerioder(any()) } answers {
                 hentPerioderDefaultResponse(firstArg())
             }
-            every { client.hentSaker(any()) } returns InfotrygdSakResponse(
-                listOf(
-                    InfotrygdSak(
-                        "1",
-                        stønadType = StønadType.BARNETILSYN,
-                        resultat = InfotrygdSakResultat.ÅPEN_SAK,
-                        type = InfotrygdSakType.KLAGE
+            every { client.hentSaker(any()) } answers {
+                InfotrygdSakResponse(
+                    listOf(
+                        InfotrygdSak(
+                            personIdent = firstArg<InfotrygdSøkRequest>().personIdenter.first(),
+                            stønadType = StønadType.BARNETILSYN,
+                            resultat = InfotrygdSakResultat.ÅPEN_SAK,
+                            type = InfotrygdSakType.KLAGE
+                        )
                     )
                 )
-            )
-            every { client.hentInslagHosInfotrygd(any()) } answers { InfotrygdFinnesResponse(emptyList(), emptyList()) }
+            }
+            every { client.hentInslagHosInfotrygd(any()) } answers {
+                InfotrygdFinnesResponse(
+                    listOf(
+                        Vedtakstreff(
+                            firstArg<InfotrygdSøkRequest>().personIdenter.first(),
+                            StønadType.OVERGANGSSTØNAD,
+                            false
+                        )
+                    ),
+                    emptyList()
+                )
+            }
             every { client.hentPersonerForMigrering(any()) } returns emptySet()
         }
 
         fun hentPerioderDefaultResponse(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
             val personIdent = request.personIdenter.first()
             return InfotrygdPeriodeResponse(
-                overgangsstønad = listOf(lagInfotrygdPeriode()),
+                overgangsstønad = listOf(lagInfotrygdPeriode(personIdent)),
                 barnetilsyn = listOf(
                     lagInfotrygdPeriode(
                         personIdent = personIdent,

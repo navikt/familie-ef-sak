@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTaskPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
@@ -31,6 +32,7 @@ import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.repository.saksbehandling
+import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakService
@@ -43,7 +45,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -56,7 +58,7 @@ import java.util.UUID
 
 internal class SendTilBeslutterStegTest {
 
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val fagsakService = mockk<FagsakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
@@ -66,6 +68,7 @@ internal class SendTilBeslutterStegTest {
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val vurderingService = mockk<VurderingService>()
     private val validerOmregningService = mockk<ValiderOmregningService>(relaxed = true)
+    private val årsakRevurderingService = mockk<ÅrsakRevurderingService>(relaxed = true)
     private val simuleringsoppsummering = Simuleringsoppsummering(
         perioder = listOf(),
         fomDatoNestePeriode = null,
@@ -80,7 +83,7 @@ internal class SendTilBeslutterStegTest {
 
     private val beslutteVedtakSteg =
         SendTilBeslutterSteg(
-            taskRepository,
+            taskService,
             oppgaveService,
             fagsakService,
             behandlingService,
@@ -89,7 +92,8 @@ internal class SendTilBeslutterStegTest {
             simuleringService,
             tilbakekrevingService,
             vurderingService,
-            validerOmregningService
+            validerOmregningService,
+            årsakRevurderingService
         )
     private val fagsak = fagsak(
         stønadstype = StønadType.OVERGANGSSTØNAD,
@@ -132,7 +136,7 @@ internal class SendTilBeslutterStegTest {
             fagsakService.hentAktivIdent(any())
         } returns "12345678901"
         every {
-            taskRepository.save(capture(taskSlot))
+            taskService.save(capture(taskSlot))
         } returns Task("", "", Properties())
         every { oppgaveService.hentOppgaveSomIkkeErFerdigstilt(any(), any()) } returns null
 
@@ -146,6 +150,7 @@ internal class SendTilBeslutterStegTest {
 
         every { tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(any()) } returns true
         every { tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(any()) } returns true
+        every { vedtakService.hentVedtak(any()) } returns vedtak(behandling.id)
         mockBrukerContext(saksbehandlerNavn)
     }
 
@@ -159,6 +164,8 @@ internal class SendTilBeslutterStegTest {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         beslutteVedtakSteg.validerSteg(innvilgetBehandling)
+
+        verify(exactly = 1) { årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(any()) }
     }
 
     @Test
@@ -168,7 +175,8 @@ internal class SendTilBeslutterStegTest {
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE
         val frontendFeilmelding =
             assertThrows<ApiFeil> { beslutteVedtakSteg.validerSteg(innvilgetBehandling) }.feil
-        val forvetetFeilmelding = "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
+        val forvetetFeilmelding =
+            "Kan ikke innvilge hvis ikke alle vilkår er oppfylt for behandlingId: ${innvilgetBehandling.id}"
         assertThat(frontendFeilmelding).isEqualTo(forvetetFeilmelding)
     }
 

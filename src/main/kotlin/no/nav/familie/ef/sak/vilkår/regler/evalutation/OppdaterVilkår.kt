@@ -193,7 +193,7 @@ object OppdaterVilkår {
         behandlingId: UUID,
         barnId: UUID? = null
     ): Vilkårsvurdering {
-        val delvilkårsvurdering = vilkårsregel.initereDelvilkårsvurdering(metadata, barnId = barnId)
+        val delvilkårsvurdering = vilkårsregel.initiereDelvilkårsvurdering(metadata, barnId = barnId)
         return Vilkårsvurdering(
             behandlingId = behandlingId,
             type = vilkårsregel.vilkårType,

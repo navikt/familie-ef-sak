@@ -4,9 +4,13 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.aktivitetOvergangsstønad
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.periodeTypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkUtil.periodeTypeOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.historikk.BehandlingHistorikkUtil.lagBehandlingHistorikkData
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -25,18 +29,33 @@ object AndelHistorikkBeregner {
         var kontrollert: UUID
     )
 
+    private data class TilkjentYtelseMedVedtakstidspunkt(
+        val tilkjentYtelse: TilkjentYtelse,
+        val vedtakstidspunkt: LocalDateTime
+    )
+
     fun lagHistorikk(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         vedtaksliste: List<Vedtak>,
         behandlinger: List<Behandling>,
         tilOgMedBehandlingId: UUID?,
-        behandlingIdsTilAktivitetArbeid: Map<UUID, SvarId?>
+        behandlingIdsTilAktivitetArbeid: Map<UUID, SvarId?>,
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkDto> {
-        val behandlingHistorikkData = lagBehandlingHistorikkData(vedtaksliste, tilkjentYtelser, behandlingIdsTilAktivitetArbeid)
+        val behandlingHistorikkData =
+            lagBehandlingHistorikkData(behandlinger, vedtaksliste, tilkjentYtelser, behandlingIdsTilAktivitetArbeid)
         return if (tilOgMedBehandlingId == null) {
-            lagHistorikk(tilkjentYtelser, behandlingHistorikkData, behandlinger)
+            lagHistorikk(stønadstype, tilkjentYtelser, behandlingHistorikkData, behandlinger, konfigurasjon)
         } else {
-            lagHistorikkTilBehandlingId(tilkjentYtelser, behandlingHistorikkData, behandlinger, tilOgMedBehandlingId)
+            lagHistorikkTilBehandlingId(
+                stønadstype,
+                tilkjentYtelser,
+                behandlingHistorikkData,
+                behandlinger,
+                tilOgMedBehandlingId,
+                konfigurasjon
+            )
         }
     }
 
@@ -44,10 +63,12 @@ object AndelHistorikkBeregner {
      * Filtrerer vekk data som kommer etter behandlingen som man sender inn
      */
     private fun lagHistorikkTilBehandlingId(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         vedtaksliste: List<BehandlingHistorikkData>,
         behandlinger: List<Behandling>,
-        tilOgMedBehandlingId: UUID?
+        tilOgMedBehandlingId: UUID?,
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkDto> {
         val filtrerteBehandlinger = filtrerBehandlinger(behandlinger, tilOgMedBehandlingId)
 
@@ -55,7 +76,13 @@ object AndelHistorikkBeregner {
         val filtrerteVedtak = vedtaksliste.filter { filtrerteBehandlingId.contains(it.behandlingId) }
         val filtrerteTilkjentYtelse = tilkjentYtelser.filter { filtrerteBehandlingId.contains(it.behandlingId) }
 
-        return lagHistorikk(filtrerteTilkjentYtelse, filtrerteVedtak, filtrerteBehandlinger)
+        return lagHistorikk(
+            stønadstype,
+            filtrerteTilkjentYtelse,
+            filtrerteVedtak,
+            filtrerteBehandlinger,
+            konfigurasjon
+        )
     }
 
     private fun filtrerBehandlinger(
@@ -65,23 +92,25 @@ object AndelHistorikkBeregner {
         val tilOgMedBehandling = behandlinger.firstOrNull { it.id == tilOgMedBehandlingId }
             ?: error("Finner ikke behandling $tilOgMedBehandlingId")
         return tilOgMedBehandling.let { tomBehandling ->
-            behandlinger.filter { it.sporbar.opprettetTid < tomBehandling.sporbar.opprettetTid } + tomBehandling
+            behandlinger.filter { it.vedtakstidspunktEllerFeil() < tomBehandling.vedtakstidspunktEllerFeil() } + tomBehandling
         }
     }
 
     private fun lagHistorikk(
+        stønadstype: StønadType,
         tilkjentYtelser: List<TilkjentYtelse>,
         behandlingHistorikkData: List<BehandlingHistorikkData>,
-        behandlinger: List<Behandling>
+        behandlinger: List<Behandling>,
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkDto> {
-        val historikk = lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData)
+        val historikk =
+            lagHistorikkHolders(sorterTilkjentYtelser(tilkjentYtelser), behandlingHistorikkData, konfigurasjon)
         val behandlingerPåId = behandlinger.associateBy { it.id }
 
         return historikk.map {
             val vedtaksperiode = it.vedtaksperiode
-            val aktivitet = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.aktivitet else null
-            val periodeType = if (vedtaksperiode is VedtakshistorikkperiodeOvergangsstønad) vedtaksperiode.periodeType else null
             val barnetilsyn = if (vedtaksperiode is VedtakshistorikkperiodeBarnetilsyn) vedtaksperiode else null
+            val sanksjon = if (vedtaksperiode is Sanksjonsperiode) vedtaksperiode else null
             val behandling = behandlingerPåId.getValue(it.behandlingId)
 
             AndelHistorikkDto(
@@ -91,43 +120,56 @@ object AndelHistorikkBeregner {
                 vedtakstidspunkt = it.vedtakstidspunkt,
                 saksbehandler = it.saksbehandler,
                 andel = AndelMedGrunnlagDto(andel = it.andel, barnetilsyn),
-                aktivitet = aktivitet,
-                periodeType = periodeType,
+                aktivitet = aktivitetOvergangsstønad(stønadstype, vedtaksperiode),
+                aktivitetBarnetilsyn = barnetilsyn?.aktivitetstype,
+                periodeType = periodeTypeOvergangsstønad(stønadstype, vedtaksperiode),
+                periodetypeBarnetilsyn = periodeTypeBarnetilsyn(stønadstype, vedtaksperiode),
                 endring = it.endring,
                 aktivitetArbeid = barnetilsyn?.aktivitetArbeid,
-                erSanksjon = vedtaksperiode.erSanksjon,
-                sanksjonsårsak = vedtaksperiode.sanksjonsårsak
+                erSanksjon = sanksjon != null,
+                sanksjonsårsak = sanksjon?.sanksjonsårsak,
+                erOpphør = vedtaksperiode is Opphørsperiode
             )
         }
     }
 
     private fun lagHistorikkHolders(
         tilkjentYtelser: List<TilkjentYtelse>,
-        behandlingHistorikkData: List<BehandlingHistorikkData>
+        behandlingHistorikkData: List<BehandlingHistorikkData>,
+        konfigurasjon: HistorikkKonfigurasjon
     ): List<AndelHistorikkHolder> {
         val historikk = mutableListOf<AndelHistorikkHolder>()
 
-        val vedtaksperioderPåBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData)
+        val vedtaksdataPerBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
 
         tilkjentYtelser.forEach { tilkjentYtelse ->
-            val vedtaksperioder = vedtaksperioderPåBehandling.getValue(tilkjentYtelse.behandlingId)
-            val andelerFraSanksjon = lagAndelerFraSanksjoner(vedtaksperioder, tilkjentYtelse)
-            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjon).forEach { andel ->
+            val vedtaksdata = vedtaksdataPerBehandling.getValue(tilkjentYtelse.behandlingId)
+            val vedtaksperioder = vedtaksdata.perioder
+            val tilkjentYtelseMedVedtakstidspunkt =
+                TilkjentYtelseMedVedtakstidspunkt(tilkjentYtelse, vedtaksdata.vedtakstidspunkt)
+
+            val andelerFraSanksjonOgOpphør = lagAndelerFraSanksjonerOgOpphør(vedtaksperioder, tilkjentYtelse)
+            (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjonOgOpphør).sortedBy { it.stønadFom }.forEach { andel ->
 
                 val vedtaksperiode = finnVedtaksperiodeForAndel(andel, vedtaksperioder)
-                markerHistorikkEtterAndelSomFjernet(tilkjentYtelse, andel, vedtaksperiode, historikk)
+                markerHistorikkEtterAndelSomFjernet(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode, historikk)
 
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
                 if (andelFraHistorikk == null) {
-                    historikk.add(index, lagNyAndel(tilkjentYtelse, andel, vedtaksperiode))
+                    historikk.add(index, lagNyAndel(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode))
                 } else {
-                    markerTidligereMedEndringOgReturnerNyAndel(tilkjentYtelse, andel, andelFraHistorikk, vedtaksperiode)
+                    markerTidligereMedEndringOgReturnerNyAndel(
+                        tilkjentYtelseMedVedtakstidspunkt,
+                        andel,
+                        andelFraHistorikk,
+                        vedtaksperiode
+                    )
                         ?.let { historikk.add(index, it) }
                 }
             }
 
-            markerAndelerSomErFjernet(historikk, tilkjentYtelse)
+            markerAndelerSomErFjernet(tilkjentYtelseMedVedtakstidspunkt, historikk)
         }
         return historikk
     }
@@ -138,23 +180,25 @@ object AndelHistorikkBeregner {
      * Dette fordi vi alltid revurderer fra X dato, og allt etter det datoet blir overskrevet
      */
     private fun markerHistorikkEtterAndelSomFjernet(
-        tilkjentYtelse: TilkjentYtelse,
+        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
         andel: AndelTilkjentYtelse,
         vedtaksperiode: Vedtakshistorikkperiode,
         historikk: MutableList<AndelHistorikkHolder>
     ) {
-        if (!vedtaksperiode.erSanksjon && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
+        val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
+        if (vedtaksperiode !is Sanksjonsperiode && vedtaksperiode !is Opphørsperiode && andel.kildeBehandlingId == tilkjentYtelse.behandlingId) {
             historikk.filter { it.andel.stønadFom > andel.stønadFom }
+                .filterNot { it.vedtaksperiode is Sanksjonsperiode }
                 .filter { it.endring == null || it.endring!!.type != EndringType.FJERNET }
-                .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse) }
+                .forEach { it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelseMedVedtakstidspunkt) }
         }
     }
 
-    private fun lagAndelerFraSanksjoner(
+    private fun lagAndelerFraSanksjonerOgOpphør(
         vedtaksperioder: List<Vedtakshistorikkperiode>,
         tilkjentYtelse: TilkjentYtelse
     ) =
-        vedtaksperioder.filter { it.erSanksjon }.map {
+        vedtaksperioder.filter { it is Sanksjonsperiode || it is Opphørsperiode }.map {
             AndelTilkjentYtelse(
                 beløp = 0,
                 periode = it.periode,
@@ -171,17 +215,17 @@ object AndelHistorikkBeregner {
      * Splitter eventuellt opp perioder som blivit avkortet, eks der stønadsbeløpet endret seg fra gitt måned
      */
     private fun markerTidligereMedEndringOgReturnerNyAndel(
-        tilkjentYtelse: TilkjentYtelse,
+        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
         andel: AndelTilkjentYtelse,
         andelFraHistorikk: AndelHistorikkHolder,
         vedtaksperiode: Vedtakshistorikkperiode
     ): AndelHistorikkHolder? {
         // settes for å senere markere de som fjernet hvis de blir markert som endret
-        andelFraHistorikk.kontrollert = tilkjentYtelse.id
+        andelFraHistorikk.kontrollert = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.id
 
         return andelFraHistorikk.finnEndringstype(andel, vedtaksperiode)?.let { endringType ->
             val andelHistorikk = andelFraHistorikk.andel
-            andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelse)
+            andelFraHistorikk.endring = lagEndring(endringType, tilkjentYtelseMedVedtakstidspunkt)
 
             return if (endringType == EndringType.SPLITTET) {
                 andelFraHistorikk.andel = andelHistorikk.copy(
@@ -190,10 +234,10 @@ object AndelHistorikkBeregner {
                 )
                 andelFraHistorikk.copy(
                     andel = andelHistorikk.copy(stønadFom = andel.stønadTom.plusDays(1)),
-                    endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
+                    endring = lagEndring(EndringType.FJERNET, tilkjentYtelseMedVedtakstidspunkt)
                 )
             } else {
-                lagNyAndel(tilkjentYtelse, andel, vedtaksperiode)
+                lagNyAndel(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode)
             }
         }
     }
@@ -210,33 +254,35 @@ object AndelHistorikkBeregner {
             .map { it.copy(andelerTilkjentYtelse = it.andelerTilkjentYtelse.sortedBy(AndelTilkjentYtelse::stønadFom)) }
 
     private fun lagNyAndel(
-        tilkjentYtelse: TilkjentYtelse,
+        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
         andel: AndelTilkjentYtelse,
         vedtaksperiode: Vedtakshistorikkperiode
     ) =
         AndelHistorikkHolder(
-            behandlingId = tilkjentYtelse.behandlingId,
-            vedtakstidspunkt = tilkjentYtelse.vedtakstidspunkt,
-            saksbehandler = tilkjentYtelse.sporbar.opprettetAv,
+            behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
+            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtakstidspunkt,
+            saksbehandler = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.sporbar.opprettetAv,
             andel = andel,
             endring = null,
             vedtaksperiode = vedtaksperiode,
-            kontrollert = tilkjentYtelse.id
+            kontrollert = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.id
         )
 
     private fun AndelHistorikkHolder.finnEndringstype(
-        tidligereAndel: AndelTilkjentYtelse,
-        tidligerePeriode: Vedtakshistorikkperiode
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
     ): EndringType? {
         return when {
-            erSanksjonMedSammePerioder(tidligereAndel, tidligerePeriode) -> null
-            aktivitetEllerPeriodeTypeHarEndretSeg(tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.beløp != tidligereAndel.beløp -> EndringType.ERSTATTET
-            this.andel.inntekt != tidligereAndel.inntekt -> EndringType.ERSTATTET
-            erEndringerForBarnetilsyn(this.vedtaksperiode, tidligerePeriode) -> EndringType.ERSTATTET
-            this.andel.stønadTom < tidligereAndel.stønadTom -> EndringType.ERSTATTET
-            this.andel.stønadTom > tidligereAndel.stønadTom -> EndringType.SPLITTET
-            this.andel.kildeBehandlingId != tidligereAndel.kildeBehandlingId -> EndringType.FJERNET
+            erOpphørMedSammePeriode(nyAndel, nyPeriode) -> null
+            nyPeriode is Opphørsperiode -> EndringType.FJERNET
+            erSanksjonMedSammePeriode(nyAndel, nyPeriode) -> null
+            aktivitetEllerPeriodeTypeHarEndretSeg(nyPeriode) -> EndringType.ERSTATTET
+            this.andel.beløp != nyAndel.beløp -> EndringType.ERSTATTET
+            this.andel.inntekt != nyAndel.inntekt -> EndringType.ERSTATTET
+            erEndringerForBarnetilsyn(this.vedtaksperiode, nyPeriode) -> EndringType.ERSTATTET
+            this.andel.stønadTom < nyAndel.stønadTom -> EndringType.ERSTATTET
+            this.andel.stønadTom > nyAndel.stønadTom -> EndringType.SPLITTET
+            this.andel.kildeBehandlingId != nyAndel.kildeBehandlingId -> EndringType.FJERNET
             else -> null // Uendret
         }
     }
@@ -256,18 +302,20 @@ object AndelHistorikkBeregner {
             first.tilleggsstønad != second.tilleggsstønad
     }
 
-    private fun AndelHistorikkHolder.erSanksjonMedSammePerioder(
-        tidligereAndel: AndelTilkjentYtelse,
-        tidligerePeriode: Vedtakshistorikkperiode
+    private fun AndelHistorikkHolder.erSanksjonMedSammePeriode(
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
     ): Boolean {
-        val vedtaksperiode = this.vedtaksperiode
-        if (vedtaksperiode !is VedtakshistorikkperiodeOvergangsstønad ||
-            tidligerePeriode !is VedtakshistorikkperiodeOvergangsstønad
-        ) {
-            return false
-        }
-        return vedtaksperiode.erSanksjon && tidligerePeriode.erSanksjon &&
-            vedtaksperiode.periode == tidligereAndel.periode
+        return this.vedtaksperiode is Sanksjonsperiode && nyPeriode is Sanksjonsperiode &&
+            this.vedtaksperiode.periode == nyAndel.periode
+    }
+
+    private fun AndelHistorikkHolder.erOpphørMedSammePeriode(
+        nyAndel: AndelTilkjentYtelse,
+        nyPeriode: Vedtakshistorikkperiode
+    ): Boolean {
+        return this.vedtaksperiode is Opphørsperiode && nyPeriode is Opphørsperiode &&
+            this.vedtaksperiode.periode == nyAndel.periode
     }
 
     private fun AndelHistorikkHolder.aktivitetEllerPeriodeTypeHarEndretSeg(annenVedtaksperiode: Vedtakshistorikkperiode): Boolean {
@@ -285,11 +333,11 @@ object AndelHistorikkBeregner {
             vedtaksperiode.periodeType != annenVedtaksperiode.periodeType
     }
 
-    private fun lagEndring(type: EndringType, tilkjentYtelse: TilkjentYtelse) =
+    private fun lagEndring(type: EndringType, tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt) =
         HistorikkEndring(
             type = type,
-            behandlingId = tilkjentYtelse.behandlingId,
-            vedtakstidspunkt = tilkjentYtelse.vedtakstidspunkt
+            behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
+            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtakstidspunkt
         )
 
     /**
@@ -319,11 +367,12 @@ object AndelHistorikkBeregner {
      * Den markeres då som fjernet.
      */
     private fun markerAndelerSomErFjernet(
-        historikk: MutableList<AndelHistorikkHolder>,
-        tilkjentYtelse: TilkjentYtelse
+        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
+        historikk: List<AndelHistorikkHolder>
     ) {
+        val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
         historikk.filterNot { erAlleredeFjernetEllerKontrollert(it, tilkjentYtelse) }.forEach {
-            it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelse)
+            it.endring = lagEndring(EndringType.FJERNET, tilkjentYtelseMedVedtakstidspunkt)
         }
     }
 

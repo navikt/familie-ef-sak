@@ -3,15 +3,14 @@ package no.nav.familie.ef.sak.service
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkRepository
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.tilHendelseshistorikkDto
+import no.nav.familie.ef.sak.behandlingshistorikk.dto.Hendelse
 import no.nav.familie.ef.sak.behandlingshistorikk.dto.HendelseshistorikkDto
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
-import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
@@ -68,6 +67,50 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Test
+    internal fun `skal slå sammen hendelser av typen opprettet`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val beslutteVedtak = behandling.copy(steg = StegType.BESLUTTE_VEDTAK)
+
+        insert(behandling.copy(steg = StegType.VILKÅR), LocalDateTime.now().minusDays(8))
+        insert(behandling.copy(steg = StegType.VILKÅR), LocalDateTime.now().minusDays(7))
+        insert(behandling.copy(steg = StegType.SEND_TIL_BESLUTTER), LocalDateTime.now().minusDays(6))
+        insert(beslutteVedtak, LocalDateTime.now().minusDays(5), StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT)
+        insert(behandling.copy(steg = StegType.VILKÅR), LocalDateTime.now().minusDays(4))
+        insert(behandling.copy(steg = StegType.SEND_TIL_BESLUTTER), LocalDateTime.now().minusDays(3))
+        insert(beslutteVedtak, LocalDateTime.now().minusDays(2), StegUtfall.BESLUTTE_VEDTAK_GODKJENT)
+
+        val historikk = behandlingshistorikkService.finnHendelseshistorikk(saksbehandling(behandling = behandling))
+        assertThat(historikk.map { it.hendelse }).containsExactly(
+            Hendelse.VEDTAK_GODKJENT,
+            Hendelse.SENDT_TIL_BESLUTTER,
+            Hendelse.VEDTAK_UNDERKJENT,
+            Hendelse.SENDT_TIL_BESLUTTER,
+            Hendelse.OPPRETTET
+        )
+    }
+
+    @Test
+    internal fun `flere sett og av vent skal ikke slåes sammen`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak, steg = StegType.VILKÅR))
+        insert(behandling, LocalDateTime.now().minusDays(10))
+        insert(behandling, LocalDateTime.now().minusDays(8), StegUtfall.SATT_PÅ_VENT)
+        insert(behandling, LocalDateTime.now().minusDays(5), StegUtfall.TATT_AV_VENT)
+        insert(behandling, LocalDateTime.now().minusDays(3), StegUtfall.SATT_PÅ_VENT)
+        insert(behandling, LocalDateTime.now().minusDays(2), StegUtfall.TATT_AV_VENT)
+
+        val historikk = behandlingshistorikkService.finnHendelseshistorikk(saksbehandling(behandling = behandling))
+        assertThat(historikk.map { it.hendelse }).containsExactly(
+            Hendelse.TATT_AV_VENT,
+            Hendelse.SATT_PÅ_VENT,
+            Hendelse.TATT_AV_VENT,
+            Hendelse.SATT_PÅ_VENT,
+            Hendelse.OPPRETTET
+        )
+    }
+
+    @Test
     internal fun `finn seneste behandlinghistorikk`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
@@ -90,69 +133,35 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
         insert(behandling, "C", LocalDateTime.now())
 
         var siste =
-            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, StegType.BESLUTTE_VEDTAK)
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(
+                behandlingId = behandling.id,
+                StegType.BESLUTTE_VEDTAK
+            )
         assertThat(siste).isNull()
 
         siste = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = behandling.id, behandling.steg)
         assertThat(siste!!.opprettetAvNavn).isEqualTo("B")
     }
 
-    @Test
-    fun `finn sist endret tispunkt for to forskjellige behandlinger, ignorer feil stegtype`() {
-        val stegType = StegType.SEND_TIL_BESLUTTER
-
-        val fagsak1 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("16"))))
-
-        val behandling1 =
-            behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType, status = BehandlingStatus.FERDIGSTILT))
-        val behandling2 = behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType))
-
-        val tidspunkt = SporbarUtils.now()
-
-        insert(behandling1, "A", tidspunkt.minusDays(1))
-        insert(behandling1, "A", tidspunkt.plusDays(1))
-        insert(behandling1, "A", tidspunkt)
-
-        insert(behandling2, "A", tidspunkt.minusDays(1))
-        insert(behandling2, "A", tidspunkt.plusDays(1))
-        insert(behandling2, "A", tidspunkt)
-
-        val sistEndret = behandlingshistorikkRepository
-            .finnSisteEndringstidspunktForBehandlinger(fagsak1.id, stegType)
-            .sortedBy { it.second }
-        assertThat(sistEndret.size).isEqualTo(2)
-        assertThat(sistEndret[0].second.toLocalDateTime()).isEqualTo(tidspunkt.plusDays(1))
-        assertThat(sistEndret[1].second.toLocalDateTime()).isEqualTo(tidspunkt.plusDays(1))
-    }
-
-    @Test
-    internal fun `skal kun finne behandlingshistorikk til gitt fagsak`() {
-        val stegType = StegType.SEND_TIL_BESLUTTER
-        val tidspunkt = SporbarUtils.now()
-
-        val fagsak1 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("16"))))
-        val fagsak2 = testoppsettService.lagreFagsak(fagsak(identer = setOf(PersonIdent("17"))))
-        val behandling1 = behandlingRepository.insert(behandling(fagsak = fagsak1, steg = stegType))
-        val behandling2 = behandlingRepository.insert(behandling(fagsak = fagsak2, steg = stegType))
-
-        insert(behandling1, "A", tidspunkt.minusDays(1))
-        insert(behandling2, "A", tidspunkt.plusDays(1))
-
-        val sistEndret = behandlingshistorikkRepository
-            .finnSisteEndringstidspunktForBehandlinger(fagsak1.id, stegType)
-
-        assertThat(sistEndret.map { it.first }).containsExactlyInAnyOrder(behandling1.id)
+    private fun insert(
+        behandling: Behandling,
+        endretTid: LocalDateTime,
+        utfall: StegUtfall? = null
+    ) {
+        insert(behandling, "opprettetAv", endretTid, utfall)
     }
 
     private fun insert(
         behandling: Behandling,
         opprettetAv: String,
-        endretTid: LocalDateTime
+        endretTid: LocalDateTime,
+        utfall: StegUtfall? = null
     ) {
         behandlingshistorikkRepository.insert(
             Behandlingshistorikk(
                 behandlingId = behandling.id,
                 steg = behandling.steg,
+                utfall = utfall,
                 opprettetAvNavn = opprettetAv,
                 endretTid = endretTid
             )

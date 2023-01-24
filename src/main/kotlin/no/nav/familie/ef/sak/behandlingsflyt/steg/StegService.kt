@@ -6,12 +6,14 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.FERDIGSTILLE_BEHANDLING
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.LAG_SAKSBEHANDLINGSBLANKETT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.PUBLISER_VEDTAKSHENDELSE
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.REVURDERING_ÅRSAK
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
@@ -19,6 +21,7 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
@@ -31,6 +34,7 @@ import java.util.UUID
 class StegService(
     private val behandlingSteg: List<BehandlingSteg<*>>,
     private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
     private val rolleConfig: RolleConfig,
     private val behandlingshistorikkService: BehandlingshistorikkService
 ) {
@@ -55,6 +59,14 @@ class StegService(
     }
 
     @Transactional
+    fun håndterFerdigstilleVedtakUtenBeslutter(saksbehandling: Saksbehandling): Behandling {
+        håndterSendTilBeslutter(saksbehandling)
+        val oppdatertBehandling = behandlingService.hentSaksbehandling(saksbehandling.id)
+        val godkjentBesluttetVedtak = BeslutteVedtakDto(godkjent = true)
+        return håndterBeslutteVedtak(oppdatertBehandling, godkjentBesluttetVedtak)
+    }
+
+    @Transactional
     fun håndterSendTilBeslutter(saksbehandling: Saksbehandling): Behandling {
         val behandlingSteg: SendTilBeslutterSteg = hentBehandlingSteg(SEND_TIL_BESLUTTER)
 
@@ -66,6 +78,15 @@ class StegService(
         val behandlingSteg: BeslutteVedtakSteg = hentBehandlingSteg(BESLUTTE_VEDTAK)
 
         return håndterSteg(saksbehandling, behandlingSteg, data)
+    }
+
+    @Transactional
+    fun håndterÅrsakRevurdering(behandlingId: UUID, data: RevurderingsinformasjonDto): Behandling {
+        val årsakRevurderingSteg: ÅrsakRevurderingSteg = hentBehandlingSteg(REVURDERING_ÅRSAK)
+
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        return håndterSteg(saksbehandling, årsakRevurderingSteg, data)
     }
 
     @Transactional
@@ -102,7 +123,7 @@ class StegService(
         if (behandling.status != BehandlingStatus.UTREDES) {
             error("Kan ikke endre steg når status=${behandling.status} behandling=$behandlingId")
         }
-        if (!behandling.steg.kommerEtter(steg)) {
+        if (steg.kommerEtter(behandling.steg)) {
             error(
                 "Kan ikke sette behandling til steg=$steg når behandling allerede " +
                     "er på ${behandling.steg} behandling=$behandlingId"
@@ -167,11 +188,9 @@ class StegService(
         saksbehandlerIdent: String,
         behandlingSteg: BehandlingSteg<T>
     ) {
-        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
-
-        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
-
         utførBehandlingsvalidering(behandlingSteg, saksbehandling)
+        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
+        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
     }
 
     private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
@@ -199,10 +218,10 @@ class StegService(
         behandlingSteg: BehandlingSteg<T>,
         saksbehandling: Saksbehandling
     ) {
-        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
-            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${saksbehandling.status}")
-        }
         behandlingSteg.validerSteg(saksbehandling)
+        feilHvis(!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
+            "Kan ikke utføre '${behandlingSteg.stegType().displayName()}' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
+        }
     }
 
     private fun validerGyldigTilstand(
@@ -231,7 +250,8 @@ class StegService(
         stegType: StegType,
         saksbehandlerIdent: String
     ) {
-        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, saksbehandling.steg.tillattFor)
+        val rolleForSteg: BehandlerRolle = utledRolleForSteg(stegType, saksbehandling)
+        val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, rolleForSteg)
 
         logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")
         secureLogger.info(
@@ -242,6 +262,19 @@ class StegService(
         feilHvis(!harTilgangTilSteg) {
             "$saksbehandlerIdent kan ikke utføre steg '${stegType.displayName()}' pga manglende rolle."
         }
+    }
+
+    private fun utledRolleForSteg(
+        stegType: StegType,
+        saksbehandling: Saksbehandling
+    ): BehandlerRolle {
+        if (stegType == BESLUTTE_VEDTAK) {
+            val vedtak = vedtakService.hentVedtak(saksbehandling.id)
+            if (vedtak.erVedtakUtenBeslutter()) {
+                return BehandlerRolle.SAKSBEHANDLER
+            }
+        }
+        return saksbehandling.steg.tillattFor
     }
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {

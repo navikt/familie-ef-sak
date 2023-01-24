@@ -6,7 +6,8 @@ import no.nav.familie.ef.sak.felles.integration.dto.EgenAnsattResponse
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.http.client.AbstractPingableRestClient
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.http.AbstractPingableRestWebClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -18,14 +19,17 @@ import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 
 @Component
 class PersonopplysningerIntegrasjonerClient(
     @Qualifier("azure") restOperations: RestOperations,
-    private val integrasjonerConfig: IntegrasjonerConfig
+    @Qualifier("azureWebClient") webClient: WebClient,
+    private val integrasjonerConfig: IntegrasjonerConfig,
+    featureToggleService: FeatureToggleService
 ) :
-    AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
+    AbstractPingableRestWebClient(restOperations, webClient, "familie.integrasjoner", featureToggleService) {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
 

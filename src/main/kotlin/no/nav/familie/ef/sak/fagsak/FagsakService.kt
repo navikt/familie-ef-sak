@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.fagsak
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.FagsakDomain
 import no.nav.familie.ef.sak.fagsak.domain.FagsakPerson
@@ -15,9 +14,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -35,8 +32,7 @@ class FagsakService(
     private val behandlingService: BehandlingService,
     private val pdlClient: PdlClient,
     private val featureToggleService: FeatureToggleService,
-    private val infotrygdService: InfotrygdService,
-    private val behandlingshistorikkService: BehandlingshistorikkService
+    private val infotrygdService: InfotrygdService
 ) {
 
     fun hentEllerOpprettFagsakMedBehandlinger(personIdent: String, stønadstype: StønadType): FagsakDto {
@@ -96,13 +92,9 @@ class FagsakService(
     fun fagsakTilDto(fagsak: Fagsak): FagsakDto {
         val behandlinger: List<Behandling> = behandlingService.hentBehandlinger(fagsak.id)
         val erLøpende = erLøpende(fagsak)
-        val vedtaksdatoPåBehandlingId = behandlingshistorikkService.finnVedtaksdatoForBehandlinger(fagsak.id)
         return fagsak.tilDto(
             behandlinger = behandlinger.map {
-                it.tilDto(
-                    fagsak.stønadstype,
-                    vedtaksdatoPåBehandlingId.get(it.id)
-                )
+                it.tilDto(fagsak.stønadstype)
             },
             erLøpende = erLøpende
         )
@@ -150,12 +142,7 @@ class FagsakService(
     private fun oppdatertPerson(
         person: FagsakPerson,
         gjeldendePersonIdent: PdlIdent
-    ) =
-        if (featureToggleService.isEnabled(Toggle.SYNKRONISER_PERSONIDENTER)) {
-            fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
-        } else {
-            person
-        }
+    ) = fagsakPersonService.oppdaterIdent(person, gjeldendePersonIdent.ident)
 
     fun hentFagsakForBehandling(behandlingId: UUID): Fagsak {
         return fagsakRepository.finnFagsakTilBehandling(behandlingId)?.tilFagsakMedPerson()
@@ -164,7 +151,12 @@ class FagsakService(
 
     fun hentEksternId(fagsakId: UUID): Long = fagsakRepository.findByIdOrThrow(fagsakId).eksternId.id
 
-    fun hentFagsakPåEksternId(eksternFagsakId: Long): FagsakDto {
+    fun hentFagsakPåEksternId(eksternFagsakId: Long): Fagsak =
+        fagsakRepository.finnMedEksternId(eksternFagsakId)
+            ?.tilFagsakMedPerson()
+            ?: error("Finner ikke fagsak til eksternFagsakId=$eksternFagsakId")
+
+    fun hentFagsakDtoPåEksternId(eksternFagsakId: Long): FagsakDto {
         return hentFagsakPåEksternIdHvisEksisterer(eksternFagsakId)
             ?: error("Kan ikke finne fagsak med eksternId=$eksternFagsakId")
     }
@@ -188,7 +180,6 @@ class FagsakService(
     }
 
     private fun opprettFagsak(stønadstype: StønadType, fagsakPerson: FagsakPerson): FagsakDomain {
-        validerStønadstype(stønadstype)
         return fagsakRepository.insert(
             FagsakDomain(
                 stønadstype = stønadstype,
@@ -200,15 +191,5 @@ class FagsakService(
     fun FagsakDomain.tilFagsakMedPerson(): Fagsak {
         val personIdenter = fagsakPersonService.hentIdenter(this.fagsakPersonId)
         return this.tilFagsakMedPerson(personIdenter)
-    }
-
-    private fun validerStønadstype(stønadstype: StønadType) {
-        when (stønadstype) {
-            StønadType.OVERGANGSSTØNAD -> {}
-            StønadType.BARNETILSYN -> {}
-            StønadType.SKOLEPENGER -> feilHvisIkke(featureToggleService.isEnabled(Toggle.SKOLEPENGER)) {
-                "Støtter ikke opprettelse av fagsak for skolepenger"
-            }
-        }
     }
 }

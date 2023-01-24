@@ -27,7 +27,9 @@ fun main(args: Array<String>) {
             "mock-brev",
             "mock-dokument",
             "mock-tilbakekreving",
-            "mock-klage"
+            "mock-klage",
+            "mock-sigrun",
+            "mock-historiskpensjon"
         )
         .run(*args)
 }

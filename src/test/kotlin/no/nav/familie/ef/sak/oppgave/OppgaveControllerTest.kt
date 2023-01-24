@@ -8,6 +8,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
+import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -18,6 +20,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
@@ -117,6 +120,30 @@ internal class OppgaveControllerTest {
         val returnertOppgaveRessurs = oppgaveController.hentOppgave(123)
 
         assertThat(returnertOppgaveRessurs.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
+    }
+
+    @Nested
+    inner class HentMapper {
+
+        @Test
+        internal fun `skal hente mappe for egen ansatt hvis man har riktig rolle`() {
+            every { tilgangService.harEgenAnsattRolle() } returns true
+            every { oppgaveService.finnMapper(any<List<String>>()) } returns emptyList()
+
+            oppgaveController.hentMapper()
+
+            verify { oppgaveService.finnMapper(listOf(ENHET_NR_NAY, ENHET_NR_EGEN_ANSATT)) }
+        }
+
+        @Test
+        internal fun `skal hente ikke mappe for egen ansatt hvis man har riktig rolle`() {
+            every { tilgangService.harEgenAnsattRolle() } returns false
+            every { oppgaveService.finnMapper(any<List<String>>()) } returns emptyList()
+
+            oppgaveController.hentMapper()
+
+            verify { oppgaveService.finnMapper(listOf(ENHET_NR_NAY)) }
+        }
     }
 
     private fun tilgangOgRolleJustRuns() {

@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.beregning.Inntekt
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
@@ -100,7 +101,8 @@ internal class BeregnYtelseStegIntegrationTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
+                resultat = BehandlingResultat.INNVILGET,
+                vedtakstidspunkt = SporbarUtils.now()
             )
         )
     }

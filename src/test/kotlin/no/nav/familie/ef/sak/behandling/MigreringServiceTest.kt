@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import io.mockk.every
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
+import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
@@ -18,16 +19,19 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infrastruktur.config.InfotrygdReplikaMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock
 import no.nav.familie.ef.sak.infrastruktur.config.IverksettClientMock.Companion.mockSimulering
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
+import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -53,8 +57,8 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Status
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.TaskExceptionUtenStackTrace
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.internal.TaskWorker
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -91,7 +95,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     private lateinit var tilkjentYtelseService: TilkjentYtelseService
 
     @Autowired
-    private lateinit var taskRepository: TaskRepository
+    private lateinit var taskService: TaskService
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -123,6 +127,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var gjeldendeBarnRepository: GjeldendeBarnRepository
+
+    @Autowired
+    private lateinit var barnRepository: BarnRepository
 
     private val periodeFraMåned = YearMonth.now().minusMonths(10)
     private val opphørsmåned = YearMonth.now()
@@ -239,21 +246,6 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             assertThat(this[0].stønadTom).isEqualTo(til.atEndOfMonth())
             assertThat(this[0].beløp).isEqualTo(0)
         }
-    }
-
-    @Test
-    internal fun `migrering feiler når man har etterbetaling`() {
-        mockSimulering(iverksettClient, etterbetaling = 1)
-        assertThatThrownBy { opprettOgIverksettMigrering() }
-            .hasMessageContaining("Etterbetaling er 1")
-    }
-
-    @Test
-    internal fun `migrering feiler når man har feilutbetaling`() {
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        mockSimulering(iverksettClient, feilutbetaling = 2)
-        assertThatThrownBy { opprettOgIverksettMigrering() }
-            .hasMessageContaining("Feilutbetaling er 2")
     }
 
     @Test
@@ -690,6 +682,31 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     }
 
     @Nested
+    inner class Simuleringssituasjoner {
+
+        @Test
+        internal fun `migrering feiler når man har etterbetaling`() {
+            mockSimulering(iverksettClient, etterbetaling = 1)
+            assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Etterbetaling er 1")
+        }
+
+        @Test
+        internal fun `migrering feiler når man har feilutbetaling`() {
+            @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+            mockSimulering(iverksettClient, feilutbetaling = 2)
+            assertThatThrownBy { opprettOgIverksettMigrering() }
+                .hasMessageContaining("Feilutbetaling er 2")
+        }
+
+        @Test
+        internal fun `skal ignorere etterbetaling hvis ignorerFeilISimulering=true`() {
+            mockSimulering(iverksettClient, etterbetaling = 1)
+            opprettOgIverksettMigrering(ignorerFeilISimulering = true)
+        }
+    }
+
+    @Nested
     inner class AutomatiskMigrering {
 
         @Test
@@ -704,6 +721,25 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                     migreringService.migrerOvergangsstønadAutomatisk("1")
                 }
             }.hasMessageContaining("Har ikke aktiv stønad")
+        }
+    }
+
+    @Nested
+    inner class Barnetilsyn {
+
+        @Test
+        internal fun `migrering av skolepenger`() {
+            mockPerioder(utgifterBarnetilsyn = 100)
+
+            val fagsak = fagsakService.hentEllerOpprettFagsak("1", OVERGANGSSTØNAD)
+            val behandlingId = testWithBrukerContext(groups = listOf(rolleConfig.beslutterRolle)) {
+                migreringService.migrerBarnetilsyn(fagsak.fagsakPersonId, MigrerRequestDto())
+            }
+
+            kjørTasks()
+
+            val barnIdenter = barnRepository.findByBehandlingId(behandlingId).map { it.personIdent }
+            assertThat(barnIdenter).containsExactly(PdlClientConfig.barnFnr)
         }
     }
 
@@ -760,6 +796,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         )
         val brevrequest = objectMapper.readTree("123")
         testWithBrukerContext(groups = listOf(rolleConfig.saksbehandlerRolle)) {
+            stegService.håndterÅrsakRevurdering(saksbehandling.id, revurderingsinformasjon())
             stegService.håndterBeregnYtelseForStønad(saksbehandling, innvilget)
             tilbakekrevingService.lagreTilbakekreving(
                 TilbakekrevingDto(Tilbakekrevingsvalg.AVVENT, begrunnelse = ""),
@@ -786,7 +823,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         migrerFraDato: YearMonth = this.migrerFraDato,
         migrerTilDato: YearMonth = til,
         erReellArbeidssøker: Boolean = false,
-        mockPerioder: () -> Unit = { mockPerioder(opphørsdato) }
+        mockPerioder: () -> Unit = { mockPerioder(opphørsdato) },
+        ignorerFeilISimulering: Boolean = false
     ): Behandling {
         mockPerioder()
 
@@ -797,7 +835,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
                 Månedsperiode(migrerFraDato, migrerTilDato),
                 inntektsgrunnlag.toInt(),
                 samordningsfradrag.toInt(),
-                erReellArbeidssøker = erReellArbeidssøker
+                erReellArbeidssøker = erReellArbeidssøker,
+                ignorerFeilISimulering = ignorerFeilISimulering
             )
         }
 
@@ -812,12 +851,15 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         opphørsdato: YearMonth? = opphørsmåned,
         stønadFom: YearMonth = periodeFraMåned,
         stønadTom: YearMonth = til,
-        aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT
+        aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
+        utgifterBarnetilsyn: Int = 0
     ) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             vedtakId = 1,
             stønadFom = stønadFom.atDay(1),
-            stønadTom = stønadTom.atEndOfMonth()
+            stønadTom = stønadTom.atEndOfMonth(),
+            utgifterBarnetilsyn = utgifterBarnetilsyn,
+            barnIdenter = listOf(PdlClientConfig.barnFnr)
         )
         val kodePeriode2 = opphørsdato?.let { InfotrygdEndringKode.OVERTFØRT_NY_LØSNING } ?: InfotrygdEndringKode.NY
         val periodeForKallNr2 = periode.copy(
@@ -827,7 +869,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             aktivitetstype = aktivitetstype
         )
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
-            InfotrygdPeriodeResponse(listOf(periodeForKallNr2), emptyList(), emptyList())
+            InfotrygdPeriodeResponse(listOf(periodeForKallNr2), listOf(periodeForKallNr2), emptyList())
     }
 
     private fun kjørTasks(erMigrering: Boolean = true) {
@@ -839,7 +881,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             if (erMigrering) SjekkMigrertStatusIInfotrygdTask.TYPE else null
         ).forEach { type ->
             try {
-                val task = taskRepository.findAll()
+                val task = taskService.findAll()
                     .filter { it.status == Status.KLAR_TIL_PLUKK || it.status == Status.UBEHANDLET }
                     .single { it.type == type }
                 taskWorker.markerPlukket(task.id)

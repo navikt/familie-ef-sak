@@ -54,6 +54,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
               b.arsak,
               b.krav_mottatt,
               b.resultat,
+              b.vedtakstidspunkt,
               b.henlagt_arsak,
               b.opprettet_av,
               b.opprettet_tid,
@@ -87,6 +88,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
               b.arsak,
               b.krav_mottatt,
               b.resultat,
+              b.vedtakstidspunkt,
               b.henlagt_arsak,
               b.opprettet_av,
               b.opprettet_tid,
@@ -117,7 +119,7 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE b.fagsak_id = :fagsakId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET')
          AND b.status = 'FERDIGSTILT'
-        ORDER BY b.opprettet_tid DESC
+        ORDER BY b.vedtakstidspunkt DESC
         LIMIT 1
     """
     )
@@ -132,7 +134,6 @@ interface BehandlingRepository : RepositoryInterface<Behandling, UUID>, InsertUp
         WHERE f.fagsak_person_id = :fagsakPersonId
          AND b.resultat IN ('OPPHØRT', 'INNVILGET', 'AVSLÅTT', 'IKKE_SATT')
          AND b.status NOT IN ('OPPRETTET')
-        ORDER BY b.opprettet_tid DESC
     """
     )
     fun finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling>

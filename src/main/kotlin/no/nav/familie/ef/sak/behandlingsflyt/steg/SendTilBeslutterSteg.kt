@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
@@ -25,9 +26,8 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vilkår.VurderingService
-import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -35,7 +35,7 @@ import java.util.UUID
 
 @Service
 class SendTilBeslutterSteg(
-    private val taskRepository: TaskRepository,
+    private val taskService: TaskService,
     private val oppgaveService: OppgaveService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
@@ -44,7 +44,8 @@ class SendTilBeslutterSteg(
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val vurderingService: VurderingService,
-    private val validerOmregningService: ValiderOmregningService
+    private val validerOmregningService: ValiderOmregningService,
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) : BehandlingSteg<Void?> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
@@ -52,8 +53,7 @@ class SendTilBeslutterSteg(
             throw ApiFeil("Behandling er i feil steg=${saksbehandling.steg}", HttpStatus.BAD_REQUEST)
         }
 
-        if (saksbehandling.årsak !== BehandlingÅrsak.KORRIGERING_UTEN_BREV &&
-            saksbehandling.årsak !== BehandlingÅrsak.G_OMREGNING &&
+        if (saksbehandling.skalSendeBrev &&
             !vedtaksbrevRepository.existsById(saksbehandling.id)
         ) {
             throw Feil("Brev mangler for behandling=${saksbehandling.id}")
@@ -64,6 +64,8 @@ class SendTilBeslutterSteg(
         validerRiktigTilstandVedInvilgelse(saksbehandling)
         validerSaksbehandlersignatur(saksbehandling)
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
+
+        årsakRevurderingService.validerHarGyldigRevurderingsinformasjon(saksbehandling)
     }
 
     private fun validerRiktigTilstandVedInvilgelse(saksbehandling: Saksbehandling) {
@@ -81,7 +83,8 @@ class SendTilBeslutterSteg(
         }
         val feilutbetaling =
             simuleringService.hentLagretSimuleringsoppsummering(saksbehandling.id).feilutbetaling > BigDecimal.ZERO
-        val harIkkeTattStillingTil = !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
+        val harIkkeTattStillingTil =
+            !tilbakekrevingService.harSaksbehandlerTattStillingTilTilbakekreving(saksbehandling.id)
         if (feilutbetaling && harIkkeTattStillingTil) {
             return !tilbakekrevingService.finnesÅpenTilbakekrevingsBehandling(saksbehandling.id)
         }
@@ -99,19 +102,21 @@ class SendTilBeslutterSteg(
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
         vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
-        opprettGodkjennVedtakOppgave(saksbehandling)
+        if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
+            opprettGodkjennVedtakOppgave(saksbehandling)
+        }
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleSak)
         ferdigstillOppgave(saksbehandling, Oppgavetype.BehandleUnderkjentVedtak)
         opprettTaskForBehandlingsstatistikk(saksbehandling.id)
     }
 
     private fun opprettTaskForBehandlingsstatistikk(behandlingId: UUID) =
-        taskRepository.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
+        taskService.save(BehandlingsstatistikkTask.opprettVedtattTask(behandlingId = behandlingId))
 
     private fun ferdigstillOppgave(saksbehandling: Saksbehandling, oppgavetype: Oppgavetype) {
         val aktivIdent = fagsakService.hentAktivIdent(saksbehandling.fagsakId)
         oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, saksbehandling)?.let {
-            taskRepository.save(
+            taskService.save(
                 FerdigstillOppgaveTask.opprettTask(
                     behandlingId = saksbehandling.id,
                     oppgavetype,
@@ -123,7 +128,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun opprettGodkjennVedtakOppgave(saksbehandling: Saksbehandling) {
-        taskRepository.save(
+        taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
@@ -135,7 +140,7 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerSaksbehandlersignatur(saksbehandling: Saksbehandling) {
-        if (saksbehandling.årsak in setOf(BehandlingÅrsak.KORRIGERING_UTEN_BREV, BehandlingÅrsak.G_OMREGNING)) return
+        if (saksbehandling.skalIkkeSendeBrev) return
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 

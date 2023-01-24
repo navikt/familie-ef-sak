@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import org.slf4j.LoggerFactory
@@ -8,21 +10,31 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import java.net.SocketTimeoutException
+import java.util.concurrent.TimeoutException
 
 @Suppress("unused")
 @ControllerAdvice
-class ApiExceptionHandler {
+class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
 
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    private fun rootCause(throwable: Throwable): String {
-        return NestedExceptionUtils.getMostSpecificCause(throwable).javaClass.simpleName
-    }
-
     @ExceptionHandler(Throwable::class)
     fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
         val metodeSomFeiler = finnMetodeSomFeiler(throwable)
+
+        val mostSpecificCause = throwable.getMostSpecificCause()
+        if (mostSpecificCause is SocketTimeoutException || mostSpecificCause is TimeoutException) {
+            secureLogger.warn("Timeout feil: ${mostSpecificCause.message}, $metodeSomFeiler ${rootCause(throwable)}", throwable)
+            logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
+            if (featureToggleService.isEnabled(Toggle.LOGG_WARN_TIMEOUTS)) {
+                return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen"))
+            }
+        }
+
         secureLogger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
         logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
@@ -124,5 +136,13 @@ class ApiExceptionHandler {
             return "$className::${firstElement.methodName}(${firstElement.lineNumber})"
         }
         return e.cause?.let { finnMetodeSomFeiler(it) } ?: "(Ukjent metode som feiler)"
+    }
+
+    private fun rootCause(throwable: Throwable): String {
+        return throwable.getMostSpecificCause().javaClass.simpleName
+    }
+
+    private fun Throwable.getMostSpecificCause(): Throwable {
+        return NestedExceptionUtils.getMostSpecificCause(this)
     }
 }

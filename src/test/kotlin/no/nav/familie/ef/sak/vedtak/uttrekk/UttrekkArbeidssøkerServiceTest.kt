@@ -15,6 +15,7 @@ import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
@@ -42,7 +43,7 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vedtak.dto.tilDomene
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -84,7 +85,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     private lateinit var service: UttrekkArbeidssøkerService
     private val arbeidssøkerClient = mockk<ArbeidssøkerClient>()
     private val personService = mockk<PersonService>()
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val fagsak = fagsak(fagsakpersoner(setOf("1")))
     private val behandling = behandling(fagsak)
     private val behandling2 = behandling(
@@ -115,7 +116,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
     @BeforeEach
     internal fun setUp() {
-        every { taskRepository.save(capture(taskSlot)) } answers { firstArg() }
+        every { taskService.save(capture(taskSlot)) } answers { firstArg() }
         every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
         every { personService.hentPdlPersonKort(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
@@ -128,7 +129,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             arbeidssøkerClient
         )
         opprettUttrekkArbeidssøkerTask =
-            OpprettUttrekkArbeidssøkerTask(service, fagsakService, taskRepository)
+            OpprettUttrekkArbeidssøkerTask(service, fagsakService, taskService)
     }
 
     @Test
@@ -298,7 +299,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
             arbeidssøkerClient
         )
         val opprettUttrekkArbeidssøkerTask =
-            OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskRepository)
+            OpprettUttrekkArbeidssøkerTask(uttrekkArbeidssøkerService, mockFagsakService, taskService)
 
         val arbeidssøkerPeriode = ArbeidssøkerPeriode(vedtaksperiode.periode.fomDato, vedtaksperiode.periode.tomDato)
         val periodeForUttrekk = VedtaksperioderForUttrekk(
@@ -553,7 +554,8 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
         behandlingRepository.update(
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
+                resultat = BehandlingResultat.INNVILGET,
+                vedtakstidspunkt = SporbarUtils.now()
             )
         )
     }

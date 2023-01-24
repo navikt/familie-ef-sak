@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
+import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalpostController(
     private val journalføringService: JournalføringService,
+    private val journalføringKlageService: JournalføringKlageService,
     private val journalpostService: JournalpostService,
     private val pdlClient: PdlClient,
     private val tilgangService: TilgangService,
@@ -78,6 +80,18 @@ class JournalpostController(
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
         tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(journalføringService.fullførJournalpost(journalføringRequest, journalpostId))
+    }
+
+    @PostMapping("/{journalpostId}/klage/fullfor")
+    fun fullførJournalpostKlage(
+        @PathVariable journalpostId: String,
+        @RequestBody journalføringRequest: JournalføringKlageRequest
+    ): Ressurs<String> {
+        val (_, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        journalføringKlageService.fullførJournalpost(journalføringRequest, journalpostId)
+        return Ressurs.success(journalpostId)
     }
 
     @PostMapping("/{journalpostId}/opprett-behandling-med-soknadsdata-fra-en-ferdigstilt-journalpost")

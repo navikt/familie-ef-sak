@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.felles.util.EnvUtil
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -24,7 +24,7 @@ import java.time.YearMonth
 class OpprettUttrekkArbeidssøkerTask(
     private val uttrekkArbeidssøkerService: UttrekkArbeidssøkerService,
     private val fagsakService: FagsakService,
-    private val taskRepository: TaskRepository
+    private val taskService: TaskService
 ) : AsyncTaskStep {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -36,6 +36,7 @@ class OpprettUttrekkArbeidssøkerTask(
         val aktiveIdenter = fagsakService.hentAktiveIdenter(uttrekk.map { it.fagsakId }.toSet())
 
         var feilede = 0
+        var antallOk = 0
         uttrekk.forEach {
             if (uttrekkArbeidssøkerService.uttrekkFinnes(årMåned, it.fagsakId)) {
                 return@forEach
@@ -48,13 +49,16 @@ class OpprettUttrekkArbeidssøkerTask(
                     personIdent = aktiveIdenter[it.fagsakId]
                         ?: error("Kunne ikke finne fagsakID")
                 )
+                ++antallOk
             } catch (ex: Exception) {
                 val errorMelding = "Sjekk av utrekkArbeidssøker feiler fagsak=${it.fagsakId} behandling=${it.behandlingId}"
-                logger.error(errorMelding)
-                secureLogger.error("$errorMelding - ${ex.message}", ex)
+                logger.warn(errorMelding)
+                secureLogger.warn("$errorMelding - ${ex.message}", ex)
                 ++feilede
             }
         }
+
+        logger.info("Opprettet uttrekk av arbeidssøkere for $antallOk av ${uttrekk.size}")
         if (feilede > 0 && !EnvUtil.erIDev()) {
             error("Kunne ikke opprette $feilede av ${uttrekk.size} uttrekk")
         }
@@ -66,7 +70,7 @@ class OpprettUttrekkArbeidssøkerTask(
 
     fun opprettTaskForNesteMåned(task: Task) {
         val årMåned = YearMonth.parse(task.payload)
-        taskRepository.save(opprettTask(årMåned.plusMonths(1)))
+        taskService.save(opprettTask(årMåned.plusMonths(1)))
     }
 
     companion object {

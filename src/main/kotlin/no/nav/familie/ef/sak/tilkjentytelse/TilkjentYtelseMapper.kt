@@ -18,7 +18,6 @@ import java.time.YearMonth
 fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(
         behandlingId = this.behandlingId,
-        vedtakstidspunkt = this.vedtakstidspunkt,
         andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
         samordningsfradragType = this.samordningsfradragType
     )
@@ -50,9 +49,9 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
     }
 }
 
-fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn): List<BeløpsperiodeBarnetilsynDto> {
+fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, brukIkkeVedtatteSatser: Boolean): List<BeløpsperiodeBarnetilsynDto> {
     val startDato = vedtak.perioder.first().periode.fomDato
-    val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned()
+    val perioder = vedtak.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSatser)
 
     return this.andelerTilkjentYtelse.filter { andel -> andel.stønadFom >= startDato }.map {
         val beløpsperiodeBarnetilsynDto = perioder.getValue(YearMonth.from(it.stønadFom))
@@ -66,7 +65,9 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn):
                 .roundUp()
                 .toInt(),
             sats = beløpsperiodeBarnetilsynDto.sats,
-            beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag
+            beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag,
+            aktivitetstype = beløpsperiodeBarnetilsynDto.aktivitetstype,
+            periodetype = beløpsperiodeBarnetilsynDto.periodetype
         )
     }
 }
@@ -75,7 +76,8 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
     saksbehandlerId: String,
     eksternBehandlingId: Long,
     stønadstype: StønadType,
-    eksternFagsakId: Long
+    eksternFagsakId: Long,
+    vedtaksdato: LocalDate
 ): TilkjentYtelseMedMetadata {
     return TilkjentYtelseMedMetadata(
         tilkjentYtelse = this.tilIverksettDto(),
@@ -85,6 +87,6 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
         eksternFagsakId = eksternFagsakId,
         personIdent = this.personident,
         behandlingId = this.behandlingId,
-        vedtaksdato = this.vedtakstidspunkt.toLocalDate()
+        vedtaksdato = vedtaksdato
     )
 }

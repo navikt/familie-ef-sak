@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
@@ -18,6 +19,8 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -124,7 +127,8 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         behandlingRepository.update(
             behandling.copy(
                 status = BehandlingStatus.FERDIGSTILT,
-                resultat = BehandlingResultat.INNVILGET
+                resultat = BehandlingResultat.INNVILGET,
+                vedtakstidspunkt = SporbarUtils.now()
             )
         )
     }
@@ -132,8 +136,24 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
     private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> =
         tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
-    private fun opprettUtgiftsperiode(fra: YearMonth, til: YearMonth, barnId: List<UUID>, beløp: BigDecimal) =
-        UtgiftsperiodeDto(fra, til, Månedsperiode(fra, til), barnId, beløp.toInt(), false)
+    private fun opprettUtgiftsperiode(
+        fra: YearMonth,
+        til: YearMonth,
+        barnId: List<UUID>,
+        beløp: BigDecimal,
+        periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID
+    ) =
+        UtgiftsperiodeDto(
+            fra,
+            til,
+            Månedsperiode(fra, til),
+            barnId,
+            beløp.toInt(),
+            null,
+            periodetype,
+            aktivitetstype
+        )
 
     private fun innvilge(
         saksbehandling: Saksbehandling,

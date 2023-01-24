@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.fagsak
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
+import no.nav.familie.ef.sak.fagsak.dto.MigrerRequestDto
 import no.nav.familie.ef.sak.fagsak.dto.MigreringInfo
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -10,6 +11,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -30,8 +32,25 @@ class MigreringController(
     }
 
     @PostMapping("{fagsakPersonId}")
-    fun migrerOvergangsstønad(@PathVariable fagsakPersonId: UUID): Ressurs<UUID> {
+    fun migrerOvergangsstønad(
+        @PathVariable fagsakPersonId: UUID,
+        @RequestBody request: MigrerRequestDto?
+    ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
-        return Ressurs.success(migreringService.migrerOvergangsstønad(fagsakPersonId))
+        return Ressurs.success(
+            migreringService.migrerOvergangsstønad(
+                fagsakPersonId,
+                request ?: MigrerRequestDto()
+            )
+        )
+    }
+
+    @PostMapping("{fagsakPersonId}/barnetilsyn")
+    fun migrerBarnetilsyn(
+        @PathVariable fagsakPersonId: UUID,
+        @RequestBody request: MigrerRequestDto?
+    ): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.CREATE)
+        return Ressurs.success(migreringService.migrerBarnetilsyn(fagsakPersonId, request ?: MigrerRequestDto()))
     }
 }

@@ -91,7 +91,7 @@ class OmregningService(
 
         val forrigeTilkjentYtelse = ytelseService.hentForBehandling(sisteBehandling.id)
 
-        feilHvis(forrigeTilkjentYtelse.grunnbeløpsdato == nyesteGrunnbeløpGyldigFraOgMed) {
+        feilHvis(forrigeTilkjentYtelse.grunnbeløpsmåned == nyesteGrunnbeløpGyldigFraOgMed) {
             "Skal ikke utføre g-omregning når forrige tilkjent ytelse allerede har nyeste grunnbeløpsdato"
         }
         return forrigeTilkjentYtelse
@@ -115,7 +115,7 @@ class OmregningService(
 
         val indeksjusterInntekt =
             BeregningUtils.indeksjusterInntekt(
-                forrigeTilkjentYtelse.grunnbeløpsdato,
+                forrigeTilkjentYtelse.grunnbeløpsmåned,
                 innvilgelseOvergangsstønad.inntekter.tilInntektsperioder()
             )
 

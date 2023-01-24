@@ -4,8 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService.Companion.MASKINELL_JOURNALFOERENDE_ENHET
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.FØRSTEGANGSBEHANDLING
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType.REVURDERING
+import no.nav.familie.ef.sak.behandling.ÅrsakRevurderingService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -19,6 +21,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingMetode
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingsstatistikkDto
 import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.ef.iverksett.ÅrsakRevurderingDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -46,7 +49,8 @@ class BehandlingsstatistikkTask(
     private val søknadService: SøknadService,
     private val vedtakRepository: VedtakRepository,
     private val oppgaveService: OppgaveService,
-    private val grunnlagsdataService: GrunnlagsdataService
+    private val grunnlagsdataService: GrunnlagsdataService,
+    private val årsakRevurderingService: ÅrsakRevurderingService
 ) : AsyncTaskStep {
 
     private val zoneIdOslo = ZoneId.of("Europe/Oslo")
@@ -56,11 +60,12 @@ class BehandlingsstatistikkTask(
             objectMapper.readValue<BehandlingsstatistikkTaskPayload>(task.payload)
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val årsakRevurdering = årsakRevurderingService.hentÅrsakRevurdering(behandlingId)
 
         val sisteOppgaveForBehandling = finnSisteOppgaveForBehandlingen(behandlingId, oppgaveId)
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
 
-        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling.stønadstype)
+        val resultatBegrunnelse = finnResultatBegrunnelse(hendelse, vedtak, saksbehandling)
         val søker = grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.søker
         val henvendelseTidspunkt = finnHenvendelsestidspunkt(saksbehandling)
         val relatertEksternBehandlingId =
@@ -96,7 +101,12 @@ class BehandlingsstatistikkTask(
             relatertEksternBehandlingId = relatertEksternBehandlingId,
             relatertBehandlingId = null,
             behandlingMetode = behandlingMetode,
-            behandlingÅrsak = saksbehandling.årsak
+            behandlingÅrsak = saksbehandling.årsak,
+            kravMottatt = saksbehandling.kravMottatt,
+            årsakRevurdering = årsakRevurdering?.let {
+                ÅrsakRevurderingDto(it.opplysningskilde, it.årsak)
+            },
+            avslagÅrsak = vedtak?.avslåÅrsak
         )
 
         iverksettClient.sendBehandlingsstatistikk(behandlingsstatistikkDto)
@@ -110,17 +120,20 @@ class BehandlingsstatistikkTask(
 
     private fun Hendelse.erBesluttetEllerFerdig() = this.name == Hendelse.BESLUTTET.name || this.name == Hendelse.FERDIG.name
 
-    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, stønadType: StønadType): String? {
+    private fun finnResultatBegrunnelse(hendelse: Hendelse, vedtak: Vedtak?, saksbehandling: Saksbehandling): String? {
+        if (saksbehandling.resultat == BehandlingResultat.HENLAGT) {
+            return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
+        }
         return when (hendelse) {
             Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
             else -> {
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
-                        stønadType,
+                        saksbehandling.stønadstype,
                         vedtak
                     )
                     ResultatType.AVSLÅ, ResultatType.OPPHØRT -> vedtak.avslåBegrunnelse
-                    ResultatType.HENLEGGE -> error("Ikke implementert")
+                    ResultatType.HENLEGGE -> error("ResultatType henlegge er ikke i bruk for vedtak")
                     ResultatType.SANKSJONERE -> vedtak.internBegrunnelse
                     null -> error("Mangler vedtak")
                 }
@@ -137,12 +150,10 @@ class BehandlingsstatistikkTask(
 
     private fun finnSaksbehandler(hendelse: Hendelse, vedtak: Vedtak?, gjeldendeSaksbehandler: String?): String {
         return when (hendelse) {
-            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER ->
-                gjeldendeSaksbehandler
-                    ?: error("Mangler saksbehandler for hendelse")
-            Hendelse.VEDTATT, Hendelse.HENLAGT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
-                vedtak?.saksbehandlerIdent
-                    ?: error("Mangler saksbehandler på vedtaket")
+            Hendelse.MOTTATT, Hendelse.PÅBEGYNT, Hendelse.VENTER, Hendelse.HENLAGT ->
+                gjeldendeSaksbehandler ?: error("Mangler saksbehandler for hendelse")
+            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.FERDIG ->
+                vedtak?.saksbehandlerIdent ?: gjeldendeSaksbehandler ?: error("Mangler saksbehandler på vedtaket")
         }
     }
 
@@ -155,12 +166,17 @@ class BehandlingsstatistikkTask(
 
     companion object {
 
-        fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long?): Task =
+        fun opprettMottattTask(
+            behandlingId: UUID,
+            hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
+            saksbehandler: String = SikkerhetContext.hentSaksbehandler(),
+            oppgaveId: Long?
+        ): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.MOTTATT,
-                hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
+                hendelseTidspunkt = hendelseTidspunkt,
+                gjeldendeSaksbehandler = saksbehandler,
                 oppgaveId = oppgaveId
             )
 
@@ -203,6 +219,14 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.FERDIG,
                 hendelseTidspunkt = LocalDateTime.now()
+            )
+
+        fun opprettHenlagtTask(behandlingId: UUID, hendelseTidspunkt: LocalDateTime, gjeldendeSaksbehandler: String): Task =
+            opprettTask(
+                behandlingId = behandlingId,
+                hendelse = Hendelse.FERDIG,
+                hendelseTidspunkt = hendelseTidspunkt,
+                gjeldendeSaksbehandler = gjeldendeSaksbehandler
             )
 
         private fun opprettTask(

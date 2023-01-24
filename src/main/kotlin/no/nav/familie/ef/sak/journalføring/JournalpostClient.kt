@@ -3,8 +3,10 @@ package no.nav.familie.ef.sak.journalføring
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.http.AbstractPingableRestWebClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
-import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -24,15 +26,18 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class JournalpostClient(
     @Qualifier("azure") restOperations: RestOperations,
-    integrasjonerConfig: IntegrasjonerConfig
+    @Qualifier("azureWebClient") webClient: WebClient,
+    integrasjonerConfig: IntegrasjonerConfig,
+    featureToggleService: FeatureToggleService
 ) :
-    AbstractPingableRestClient(restOperations, "journalpost") {
+    AbstractPingableRestWebClient(restOperations, webClient, "journalpost", featureToggleService) {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
@@ -117,11 +122,18 @@ class JournalpostClient(
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String, saksbehandler: String?) {
-        val ressurs = putForEntity<Ressurs<OppdaterJournalpostResponse>>(
-            URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
-            "",
-            headerMedSaksbehandler(saksbehandler)
-        )
+        val ressurs = try {
+            putForEntity<Ressurs<OppdaterJournalpostResponse>>(
+                URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
+                "",
+                headerMedSaksbehandler(saksbehandler)
+            )
+        } catch (e: RessursException) {
+            brukerfeilHvis(e.ressurs.melding.contains("DokumentInfo.tittel")) {
+                "Mangler tittel på et/flere dokument/vedlegg"
+            }
+            throw e
+        }
 
         if (ressurs.status != Ressurs.Status.SUKSESS) {
             secureLogger.error(" Feil ved oppdatering av journalpost=$journalpostId - mottok: $ressurs")

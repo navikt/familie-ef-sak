@@ -1,11 +1,10 @@
 package no.nav.familie.ef.sak.brev
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerOrganisasjon
 import no.nav.familie.ef.sak.brev.domain.BrevmottakerPerson
@@ -28,6 +27,7 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
@@ -44,6 +44,7 @@ internal class FrittståendeBrevServiceTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val iverksettClient = mockk<IverksettClient>()
     private val brevsignaturService = mockk<BrevsignaturService>()
+    private val mellomlagringBrevService = mockk<MellomlagringBrevService>()
 
     private val frittståendeBrevService =
         FrittståendeBrevService(
@@ -52,8 +53,8 @@ internal class FrittståendeBrevServiceTest {
             personopplysningerService,
             arbeidsfordelingService,
             iverksettClient,
-            brevsignaturService
-
+            brevsignaturService,
+            mellomlagringBrevService
         )
     private val fagsak = fagsak(fagsakpersoner(identer = setOf("01010172272")))
     private val frittståendeBrevDto = FrittståendeBrevDto(
@@ -115,9 +116,14 @@ internal class FrittståendeBrevServiceTest {
 
     @BeforeEach
     internal fun setUp() {
+        BrukerContextUtil.mockBrukerContext("Saksbehandler")
         frittståendeBrevSlot.clear()
         mockAvhengigheter()
-        justRun { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) }
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
     }
 
     @TestFactory
@@ -136,6 +142,16 @@ internal class FrittståendeBrevServiceTest {
                 assertThat(frittståendeBrevSlot.captured.mottakere!![0].ident).isEqualTo("mottakerIdent")
             }
         }
+
+    @Test
+    internal fun `skal slette mellomlagret brev etter at man har sendt brevet`() {
+        frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto)
+
+        verifyOrder {
+            iverksettClient.sendFrittståendeBrev(any())
+            mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsak.id, "Saksbehandler")
+        }
+    }
 
     @Nested
     inner class Mottakere {
@@ -209,7 +225,6 @@ internal class FrittståendeBrevServiceTest {
     }
 
     private fun mockAvhengigheter() {
-        BrukerContextUtil.mockBrukerContext("Saksbehandler")
         every { brevClient.genererBrev(any(), any(), any()) } returns "123".toByteArray()
         every { fagsakService.hentAktivIdent(any()) } returns fagsak.hentAktivIdent()
         every { fagsakService.fagsakMedOppdatertPersonIdent(any()) } returns fagsak
@@ -218,12 +233,13 @@ internal class FrittståendeBrevServiceTest {
         every { personopplysningerService.hentGjeldeneNavn(any()) } returns mapOf(fagsak.hentAktivIdent() to "Navn Navnesen")
         every { personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(any()) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "123"
-        every { iverksettClient.sendFrittståendeBrev(any()) } just Runs
         every { brevsignaturService.lagSignaturMedEnhet(any<Fagsak>()) } returns SignaturDto(
             "Navn Navnesen",
             "En enhet",
             false
         )
+        justRun { iverksettClient.sendFrittståendeBrev(capture(frittståendeBrevSlot)) }
+        justRun { mellomlagringBrevService.slettMellomlagretFrittståendeBrev(any(), any()) }
     }
 
     companion object {

@@ -4,10 +4,25 @@ import no.nav.familie.ef.sak.beregning.nyesteGrunnbeløpGyldigFraOgMed
 import no.nav.familie.ef.sak.fagsak.FagsakRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+
+@Profile("!integrasjonstest")
+@Service
+class GOmregningTaskServiceScheduler(
+    private val gOmregningTaskService: GOmregningTaskService
+) {
+
+    val logger: Logger = LoggerFactory.getLogger(javaClass)
+
+    @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
+    fun opprettGOmregningTaskForBehandlingerMedUtdatertG() {
+        gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
+    }
+}
 
 @Service
 class GOmregningTaskService(
@@ -17,10 +32,9 @@ class GOmregningTaskService(
 
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @Scheduled(cron = "\${G_OMREGNING_CRON_EXPRESSION}")
     fun opprettGOmregningTaskForBehandlingerMedUtdatertG(): Int {
         logger.info("Starter opprettelse av tasker for G-omregning.")
-        val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed)
+        val fagsakIder = fagsakRepository.finnFerdigstilteFagsakerMedUtdatertGBelop(nyesteGrunnbeløpGyldigFraOgMed.atDay(1))
         try {
             fagsakIder.forEach {
                 gOmregningTask.opprettTask(it)

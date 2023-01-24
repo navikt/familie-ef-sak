@@ -12,6 +12,7 @@ import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -75,10 +76,7 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `skal finne siste behandling med avslåtte hvis kun avslått`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT)
         )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(behandling.id)
@@ -88,16 +86,10 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `skal finne siste behandling med avslåtte hvis avslått og henlagt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val avslag = behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT)
         )
         behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsak, resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT)
         )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(avslag.id)
@@ -107,22 +99,13 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `skal plukke ut førstegangsbehandling hvis det finnes førstegangsbehandling, avslått og henlagt`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val førstegang = behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsak, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT)
         )
         behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsak, resultat = BehandlingResultat.AVSLÅTT, status = BehandlingStatus.FERDIGSTILT)
         )
         behandlingRepository.insert(
-            behandling(fagsak).copy(
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsak, resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT)
         )
         val sisteBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
         assertThat(sisteBehandling?.id).isEqualTo(førstegang.id)
@@ -151,32 +134,63 @@ internal class BehandlingServiceIntegrationTest : OppslagSpringRunnerTest() {
         )
 
         behandlingRepository.insert(
-            behandling(fagsakOs).copy(
-                resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsakOs, resultat = BehandlingResultat.HENLAGT, status = BehandlingStatus.FERDIGSTILT)
         )
         val førstegangBt = behandlingRepository.insert(
-            behandling(fagsakBt).copy(
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsakBt, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT)
         )
         val førstegangSp = behandlingRepository.insert(
-            behandling(fagsakSp).copy(
-                resultat = BehandlingResultat.INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            )
+            behandling(fagsakSp, resultat = BehandlingResultat.INNVILGET, status = BehandlingStatus.FERDIGSTILT)
         )
         val revurderingUnderArbeidSP = behandlingRepository.insert(
-            behandling(fagsakSp).copy(
-                resultat = BehandlingResultat.IKKE_SATT,
-                status = BehandlingStatus.UTREDES
-            )
+            behandling(fagsakSp, resultat = BehandlingResultat.IKKE_SATT, status = BehandlingStatus.UTREDES)
         )
 
         val behandlingerForVilkårsgjenbrukHentet = behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
         val behandlingerForVilkårsgjenbrukkLagret = listOf(revurderingUnderArbeidSP, førstegangSp, førstegangBt)
         assertThat(behandlingerForVilkårsgjenbrukHentet).isEqualTo(behandlingerForVilkårsgjenbrukkLagret)
+    }
+
+    @Nested
+    inner class BehandlingPåVent {
+        @Test
+        internal fun `opprettBehandling av førstegangsbehandling er ikke mulig hvis det finnes en førstegangsbehandling på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, BehandlingStatus.SATT_PÅ_VENT))
+            assertThatThrownBy {
+                behandlingService.opprettBehandling(
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
+                    fagsak.id,
+                    behandlingsårsak = behandlingÅrsak
+                )
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
+
+        @Test
+        internal fun `opprettBehandling av revurdering er ikke mulig hvis det finnes en førstegangsbehandling på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, BehandlingStatus.SATT_PÅ_VENT))
+            assertThatThrownBy {
+                behandlingService.opprettBehandling(
+                    BehandlingType.REVURDERING,
+                    fagsak.id,
+                    behandlingsårsak = behandlingÅrsak
+                )
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
+
+        @Test
+        internal fun `opprettBehandling er mulig hvis det finnes en revurdering på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, BehandlingStatus.FERDIGSTILT))
+            behandlingRepository.insert(
+                behandling(fagsak, BehandlingStatus.SATT_PÅ_VENT, type = BehandlingType.REVURDERING)
+            )
+            behandlingService.opprettBehandling(
+                BehandlingType.REVURDERING,
+                fagsak.id,
+                behandlingsårsak = behandlingÅrsak
+            )
+        }
     }
 }

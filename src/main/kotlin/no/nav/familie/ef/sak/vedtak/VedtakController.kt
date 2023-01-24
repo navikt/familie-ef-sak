@@ -5,16 +5,13 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseOvergangsstønad
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnskontrollStatusDto
-import no.nav.familie.ef.sak.vedtak.dto.VEDTAK_SKOLEPENGER_OPPHØR_TYPE
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -49,8 +46,8 @@ class VedtakController(
     private val vurderingService: VurderingService,
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
-    private val featureToggleService: FeatureToggleService,
-    private val nullstillVedtakService: NullstillVedtakService
+    private val nullstillVedtakService: NullstillVedtakService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -59,7 +56,13 @@ class VedtakController(
     fun sendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandling, AuditLoggerEvent.UPDATE)
-        return Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+        val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
+
+        return if (vedtakErUtenBeslutter.value) {
+            Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)
+        } else {
+            Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
+        }
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
@@ -92,12 +95,18 @@ class VedtakController(
     fun hentVedtak(
         @PathVariable fagsakId: UUID,
         @PathVariable fra: YearMonth
-    ): Ressurs<VedtakDto> {
+    ): Ressurs<InnvilgelseOvergangsstønad> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        brukerfeilHvisIkke(featureToggleService.isEnabled(Toggle.FRONTEND_PREFYLL_VEDTAKSPERIODER)) {
-            "Feil vid henting av vedtakshistorikk. Det virker som at du sitter med en eldre versjon av saksbehandling, prøv å laste siden på nytt"
-        }
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
+    }
+
+    @GetMapping("{behandlingId}/historikk/{fra}")
+    fun hentVedtakForBehandling(
+        @PathVariable behandlingId: UUID,
+        @PathVariable fra: YearMonth
+    ): Ressurs<VedtakDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(vedtakHistorikkService.hentVedtakFraDato(behandlingId, fra))
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")
@@ -105,12 +114,6 @@ class VedtakController(
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         validerAlleVilkårOppfyltDersomInvilgelse(vedtak, behandlingId)
-        brukerfeilHvis(
-            vedtak._type == VEDTAK_SKOLEPENGER_OPPHØR_TYPE &&
-                !featureToggleService.isEnabled(Toggle.SKOLEPENGER_OPPHØR)
-        ) {
-            "Feature toggle for opphør av skolepenger er disabled"
-        }
         return Ressurs.success(stegService.håndterBeregnYtelseForStønad(behandling, vedtak).id)
     }
 

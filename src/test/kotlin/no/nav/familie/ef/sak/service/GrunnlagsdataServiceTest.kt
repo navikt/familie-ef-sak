@@ -98,7 +98,7 @@ internal class GrunnlagsdataServiceTest {
         val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
         every { pdlClient.hentSøker(any()) } returns pdlSøker
 
-        service.hentGrunnlagsdataFraRegister("1", emptyList())
+        service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 1) { pdlClient.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
     }
@@ -113,7 +113,7 @@ internal class GrunnlagsdataServiceTest {
                 vergemaalEllerFremtidsfullmakt = emptyList()
             )
 
-        service.hentGrunnlagsdataFraRegister("1", emptyList())
+        service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
     }
@@ -129,7 +129,7 @@ internal class GrunnlagsdataServiceTest {
         every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr)) } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak, defaultTidligereInnvilgetVedtak)
 
-        val grunnlagsdata = service.hentGrunnlagsdataFraRegister(personIdent, emptyList())
+        val grunnlagsdata = service.hentFraRegisterForPersonOgAndreForeldre(personIdent, emptyList())
 
         val tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder!!
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereOvergangsstønad).isTrue

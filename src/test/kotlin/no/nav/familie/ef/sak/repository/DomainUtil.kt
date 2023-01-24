@@ -7,7 +7,10 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
+import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
 import no.nav.familie.ef.sak.fagsak.domain.EksternFagsakId
@@ -34,12 +37,19 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
+import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
+import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -47,6 +57,8 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.ef.felles.Opplysningskilde
+import no.nav.familie.kontrakter.ef.felles.Revurderingsårsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -80,7 +92,9 @@ fun behandling(
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
-    eksternId: EksternBehandlingId = EksternBehandlingId()
+    eksternId: EksternBehandlingId = EksternBehandlingId(),
+    vedtakstidspunkt: LocalDateTime? = null,
+    kravMottatt: LocalDate? = null
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -93,7 +107,10 @@ fun behandling(
         sporbar = Sporbar(opprettetTid = opprettetTid),
         årsak = årsak,
         henlagtÅrsak = henlagtÅrsak,
-        eksternId = eksternId
+        eksternId = eksternId,
+        vedtakstidspunkt = vedtakstidspunkt
+            ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
+        kravMottatt = kravMottatt
     )
 
 fun saksbehandling(
@@ -106,7 +123,8 @@ fun saksbehandling(
     opprettetTid: LocalDateTime = SporbarUtils.now(),
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT
+    henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
+    kravMottatt: LocalDate? = null
 ): Saksbehandling =
     saksbehandling(
         fagsak,
@@ -120,7 +138,8 @@ fun saksbehandling(
             resultat = resultat,
             sporbar = Sporbar(opprettetTid = opprettetTid),
             årsak = årsak,
-            henlagtÅrsak = henlagtÅrsak
+            henlagtÅrsak = henlagtÅrsak,
+            kravMottatt = kravMottatt
         )
     )
 
@@ -137,6 +156,7 @@ fun saksbehandling(
         steg = behandling.steg,
         årsak = behandling.årsak,
         resultat = behandling.resultat,
+        vedtakstidspunkt = behandling.vedtakstidspunkt,
         henlagtÅrsak = behandling.henlagtÅrsak,
         ident = fagsak.hentAktivIdent(),
         fagsakId = fagsak.id,
@@ -145,13 +165,15 @@ fun saksbehandling(
         migrert = fagsak.migrert,
         opprettetAv = behandling.sporbar.opprettetAv,
         opprettetTid = behandling.sporbar.opprettetTid,
-        endretTid = behandling.sporbar.endret.endretTid
+        endretTid = behandling.sporbar.endret.endretTid,
+        kravMottatt = behandling.kravMottatt
     )
 
 fun Behandling.innvilgetOgFerdigstilt() =
     this.copy(
         resultat = BehandlingResultat.INNVILGET,
-        status = BehandlingStatus.FERDIGSTILT
+        status = BehandlingStatus.FERDIGSTILT,
+        vedtakstidspunkt = SporbarUtils.now()
     )
 
 val defaultIdenter = setOf(PersonIdent("15"))
@@ -214,8 +236,8 @@ fun Fagsak.tilFagsakDomain() =
 
 fun vilkårsvurdering(
     behandlingId: UUID,
-    resultat: Vilkårsresultat,
-    type: VilkårType,
+    resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+    type: VilkårType = VilkårType.LOVLIG_OPPHOLD,
     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
     barnId: UUID? = null
 ): Vilkårsvurdering =
@@ -239,12 +261,30 @@ fun fagsakpersonerAvPersonIdenter(identer: Set<PersonIdent>): Set<PersonIdent> =
     PersonIdent(ident = it.ident, sporbar = it.sporbar)
 }.toSet()
 
+fun årsakRevurdering(
+    behandlingId: UUID = UUID.randomUUID(),
+    opplysningskilde: Opplysningskilde = Opplysningskilde.MELDING_MODIA,
+    årsak: Revurderingsårsak = Revurderingsårsak.ANNET,
+    beskrivelse: String? = null
+) =
+    ÅrsakRevurdering(
+        behandlingId = behandlingId,
+        opplysningskilde = opplysningskilde,
+        årsak = årsak,
+        beskrivelse = beskrivelse
+    )
+
+fun revurderingsinformasjon() = RevurderingsinformasjonDto(
+    LocalDate.now(),
+    ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse")
+)
+
 fun tilkjentYtelse(
     behandlingId: UUID,
     personIdent: String,
     stønadsår: Int = 2021,
     startdato: LocalDate? = null,
-    grunnbeløpsdato: LocalDate = LocalDate.of(stønadsår - 1, 5, 1),
+    grunnbeløpsmåned: YearMonth = YearMonth.of(stønadsår - 1, 5),
     samordningsfradrag: Int = 0,
     beløp: Int = 11554
 ): TilkjentYtelse {
@@ -263,10 +303,9 @@ fun tilkjentYtelse(
     return TilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
-        vedtakstidspunkt = LocalDateTime.now(),
         startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
-        grunnbeløpsdato = grunnbeløpsdato
+        grunnbeløpsmåned = grunnbeløpsmåned
     )
 }
 
@@ -287,6 +326,40 @@ fun vedtak(
         inntekter = inntekter
     )
 
+fun vedtakBarnetilsyn(
+    behandlingId: UUID,
+    barn: List<UUID>,
+    resultatType: ResultatType = ResultatType.INNVILGE,
+    beløp: Int = 1000,
+    kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList()),
+    fom: YearMonth,
+    tom: YearMonth
+) = Vedtak(
+    behandlingId = behandlingId,
+    resultatType = resultatType,
+    barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp, fom = fom, tom = tom)), "begrunnelse"),
+    kontantstøtte = kontantstøtteWrapper,
+    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+)
+
+fun barnetilsynperiode(
+    år: Int = 2022,
+    fom: YearMonth = YearMonth.of(år, 1),
+    tom: YearMonth = YearMonth.of(år, 12),
+    beløp: Int = 1000,
+    barn: List<UUID>,
+    sanksjonsårsak: Sanksjonsårsak? = null,
+    periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+) = Barnetilsynperiode(
+    periode = Månedsperiode(fom, tom),
+    utgifter = beløp,
+    barn = barn,
+    sanksjonsårsak = sanksjonsårsak,
+    periodetype = periodetype,
+    aktivitet = aktivitetstype
+)
+
 fun inntektsperiode(
     år: Int = 2021,
     startDato: LocalDate = LocalDate.of(år, 1, 1),
@@ -294,35 +367,38 @@ fun inntektsperiode(
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
     samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)
 ) =
-    Inntektsperiode(Månedsperiode(startDato, sluttDato), inntekt, samordningsfradrag)
+    Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
 fun vedtaksperiode(
     år: Int = 2021,
     startDato: LocalDate = LocalDate.of(år, 1, 1),
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
-    aktivitetstype: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    vedtaksperiodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitetstype: AktivitetType =
+        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) AktivitetType.IKKE_AKTIVITETSPLIKT else AktivitetType.BARN_UNDER_ETT_ÅR,
+    sanksjonsårsak: Sanksjonsårsak? =
+        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) Sanksjonsårsak.SAGT_OPP_STILLING else null
 ) =
-    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType)
+    Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
 
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
     årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
 ) =
     vedtaksperiodeDto(
         årMånedFra = YearMonth.from(årMånedFra),
         årMånedTil = YearMonth.from(årMånedTil),
-        aktivitet = aktivitet,
-        periodeType = periodeType
+        periodeType = periodeType,
+        aktivitet = aktivitet
     )
 
 fun vedtaksperiodeDto(
     årMånedFra: YearMonth = YearMonth.of(2021, 1),
     årMånedTil: YearMonth = YearMonth.of(2021, 12),
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
 ) =
     VedtaksperiodeDto(
         årMånedFra = årMånedFra,
@@ -370,15 +446,16 @@ fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate
         personIdent = fnr
     )
 
-fun sivilstand(type: Sivilstandstype) = SivilstandMedNavn(
-    type = type,
-    gyldigFraOgMed = LocalDate.now(),
-    relatertVedSivilstand = null,
-    bekreftelsesdato = null,
-    dødsfall = null,
-    navn = null,
-    metadata = metadataGjeldende
-)
+fun sivilstand(type: Sivilstandstype, gyldigFraOgMed: LocalDate = LocalDate.now(), metadata: Metadata = metadataGjeldende) =
+    SivilstandMedNavn(
+        type = type,
+        gyldigFraOgMed = gyldigFraOgMed,
+        relatertVedSivilstand = null,
+        bekreftelsesdato = null,
+        dødsfall = null,
+        navn = null,
+        metadata = metadata
+    )
 
 fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
     Søker(

@@ -22,7 +22,7 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -39,12 +39,12 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val pdlClient = mockk<PdlClient>()
     private val oppgaveService = mockk<OppgaveService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
-    private val taskRepository = mockk<TaskRepository>()
+    private val taskService = mockk<TaskService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val opprettOppgaveForBarnService = BarnFyllerÅrOppfølgingsoppgaveService(
         gjeldendeBarnRepository,
         oppgaveRepository,
-        taskRepository,
+        taskService,
         pdlClient
     )
 
@@ -72,7 +72,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveClient.opprettOppgave(any()) } returns 1
         every { oppgaveRepository.insert(capture(oppgaveSlot)) } returns oppgaveMock
         every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
-        every { taskRepository.save(capture(taskSlot)) } returns mockk()
+        every { taskService.save(capture(taskSlot)) } returns mockk()
         every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns emptyMap()
     }
 
@@ -89,7 +89,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             gjeldendeBarnRepository.finnBarnAvGjeldendeIverksatteBehandlinger(StønadType.OVERGANGSSTØNAD, any())
         } returns listOf(barnTilUtplukkForOppgave)
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify { taskRepository.save(any()) }
+        verify { taskService.save(any()) }
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         } returns listOf(barnTilUtplukkForOppgave)
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify { taskRepository.save(any()) }
+        verify { taskService.save(any()) }
     }
 
     @Test
@@ -113,7 +113,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         } returns listOf(barnTilUtplukkForOppgave)
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify(exactly = 0) { taskRepository.save(any()) }
+        verify(exactly = 0) { taskService.save(any()) }
     }
 
     @Test
@@ -129,7 +129,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify(exactly = 5) { taskRepository.save(any()) }
+        verify(exactly = 5) { taskService.save(any()) }
     }
 
     @Test
@@ -217,7 +217,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
 
-        verify(exactly = 1) { taskRepository.save(any()) }
+        verify(exactly = 1) { taskService.save(any()) }
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(taskSlot.captured.payload)
         assertThat(opprettOppgavePayload.alder).isEqualTo(Alder.ETT_ÅR)
     }
@@ -238,7 +238,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             opprettBarnForFødselsdato.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify(exactly = 2) { taskRepository.save(any()) }
+        verify(exactly = 2) { taskService.save(any()) }
     }
 
     @Test
@@ -271,7 +271,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         )
 
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
-        verify(exactly = 2) { taskRepository.save(any()) }
+        verify(exactly = 2) { taskService.save(any()) }
     }
 
     private fun opprettBarn(

@@ -2,12 +2,14 @@ package no.nav.familie.ef.sak.tilkjentytelse
 
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkBeregner
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.ef.sak.vedtak.historikk.EndringType
+import no.nav.familie.ef.sak.vedtak.historikk.HistorikkKonfigurasjon
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -20,7 +22,8 @@ class AndelsHistorikkService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vedtakService: VedtakService,
     private val vurderingService: VurderingService,
-    private val barnService: BarnService
+    private val barnService: BarnService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentHistorikk(fagsakId: UUID, tilOgMedBehandlingId: UUID?): List<AndelHistorikkDto> {
@@ -28,18 +31,23 @@ class AndelsHistorikkService(
         if (tilkjenteYtelser.isEmpty()) {
             return emptyList()
         }
-
+        val stønadstype = fagsakService.hentFagsak(fagsakId).stønadstype
         val behandlingIder = tilkjenteYtelser.map { it.behandlingId }.toSet()
         val vedtakForBehandlinger = vedtakService.hentVedtakForBehandlinger(behandlingIder)
         val behandlinger = behandlingService.hentBehandlinger(behandlingIder)
         // hent vilkår for viss type hvor behandlingIder sendes inn
         val aktivitetArbeid = vurderingService.aktivitetArbeidForBehandlingIds(behandlingIder)
         return AndelHistorikkBeregner.lagHistorikk(
+            stønadstype,
             tilkjenteYtelser,
             vedtakForBehandlinger,
             behandlinger,
             tilOgMedBehandlingId,
-            aktivitetArbeid
+            aktivitetArbeid,
+            HistorikkKonfigurasjon(
+                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
+                lagOpphørsperiode = featureToggleService.isEnabled(Toggle.VEDTAKSHISTORIKK_OPPHØR)
+            )
         )
     }
 
@@ -49,8 +57,7 @@ class AndelsHistorikkService(
         return behandling.forrigeBehandlingId?.let {
             val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
             val barnPåBehandling = barnService.finnBarnPåBehandling(behandlingId)
-            val vedtaksdatoEllerDagensdato =
-                finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling)
+            val vedtaksdatoEllerDagensdato = behandling.vedtakstidspunkt?.toLocalDate() ?: LocalDate.now()
 
             val barnIdForAlleAktuelleBehandlinger = hentHistorikk(fagsak.id, behandling.forrigeBehandlingId)
                 .filter { it.endring?.type != EndringType.FJERNET }
@@ -65,12 +72,4 @@ class AndelsHistorikkService(
             return BarnMedLøpendeStønad(barn = barnMedLøpendeStønad, dato = vedtaksdatoEllerDagensdato)
         } ?: BarnMedLøpendeStønad(barn = emptyList(), dato = LocalDate.now())
     }
-
-    private fun finnDatoForKalkuleringAvLøpendeStønadPåBehandling(behandling: Behandling) =
-        vedtakService.hentVedtakHvisEksisterer(behandling.id)
-            ?.let {
-                tilkjentYtelseRepository.findByBehandlingId(behandling.id)?.vedtakstidspunkt?.toLocalDate()
-                    ?: behandling.sporbar.opprettetTid.toLocalDate()
-            }
-            ?: LocalDate.now()
 }

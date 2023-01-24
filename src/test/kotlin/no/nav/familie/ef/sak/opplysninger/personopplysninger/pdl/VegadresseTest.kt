@@ -1,12 +1,13 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
+import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 internal class VegadresseTest {
 
     @Test
-    fun `returner false når avstand til annen adresse er mindre enn minimumsavstand for automatisk behandling`() {
+    fun `returner UKJENT med distanse når avstand til annen adresse er mindre enn minimumsavstand for automatisk behandling`() {
         val avstandTilAnnenAdresse =
             PdlTestdata.vegadresse.fjerneBoforhold(
                 PdlTestdata.vegadresse.copy(
@@ -19,11 +20,12 @@ internal class VegadresseTest {
                 )
             )
 
-        assertThat(avstandTilAnnenAdresse).isFalse
+        assertThat(avstandTilAnnenAdresse.langAvstandTilSøker).isEqualTo(LangAvstandTilSøker.UKJENT)
+        assertThat(avstandTilAnnenAdresse.avstandIKm).isLessThan(1)
     }
 
     @Test
-    fun `returner true når avstand til annen adresse er lenger enn minimumsavstand for automatisk behandling, sjekk Motzfeldts Gate og Sofiemyr`() {
+    fun `returner avstand til annen adresse er lenger enn minimumsavstand for automatisk behandling, sjekk Motzfeldts Gate og Sofiemyr`() {
         val motzfeldtsgate = PdlTestdata.vegadresse.copy(
             koordinater = Koordinater(
                 598845f,
@@ -43,11 +45,12 @@ internal class VegadresseTest {
         val avstandTilAnnenAdresse =
             motzfeldtsgate.fjerneBoforhold(sofiemyr)
 
-        assertThat(avstandTilAnnenAdresse).isTrue
+        assertThat(avstandTilAnnenAdresse.avstandIKm).isGreaterThan(1)
+        assertThat(avstandTilAnnenAdresse.langAvstandTilSøker).isEqualTo(LangAvstandTilSøker.JA)
     }
 
     @Test
-    fun `returner true når avstand til annen adresse er lenger enn minimumsavstand for automatisk behandling, sjekk Sofiemyr og Kirkenes`() {
+    fun `returner avstand til annen adresse er lenger enn minimumsavstand for automatisk behandling som krysser to UTM-soner, sjekk Sofiemyr og Kirkenes`() {
         val kirkenes = PdlTestdata.vegadresse.copy(
             koordinater = Koordinater(
                 615386.4f,
@@ -68,6 +71,7 @@ internal class VegadresseTest {
         val avstandTilAnnenAdresse =
             kirkenes.fjerneBoforhold(sofiemyr)
 
-        assertThat(avstandTilAnnenAdresse).isTrue()
+        assertThat(avstandTilAnnenAdresse.avstandIKm).isGreaterThan(1)
+        assertThat(avstandTilAnnenAdresse.langAvstandTilSøker).isEqualTo(LangAvstandTilSøker.JA_UPRESIS)
     }
 }

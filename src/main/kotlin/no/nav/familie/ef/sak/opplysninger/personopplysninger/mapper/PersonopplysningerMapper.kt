@@ -44,7 +44,6 @@ class PersonopplysningerMapper(
 
         val gjeldendePersonIdent = søkerIdenter.gjeldende().ident
         return PersonopplysningerDto(
-            lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
             adressebeskyttelse = søker.adressebeskyttelse
                 ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
@@ -63,9 +62,10 @@ class PersonopplysningerMapper(
                     gyldigFraOgMed = it.gyldigFraOgMed ?: it.bekreftelsesdato,
                     relatertVedSivilstand = it.relatertVedSivilstand,
                     navn = it.navn,
-                    dødsdato = it.dødsfall?.dødsdato
+                    dødsdato = it.dødsfall?.dødsdato,
+                    erGjeldende = !it.metadata.historisk
                 )
-            }.sortedByDescending { it.gyldigFraOgMed },
+            }.sortedWith(compareByDescending<SivilstandDto> { it.erGjeldende }.thenByDescending { it.gyldigFraOgMed }),
             adresse = tilAdresser(søker),
             fullmakt = søker.fullmakt.map {
                 FullmaktDto(

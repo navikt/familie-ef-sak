@@ -10,16 +10,18 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
+import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -28,8 +30,7 @@ class VedtaksbrevService(
     private val brevRepository: VedtaksbrevRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val brevsignaturService: BrevsignaturService,
-    private val familieDokumentClient: FamilieDokumentClient,
-    private val featureToggleService: FeatureToggleService
+    private val familieDokumentClient: FamilieDokumentClient
 ) {
 
     fun hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId: UUID): ByteArray {
@@ -105,12 +106,12 @@ class VedtaksbrevService(
         ).bytes
     }
 
-    fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling): Fil {
+    fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling, vedtakErUtenBeslutter: VedtakErUtenBeslutter): Fil {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
         val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
         val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
-        validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent)
-        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling)
+        validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent, vedtakErUtenBeslutter)
+        val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
         val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)
         val besluttervedtaksbrev = vedtaksbrev.copy(
             besluttersignatur = signaturMedEnhet.navn,
@@ -135,7 +136,12 @@ class VedtaksbrevService(
         return vedtaksbrev.saksbehandlerHtml
     }
 
-    private fun validerKanLageBeslutterbrev(behandling: Saksbehandling, vedtaksbrev: Vedtaksbrev, beslutterIdent: String) {
+    private fun validerKanLageBeslutterbrev(
+        behandling: Saksbehandling,
+        vedtaksbrev: Vedtaksbrev,
+        beslutterIdent: String,
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter
+    ) {
         if (behandling.steg != StegType.BESLUTTE_VEDTAK || behandling.status != BehandlingStatus.FATTER_VEDTAK) {
             throw Feil(
                 "Behandling er i feil steg=${behandling.steg} status=${behandling.status}",
@@ -146,7 +152,9 @@ class VedtaksbrevService(
         feilHvisIkke(vedtaksbrev.beslutterPdf == null) {
             "Det finnes allerede et beslutterbrev"
         }
-        validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
+        if (!vedtakErUtenBeslutter.value) {
+            validerUlikeIdenter(vedtaksbrev.saksbehandlerident, beslutterIdent)
+        }
     }
 
     private fun lagBeslutterPdfMedSignatur(
@@ -166,7 +174,9 @@ class VedtaksbrevService(
         }
 
         val beslutterSignatur = if (signaturMedEnhet.skjulBeslutter) "" else signaturMedEnhet.navn
-        return html.replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
+        return html
+            .replace(BESLUTTER_SIGNATUR_PLACEHOLDER, beslutterSignatur)
+            .replace(BESLUTTER_VEDTAKSDATO_PLACEHOLDER, LocalDate.now().norskFormat())
     }
 
     fun lagSaksbehandlerFritekstbrev(fritekstbrevDto: VedtaksbrevFritekstDto, saksbehandling: Saksbehandling): ByteArray {
@@ -223,5 +233,6 @@ class VedtaksbrevService(
     companion object {
 
         const val BESLUTTER_SIGNATUR_PLACEHOLDER = "BESLUTTER_SIGNATUR"
+        const val BESLUTTER_VEDTAKSDATO_PLACEHOLDER = "BESLUTTER_VEDTAKSDATO"
     }
 }

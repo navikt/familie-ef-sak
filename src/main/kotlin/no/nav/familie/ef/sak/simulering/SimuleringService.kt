@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -86,7 +87,8 @@ class SimuleringService(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
                 eksternBehandlingId = saksbehandling.eksternId,
                 stønadstype = saksbehandling.stønadstype,
-                eksternFagsakId = saksbehandling.eksternFagsakId
+                eksternFagsakId = saksbehandling.eksternFagsakId,
+                vedtaksdato = LocalDate.now()
             )
 
         try {

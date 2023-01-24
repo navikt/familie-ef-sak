@@ -12,18 +12,20 @@ import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
-import no.nav.familie.ef.sak.vedtak.domain.AvslagÅrsak
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
+import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeMedSanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
+import no.nav.familie.kontrakter.ef.felles.AvslagÅrsak
 import no.nav.familie.kontrakter.ef.felles.Vedtaksresultat
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
@@ -62,12 +64,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
 /*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
               include = JsonTypeInfo.As.PROPERTY,
               property = "_type")*/
-sealed class VedtakDto(open val resultatType: ResultatType, open val _type: String) {
-
-    fun erInnvilgeMedOpphør(): Boolean {
-        return this is InnvilgelseOvergangsstønad && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-    }
-}
+sealed class VedtakDto(open val resultatType: ResultatType, open val _type: String)
 
 // Rename til dto? InnvilgelseOvergangsstønadDto, AvslagDto, OpphørDto, SanksjoneringDto
 data class InnvilgelseOvergangsstønad(
@@ -163,7 +160,7 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             behandlingId = behandlingId,
             avslåBegrunnelse = begrunnelse,
             resultatType = ResultatType.OPPHØRT,
-            opphørFom = opphørFom.atDay(1)
+            opphørFom = opphørFom
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
@@ -177,11 +174,11 @@ private fun Sanksjonert.sanksjonertTilVedtak(
             val vedtaksperiode = Vedtaksperiode(
                 periode.tilPeriode(),
                 AktivitetType.IKKE_AKTIVITETSPLIKT,
-                VedtaksperiodeType.SANKSJON
+                VedtaksperiodeType.SANKSJON,
+                this.sanksjonsårsak
             )
             Vedtak(
                 behandlingId = behandlingId,
-                sanksjonsårsak = this.sanksjonsårsak,
                 perioder = PeriodeWrapper(listOf(vedtaksperiode)),
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE
@@ -192,11 +189,11 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 periode = periode.tilPeriode(),
                 utgifter = 0,
                 barn = emptyList(),
-                erMidlertidigOpphør = true
+                sanksjonsårsak = this.sanksjonsårsak,
+                periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND
             )
             Vedtak(
                 behandlingId = behandlingId,
-                sanksjonsårsak = this.sanksjonsårsak,
                 barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE
@@ -229,15 +226,27 @@ fun Vedtak.tilVedtakDto(): VedtakDto =
                 )
             }
         }
-        ResultatType.SANKSJONERE -> Sanksjonert(
-            sanksjonsårsak = this.sanksjonsårsak ?: error("Sanksjon mangler årsak."),
-            periode = this.perioder?.perioder?.single()?.fraDomeneForSanksjon()
-                ?: this.barnetilsyn?.perioder?.single()?.fraDomeneForSanksjon()
-                ?: error("Mangler perioder for sanksjon"),
-            internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
-        )
+        ResultatType.SANKSJONERE -> {
+            val periode: VedtaksperiodeMedSanksjonsårsak =
+                perioder?.perioder?.single()
+                    ?: barnetilsyn?.perioder?.single()
+                    ?: error("Mangler perioder for sanksjon")
+            Sanksjonert(
+                sanksjonsårsak = periode.sanksjonsårsak ?: error("Mangler perioder for sanksjon"),
+                periode = periode.fraDomeneForSanksjon(),
+                internBegrunnelse = this.internBegrunnelse ?: error("Sanksjon mangler intern begrunnelse.")
+            )
+        }
         else -> throw Feil("Kan ikke sette vedtaksresultat som $this - ikke implementert")
     }
+
+private fun VedtaksperiodeMedSanksjonsårsak.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
+    SanksjonertPeriodeDto(
+        årMånedFra = YearMonth.from(this.datoFra),
+        årMånedTil = YearMonth.from(this.datoTil),
+        fom = YearMonth.from(this.datoFra),
+        tom = YearMonth.from(this.datoTil)
+    )
 
 fun Vedtak.mapInnvilgelseOvergangsstønad(): InnvilgelseOvergangsstønad {
     feilHvis(this.perioder == null || this.inntekter == null) {

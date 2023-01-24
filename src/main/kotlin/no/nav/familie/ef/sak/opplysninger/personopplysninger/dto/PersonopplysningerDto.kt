@@ -30,8 +30,7 @@ data class PersonopplysningerDto(
     val innflyttingTilNorge: List<InnflyttingDto>,
     val utflyttingFraNorge: List<UtflyttingDto>,
     val oppholdstillatelse: List<OppholdstillatelseDto>,
-    val vergemål: List<VergemålDto>,
-    val lagtTilEtterFerdigstilling: Boolean
+    val vergemål: List<VergemålDto>
 )
 
 data class BarnDto(
@@ -66,7 +65,8 @@ data class SivilstandDto(
     val gyldigFraOgMed: LocalDate?,
     val relatertVedSivilstand: String?,
     val navn: String?,
-    val dødsdato: LocalDate?
+    val dødsdato: LocalDate?,
+    val erGjeldende: Boolean
 )
 
 @Suppress("unused") // Kopi fra PDL
@@ -95,7 +95,8 @@ data class AdresseDto(
     val type: AdresseType,
     val gyldigFraOgMed: LocalDate?,
     val gyldigTilOgMed: LocalDate?,
-    val angittFlyttedato: LocalDate? = null
+    val angittFlyttedato: LocalDate? = null,
+    val erGjeldende: Boolean = false
 )
 
 enum class AdresseType(val rekkefølge: Int) {

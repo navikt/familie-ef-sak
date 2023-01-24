@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.avstemming.KonsistensavstemmingJobb
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.Behandlingsjournalpost
+import no.nav.familie.ef.sak.behandling.domain.ÅrsakRevurdering
 import no.nav.familie.ef.sak.behandling.migrering.Migreringsstatus
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.blankett.Blankett
@@ -29,6 +30,7 @@ import no.nav.familie.ef.sak.simulering.Simuleringsresultat
 import no.nav.familie.ef.sak.testutil.TestoppsettService
 import no.nav.familie.ef.sak.tilbakekreving.domain.Tilbakekreving
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
+import no.nav.familie.ef.sak.utestengelse.Utestengelse
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.uttrekk.UttrekkArbeidssøkere
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -68,7 +70,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-ereg",
     "mock-aareg",
     "mock-tilbakekreving",
-    "mock-dokument"
+    "mock-sigrun",
+    "mock-dokument",
+    "mock-historiskpensjon"
 )
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
@@ -127,6 +131,7 @@ abstract class OppslagSpringRunnerTest {
 
     private fun resetDatabase() {
         listOf(
+            Utestengelse::class,
             UttrekkArbeidssøkere::class,
             KonsistensavstemmingJobb::class,
             Simuleringsresultat::class,
@@ -147,6 +152,7 @@ abstract class OppslagSpringRunnerTest {
             Behandlingsjournalpost::class,
             Grunnlagsdata::class,
             Tilbakekreving::class,
+            ÅrsakRevurdering::class,
             Behandling::class,
             TerminbarnOppgave::class,
             FagsakDomain::class,
@@ -154,7 +160,6 @@ abstract class OppslagSpringRunnerTest {
             TaskLogg::class,
             Task::class,
             Migreringsstatus::class
-
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
@@ -175,7 +180,10 @@ abstract class OppslagSpringRunnerTest {
             return onBehalfOfToken(role = rolleConfig.beslutterRolle)
         }
 
-    protected fun onBehalfOfToken(role: String = rolleConfig.beslutterRolle, saksbehandler: String = "julenissen"): String {
+    protected fun onBehalfOfToken(
+        role: String = rolleConfig.beslutterRolle,
+        saksbehandler: String = "julenissen"
+    ): String {
         return TokenUtil.onBehalfOfToken(mockOAuth2Server, role, saksbehandler)
     }
 

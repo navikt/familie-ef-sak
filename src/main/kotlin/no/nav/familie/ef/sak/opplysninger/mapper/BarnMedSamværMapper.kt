@@ -12,6 +12,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.domain.AnnenForelder
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Barnepassordning
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.vilkår.dto.AnnenForelderDto
+import no.nav.familie.ef.sak.vilkår.dto.AvstandTilSøkerDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværRegistergrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværSøknadsgrunnlagDto
@@ -151,7 +152,7 @@ object BarnMedSamværMapper {
             fødselsdato = annenForelder.person?.fødselsdato,
             bosattINorge = annenForelder.bosattNorge,
             land = annenForelder.land,
-            langAvstandTilSøker = LangAvstandTilSøker.UKJENT
+            avstandTilSøker = AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
         )
     }
 
@@ -168,17 +169,15 @@ object BarnMedSamværMapper {
             bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
             land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode,
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
-            langAvstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende())
+            avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende())
         )
     }
     private fun langAvstandTilSøker(
         søkerAdresse: List<Bostedsadresse>,
         bostedsadresse: Bostedsadresse?
-    ) =
+    ): AvstandTilSøkerDto =
         bostedsadresse
             ?.vegadresse
             ?.fjerneBoforhold(søkerAdresse.gjeldende()?.vegadresse)
-            ?.takeIf { it }
-            ?.let { LangAvstandTilSøker.JA }
-            ?: LangAvstandTilSøker.UKJENT
+            ?: AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
 }

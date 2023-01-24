@@ -6,17 +6,21 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeløpsperiodeBarnetilsynDto
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynService
+import no.nav.familie.ef.sak.cucumber.domeneparser.parseAktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseBooleanJaIsTrue
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
+import no.nav.familie.ef.sak.cucumber.domeneparser.parsePeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.cucumber.domeneparser.parseÅrMåned
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.ANTALL_BARN
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.BELØP
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.FRA_MND
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.HAR_KONTANTSTØTTE
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.HAR_TILLEGGSSTØNAD
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.cucumber.domeneparser.BeregningBarnetilsynDomenebegrep.TIL_OG_MED_MND
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.AlderPåBarnRegel
@@ -33,27 +37,34 @@ class BeregningBarnetilsynStepDefinitions {
     private var datoForKjøring: LocalDate? = null
     private var resultatHarFullførtFjerdetrinn: Boolean? = null
 
-    val beregningBarnetilsynService = BeregningBarnetilsynService()
+    val featureToggleService = mockFeatureToggleService()
+    val beregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
     val kontantStøtteperioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     val tilleggsstønadPerioder: MutableList<PeriodeMedBeløpDto> = mutableListOf()
     var beregnYtelseBarnetilsynResultat: MutableList<BeløpsperiodeBarnetilsynDto> = mutableListOf()
     val utgiftsperioder: MutableList<UtgiftsperiodeDto> = mutableListOf()
+    val barnPåIndex = List(10) { UUID.randomUUID() }
 
     @Gitt("utgiftsperioder")
     fun data(dataTable: DataTable) {
         dataTable.asMaps().map {
+            val periodetype = parsePeriodetypeBarnetilsyn(it) ?: PeriodetypeBarnetilsyn.ORDINÆR
+            val aktivitetstype = parseAktivitetstypeBarnetilsyn(it)
             val fraÅrMåned = parseÅrMåned(FRA_MND, it)
             val tilÅrMåned = parseÅrMåned(TIL_OG_MED_MND, it)
             val beløp = parseInt(BELØP, it)
-            val barn = parseInt(ANTALL_BARN, it)
+            val antallBarn = parseInt(ANTALL_BARN, it)
+            val barn = barnPåIndex.take(antallBarn)
             utgiftsperioder.add(
                 UtgiftsperiodeDto(
-                    fraÅrMåned,
-                    tilÅrMåned,
-                    Månedsperiode(fraÅrMåned, tilÅrMåned),
-                    List(barn) { UUID.randomUUID() },
-                    beløp,
-                    false
+                    årMånedFra = fraÅrMåned,
+                    årMånedTil = tilÅrMåned,
+                    periode = Månedsperiode(fraÅrMåned, tilÅrMåned),
+                    barn = barn,
+                    utgifter = beløp,
+                    sanksjonsårsak = null,
+                    periodetype = periodetype,
+                    aktivitetstype = aktivitetstype
                 )
             )
         }

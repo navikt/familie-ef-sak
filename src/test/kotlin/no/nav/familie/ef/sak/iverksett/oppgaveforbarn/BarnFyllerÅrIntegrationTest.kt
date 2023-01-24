@@ -20,7 +20,7 @@ import no.nav.familie.ef.sak.vedtak.VedtakRepository
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -41,7 +41,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
     @Autowired private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
-    @Autowired private lateinit var taskRepository: TaskRepository
+    @Autowired private lateinit var taskService: TaskService
 
     @Test
     fun `barn har blitt mer enn 6 mnd, skal opprette og lagre oppgave`() {
@@ -58,7 +58,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
 
-        val tasks = taskRepository.findAll().toList()
+        val tasks = taskService.findAll().toList()
         assertThat(tasks.size).isEqualTo(1)
 
         val opprettOppgavePayload = objectMapper.readValue<OpprettOppgavePayload>(tasks.first().payload)
@@ -68,7 +68,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         assertThatThrownBy { barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr() }
             .isInstanceOf(UnexpectedRollbackException::class.java)
 
-        val tasksEtterAndreKjøring = taskRepository.findAll().toList()
+        val tasksEtterAndreKjøring = taskService.findAll().toList()
         assertThat(tasksEtterAndreKjøring.size).isEqualTo(1)
     }
 
@@ -86,7 +86,7 @@ class BarnFyllerÅrIntegrationTest : OppslagSpringRunnerTest() {
         lagreFremtidligAndel(behandling, 3000)
 
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr()
-        assertThat(taskRepository.findAll().toList().isEmpty()).isTrue
+        assertThat(taskService.findAll().toList().isEmpty()).isTrue
     }
 
     private fun lagreFremtidligAndel(behandling: Behandling, beløp: Int): TilkjentYtelse {

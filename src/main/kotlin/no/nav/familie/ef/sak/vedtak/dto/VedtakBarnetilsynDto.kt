@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.vedtak.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -46,9 +48,24 @@ data class UtgiftsperiodeDto(
     ),
     val barn: List<UUID>,
     val utgifter: Int,
-    val erMidlertidigOpphør: Boolean
-)
+    val sanksjonsårsak: Sanksjonsårsak? = null,
+    val periodetype: PeriodetypeBarnetilsyn,
+    val aktivitetstype: AktivitetstypeBarnetilsyn?
+) {
 
+    val erMidlertidigOpphør get() = periodetype == PeriodetypeBarnetilsyn.OPPHØR
+
+    /**
+     * TODO slett default verdi på PERIODETYPE og init
+     */
+    init {
+        feilHvis(periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND || sanksjonsårsak != null) {
+            "Har ikke støtte for sanksjon i utgiftsperiode ennå"
+        }
+    }
+}
+
+fun UtgiftsperiodeDto.erOpphørEllerSanksjon(): Boolean = this.periodetype == PeriodetypeBarnetilsyn.OPPHØR || this.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
 
 fun List<UtgiftsperiodeDto>.erSammenhengende(): Boolean = map(UtgiftsperiodeDto::periode).erSammenhengende()
@@ -58,7 +75,9 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         periode = this.periode,
         utgifter = this.utgifter,
         barn = this.barn,
-        erMidlertidigOpphør = this.erMidlertidigOpphør
+        sanksjonsårsak = this.sanksjonsårsak,
+        periodetype = this.periodetype,
+        aktivitet = this.aktivitetstype
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -80,7 +99,9 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 periode = it.periode,
                 utgifter = it.utgifter,
                 barn = it.barn,
-                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false
+                sanksjonsårsak = it.sanksjonsårsak,
+                periodetype = it.periodetype,
+                aktivitetstype = it.aktivitetstype
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },
@@ -97,11 +118,3 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
         }
     )
 }
-
-fun Barnetilsynperiode.fraDomeneForSanksjon(): SanksjonertPeriodeDto =
-    SanksjonertPeriodeDto(
-        årMånedFra = YearMonth.from(datoFra),
-        årMånedTil = YearMonth.from(datoTil),
-        fom = YearMonth.from(datoFra),
-        tom = YearMonth.from(datoTil)
-    )

@@ -10,20 +10,25 @@ import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat.INNVILGET
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.FERDIGSTILT
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.OPPRETTET
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.SATT_PÅ_VENT
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus.UTREDES
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
+import no.nav.familie.ef.sak.testutil.hasCauseMessageContaining
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.ef.StønadType.SKOLEPENGER
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -105,7 +110,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
                     )
                 )
             )
-        val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET))
+        val behandling = behandlingRepository.insert(behandling(fagsak, status = OPPRETTET, resultat = INNVILGET))
 
         val behandlingServiceObject = behandlingRepository.finnSaksbehandling(behandling.id)
 
@@ -127,6 +132,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(behandlingServiceObject.opprettetAv).isEqualTo(behandling.sporbar.opprettetAv)
         assertThat(behandlingServiceObject.opprettetTid).isEqualTo(behandling.sporbar.opprettetTid)
         assertThat(behandlingServiceObject.endretTid).isEqualTo(behandling.sporbar.endret.endretTid)
+        assertThat(behandlingServiceObject.vedtakstidspunkt).isEqualTo(behandling.vedtakstidspunkt)
     }
 
     @Test
@@ -289,13 +295,37 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             behandlingRepository.insert(behandling(fagsak, status = UTREDES))
             behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
 
-            listOf(UTREDES, OPPRETTET, FATTER_VEDTAK).forEach {
+            listOf(UTREDES, OPPRETTET, FATTER_VEDTAK, IVERKSETTER_VEDTAK).forEach { status ->
                 val cause = assertThatThrownBy {
-                    behandlingRepository.insert(behandling(fagsak, status = it))
+                    behandlingRepository.insert(behandling(fagsak, status = status))
                 }.cause
                 cause.isInstanceOf(DuplicateKeyException::class.java)
-                cause.hasMessageContaining("duplicate key value violates unique constraint \"behandlinger_i_arbeid\"")
+                cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
             }
+        }
+
+        @Test
+        fun `skal kunne ha en behandling som utredes når det finnes en behandling satt på vent`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
+            behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
+            behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
+
+            behandlingRepository.insert(behandling(fagsak, status = UTREDES))
+        }
+
+        @Test
+        fun `kan ikke endre en behandling fra satt på vent til utredes når det allerede finnes en behandling som ikke er ferdigstilt`() {
+            val fagsak = testoppsettService.lagreFagsak(fagsak())
+            behandlingRepository.insert(behandling(fagsak, status = FERDIGSTILT))
+            val påVent = behandlingRepository.insert(behandling(fagsak, status = SATT_PÅ_VENT))
+            behandlingRepository.insert(behandling(fagsak, status = IVERKSETTER_VEDTAK))
+
+            val cause = assertThatThrownBy {
+                behandlingRepository.update(påVent.copy(status = UTREDES))
+            }.cause
+            cause.isInstanceOf(DuplicateKeyException::class.java)
+            cause.hasMessageContaining("duplicate key value violates unique constraint \"idx_behandlinger_i_arbeid\"")
         }
 
         @Test
@@ -337,7 +367,7 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
         val behandlingerForGjenbruk: List<Behandling> =
             behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakBT.fagsakPersonId)
 
-        assertThat(behandlingerForGjenbruk).containsExactly(førstegangsbehandlingBT, førstegangsbehandlingOS)
+        assertThat(behandlingerForGjenbruk).containsExactly(førstegangsbehandlingOS, førstegangsbehandlingBT)
     }
 
     @Test
@@ -360,12 +390,59 @@ internal class BehandlingRepositoryTest : OppslagSpringRunnerTest() {
             behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakSP.fagsakPersonId)
 
         assertThat(behandlingerForGjenbruk).containsExactly(
-            revurderingUnderArbeidSP,
-            revurderingUnderArbeidBT,
-            førstegangsbehandlingBT,
+            førstegangsbehandlingOS,
             annengangsbehandlingOS,
-            førstegangsbehandlingOS
+            førstegangsbehandlingBT,
+            revurderingUnderArbeidBT,
+            revurderingUnderArbeidSP
         )
+    }
+
+    @Nested
+    inner class Vedtakstidspunkt {
+
+        private val fagsak = fagsak()
+
+        @BeforeEach
+        internal fun setUp() {
+            testoppsettService.lagreFagsak(fagsak)
+        }
+
+        @Test
+        internal fun `kan sette resultat med vedtakstidspunkt`() {
+            behandlingRepository.insert(behandling(fagsak, resultat = INNVILGET))
+        }
+
+        @Test
+        internal fun `kan ikke sette resultat uten vedtakstidspunkt`() {
+            assertThatThrownBy {
+                behandlingRepository.insert(behandling(fagsak, resultat = INNVILGET).copy(vedtakstidspunkt = null))
+            }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
+        }
+
+        @Test
+        internal fun `kan ikke sette vedtakstidspunkt uten resultat`() {
+            assertThatThrownBy {
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        resultat = IKKE_SATT
+                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                )
+            }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
+        }
+
+        @Test
+        internal fun `kan ikke sette resultat IKKE_SATT med vedtakstidspunkt`() {
+            assertThatThrownBy {
+                behandlingRepository.insert(
+                    behandling(
+                        fagsak,
+                        resultat = IKKE_SATT
+                    ).copy(vedtakstidspunkt = SporbarUtils.now())
+                )
+            }.has(hasCauseMessageContaining("behandling_resultat_vedtakstidspunkt_check"))
+        }
     }
 
     private fun lagreBehandling(

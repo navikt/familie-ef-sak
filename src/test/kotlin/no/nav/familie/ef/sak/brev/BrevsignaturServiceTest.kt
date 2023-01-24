@@ -2,28 +2,19 @@ package no.nav.familie.ef.sak.brev
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class BrevsignaturServiceTest {
 
     val personopplysningerService = mockk<PersonopplysningerService>()
-    val fagsakService = mockk<FagsakService>()
 
-    val brevsignaturService = BrevsignaturService(personopplysningerService, fagsakService)
-
-    @BeforeEach
-    fun setUp() {
-        every { fagsakService.hentFagsak(any()) } returns fagsak(identer = setOf(PersonIdent("123")))
-    }
+    val brevsignaturService = BrevsignaturService(personopplysningerService)
 
     @Test
     fun `skal sende frittstående brev med NAV Vikafossen signatur `() {

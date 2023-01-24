@@ -38,15 +38,6 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-oppdrag:
-        resource-url: ${FAMILIE_OPPDRAG_API_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${FAMILIE_OPPDRAG_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
       infotrygd-replika:
         resource-url: ${INFOTRYGD_REPLIKA_API_URL}
         token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
@@ -128,13 +119,43 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      arbeidssoker-clientcredentials:
+        resource-url: ${ARBEIDSSOKER_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${ARBEIDSSOKER_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      arbeidssoker:
+        resource-url: ${ARBEIDSSOKER_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${ARBEIDSSOKER_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      historisk-pensjon-clientcredentials:
+        resource-url: ${HISTORISK_PENSJON_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: client_credentials
+        scope: ${HISTORISK_PENSJON_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
-IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
+EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
 FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-tilbake/.default
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
+ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.veilarbregistrering/.default
+FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integrasjoner/.default
+HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
 
 spring:
   mvc:
@@ -187,11 +208,12 @@ FAMILIE_DOKUMENT_URL: http://familie-dokument
 FAMILIE_TILBAKE_URL: http://familie-tilbake
 FAMILIE_KLAGE_URL: http://familie-klage
 
-FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-pub.nais.io
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
+ARBEIDSSOKER_URL: http://veilarbregistrering.paw.svc.cluster.local
+HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 
 FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.nav.no/oppgavebenk
 
@@ -206,6 +228,7 @@ rolle:
   beslutter: "5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54"
   kode6: "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
+  egenAnsatt: "73ff0e76-f2b1-4586-8387-b33f15617381" # 0000-GA-GOSYS_UTVIDET egen ansatt
 
 funksjonsbrytere:
   enabled: true

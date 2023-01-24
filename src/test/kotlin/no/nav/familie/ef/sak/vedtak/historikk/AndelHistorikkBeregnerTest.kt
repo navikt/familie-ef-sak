@@ -8,8 +8,10 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -30,6 +32,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.values
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -91,11 +94,6 @@ class AndelHistorikkBeregnerTest {
         }
 
         @Test
-        internal fun `sanksjon overlapper 2 perioder`() {
-            run("/økonomi/sanksjon_overlapper_2_andeler.csv")
-        }
-
-        @Test
         internal fun `revuderer sanksjon og setter tilbake til den første perioden på nytt`() {
             run("/økonomi/sanksjon_revurderes.csv")
         }
@@ -125,11 +123,19 @@ object AndelHistorikkRunner {
 
         val now = LocalDateTime.now()
         val behandlinger = grupper.input.map { it.behandlingId }.distinct().mapIndexed { index, id ->
-            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()))
+            behandling(id = id, opprettetTid = now.plusMinutes(index.toLong()), vedtakstidspunkt = LocalDateTime.now())
         }
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
-        val output = AndelHistorikkBeregner.lagHistorikk(grupper.input, grupper.vedtaksliste, behandlinger, behandlingId, mapOf())
+        val output = AndelHistorikkBeregner.lagHistorikk(
+            StønadType.OVERGANGSSTØNAD,
+            grupper.input,
+            grupper.vedtaksliste,
+            behandlinger,
+            behandlingId,
+            mapOf(),
+            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true, lagOpphørsperiode = true)
+        )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
     }
@@ -309,12 +315,10 @@ object AndelHistorikkParser {
             .map { (behandlingId, vedtaksperioder) ->
                 val resultat: ResultatType
                 var periodeWrapper: PeriodeWrapper? = null
-                var opphørFom: LocalDate? = null
-                var sanksjonsårsak: Sanksjonsårsak? = null
+                var opphørFom: YearMonth? = null
                 if (vedtaksperioder.singleOrNull()?.takeIf { it.periodeType == VedtaksperiodeType.SANKSJON } != null) {
                     resultat = ResultatType.SANKSJONERE
-                    sanksjonsårsak = Sanksjonsårsak.SAGT_OPP_STILLING
-                    periodeWrapper = mapVedtaksperioder(vedtaksperioder)
+                    periodeWrapper = mapVedtaksperioder(vedtaksperioder, Sanksjonsårsak.SAGT_OPP_STILLING)
                 } else if (vedtaksperioder.all { it.stønadFom != null && it.stønadTom != null }) {
                     resultat = ResultatType.INNVILGE
                     periodeWrapper = mapVedtaksperioder(vedtaksperioder)
@@ -323,15 +327,15 @@ object AndelHistorikkParser {
                         "Kan kun være en vedtaksperiode som er av typen opphør"
                     }
                     resultat = ResultatType.OPPHØRT
-                    opphørFom = vedtaksperioder.single().stønadFom ?: error("Mangler stønadFom i opphør")
+                    opphørFom = YearMonth.from(vedtaksperioder.single().stønadFom) ?: error("Mangler stønadFom i opphør")
                 }
                 val inntekter = periodeWrapper?.perioder?.firstOrNull()
                     ?.let {
                         listOf(
                             Inntektsperiode(
-                                Månedsperiode(it.datoFra, it.datoTil),
-                                BigDecimal.ZERO,
-                                BigDecimal.ZERO
+                                periode = Månedsperiode(it.datoFra, it.datoTil),
+                                inntekt = BigDecimal.ZERO,
+                                samordningsfradrag = BigDecimal.ZERO
                             )
                         )
                     } ?: emptyList()
@@ -346,20 +350,20 @@ object AndelHistorikkParser {
                     saksbehandlerIdent = null,
                     opphørFom = opphørFom,
                     beslutterIdent = null,
-                    sanksjonsårsak = sanksjonsårsak,
                     internBegrunnelse = ""
                 )
             }
     }
 
-    private fun mapVedtaksperioder(vedtaksperioder: List<AndelHistorikkData>) =
+    private fun mapVedtaksperioder(vedtaksperioder: List<AndelHistorikkData>, sanksjonsårsak: Sanksjonsårsak? = null) =
         PeriodeWrapper(
             vedtaksperioder.map {
                 Vedtaksperiode(
                     datoFra = it.stønadFom!!,
                     datoTil = it.stønadTom!!,
                     aktivitet = it.aktivitet!!,
-                    periodeType = it.periodeType!!
+                    periodeType = it.periodeType!!,
+                    sanksjonsårsak = sanksjonsårsak
                 )
             }
         )
@@ -384,7 +388,10 @@ object AndelHistorikkParser {
             },
             aktivitetArbeid = null,
             erSanksjon = false,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
+            erOpphør = false,
+            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
         )
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)
@@ -418,7 +425,6 @@ object AndelHistorikkParser {
 
                 TilkjentYtelse(
                     behandlingId = holder.behandlingId,
-                    vedtakstidspunkt = LocalDateTime.now(),
                     andelerTilkjentYtelse = andelerTilkjentYtelse,
                     personident = PERSON_IDENT,
                     startdato = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now()

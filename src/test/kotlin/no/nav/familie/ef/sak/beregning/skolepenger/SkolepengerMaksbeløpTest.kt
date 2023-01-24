@@ -34,12 +34,12 @@ internal class SkolepengerMaksbeløpTest {
 
     @Test
     internal fun `maksbeløp for skoleår som ikke er definiert kaster exception`() {
-        assertThatThrownBy { assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2019))) }
+        assertThatThrownBy { assertThat(maksbeløpForÅr(HØGSKOLE_UNIVERSITET, Year.of(2018))) }
             .isInstanceOf(ApiFeil::class.java)
-            .withFailMessage("Finner ikke maksbeløp for studietype=HØGSKOLE_UNIVERSITET skoleår=19/20")
-        assertThatThrownBy { assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2019))) }
+            .withFailMessage("Finner ikke maksbeløp for studietype=HØGSKOLE_UNIVERSITET skoleår=18/19")
+        assertThatThrownBy { assertThat(maksbeløpForÅr(VIDEREGÅENDE, Year.of(2018))) }
             .isInstanceOf(ApiFeil::class.java)
-            .withFailMessage("Finner ikke maksbeløp for studietype=VIDEREGÅENDE skoleår=19/20")
+            .withFailMessage("Finner ikke maksbeløp for studietype=VIDEREGÅENDE skoleår=18/19")
     }
 
     /**

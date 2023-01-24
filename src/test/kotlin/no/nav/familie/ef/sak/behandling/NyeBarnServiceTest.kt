@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BarnService
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -21,7 +22,7 @@ import no.nav.familie.kontrakter.ef.personhendelse.NyttBarn
 import no.nav.familie.kontrakter.ef.personhendelse.NyttBarnÅrsak
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.StønadType
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.util.FnrGenerator
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -38,8 +39,8 @@ class NyeBarnServiceTest {
     val personService = mockk<PersonService>()
     val barnService = mockk<BarnService>()
     val pdlSøker = mockk<PdlSøker>(relaxed = true)
-    val taskRepository = mockk<TaskRepository>(relaxed = true)
-    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, taskRepository)
+    val taskService = mockk<TaskService>(relaxed = true)
+    val nyeBarnService = NyeBarnService(behandlingService, fagsakService, personService, barnService, taskService, mockFeatureToggleService())
 
     val grunnlagsdataMedMetadata = mockk<GrunnlagsdataMedMetadata>()
     val fagsak = fagsak()
@@ -150,7 +151,7 @@ class NyeBarnServiceTest {
     }
 
     @Test
-    fun `finnNyeEllerTidligereFødteBarn med ett ekstra voksent barn i PDL, forvent ingen treff`() {
+    fun `finnNyeEllerTidligereFødteBarn med ett ekstra voksent barn i PDL skal returnere det voksne barnet som nytt barn`() {
         val pdlBarn = mapOf(
             fnrForEksisterendeBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoEksisterendeBarn)),
             fnrForVoksentBarn to pdlBarn(fødsel = fødsel(fødselsdato = fødselsdatoVoksentBarn))
@@ -159,7 +160,8 @@ class NyeBarnServiceTest {
         every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fnrForEksisterendeBarn))
 
         val barn = nyeBarnService.finnNyeEllerTidligereFødteBarn(PersonIdent("fnr til søker")).nyeBarn
-        assertThat(barn).hasSize(0)
+        assertThat(barn).hasSize(1)
+        assertThat(barn[0].personIdent).isEqualTo(fnrForVoksentBarn)
     }
 
     @Test
@@ -312,6 +314,17 @@ class NyeBarnServiceTest {
 
             assertThat(dto.nyeBarn).hasSize(1)
             assertThat(dto.nyeBarn.first().personIdent).isEqualTo(fnrForNyttBarn)
+            assertThat(dto.harBarnISisteIverksatteBehandling).isTrue
+        }
+
+        @Test
+        internal fun `har terminbarn fra før, som ikke er født`() {
+            val terminDato = LocalDate.of(2021, 3, 1)
+            every { personService.hentPersonMedBarn(any()) } returns søkerMedBarn(emptyMap())
+            every { barnService.finnBarnPåBehandling(any()) } returns listOf(behandlingBarn(fødselTermindato = terminDato))
+            val dto = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(UUID.randomUUID())
+
+            assertThat(dto.nyeBarn).isEmpty()
             assertThat(dto.harBarnISisteIverksatteBehandling).isTrue
         }
 

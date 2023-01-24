@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.dto.tilDto
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -41,7 +42,7 @@ internal class TilgangServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
     private val kode6Gruppe = "kode6"
     private val kode7Gruppe = "kode7"
-    private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe)
+    private val rolleConfig = RolleConfig("", "", "", kode6 = kode6Gruppe, kode7 = kode7Gruppe, "")
     private val tilgangService =
         TilgangService(
             personopplysningerIntegrasjonerClient = personopplysningerIntegrajsonerClient,
@@ -214,6 +215,14 @@ internal class TilgangServiceTest {
         testWithBrukerContext(groups = listOf()) {
             assertThat(filtrer(listOf(uten))).containsExactly(uten)
         }
+    }
+
+    @Test
+    internal fun `validerTilgangTilEksternFagsak `() {
+        every { personopplysningerIntegrajsonerClient.sjekkTilgangTilPersonMedRelasjoner(any()) } returns Tilgang(true)
+        every { fagsakService.hentFagsakDtoPåEksternId(any()) } returns fagsak.tilDto(emptyList(), true)
+
+        tilgangService.validerTilgangTilEksternFagsak(fagsak.eksternId.id, AuditLoggerEvent.ACCESS)
     }
 
     private fun filtrer(personer: List<PdlSøker>): List<PdlSøker> =

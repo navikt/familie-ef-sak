@@ -31,9 +31,9 @@ class AutomatiskJournalføringController(
      * Skal bare brukes av familie-ef-mottak for å vurdere om en journalføring skal automatisk ferdigstilles
      * eller manuelt gjennomgås.
      */
-    @PostMapping("kan-opprette-forstegangsbehandling")
+    @PostMapping("kan-opprette-behandling")
     @ProtectedWithClaims(issuer = "azuread", claimMap = ["roles=access_as_application"])
-    fun kanOppretteFørstegangsbehandling(
+    fun kanOppretteBehandling(
         @RequestBody personIdent: PersonIdent,
         @RequestParam type: StønadType
     ): Ressurs<Boolean> {
@@ -41,7 +41,7 @@ class AutomatiskJournalføringController(
             throw Feil(message = "Kallet utføres ikke av en autorisert klient", httpStatus = HttpStatus.UNAUTHORIZED)
         }
         validerIdent(personIdent.ident)
-        return Ressurs.success(automatiskJournalføringService.kanOppretteFørstegangsbehandling(personIdent.ident, type))
+        return Ressurs.success(automatiskJournalføringService.kanOppretteBehandling(personIdent.ident, type))
     }
 
     /**
@@ -57,7 +57,7 @@ class AutomatiskJournalføringController(
         }
         validerIdent(request.personIdent)
         return Ressurs.success(
-            automatiskJournalføringService.automatiskJournalførTilFørstegangsbehandling(
+            automatiskJournalføringService.automatiskJournalførTilBehandling(
                 journalpostId = request.journalpostId,
                 personIdent = request.personIdent,
                 stønadstype = request.stønadstype,

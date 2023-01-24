@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.opplysninger.søknad.mapper
 
+import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Aktivitet
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Arbeidssøker
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.BarnetilsynDokumentasjon
@@ -100,6 +101,12 @@ internal class DokumentasjonMapperTest {
         eksamensgebyr = null
     )
 
+    private val adresseopplysninger = Adresseopplysninger(
+        søkerBorPåRegistrertAdresse = false,
+        harMeldtAdresseendring = true,
+        dokumentasjonAdresseendring = dokumentasjonMedVedlegg
+    )
+
     @Test
     internal fun `skal mappe dokumentasjonsbehov for overgangsstønad`() {
         val søknadOvergangsstønad = SøknadsskjemaOvergangsstønad(
@@ -112,7 +119,8 @@ internal class DokumentasjonMapperTest {
             barn = setOf(søknadBarn),
             aktivitet = aktivitet,
             situasjon = situasjon,
-            søkerFra = null, søkerFraBestemtMåned = false
+            søkerFra = null, søkerFraBestemtMåned = false,
+            adresseopplysninger = adresseopplysninger
         )
 
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadOvergangsstønad)
@@ -127,7 +135,8 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.samlivsbrudd).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.avtaleOmDeltBosted).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.samværsavtale).isEqualTo(dokumentasjonMedVedlegg.tilDto())
-        assertThat(dokumentasjon.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
+        assertThat(dokumentasjon.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke)
+            .isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.erklæringOmSamlivsbrudd).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.terminbekreftelse).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.barnepassordningFaktura).isEqualTo(null)
@@ -145,6 +154,7 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.reduksjonAvArbeidsforhold).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.oppsigelse).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.utdanningsutgifter).isEqualTo(null)
+        assertThat(dokumentasjon.meldtAdresseendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
     }
 
     @Test
@@ -166,7 +176,9 @@ internal class DokumentasjonMapperTest {
                 spesielleBehov = dokumentasjonMedVedlegg
 
             ),
-            søkerFra = null, søkerFraBestemtMåned = false
+            søkerFra = null,
+            søkerFraBestemtMåned = false,
+            adresseopplysninger = adresseopplysninger
         )
 
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadBarnetilsyn)
@@ -181,7 +193,8 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.samlivsbrudd).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.avtaleOmDeltBosted).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.samværsavtale).isEqualTo(dokumentasjonMedVedlegg.tilDto())
-        assertThat(dokumentasjon.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
+        assertThat(dokumentasjon.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke)
+            .isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.erklæringOmSamlivsbrudd).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.terminbekreftelse).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.barnepassordningFaktura).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
@@ -199,6 +212,7 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.reduksjonAvArbeidsforhold).isEqualTo(null)
         assertThat(dokumentasjon.oppsigelse).isEqualTo(null)
         assertThat(dokumentasjon.utdanningsutgifter).isEqualTo(null)
+        assertThat(dokumentasjon.meldtAdresseendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
     }
 
     @Test
@@ -215,7 +229,8 @@ internal class DokumentasjonMapperTest {
             ),
             utdanning = utdanning,
             utdanningsutgifter = dokumentasjonSendtInnTidligere,
-            tidligereUtdanninger = setOf()
+            tidligereUtdanninger = setOf(),
+            adresseopplysninger = adresseopplysninger
         )
         val dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(søknadSkolepenger)
 
@@ -229,7 +244,8 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.samlivsbrudd).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.avtaleOmDeltBosted).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.samværsavtale).isEqualTo(dokumentasjonMedVedlegg.tilDto())
-        assertThat(dokumentasjon.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
+        assertThat(dokumentasjon.skalBarnetBoHosSøkerMenAnnenForelderSamarbeiderIkke)
+            .isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
         assertThat(dokumentasjon.erklæringOmSamlivsbrudd).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.terminbekreftelse).isEqualTo(dokumentasjonMedVedlegg.tilDto())
         assertThat(dokumentasjon.barnepassordningFaktura).isEqualTo(null)
@@ -247,5 +263,6 @@ internal class DokumentasjonMapperTest {
         assertThat(dokumentasjon.reduksjonAvArbeidsforhold).isEqualTo(null)
         assertThat(dokumentasjon.oppsigelse).isEqualTo(null)
         assertThat(dokumentasjon.utdanningsutgifter).isEqualTo(dokumentasjonSendtInnTidligere.tilDto())
+        assertThat(dokumentasjon.meldtAdresseendring).isEqualTo(dokumentasjonMedVedlegg.tilDto())
     }
 }

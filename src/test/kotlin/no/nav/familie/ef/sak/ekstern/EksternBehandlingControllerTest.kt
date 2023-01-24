@@ -3,9 +3,9 @@ package no.nav.familie.ef.sak.ekstern
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.RevurderingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
-import no.nav.familie.ef.sak.infotrygd.InfotrygdService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -20,13 +20,15 @@ import java.util.UUID
 
 internal class EksternBehandlingControllerTest {
 
+    private val tilgangService = mockk<TilgangService>(relaxed = true)
     private val behandlingService = mockk<BehandlingService>()
     private val fagsakService = mockk<FagsakService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val personService = mockk<PersonService>()
-    private val infotrygdService = mockk<InfotrygdService>()
-    private val eksternBehandlingService = EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService, personService, infotrygdService)
-    private val eksternBehandlingController = EksternBehandlingController(eksternBehandlingService)
+    private val revurderingService = mockk<RevurderingService>()
+    private val eksternBehandlingService =
+        EksternBehandlingService(tilkjentYtelseService, behandlingService, fagsakService, revurderingService)
+
+    private val eksternBehandlingController = EksternBehandlingController(tilgangService, eksternBehandlingService)
 
     @Test
     internal fun `send tom liste med personidenter, forvent HttpStatus 400`() {

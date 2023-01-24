@@ -11,10 +11,9 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
-import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårsvurderingDto
@@ -26,6 +25,7 @@ import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår
 import no.nav.familie.ef.sak.vilkår.regler.evalutation.OppdaterVilkår.opprettNyeVilkårsvurderinger
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -42,11 +42,30 @@ class VurderingService(
     private val featureToggleService: FeatureToggleService
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     @Transactional
     fun hentEllerOpprettVurderinger(behandlingId: UUID): VilkårDto {
         val (grunnlag, metadata) = hentGrunnlagOgMetadata(behandlingId)
         val vurderinger = hentEllerOpprettVurderinger(behandlingId, metadata)
         return VilkårDto(vurderinger = vurderinger, grunnlag = grunnlag)
+    }
+
+    @Transactional
+    fun hentOpprettEllerOppdaterVurderinger(behandlingId: UUID): VilkårDto {
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        if (behandling.harStatusOpprettet) {
+            val endredeGrunnlagsdata = finnEndringerIGrunnlagsdata(behandlingId)
+            if (endredeGrunnlagsdata.isNotEmpty()) {
+                secureLogger.info("Grunnlagsdata som har endret seg: $endredeGrunnlagsdata")
+                logger.info("Grunnlagsdata har endret seg siden sist. Sletter gamle vilkår og grunnlagsdata og legger inn nye.")
+                grunnlagsdataService.oppdaterOgHentNyGrunnlagsdata(behandlingId)
+                vilkårsvurderingRepository.deleteByBehandlingId(behandlingId)
+            }
+        }
+        return hentEllerOpprettVurderinger(behandlingId)
     }
 
     fun hentAlleVurderinger(behandlingId: UUID): List<VilkårsvurderingDto> {
@@ -104,24 +123,14 @@ class VurderingService(
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
-        val skalSjekkeNæreBoforholdMetadata = featureToggleService.isEnabled(Toggle.AUTOMATISK_BEREGN_NÆRE_BOFORHOLD)
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
-            langAvstandTilSøker = mapBarnMedSamværTilLangAvstandTilSøker(skalSjekkeNæreBoforholdMetadata, grunnlag.barnMedSamvær)
+            langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
         )
         return Pair(grunnlag, metadata)
-    }
-
-    private fun mapBarnMedSamværTilLangAvstandTilSøker(
-        skalSjekkeNæreBoforholdMetadata: Boolean,
-        barnMedSamvær: List<BarnMedSamværDto>
-    ) = if (skalSjekkeNæreBoforholdMetadata) {
-        barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
-    } else {
-        listOf()
     }
 
     private fun hentEllerOpprettVurderinger(
@@ -159,6 +168,12 @@ class VurderingService(
 
     private fun behandlingErLåstForVidereRedigering(behandlingId: UUID) =
         behandlingService.hentBehandling(behandlingId).status.behandlingErLåstForVidereRedigering()
+
+    private fun finnEndringerIGrunnlagsdata(behandlingId: UUID): List<GrunnlagsdataEndring> {
+        val oppdaterteGrunnlagsdata = grunnlagsdataService.hentFraRegister(behandlingId)
+        val eksisterendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
+        return oppdaterteGrunnlagsdata.endringerMellom(eksisterendeGrunnlagsdata)
+    }
 
     /**
      * Når en revurdering opprettes skal den kopiere de tidligere vilkårsvurderingene med lik verdi for endretTid.
