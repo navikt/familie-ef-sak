@@ -1,8 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.felles.util.harGåttAntallTimer
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endringer
@@ -50,7 +52,11 @@ class PersonopplysningerService(
     }
 
     fun hentEndringerPersonopplysninger(behandlingId: UUID): EndringerIPersonopplysningerDto {
-        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val behandling = behandlingService.hentSaksbehandling(behandlingId)
+        feilHvis(behandling.status == BehandlingStatus.FERDIGSTILT) {
+            "Kan ikke hente endringer for behandling med status=${behandling.status}"
+        }
+        val personIdent = behandling.ident
         val egenAnsatt = egenAnsatt(personIdent)
         val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val grunnlagsdata = grunnlagsdataService.hentLagretGrunnlagsdata(behandlingId)
@@ -65,7 +71,6 @@ class PersonopplysningerService(
         }
         val endringer = sjekkEndringer(grunnlagsdata, egenAnsatt, søkerIdenter, nyGrunnlagsdata)
         if (skalSjekkeDataFraRegisteret) {
-            // TODO skal ikke oppdatere hvis behandlingen er låst
             grunnlagsdataService.oppdaterEndringer(
                 grunnlagsdata.copy(
                     endringerSjekket = LocalDateTime.now(),
