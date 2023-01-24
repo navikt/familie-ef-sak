@@ -183,11 +183,8 @@ internal class IverksettingDtoMapperTest {
     @Test
     internal fun `tilDto - skal kunne mappe person uten barn`() {
         every { barnService.finnBarnPåBehandling(any()) } returns emptyList()
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
-            opprettGrunnlagsdata(),
-            false,
-            LocalDateTime.now()
-        )
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+            GrunnlagsdataMedMetadata(opprettGrunnlagsdata(), LocalDateTime.now())
         every { tilkjentYtelseService.hentForBehandling(any()) } returns tilkjentYtelse(UUID.randomUUID(), personIdent = "132")
         every { vilkårsvurderingRepository.findByBehandlingId(any()) } returns mockk(relaxed = true)
         iverksettingDtoMapper.tilDto(saksbehandling, "bes")
@@ -466,11 +463,8 @@ internal class IverksettingDtoMapperTest {
                 søker = søker(),
                 barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn"))
             )
-        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns GrunnlagsdataMedMetadata(
-            grunnlagsdata,
-            false,
-            LocalDateTime.parse("2022-03-25T05:51:31.439")
-        )
+        every { grunnlagsdataService.hentGrunnlagsdata(any()) } returns
+            GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.parse("2022-03-25T05:51:31.439"))
         every { arbeidsfordelingService.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
         val behandlingId = UUID.fromString("73144d90-d238-41d2-833b-fc719dae23cb")
 

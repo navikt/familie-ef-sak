@@ -73,7 +73,7 @@ internal class PersonopplysningerMapperTest {
             )
         )
         val personOpplysninger = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, false, LocalDateTime.now()),
+            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
             egenAnsatt = false,
             søkerIdenter = PdlIdenter(
                 listOf(PdlIdent("11223344551", false))
@@ -134,7 +134,7 @@ internal class PersonopplysningerMapperTest {
             )
         )
         val personOpplysninger = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, false, LocalDateTime.now()),
+            grunnlagsdataMedMetadata = GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now()),
             egenAnsatt = false,
             søkerIdenter = PdlIdenter(
                 listOf(PdlIdent("11223344551", false))

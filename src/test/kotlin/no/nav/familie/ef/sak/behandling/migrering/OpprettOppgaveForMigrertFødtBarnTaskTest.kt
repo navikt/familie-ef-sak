@@ -119,7 +119,7 @@ internal class OpprettOppgaveForMigrertFødtBarnTaskTest {
             metadata = Metadata(false)
         )
         val barn = opprettBarnMedIdent("1", fødsel = fødsel)
-        return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), false, LocalDateTime.now())
+        return GrunnlagsdataMedMetadata(grunnlagsdata.copy(barn = listOf(barn)), LocalDateTime.now())
     }
 
     private fun opprettOppgave(fødelsdato: LocalDate?) =
