@@ -30,8 +30,7 @@ data class PersonopplysningerDto(
     val innflyttingTilNorge: List<InnflyttingDto>,
     val utflyttingFraNorge: List<UtflyttingDto>,
     val oppholdstillatelse: List<OppholdstillatelseDto>,
-    val vergemål: List<VergemålDto>,
-    val lagtTilEtterFerdigstilling: Boolean
+    val vergemål: List<VergemålDto>
 )
 
 data class BarnDto(

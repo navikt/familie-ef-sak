@@ -32,7 +32,6 @@ import java.time.LocalDateTime
 
 data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
-    val lagtTilEtterFerdigstilling: Boolean,
     val opprettetTidspunkt: LocalDateTime
 ) {
 

@@ -212,11 +212,8 @@ internal class GjenbrukVilkårServiceTest {
             søker = søker(sivilstand = listOf(sivilstand(sivilstandstype))),
             barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn"))
         )
-        every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns GrunnlagsdataMedMetadata(
-            grunnlagsdata,
-            false,
-            LocalDateTime.now()
-        )
+        every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns
+            GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now())
     }
 
     data class TestData(

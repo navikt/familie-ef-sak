@@ -30,7 +30,6 @@ class GrunnlagsdataService(
         grunnlagsdataRepository.insert(grunnlagsdata)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata.data,
-            grunnlagsdata.lagtTilEtterFerdigstilling,
             grunnlagsdata.sporbar.opprettetTid
         )
     }
@@ -39,7 +38,6 @@ class GrunnlagsdataService(
         val grunnlagsdata = hentFraRegisterMedSøknadsdata(behandlingId)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata = grunnlagsdata,
-            lagtTilEtterFerdigstilling = false,
             opprettetTidspunkt = LocalDateTime.now()
         )
     }
@@ -48,7 +46,6 @@ class GrunnlagsdataService(
         val grunnlagsdata = hentLagretGrunnlagsdata(behandlingId)
         return GrunnlagsdataMedMetadata(
             grunnlagsdata.data,
-            grunnlagsdata.lagtTilEtterFerdigstilling,
             grunnlagsdata.sporbar.opprettetTid
         )
     }
