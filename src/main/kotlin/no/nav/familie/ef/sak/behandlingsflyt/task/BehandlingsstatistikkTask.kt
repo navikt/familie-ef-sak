@@ -125,8 +125,8 @@ class BehandlingsstatistikkTask(
             return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
         }
         return when (hendelse) {
-            Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
-            else -> {
+            Hendelse.PÅBEGYNT, Hendelse.MOTTATT, Hendelse.VENTER -> null
+            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.HENLAGT, Hendelse.FERDIG -> {
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
                         saksbehandling.stønadstype,
