@@ -28,9 +28,9 @@ class AndelshistorikkUttrekkController(
     fun hentDataManglerTilsyn2022(): ResponseEntity<String> {
         val fagsakerMedTilsynManglerKandidater = andelshistorikkUttrekkRepository.finnFagsakerMedTilsynManglerKandidater()
 
-        val fagsakerMedAndelshistorikk: List<FagsakMedAndelshistorikk> =
+        val fagsakerMedAndelshistorikk: List<UttrekkFagsakMedAndelshistorikk> =
             fagsakerMedTilsynManglerKandidater.map {
-                FagsakMedAndelshistorikk(it, vedtakHistorikkService.hentAktivHistorikk(it))
+                UttrekkFagsakMedAndelshistorikk(it, vedtakHistorikkService.hentAktivHistorikk(it))
             }
 
         val alleSomManglerTilsynForÅr = fagsakerMedAndelshistorikk.filter { it.harAndelOgManglerTilsyn(2022) }

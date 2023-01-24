@@ -5,7 +5,7 @@ import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.YearMonth
 import java.util.UUID
 
-data class FagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistorikk: List<AndelHistorikkDto>) {
+data class UttrekkFagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistorikk: List<AndelHistorikkDto>) {
 
     fun harAndelOgManglerTilsyn(år: Int) =
         andelshistorikk.any { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }

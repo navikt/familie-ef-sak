@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface AndelshistorikkUttrekkRepository : RepositoryInterface<FagsakMedAndelshistorikk, UUID> {
+interface AndelshistorikkUttrekkRepository : RepositoryInterface<UttrekkFagsakMedAndelshistorikk, UUID> {
 
     @Query(
         """
