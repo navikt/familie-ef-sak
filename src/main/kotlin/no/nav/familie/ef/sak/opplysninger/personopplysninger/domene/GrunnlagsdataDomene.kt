@@ -30,6 +30,8 @@ import java.time.LocalDateTime
  * kritiske
  */
 
+
+
 data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
     val opprettetTidspunkt: LocalDateTime

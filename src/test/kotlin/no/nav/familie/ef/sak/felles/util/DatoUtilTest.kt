@@ -167,4 +167,15 @@ internal class DatoUtilTest {
             assertThat(Skoleår(Year.of(1999)).toString()).isEqualTo("99/00")
         }
     }
+
+    @Nested
+    inner class harGåttAntallTimer {
+
+        @Test
+        internal fun `sjekker har gått mer enn X timer`() {
+            assertThat(LocalDateTime.now().harGåttAntallTimer(4)).isFalse
+            assertThat(LocalDateTime.now().plusHours(3).harGåttAntallTimer(4)).isFalse
+            assertThat(LocalDateTime.now().plusHours(5).harGåttAntallTimer(4)).isTrue
+        }
+    }
 }

@@ -58,3 +58,6 @@ fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolea
     return erEttÅrEllerMer() &&
         LocalDate.now() <= this.plusYears(1).plusDays(numberOfDaysCutoff)
 }
+
+fun LocalDateTime.harGåttAntallTimer(timer: Int) =
+    this.plusHours(timer.toLong()) > LocalDateTime.now()

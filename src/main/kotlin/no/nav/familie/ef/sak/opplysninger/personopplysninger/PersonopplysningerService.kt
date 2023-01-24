@@ -1,10 +1,16 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.felles.util.harGåttAntallTimer
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endringer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.finnEndringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
@@ -43,6 +49,53 @@ class PersonopplysningerService(
         )
     }
 
+    fun hentEndringerPersonopplysninger(behandlingId: UUID): EndringerIPersonopplysningerDto {
+        val personIdent = behandlingService.hentAktivIdent(behandlingId)
+        val egenAnsatt = egenAnsatt(personIdent)
+        val søkerIdenter = personService.hentPersonIdenter(personIdent)
+        val grunnlagsdata = grunnlagsdataService.hentLagretGrunnlagsdata(behandlingId)
+        val skalSjekkeDataFraRegisteret = grunnlagsdata.endringerSjekket.harGåttAntallTimer(4)
+        val nyGrunnlagsdata = if (skalSjekkeDataFraRegisteret) {
+            grunnlagsdataService.hentFraRegister(behandlingId)
+        } else {
+            grunnlagsdata.endringer?.let { GrunnlagsdataMedMetadata(it, grunnlagsdata.endringerSjekket) }
+        }
+        if (nyGrunnlagsdata == null) {
+            return EndringerIPersonopplysningerDto(grunnlagsdata.endringerSjekket, Endringer())
+        }
+        val endringer = sjekkEndringer(grunnlagsdata, egenAnsatt, søkerIdenter, nyGrunnlagsdata)
+        if (skalSjekkeDataFraRegisteret) {
+            grunnlagsdataService.oppdaterEndringer(
+                grunnlagsdata.copy(
+                    endringerSjekket = LocalDateTime.now(),
+                    endringer = if (endringer.harEndringer) nyGrunnlagsdata.grunnlagsdata else null
+                )
+            )
+        }
+
+        return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
+    }
+
+    private fun sjekkEndringer(
+        grunnlagsdata: Grunnlagsdata,
+        egenAnsatt: Boolean,
+        søkerIdenter: PdlIdenter,
+        annenData: GrunnlagsdataMedMetadata
+    ): Endringer {
+        val tidligere = personopplysningerMapper.tilPersonopplysninger(
+            grunnlagsdata.tilGrunnlagsdataMedMetadata(),
+            egenAnsatt,
+            søkerIdenter
+        )
+
+        val nye = personopplysningerMapper.tilPersonopplysninger(
+            annenData,
+            egenAnsatt,
+            søkerIdenter
+        )
+        return finnEndringer(tidligere, nye)
+    }
+
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre(personIdent, emptyList())
@@ -66,7 +119,8 @@ class PersonopplysningerService(
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
+        return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }
+            .toMap()
     }
 
     @Cacheable("navKontor")
