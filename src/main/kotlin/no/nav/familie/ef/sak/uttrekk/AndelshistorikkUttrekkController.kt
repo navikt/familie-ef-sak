@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import java.math.BigDecimal
+import java.time.YearMonth
 import java.util.UUID
 
 @Controller
@@ -36,20 +38,21 @@ class AndelshistorikkUttrekkController(
         val alleSomManglerTilsynForÅr = fagsakerMedAndelshistorikk.filter { it.harAndelOgManglerTilsyn(2022) }
 
         val alleAvsluttedeMedBeløpOgAntallMåneder: List<ResultatPerFagsak> = alleSomManglerTilsynForÅr
-            .filter { it.harAvsluttetPeriodeMedManglendeTilsyn(2022) }
+            .filter { it.harAvsluttetPeriodeMedManglendeTilsyn() }
             .map {
                 val resultatPerFagsak = ResultatPerFagsak(
                     it.fagsakId,
-                    it.antallMånederMedManglendeTilsynSomErAvsluttet(2022),
-                    it.beløpForManglendeTilsynSomErAvsluttet(2022)
+                    it.antallMånederMedManglendeTilsynSomErAvsluttet(),
+                    it.beløpForManglendeTilsynSomErAvsluttet(),
+                    it.tidligsteFom(),
                 )
                 secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
                 resultatPerFagsak
             }
 
-        val alleMnd = alleAvsluttedeMedBeløpOgAntallMåneder.sumOf { it.antallMåneder }
-        val snittAntMnd = alleMnd.div(alleAvsluttedeMedBeløpOgAntallMåneder.size)
-        val snittBeløp = alleAvsluttedeMedBeløpOgAntallMåneder.sumOf { it.totalBeløp }.div(alleMnd)
+        val alleMnd = BigDecimal.valueOf(alleAvsluttedeMedBeløpOgAntallMåneder.sumOf { it.antallMåneder })
+        val snittAntMnd = alleMnd.div(BigDecimal(alleAvsluttedeMedBeløpOgAntallMåneder.size))
+        val snittBeløp = alleAvsluttedeMedBeløpOgAntallMåneder.sumOf { it.totalBeløp.toBigDecimal() }.div(alleMnd)
 
         val uttrekkResultat =
             "Uttrekk unntatt aktivitet: mangler tilsyn. Total: ${alleSomManglerTilsynForÅr.size}. Snitt mnd: $snittAntMnd, Snitt beløp pr mnd: $snittBeløp "
@@ -58,4 +61,9 @@ class AndelshistorikkUttrekkController(
     }
 }
 
-data class ResultatPerFagsak(val fagsakId: UUID, val antallMåneder: Long, val totalBeløp: Long)
+data class ResultatPerFagsak(
+    val fagsakId: UUID,
+    val antallMåneder: Long,
+    val totalBeløp: Long,
+    val tidligsteFom: YearMonth
+)
