@@ -52,7 +52,6 @@ class PersonopplysningerService(
         return personopplysningerMapper.tilPersonopplysninger(
             GrunnlagsdataMedMetadata(
                 grunnlagsdata,
-                lagtTilEtterFerdigstilling = false,
                 opprettetTidspunkt = LocalDateTime.now()
             ),
             egenAnsatt,

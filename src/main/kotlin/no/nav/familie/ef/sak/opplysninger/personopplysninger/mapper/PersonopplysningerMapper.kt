@@ -44,7 +44,6 @@ class PersonopplysningerMapper(
 
         val gjeldendePersonIdent = søkerIdenter.gjeldende().ident
         return PersonopplysningerDto(
-            lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
             adressebeskyttelse = søker.adressebeskyttelse
                 ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()

@@ -17,7 +17,6 @@ data class VilkårGrunnlagDto(
     val sivilstandsplaner: SivilstandsplanerDto,
     val aktivitet: AktivitetDto?,
     val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
-    val lagtTilEtterFerdigstilling: Boolean,
     val registeropplysningerOpprettetTid: LocalDateTime,
     val adresseopplysninger: AdresseopplysningerDto?,
     val dokumentasjon: DokumentasjonFraSøknadDto?
