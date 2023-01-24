@@ -1,11 +1,11 @@
-package no.nav.familie.ef.sak.tilkjentytelse.uttrekk
+package no.nav.familie.ef.sak.uttrekk
 
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.time.YearMonth
 import java.util.UUID
 
-data class VedtakMedTilsynordningKanditat(val fagsakId: UUID, val andelshistorikk: List<AndelHistorikkDto>) {
+data class FagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistorikk: List<AndelHistorikkDto>) {
 
     fun harAndelOgManglerTilsyn(år: Int) =
         andelshistorikk.any { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
@@ -24,8 +24,6 @@ data class VedtakMedTilsynordningKanditat(val fagsakId: UUID, val andelshistorik
 }
 
 private fun Månedsperiode.harPeriodeI(år: Int): Boolean {
-    val janÅr = YearMonth.of(år, 1)
-    val desÅr = YearMonth.of(år, 12)
-    val periodeÅr = Månedsperiode(fom = janÅr, tom = desÅr)
-    return periodeÅr overlapper this
+    val periodeForÅr = Månedsperiode(fom = YearMonth.of(år, 1), tom = YearMonth.of(år, 12))
+    return periodeForÅr overlapper this
 }

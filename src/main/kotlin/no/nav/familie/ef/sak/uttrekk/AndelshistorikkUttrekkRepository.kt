@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.tilkjentytelse.uttrekk
+package no.nav.familie.ef.sak.uttrekk
 
 import no.nav.familie.ef.sak.repository.RepositoryInterface
 import org.springframework.data.jdbc.repository.query.Query
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface AndelshistorikkUttrekkRepository : RepositoryInterface<VedtakMedTilsynordningKanditat, UUID> {
+interface AndelshistorikkUttrekkRepository : RepositoryInterface<FagsakMedAndelshistorikk, UUID> {
 
     @Query(
         """
