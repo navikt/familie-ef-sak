@@ -25,7 +25,6 @@ object VilkårTestUtil {
         sivilstandsplaner: SivilstandsplanerDto = mockk(relaxed = true),
         aktivitet: AktivitetDto? = mockk(relaxed = true),
         sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto? = mockk(relaxed = true),
-        lagtTilEtterFerdigstilling: Boolean = false,
         registeropplysningerOpprettetTid: LocalDateTime = mockk(relaxed = true),
         adresseopplysninger: AdresseopplysningerDto = mockk(relaxed = true),
         dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true)
@@ -39,7 +38,6 @@ object VilkårTestUtil {
             sivilstandsplaner = sivilstandsplaner,
             aktivitet = aktivitet,
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
-            lagtTilEtterFerdigstilling = lagtTilEtterFerdigstilling,
             registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
             adresseopplysninger = adresseopplysninger,
             dokumentasjon = dokumentasjon

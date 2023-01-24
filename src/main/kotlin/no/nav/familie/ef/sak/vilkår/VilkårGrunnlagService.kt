@@ -66,7 +66,6 @@ class VilkårGrunnlagService(
             sivilstandsplaner = sivilstandsplaner,
             aktivitet = aktivitet,
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
-            lagtTilEtterFerdigstilling = registergrunnlagData.lagtTilEtterFerdigstilling,
             registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt,
             adresseopplysninger = AdresseopplysningerMapper.tilDto(søknad?.adresseopplysninger),
             dokumentasjon = søknad?.dokumentasjon
