@@ -2,13 +2,8 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.felles.util.harGåttAntallTimer
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.finnEndringer
@@ -51,57 +46,22 @@ class PersonopplysningerService(
         )
     }
 
-    fun hentEndringerPersonopplysninger(behandlingId: UUID): EndringerIPersonopplysningerDto {
-        val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        feilHvis(behandling.status == BehandlingStatus.FERDIGSTILT) {
-            "Kan ikke hente endringer for behandling med status=${behandling.status}"
-        }
-        val grunnlagsdata = grunnlagsdataService.hentLagretGrunnlagsdata(behandlingId)
-        return hentEndringerPersonopplysninger(behandling, grunnlagsdata)
-    }
-
-    private fun hentEndringerPersonopplysninger(
+    fun finnEndringerIPersonopplysninger(
         behandling: Saksbehandling,
-        grunnlagsdata: Grunnlagsdata,
-    ): EndringerIPersonopplysningerDto {
-        val skalSjekkeDataFraRegisteret = grunnlagsdata.endringerSjekket.harGåttAntallTimer(4)
-        val nyGrunnlagsdata = if (skalSjekkeDataFraRegisteret) {
-            grunnlagsdataService.hentFraRegister(behandling.id)
-        } else {
-            grunnlagsdata.endringer?.let { GrunnlagsdataMedMetadata(it, grunnlagsdata.endringerSjekket) }
-        }
-        if (nyGrunnlagsdata == null) {
-            return EndringerIPersonopplysningerDto(grunnlagsdata.endringerSjekket, Endringer())
-        }
-
-        val endringer = finnEndringerIPersonopplysninger(behandling, grunnlagsdata, nyGrunnlagsdata)
-        if (skalSjekkeDataFraRegisteret) {
-            grunnlagsdataService.oppdaterEndringer(
-                grunnlagsdata.copy(
-                    endringerSjekket = LocalDateTime.now(),
-                    endringer = if (endringer.endringer.harEndringer) nyGrunnlagsdata.grunnlagsdata else null
-                )
-            )
-        }
-        return endringer
-    }
-
-    private fun finnEndringerIPersonopplysninger(
-        behandling: Saksbehandling,
-        grunnlagsdata: Grunnlagsdata,
-        annenData: GrunnlagsdataMedMetadata
+        tidligereGrunnlagsdata: GrunnlagsdataMedMetadata,
+        nyGrunnlagsdata: GrunnlagsdataMedMetadata
     ): EndringerIPersonopplysningerDto {
         val personIdent = behandling.ident
         val egenAnsatt = egenAnsatt(personIdent)
         val søkerIdenter = personService.hentPersonIdenter(personIdent)
         val tidligerePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdata.tilGrunnlagsdataMedMetadata(),
+            tidligereGrunnlagsdata,
             egenAnsatt,
             søkerIdenter
         )
 
         val nyePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
-            annenData,
+            nyGrunnlagsdata,
             egenAnsatt,
             søkerIdenter
         )

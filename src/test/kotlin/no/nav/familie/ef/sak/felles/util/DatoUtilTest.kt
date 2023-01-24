@@ -174,8 +174,8 @@ internal class DatoUtilTest {
         @Test
         internal fun `sjekker har gått mer enn X timer`() {
             assertThat(LocalDateTime.now().harGåttAntallTimer(4)).isFalse
-            assertThat(LocalDateTime.now().plusHours(3).harGåttAntallTimer(4)).isFalse
-            assertThat(LocalDateTime.now().plusHours(5).harGåttAntallTimer(4)).isTrue
+            assertThat(LocalDateTime.now().minusHours(3).harGåttAntallTimer(4)).isFalse
+            assertThat(LocalDateTime.now().minusHours(5).harGåttAntallTimer(4)).isTrue
         }
     }
 }

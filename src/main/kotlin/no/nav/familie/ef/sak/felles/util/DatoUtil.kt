@@ -60,4 +60,4 @@ fun LocalDate.erEttÅrEllerMerOgInnenforCutoff(numberOfDaysCutoff: Long): Boolea
 }
 
 fun LocalDateTime.harGåttAntallTimer(timer: Int) =
-    this.plusHours(timer.toLong()) > LocalDateTime.now()
+    this.plusHours(timer.toLong()) < LocalDateTime.now()

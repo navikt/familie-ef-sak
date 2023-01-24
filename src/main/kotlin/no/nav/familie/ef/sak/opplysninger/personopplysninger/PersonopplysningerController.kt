@@ -27,6 +27,7 @@ import java.util.UUID
 @Validated
 class PersonopplysningerController(
     private val personopplysningerService: PersonopplysningerService,
+    private val endringerIPersonOpplysningerService: EndringerIPersonOpplysningerService,
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
@@ -48,7 +49,7 @@ class PersonopplysningerController(
     @GetMapping("/behandling/{behandlingId}/endringer")
     fun hentEndringerPersonopplysninger(@PathVariable behandlingId: UUID): Ressurs<EndringerIPersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        return Ressurs.success(personopplysningerService.hentEndringerPersonopplysninger(behandlingId))
+        return Ressurs.success(endringerIPersonOpplysningerService.hentEndringerPersonopplysninger(behandlingId))
     }
 
     @GetMapping("/fagsak/{fagsakId}")
