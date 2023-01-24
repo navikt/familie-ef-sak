@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.dto
 
-import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class EndringerIPersonopplysningerDto(
@@ -10,21 +8,20 @@ data class EndringerIPersonopplysningerDto(
 )
 
 data class Endringer(
-    val folkeregisterpersonstatus: Endring<Folkeregisterpersonstatus?>? = null,
-    val fødselsdato: Endring<LocalDate?>? = null,
-    val dødsdato: Endring<LocalDate?>? = null,
-    val statsborgerskap: Endring<List<StatsborgerskapDto>>? = null,
-    val sivilstand: Endring<List<SivilstandDto>>? = null,
-    val adresse: Endring<List<AdresseDto>>? = null,
-    val fullmakt: Endring<List<FullmaktDto>>? = null,
-    val egenAnsatt: Endring<Boolean>? = null,
-    val barn: Endring<List<BarnDto>>? = null,
-    val innflyttingTilNorge: Endring<List<InnflyttingDto>>? = null,
-    val utflyttingFraNorge: Endring<List<UtflyttingDto>>? = null,
-    val oppholdstillatelse: Endring<List<OppholdstillatelseDto>>? = null,
-    val vergemål: Endring<List<VergemålDto>>? = null
+    val folkeregisterpersonstatus: Endring = Endring(),
+    val fødselsdato: Endring = Endring(),
+    val dødsdato: Endring = Endring(),
+    val statsborgerskap: Endring = Endring(),
+    val sivilstand: Endring = Endring(),
+    val adresse: Endring = Endring(),
+    val fullmakt: Endring = Endring(),
+    val barn: Endring = Endring(),
+    val innflyttingTilNorge: Endring = Endring(),
+    val utflyttingFraNorge: Endring = Endring(),
+    val oppholdstillatelse: Endring = Endring(),
+    val vergemål: Endring = Endring()
 ) {
-    val harEndringer = listOfNotNull(
+    val harEndringer = listOf(
         folkeregisterpersonstatus,
         fødselsdato,
         dødsdato,
@@ -32,16 +29,15 @@ data class Endringer(
         sivilstand,
         adresse,
         fullmakt,
-        egenAnsatt,
         barn,
         innflyttingTilNorge,
         utflyttingFraNorge,
         oppholdstillatelse,
         vergemål,
-    ).isNotEmpty()
+    ).any { it.harEndringer }
 }
 
-data class Endring<T>(val tidligere: T, val nye: T)
+data class Endring(val harEndringer: Boolean = false)
 
 fun finnEndringer(tidligere: PersonopplysningerDto, nye: PersonopplysningerDto) =
     Endringer(
@@ -52,7 +48,6 @@ fun finnEndringer(tidligere: PersonopplysningerDto, nye: PersonopplysningerDto) 
         sivilstand = utledEndringer(tidligere.sivilstand, nye.sivilstand),
         adresse = utledEndringer(tidligere.adresse, nye.adresse),
         fullmakt = utledEndringer(tidligere.fullmakt, nye.fullmakt),
-        egenAnsatt = utledEndringer(tidligere.egenAnsatt, nye.egenAnsatt),
         barn = utledEndringer(tidligere.barn, nye.barn),
         // andreForeldre = //
         innflyttingTilNorge = utledEndringer(tidligere.innflyttingTilNorge, nye.innflyttingTilNorge),
@@ -61,9 +56,5 @@ fun finnEndringer(tidligere: PersonopplysningerDto, nye: PersonopplysningerDto) 
         vergemål = utledEndringer(tidligere.vergemål, nye.vergemål),
     )
 
-fun <T> utledEndringer(tidligere: T, nye: T): Endring<T>? =
-    if (tidligere != nye) {
-        Endring(tidligere, nye)
-    } else {
-        null
-    }
+fun <T> utledEndringer(tidligere: T, nye: T) =
+    Endring(tidligere != nye)
