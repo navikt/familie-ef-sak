@@ -14,8 +14,8 @@ data class Grunnlagsdata(
     val lagtTilEtterFerdigstilling: Boolean = false,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
-    val endringerSjekket: LocalDateTime? = SporbarUtils.now(),
-    val endringer: GrunnlagsdataDomene? = null,
+    val endringerSjekket: LocalDateTime = SporbarUtils.now(),
+    val endringer: GrunnlagsdataDomene? = null
 ) {
     fun tilGrunnlagsdataMedMetadata() = GrunnlagsdataMedMetadata(data, sporbar.opprettetTid)
 // burde vi ha en tidspunkt for når dataen ble oppdatert? endret tid er kanskje kun når endringer ble sjekket
