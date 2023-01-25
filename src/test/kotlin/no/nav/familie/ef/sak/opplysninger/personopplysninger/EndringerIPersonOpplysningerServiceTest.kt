@@ -60,8 +60,8 @@ internal class EndringerIPersonOpplysningerServiceTest {
             verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
             verify(exactly = 1) {
                 grunnlagsdataService.oppdaterEndringer(coWithArg {
-                    assertThat(it.endringer).isNull()
-                    assertThat(it.endringerSjekket).isAfter(LocalDateTime.now().minusMinutes(1))
+                    assertThat(it.oppdaterteData).isNull()
+                    assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
                 })
             }
         }
@@ -76,8 +76,8 @@ internal class EndringerIPersonOpplysningerServiceTest {
             verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
             verify(exactly = 1) {
                 grunnlagsdataService.oppdaterEndringer(coWithArg {
-                    assertThat(it.endringer).isNotNull
-                    assertThat(it.endringerSjekket).isAfter(LocalDateTime.now().minusMinutes(1))
+                    assertThat(it.oppdaterteData).isNotNull
+                    assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
                 })
             }
         }
@@ -125,8 +125,8 @@ internal class EndringerIPersonOpplysningerServiceTest {
     ) = Grunnlagsdata(
         behandlingId,
         opprettGrunnlagsdata(),
-        endringerSjekket = endringerSjekket,
-        endringer = endringer
+        oppdaterteDataHentetTid = endringerSjekket,
+        oppdaterteData = endringer
     )
 
     private fun mockPersonopplysninger(harEndringer: Boolean) {
