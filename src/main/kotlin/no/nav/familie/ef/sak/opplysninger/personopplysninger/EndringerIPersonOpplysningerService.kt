@@ -33,14 +33,15 @@ class EndringerIPersonOpplysningerService(
         behandling: Saksbehandling,
         grunnlagsdata: Grunnlagsdata,
     ): EndringerIPersonopplysningerDto {
-        val skalSjekkeDataFraRegisteret = grunnlagsdata.endringerSjekket.harGåttAntallTimer(4)
+        val endringerSjekket = grunnlagsdata.endringerSjekket ?: LocalDateTime.MIN
+        val skalSjekkeDataFraRegisteret = endringerSjekket.harGåttAntallTimer(4)
         val nyGrunnlagsdata = if (skalSjekkeDataFraRegisteret) {
             grunnlagsdataService.hentFraRegister(behandling.id)
         } else {
-            grunnlagsdata.endringer?.let { GrunnlagsdataMedMetadata(it, grunnlagsdata.endringerSjekket) }
+            grunnlagsdata.endringer?.let { GrunnlagsdataMedMetadata(it, endringerSjekket) }
         }
         if (nyGrunnlagsdata == null) {
-            return EndringerIPersonopplysningerDto(grunnlagsdata.endringerSjekket, Endringer())
+            return EndringerIPersonopplysningerDto(endringerSjekket, Endringer())
         }
 
         val endringer = personopplysningerService.finnEndringerIPersonopplysninger(
