@@ -35,6 +35,23 @@ data class Endringer(
         oppholdstillatelse,
         vergemål,
     ).any { it.harEndringer }
+
+    fun felterMedEndringerString(): String {
+        return listOf(
+            "folkeregisterpersonstatus=${folkeregisterpersonstatus.harEndringer}",
+            "fødselsdato=${fødselsdato.harEndringer}",
+            "dødsdato=${dødsdato.harEndringer}",
+            "statsborgerskap=${statsborgerskap.harEndringer}",
+            "sivilstand=${sivilstand.harEndringer}",
+            "adresse=${adresse.harEndringer}",
+            "fullmakt=${fullmakt.harEndringer}",
+            "barn=${barn.harEndringer}",
+            "innflyttingTilNorge=${innflyttingTilNorge.harEndringer}",
+            "utflyttingFraNorge=${utflyttingFraNorge.harEndringer}",
+            "oppholdstillatelse=${oppholdstillatelse.harEndringer}",
+            "vergemål=${vergemål.harEndringer}"
+        ).joinToString(", ")
+    }
 }
 
 data class Endring(val harEndringer: Boolean = false)

@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.EndringerIPersonopplysningerDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -19,6 +20,8 @@ class EndringerIPersonOpplysningerService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val personopplysningerService: PersonopplysningerService
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun hentEndringerPersonopplysninger(behandlingId: UUID): EndringerIPersonopplysningerDto {
         val behandling = behandlingService.hentSaksbehandling(behandlingId)
@@ -49,6 +52,10 @@ class EndringerIPersonOpplysningerService(
             nyGrunnlagsdata
         )
         if (skalSjekkeDataFraRegisteret) {
+            logger.info(
+                "Endringer i fagsak=${behandling.fagsakId} behandling=${behandling.id}" +
+                    " ${endringer.endringer.felterMedEndringerString()}"
+            )
             grunnlagsdataService.oppdaterEndringer(
                 grunnlagsdata.copy(
                     oppdaterteDataHentetTid = LocalDateTime.now(),
