@@ -48,8 +48,8 @@ fun finnEndringer(tidligere: PersonopplysningerDto, nye: PersonopplysningerDto) 
         sivilstand = utledEndringer(tidligere.sivilstand, nye.sivilstand),
         adresse = utledEndringer(tidligere.adresse, nye.adresse),
         fullmakt = utledEndringer(tidligere.fullmakt, nye.fullmakt),
-        barn = utledEndringer(tidligere.barn, nye.barn),
-        // andreForeldre = //
+        barn = utledEndringer(tidligere.barn, nye.barn), // TODO bedre diff på barn
+        // andreForeldre = // TODO legge til andre forelder og adresse på disse?
         innflyttingTilNorge = utledEndringer(tidligere.innflyttingTilNorge, nye.innflyttingTilNorge),
         utflyttingFraNorge = utledEndringer(tidligere.utflyttingFraNorge, nye.utflyttingFraNorge),
         oppholdstillatelse = utledEndringer(tidligere.oppholdstillatelse, nye.oppholdstillatelse),
