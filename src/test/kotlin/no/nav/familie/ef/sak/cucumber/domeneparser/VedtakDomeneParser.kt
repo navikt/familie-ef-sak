@@ -221,8 +221,10 @@ object VedtakDomeneParser {
             val barn = mapBarn(behandlingId, rad) ?: parseValgfriInt(VedtakDomenebegrep.ANTALL_BARN, rad)?.let {
                 IntRange(1, it).map { UUID.randomUUID() }
             } ?: emptyList()
-            val periodetype = parsePeriodetypeBarnetilsyn(rad)
-            val aktivitetstype = parseAktivitetstypeBarnetilsyn(rad)
+            val periodetype = parsePeriodetypeBarnetilsyn(rad) ?: PeriodetypeBarnetilsyn.ORDINÆR
+            val aktivitetstype =
+                parseAktivitetstypeBarnetilsyn(rad) ?: periodetype.takeIf { it == PeriodetypeBarnetilsyn.ORDINÆR }
+                    ?.let { AktivitetstypeBarnetilsyn.I_ARBEID }
             if (resultatType == ResultatType.SANKSJONERE) {
                 feilHvis(periodetype != PeriodetypeBarnetilsyn.SANKSJON_1_MND) {
                     "Periodetype for sanksjon må være SANKSJON_1_MND"
@@ -235,7 +237,7 @@ object VedtakDomeneParser {
                 utgifter = parseValgfriInt(VedtakDomenebegrep.UTGIFTER, rad) ?: 0,
                 barn = barn,
                 sanksjonsårsak = sanksjonsårsak,
-                periodetype = periodetype ?: error("Mangler periodetype"),
+                periodetype = periodetype,
                 aktivitetstype = aktivitetstype
             )
         }

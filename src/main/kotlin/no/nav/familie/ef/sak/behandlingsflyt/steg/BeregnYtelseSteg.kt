@@ -94,7 +94,7 @@ class BeregnYtelseSteg(
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is InnvilgelseBarnetilsyn -> {
-                validerStartTidEtterSanksjon(data, saksbehandlingMedOppdatertIdent)
+                validerSanksjoner(data, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForInnvilgetBarnetilsyn(data, saksbehandlingMedOppdatertIdent)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
@@ -117,9 +117,19 @@ class BeregnYtelseSteg(
         }
     }
 
-    private fun validerStartTidEtterSanksjon(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
-        innvilget.perioder.firstOrNull()?.let {
-            validerStartTidEtterSanksjon(it.periode.fom, behandling)
+    private fun validerSanksjoner(innvilget: InnvilgelseBarnetilsyn, behandling: Saksbehandling) {
+        if (behandling.erMaskinellOmregning) {
+            return
+        }
+        if (!featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON)) {
+            innvilget.perioder.firstOrNull()?.let {
+                validerStartTidEtterSanksjon(it.periode.fom, behandling)
+            }
+        } else {
+            val nyeSanksjonsperioder = innvilget.perioder
+                .filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
+                .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+            validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
         }
     }
 
@@ -160,7 +170,10 @@ class BeregnYtelseSteg(
     private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
         val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
             .filter { it.erAktivVedtaksperiode() }
-            .lastOrNull { it.periodeType == VedtaksperiodeType.SANKSJON }
+            .lastOrNull {
+                it.periodeType == VedtaksperiodeType.SANKSJON ||
+                    it.periodetypeBarnetilsyn == PeriodetypeBarnetilsyn.SANKSJON_1_MND
+            }
         nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
             feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
                 "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
@@ -202,17 +215,17 @@ class BeregnYtelseSteg(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         behandlingId: UUID
     ) {
-        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphør && it.barn.isNotEmpty() }) {
-            "Kan ikke ta med barn på en periode som er et midlertidig opphør, på behandling=$behandlingId"
+        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphørEllerSanksjon && it.barn.isNotEmpty() }) {
+            "Kan ikke ta med barn på en periode som er et midlertidig opphør eller sanksjon, på behandling=$behandlingId"
         }
-        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphør && it.utgifter > 0 }) {
-            "kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør, på behandling=$behandlingId"
+        brukerfeilHvis(utgiftsperioder.any { it.erMidlertidigOpphørEllerSanksjon && it.utgifter > 0 }) {
+            "Kan ikke ha utgifter større enn null på en periode som er et midlertidig opphør eller sanksjon, på behandling=$behandlingId"
         }
-        brukerfeilHvis(utgiftsperioder.any { !it.erMidlertidigOpphør && it.barn.isEmpty() }) {
-            "Må ha med minst et barn på en periode som ikke er et midlertidig opphør, på behandling=$behandlingId"
+        brukerfeilHvis(utgiftsperioder.any { !it.erMidlertidigOpphørEllerSanksjon && it.barn.isEmpty() }) {
+            "Må ha med minst et barn på en periode som ikke er et midlertidig opphør eller sanksjon, på behandling=$behandlingId"
         }
-        brukerfeilHvis(utgiftsperioder.any { !it.erMidlertidigOpphør && it.utgifter <= 0 }) {
-            "Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør, på behandling=$behandlingId"
+        brukerfeilHvis(utgiftsperioder.any { !it.erMidlertidigOpphørEllerSanksjon && it.utgifter <= 0 }) {
+            "Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon, på behandling=$behandlingId"
         }
     }
 
@@ -220,9 +233,9 @@ class BeregnYtelseSteg(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         saksbehandling: Saksbehandling
     ) {
-        val førstePeriodeErMidlertidigOpphør = utgiftsperioder.first().erMidlertidigOpphør
+        val førstePeriodeErMidlertidigOpphør = utgiftsperioder.first().periodetype == PeriodetypeBarnetilsyn.OPPHØR
         brukerfeilHvis(førstePeriodeErMidlertidigOpphør && saksbehandling.forrigeBehandlingId == null) {
-            "Første periode kan ikke ha et nullbeløp, på førstegangsbehandling=${saksbehandling.id}"
+            "Første periode kan ikke være en opphørsperiode, på førstegangsbehandling=${saksbehandling.id}"
         }
         val harIkkeInnvilgetBeløp =
             if (saksbehandling.forrigeBehandlingId != null) tilkjentYtelseService.hentForBehandling(saksbehandling.forrigeBehandlingId).andelerTilkjentYtelse.all { it.beløp == 0 } else true
@@ -567,8 +580,7 @@ class BeregnYtelseSteg(
         saksbehandling: Saksbehandling
     ): List<AndelTilkjentYtelse> {
         val beløpsperioder = beregningBarnetilsynService.beregnYtelseBarnetilsyn(
-            vedtak.perioder
-                .filter { !it.erMidlertidigOpphør || it.periodetype == PeriodetypeBarnetilsyn.ORDINÆR },
+            vedtak.perioder.filter { !it.erMidlertidigOpphørEllerSanksjon },
             kontantstøttePerioder = vedtak.perioderKontantstøtte,
             tilleggsstønadsperioder = vedtak.tilleggsstønad.perioder,
             erMigrering = saksbehandling.erMigrering

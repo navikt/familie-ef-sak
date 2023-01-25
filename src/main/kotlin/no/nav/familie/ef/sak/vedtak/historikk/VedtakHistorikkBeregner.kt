@@ -160,9 +160,8 @@ object VedtakHistorikkBeregner {
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + nyePerioder
             }
             is InnvilgelseBarnetilsyn -> {
-                val perioder =
-                    data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, konfigurasjon.brukIkkeVedtatteSatser)
-                        .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
+                val perioder = (perioderFraBeløp(vedtak, data, konfigurasjon) + sanksjonsperioder(vedtak))
+                    .sortedBy { it.periode }
                 val førsteFomDato = perioder.first().periode.fom
                 avkortTidligerePerioder(acc.lastOrNull(), førsteFomDato) + perioder
             }
@@ -184,6 +183,18 @@ object VedtakHistorikkBeregner {
             }
         }
     }
+
+    private fun sanksjonsperioder(vedtak: InnvilgelseBarnetilsyn): List<Sanksjonsperiode> {
+        return vedtak.perioder.filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
+            .map { Sanksjonsperiode(it.periode, it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+    }
+
+    private fun perioderFraBeløp(
+        vedtak: InnvilgelseBarnetilsyn,
+        data: BehandlingHistorikkData,
+        konfigurasjon: HistorikkKonfigurasjon
+    ) = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, konfigurasjon.brukIkkeVedtatteSatser)
+        .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
 
     private fun splitOppPerioderSomErSanksjonert(
         acc: List<Pair<UUID, Vedtaksdata>>,

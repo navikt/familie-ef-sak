@@ -138,7 +138,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             barn = listOf(barn.id),
             utgifter = 2500,
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+            sanksjonsårsak = null
         )
 
         val vedtakDto = InnvilgelseBarnetilsyn(
@@ -203,7 +204,8 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             barn = barn.map { it.id },
             utgifter = 3000,
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+            sanksjonsårsak = null
         )
 
         val vedtakDto = InnvilgelseBarnetilsyn(
