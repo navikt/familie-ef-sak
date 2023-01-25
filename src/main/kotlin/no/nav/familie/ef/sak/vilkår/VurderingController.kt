@@ -78,7 +78,6 @@ class VurderingController(
         return Ressurs.success(vurderingService.hentOpprettEllerOppdaterVurderinger(behandlingId))
     }
 
-    // TODO endre til post?
     @GetMapping("{behandlingId}/oppdater")
     fun oppdaterRegisterdata(@PathVariable behandlingId: UUID): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
