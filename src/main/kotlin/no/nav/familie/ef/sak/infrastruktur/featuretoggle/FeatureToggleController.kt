@@ -26,6 +26,7 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.BRUK_8_ÅR_HOVEDPERIODEVALIDERING,
         Toggle.VIS_SETT_PÅ_VENT_KNAPP,
         Toggle.AUTOMATISKE_HJEMLER_BREV,
+        Toggle.ANGRE_SEND_TIL_BESLUTTER
     )
 
     @GetMapping
