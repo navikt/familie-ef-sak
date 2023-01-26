@@ -11,11 +11,11 @@ data class UttrekkFagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistori
         andelshistorikk.any { it.andel.periode.harPeriodeI(år) && it.aktivitet?.manglerTilsyn() ?: false }
 
     fun harAvsluttetPeriodeMedManglendeTilsyn(): Boolean =
-        andelshistorikk.filter {  it.aktivitet?.manglerTilsyn() ?: false }
+        andelshistorikk.filter { it.aktivitet?.manglerTilsyn() ?: false }
             .all { it.andel.periode.tom <= YearMonth.now() }
 
     fun antallMånederMedManglendeTilsynSomErAvsluttet(): Long =
-        andelshistorikk.filter {  it.aktivitet?.manglerTilsyn() ?: false }
+        andelshistorikk.filter { it.aktivitet?.manglerTilsyn() ?: false }
             .sumOf { it.andel.periode.lengdeIHeleMåneder() }
 
     fun beløpForManglendeTilsynSomErAvsluttet(): Long =
@@ -23,8 +23,7 @@ data class UttrekkFagsakMedAndelshistorikk(val fagsakId: UUID, val andelshistori
             .sumOf { it.andel.beløp * it.andel.periode.lengdeIHeleMåneder() }
 
     fun tidligsteFom(): YearMonth {
-        val andeler =
-            andelshistorikk.filter {  it.aktivitet?.manglerTilsyn() ?: false }
+        val andeler = andelshistorikk.filter { it.aktivitet?.manglerTilsyn() ?: false }
         return andeler.sortedBy { it.andel.periode.fom }.first().andel.periode.fom
     }
 }
