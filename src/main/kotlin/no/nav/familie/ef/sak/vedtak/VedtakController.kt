@@ -65,6 +65,14 @@ class VedtakController(
         }
     }
 
+    @PostMapping("/{behandlingId}/angre-send-til-beslutter")
+    fun angreSendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
+        vedtakService.angreSendTilBeslutter(saksbehandling)
+        return Ressurs.success(saksbehandling.id)
+    }
+
     @PostMapping("/{behandlingId}/beslutte-vedtak")
     fun beslutteVedtak(
         @PathVariable behandlingId: UUID,

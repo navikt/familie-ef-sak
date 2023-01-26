@@ -1,5 +1,11 @@
 package no.nav.familie.ef.sak.vedtak
 
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
@@ -9,7 +15,9 @@ import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -18,7 +26,9 @@ import java.util.UUID
 @Service
 class VedtakService(
     private val vedtakRepository: VedtakRepository,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService
 ) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
@@ -99,6 +109,26 @@ class VedtakService(
 
     fun hentHarAktivtVedtak(behandlingId: UUID, localDate: LocalDate = LocalDate.now()): Boolean {
         return hentVedtak(behandlingId).erVedtakAktivtForDato(localDate)
+    }
+
+    fun angreSendTilBeslutter(saksbehandling: Saksbehandling) {
+        val vedtak = hentVedtak(behandlingId = saksbehandling.id)
+        // val saksbehandling = behandlingService.hentSaksbehandling(behandlingId = saksbehandling.id)
+
+        validerKanAngreSendTilBeslutter(saksbehandling, vedtak)
+        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.GodkjenneVedtak)
+        // TODO("Legg inn beskrivelse")
+        oppgaveService.opprettOppgave(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.BehandleSak, tilordnetNavIdent = SikkerhetContext.hentSaksbehandler())
+        behandlingService.oppdaterStegPåBehandling(saksbehandling.id, steg = StegType.SEND_TIL_BESLUTTER)
+    }
+
+    private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling, vedtak: Vedtak) {
+        feilHvis(vedtak.saksbehandlerIdent != SikkerhetContext.hentSaksbehandler(), httpStatus = HttpStatus.UNAUTHORIZED) { "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket" }
+        feilHvis(saksbehandling.steg == StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
+
+        val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.GodkjenneVedtak, saksbehandling = saksbehandling) ?: error("Fant ingen godkjenne vedtak oppgave")
+        val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
+        feilHvis(tilordnetRessurs != null, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs" }
     }
 }
 
