@@ -14,7 +14,7 @@ interface AndelshistorikkUttrekkRepository : RepositoryInterface<UttrekkFagsakMe
          from vedtak v
          join behandling b on b.id = v.behandling_id
          join fagsak f on b.fagsak_id = f.id
-         where perioder::text like '%FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING%' or  perioder::text like '%FORSØRGER_MANGLER_TILSYNSORDNING%'
+         where perioder::text like '%FORSØRGER_MANGLER_TILSYNSORDNING%'
         """
     )
     fun finnFagsakerMedTilsynManglerKandidater(): List<UUID>

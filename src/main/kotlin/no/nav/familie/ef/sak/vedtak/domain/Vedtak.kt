@@ -257,8 +257,7 @@ enum class AktivitetType {
     FORLENGELSE_STØNAD_PÅVENTE_UTDANNING,
     FORLENGELSE_STØNAD_UT_SKOLEÅRET;
 
-    fun manglerTilsyn(): Boolean =
-        this == FORLENGELSE_STØNAD_PÅVENTE_TILSYNSORDNING || this == FORSØRGER_MANGLER_TILSYNSORDNING
+    fun manglerTilsyn(): Boolean = this == FORSØRGER_MANGLER_TILSYNSORDNING
 }
 
 enum class SamordningsfradragType {
