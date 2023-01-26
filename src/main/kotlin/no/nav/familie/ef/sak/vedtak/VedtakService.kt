@@ -113,7 +113,6 @@ class VedtakService(
 
     fun angreSendTilBeslutter(saksbehandling: Saksbehandling) {
         val vedtak = hentVedtak(behandlingId = saksbehandling.id)
-        // val saksbehandling = behandlingService.hentSaksbehandling(behandlingId = saksbehandling.id)
 
         validerKanAngreSendTilBeslutter(saksbehandling, vedtak)
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.GodkjenneVedtak)
@@ -123,8 +122,8 @@ class VedtakService(
     }
 
     private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling, vedtak: Vedtak) {
-        feilHvis(vedtak.saksbehandlerIdent != SikkerhetContext.hentSaksbehandler(), httpStatus = HttpStatus.UNAUTHORIZED) { "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket" }
-        feilHvis(saksbehandling.steg == StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
+        feilHvis(vedtak.saksbehandlerIdent != SikkerhetContext.hentSaksbehandler(), httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket" }
+        feilHvis(saksbehandling.steg != StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
 
         val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.GodkjenneVedtak, saksbehandling = saksbehandling) ?: error("Fant ingen godkjenne vedtak oppgave")
         val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
