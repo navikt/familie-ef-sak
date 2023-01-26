@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vedtak
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
@@ -19,7 +21,14 @@ class VedtakServiceTest {
 
     private val vedtakRepository = mockk<VedtakRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val vedtakService = VedtakService(vedtakRepository, tilkjentYtelseRepository)
+    private val oppgaveService = mockk<OppgaveService>()
+    val behandlingService = mockk<BehandlingService>()
+    private val vedtakService = VedtakService(
+        vedtakRepository,
+        tilkjentYtelseRepository,
+        oppgaveService,
+        behandlingService
+    )
     private val behandlingId = UUID.randomUUID()
     private val inntektsperiodeUtenInntekt = inntektsperiode(
         startDato = LocalDate.of(2021, 1, 1),
