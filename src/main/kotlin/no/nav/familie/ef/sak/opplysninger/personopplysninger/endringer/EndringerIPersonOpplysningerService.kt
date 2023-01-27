@@ -36,7 +36,7 @@ class EndringerIPersonOpplysningerService(
         behandling: Saksbehandling,
         grunnlagsdata: Grunnlagsdata
     ): EndringerIPersonopplysningerDto {
-        val nyGrunnlagsdata = brukOppdaterteDataEllerHentNyFraRegister(behandling, grunnlagsdata)
+        val nyGrunnlagsdata = hentOppdatertGrunnlagsdata(behandling, grunnlagsdata)
             ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
 
         val endringer = personopplysningerService.finnEndringerIPersonopplysninger(
@@ -59,7 +59,7 @@ class EndringerIPersonOpplysningerService(
         return endringer
     }
 
-    private fun brukOppdaterteDataEllerHentNyFraRegister(
+    private fun hentOppdatertGrunnlagsdata(
         behandling: Saksbehandling,
         grunnlagsdata: Grunnlagsdata
     ) = if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
