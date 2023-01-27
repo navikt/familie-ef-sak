@@ -11,8 +11,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.Endring
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.Endringer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonOpplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.repository.saksbehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -62,10 +62,12 @@ internal class EndringerIPersonOpplysningerServiceTest {
             verify(exactly = 1) { grunnlagsdataService.hentFraRegister(any()) }
             verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
             verify(exactly = 1) {
-                grunnlagsdataService.oppdaterEndringer(coWithArg {
-                    assertThat(it.oppdaterteData).isNull()
-                    assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
-                })
+                grunnlagsdataService.oppdaterEndringer(
+                    coWithArg {
+                        assertThat(it.oppdaterteData).isNull()
+                        assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
+                    }
+                )
             }
         }
 
@@ -78,10 +80,12 @@ internal class EndringerIPersonOpplysningerServiceTest {
             verify(exactly = 1) { grunnlagsdataService.hentFraRegister(any()) }
             verify(exactly = 1) { personopplysningerService.finnEndringerIPersonopplysninger(any(), any(), any()) }
             verify(exactly = 1) {
-                grunnlagsdataService.oppdaterEndringer(coWithArg {
-                    assertThat(it.oppdaterteData).isNotNull
-                    assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
-                })
+                grunnlagsdataService.oppdaterEndringer(
+                    coWithArg {
+                        assertThat(it.oppdaterteData).isNotNull
+                        assertThat(it.oppdaterteDataHentetTid).isAfter(LocalDateTime.now().minusMinutes(1))
+                    }
+                )
             }
         }
     }
@@ -124,7 +128,7 @@ internal class EndringerIPersonOpplysningerServiceTest {
 
     private fun grunnlagsdata(
         endringerSjekket: LocalDateTime,
-        endringer: GrunnlagsdataDomene? = opprettGrunnlagsdata(),
+        endringer: GrunnlagsdataDomene? = opprettGrunnlagsdata()
     ) = Grunnlagsdata(
         behandlingId,
         opprettGrunnlagsdata(),

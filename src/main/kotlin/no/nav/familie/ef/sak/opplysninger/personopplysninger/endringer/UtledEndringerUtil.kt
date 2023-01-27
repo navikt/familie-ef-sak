@@ -17,7 +17,7 @@ object UtledEndringerUtil {
             innflyttingTilNorge = utledEndringer(tidligere.innflyttingTilNorge, nye.innflyttingTilNorge),
             utflyttingFraNorge = utledEndringer(tidligere.utflyttingFraNorge, nye.utflyttingFraNorge),
             oppholdstillatelse = utledEndringer(tidligere.oppholdstillatelse, nye.oppholdstillatelse),
-            vergemål = utledEndringer(tidligere.vergemål, nye.vergemål),
+            vergemål = utledEndringer(tidligere.vergemål, nye.vergemål)
         )
 
     private fun <T> utledEndringer(tidligere: T, nye: T) =

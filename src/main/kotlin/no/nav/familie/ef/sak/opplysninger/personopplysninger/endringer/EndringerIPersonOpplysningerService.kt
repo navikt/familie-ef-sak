@@ -18,7 +18,7 @@ import java.util.UUID
 class EndringerIPersonOpplysningerService(
     private val behandlingService: BehandlingService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val personopplysningerService: PersonopplysningerService,
+    private val personopplysningerService: PersonopplysningerService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -34,7 +34,7 @@ class EndringerIPersonOpplysningerService(
 
     private fun hentEndringerPersonopplysninger(
         behandling: Saksbehandling,
-        grunnlagsdata: Grunnlagsdata,
+        grunnlagsdata: Grunnlagsdata
     ): EndringerIPersonopplysningerDto {
         val nyGrunnlagsdata = brukOppdaterteDataEllerHentNyFraRegister(behandling, grunnlagsdata)
             ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
@@ -61,7 +61,7 @@ class EndringerIPersonOpplysningerService(
 
     private fun brukOppdaterteDataEllerHentNyFraRegister(
         behandling: Saksbehandling,
-        grunnlagsdata: Grunnlagsdata,
+        grunnlagsdata: Grunnlagsdata
     ) = if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
         grunnlagsdataService.hentFraRegister(behandling.id)
     } else {

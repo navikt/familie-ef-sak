@@ -33,7 +33,7 @@ data class Endringer(
         innflyttingTilNorge,
         utflyttingFraNorge,
         oppholdstillatelse,
-        vergemål,
+        vergemål
     ).any { it.harEndringer }
 
     fun felterMedEndringerString(): String {
