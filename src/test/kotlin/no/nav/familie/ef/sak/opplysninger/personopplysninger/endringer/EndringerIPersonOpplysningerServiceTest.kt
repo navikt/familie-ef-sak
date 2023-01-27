@@ -1,15 +1,18 @@
-package no.nav.familie.ef.sak.opplysninger.personopplysninger
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endring
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endringer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.EndringerIPersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.Endring
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.Endringer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonOpplysningerService
 import no.nav.familie.ef.sak.repository.saksbehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

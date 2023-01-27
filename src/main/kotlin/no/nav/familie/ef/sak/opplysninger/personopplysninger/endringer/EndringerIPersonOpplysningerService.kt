@@ -1,14 +1,14 @@
-package no.nav.familie.ef.sak.opplysninger.personopplysninger
+package no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.felles.util.harGåttAntallTimer
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Endringer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.EndringerIPersonopplysningerDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

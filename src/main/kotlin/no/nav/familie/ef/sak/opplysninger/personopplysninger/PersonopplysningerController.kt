@@ -6,8 +6,9 @@ import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.EndringerIPersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonOpplysningerService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
