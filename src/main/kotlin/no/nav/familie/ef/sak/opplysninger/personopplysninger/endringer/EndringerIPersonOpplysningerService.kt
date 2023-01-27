@@ -18,7 +18,7 @@ import java.util.UUID
 class EndringerIPersonOpplysningerService(
     private val behandlingService: BehandlingService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -36,22 +36,15 @@ class EndringerIPersonOpplysningerService(
         behandling: Saksbehandling,
         grunnlagsdata: Grunnlagsdata,
     ): EndringerIPersonopplysningerDto {
-        val skalSjekkeDataFraRegisteret = grunnlagsdata.oppdaterteDataHentetTid.harGåttAntallTimer(4)
-        val nyGrunnlagsdata = if (skalSjekkeDataFraRegisteret) {
-            grunnlagsdataService.hentFraRegister(behandling.id)
-        } else {
-            grunnlagsdata.oppdaterteData?.let { GrunnlagsdataMedMetadata(it, grunnlagsdata.oppdaterteDataHentetTid) }
-        }
-        if (nyGrunnlagsdata == null) {
-            return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
-        }
+        val nyGrunnlagsdata = brukOppdaterteDataEllerHentNyFraRegister(behandling, grunnlagsdata)
+            ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
 
         val endringer = personopplysningerService.finnEndringerIPersonopplysninger(
             behandling,
             grunnlagsdata.tilGrunnlagsdataMedMetadata(),
             nyGrunnlagsdata
         )
-        if (skalSjekkeDataFraRegisteret) {
+        if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
             logger.info(
                 "Endringer i fagsak=${behandling.fagsakId} behandling=${behandling.id}" +
                     " ${endringer.endringer.felterMedEndringerString()}"
@@ -65,4 +58,16 @@ class EndringerIPersonOpplysningerService(
         }
         return endringer
     }
+
+    private fun brukOppdaterteDataEllerHentNyFraRegister(
+        behandling: Saksbehandling,
+        grunnlagsdata: Grunnlagsdata,
+    ) = if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
+        grunnlagsdataService.hentFraRegister(behandling.id)
+    } else {
+        grunnlagsdata.oppdaterteData?.let { GrunnlagsdataMedMetadata(it, grunnlagsdata.oppdaterteDataHentetTid) }
+    }
+
+    private fun Grunnlagsdata.skalSjekkeDataFraRegisteret() =
+        this.oppdaterteDataHentetTid.harGåttAntallTimer(4)
 }
