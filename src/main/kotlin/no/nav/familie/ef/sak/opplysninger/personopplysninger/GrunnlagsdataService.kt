@@ -65,7 +65,7 @@ class GrunnlagsdataService(
         grunnlagsdataRepository.deleteById(behandlingId)
     }
 
-    private fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
+    fun hentLagretGrunnlagsdata(behandlingId: UUID): Grunnlagsdata {
         return grunnlagsdataRepository.findByIdOrThrow(behandlingId)
     }
 
@@ -96,5 +96,9 @@ class GrunnlagsdataService(
                 barneforeldreFraSøknad
             )
         }
+    }
+
+    fun oppdaterEndringer(grunnlagsdata: Grunnlagsdata): Grunnlagsdata {
+        return grunnlagsdataRepository.update(grunnlagsdata)
     }
 }

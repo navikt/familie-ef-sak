@@ -46,6 +46,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode"),
     VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp"),
     HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon"),
+    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
     AUTOMATISKE_HJEMLER_BREV("familie.ef.sak.frontend.automatiske-hjemler-brev"),
     ANGRE_SEND_TIL_BESLUTTER("familie.ef.sak.frontend-angre-send-til-beslutter");
 
