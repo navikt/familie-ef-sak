@@ -38,7 +38,8 @@ internal class GrunnlagsdataServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val behandlingService = mockk<BehandlingService>()
-    private val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
+    private val pdlClient = PdlClientConfig().pdlClient()
+    private val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
@@ -102,7 +103,7 @@ internal class GrunnlagsdataServiceTest {
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
-        verify(exactly = 1) { personService.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
+        verify(exactly = 1) { pdlClient.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
     }
 
     @Test
@@ -117,7 +118,7 @@ internal class GrunnlagsdataServiceTest {
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
-        verify(exactly = 0) { personService.hentPersonKortBolk(any()) }
+        verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
     }
 
     @Test
