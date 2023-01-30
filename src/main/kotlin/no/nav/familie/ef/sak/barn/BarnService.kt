@@ -5,14 +5,12 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
@@ -46,17 +44,14 @@ class BarnService(
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ) {
-        val barnOver18Toggle = featureToggleService.isEnabled(Toggle.BARN_OVER_18)
-        val grunnlagsdataBarnFiltrert = grunnlagsdataBarn
-            .filter { barnOver18Toggle || it.fødsel.gjeldende().erUnder18År() }
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
-            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarnFiltrert)
+            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
                 kobleBarnForOvergangsstønadOgSkolepenger(
                     fagsakId,
                     behandlingId,
                     ustrukturertDokumentasjonType,
-                    grunnlagsdataBarnFiltrert,
+                    grunnlagsdataBarn,
                     barnSomSkalFødes,
                     vilkårsbehandleNyeBarn
                 )
@@ -256,10 +251,7 @@ class BarnService(
         kobledeBarn: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>
     ) {
-        val barnOver18Toggle = featureToggleService.isEnabled(Toggle.BARN_OVER_18)
-        val grunnlagsdataBarnIdenter = grunnlagsdataBarn
-            .filter { barnOver18Toggle || it.fødsel.gjeldende().erUnder18År() }
-            .map { it.personIdent }
+        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.map { it.personIdent }
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
 
         feilHvisIkke(kobledeBarnIdenter.containsAll(grunnlagsdataBarnIdenter)) {
