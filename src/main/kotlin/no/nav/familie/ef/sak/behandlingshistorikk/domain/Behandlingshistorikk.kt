@@ -55,6 +55,7 @@ private fun Behandlingshistorikk.mapUtfallTilHendelse() =
     when (this.utfall) {
         StegUtfall.SATT_PÅ_VENT -> Hendelse.SATT_PÅ_VENT
         StegUtfall.TATT_AV_VENT -> Hendelse.TATT_AV_VENT
+        StegUtfall.ANGRE_SEND_TIL_BESLUTTER -> Hendelse.ANGRE_SEND_TIL_BESLUTTER
         else -> null
     }
 
@@ -101,5 +102,6 @@ enum class StegUtfall {
     BESLUTTE_VEDTAK_UNDERKJENT,
     HENLAGT,
     SATT_PÅ_VENT,
-    TATT_AV_VENT
+    TATT_AV_VENT,
+    ANGRE_SEND_TIL_BESLUTTER
 }

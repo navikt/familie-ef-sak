@@ -2,7 +2,10 @@ package no.nav.familie.ef.sak.vedtak
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
@@ -28,7 +31,8 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val oppgaveService: OppgaveService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val behandlingshistorikkService: BehandlingshistorikkService
 ) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
@@ -116,18 +120,25 @@ class VedtakService(
 
         validerKanAngreSendTilBeslutter(saksbehandling, vedtak)
         oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.GodkjenneVedtak)
-        // TODO("Legg inn beskrivelse")
-        oppgaveService.opprettOppgave(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.BehandleSak, tilordnetNavIdent = SikkerhetContext.hentSaksbehandler())
+        oppgaveService.opprettOppgave(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.BehandleSak, tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(), beskrivelse = "Angret send til beslutter")
         behandlingService.oppdaterStegPåBehandling(saksbehandling.id, steg = StegType.SEND_TIL_BESLUTTER)
+        behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, status = BehandlingStatus.UTREDES)
+        behandlingshistorikkService.opprettHistorikkInnslag(
+            behandlingId = saksbehandling.id,
+            stegtype = saksbehandling.steg,
+            utfall = StegUtfall.ANGRE_SEND_TIL_BESLUTTER,
+            metadata = null
+        )
     }
 
     private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling, vedtak: Vedtak) {
-        feilHvis(vedtak.saksbehandlerIdent != SikkerhetContext.hentSaksbehandler(), httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket" }
+        val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
+        feilHvis(vedtak.saksbehandlerIdent != innloggetSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket" }
         feilHvis(saksbehandling.steg != StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
 
         val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.GodkjenneVedtak, saksbehandling = saksbehandling) ?: error("Fant ingen godkjenne vedtak oppgave")
         val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
-        feilHvis(tilordnetRessurs != null, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs" }
+        feilHvis(tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs" }
     }
 }
 
