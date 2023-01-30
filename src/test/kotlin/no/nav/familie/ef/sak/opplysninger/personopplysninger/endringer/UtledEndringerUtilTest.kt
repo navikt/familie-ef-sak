@@ -107,7 +107,6 @@ internal class UtledEndringerUtilTest {
             val endringer = finnEndringer(dto(statsborgerskap = listOf()), dto(statsborgerskap = listOf()))
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.statsborgerskap.harEndringer).isFalse
-            assertThat(endringer.statsborgerskap.detaljer).isNull()
             assertIngenAndreEndringer(endringer)
         }
 
@@ -119,7 +118,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.statsborgerskap.harEndringer).isFalse
-            assertThat(endringer.statsborgerskap.detaljer).isNull()
             assertIngenAndreEndringer(endringer)
         }
     }
@@ -159,7 +157,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.statsborgerskap.harEndringer).isTrue
-            assertThat(endringer.statsborgerskap.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "statsborgerskap")
         }
 
@@ -171,7 +168,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.sivilstand.harEndringer).isTrue
-            assertThat(endringer.sivilstand.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "sivilstand")
         }
 
@@ -183,7 +179,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.adresse.harEndringer).isTrue
-            assertThat(endringer.adresse.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "adresse")
         }
 
@@ -196,7 +191,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fullmakt.harEndringer).isTrue
-            assertThat(endringer.fullmakt.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "fullmakt")
         }
 
@@ -208,7 +202,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.innflyttingTilNorge.harEndringer).isTrue
-            assertThat(endringer.innflyttingTilNorge.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "innflyttingTilNorge")
         }
 
@@ -220,7 +213,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.utflyttingFraNorge.harEndringer).isTrue
-            assertThat(endringer.utflyttingFraNorge.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "utflyttingFraNorge")
         }
 
@@ -232,7 +224,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.oppholdstillatelse.harEndringer).isTrue
-            assertThat(endringer.oppholdstillatelse.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "oppholdstillatelse")
         }
 
@@ -244,7 +235,6 @@ internal class UtledEndringerUtilTest {
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.vergemål.harEndringer).isTrue
-            assertThat(endringer.vergemål.detaljer).isNull()
             assertIngenAndreEndringer(endringer, "vergemål")
         }
     }

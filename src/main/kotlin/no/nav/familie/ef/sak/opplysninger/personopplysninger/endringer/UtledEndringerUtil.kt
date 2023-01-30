@@ -32,10 +32,10 @@ object UtledEndringerUtil {
         )
     }
 
-    private fun <T, DETALJER> utledEndringerUtenDetaljer(
+    private fun <T> utledEndringerUtenDetaljer(
         tidligere: T,
         nye: T
-    ) = Endring<DETALJER>(tidligere != nye)
+    ) = EndringUtenDetaljer(tidligere != nye)
 
     private fun <T> utledEndringer(
         tidligere: T,

@@ -11,16 +11,16 @@ data class Endringer(
     val folkeregisterpersonstatus: Endring<EndringVerdi> = Endring(),
     val fødselsdato: Endring<EndringVerdi> = Endring(),
     val dødsdato: Endring<EndringVerdi> = Endring(),
-    val statsborgerskap: Endring<Unit> = Endring(),
-    val sivilstand: Endring<Unit> = Endring(),
-    val adresse: Endring<Unit> = Endring(),
-    val fullmakt: Endring<Unit> = Endring(),
+    val statsborgerskap: EndringUtenDetaljer = Endring(),
+    val sivilstand: EndringUtenDetaljer = Endring(),
+    val adresse: EndringUtenDetaljer = Endring(),
+    val fullmakt: EndringUtenDetaljer = Endring(),
     val barn: Endring<List<Personendring>> = Endring(),
     val annenForelder: Endring<List<Personendring>> = Endring(),
-    val innflyttingTilNorge: Endring<Unit> = Endring(),
-    val utflyttingFraNorge: Endring<Unit> = Endring(),
-    val oppholdstillatelse: Endring<Unit> = Endring(),
-    val vergemål: Endring<Unit> = Endring()
+    val innflyttingTilNorge: EndringUtenDetaljer = Endring(),
+    val utflyttingFraNorge: EndringUtenDetaljer = Endring(),
+    val oppholdstillatelse: EndringUtenDetaljer = Endring(),
+    val vergemål: EndringUtenDetaljer = Endring()
 ) {
 
     val harEndringer = listOf(
@@ -61,6 +61,8 @@ data class Endring<DETALJER>(
     val harEndringer: Boolean = false,
     val detaljer: DETALJER? = null
 )
+
+typealias EndringUtenDetaljer = Endring<Nothing>
 
 data class Personendring(
     val ident: String,
