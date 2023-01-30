@@ -65,7 +65,7 @@ object UtledEndringerUtil {
     private fun utledEndringerBarn(
         tidligere: List<BarnDto>,
         nye: List<BarnDto>
-    ) = utledPersoendringer(tidligere, nye, { it.personIdent }, barnEndringer)
+    ) = utledPersonendringer(tidligere, nye, { it.personIdent }, barnEndringer)
 
     private fun utledEndringerAndreForelder(
         tidligere: List<BarnDto>,
@@ -73,10 +73,10 @@ object UtledEndringerUtil {
     ): Endring<List<Personendring>> {
         val tidligereForeldrer = tidligere.mapNotNull { it.annenForelder }.distinct()
         val nyeForeldrer = nye.mapNotNull { it.annenForelder }.distinct()
-        return utledPersoendringer(tidligereForeldrer, nyeForeldrer, { it.personIdent }, annenForelderEndringer)
+        return utledPersonendringer(tidligereForeldrer, nyeForeldrer, { it.personIdent }, annenForelderEndringer)
     }
 
-    private fun <T> utledPersoendringer(
+    private fun <T> utledPersonendringer(
         tidligere: List<T>,
         nye: List<T>,
         ident: (T) -> String,
@@ -104,8 +104,8 @@ object UtledEndringerUtil {
     }
 
     /**
-     * @return en funskjon som tar inn tidligere og nytt barn
-     * Funskjonen returnerer en verdi hvis det er en endring, og null hvis ikke
+     * @return en funksjon som tar inn tidligere og nytt barn
+     * Funksjonen returnerer en verdi hvis det er en endring, og null hvis ikke
      */
     private fun <T, VERDI : Any> formatterEndring(
         verdi: (T) -> VERDI?,
