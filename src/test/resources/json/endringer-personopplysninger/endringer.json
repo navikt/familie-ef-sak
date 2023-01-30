@@ -1,0 +1,100 @@
+{
+  "folkeregisterpersonstatus" : {
+    "harEndringer" : true,
+    "detaljer" : {
+      "tidligere" : "Mangler verdi",
+      "ny" : "Ukjent"
+    }
+  },
+  "fødselsdato" : {
+    "harEndringer" : true,
+    "detaljer" : {
+      "tidligere" : "Mangler verdi",
+      "ny" : "14.12.2000"
+    }
+  },
+  "dødsdato" : {
+    "harEndringer" : true,
+    "detaljer" : {
+      "tidligere" : "01.01.2021",
+      "ny" : "02.01.2021"
+    }
+  },
+  "statsborgerskap" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "sivilstand" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "adresse" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "fullmakt" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "barn" : {
+    "harEndringer" : true,
+    "detaljer" : [ {
+      "ident" : "barnBlirFjernet",
+      "endringer" : [ ],
+      "ny" : false,
+      "fjernet" : true
+    }, {
+      "ident" : "barnFårEndretBorHosSøker",
+      "endringer" : [ {
+        "felt" : "Bor hos søker",
+        "tidligere" : "Ja",
+        "ny" : "Nei"
+      }, {
+        "felt" : "Dødsdato",
+        "tidligere" : "Mangler verdi",
+        "ny" : "01.01.2021"
+      }, {
+        "felt" : "Fødselsdato",
+        "tidligere" : "Mangler verdi",
+        "ny" : "01.01.2020"
+      } ],
+      "ny" : false,
+      "fjernet" : false
+    }, {
+      "ident" : "nyttBarn",
+      "endringer" : [ ],
+      "ny" : true,
+      "fjernet" : false
+    } ]
+  },
+  "annenForelder" : {
+    "harEndringer" : true,
+    "detaljer" : [ {
+      "ident" : "1",
+      "endringer" : [ {
+        "felt" : "Dødsdato",
+        "tidligere" : "Mangler verdi",
+        "ny" : "01.01.2022"
+      } ],
+      "ny" : false,
+      "fjernet" : false
+    } ]
+  },
+  "innflyttingTilNorge" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "utflyttingFraNorge" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "oppholdstillatelse" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "vergemål" : {
+    "harEndringer" : true,
+    "detaljer" : null
+  },
+  "harEndringer" : true
+}
