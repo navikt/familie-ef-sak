@@ -34,16 +34,15 @@ object UtledEndringerUtil {
 
     private fun <T> utledEndringerUtenDetaljer(
         tidligere: T,
-        nye: T
+        nye: T,
     ) = EndringUtenDetaljer(tidligere != nye)
 
     private fun <T> utledEndringer(
         tidligere: T,
         ny: T,
-        formattertVerdi: (T) -> String = defaultMapper
     ): Endring<EndringVerdi> {
         return if (tidligere != ny) {
-            Endring(true, EndringVerdi(formattertVerdi(tidligere), formattertVerdi(ny)))
+            Endring(true, EndringVerdi(format(tidligere), format(ny)))
         } else {
             Endring(false)
         }
@@ -64,12 +63,12 @@ object UtledEndringerUtil {
 
     private fun utledEndringerBarn(
         tidligere: List<BarnDto>,
-        nye: List<BarnDto>
+        nye: List<BarnDto>,
     ) = utledPersonendringer(tidligere, nye, { it.personIdent }, barnEndringer)
 
     private fun utledEndringerAndreForelder(
         tidligere: List<BarnDto>,
-        nye: List<BarnDto>
+        nye: List<BarnDto>,
     ): Endring<List<Personendring>> {
         val tidligereForeldrer = tidligere.mapNotNull { it.annenForelder }.distinct()
         val nyeForeldrer = nye.mapNotNull { it.annenForelder }.distinct()
@@ -80,7 +79,7 @@ object UtledEndringerUtil {
         tidligere: List<T>,
         nye: List<T>,
         ident: (T) -> String,
-        endringer: List<PersonendringDetaljerFn<T>>
+        endringer: List<PersonendringDetaljerFn<T>>,
     ): Endring<List<Personendring>> {
         val tidligerePåIdent = tidligere.associateBy { ident(it) }
         val nyePåIdent = nye.associateBy { ident(it) }
@@ -111,7 +110,6 @@ object UtledEndringerUtil {
         verdi: (T) -> VERDI?,
         felt: String,
         harEndring: (VERDI?, VERDI?) -> Boolean = { tidligere, ny -> tidligere != ny },
-        format: (VERDI?) -> String = defaultMapper
     ): PersonendringDetaljerFn<T> =
         { tidligere: T, ny: T ->
             val tidligereVerdi = verdi(tidligere)
@@ -122,14 +120,12 @@ object UtledEndringerUtil {
                 null
             }
         }
-}
 
-private val defaultMapper: (Any?) -> String = {
-    when (it) {
+    private fun format(verdi: Any?): String = when (verdi) {
         null -> "Mangler verdi"
-        is Boolean -> if (it) "Ja" else "Nei"
-        is LocalDate -> it.norskFormat()
-        is Folkeregisterpersonstatus -> it.visningsnavn
-        else -> "$it"
+        is Boolean -> if (verdi) "Ja" else "Nei"
+        is LocalDate -> verdi.norskFormat()
+        is Folkeregisterpersonstatus -> verdi.visningsnavn
+        else -> "$verdi"
     }
 }
