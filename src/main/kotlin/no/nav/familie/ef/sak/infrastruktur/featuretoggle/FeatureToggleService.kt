@@ -33,7 +33,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     PÅ_VENT_NULLSTILL_VEDTAK("familie.ef.sak.paa-vent-nullstill-vedtak"),
 
-    REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
     LOGG_WARN_TIMEOUTS("familie.ef.sak.logg-timeout-som-warn"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
