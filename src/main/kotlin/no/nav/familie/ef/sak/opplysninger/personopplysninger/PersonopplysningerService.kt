@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
@@ -43,6 +46,29 @@ class PersonopplysningerService(
         )
     }
 
+    fun finnEndringerIPersonopplysninger(
+        behandling: Saksbehandling,
+        tidligereGrunnlagsdata: GrunnlagsdataMedMetadata,
+        nyGrunnlagsdata: GrunnlagsdataMedMetadata
+    ): EndringerIPersonopplysningerDto {
+        val personIdent = behandling.ident
+        val egenAnsatt = egenAnsatt(personIdent)
+        val søkerIdenter = personService.hentPersonIdenter(personIdent)
+        val tidligerePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
+            tidligereGrunnlagsdata,
+            egenAnsatt,
+            søkerIdenter
+        )
+
+        val nyePersonopplysninger = personopplysningerMapper.tilPersonopplysninger(
+            nyGrunnlagsdata,
+            egenAnsatt,
+            søkerIdenter
+        )
+        val endringer = finnEndringer(tidligerePersonopplysninger, nyePersonopplysninger)
+        return EndringerIPersonopplysningerDto(LocalDateTime.now(), endringer)
+    }
+
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPersonopplysninger(personIdent: String): PersonopplysningerDto {
         val grunnlagsdata = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre(personIdent, emptyList())
@@ -66,7 +92,9 @@ class PersonopplysningerService(
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        return personService.hentPdlPersonKort(identer).map { it.key to it.value.navn.gjeldende().visningsnavn() }.toMap()
+        return personService.hentPdlPersonKort(identer)
+            .map { it.key to it.value.navn.gjeldende().visningsnavn() }
+            .toMap()
     }
 
     @Cacheable("navKontor")

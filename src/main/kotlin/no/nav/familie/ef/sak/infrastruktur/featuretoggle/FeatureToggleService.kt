@@ -31,8 +31,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     BARNETILSYN_REVURDER_FRA("familie.ef.sak.barnetilsyn-revurder-fra"),
 
-    BARN_OVER_18("familie.ef.sak.barn-over-18"),
-
     PÅ_VENT_NULLSTILL_VEDTAK("familie.ef.sak.paa-vent-nullstill-vedtak"),
 
     REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
@@ -46,6 +44,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode"),
     VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp"),
     HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon"),
+    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
     AUTOMATISKE_HJEMLER_BREV("familie.ef.sak.frontend.automatiske-hjemler-brev"),
     ANGRE_SEND_TIL_BESLUTTER("familie.ef.sak.frontend-angre-send-til-beslutter");
 
