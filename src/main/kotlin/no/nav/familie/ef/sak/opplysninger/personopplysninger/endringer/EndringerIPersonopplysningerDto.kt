@@ -8,19 +8,21 @@ data class EndringerIPersonopplysningerDto(
 )
 
 data class Endringer(
-    val folkeregisterpersonstatus: Endring = Endring(),
-    val fødselsdato: Endring = Endring(),
-    val dødsdato: Endring = Endring(),
-    val statsborgerskap: Endring = Endring(),
-    val sivilstand: Endring = Endring(),
-    val adresse: Endring = Endring(),
-    val fullmakt: Endring = Endring(),
-    val barn: Endring = Endring(),
-    val innflyttingTilNorge: Endring = Endring(),
-    val utflyttingFraNorge: Endring = Endring(),
-    val oppholdstillatelse: Endring = Endring(),
-    val vergemål: Endring = Endring()
+    val folkeregisterpersonstatus: Endring<EndringVerdi> = Endring(),
+    val fødselsdato: Endring<EndringVerdi> = Endring(),
+    val dødsdato: Endring<EndringVerdi> = Endring(),
+    val statsborgerskap: Endring<Unit> = Endring(),
+    val sivilstand: Endring<Unit> = Endring(),
+    val adresse: Endring<Unit> = Endring(),
+    val fullmakt: Endring<Unit> = Endring(),
+    val barn: Endring<List<Personendring>> = Endring(),
+    val annenForelder: Endring<List<Personendring>> = Endring(),
+    val innflyttingTilNorge: Endring<Unit> = Endring(),
+    val utflyttingFraNorge: Endring<Unit> = Endring(),
+    val oppholdstillatelse: Endring<Unit> = Endring(),
+    val vergemål: Endring<Unit> = Endring()
 ) {
+
     val harEndringer = listOf(
         folkeregisterpersonstatus,
         fødselsdato,
@@ -30,6 +32,7 @@ data class Endringer(
         adresse,
         fullmakt,
         barn,
+        annenForelder,
         innflyttingTilNorge,
         utflyttingFraNorge,
         oppholdstillatelse,
@@ -54,4 +57,25 @@ data class Endringer(
     }
 }
 
-data class Endring(val harEndringer: Boolean = false)
+data class Endring<DETALJER>(
+    val harEndringer: Boolean = false,
+    val detaljer: DETALJER? = null
+)
+
+data class Personendring(
+    val ident: String,
+    val endringer: List<EndringFelt> = emptyList(),
+    val ny: Boolean = false,
+    val fjernet: Boolean = false
+)
+
+data class EndringFelt(
+    val felt: String,
+    val tidligere: String,
+    val ny: String
+)
+
+data class EndringVerdi(
+    val tidligere: String,
+    val ny: String
+)

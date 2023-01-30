@@ -44,7 +44,7 @@ class AndelshistorikkUttrekkController(
                     it.fagsakId,
                     it.antallMånederMedManglendeTilsynSomErAvsluttet(),
                     it.beløpForManglendeTilsynSomErAvsluttet(),
-                    it.tidligsteFom(),
+                    it.tidligsteFom()
                 )
                 secureLogger.info("Snittutregning-manglertilsyn: $resultatPerFagsak ")
                 resultatPerFagsak
