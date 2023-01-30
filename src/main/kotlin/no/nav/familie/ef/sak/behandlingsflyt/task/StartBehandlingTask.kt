@@ -33,7 +33,7 @@ class StartBehandlingTask(
         val stønadType = fagsak.stønadstype
 
         if (!finnesEnIverksattBehandlingFor(fagsak)) {
-            val identer = personService.hentPersonIdenter(fagsak.hentAktivIdent(), historikk = true).identer()
+            val identer = personService.hentPersonIdenter(fagsak.hentAktivIdent()).identer()
             iverksettClient.startBehandling(OpprettStartBehandlingHendelseDto(identer, stønadType))
         }
     }

@@ -116,12 +116,11 @@ class PdlClient(
 
     /**
      * @param ident Ident til personen, samme hvilke type (Folkeregisterident, aktørid eller npid)
-     * @param historikk default false, tar med historikk hvis det er ønskelig
      * @return liste med folkeregisteridenter
      */
-    fun hentPersonidenter(ident: String, historikk: Boolean = false): PdlIdenter {
+    fun hentPersonidenter(ident: String): PdlIdenter {
         val pdlIdentRequest = PdlIdentRequest(
-            variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk),
+            variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk = true),
             query = PdlConfig.hentIdentQuery
         )
         val pdlResponse: PdlResponse<PdlHentIdenter> = postForEntity(

@@ -122,6 +122,6 @@ class InfotrygdService(
     }
 
     private fun hentPersonIdenter(personIdent: String): Set<String> {
-        return personService.hentPersonIdenter(personIdent, true).identer()
+        return personService.hentPersonIdenter(personIdent).identer()
     }
 }

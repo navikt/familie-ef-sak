@@ -59,7 +59,7 @@ internal class TidligereVedaksperioderServiceTest {
         every {
             infotrygdReplikaClient.hentPerioder(capture(infotrygdPeriodeRequestSlot))
         } answers { InfotrygdReplikaMock.hentPerioderDefaultResponse(firstArg()) }
-        every { personService.hentPersonIdenter(personIdent, true) } returns
+        every { personService.hentPersonIdenter(personIdent) } returns
             PdlIdenter(listOf(PdlIdent(personIdent, false)))
     }
 

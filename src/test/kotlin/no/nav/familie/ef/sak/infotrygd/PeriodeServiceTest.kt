@@ -50,7 +50,7 @@ internal class PeriodeServiceTest {
     internal fun setUp() {
         mockFagsak(fagsak)
         every {
-            personService.hentPersonIdenter(personIdent, true)
+            personService.hentPersonIdenter(personIdent)
         } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
         every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),

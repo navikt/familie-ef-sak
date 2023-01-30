@@ -89,6 +89,6 @@ internal class InfotrygdServiceTest {
         if (historiskIdent != null) {
             pdlIdenter.add(PdlIdent(historiskIdent, true))
         }
-        every { personService.hentPersonIdenter(ident, true) } returns PdlIdenter(pdlIdenter)
+        every { personService.hentPersonIdenter(ident) } returns PdlIdenter(pdlIdenter)
     }
 }

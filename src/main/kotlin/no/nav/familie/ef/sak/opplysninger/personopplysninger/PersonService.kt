@@ -42,8 +42,8 @@ class PersonService(
     }
 
     @Cacheable("personidenter")
-    fun hentPersonIdenter(ident: String, historikk: Boolean = false): PdlIdenter =
-        pdlClient.hentPersonidenter(ident = ident, historikk = historikk)
+    fun hentPersonIdenter(ident: String): PdlIdenter =
+        pdlClient.hentPersonidenter(ident = ident)
 
     fun hentIdenterBolk(identer: List<String>): Map<String, PdlIdent> =
         pdlClient.hentIdenterBolk(identer)

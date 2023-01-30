@@ -44,7 +44,7 @@ class FagsakService(
         personIdent: String,
         stønadstype: StønadType
     ): Fagsak {
-        val personIdenter = personService.hentPersonIdenter(personIdent, true)
+        val personIdenter = personService.hentPersonIdenter(personIdent)
         val gjeldendePersonIdent = personIdenter.gjeldende()
         val person = fagsakPersonService.hentEllerOpprettPerson(personIdenter.identer(), gjeldendePersonIdent.ident)
         val oppdatertPerson = oppdatertPerson(person, gjeldendePersonIdent)
@@ -120,7 +120,7 @@ class FagsakService(
     fun fagsakMedOppdatertPersonIdent(fagsakId: UUID): Fagsak {
         val fagsak = fagsakRepository.findByIdOrThrow(fagsakId)
         val person = fagsakPersonService.hentPerson(fagsak.fagsakPersonId)
-        val gjeldendeIdent = personService.hentPersonIdenter(person.hentAktivIdent(), true).gjeldende()
+        val gjeldendeIdent = personService.hentPersonIdenter(person.hentAktivIdent()).gjeldende()
         val oppdatertPerson = oppdatertPerson(person, gjeldendeIdent)
         return fagsak.tilFagsakMedPerson(oppdatertPerson.identer)
     }

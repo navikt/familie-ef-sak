@@ -104,15 +104,12 @@ class PdlClientConfig {
         }
 
         val personIdent = slot<String>()
-        every { pdlClient.hentPersonidenter(capture(personIdent), eq(true)) } answers {
+        every { pdlClient.hentPersonidenter(capture(personIdent)) } answers {
             if (personIdent.captured == "19117313797") {
                 throw PdlNotFoundException()
             } else {
                 PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true)))
             }
-        }
-        every { pdlClient.hentPersonidenter(capture(personIdent), eq(false)) } answers {
-            PdlIdenter(listOf(PdlIdent(firstArg(), false)))
         }
 
         every { pdlClient.hentIdenterBolk(listOf("123", "456")) }

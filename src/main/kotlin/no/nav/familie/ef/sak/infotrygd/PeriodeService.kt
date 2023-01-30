@@ -23,7 +23,7 @@ class PeriodeService(
 ) {
 
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
-        val personIdenter = personService.hentPersonIdenter(personIdent, true).identer()
+        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
 
         return InternePerioder(
@@ -43,7 +43,7 @@ class PeriodeService(
     }
 
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
-        val personIdenter = personService.hentPersonIdenter(personIdent, true).identer()
+        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         val perioderFraReplika =
             infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad
         val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD)

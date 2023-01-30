@@ -130,7 +130,7 @@ internal class ArenaStønadsperioderServiceTest {
     }
 
     private fun mockPdl() {
-        every { personService.hentPersonIdenter(ident, true) } returns PdlIdenter(mutableListOf(PdlIdent(ident, false)))
+        every { personService.hentPersonIdenter(ident) } returns PdlIdenter(mutableListOf(PdlIdent(ident, false)))
     }
 
     private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =

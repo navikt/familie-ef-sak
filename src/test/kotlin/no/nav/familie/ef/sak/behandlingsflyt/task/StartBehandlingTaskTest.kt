@@ -45,7 +45,7 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
     fun setup() {
         testoppsettService.lagreFagsak(fagsak)
 
-        every { personService.hentPersonIdenter(personIdent, true) } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
+        every { personService.hentPersonIdenter(personIdent) } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
         justRun { iverksettClient.startBehandling(capture(opprettStartBehandlingHendelseDtoSlot)) }
 
         startBehandlingTask = StartBehandlingTask(iverksettClient, personService, fagsakService, behandlingRepository)
