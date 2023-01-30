@@ -28,6 +28,7 @@ class VedtakServiceTest {
         tilkjentYtelseRepository,
         oppgaveService,
         behandlingService,
+        mockk(relaxed = true),
         mockk(relaxed = true)
     )
     private val behandlingId = UUID.randomUUID()

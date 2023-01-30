@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -19,9 +21,11 @@ import no.nav.familie.ef.sak.vedtak.dto.tilVedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -32,7 +36,8 @@ class VedtakService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
-    private val behandlingshistorikkService: BehandlingshistorikkService
+    private val behandlingshistorikkService: BehandlingshistorikkService,
+    private val taskService: TaskService
 ) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {
@@ -115,12 +120,12 @@ class VedtakService(
         return hentVedtak(behandlingId).erVedtakAktivtForDato(localDate)
     }
 
+    @Transactional
     fun angreSendTilBeslutter(saksbehandling: Saksbehandling) {
         val vedtak = hentVedtak(behandlingId = saksbehandling.id)
 
         validerKanAngreSendTilBeslutter(saksbehandling, vedtak)
-        oppgaveService.ferdigstillOppgaveHvisOppgaveFinnes(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.GodkjenneVedtak)
-        oppgaveService.opprettOppgave(behandlingId = saksbehandling.id, oppgavetype = Oppgavetype.BehandleSak, tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(), beskrivelse = "Angret send til beslutter")
+
         behandlingService.oppdaterStegPåBehandling(saksbehandling.id, steg = StegType.SEND_TIL_BESLUTTER)
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, status = BehandlingStatus.UTREDES)
         behandlingshistorikkService.opprettHistorikkInnslag(
@@ -129,6 +134,34 @@ class VedtakService(
             utfall = StegUtfall.ANGRE_SEND_TIL_BESLUTTER,
             metadata = null
         )
+
+        ferdigstillGodkjenneVedtakOppgave(saksbehandling)
+        opprettBehandleSakOppgave(saksbehandling)
+    }
+
+    private fun opprettBehandleSakOppgave(saksbehandling: Saksbehandling) {
+        taskService.save(
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = saksbehandling.id,
+                    oppgavetype = Oppgavetype.BehandleSak,
+                    beskrivelse = "Angret send til beslutter"
+                )
+            )
+        )
+    }
+
+    private fun ferdigstillGodkjenneVedtakOppgave(saksbehandling: Saksbehandling) {
+        oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.GodkjenneVedtak, saksbehandling)?.let {
+            taskService.save(
+                FerdigstillOppgaveTask.opprettTask(
+                    behandlingId = saksbehandling.id,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    it.gsakOppgaveId,
+                    personIdent = null
+                )
+            )
+        }
     }
 
     private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling, vedtak: Vedtak) {
