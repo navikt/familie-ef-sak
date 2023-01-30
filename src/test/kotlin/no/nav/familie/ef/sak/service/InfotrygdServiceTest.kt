@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
@@ -21,9 +21,9 @@ import java.time.LocalDate
 
 internal class InfotrygdServiceTest {
 
-    private val pdlClient = mockk<PdlClient>()
+    private val personService = mockk<PersonService>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
-    private val infotrygdService = InfotrygdService(infotrygdReplikaClient, pdlClient)
+    private val infotrygdService = InfotrygdService(infotrygdReplikaClient, personService)
 
     private val ident = "01234567890"
 
@@ -89,6 +89,6 @@ internal class InfotrygdServiceTest {
         if (historiskIdent != null) {
             pdlIdenter.add(PdlIdent(historiskIdent, true))
         }
-        every { pdlClient.hentPersonidenter(ident, true) } returns PdlIdenter(pdlIdenter)
+        every { personService.hentPersonIdenter(ident, true) } returns PdlIdenter(pdlIdenter)
     }
 }

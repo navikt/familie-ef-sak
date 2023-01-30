@@ -32,9 +32,9 @@ internal class TidligereVedaksperioderServiceTest {
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-    private val pdlClient = mockk<PdlClient>()
+    private val personService = mockk<PersonService>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>()
-    private val infotrygdService = InfotrygdService(infotrygdReplikaClient, pdlClient)
+    private val infotrygdService = InfotrygdService(infotrygdReplikaClient, personService)
 
     private val service = TidligereVedaksperioderService(
         fagsakPersonService,
@@ -59,7 +59,7 @@ internal class TidligereVedaksperioderServiceTest {
         every {
             infotrygdReplikaClient.hentPerioder(capture(infotrygdPeriodeRequestSlot))
         } answers { InfotrygdReplikaMock.hentPerioderDefaultResponse(firstArg()) }
-        every { pdlClient.hentPersonidenter(personIdent, true) } returns
+        every { personService.hentPersonIdenter(personIdent, true) } returns
             PdlIdenter(listOf(PdlIdent(personIdent, false)))
     }
 

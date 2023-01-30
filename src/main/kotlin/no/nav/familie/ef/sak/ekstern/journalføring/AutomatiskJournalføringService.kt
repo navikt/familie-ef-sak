@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.ef.journalføring.AutomatiskJournalføringResponse
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -65,7 +66,7 @@ class AutomatiskJournalføringService(
     }
 
     fun kanOppretteBehandling(ident: String, stønadstype: StønadType): Boolean {
-        val allePersonIdenter = personService.hentPersonIdenter(ident).identer.map { it.ident }.toSet()
+        val allePersonIdenter = personService.hentPersonIdenter(ident).identer()
         val fagsak = fagsakService.finnFagsak(allePersonIdenter, stønadstype)
         val behandlinger = fagsak?.let { behandlingService.hentBehandlinger(fagsak.id) } ?: emptyList()
         val behandlingstype = utledNesteBehandlingstype(behandlinger)
@@ -95,7 +96,7 @@ class AutomatiskJournalføringService(
         stønadstype: StønadType,
         journalpost: Journalpost
     ) {
-        val allePersonIdenter = personService.hentPersonIdenter(personIdent).identer.map { it.ident }.toSet()
+        val allePersonIdenter = personService.hentPersonIdenter(personIdent).identer()
 
         feilHvisIkke(kanOppretteBehandling(personIdent, stønadstype)) {
             "Kan ikke opprette førstegangsbehandling for $stønadstype da det allerede finnes en behandling i infotrygd eller ny løsning"
@@ -127,7 +128,7 @@ class AutomatiskJournalføringService(
     }
 
     private fun hentAktørIderForPerson(personIdent: String) =
-        personService.hentAktørIder(personIdent).identer.map { it.ident }
+        personService.hentAktørIder(personIdent).identer()
 
     private fun harIngenInnslagIInfotrygd(
         ident: String,

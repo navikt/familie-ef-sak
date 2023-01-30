@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.journalføring.dto.JournalføringKlageRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringTilNyBehandlingRequest
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -36,7 +36,7 @@ class JournalpostController(
     private val journalføringService: JournalføringService,
     private val journalføringKlageService: JournalføringKlageService,
     private val journalpostService: JournalpostService,
-    private val pdlClient: PdlClient,
+    private val personService: PersonService,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService
 ) {
@@ -133,7 +133,7 @@ class JournalpostController(
         val personIdent = journalpost.bruker?.let {
             when (it.type) {
                 BrukerIdType.FNR -> it.id
-                BrukerIdType.AKTOERID -> pdlClient.hentPersonidenter(it.id).identer.first().ident
+                BrukerIdType.AKTOERID -> personService.hentPersonIdenter(it.id).identer.first().ident
                 BrukerIdType.ORGNR -> error("Kan ikke hente journalpost=$journalpostId for orgnr")
             }
         } ?: error("Kan ikke hente journalpost=$journalpostId uten bruker")
@@ -154,5 +154,5 @@ class JournalpostController(
     }
 
     private fun hentNavnFraPdl(personIdent: String) =
-        pdlClient.hentPersonKortBolk(listOf(personIdent)).getValue(personIdent).navn.gjeldende().visningsnavn()
+        personService.hentPersonKortBolk(listOf(personIdent)).getValue(personIdent).navn.gjeldende().visningsnavn()
 }

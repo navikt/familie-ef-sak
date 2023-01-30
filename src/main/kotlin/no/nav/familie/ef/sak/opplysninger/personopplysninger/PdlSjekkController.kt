@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @Unprotected
 @Validated
 class PdlSjekkController(
-    private val pdlClient: PdlClient,
+    private val personService: PersonService,
     private val fagsakService: FagsakService
 ) {
 
@@ -25,7 +25,7 @@ class PdlSjekkController(
     @PostMapping
     fun sjekkIdenter(@RequestBody identer: Set<String>): Int {
         val count = identer.map { aktørId ->
-            val identer = pdlClient.hentPersonidenter(aktørId, true)
+            val identer = personService.hentPersonIdenter(aktørId, true)
             val fagsaker = fagsakService.finnFagsaker(identer.identer())
             if (fagsaker.isNotEmpty()) {
                 fagsaker.forEach {

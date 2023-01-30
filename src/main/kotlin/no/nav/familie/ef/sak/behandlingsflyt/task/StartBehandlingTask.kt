@@ -5,7 +5,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.ef.infotrygd.OpprettStartBehandlingHendelseDto
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -21,7 +22,7 @@ import java.util.UUID
 )
 class StartBehandlingTask(
     private val iverksettClient: IverksettClient,
-    private val pdlClient: PdlClient,
+    private val personService: PersonService,
     private val fagsakService: FagsakService,
     private val behandlingRepository: BehandlingRepository
 ) : AsyncTaskStep {
@@ -32,7 +33,7 @@ class StartBehandlingTask(
         val stønadType = fagsak.stønadstype
 
         if (!finnesEnIverksattBehandlingFor(fagsak)) {
-            val identer = pdlClient.hentPersonidenter(fagsak.hentAktivIdent(), historikk = true).identer.map { it.ident }.toSet()
+            val identer = personService.hentPersonIdenter(fagsak.hentAktivIdent(), historikk = true).identer()
             iverksettClient.startBehandling(OpprettStartBehandlingHendelseDto(identer, stønadType))
         }
     }

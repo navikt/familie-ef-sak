@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.infotrygd
 
 import no.nav.familie.ef.sak.infotrygd.InfotrygdUtils.KLAGETYPER
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdEndringKode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
@@ -18,7 +18,7 @@ import java.time.LocalDate
 @Service
 class InfotrygdService(
     private val infotrygdReplikaClient: InfotrygdReplikaClient,
-    private val pdlClient: PdlClient
+    private val personService: PersonService
 ) {
 
     /**
@@ -122,6 +122,6 @@ class InfotrygdService(
     }
 
     private fun hentPersonIdenter(personIdent: String): Set<String> {
-        return pdlClient.hentPersonidenter(personIdent, true).identer()
+        return personService.hentPersonIdenter(personIdent, true).identer()
     }
 }

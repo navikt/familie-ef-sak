@@ -21,8 +21,8 @@ internal class PersonServiceTest {
 
     @Test
     internal fun `hentPdlPersonKort - skal cachea svar`() {
-        personService.hentPdlPersonKort(listOf("1", "2"))
-        personService.hentPdlPersonKort(listOf("1"))
+        personService.hentPersonKortBolk(listOf("1", "2"))
+        personService.hentPersonKortBolk(listOf("1"))
         verify(exactly = 1) {
             pdlClient.hentPersonKortBolk(any())
         }

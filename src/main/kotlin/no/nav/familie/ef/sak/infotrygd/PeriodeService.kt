@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.infotrygd
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InternPeriodeUtil.slåSammenPerioder
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PeriodeService(
-    private val pdlClient: PdlClient,
+    private val personService: PersonService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
@@ -23,7 +23,7 @@ class PeriodeService(
 ) {
 
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
-        val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
+        val personIdenter = personService.hentPersonIdenter(personIdent, true).identer()
         val perioderFraReplika = infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter)
 
         return InternePerioder(
@@ -43,7 +43,7 @@ class PeriodeService(
     }
 
     fun hentPerioderForOvergangsstønadFraEfOgInfotrygd(personIdent: String): List<InternPeriode> {
-        val personIdenter = pdlClient.hentPersonidenter(personIdent, true).identer()
+        val personIdenter = personService.hentPersonIdenter(personIdent, true).identer()
         val perioderFraReplika =
             infotrygdService.hentSammenslåttePerioderSomInternPerioder(personIdenter).overgangsstønad
         val perioderFraEf = hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD)

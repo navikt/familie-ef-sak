@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
@@ -28,6 +29,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
@@ -36,12 +38,12 @@ internal class GrunnlagsdataServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val behandlingService = mockk<BehandlingService>()
-    private val pdlClient = PdlClientConfig().pdlClient()
+    private val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-        pdlClient,
+        personService,
         personopplysningerIntegrasjonerClient,
         tidligereVedaksperioderService
     )
@@ -85,7 +87,7 @@ internal class GrunnlagsdataServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
 
-        verify(exactly = 0) { pdlClient.hentSøker(any()) }
+        verify(exactly = 0) { personService.hentSøker(any()) }
     }
 
     @Test
@@ -96,17 +98,17 @@ internal class GrunnlagsdataServiceTest {
             vergemaalEllerFremtidsfullmakt = emptyList()
         )
         val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
-        every { pdlClient.hentSøker(any()) } returns pdlSøker
+        every { personService.hentSøker(any()) } returns pdlSøker
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
-        verify(exactly = 1) { pdlClient.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
+        verify(exactly = 1) { personService.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
     }
 
     @Test
     internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.UOPPGITT, null, null, null, Metadata(false))
-        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
+        every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
             .copy(
                 sivilstand = listOf(sivilstand),
                 fullmakt = emptyList(),
@@ -115,7 +117,7 @@ internal class GrunnlagsdataServiceTest {
 
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
-        verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
+        verify(exactly = 0) { personService.hentPersonKortBolk(any()) }
     }
 
     @Test
