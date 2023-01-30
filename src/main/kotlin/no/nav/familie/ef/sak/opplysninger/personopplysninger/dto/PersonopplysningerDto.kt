@@ -124,17 +124,17 @@ enum class Adressebeskyttelse {
 }
 
 @Suppress("unused")
-enum class Folkeregisterpersonstatus(private val pdlStatus: String) {
+enum class Folkeregisterpersonstatus(private val pdlStatus: String, val visningsnavn: String) {
 
-    BOSATT("bosatt"),
-    UTFLYTTET("utflyttet"),
-    FORSVUNNET("forsvunnet"),
-    DØD("doed"),
-    OPPHØRT("opphoert"),
-    FØDSELSREGISTRERT("foedselsregistrert"),
-    MIDLERTIDIG("midlertidig"),
-    INAKTIV("inaktiv"),
-    UKJENT("ukjent");
+    BOSATT("bosatt", "Bosatt"),
+    UTFLYTTET("utflyttet", "Utflyttet"),
+    FORSVUNNET("forsvunnet", "Forsvunnet"),
+    DØD("doed", "Død"),
+    OPPHØRT("opphoert", "Opphørt"),
+    FØDSELSREGISTRERT("foedselsregistrert", "Fødselsregistrert"),
+    MIDLERTIDIG("midlertidig", "Midlertidig"),
+    INAKTIV("inaktiv", "Inaktiv"),
+    UKJENT("ukjent", "Ukjent");
 
     companion object {
 
