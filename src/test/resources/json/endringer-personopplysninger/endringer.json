@@ -44,6 +44,15 @@
       "ny" : false,
       "fjernet" : true
     }, {
+      "ident" : "barnFårForelder",
+      "endringer" : [ {
+        "felt" : "Annen forelder",
+        "tidligere" : "Mangler verdi",
+        "ny" : "2"
+      } ],
+      "ny" : false,
+      "fjernet" : false
+    }, {
       "ident" : "barnFårEndretBorHosSøker",
       "endringer" : [ {
         "felt" : "Bor hos søker",
@@ -77,6 +86,11 @@
         "ny" : "01.01.2022"
       } ],
       "ny" : false,
+      "fjernet" : false
+    }, {
+      "ident" : "2",
+      "endringer" : [ ],
+      "ny" : true,
       "fjernet" : false
     } ]
   },
