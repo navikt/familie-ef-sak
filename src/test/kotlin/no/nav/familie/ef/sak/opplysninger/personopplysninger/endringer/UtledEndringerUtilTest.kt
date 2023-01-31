@@ -32,13 +32,15 @@ internal class UtledEndringerUtilTest {
     internal fun jsontest() {
         val barnBlirFjernet = BarnDto("barnBlirFjernet", "2", null, emptyList(), true, null, null)
         val annenForelder = AnnenForelderMinimumDto("1", "", null)
+        val annenForelder2 = AnnenForelderMinimumDto("2", "", null)
         val barnsForelderBlirEndret =
             BarnDto("forelderFårEndring", "2", annenForelder, emptyList(), true, null, null)
         val barnFårEndring = BarnDto("barnFårEndretBorHosSøker", "2", null, emptyList(), true, null, null)
+        val barnFårForelder = BarnDto("barnFårForelder", "2", null, emptyList(), true, null, null)
         val nyttBarn = BarnDto("nyttBarn", "2", null, emptyList(), true, null, null)
         val tidligere = dto(
             dødsdato = LocalDate.of(2021, 1, 1),
-            barn = listOf(barnBlirFjernet, barnsForelderBlirEndret, barnFårEndring)
+            barn = listOf(barnBlirFjernet, barnsForelderBlirEndret, barnFårForelder, barnFårEndring)
         )
         val nye = dto(
             status = Folkeregisterpersonstatus.UKJENT,
@@ -50,6 +52,7 @@ internal class UtledEndringerUtilTest {
             fullmakt = listOf(FullmaktDto(LocalDate.now(), LocalDate.now(), "1", null, emptyList())),
             barn = listOf(
                 barnsForelderBlirEndret.copy(annenForelder = annenForelder.copy(dødsdato = LocalDate.of(2022, 1, 1))),
+                barnFårForelder.copy(annenForelder = annenForelder2),
                 barnFårEndring.copy(
                     borHosSøker = false,
                     fødselsdato = LocalDate.of(2020, 1, 1),

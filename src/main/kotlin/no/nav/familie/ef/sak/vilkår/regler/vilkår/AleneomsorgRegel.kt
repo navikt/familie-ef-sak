@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler.vilkår
 
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
@@ -13,6 +14,7 @@ import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
+import java.time.LocalDate
 import java.util.UUID
 
 class AleneomsorgRegel : Vilkårsregel(
@@ -49,7 +51,7 @@ class AleneomsorgRegel : Vilkårsregel(
             Vurdering(
                 regelId = RegelId.NÆRE_BOFORHOLD,
                 svar = SvarId.NEI,
-                begrunnelse = "Automatisk vurdert: Det er beregnet at annen forelder bor mer enn 1 km unna bruker."
+                begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Det er beregnet at annen forelder bor mer enn 1 km unna bruker."
             )
         )
     )

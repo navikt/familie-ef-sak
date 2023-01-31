@@ -92,7 +92,7 @@ class PersonopplysningerService(
     fun hentGjeldeneNavn(identer: List<String>): Map<String, String> {
         if (identer.isEmpty()) return emptyMap()
         logger.info("Henter navn til {} personer", identer.size)
-        return personService.hentPdlPersonKort(identer)
+        return personService.hentPersonKortBolk(identer)
             .map { it.key to it.value.navn.gjeldende().visningsnavn() }
             .toMap()
     }

@@ -24,15 +24,6 @@ class KlageController(
     private val klageService: KlageService
 ) {
 
-    @Deprecated("Denne kan slettes når frontend tatt i bruk opprettKlage på fagsakPersonId")
-    @PostMapping("/{behandlingId}")
-    fun opprettKlageDeprecated(@PathVariable behandlingId: UUID, @RequestBody opprettKlageDto: OpprettKlageDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
-        klageService.opprettKlageBehandling(behandlingId, opprettKlageDto)
-        return Ressurs.success(behandlingId)
-    }
-
     @PostMapping("/fagsak/{fagsakId}")
     fun opprettKlage(@PathVariable fagsakId: UUID, @RequestBody opprettKlageDto: OpprettKlageDto): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
