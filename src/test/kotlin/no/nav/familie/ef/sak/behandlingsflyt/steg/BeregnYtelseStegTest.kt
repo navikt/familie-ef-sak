@@ -1426,44 +1426,6 @@ internal class BeregnYtelseStegTest {
         }
 
         @Test
-        internal fun `skal ikke kunne opphøre før forrige sanksjonsbehandling`() {
-            every { featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON) } returns false
-            mockHistorikk(
-                andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
-                andelhistorikkSanksjon(sankskjonsMåned),
-                andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
-            )
-
-            assertThrows<Feil> {
-                utførSteg(
-                    BehandlingType.REVURDERING,
-                    Opphør(opphørFom, "ok"),
-                    forrigeBehandlingId = UUID.randomUUID()
-                )
-            }
-            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
-        }
-
-        @Test
-        internal fun `skal ikke kunne innvilge med periode før forrige sanksjonsbehandling`() {
-            every { featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON) } returns false
-            mockHistorikk(
-                andelhistorikkInnvilget(startMåned, sankskjonsMåned.minusMonths(1)),
-                andelhistorikkSanksjon(sankskjonsMåned),
-                andelhistorikkInnvilget(sankskjonsMåned.plusMonths(1), sluttMåned)
-            )
-
-            assertThrows<Feil> {
-                utførSteg(
-                    BehandlingType.REVURDERING,
-                    innvilget(listOf(innvilgetPeriode(startMåned, sluttMåned)), listOf(inntekt(startMåned))),
-                    forrigeBehandlingId = UUID.randomUUID()
-                )
-            }
-            verify { andelsHistorikkService.hentHistorikk(any(), any()) }
-        }
-
-        @Test
         internal fun `skal ikke kunne sanksjonere når periode allerede er sanksjonert`() {
             mockHistorikk(
                 andelhistorikkInnvilget(startMåned, startMåned),

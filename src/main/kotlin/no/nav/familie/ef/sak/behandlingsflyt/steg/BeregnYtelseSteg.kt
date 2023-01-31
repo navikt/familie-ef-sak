@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.felles.util.min
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.tilkjentytelse.AndelsHistorikkService
@@ -121,32 +120,22 @@ class BeregnYtelseSteg(
         if (behandling.erMaskinellOmregning) {
             return
         }
-        if (!featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON)) {
-            innvilget.perioder.firstOrNull()?.let {
-                validerStartTidEtterSanksjon(it.periode.fom, behandling)
-            }
-        } else {
-            val nyeSanksjonsperioder = innvilget.perioder
-                .filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
-                .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
-            validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
-        }
+
+        val nyeSanksjonsperioder = innvilget.perioder
+            .filter { it.periodetype == PeriodetypeBarnetilsyn.SANKSJON_1_MND }
+            .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+        validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
     }
 
     private fun validerSanksjoner(innvilget: InnvilgelseOvergangsstønad, behandling: Saksbehandling) {
         if (behandling.erMaskinellOmregning) {
             return
         }
-        if (!featureToggleService.isEnabled(Toggle.REVURDERING_SANKSJON)) {
-            innvilget.perioder.firstOrNull()?.let {
-                validerStartTidEtterSanksjon(it.periode.fom, behandling)
-            }
-        } else {
-            val nyeSanksjonsperioder = innvilget.perioder
-                .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
-                .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
-            validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
-        }
+
+        val nyeSanksjonsperioder = innvilget.perioder
+            .filter { it.periodeType == VedtaksperiodeType.SANKSJON }
+            .map { it.periode to (it.sanksjonsårsak ?: error("Mangler sanksjonsårsak")) }
+        validerHarIkkeLagtTilSanksjonsperioder(behandling, nyeSanksjonsperioder)
     }
 
     private fun validerHarIkkeLagtTilSanksjonsperioder(
