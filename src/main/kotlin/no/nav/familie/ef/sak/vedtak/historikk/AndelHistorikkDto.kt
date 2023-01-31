@@ -34,7 +34,7 @@ data class AndelHistorikkDto(
     val aktivitetArbeid: SvarId?,
     val periodeType: VedtaksperiodeType?,
     val periodetypeBarnetilsyn: PeriodetypeBarnetilsyn?,
-    val erSanksjon: Boolean,
+    val erSanksjon: Boolean, // TODO denne kan fjernes / flyttes som en get og være beroende av periodetype / periodetypeBarnetilsyn
     val sanksjonsårsak: Sanksjonsårsak?,
     val erOpphør: Boolean,
     val endring: HistorikkEndring?

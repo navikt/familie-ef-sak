@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil.lagInfotrygdPeriode
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
@@ -28,18 +28,18 @@ import java.time.YearMonth
 
 internal class PeriodeServiceTest {
 
-    private val pdlClient = mockk<PdlClient>()
+    private val personService = mockk<PersonService>()
     private val fagsakService = mockk<FagsakService>()
     private val behandlingService = mockk<BehandlingService>()
     private val tilkjentYtelseService = mockk<TilkjentYtelseService>()
     private val replikaClient = mockk<InfotrygdReplikaClient>()
 
     private val service = PeriodeService(
-        pdlClient = pdlClient,
+        personService = personService,
         fagsakService = fagsakService,
         behandlingService = behandlingService,
         tilkjentYtelseService = tilkjentYtelseService,
-        infotrygdService = InfotrygdService(replikaClient, pdlClient)
+        infotrygdService = InfotrygdService(replikaClient, personService)
     )
 
     private val personIdent = "123"
@@ -50,7 +50,7 @@ internal class PeriodeServiceTest {
     internal fun setUp() {
         mockFagsak(fagsak)
         every {
-            pdlClient.hentPersonidenter(personIdent, true)
+            personService.hentPersonIdenter(personIdent)
         } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
         every { replikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),

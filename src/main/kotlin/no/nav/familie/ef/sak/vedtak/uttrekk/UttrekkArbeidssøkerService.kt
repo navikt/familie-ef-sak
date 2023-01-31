@@ -138,7 +138,7 @@ class UttrekkArbeidssøkerService(
 
     private fun hentPersondataTilFagsak(arbeidsssøkere: List<UttrekkArbeidssøkere>): Map<UUID, Persondata> {
         val personIdentPåFagsak = fagsakService.hentAktiveIdenter(arbeidsssøkere.map { it.fagsakId }.toSet())
-        val personKortPåPersonIdent = personService.hentPdlPersonKort(personIdentPåFagsak.values.toList())
+        val personKortPåPersonIdent = personService.hentPersonKortBolk(personIdentPåFagsak.values.toList())
 
         return personIdentPåFagsak.entries.associateBy({ it.key }) {
             Persondata(it.value, personKortPåPersonIdent[it.value] ?: error("Finner ikke data til ident=${it.value}"))

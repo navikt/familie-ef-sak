@@ -14,7 +14,7 @@ import no.nav.familie.ef.sak.oppgave.Oppgave
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
@@ -36,7 +36,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
     private val gjeldendeBarnRepository = mockk<GjeldendeBarnRepository>()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val oppgaveClient = mockk<OppgaveClient>()
-    private val pdlClient = mockk<PdlClient>()
+    private val personService = mockk<PersonService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val oppgaveRepository = mockk<OppgaveRepository>()
     private val taskService = mockk<TaskService>()
@@ -45,7 +45,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         gjeldendeBarnRepository,
         oppgaveRepository,
         taskService,
-        pdlClient
+        personService
     )
 
     private val oppgaveSlot = slot<Oppgave>()
@@ -73,7 +73,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
         every { oppgaveRepository.insert(capture(oppgaveSlot)) } returns oppgaveMock
         every { oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(any(), any()) } returns emptyList()
         every { taskService.save(capture(taskSlot)) } returns mockk()
-        every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns emptyMap()
+        every { personService.hentPersonForelderBarnRelasjon(any()) } returns emptyMap()
     }
 
     @AfterEach
@@ -148,7 +148,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
         )
 
-        every { pdlClient.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns mapOf(
+        every { personService.hentPersonForelderBarnRelasjon(listOf(fødselsnummerSøker)) } returns mapOf(
             Pair(
                 fødselsnummerSøker,
                 PdlTestdataHelper.pdlBarn(
@@ -194,7 +194,7 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             )
         )
 
-        every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns mapOf(
+        every { personService.hentPersonForelderBarnRelasjon(any()) } returns mapOf(
             Pair(
                 fødselsnummerSøker,
                 PdlTestdataHelper.pdlBarn(

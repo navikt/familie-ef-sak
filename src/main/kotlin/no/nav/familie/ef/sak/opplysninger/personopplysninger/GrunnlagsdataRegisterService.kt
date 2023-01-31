@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class GrunnlagsdataRegisterService(
-    private val pdlClient: PdlClient,
+    private val personService: PersonService,
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
     private val tidligereVedaksperioderService: TidligereVedaksperioderService
 ) {
@@ -24,7 +24,7 @@ class GrunnlagsdataRegisterService(
         personIdent: String,
         barneforeldreFraSøknad: List<String>
     ): GrunnlagsdataDomene {
-        val pdlSøker = pdlClient.hentSøker(personIdent)
+        val pdlSøker = personService.hentSøker(personIdent)
         val pdlBarn = hentPdlBarn(pdlSøker)
         val barneForeldre = hentPdlBarneForeldre(pdlBarn, personIdent, barneforeldreFraSøknad)
         val tidligereVedtasksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(barneForeldre)
@@ -59,7 +59,7 @@ class GrunnlagsdataRegisterService(
         return pdlSøker.forelderBarnRelasjon
             .filter { it.relatertPersonsRolle == Familierelasjonsrolle.BARN }
             .mapNotNull { it.relatertPersonsIdent }
-            .let { pdlClient.hentPersonForelderBarnRelasjon(it) }
+            .let { personService.hentPersonForelderBarnRelasjon(it) }
     }
 
     private fun hentPdlBarneForeldre(
@@ -72,7 +72,7 @@ class GrunnlagsdataRegisterService(
             .mapNotNull { it.relatertPersonsIdent }
             .plus(barneforeldrePersonIdentFraSøknad)
             .distinct()
-            .let { pdlClient.hentAndreForeldre(it) }
+            .let { personService.hentAndreForeldre(it) }
     }
 
     private fun hentDataTilAndreIdenter(pdlSøker: PdlSøker): Map<String, PdlPersonKort> {
@@ -80,6 +80,6 @@ class GrunnlagsdataRegisterService(
             pdlSøker.fullmakt.map { it.motpartsPersonident } +
             pdlSøker.vergemaalEllerFremtidsfullmakt.mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
         if (andreIdenter.isEmpty()) return emptyMap()
-        return pdlClient.hentPersonKortBolk(andreIdenter)
+        return personService.hentPersonKortBolk(andreIdenter)
     }
 }
