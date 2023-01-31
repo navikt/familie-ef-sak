@@ -36,6 +36,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockV
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -410,6 +411,8 @@ internal class JournalføringServiceTest {
         @Test
         internal fun `kan velge å ta med eller ikke ta med barn på ny behandling`() {
             every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
+            mockSisteIverksatteBehandlinger(null)
+
             listOf(VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE).forEach {
                 fullførJournalpost(
                     JournalføringBehandling(
@@ -422,7 +425,7 @@ internal class JournalføringServiceTest {
         }
 
         @Test
-        internal fun `eksisterende behandling behandling - skal ikke kopiere vurderinger fra forrige behandling`() {
+        internal fun `eksisterende behandling - skal ikke kopiere vurderinger fra forrige behandling`() {
             mockOpprettBehandling(behandlingId)
             fullførJournalpost(
                 JournalføringBehandling(
@@ -436,9 +439,47 @@ internal class JournalføringServiceTest {
         }
 
         @Test
+        internal fun `eksisterende behandling - skal kopiere fra forrige avslåtte behandling`() {
+            mockOpprettBehandling(behandlingId)
+            val forrigeAvslåtteBehandling = behandling()
+            mockSisteIverksatteBehandlinger(forrigeAvslåtteBehandling)
+
+            justRun { vurderingService.kopierVurderingerTilNyBehandling(any(), behandlingId, any(), any()) }
+            every { infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any()) } just Runs
+            every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
+                Pair(
+                    mockVilkårGrunnlagDto(),
+                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList())
+                )
+
+            fullførJournalpost(
+                JournalføringBehandling(
+                    ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
+                    behandlingstype = BehandlingType.REVURDERING,
+                ),
+                VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            )
+            verify(exactly = 1) {
+                vurderingService.kopierVurderingerTilNyBehandling(
+                    forrigeAvslåtteBehandling.id,
+                    behandlingId,
+                    any(),
+                    any()
+                )
+            }
+        }
+
+        @Test
         internal fun `ny behandling - skal kopiere vurderinger fra forrige behandling etter at barn er opprettet`() {
             val forrigeBehandlingId = UUID.randomUUID()
             mockOpprettBehandling(behandlingId, forrigeBehandlingId)
+            mockSisteIverksatteBehandlinger(
+                behandling(
+                    id = forrigeBehandlingId,
+                    resultat = BehandlingResultat.INNVILGET,
+                    status = BehandlingStatus.FERDIGSTILT
+                )
+            )
             justRun {
                 vurderingService.kopierVurderingerTilNyBehandling(forrigeBehandlingId, behandlingId, any(), any())
             }
@@ -533,7 +574,13 @@ internal class JournalføringServiceTest {
 
             val journalførendeEnhet = "4489"
             val mappeId = 1234L
-            val res = journalføringService.automatiskJournalfør(fagsak, journalpost, journalførendeEnhet, mappeId, FØRSTEGANGSBEHANDLING)
+            val res = journalføringService.automatiskJournalfør(
+                fagsak,
+                journalpost,
+                journalførendeEnhet,
+                mappeId,
+                FØRSTEGANGSBEHANDLING
+            )
             verify { journalpostClient.oppdaterJournalpost(any(), journalpostId, null) }
             verify { journalpostClient.ferdigstillJournalpost(journalpostId, journalførendeEnhet, null) }
             verify { iverksettService.startBehandling(any(), fagsak) }
@@ -546,7 +593,17 @@ internal class JournalføringServiceTest {
                 )
             }
             verify(exactly = 0) { oppgaveService.opprettOppgave(any(), any(), any(), any(), any()) }
-            verify { barnService.opprettBarnPåBehandlingMedSøknadsdata(any(), any(), any(), any(), any(), any(), any()) }
+            verify {
+                barnService.opprettBarnPåBehandlingMedSøknadsdata(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
             assertThat(res.behandlingId).isEqualTo(behandlingId)
             assertThat(res.fagsakId).isEqualTo(fagsakId)
             assertThat(slotOpprettedeTasks.map { it.type }).containsExactly(OpprettOppgaveForOpprettetBehandlingTask.TYPE)
@@ -599,6 +656,10 @@ internal class JournalføringServiceTest {
         every {
             infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(any())
         } throws ApiFeil("feil", BAD_REQUEST)
+    }
+
+    private fun mockSisteIverksatteBehandlinger(sisteBehandling: Behandling?) {
+        every { behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(any()) } returns sisteBehandling
     }
 
     // Test barnetilsyn!!!

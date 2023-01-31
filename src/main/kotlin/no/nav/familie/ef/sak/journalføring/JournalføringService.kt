@@ -246,14 +246,17 @@ class JournalføringService(
         fagsak: Fagsak
     ) {
         val erEttersending = ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING
-        if (erEttersending && behandling.forrigeBehandlingId != null) {
-            val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
-            vurderingService.kopierVurderingerTilNyBehandling(
-                behandling.forrigeBehandlingId,
-                behandling.id,
-                metadata,
-                fagsak.stønadstype
-            )
+        if (erEttersending) {
+            val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+            forrigeBehandling?.let {
+                val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
+                vurderingService.kopierVurderingerTilNyBehandling(
+                    it.id,
+                    behandling.id,
+                    metadata,
+                    fagsak.stønadstype
+                )
+            }
         }
     }
 
@@ -304,10 +307,12 @@ class JournalføringService(
                 val søknad = journalpostService.hentSøknadFraJournalpostForOvergangsstønad(journalpost)
                 søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
+
             StønadType.BARNETILSYN -> {
                 val søknad = journalpostService.hentSøknadFraJournalpostForBarnetilsyn(journalpost)
                 søknadService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
+
             StønadType.SKOLEPENGER -> {
                 val søknad = journalpostService.hentSøknadFraJournalpostForSkolepenger(journalpost)
                 søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpost.journalpostId)

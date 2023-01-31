@@ -80,7 +80,8 @@ class RevurderingService(
             behandlingsårsak = revurderingInnhold.behandlingsårsak,
             kravMottatt = revurderingInnhold.kravMottatt
         )
-        val forrigeBehandlingId = forrigeBehandling(revurdering)
+        val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
+            ?: error("Revurdering må ha eksisterende iverksatt behandling")
         val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
@@ -144,18 +145,4 @@ class RevurderingService(
 
     private fun erSatsendring(revurderingInnhold: RevurderingDto) =
         revurderingInnhold.behandlingsårsak == BehandlingÅrsak.SATSENDRING
-
-    /**
-     * Returnerer id til forrige behandling.
-     * Skal håndtere en førstegangsbehandling som er avslått, då vi trenger en behandlingId for å kopiere data fra søknaden
-     */
-    private fun forrigeBehandling(revurdering: Behandling): UUID {
-        val sisteBehandling = behandlingService.hentBehandlinger(revurdering.fagsakId)
-            .filter { it.id != revurdering.id }
-            .filter { it.resultat != BehandlingResultat.HENLAGT }
-            .sisteFerdigstilteBehandling()
-        return revurdering.forrigeBehandlingId
-            ?: sisteBehandling?.id
-            ?: error("Revurdering må ha eksisterende iverksatt behandling")
-    }
 }
