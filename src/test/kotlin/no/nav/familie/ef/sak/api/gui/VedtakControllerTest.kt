@@ -8,10 +8,16 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
+import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
+import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.behandling
@@ -36,8 +42,12 @@ import no.nav.familie.kontrakter.ef.søknad.Testsøknad
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.exchange
@@ -75,6 +85,15 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
+
+    @Autowired
+    private lateinit var oppgaveService: OppgaveService
+
+    @Autowired
+    private lateinit var behandlingshistorikkService: BehandlingshistorikkService
+
+    @Autowired
+    private lateinit var taskService: TaskService
 
     private val fagsak = fagsak()
     private val behandling = behandling(fagsak)
@@ -251,6 +270,68 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         validerBehandlingIverksetter()
     }
 
+    @Nested
+    inner class AngreSendTilBeslutter {
+        @BeforeEach
+        fun setUp() {
+            mockBrukerContext(SAKSBEHANDLER.name)
+        }
+
+        @AfterEach
+        fun tearDown() {
+            clearBrukerContext()
+        }
+
+        @Test
+        internal fun `skal feile hvis en annen saksbehandler prøver å angre send til beslutter`() {
+            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            angreSendTilBeslutter(BESLUTTER, responseBadRequest())
+        }
+
+        @Test
+        internal fun `skal feile hvis vedtak ikke er i steg BESLUTTE_VEDTAK`() {
+            opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.FATTER_VEDTAK)
+            angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
+        }
+
+        @Test
+        internal fun `skal feile hvis vedtak ikke har status FATTER_VEDTAK`() {
+            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.UTREDES)
+            angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
+        }
+
+        @Test
+        internal fun `skal feile hvis oppgave er plukket av noen andre`() {
+            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
+            angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
+        }
+
+        @Test
+        internal fun `skal kunne angre send til beslutter`() {
+            val behandlingId = opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak)
+
+            val behandlingFørAngre = behandlingService.hentBehandling(behandlingId)
+            assertThat(behandlingFørAngre.steg == StegType.BESLUTTE_VEDTAK)
+            assertThat(behandlingFørAngre.status == BehandlingStatus.FATTER_VEDTAK)
+
+            angreSendTilBeslutter(SAKSBEHANDLER, responseOK())
+
+            val oppdatertBehandling = behandlingService.hentBehandling(behandlingId)
+            assertThat(oppdatertBehandling.steg == StegType.SEND_TIL_BESLUTTER)
+            assertThat(oppdatertBehandling.status == BehandlingStatus.UTREDES)
+
+            val historikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
+            assertThat(historikk.utfall == StegUtfall.ANGRE_SEND_TIL_BESLUTTER)
+
+            val gjeldendeTasks = taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
+            assertThat(gjeldendeTasks).hasSize(2)
+            assertThat(gjeldendeTasks.single { task -> task.type == FerdigstillOppgaveTask.TYPE }).isNotNull
+            assertThat(gjeldendeTasks.single { task -> task.type == OpprettOppgaveTask.TYPE }).isNotNull
+        }
+    }
+
     private fun opprettBehandling(
         status: BehandlingStatus = BehandlingStatus.UTREDES,
         steg: StegType = StegType.SEND_TIL_BESLUTTER,
@@ -264,11 +345,28 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             )
         )
 
-        vedtakRepository.insert(vedtak(lagretBehandling.id, vedtakResultatType).copy(avslåÅrsak = avlsåÅrsak))
+        vedtakRepository.insert(
+            vedtak(lagretBehandling.id, vedtakResultatType).copy(
+                avslåÅrsak = avlsåÅrsak,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+            )
+        )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))
-        søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, lagretBehandling.id, fagsak.id, "1")
+        søknadService.lagreSøknadForOvergangsstønad(
+            Testsøknad.søknadOvergangsstønad,
+            lagretBehandling.id,
+            fagsak.id,
+            "1"
+        )
         grunnlagsdataService.opprettGrunnlagsdata(lagretBehandling.id)
         return lagretBehandling.id
+    }
+
+    private fun opprettOppgave(
+        oppgaveType: Oppgavetype = Oppgavetype.GodkjenneVedtak,
+        sakshandler: Saksbehandler = SAKSBEHANDLER
+    ) {
+        oppgaveService.opprettOppgave(oppgavetype = oppgaveType, behandlingId = behandling.id, tilordnetNavIdent = sakshandler.name)
     }
 
     private fun <T> responseOK(): (ResponseEntity<Ressurs<T>>) -> Unit = {
@@ -292,6 +390,19 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         lagSaksbehandlerBrev(saksbehandler.name)
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/vedtak/${behandling.id}/send-til-beslutter"),
+            HttpMethod.POST,
+            HttpEntity<Any>(headers)
+        )
+        validator.invoke(response)
+    }
+
+    private fun angreSendTilBeslutter(
+        saksbehandler: Saksbehandler,
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+    ) {
+        headers.setBearerAuth(token(saksbehandler))
+        val response = restTemplate.exchange<Ressurs<UUID>>(
+            localhost("/api/vedtak/${behandling.id}/angre-send-til-beslutter"),
             HttpMethod.POST,
             HttpEntity<Any>(headers)
         )
