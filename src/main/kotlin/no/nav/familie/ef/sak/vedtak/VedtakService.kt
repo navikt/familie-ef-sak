@@ -172,7 +172,8 @@ class VedtakService(
 
         val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.GodkjenneVedtak, saksbehandling = saksbehandling) ?: error("Fant ingen godkjenne vedtak oppgave")
         val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
-        feilHvis(tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs" }
+        val oppgaveErTilordnetEnAnnenSaksbehandler = tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
+        feilHvis(oppgaveErTilordnetEnAnnenSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs" }
     }
 }
 
