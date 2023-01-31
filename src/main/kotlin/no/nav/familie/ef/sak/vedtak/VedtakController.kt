@@ -6,7 +6,9 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -67,6 +69,7 @@ class VedtakController(
 
     @PostMapping("/{behandlingId}/angre-send-til-beslutter")
     fun angreSendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        feilHvisIkke(featureToggleService.isEnabled(Toggle.ANGRE_SEND_TIL_BESLUTTER), HttpStatus.SERVICE_UNAVAILABLE) { "Feature toggle for angre send er ikke påskrudd." }
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
         vedtakService.angreSendTilBeslutter(saksbehandling)
