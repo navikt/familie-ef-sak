@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
@@ -47,8 +46,6 @@ import java.util.UUID
 
 internal class KlageServiceTest {
 
-    private val behandlingService = mockk<BehandlingService>()
-
     private val fagsakService = mockk<FagsakService>()
 
     private val fagsakPersonService = mockk<FagsakPersonService>()
@@ -61,7 +58,6 @@ internal class KlageServiceTest {
 
     private val klageService =
         KlageService(
-            behandlingService,
             fagsakService,
             fagsakPersonService,
             klageClient,
@@ -84,7 +80,6 @@ internal class KlageServiceTest {
     @BeforeEach
     internal fun setUp() {
         opprettKlageSlot.clear()
-        every { behandlingService.hentSaksbehandling(any<UUID>()) } returns saksbehandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.klage
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -23,7 +22,6 @@ import java.util.UUID
 
 @Service
 class KlageService(
-    private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
     private val klageClient: KlageClient,
@@ -53,12 +51,6 @@ class KlageService(
             barnetilsyn = klagebehandlingerPåEksternId[fagsaker.barnetilsyn?.eksternId?.id] ?: emptyList(),
             skolepenger = klagebehandlingerPåEksternId[fagsaker.skolepenger?.eksternId?.id] ?: emptyList()
         )
-    }
-
-    @Deprecated("Kan fjernes når frontend tatt i bruk opprettKlage")
-    fun opprettKlageBehandling(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
-        val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        opprettKlage(behandling.fagsakId, opprettKlageDto)
     }
 
     fun opprettKlage(fagsakId: UUID, opprettKlageDto: OpprettKlageDto) {
