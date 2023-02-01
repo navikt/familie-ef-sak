@@ -59,6 +59,11 @@ enum class StegType(
         tillattFor = BehandlerRolle.BESLUTTER,
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)
     ),
+    ANGRE_SEND_TIL_BESLUTTER(
+        rekkefølge = 4,
+        tillattFor = BehandlerRolle.SAKSBEHANDLER,
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)
+    ),
     VENTE_PÅ_STATUS_FRA_IVERKSETT(
         rekkefølge = 5,
         tillattFor = BehandlerRolle.SYSTEM,
@@ -104,6 +109,7 @@ enum class StegType(
             BEREGNE_YTELSE -> SEND_TIL_BESLUTTER
             SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
             BESLUTTE_VEDTAK -> VENTE_PÅ_STATUS_FRA_IVERKSETT
+            ANGRE_SEND_TIL_BESLUTTER -> SEND_TIL_BESLUTTER
             VENTE_PÅ_STATUS_FRA_IVERKSETT -> LAG_SAKSBEHANDLINGSBLANKETT
             LAG_SAKSBEHANDLINGSBLANKETT -> FERDIGSTILLE_BEHANDLING
             FERDIGSTILLE_BEHANDLING -> PUBLISER_VEDTAKSHENDELSE

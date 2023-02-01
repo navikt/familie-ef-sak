@@ -11,7 +11,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
-import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
@@ -323,7 +322,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThat(oppdatertBehandling.status == BehandlingStatus.UTREDES)
 
             val historikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
-            assertThat(historikk.utfall == StegUtfall.ANGRE_SEND_TIL_BESLUTTER)
+            // assertThat(historikk.utfall == StegUtfall.ANGRE_SEND_TIL_BESLUTTER)
 
             val gjeldendeTasks = taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
             assertThat(gjeldendeTasks).hasSize(2)

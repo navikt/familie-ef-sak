@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
+import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.ANGRE_SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEHANDLING_FERDIGSTILT
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BEREGNE_YTELSE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType.BESLUTTE_VEDTAK
@@ -115,6 +116,14 @@ class StegService(
         val behandlingSteg: FerdigstillBehandlingSteg = hentBehandlingSteg(FERDIGSTILLE_BEHANDLING)
 
         return håndterSteg(saksbehandling, behandlingSteg, null)
+    }
+
+    @Transactional
+    fun håndterAngreSendTilBeslutterSteg(behandlingId: UUID): Behandling {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val steg: AngreSendTilBeslutterSteg = hentBehandlingSteg(ANGRE_SEND_TIL_BESLUTTER)
+
+        return håndterSteg(saksbehandling, steg, null)
     }
 
     @Transactional
@@ -240,7 +249,7 @@ class StegService(
             )
         }
 
-        if (saksbehandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK) {
+        if (saksbehandling.steg == BESLUTTE_VEDTAK && stegType != BESLUTTE_VEDTAK && stegType != ANGRE_SEND_TIL_BESLUTTER) {
             error("Behandlingen er på steg '${saksbehandling.steg.displayName()}', og er da låst for alle andre type endringer.")
         }
     }
@@ -274,7 +283,7 @@ class StegService(
                 return BehandlerRolle.SAKSBEHANDLER
             }
         }
-        return saksbehandling.steg.tillattFor
+        return stegType.tillattFor
     }
 
     private fun <T : BehandlingSteg<*>> hentBehandlingSteg(stegType: StegType): T {

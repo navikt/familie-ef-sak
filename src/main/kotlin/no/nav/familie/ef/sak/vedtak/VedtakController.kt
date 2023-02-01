@@ -70,10 +70,8 @@ class VedtakController(
     @PostMapping("/{behandlingId}/angre-send-til-beslutter")
     fun angreSendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.ANGRE_SEND_TIL_BESLUTTER), HttpStatus.SERVICE_UNAVAILABLE) { "Feature toggle for angre send er ikke påskrudd." }
-        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
-        tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
-        vedtakService.angreSendTilBeslutter(saksbehandling)
-        return Ressurs.success(saksbehandling.id)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        return Ressurs.success(stegService.håndterAngreSendTilBeslutterSteg(behandlingId).id)
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
