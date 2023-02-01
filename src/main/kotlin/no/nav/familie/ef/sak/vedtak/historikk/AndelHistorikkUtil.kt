@@ -61,6 +61,5 @@ object AndelHistorikkUtil {
 }
 
 data class HistorikkKonfigurasjon(
-    val brukIkkeVedtatteSatser: Boolean,
-    val lagOpphørsperiode: Boolean
+    val brukIkkeVedtatteSatser: Boolean
 )

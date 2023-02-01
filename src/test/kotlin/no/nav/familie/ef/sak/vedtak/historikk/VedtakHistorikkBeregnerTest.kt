@@ -141,7 +141,7 @@ internal class VedtakHistorikkBeregnerTest {
                 tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
             )
         }
-        val konfigurasjon = HistorikkKonfigurasjon(true, true)
+        val konfigurasjon = HistorikkKonfigurasjon(true)
         return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
             .map { it.key to it.value.perioder }
             .toMap()
