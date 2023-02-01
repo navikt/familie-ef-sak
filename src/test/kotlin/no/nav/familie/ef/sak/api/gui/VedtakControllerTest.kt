@@ -290,6 +290,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `skal feile hvis vedtak ikke er i steg BESLUTTE_VEDTAK`() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
             angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
         }
 
