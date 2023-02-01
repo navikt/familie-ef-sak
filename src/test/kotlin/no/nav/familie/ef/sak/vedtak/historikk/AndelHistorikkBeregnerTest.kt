@@ -134,7 +134,7 @@ object AndelHistorikkRunner {
             behandlinger,
             behandlingId,
             mapOf(),
-            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true, lagOpphørsperiode = true)
+            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true)
         )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))

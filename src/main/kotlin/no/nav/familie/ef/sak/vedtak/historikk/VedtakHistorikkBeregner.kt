@@ -171,11 +171,7 @@ object VedtakHistorikkBeregner {
             is Opphør -> {
                 val opphørFom = vedtak.opphørFom
                 val avkortedePerioder = avkortTidligerePerioder(acc.lastOrNull(), opphørFom)
-                if (konfigurasjon.lagOpphørsperiode) {
-                    avkortedePerioder + Opphørsperiode(Månedsperiode(opphørFom))
-                } else {
-                    avkortedePerioder
-                }
+                avkortedePerioder + Opphørsperiode(Månedsperiode(opphørFom))
             }
             else -> {
                 logger.error("Håndterer ikke ${vedtak::class.java.simpleName} behandling=${data.behandlingId}")

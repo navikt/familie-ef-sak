@@ -46,7 +46,6 @@ class AndelsHistorikkService(
             aktivitetArbeid,
             HistorikkKonfigurasjon(
                 brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
-                lagOpphørsperiode = featureToggleService.isEnabled(Toggle.VEDTAKSHISTORIKK_OPPHØR)
             )
         )
     }

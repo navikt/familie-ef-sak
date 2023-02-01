@@ -21,8 +21,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
-    VEDTAKSHISTORIKK_OPPHØR("familie.ef.sak.vedtakshistorikk-opphor"),
-
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
 
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
