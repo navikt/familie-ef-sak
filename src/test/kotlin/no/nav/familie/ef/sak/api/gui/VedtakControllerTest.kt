@@ -322,7 +322,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThat(oppdatertBehandling.status == BehandlingStatus.UTREDES)
 
             val historikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
-            // assertThat(historikk.utfall == StegUtfall.ANGRE_SEND_TIL_BESLUTTER)
+            assertThat(historikk.steg == StegType.ANGRE_SEND_TIL_BESLUTTER)
 
             val gjeldendeTasks = taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
             assertThat(gjeldendeTasks).hasSize(2)
