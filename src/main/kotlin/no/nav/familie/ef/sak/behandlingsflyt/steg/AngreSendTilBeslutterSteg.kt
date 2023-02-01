@@ -32,7 +32,6 @@ class AngreSendTilBeslutterSteg(
         val vedtak = vedtakService.hentVedtak(saksbehandling.id)
         val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
         feilHvis(vedtak.saksbehandlerIdent != innloggetSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket" }
-        feilHvis(saksbehandling.steg != StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
         feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}" }
 
         val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype = Oppgavetype.GodkjenneVedtak, saksbehandling = saksbehandling) ?: error("Fant ingen godkjenne vedtak oppgave")
