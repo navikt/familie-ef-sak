@@ -2,16 +2,12 @@ package no.nav.familie.ef.sak.vedtak
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.inntektsperiode
 import no.nav.familie.ef.sak.repository.vedtak
 import no.nav.familie.ef.sak.repository.vedtaksperiode
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
-import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,18 +19,10 @@ class VedtakServiceTest {
 
     private val vedtakRepository = mockk<VedtakRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val oppgaveService = mockk<OppgaveService>()
-    private val behandlingService = mockk<BehandlingService>()
-    private val behandlingshistorikkService = mockk<BehandlingshistorikkService>(relaxed = true)
-    private val taskService = mockk<TaskService>(relaxed = true)
 
     private val vedtakService = VedtakService(
         vedtakRepository,
         tilkjentYtelseRepository,
-        oppgaveService,
-        behandlingService,
-        behandlingshistorikkService,
-        taskService
     )
     private val behandlingId = UUID.randomUUID()
     private val inntektsperiodeUtenInntekt = inntektsperiode(
