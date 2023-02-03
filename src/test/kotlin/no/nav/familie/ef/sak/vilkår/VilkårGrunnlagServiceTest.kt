@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
@@ -25,13 +26,14 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 internal class VilkårGrunnlagServiceTest {
 
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
-    private val pdlClient = PdlClientConfig().pdlClient()
+    private val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val søknadService = mockk<SøknadService>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -40,7 +42,7 @@ internal class VilkårGrunnlagServiceTest {
     private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-        pdlClient,
+        personService,
         personopplysningerIntegrasjonerClient,
         tidligereVedaksperioderService
     )

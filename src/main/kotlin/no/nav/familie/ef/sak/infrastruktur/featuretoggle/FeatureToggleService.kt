@@ -21,19 +21,14 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
-    VEDTAKSHISTORIKK_OPPHØR("familie.ef.sak.vedtakshistorikk-opphor"),
-
     OPPRETT_OPPGAVER_TERMINBARN("familie.ef.iverksett.opprett-oppgaver-terminbarn"),
 
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost"),
 
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
-    BARNETILSYN_REVURDER_FRA("familie.ef.sak.barnetilsyn-revurder-fra"),
-
     PÅ_VENT_NULLSTILL_VEDTAK("familie.ef.sak.paa-vent-nullstill-vedtak"),
 
-    REVURDERING_SANKSJON("familie.ef.sak.revurdering-sanksjon"),
     LOGG_WARN_TIMEOUTS("familie.ef.sak.logg-timeout-som-warn"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
@@ -41,11 +36,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),
     FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
     AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
-    BRUK_8_ÅR_HOVEDPERIODEVALIDERING("familie.ef.sak.frontend-bruk-validering-8ar-hovedperiode"),
-    VIS_SETT_PÅ_VENT_KNAPP("familie.ef.sak.frontend.vis-sett-pa-vent-knapp"),
     HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon"),
     PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
-    AUTOMATISKE_HJEMLER_BREV("familie.ef.sak.frontend.automatiske-hjemler-brev"),
     ANGRE_SEND_TIL_BESLUTTER("familie.ef.sak.frontend-angre-send-til-beslutter");
 
     companion object {

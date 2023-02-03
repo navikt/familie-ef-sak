@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
@@ -37,7 +37,7 @@ import java.util.UUID
 class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val tilgangService: TilgangService,
-    private val pdlClient: PdlClient
+    private val personService: PersonService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -52,7 +52,7 @@ class OppgaveController(
         validerOptionalIdent(finnOppgaveRequest.ident)
 
         val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
-            ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
+            ?.let { personService.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))

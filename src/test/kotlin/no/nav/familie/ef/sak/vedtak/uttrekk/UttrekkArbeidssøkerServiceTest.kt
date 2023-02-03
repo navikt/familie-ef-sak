@@ -118,7 +118,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
     internal fun setUp() {
         every { taskService.save(capture(taskSlot)) } answers { firstArg() }
         every { arbeidssøkerClient.hentPerioder(any(), any(), any()) } returns ArbeidssøkerResponse(listOf())
-        every { personService.hentPdlPersonKort(any()) } answers {
+        every { personService.hentPersonKortBolk(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort() }
         }
         service = UttrekkArbeidssøkerService(
@@ -368,7 +368,7 @@ internal class UttrekkArbeidssøkerServiceTest : OppslagSpringRunnerTest() {
 
         @BeforeEach
         internal fun setUp() {
-            every { personService.hentPdlPersonKort(any()) } answers {
+            every { personService.hentPersonKortBolk(any()) } answers {
                 identer.associate { it.first to lagPersonKort(it.second) }
             }
             identer.forEach {

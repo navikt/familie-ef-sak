@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_EGEN_ANSATT
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
 import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -29,13 +29,13 @@ internal class OppgaveControllerTest {
 
     private val tilgangService: TilgangService = mockk()
     private val oppgaveService: OppgaveService = mockk()
-    private val pdlClient: PdlClient = mockk()
+    private val personService: PersonService = mockk()
 
-    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, pdlClient)
+    private val oppgaveController: OppgaveController = OppgaveController(oppgaveService, tilgangService, personService)
 
     @Test
     internal fun `skal kaste feil hvis ident ikke er på gyldig format`() {
-        every { pdlClient.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("1234", false)))
+        every { personService.hentAktørIder(any()) } returns PdlIdenter(listOf(PdlIdent("1234", false)))
         every { oppgaveService.hentOppgaver(any()) } returns FinnOppgaveResponseDto(0, listOf())
 
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
@@ -51,7 +51,7 @@ internal class OppgaveControllerTest {
     internal fun `skal sende med aktoerId i request `() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
-        every { pdlClient.hentAktørIder("12345678901") } returns PdlIdenter(listOf(PdlIdent("1234", false)))
+        every { personService.hentAktørIder("12345678901") } returns PdlIdenter(listOf(PdlIdent("1234", false)))
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = "12345678901"))
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo("1234")
@@ -63,7 +63,7 @@ internal class OppgaveControllerTest {
         tilgangOgRolleJustRuns()
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = " "))
-        verify(exactly = 0) { pdlClient.hentAktørIder(any()) }
+        verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
     }
 
@@ -73,7 +73,7 @@ internal class OppgaveControllerTest {
         tilgangOgRolleJustRuns()
         every { oppgaveService.hentOppgaver(capture(finnOppgaveRequestSlot)) } returns FinnOppgaveResponseDto(0, listOf())
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
-        verify(exactly = 0) { pdlClient.hentAktørIder(any()) }
+        verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
     }
 

@@ -104,7 +104,7 @@ class PdlClientConfig {
         }
 
         val personIdent = slot<String>()
-        every { pdlClient.hentPersonidenter(capture(personIdent), eq(true)) } answers {
+        every { pdlClient.hentPersonidenter(capture(personIdent)) } answers {
             if (personIdent.captured == "19117313797") {
                 throw PdlNotFoundException()
             } else {

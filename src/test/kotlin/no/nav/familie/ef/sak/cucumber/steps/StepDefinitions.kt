@@ -249,7 +249,7 @@ class StepDefinitions {
                     saksbehandlinger.values.map { it.first }.toList(),
                     null,
                     behandlingIdsToAktivitetArbeid,
-                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true, lagOpphørsperiode = true)
+                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true)
                 )
             }
         }
