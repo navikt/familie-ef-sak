@@ -54,7 +54,8 @@ class AngreSendTilBeslutterService(
                 OpprettOppgaveTask.OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.BehandleSak,
-                    beskrivelse = "Angret send til beslutter"
+                    beskrivelse = "Angret send til beslutter",
+                    tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(strict = true)
                 )
             )
         )
