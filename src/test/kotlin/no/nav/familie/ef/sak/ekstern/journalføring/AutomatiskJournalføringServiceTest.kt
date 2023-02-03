@@ -161,22 +161,6 @@ internal class AutomatiskJournalføringServiceTest {
     }
 
     @Test
-    internal fun `kan ikke opprette behandling hvis det alle behandlinger i ny løsning er ferdigstilt, men featuretoggle er av`() {
-        every { featureToggleService.isEnabled(any()) } returns false
-        every { infotrygdService.eksisterer(any(), any()) } returns false
-        every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(
-            behandling(
-                resultat = INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            ),
-            behandling(resultat = AVSLÅTT, status = BehandlingStatus.FERDIGSTILT)
-        )
-        val kanOppretteBehandling =
-            automatiskJournalføringService.kanOppretteBehandling(personIdent, StønadType.OVERGANGSSTØNAD)
-        assertThat(kanOppretteBehandling).isFalse
-    }
-
-    @Test
     internal fun `skal ikke kunne automatisk journalføre hvis journalpostens bruker og personident ikke samsvarer`() {
         val enAnnenBruker = Bruker(
             id = personIdentAnnen,
