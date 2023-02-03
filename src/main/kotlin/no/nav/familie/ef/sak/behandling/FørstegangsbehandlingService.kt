@@ -37,9 +37,6 @@ class FørstegangsbehandlingService(
 
     @Transactional
     fun opprettFørstegangsbehandling(fagsakId: UUID, førstegangsBehandlingRequest: FørstegangsbehandlingDto): Behandling {
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.FØRSTEGANGSBEHANDLING)) {
-            "Opprettelse av førstegangsbehandling er skrudd av"
-        }
         validerGyldigÅrsak(førstegangsBehandlingRequest.behandlingsårsak)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)

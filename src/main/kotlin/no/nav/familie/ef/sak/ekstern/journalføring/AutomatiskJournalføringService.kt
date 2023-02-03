@@ -84,7 +84,7 @@ class AutomatiskJournalføringService(
     private fun kanAutomatiskJournalføreRevurdering(behandlinger: List<Behandling>, fagsak: Fagsak?): Boolean {
         return if (!harÅpenBehandling(behandlinger)) {
             secureLogger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
-            featureToggleService.isEnabled(Toggle.AUTOMATISK_JOURNALFØR_REVURDERING)
+            true
         } else {
             secureLogger.info("Kan ikke automatisk journalføre for fagsak: ${fagsak?.id}")
             false
