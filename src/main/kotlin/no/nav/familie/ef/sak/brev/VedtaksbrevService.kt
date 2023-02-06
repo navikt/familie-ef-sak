@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -83,7 +84,8 @@ class VedtaksbrevService(
             brevmal = brevmal,
             saksbehandlersignatur = saksbehandlersignatur,
             enhet = enhet,
-            saksbehandlerident = SikkerhetContext.hentSaksbehandler(true)
+            saksbehandlerident = SikkerhetContext.hentSaksbehandler(true),
+            opprettetTid = SporbarUtils.now()
         )
 
         return when (brevRepository.existsById(behandlingId)) {
