@@ -23,6 +23,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikator
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
@@ -123,25 +124,28 @@ internal class GrunnlagsdataServiceTest {
 
     @Test
     internal fun `skal sjekke om personen har historikk i infotrygd`() {
-        val personIdent = PdlClientConfig.søkerFnr
+        val identifikatorSøker = folkeregisteridentifikator(PdlClientConfig.søkerFnr)
+        val folkeregisteridentifikatorAnnenForelder = folkeregisteridentifikator(annenForelderFnr)
         val defaultTidligereInnvilgetVedtak = TidligereInnvilgetVedtak(true, true, false)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(setOf(personIdent))) } returns
+        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(listOf(identifikatorSøker))) } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr)) } returns
+        every {
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
+        } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak, defaultTidligereInnvilgetVedtak)
 
-        val grunnlagsdata = service.hentFraRegisterForPersonOgAndreForeldre(personIdent, emptyList())
+        val grunnlagsdata = service.hentFraRegisterForPersonOgAndreForeldre(identifikatorSøker.ident, emptyList())
 
         val tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder!!
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereOvergangsstønad).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereBarnetilsyn).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereSkolepenger).isFalse
 
-        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(personIdent)) }
+        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(identifikatorSøker)) }
         verify(exactly = 1) {
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr))
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
         }
     }
 }

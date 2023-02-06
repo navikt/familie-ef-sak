@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
-import no.nav.familie.ef.sak.behandling.BehandlingUtil.sisteFerdigstilteBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
-import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
@@ -18,7 +16,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
-import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
@@ -35,7 +32,6 @@ import java.util.UUID
 class RevurderingService(
     private val søknadService: SøknadService,
     private val behandlingService: BehandlingService,
-    private val oppgaveService: OppgaveService,
     private val vurderingService: VurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val taskService: TaskService,

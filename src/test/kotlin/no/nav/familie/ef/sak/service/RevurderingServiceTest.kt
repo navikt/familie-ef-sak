@@ -20,7 +20,6 @@ internal class RevurderingServiceTest {
     val revurderingService: RevurderingService = RevurderingService(
         søknadService = mockk(),
         behandlingService = mockk(),
-        oppgaveService = mockk(),
         vurderingService = mockk(),
         grunnlagsdataService = mockk(),
         taskService = mockk(),

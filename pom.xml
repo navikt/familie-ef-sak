@@ -29,14 +29,14 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.8.0</kotlin.version>
+        <kotlin.version>1.8.10</kotlin.version>
         <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
         <springdoc.version>1.6.14</springdoc.version>
         <mockk.version>1.13.4</mockk.version>
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20230112095049_2b9ddd6</kontrakter.version>
+        <kontrakter.version>2.0_20230206084121_fb3451a</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20221118130052_e2abd9f</eksterne.kontrakter.bisys.version>
         <cucumber.version>7.11.0</cucumber.version>
 
@@ -224,7 +224,7 @@
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>1.6.0</version>
+            <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
 

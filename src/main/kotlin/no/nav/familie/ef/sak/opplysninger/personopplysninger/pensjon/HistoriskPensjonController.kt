@@ -25,4 +25,12 @@ class HistoriskPensjonController(
         }
         return Ressurs.success(HistoriskPensjonResponse(false, ""))
     }
+
+    @GetMapping("fagsak/{fagsakId}")
+    fun hentHistoriskPensjonForFagsak(@PathVariable fagsakId: UUID): Ressurs<HistoriskPensjonResponse> {
+        if (featureToggleService.isEnabled(Toggle.HISTORISK_PENSJON)) {
+            return Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
+        }
+        return Ressurs.success(HistoriskPensjonResponse(false, ""))
+    }
 }

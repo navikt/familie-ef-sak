@@ -7,6 +7,9 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon.HistoriskPensjonService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import org.springframework.stereotype.Service
@@ -17,18 +20,22 @@ class TidligereVedaksperioderService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
+    private val historiskPensjonService: HistoriskPensjonService
 ) {
 
     /**
-     * @param personIdenter for 1 person
+     * @param folkeregisteridentifikatorer for 1 person
      */
-    fun hentTidligereVedtaksperioder(personIdenter: Set<String>): TidligereVedtaksperioder {
+    fun hentTidligereVedtaksperioder(folkeregisteridentifikatorer: List<Folkeregisteridentifikator>): TidligereVedtaksperioder {
+        val aktivIdent = folkeregisteridentifikatorer.gjeldende().ident
+        val alleIdenter = folkeregisteridentifikatorer.map { it.ident }.toSet()
         val tidligereInnvilgetVedtak =
-            mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(personIdenter))
+            mapTidligereInnvilgetVedtak(infotrygdService.hentPerioderFraReplika(alleIdenter))
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
-            sak = harTidligereMottattStønadEf(personIdenter)
+            sak = harTidligereMottattStønadEf(alleIdenter),
+            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata
         )
     }
 

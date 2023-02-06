@@ -1509,6 +1509,11 @@
               }
             },
             "nullable" : true
+          },
+          "historiskPensjon" : {
+            "name" : "historiskPensjon",
+            "type" : "Boolean",
+            "nullable" : true
           }
         },
         "nullable" : true
@@ -2166,6 +2171,11 @@
             "nullable" : false
           }
         },
+        "nullable" : true
+      },
+      "historiskPensjon" : {
+        "name" : "historiskPensjon",
+        "type" : "Boolean",
         "nullable" : true
       }
     },

@@ -45,7 +45,7 @@ class AndelsHistorikkService(
             tilOgMedBehandlingId,
             aktivitetArbeid,
             HistorikkKonfigurasjon(
-                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS),
+                brukIkkeVedtatteSatser = featureToggleService.isEnabled(Toggle.SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS)
             )
         )
     }

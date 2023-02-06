@@ -33,7 +33,7 @@ class GrunnlagsdataRegisterService(
         val medlUnntak = personopplysningerIntegrasjonerClient.hentMedlemskapsinfo(ident = personIdent)
 
         val tidligereVedtaksperioder =
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(pdlSøker.alleIdenter())
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(pdlSøker.folkeregisteridentifikator)
 
         return GrunnlagsdataDomene(
             søker = mapSøker(pdlSøker, dataTilAndreIdenter),
@@ -48,9 +48,9 @@ class GrunnlagsdataRegisterService(
         barneForeldre: Map<String, PdlAnnenForelder>
     ): Map<String, TidligereVedtaksperioder> {
         return loggTid("antall=${barneForeldre.size}") {
-            barneForeldre.entries.associate { (key, value) ->
-                val personIdenter = value.folkeregisteridentifikator.map { it.ident }.toSet()
-                key to tidligereVedaksperioderService.hentTidligereVedtaksperioder(personIdenter)
+            barneForeldre.entries.associate { (ident, annenForelder) ->
+                val folkeregisteridentifikatorer = annenForelder.folkeregisteridentifikator
+                ident to tidligereVedaksperioderService.hentTidligereVedtaksperioder(folkeregisteridentifikatorer)
             }
         }
     }
