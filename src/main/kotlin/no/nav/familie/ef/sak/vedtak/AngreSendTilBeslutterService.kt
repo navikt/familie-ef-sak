@@ -7,13 +7,12 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -77,7 +76,7 @@ class AngreSendTilBeslutterService(
     private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling, vedtak: Vedtak) {
         val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler(strict = true)
 
-        feilHvis(vedtak.saksbehandlerIdent != innloggetSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) {
+        brukerfeilHvis(vedtak.saksbehandlerIdent != innloggetSaksbehandler) {
             "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket"
         }
 
@@ -90,7 +89,7 @@ class AngreSendTilBeslutterService(
         val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
         val oppgaveErTilordnetEnAnnenSaksbehandler =
             tilordnetRessurs != null && tilordnetRessurs != innloggetSaksbehandler
-        feilHvis(oppgaveErTilordnetEnAnnenSaksbehandler, httpStatus = HttpStatus.BAD_REQUEST) {
+        brukerfeilHvis(oppgaveErTilordnetEnAnnenSaksbehandler) {
             "Kan ikke angre send til beslutter når oppgave er plukket av $tilordnetRessurs"
         }
     }
