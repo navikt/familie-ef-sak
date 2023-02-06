@@ -332,6 +332,13 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThat(gjeldendeTasks.single { task -> task.type == FerdigstillOppgaveTask.TYPE }).isNotNull
             assertThat(gjeldendeTasks.single { task -> task.type == OpprettOppgaveTask.TYPE }).isNotNull
         }
+
+        @Test
+        internal fun `skal kunne angre send til beslutter når godkjenne vedtak-oppgaven er plukket av saksbehandler`() {
+            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = SAKSBEHANDLER)
+            angreSendTilBeslutter(SAKSBEHANDLER, responseOK())
+        }
     }
 
     private fun opprettBehandling(
