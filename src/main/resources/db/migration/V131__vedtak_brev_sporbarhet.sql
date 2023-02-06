@@ -1,0 +1,23 @@
+ALTER TABLE vedtak
+    ADD COLUMN opprettet_tid TIMESTAMP(3);
+
+-- Oppdaterer behandlinger som er henlagt eller sendt til totrinnskontroll
+UPDATE vedtak
+SET saksbehandler_ident = COALESCE(saksbehandler_ident, bh.opprettet_av),
+    opprettet_tid       = COALESCE(opprettet_tid, bh.endret_tid)
+FROM (SELECT *, row_number() OVER (PARTITION BY behandling_id ORDER BY endret_tid DESC) rn
+      FROM behandlingshistorikk bh
+      WHERE bh.steg = 'BEREGNE_YTELSE') bh
+WHERE vedtak.behandling_id = bh.behandling_id
+  AND bh.rn = 1;
+
+UPDATE vedtak
+SET saksbehandler_ident = COALESCE(saksbehandler_ident, b.opprettet_av),
+    opprettet_tid       = COALESCE(opprettet_tid, b.vedtakstidspunkt)
+FROM (SELECT * FROM behandling WHERE arsak IN ('MIGRERING', 'G_OMREGNING')) b
+WHERE vedtak.behandling_id = b.id;
+
+ALTER TABLE vedtak
+    ALTER COLUMN opprettet_tid SET NOT NULL;
+ALTER TABLE vedtak
+    ALTER COLUMN saksbehandler_ident SET NOT NULL;
