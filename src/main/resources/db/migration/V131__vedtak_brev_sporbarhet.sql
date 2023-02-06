@@ -1,5 +1,7 @@
 ALTER TABLE vedtak
     ADD COLUMN opprettet_tid TIMESTAMP(3);
+ALTER table vedtaksbrev
+    ADD COLUMN opprettet_tid TIMESTAMP(3);
 
 -- Oppdaterer behandlinger som er henlagt eller sendt til totrinnskontroll
 UPDATE vedtak
@@ -21,3 +23,13 @@ ALTER TABLE vedtak
     ALTER COLUMN opprettet_tid SET NOT NULL;
 ALTER TABLE vedtak
     ALTER COLUMN saksbehandler_ident SET NOT NULL;
+
+UPDATE vedtaksbrev
+SET opprettet_tid = COALESCE(opprettet_tid, bh.endret_tid)
+FROM (SELECT *, row_number() OVER (PARTITION BY behandling_id ORDER BY endret_tid DESC) rn
+      FROM behandlingshistorikk bh
+      WHERE bh.steg = 'SEND_TIL_BESLUTTER') bh
+WHERE vedtaksbrev.behandling_id = bh.behandling_id
+  AND bh.rn = 1;
+
+-- Kan ikke sette opprettet_tid på alle vedtaksbrev då flere behandlinger er henlagte eller ikke blitt sendt til totrinnskontroll
