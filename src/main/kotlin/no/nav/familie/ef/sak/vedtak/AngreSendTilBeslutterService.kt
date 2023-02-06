@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveService
-import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.stereotype.Service
@@ -19,20 +18,19 @@ import java.util.UUID
 
 @Service
 class AngreSendTilBeslutterService(
-    private val vedtakService: VedtakService,
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
-    private val stegService: StegService
+    private val stegService: StegService,
+    private val totrinnskontrollService: TotrinnskontrollService
 ) {
 
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {
-        val vedtak = vedtakService.hentVedtak(behandlingId = behandlingId)
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
 
-        validerKanAngreSendTilBeslutter(saksbehandling, vedtak)
+        validerKanAngreSendTilBeslutter(saksbehandling)
 
         behandlingshistorikkService.opprettHistorikkInnslag(
             behandlingId = behandlingId,
@@ -73,11 +71,12 @@ class AngreSendTilBeslutterService(
         }
     }
 
-    private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling, vedtak: Vedtak) {
+    private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling) {
         val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler(strict = true)
+        val saksbehandlerSendtTilBeslutter = totrinnskontrollService.hentSaksbehandlerSomSendteTilBeslutter(saksbehandling.id)
 
-        brukerfeilHvis(vedtak.saksbehandlerIdent != innloggetSaksbehandler) {
-            "Kan ikke angre send til beslutter om du ikke er saksbehandler på vedtaket"
+        brukerfeilHvis(saksbehandlerSendtTilBeslutter != innloggetSaksbehandler) {
+            "Kan kun angre send til beslutter dersom du er saksbehandler på vedtaket"
         }
 
         val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(

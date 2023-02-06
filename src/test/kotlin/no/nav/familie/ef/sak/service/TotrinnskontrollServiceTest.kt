@@ -60,6 +60,16 @@ internal class TotrinnskontrollServiceTest {
     }
 
     @Test
+    internal fun `skal utlede saksbehandler som sendte behandling til besluttning`() {
+        val opprettetAv = "Behandler"
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
+            behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
+        val response = totrinnskontrollService
+            .hentSaksbehandlerSomSendteTilBeslutter(UUID.randomUUID())
+        assertThat(response).isEqualTo(opprettetAv)
+    }
+
+    @Test
     internal fun `skal returnere UAKTUELT når behandlingen FERDIGSTILT`() {
         every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.FERDIGSTILT)
 

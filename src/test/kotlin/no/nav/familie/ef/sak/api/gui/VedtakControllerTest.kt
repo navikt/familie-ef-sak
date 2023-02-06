@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.FerdigstillOppgaveTask
 import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
@@ -284,35 +285,33 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
 
         @Test
         internal fun `skal feile hvis en annen saksbehandler prøver å angre send til beslutter`() {
-            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
+            sendTilBeslutter(SAKSBEHANDLER)
             angreSendTilBeslutter(BESLUTTER, responseBadRequest())
         }
 
         @Test
         internal fun `skal feile hvis vedtak ikke er i steg BESLUTTE_VEDTAK`() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.FATTER_VEDTAK)
+            behandlingshistorikkService.opprettHistorikkInnslag(Behandlingshistorikk(behandlingId = behandling.id, steg = StegType.SEND_TIL_BESLUTTER, opprettetAv = SAKSBEHANDLER.name))
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
             angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
         }
 
-        @Test
-        internal fun `skal feile hvis vedtak ikke har status FATTER_VEDTAK`() {
-            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.UTREDES)
-            opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
-            angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
-        }
 
         @Test
         internal fun `skal feile hvis oppgave er plukket av noen andre`() {
-            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
+            sendTilBeslutter(SAKSBEHANDLER)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = BESLUTTER)
             angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
         }
 
         @Test
         internal fun `skal kunne angre send til beslutter`() {
-            val behandlingId = opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            val behandlingId = opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak)
+            sendTilBeslutter(SAKSBEHANDLER)
 
             val behandlingFørAngre = behandlingService.hentBehandling(behandlingId)
             assertThat(behandlingFørAngre.steg == StegType.BESLUTTE_VEDTAK)
@@ -328,14 +327,14 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             assertThat(historikk.utfall == StegUtfall.ANGRE_SEND_TIL_BESLUTTER)
 
             val gjeldendeTasks = taskService.findAll().filter { task -> task.metadata["behandlingId"] == behandlingId.toString() }
-            assertThat(gjeldendeTasks).hasSize(2)
-            assertThat(gjeldendeTasks.single { task -> task.type == FerdigstillOppgaveTask.TYPE }).isNotNull
-            assertThat(gjeldendeTasks.single { task -> task.type == OpprettOppgaveTask.TYPE }).isNotNull
+            assertThat(gjeldendeTasks.single { task -> task.type == FerdigstillOppgaveTask.TYPE && task.metadata["oppgavetype"] == "GodkjenneVedtak" }).isNotNull
+            assertThat(gjeldendeTasks.single { task -> task.type == OpprettOppgaveTask.TYPE && task.metadata["oppgavetype"] == "BehandleSak" }).isNotNull
         }
 
         @Test
         internal fun `skal kunne angre send til beslutter når godkjenne vedtak-oppgaven er plukket av saksbehandler`() {
-            opprettBehandling(steg = StegType.BESLUTTE_VEDTAK, status = BehandlingStatus.FATTER_VEDTAK)
+            opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
+            sendTilBeslutter(SAKSBEHANDLER)
             opprettOppgave(oppgaveType = Oppgavetype.GodkjenneVedtak, sakshandler = SAKSBEHANDLER)
             angreSendTilBeslutter(SAKSBEHANDLER, responseOK())
         }
