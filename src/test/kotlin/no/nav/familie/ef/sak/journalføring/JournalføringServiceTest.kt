@@ -455,7 +455,7 @@ internal class JournalføringServiceTest {
             fullførJournalpost(
                 JournalføringBehandling(
                     ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.ETTERSENDING,
-                    behandlingstype = BehandlingType.REVURDERING,
+                    behandlingstype = BehandlingType.REVURDERING
                 ),
                 VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
             )
