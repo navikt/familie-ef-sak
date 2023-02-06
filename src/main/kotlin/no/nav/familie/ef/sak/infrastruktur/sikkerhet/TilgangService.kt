@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskytte
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.FORTROLIG
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -41,9 +42,11 @@ class TilgangService(
         val tilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
+            secureLogger.warn("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                "har ikke tilgang til $personIdent")
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til $personIdent",
+                    "har ikke tilgang til person",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
         }
@@ -53,9 +56,11 @@ class TilgangService(
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
+            secureLogger.warn("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                "har ikke tilgang til $personIdent eller dets barn")
             throw ManglerTilgang(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til $personIdent eller dets barn",
+                    "har ikke tilgang til person eller dets barn",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
         }
