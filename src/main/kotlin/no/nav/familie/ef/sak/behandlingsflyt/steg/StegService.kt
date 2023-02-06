@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -132,6 +133,18 @@ class StegService(
 
         validerAtStegKanResettes(behandling, steg)
         behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
+    }
+
+    @Transactional
+    fun angreSendTilBeslutter(behandlingId: UUID) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+
+        feilHvis(saksbehandling.steg != StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
+        feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}" }
+
+        behandlingService.oppdaterStegPåBehandling(behandlingId, SEND_TIL_BESLUTTER)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+
     }
 
     private fun validerAtStegKanResettes(

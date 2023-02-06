@@ -18,7 +18,7 @@ import java.util.UUID
 @Service
 class VedtakService(
     private val vedtakRepository: VedtakRepository,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
 
     fun lagreVedtak(vedtakDto: VedtakDto, behandlingId: UUID, stønadstype: StønadType): UUID {

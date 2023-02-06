@@ -21,5 +21,6 @@ enum class Hendelse {
     VEDTAK_IVERKSATT,
     VEDTAK_AVSLÅTT,
     HENLAGT,
-    UKJENT
+    UKJENT,
+    ANGRE_SEND_TIL_BESLUTTER
 }

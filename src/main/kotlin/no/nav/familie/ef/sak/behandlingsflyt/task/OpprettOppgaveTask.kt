@@ -56,6 +56,8 @@ class OpprettOppgaveTask(private val oppgaveService: OppgaveService) : AsyncTask
                 }
             )
         }
+        
+        
 
         const val TYPE = "opprettOppgave"
     }
