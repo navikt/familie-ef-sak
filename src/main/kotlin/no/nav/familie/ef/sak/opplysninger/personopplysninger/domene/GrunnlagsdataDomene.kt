@@ -151,12 +151,12 @@ data class FullmaktMedNavn(
 )
 
 /**
- * @param infotrygdPePp PE PP, infotrygdperioder før desember 2008, som er en del av historisk pensjon
+ * @param historiskPensjon kalles også Infotrygd PE PP, infotrygdperioder før desember 2008
  */
 data class TidligereVedtaksperioder(
     val infotrygd: TidligereInnvilgetVedtak,
     val sak: TidligereInnvilgetVedtak? = null,
-    val infotrygdPePp: Boolean? = null
+    val historiskPensjon: Boolean? = null
 )
 
 data class TidligereInnvilgetVedtak(

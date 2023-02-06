@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
@@ -36,7 +35,7 @@ class TidligereVedaksperioderService(
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
             sak = harTidligereMottattStønadEf(alleIdenter),
-            infotrygdPePp = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata
+            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata
         )
     }
 

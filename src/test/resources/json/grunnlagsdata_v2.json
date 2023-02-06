@@ -1510,8 +1510,8 @@
             },
             "nullable" : true
           },
-          "infotrygdPePp" : {
-            "name" : "infotrygdPePp",
+          "historiskPensjon" : {
+            "name" : "historiskPensjon",
             "type" : "Boolean",
             "nullable" : true
           }
@@ -2173,8 +2173,8 @@
         },
         "nullable" : true
       },
-      "infotrygdPePp" : {
-        "name" : "infotrygdPePp",
+      "historiskPensjon" : {
+        "name" : "historiskPensjon",
         "type" : "Boolean",
         "nullable" : true
       }

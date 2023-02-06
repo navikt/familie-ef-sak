@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVed
 data class TidligereVedtaksperioderDto(
     val infotrygd: TidligereInnvilgetVedtakDto?,
     val sak: TidligereInnvilgetVedtakDto?,
-    val infotrygdPePp: Boolean?
+    val historiskPensjon: Boolean?
 )
 
 data class TidligereInnvilgetVedtakDto(
@@ -19,7 +19,7 @@ fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let 
     TidligereVedtaksperioderDto(
         infotrygd = it.infotrygd.tilDto(),
         sak = it.sak?.tilDto(),
-        infotrygdPePp = it.infotrygdPePp
+        historiskPensjon = it.historiskPensjon
     )
 } ?: TidligereVedtaksperioderDto(null, null, null)
 
