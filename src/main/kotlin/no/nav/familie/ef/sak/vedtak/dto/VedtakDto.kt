@@ -9,8 +9,10 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ef.sak.beregning.Inntekt
 import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
@@ -111,7 +113,9 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
         behandlingId = behandlingId,
         avslåÅrsak = this.avslåÅrsak,
         avslåBegrunnelse = this.avslåBegrunnelse,
-        resultatType = this.resultatType
+        resultatType = this.resultatType,
+        saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+        opprettetTid = SporbarUtils.now()
     )
     is InnvilgelseOvergangsstønad ->
         Vedtak(
@@ -121,7 +125,9 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             resultatType = this.resultatType,
             perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
             inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
-            samordningsfradragType = this.samordningsfradragType
+            samordningsfradragType = this.samordningsfradragType,
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+            opprettetTid = SporbarUtils.now()
         )
     is InnvilgelseBarnetilsyn ->
         Vedtak(
@@ -136,7 +142,9 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
                 harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                 perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
                 begrunnelse = this.tilleggsstønad.begrunnelse
-            )
+            ),
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+            opprettetTid = SporbarUtils.now()
         )
     is InnvilgelseSkolepenger ->
         Vedtak(
@@ -145,7 +153,9 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             skolepenger = SkolepengerWrapper(
                 skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().periode },
                 begrunnelse = this.begrunnelse
-            )
+            ),
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+            opprettetTid = SporbarUtils.now()
         )
     is OpphørSkolepenger -> Vedtak(
         resultatType = this.resultatType,
@@ -153,14 +163,18 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
         skolepenger = SkolepengerWrapper(
             skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() },
             begrunnelse = this.begrunnelse
-        )
+        ),
+        saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+        opprettetTid = SporbarUtils.now()
     )
     is Opphør ->
         Vedtak(
             behandlingId = behandlingId,
             avslåBegrunnelse = begrunnelse,
             resultatType = ResultatType.OPPHØRT,
-            opphørFom = opphørFom
+            opphørFom = opphørFom,
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+            opprettetTid = SporbarUtils.now()
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
@@ -181,7 +195,9 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 behandlingId = behandlingId,
                 perioder = PeriodeWrapper(listOf(vedtaksperiode)),
                 internBegrunnelse = this.internBegrunnelse,
-                resultatType = ResultatType.SANKSJONERE
+                resultatType = ResultatType.SANKSJONERE,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+                opprettetTid = SporbarUtils.now()
             )
         }
         StønadType.BARNETILSYN -> {
@@ -196,7 +212,9 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 behandlingId = behandlingId,
                 barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
                 internBegrunnelse = this.internBegrunnelse,
-                resultatType = ResultatType.SANKSJONERE
+                resultatType = ResultatType.SANKSJONERE,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
+                opprettetTid = SporbarUtils.now()
             )
         }
         StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
