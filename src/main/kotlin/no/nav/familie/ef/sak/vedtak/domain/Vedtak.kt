@@ -39,7 +39,8 @@ data class Vedtak(
     val skolepenger: SkolepengerWrapper? = null,
     val beslutterIdent: String? = null,
     val internBegrunnelse: String? = null,
-    val opprettetTid: LocalDateTime? = null // TODO sett not null default
+    val opprettetTid: LocalDateTime? = null, // TODO sett not null default
+    val opprettetAv: String? = null // TODO sett not null default
 ) {
     fun erVedtakUtenBeslutter(): Boolean =
         resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER

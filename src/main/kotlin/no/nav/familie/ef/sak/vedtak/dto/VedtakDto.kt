@@ -115,7 +115,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
         avslåBegrunnelse = this.avslåBegrunnelse,
         resultatType = this.resultatType,
         saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-        opprettetTid = SporbarUtils.now()
+        opprettetTid = SporbarUtils.now(),
+        opprettetAv = SikkerhetContext.hentSaksbehandler()
     )
     is InnvilgelseOvergangsstønad ->
         Vedtak(
@@ -127,7 +128,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
             samordningsfradragType = this.samordningsfradragType,
             saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-            opprettetTid = SporbarUtils.now()
+            opprettetTid = SporbarUtils.now(),
+            opprettetAv = SikkerhetContext.hentSaksbehandler()
         )
     is InnvilgelseBarnetilsyn ->
         Vedtak(
@@ -144,18 +146,21 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
                 begrunnelse = this.tilleggsstønad.begrunnelse
             ),
             saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-            opprettetTid = SporbarUtils.now()
+            opprettetTid = SporbarUtils.now(),
+            opprettetAv = SikkerhetContext.hentSaksbehandler()
         )
     is InnvilgelseSkolepenger ->
         Vedtak(
             resultatType = this.resultatType,
             behandlingId = behandlingId,
             skolepenger = SkolepengerWrapper(
-                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().periode },
+                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }
+                    .sortedBy { it.perioder.first().periode },
                 begrunnelse = this.begrunnelse
             ),
             saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-            opprettetTid = SporbarUtils.now()
+            opprettetTid = SporbarUtils.now(),
+            opprettetAv = SikkerhetContext.hentSaksbehandler()
         )
     is OpphørSkolepenger -> Vedtak(
         resultatType = this.resultatType,
@@ -165,7 +170,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             begrunnelse = this.begrunnelse
         ),
         saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-        opprettetTid = SporbarUtils.now()
+        opprettetTid = SporbarUtils.now(),
+        opprettetAv = SikkerhetContext.hentSaksbehandler()
     )
     is Opphør ->
         Vedtak(
@@ -174,7 +180,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             resultatType = ResultatType.OPPHØRT,
             opphørFom = opphørFom,
             saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-            opprettetTid = SporbarUtils.now()
+            opprettetTid = SporbarUtils.now(),
+            opprettetAv = SikkerhetContext.hentSaksbehandler()
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
@@ -197,7 +204,8 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE,
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-                opprettetTid = SporbarUtils.now()
+                opprettetTid = SporbarUtils.now(),
+                opprettetAv = SikkerhetContext.hentSaksbehandler()
             )
         }
         StønadType.BARNETILSYN -> {
@@ -214,7 +222,8 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 internBegrunnelse = this.internBegrunnelse,
                 resultatType = ResultatType.SANKSJONERE,
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
-                opprettetTid = SporbarUtils.now()
+                opprettetTid = SporbarUtils.now(),
+                opprettetAv = SikkerhetContext.hentSaksbehandler()
             )
         }
         StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")
