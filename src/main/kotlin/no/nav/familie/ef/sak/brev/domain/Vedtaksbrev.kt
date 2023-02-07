@@ -16,7 +16,8 @@ data class Vedtaksbrev(
     val enhet: String? = null,
     val saksbehandlerident: String,
     val beslutterident: String? = null,
-    val opprettetTid: LocalDateTime? = null
+    val opprettetTid: LocalDateTime? = null,
+    val besluttetTid: LocalDateTime? = null
 )
 
 const val FRITEKST = "fritekst"

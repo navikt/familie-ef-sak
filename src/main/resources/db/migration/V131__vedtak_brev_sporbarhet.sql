@@ -27,6 +27,8 @@ ALTER TABLE vedtak
 ALTER TABLE vedtak
     ALTER COLUMN opprettet_av SET NOT NULL;
 
+-- VEDTAKSBREV
+
 ALTER table vedtaksbrev
     ADD COLUMN opprettet_tid TIMESTAMP(3);
 ALTER TABLE vedtaksbrev
@@ -39,4 +41,11 @@ FROM (SELECT *, row_number() OVER (PARTITION BY behandling_id ORDER BY endret_ti
 WHERE vedtaksbrev.behandling_id = bh.behandling_id
   AND bh.rn = 1;
 
--- Kan ikke sette opprettet_tid på alle vedtaksbrev då flere behandlinger er henlagte eller ikke blitt sendt til totrinnskontroll
+UPDATE vedtaksbrev
+SET besluttet_tid = COALESCE(opprettet_tid, bh.endret_tid)
+FROM (SELECT *, row_number() OVER (PARTITION BY behandling_id ORDER BY endret_tid DESC) rn
+      FROM behandlingshistorikk bh
+      WHERE bh.steg = 'BESLUTTE_VEDTAK' AND bh.utfall = 'BESLUTTE_VEDTAK_GODKJENT') bh
+WHERE vedtaksbrev.behandling_id = bh.behandling_id
+  AND bh.rn = 1;
+
