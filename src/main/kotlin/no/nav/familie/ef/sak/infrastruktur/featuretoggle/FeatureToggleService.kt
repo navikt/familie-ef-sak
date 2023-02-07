@@ -27,8 +27,6 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     PÅ_VENT_NULLSTILL_VEDTAK("familie.ef.sak.paa-vent-nullstill-vedtak"),
 
-    LOGG_WARN_TIMEOUTS("familie.ef.sak.logg-timeout-som-warn"),
-
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),

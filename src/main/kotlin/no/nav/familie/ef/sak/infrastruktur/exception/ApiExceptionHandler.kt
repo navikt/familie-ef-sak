@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -28,20 +28,21 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
         if (mostSpecificCause is SocketTimeoutException || mostSpecificCause is TimeoutException) {
             secureLogger.warn("Timeout feil: ${mostSpecificCause.message}, $metodeSomFeiler ${rootCause(throwable)}", throwable)
             logger.warn("Timeout feil: $metodeSomFeiler ${rootCause(throwable)} ")
-            if (featureToggleService.isEnabled(Toggle.LOGG_WARN_TIMEOUTS)) {
-                return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Ressurs.failure(errorMessage = "Timeout feil", frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen"))
-            }
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(lagTimeoutfeilRessurs())
         }
 
         secureLogger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)}", throwable)
         logger.error("Uventet feil: $metodeSomFeiler ${rootCause(throwable)} ")
 
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .status(INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(errorMessage = "Uventet feil", frontendFeilmelding = "En uventet feil oppstod."))
     }
+
+    private fun lagTimeoutfeilRessurs(): Ressurs<Nothing> = Ressurs.failure(
+        errorMessage = "Timeout feil",
+        frontendFeilmelding = "Kommunikasjonsproblemer med andre systemer - prøv igjen"
+    )
 
     @ExceptionHandler(JwtTokenMissingException::class)
     fun handleJwtTokenMissingException(jwtTokenMissingException: JwtTokenMissingException): ResponseEntity<Ressurs<Nothing>> {
@@ -121,7 +122,7 @@ class ApiExceptionHandler(val featureToggleService: FeatureToggleService) {
     fun handleThrowable(feil: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
         secureLogger.error("Feil mot integrasjonsclienten har oppstått: uri={} data={}", feil.uri, feil.data, feil)
         logger.error("Feil mot integrasjonsclienten har oppstått exception=${rootCause(feil)}")
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
