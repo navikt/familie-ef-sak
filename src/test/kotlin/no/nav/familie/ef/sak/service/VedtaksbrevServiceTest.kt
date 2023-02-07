@@ -327,6 +327,8 @@ internal class VedtaksbrevServiceTest {
         val vedtaksbrevSlot = slot<Vedtaksbrev>()
         every { vedtaksbrevRepository.existsById(any()) } returns true
         every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
+        every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
+        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
         val now = LocalDateTime.now()
         vedtaksbrevService.lagSaksbehandlerSanitybrev(

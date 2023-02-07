@@ -323,7 +323,10 @@ fun vedtak(
         inntektBegrunnelse = "OK",
         avslåBegrunnelse = null,
         perioder = perioder,
-        inntekter = inntekter
+        inntekter = inntekter,
+        saksbehandlerIdent = "VL",
+        opprettetAv = "VL",
+        opprettetTid = LocalDateTime.now()
     )
 
 fun vedtakBarnetilsyn(
@@ -339,7 +342,10 @@ fun vedtakBarnetilsyn(
     resultatType = resultatType,
     barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp, fom = fom, tom = tom)), "begrunnelse"),
     kontantstøtte = kontantstøtteWrapper,
-    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+    saksbehandlerIdent = "VL",
+    opprettetAv = "VL",
+    opprettetTid = LocalDateTime.now()
 )
 
 fun barnetilsynperiode(

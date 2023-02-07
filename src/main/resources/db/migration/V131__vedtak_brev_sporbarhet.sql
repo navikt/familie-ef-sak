@@ -15,7 +15,7 @@ WHERE vedtak.behandling_id = bh.behandling_id
 
 UPDATE vedtak
 SET saksbehandler_ident = COALESCE(saksbehandler_ident, b.opprettet_av),
-    opprettet_tid       = COALESCE(opprettet_tid, b.vedtakstidspunkt),
+    opprettet_tid       = COALESCE(vedtak.opprettet_tid, b.vedtakstidspunkt),
     opprettet_av        = b.opprettet_av
 FROM (SELECT * FROM behandling WHERE arsak IN ('MIGRERING', 'G_OMREGNING')) b
 WHERE vedtak.behandling_id = b.id;
