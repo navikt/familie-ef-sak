@@ -29,7 +29,8 @@ import java.util.UUID
 class VilkårGrunnlagService(
     private val medlemskapMapper: MedlemskapMapper,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
+    private val barnMedsamværMapper: BarnMedSamværMapper
 ) {
 
     fun hentGrunnlag(
@@ -79,7 +80,7 @@ class VilkårGrunnlagService(
         søknadsbarn: Collection<SøknadBarn>,
         stønadstype: StønadType
     ): List<BarnMedSamværDto> {
-        val barnMedSamværRegistergrunnlag = BarnMedSamværMapper.mapRegistergrunnlag(
+        val barnMedSamværRegistergrunnlag = barnMedsamværMapper.mapRegistergrunnlag(
             personIdentSøker,
             grunnlagsdata.barn,
             grunnlagsdata.annenForelder,
@@ -87,12 +88,12 @@ class VilkårGrunnlagService(
             søknadsbarn,
             grunnlagsdata.søker.bostedsadresse
         )
-        val søknadsgrunnlag = BarnMedSamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
+        val søknadsgrunnlag = barnMedsamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
         val barnepass: List<BarnepassDto> = when (stønadstype) {
-            StønadType.BARNETILSYN -> BarnMedSamværMapper.mapBarnepass(barn, søknadsbarn)
+            StønadType.BARNETILSYN -> barnMedsamværMapper.mapBarnepass(barn, søknadsbarn)
             else -> emptyList()
         }
-        return BarnMedSamværMapper
+        return barnMedsamværMapper
             .slåSammenBarnMedSamvær(søknadsgrunnlag, barnMedSamværRegistergrunnlag, barnepass)
             .sortedByDescending {
                 it.registergrunnlag.fødselsnummer?.let { fødsesnummer -> Fødselsnummer(fødsesnummer).fødselsdato }

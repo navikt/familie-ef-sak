@@ -57,8 +57,8 @@ object UtledEndringerUtil {
     )
 
     private val annenForelderEndringer: List<PersonendringDetaljerFn<AnnenForelderMinimumDto>> = listOf(
-        // TODO gjeldende adresse?
-        formatterEndring(AnnenForelderMinimumDto::dødsdato, "Dødsdato")
+        formatterEndring(AnnenForelderMinimumDto::dødsdato, "Dødsdato"),
+        formatterEndring(AnnenForelderMinimumDto::bostedsadresse, "Bostedsadresse")
     )
 
     private fun utledEndringerBarn(
@@ -84,11 +84,11 @@ object UtledEndringerUtil {
         val tidligerePåIdent = tidligere.associateBy { ident(it) }
         val nyePåIdent = nye.associateBy { ident(it) }
 
-        val endringerPåNye = nyePåIdent.mapNotNull { (ident, nyttBarn) ->
-            val tidligereBarn = tidligerePåIdent[ident]
-            if (tidligereBarn != null) {
+        val endringerPåNye = nyePåIdent.mapNotNull { (ident, nyPerson) ->
+            val tidligerePerson = tidligerePåIdent[ident]
+            if (tidligerePerson != null) {
                 endringer
-                    .mapNotNull { it(tidligereBarn, nyttBarn) }
+                    .mapNotNull { it(tidligerePerson, nyPerson) }
                     .takeIf { it.isNotEmpty() }
                     ?.let { Personendring(ident, it) }
             } else {
@@ -103,7 +103,7 @@ object UtledEndringerUtil {
     }
 
     /**
-     * @return en funksjon som tar inn tidligere og nytt barn
+     * @return en funksjon som tar inn tidligere og ny person
      * Funksjonen returnerer en verdi hvis det er en endring, og null hvis ikke
      */
     private fun <T, VERDI : Any> formatterEndring(
