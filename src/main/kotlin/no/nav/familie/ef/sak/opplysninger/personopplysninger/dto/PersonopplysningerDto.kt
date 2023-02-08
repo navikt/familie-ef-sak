@@ -52,7 +52,8 @@ data class BarnMinimumDto(
 data class AnnenForelderMinimumDto(
     val personIdent: String,
     val navn: String,
-    val dødsdato: LocalDate?
+    val dødsdato: LocalDate?,
+    val bostedsadresse: String?
 )
 
 data class TelefonnummerDto(
