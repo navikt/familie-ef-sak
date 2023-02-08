@@ -12,5 +12,7 @@ enum class FrittståendeBrevKategori(val frittståendeBrevType: FrittståendeBre
     BREV_OM_SVARTID_KLAGE(frittståendeBrevType = FrittståendeBrevType.BREV_OM_SVARTID_KLAGE),
     BREV_OM_FORLENGET_SVARTID(frittståendeBrevType = FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID),
     BREV_OM_FORLENGET_SVARTID_KLAGE(frittståendeBrevType = FrittståendeBrevType.BREV_OM_FORLENGET_SVARTID_KLAGE),
-    INFORMASJONSBREV_TRUKKET_SØKNAD(frittståendeBrevType = FrittståendeBrevType.INFORMASJONSBREV_TRUKKET_SØKNAD)
+    INFORMASJONSBREV_TRUKKET_SØKNAD(frittståendeBrevType = FrittståendeBrevType.INFORMASJONSBREV_TRUKKET_SØKNAD),
+    VARSEL_UTESTENGELSE(frittståendeBrevType = FrittståendeBrevType.VARSEL_UTESTENGELSE),
+    VEDTAK_UTESTENGELSE(frittståendeBrevType = FrittståendeBrevType.VEDTAK_UTESTENGELSE)
 }
