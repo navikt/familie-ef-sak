@@ -71,7 +71,6 @@ object GrunnlagsdataMapper {
         opphold = pdlSøker.opphold,
         oppholdsadresse = pdlSøker.oppholdsadresse,
         statsborgerskap = pdlSøker.statsborgerskap,
-        telefonnummer = pdlSøker.telefonnummer,
         tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
         utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
         vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner),

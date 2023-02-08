@@ -109,7 +109,6 @@ data class PdlSøker(
     val oppholdsadresse: List<Oppholdsadresse>,
     val sivilstand: List<Sivilstand>,
     val statsborgerskap: List<Statsborgerskap>,
-    val telefonnummer: List<Telefonnummer>,
     val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
@@ -370,12 +369,6 @@ data class Personnavn(
     val etternavn: String,
     val fornavn: String,
     val mellomnavn: String?
-)
-
-data class Telefonnummer(
-    val landskode: String,
-    val nummer: String,
-    val prioritet: Int
 )
 
 data class TilrettelagtKommunikasjon(
