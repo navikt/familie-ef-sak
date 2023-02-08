@@ -85,7 +85,7 @@ class AngreSendTilBeslutterService(
             oppgavetype = Oppgavetype.GodkjenneVedtak,
             saksbehandling = saksbehandling
         )
-            ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Denne må opprettes før man kan angre send til beslutter. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
 
         val tilordnetRessurs = oppgaveService.hentOppgave(efOppgave.gsakOppgaveId).tilordnetRessurs
         val oppgaveErTilordnetEnAnnenSaksbehandler =
