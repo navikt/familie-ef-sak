@@ -21,7 +21,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST,
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
-        Toggle.FØRSTEGANGSBEHANDLING,
         Toggle.PERSONOPPLYSNINGER_ENDRINGER,
         Toggle.ANGRE_SEND_TIL_BESLUTTER
     )
