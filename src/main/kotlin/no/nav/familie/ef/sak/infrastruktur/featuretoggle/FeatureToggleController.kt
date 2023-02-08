@@ -23,7 +23,6 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FØRSTEGANGSBEHANDLING,
         Toggle.PERSONOPPLYSNINGER_ENDRINGER,
-        Toggle.ANGRE_SEND_TIL_BESLUTTER
     )
 
     @GetMapping

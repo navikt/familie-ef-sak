@@ -33,8 +33,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     FØRSTEGANGSBEHANDLING("familie.ef.sak.opprett-forstegangsbehandling"),
     AUTOMATISK_JOURNALFØR_REVURDERING("familie.ef.sak.automatisk-journalfor-revurdering"),
     HISTORISK_PENSJON("familie.ef.sak.historisk-pensjon"),
-    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer"),
-    ANGRE_SEND_TIL_BESLUTTER("familie.ef.sak.frontend-angre-send-til-beslutter");
+    PERSONOPPLYSNINGER_ENDRINGER("familie.ef.sak.frontend.personopplysninger-endringer");
 
     companion object {
         private val toggles: Map<String, Toggle> = values().associateBy { it.name }
