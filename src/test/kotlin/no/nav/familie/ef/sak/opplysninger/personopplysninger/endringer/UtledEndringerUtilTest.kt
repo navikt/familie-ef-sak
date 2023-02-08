@@ -483,7 +483,6 @@ internal class UtledEndringerUtilTest {
         folkeregisterpersonstatus = status,
         fødselsdato = fødselsdato,
         dødsdato = dødsdato,
-        telefonnummer = null,
         statsborgerskap = statsborgerskap,
         sivilstand = sivilstand,
         adresse = adresse,

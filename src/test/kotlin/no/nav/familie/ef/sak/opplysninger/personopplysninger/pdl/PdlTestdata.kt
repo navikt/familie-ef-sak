@@ -141,7 +141,6 @@ object PdlTestdata {
                     )
                 ),
                 statsborgerskap,
-                listOf(Telefonnummer("", "", 1)),
                 listOf(TilrettelagtKommunikasjon(Tolk(""), Tolk(""))),
                 innflyttingTilNorge,
                 utflyttingFraNorge,

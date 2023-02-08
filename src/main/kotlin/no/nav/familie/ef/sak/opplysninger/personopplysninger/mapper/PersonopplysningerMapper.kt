@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
@@ -53,8 +52,6 @@ class PersonopplysningerMapper(
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
             personIdent = gjeldendePersonIdent,
-            telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
-                ?.let { TelefonnummerDto(it.landskode, it.nummer) },
             statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
             sivilstand = søker.sivilstand.map {
                 SivilstandDto(

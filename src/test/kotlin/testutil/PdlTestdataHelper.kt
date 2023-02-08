@@ -22,7 +22,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForeld
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
@@ -65,7 +64,6 @@ object PdlTestdataHelper {
         oppholdsadresse: List<Oppholdsadresse> = emptyList(),
         sivilstand: List<Sivilstand> = emptyList(),
         statsborgerskap: List<Statsborgerskap> = emptyList(),
-        telefonnummer: List<Telefonnummer> = emptyList(),
         tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon> = emptyList(),
         innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
         utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList(),
@@ -88,7 +86,6 @@ object PdlTestdataHelper {
             oppholdsadresse,
             sivilstand,
             statsborgerskap,
-            telefonnummer,
             tilrettelagtKommunikasjon,
             innflyttingTilNorge,
             utflyttingFraNorge,
