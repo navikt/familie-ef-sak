@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.opplysninger.mapper.barnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -56,7 +57,8 @@ internal class VilkårGrunnlagServiceTest {
         mockk()
     )
 
-    private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService, fagsakService)
+    private val service =
+        VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService, fagsakService, barnMedSamværMapper())
     private val behandling = behandling(fagsak())
     private val behandlingId = behandling.id
 

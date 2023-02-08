@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -20,8 +21,12 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassordningDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import org.springframework.stereotype.Service
 
-object BarnMedSamværMapper {
+@Service
+class BarnMedSamværMapper(
+    private val adresseMapper: AdresseMapper,
+) {
 
     fun slåSammenBarnMedSamvær(
         søknadsgrunnlag: List<BarnMedSamværSøknadsgrunnlagDto>,
@@ -152,6 +157,7 @@ object BarnMedSamværMapper {
             fødselsdato = annenForelder.person?.fødselsdato,
             bosattINorge = annenForelder.bosattNorge,
             land = annenForelder.land,
+            visningsadresse = null,
             avstandTilSøker = AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
         )
     }
@@ -168,10 +174,16 @@ object BarnMedSamværMapper {
             dødsfall = pdlAnnenForelder.dødsfall.gjeldende()?.dødsdato,
             bosattINorge = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.let { false } ?: true,
             land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode,
+            visningsadresse = visningsadresse(pdlAnnenForelder),
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
             avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende())
         )
     }
+
+    private fun visningsadresse(pdlAnnenForelder: AnnenForelderMedIdent): String? =
+        pdlAnnenForelder.bostedsadresse.gjeldende()
+            ?.let { adresseMapper.tilAdresse(it).visningsadresse }
+
     private fun langAvstandTilSøker(
         søkerAdresse: List<Bostedsadresse>,
         bostedsadresse: Bostedsadresse?
