@@ -46,7 +46,6 @@ import no.nav.familie.kontrakter.felles.erSammenhengende
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -102,7 +101,6 @@ class BeregnYtelseSteg(
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
             is Opphør -> {
-                validerStartTidEtterSanksjon(data.opphørFom, saksbehandlingMedOppdatertIdent)
                 opprettTilkjentYtelseForOpphørtBehandling(saksbehandlingMedOppdatertIdent, data)
                 simuleringService.hentOgLagreSimuleringsresultat(saksbehandlingMedOppdatertIdent)
             }
@@ -153,20 +151,6 @@ class BeregnYtelseSteg(
         feilHvis(nySanksjonsperiodeUtenTreff != null) {
             logger.error("Ny sanksjonsperiode uten treff=$nySanksjonsperiodeUtenTreff historikk=$historiskeSanksjonsperioder")
             "Nye eller endrede sanksjonsperioder ($nySanksjonsperiodeUtenTreff) som ikke finnes i historikken"
-        }
-    }
-
-    private fun validerStartTidEtterSanksjon(vedtakFom: YearMonth, behandling: Saksbehandling) {
-        val nyesteSanksjonsperiode = andelsHistorikkService.hentHistorikk(behandling.fagsakId, null)
-            .filter { it.erAktivVedtaksperiode() }
-            .lastOrNull {
-                it.periodeType == VedtaksperiodeType.SANKSJON ||
-                    it.periodetypeBarnetilsyn == PeriodetypeBarnetilsyn.SANKSJON_1_MND
-            }
-        nyesteSanksjonsperiode?.andel?.stønadFra?.let { sanksjonsdato ->
-            feilHvis(sanksjonsdato >= vedtakFom.atDay(1)) {
-                "Systemet støtter ikke revurdering før sanksjonsperioden. Kontakt brukerstøtte for videre bistand"
-            }
         }
     }
 

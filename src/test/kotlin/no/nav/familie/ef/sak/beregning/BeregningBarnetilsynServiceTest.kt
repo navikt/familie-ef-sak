@@ -56,6 +56,18 @@ class BeregningBarnetilsynServiceTest {
         every { featureToggleService.isEnabled(any()) } returns false
     }
 
+    @Test
+    internal fun yolo() {
+        val utgiftsperiode =
+            listeMedEnUtgiftsperiode(fra = YearMonth.of(2023, 2), til = YearMonth.of(2023, 6), beløp = 2344)
+        val kontantstøtteperiodeStarterForTidlig = service.beregnYtelseBarnetilsyn(
+            utgiftsperioder = utgiftsperiode,
+            kontantstøttePerioder = emptyList(),
+            tilleggsstønadsperioder = listOf()
+        )
+        println()
+    }
+
     @Nested
     inner class BeregningBarnetilsynValidering {
 
@@ -176,7 +188,8 @@ class BeregningBarnetilsynServiceTest {
 
         @Test
         fun `Skal kaste brukerfeil hvis kontantstøtteperioder er overlappende`() {
-            val overlappende = listeMedEnPeriodeMedBeløp(januar2022, april2022) + listeMedEnPeriodeMedBeløp(april2022, april2022)
+            val overlappende =
+                listeMedEnPeriodeMedBeløp(januar2022, april2022) + listeMedEnPeriodeMedBeløp(april2022, april2022)
 
             val feil = assertThrows<ApiFeil> {
                 service.beregnYtelseBarnetilsyn(
@@ -204,8 +217,12 @@ class BeregningBarnetilsynServiceTest {
 
         @Test
         internal fun `Skal kaste feil dersom aktivitetstype ikke er valgt og periodetype ikke er opphør eller sanksjon`() {
-            val utgiftsperioder = listeMedEnUtgiftsperiode(aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, periodetype = PeriodetypeBarnetilsyn.ORDINÆR) +
-                listeMedEnUtgiftsperiode(fra = mars2022, til = april2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = null)
+            val utgiftsperioder = listeMedEnUtgiftsperiode(aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR) +
+                listeMedEnUtgiftsperiode(fra = mars2022,
+                    til = april2022,
+                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                    aktivitetstype = null)
             val ugyldigUtgiftsperiode = assertThrows<ApiFeil> {
                 service.beregnYtelseBarnetilsyn(
                     utgiftsperioder = utgiftsperioder,
@@ -298,7 +315,10 @@ class BeregningBarnetilsynServiceTest {
         val perioder = listOf(periode1, periode2)
 
         val kontantStøtteperiodeJanuar =
-            PeriodeMedBeløpDto(årMånedFra = juli2022, årMånedTil = august2022, Månedsperiode(juli2022, august2022), beløp = 10)
+            PeriodeMedBeløpDto(årMånedFra = juli2022,
+                årMånedTil = august2022,
+                Månedsperiode(juli2022, august2022),
+                beløp = 10)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = perioder,
@@ -353,7 +373,10 @@ class BeregningBarnetilsynServiceTest {
             beløp = 10
         )
         val kontantStøtteperiodeApril =
-            PeriodeMedBeløpDto(årMånedFra = april2022, årMånedTil = april2022, Månedsperiode(april2022, april2022), beløp = 10)
+            PeriodeMedBeløpDto(årMånedFra = april2022,
+                årMånedTil = april2022,
+                Månedsperiode(april2022, april2022),
+                beløp = 10)
         val kontantStøtteperiodeAugust = PeriodeMedBeløpDto(
             årMånedFra = august2022,
             årMånedTil = august2022,
@@ -564,9 +587,21 @@ class BeregningBarnetilsynServiceTest {
     fun `Skal lage tre utgiftsperioder når etterfølgende perioder differ på periodetype`() {
         val barnUUID = listOf(UUID.randomUUID())
         val utgiftsperioder =
-            listeMedEnUtgiftsperiode(fra = januar2022, til = mars2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID) +
-                listeMedEnUtgiftsperiode(fra = april2022, til = juli2022, periodetype = PeriodetypeBarnetilsyn.OPPHØR, aktivitetstype = null, barn = barnUUID) +
-                listeMedEnUtgiftsperiode(fra = august2022, til = desember2022, periodetype = PeriodetypeBarnetilsyn.ORDINÆR, aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID, barn = barnUUID)
+            listeMedEnUtgiftsperiode(fra = januar2022,
+                til = mars2022,
+                periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                barn = barnUUID) +
+                listeMedEnUtgiftsperiode(fra = april2022,
+                    til = juli2022,
+                    periodetype = PeriodetypeBarnetilsyn.OPPHØR,
+                    aktivitetstype = null,
+                    barn = barnUUID) +
+                listeMedEnUtgiftsperiode(fra = august2022,
+                    til = desember2022,
+                    periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                    aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    barn = barnUUID)
 
         val beregnYtelseBarnetilsyn = service.beregnYtelseBarnetilsyn(
             utgiftsperioder = utgiftsperioder,
@@ -580,7 +615,7 @@ class BeregningBarnetilsynServiceTest {
     private fun lagBeløpsperiode(
         fraDato: LocalDate,
         tilDato: LocalDate,
-        beløp: BigDecimal = BigDecimal(100)
+        beløp: BigDecimal = BigDecimal(100),
     ): BeløpsperiodeBarnetilsynDto {
         return BeløpsperiodeBarnetilsynDto(
             periode = Månedsperiode(fraDato, tilDato),
@@ -602,7 +637,7 @@ class BeregningBarnetilsynServiceTest {
     private fun listeMedEnPeriodeMedBeløp(
         fra: YearMonth = januar2022,
         til: YearMonth = februar2022,
-        beløp: Int = 10
+        beløp: Int = 10,
     ): List<PeriodeMedBeløpDto> {
         return listOf(
             PeriodeMedBeløpDto(
@@ -620,7 +655,7 @@ class BeregningBarnetilsynServiceTest {
         beløp: Int = 10,
         periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
         aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID,
-        barn: List<UUID>? = null
+        barn: List<UUID>? = null,
     ): List<UtgiftsperiodeDto> {
         return listOf(
             UtgiftsperiodeDto(
