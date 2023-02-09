@@ -12,11 +12,13 @@ import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandsplanerDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.VilkårRegistergrunnlagDto
 import java.time.LocalDateTime
 
 object VilkårTestUtil {
 
     fun mockVilkårGrunnlagDto(
+        registergrunnlag: VilkårRegistergrunnlagDto = mockk(relaxed = true),
         tidligereVedtaksperioder: TidligereVedtaksperioderDto = mockk(relaxed = true),
         medlemskap: MedlemskapDto = mockk(relaxed = true),
         sivilstand: SivilstandInngangsvilkårDto = mockk(relaxed = true),
@@ -30,6 +32,7 @@ object VilkårTestUtil {
         dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true)
     ) =
         VilkårGrunnlagDto(
+            registergrunnlag = registergrunnlag,
             tidligereVedtaksperioder = tidligereVedtaksperioder,
             medlemskap = medlemskap,
             sivilstand = sivilstand,
