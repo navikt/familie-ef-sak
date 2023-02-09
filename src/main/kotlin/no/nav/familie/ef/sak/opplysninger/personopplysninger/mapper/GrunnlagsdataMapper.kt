@@ -77,7 +77,7 @@ object GrunnlagsdataMapper {
         folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator)
     )
 
-    private fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) =
+    fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) =
         list.map { Folkeregisteridentifikator(it.ident, it.status, it.metadata.historisk) }
 
     private fun List<ForelderBarnRelasjonPdl>.mapForelderBarnRelasjon() =
