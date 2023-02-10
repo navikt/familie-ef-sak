@@ -7,12 +7,12 @@ import no.nav.familie.ef.sak.vilkår.dto.AktivitetDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BosituasjonDto
 import no.nav.familie.ef.sak.vilkår.dto.MedlemskapDto
+import no.nav.familie.ef.sak.vilkår.dto.PersonaliaDto
 import no.nav.familie.ef.sak.vilkår.dto.SagtOppEllerRedusertStillingDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandInngangsvilkårDto
 import no.nav.familie.ef.sak.vilkår.dto.SivilstandsplanerDto
 import no.nav.familie.ef.sak.vilkår.dto.TidligereVedtaksperioderDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.vilkår.dto.PersonaliaDto
 import java.time.LocalDateTime
 
 object VilkårTestUtil {

@@ -6,14 +6,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.webflux.builder.NaisProxyCustomizer
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.postForEntity
@@ -25,15 +22,7 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var restTemplateBuilder: RestTemplateBuilder
 
-    @Autowired
-    private lateinit var naisProxyCustomizer: ObjectProvider<NaisProxyCustomizer>
-
     data class TestDto(val dato: LocalDate = LocalDate.of(2020, 1, 1))
-
-    @Test
-    internal fun `skal ikke sette opp naisProxyCostumizer`() {
-        assertThat(naisProxyCustomizer.ifAvailable).isNull()
-    }
 
     @Test
     internal fun `default restTemplateBuilder skal sende datoer som iso`() {

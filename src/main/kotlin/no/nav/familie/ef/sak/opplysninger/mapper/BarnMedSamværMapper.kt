@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class BarnMedSamværMapper(
-    private val adresseMapper: AdresseMapper,
+    private val adresseMapper: AdresseMapper
 ) {
 
     fun slåSammenBarnMedSamvær(
