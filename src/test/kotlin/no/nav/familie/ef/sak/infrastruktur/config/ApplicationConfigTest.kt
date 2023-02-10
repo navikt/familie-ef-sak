@@ -6,7 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
-import no.nav.familie.webflux.builder.FAMILIE_WEB_CLIENT_BUILDER
 import no.nav.familie.webflux.builder.NaisProxyCustomizer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -16,11 +15,8 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.postForEntity
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.LocalDate
 
 @Disabled
@@ -28,10 +24,6 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var restTemplateBuilder: RestTemplateBuilder
-
-    @Autowired
-    @Qualifier(FAMILIE_WEB_CLIENT_BUILDER)
-    private lateinit var familieWebClientBuilder: WebClient.Builder
 
     @Autowired
     private lateinit var naisProxyCustomizer: ObjectProvider<NaisProxyCustomizer>
@@ -52,40 +44,6 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
             postRequestedFor(WireMock.anyUrl())
                 .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """))
         )
-    }
-
-    @Test
-    internal fun `default webClient skal sende datoer som iso`() {
-        wiremockServerItem.stubFor(WireMock.post(WireMock.anyUrl()).willReturn(WireMock.ok()))
-        val build = familieWebClientBuilder.build()
-        val response = build
-            .post()
-            .uri("http://localhost:${wiremockServerItem.port()}")
-            .bodyValue(TestDto())
-            .retrieve()
-            .bodyToMono<String>()
-            .block()
-
-        wiremockServerItem.verify(
-            postRequestedFor(WireMock.anyUrl())
-                .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """))
-        )
-    }
-
-    @Test
-    internal fun `default webClient skal kunne ta imot stor request`() {
-        val fil = this::class.java.classLoader.getResource("dummy/image.jpg").readText()
-        val mockResponse = WireMock.okJson(fil)
-        wiremockServerItem.stubFor(WireMock.post(WireMock.anyUrl()).willReturn(mockResponse))
-        val build = familieWebClientBuilder.build()
-
-        val response = build
-            .post()
-            .uri("http://localhost:${wiremockServerItem.port()}")
-            .bodyValue(TestDto())
-            .retrieve()
-            .bodyToMono<String>()
-            .block()
     }
 
     companion object {

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.amelding.ekstern
 
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.http.AbstractRestWebClient
+import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -9,7 +8,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.time.YearMonth
@@ -17,10 +15,8 @@ import java.time.YearMonth
 @Component
 class AMeldingInntektClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
-    @Qualifier("azure") restOperations: RestOperations,
-    @Qualifier("azureWebClient") webClient: WebClient,
-    featureToggleService: FeatureToggleService
-) : AbstractRestWebClient(restOperations, webClient, "inntekt", featureToggleService) {
+    @Qualifier("azure") restOperations: RestOperations
+) : AbstractRestClient(restOperations, "inntekt") {
 
     private fun lagInntektUri(fom: YearMonth, tom: YearMonth) =
         UriComponentsBuilder.fromUri(uri).pathSegment("api/inntekt")
