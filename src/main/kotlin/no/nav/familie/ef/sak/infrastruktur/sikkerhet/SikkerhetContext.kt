@@ -37,29 +37,22 @@ object SikkerhetContext {
     }
 
     fun hentSaksbehandler(): String {
-        val result = Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-            .fold(
-                onSuccess = {
-                    it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
-                },
-                onFailure = { SYSTEM_FORKORTELSE }
-            )
+        val result = hentSaksbehandlerEllerSystembruker()
+
         if (result == SYSTEM_FORKORTELSE) {
             error("Finner ikke NAVident i token")
         }
         return result
     }
 
-    fun hentSaksbehandlerEllerSystembruker(): String {
-        val result = Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+    fun hentSaksbehandlerEllerSystembruker() =
+        Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = {
                     it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
                 },
                 onFailure = { SYSTEM_FORKORTELSE }
             )
-        return result
-    }
 
     fun hentSaksbehandlerNavn(strict: Boolean = false): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
