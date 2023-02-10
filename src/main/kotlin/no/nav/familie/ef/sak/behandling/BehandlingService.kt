@@ -166,7 +166,7 @@ class BehandlingService(
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer status på behandling $behandlingId " +
                 "fra ${behandling.status} til $status"
         )
         return behandlingRepository.update(behandling.copy(status = status))
@@ -178,7 +178,7 @@ class BehandlingService(
             "Kan ikke endre forrigeBehandlingId når behandlingen er låst"
         }
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandler()} endrer forrigeBehandlingId på behandling $behandlingId " +
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer forrigeBehandlingId på behandling $behandlingId " +
                 "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId"
         )
         return behandlingRepository.update(behandling.copy(forrigeBehandlingId = forrigeBehandlingId))
@@ -187,7 +187,7 @@ class BehandlingService(
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer steg på behandling $behandlingId " +
                 "fra ${behandling.steg} til $steg"
         )
         return behandlingRepository.update(behandling.copy(steg = steg))
@@ -241,7 +241,7 @@ class BehandlingService(
             BehandlingsstatistikkTask.opprettHenlagtTask(
                 behandlingId = behandling.id,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
             )
         )
     }

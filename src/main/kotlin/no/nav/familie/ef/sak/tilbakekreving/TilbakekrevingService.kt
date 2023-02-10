@@ -92,7 +92,7 @@ class TilbakekrevingService(
             ytelsestype = Ytelsestype.valueOf(saksbehandling.stønadstype.name),
             behandlendeEnhetId = navEnhet?.enhetId ?: MASKINELL_JOURNALFOERENDE_ENHET,
             behandlendeEnhetsNavn = navEnhet?.enhetNavn ?: "Ukjent",
-            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(strict = true),
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(),
             språkkode = Språkkode.NB,
             vedtaksdato = LocalDate.now(),
             feilutbetaltePerioderDto = feilutbetaltePerioderDto,

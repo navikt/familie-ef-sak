@@ -52,7 +52,7 @@ class FørstegangsbehandlingService(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = behandling.id,
-                    saksbehandler = SikkerhetContext.hentSaksbehandler(true),
+                    saksbehandler = SikkerhetContext.hentSaksbehandler(),
                     beskrivelse = "Førstegangsbehandling - manuelt opprettet"
                 )
             )

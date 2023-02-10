@@ -17,7 +17,7 @@ class HistoriskPensjonService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     @Qualifier("longCache")
-    private val cacheManager: CacheManager,
+    private val cacheManager: CacheManager
 ) {
 
     fun hentHistoriskPensjon(fagsakPersonId: UUID): HistoriskPensjonResponse {
@@ -35,7 +35,7 @@ class HistoriskPensjonService(
 
     fun hentHistoriskPensjon(
         aktivIdent: String,
-        identer: Set<String>,
+        identer: Set<String>
     ): HistoriskPensjonResponse {
         return cacheManager.getValue("historiskPensjon", aktivIdent) {
             historiskPensjonClient.harPensjon(aktivIdent, identer)
@@ -46,5 +46,5 @@ class HistoriskPensjonService(
 data class HistoriskPensjonResponse(val harPensjonsdata: Boolean, val webAppUrl: String)
 data class EnsligForsoergerRequest(
     val aktivtFoedselsnummer: String,
-    val alleRelaterteFoedselsnummer: Set<String>,
+    val alleRelaterteFoedselsnummer: Set<String>
 )

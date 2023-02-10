@@ -15,7 +15,7 @@ data class FagsakPerson(
     val id: UUID = UUID.randomUUID(),
     @MappedCollection(idColumn = "fagsak_person_id")
     val identer: Set<PersonIdent>,
-    val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
     val opprettetTid: LocalDateTime = SporbarUtils.now()
 ) {
 

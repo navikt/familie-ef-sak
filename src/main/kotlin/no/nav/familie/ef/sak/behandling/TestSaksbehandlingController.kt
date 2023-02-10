@@ -178,7 +178,7 @@ class TestSaksbehandlingController(
             val oppgaveId = oppgaveService.opprettOppgave(
                 behandling.id,
                 Oppgavetype.BehandleSak,
-                SikkerhetContext.hentSaksbehandler(true),
+                SikkerhetContext.hentSaksbehandler(),
                 "Dummy-oppgave opprettet i ny løsning"
             )
             taskService.save(

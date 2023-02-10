@@ -42,10 +42,12 @@ class TilgangService(
         val tilgang = personopplysningerIntegrasjonerClient.sjekkTilgangTilPerson(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
-            secureLogger.warn("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                "har ikke tilgang til $personIdent")
+            secureLogger.warn(
+                "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                    "har ikke tilgang til $personIdent"
+            )
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til person",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
@@ -56,10 +58,12 @@ class TilgangService(
         val tilgang = harTilgangTilPersonMedRelasjoner(personIdent)
         auditLogger.log(Sporingsdata(event, personIdent, tilgang))
         if (!tilgang.harTilgang) {
-            secureLogger.warn("Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                "har ikke tilgang til $personIdent eller dets barn")
+            secureLogger.warn(
+                "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
+                    "har ikke tilgang til $personIdent eller dets barn"
+            )
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til person eller dets barn",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
@@ -81,7 +85,7 @@ class TilgangService(
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til behandling=$behandlingId",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
@@ -100,7 +104,7 @@ class TilgangService(
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til behandling=${saksbehandling.id}",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
@@ -115,7 +119,7 @@ class TilgangService(
         auditLogger.log(Sporingsdata(event, personIdent, tilgang, custom1 = CustomKeyValue("fagsak", fagsakId.toString())))
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til fagsak=$fagsakId",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
@@ -144,7 +148,7 @@ class TilgangService(
         )
         if (!tilgang.harTilgang) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} " +
                     "har ikke tilgang til fagsakPerson=$fagsakPersonId",
                 frontendFeilmelding = "Mangler tilgang til opplysningene. ${tilgang.utledÅrsakstekst()}"
             )
@@ -168,7 +172,7 @@ class TilgangService(
     fun validerTilgangTilRolle(minimumsrolle: BehandlerRolle) {
         if (!harTilgangTilRolle(minimumsrolle)) {
             throw ManglerTilgang(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang " +
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} har ikke tilgang " +
                     "til å utføre denne operasjonen som krever minimumsrolle $minimumsrolle",
                 frontendFeilmelding = "Mangler nødvendig saksbehandlerrolle for å utføre handlingen"
             )
@@ -207,12 +211,12 @@ class TilgangService(
      */
     private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Tilgang): Tilgang {
         val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
-        return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler(true))) {
+        return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
             hentVerdi()
         } ?: error("Finner ikke verdi fra cache=$cacheName")
     }
 
     fun validerSaksbehandler(saksbehandler: String): Boolean {
-        return SikkerhetContext.hentSaksbehandler() == saksbehandler
+        return SikkerhetContext.hentSaksbehandlerEllerSystembruker() == saksbehandler
     }
 }

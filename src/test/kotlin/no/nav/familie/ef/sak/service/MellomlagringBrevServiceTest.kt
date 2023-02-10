@@ -42,7 +42,7 @@ internal class MellomlagringBrevServiceTest {
     @BeforeAll
     fun setUp() {
         mockkObject(SikkerhetContext)
-        every { SikkerhetContext.hentSaksbehandler(true) } returns "bob"
+        every { SikkerhetContext.hentSaksbehandler() } returns "bob"
     }
 
     @AfterAll

@@ -42,7 +42,7 @@ internal class BehandlingshistorikkServiceTest : OppslagSpringRunnerTest() {
                     behandlingId = behandling.id,
                     steg = behandling.steg,
                     opprettetAvNavn = "Saksbehandlernavn",
-                    opprettetAv = SikkerhetContext.hentSaksbehandler()
+                    opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
                 )
             )
         val hendelseshistorikkDto = behandlingHistorikk.tilHendelseshistorikkDto(saksbehandling(fagsak, behandling))

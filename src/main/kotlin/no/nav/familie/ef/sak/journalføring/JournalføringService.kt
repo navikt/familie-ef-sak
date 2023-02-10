@@ -76,7 +76,7 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest,
         journalpost: Journalpost
     ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         logger.info(
@@ -99,7 +99,7 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest,
         journalpost: Journalpost
     ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
@@ -163,7 +163,7 @@ class JournalføringService(
         opprettBehandleSakOppgaveTask(
             OpprettOppgaveTaskData(
                 behandlingId = behandling.id,
-                saksbehandler = SikkerhetContext.hentSaksbehandler(),
+                saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
                 beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE,
                 mappeId = mappeId
             )
@@ -179,7 +179,7 @@ class JournalføringService(
         journalføringRequest: JournalføringTilNyBehandlingRequest,
         journalpostId: String
     ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         brukerfeilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
             "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
