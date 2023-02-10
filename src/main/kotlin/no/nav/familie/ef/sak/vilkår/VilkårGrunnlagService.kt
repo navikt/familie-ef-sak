@@ -19,7 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
-import no.nav.familie.ef.sak.vilkår.dto.VilkårRegistergrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.PersonaliaDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -64,7 +64,7 @@ class VilkårGrunnlagService(
         val sagtOppEllerRedusertStilling = søknad?.situasjon?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it) }
 
         return VilkårGrunnlagDto(
-            registergrunnlag = VilkårRegistergrunnlagDto(
+            personalia = PersonaliaDto(
                 navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
                 personIdent = personident,
                 bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) }

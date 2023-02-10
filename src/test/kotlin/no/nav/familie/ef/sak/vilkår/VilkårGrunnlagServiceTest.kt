@@ -16,8 +16,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.tilSøknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
@@ -180,9 +178,9 @@ internal class VilkårGrunnlagServiceTest {
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
 
         val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
-        assertThat(grunnlag.registergrunnlag.personIdent).isEqualTo(søknadOvergangsstønad.fødselsnummer)
-        assertThat(grunnlag.registergrunnlag.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
-        assertThat(grunnlag.registergrunnlag.bostedsadresse!!.visningsadresse)
+        assertThat(grunnlag.personalia.personIdent).isEqualTo(søknadOvergangsstønad.fødselsnummer)
+        assertThat(grunnlag.personalia.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
+        assertThat(grunnlag.personalia.bostedsadresse!!.visningsadresse)
             .isEqualTo("c/o CONAVN, Charlies vei 13 b, 0575 Oslo")
     }
 }

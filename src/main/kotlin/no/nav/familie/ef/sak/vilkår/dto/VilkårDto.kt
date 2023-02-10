@@ -11,7 +11,7 @@ data class VilkårDto(
 )
 
 data class VilkårGrunnlagDto(
-    val registergrunnlag: VilkårRegistergrunnlagDto,
+    val personalia: PersonaliaDto,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto,
     val medlemskap: MedlemskapDto,
     val sivilstand: SivilstandInngangsvilkårDto,
@@ -25,7 +25,7 @@ data class VilkårGrunnlagDto(
     val dokumentasjon: DokumentasjonFraSøknadDto?
 )
 
-data class VilkårRegistergrunnlagDto(
+data class PersonaliaDto(
     val navn: NavnDto,
     val personIdent: String,
     val bostedsadresse: AdresseDto?
