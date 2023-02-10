@@ -6,6 +6,9 @@ import no.nav.familie.ef.sak.opplysninger.mapper.BarnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.SivilstandMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadBarn
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Søknadsverdier
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.AdresseopplysningerMapper
@@ -16,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SivilstandsplanerMapper
 import no.nav.familie.ef.sak.vilkår.dto.BarnMedSamværDto
 import no.nav.familie.ef.sak.vilkår.dto.BarnepassDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
+import no.nav.familie.ef.sak.vilkår.dto.PersonaliaDto
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -30,7 +34,8 @@ class VilkårGrunnlagService(
     private val medlemskapMapper: MedlemskapMapper,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val fagsakService: FagsakService,
-    private val barnMedsamværMapper: BarnMedSamværMapper
+    private val barnMedsamværMapper: BarnMedSamværMapper,
+    private val adresseMapper: AdresseMapper
 ) {
 
     fun hentGrunnlag(
@@ -59,6 +64,11 @@ class VilkårGrunnlagService(
         val sagtOppEllerRedusertStilling = søknad?.situasjon?.let { SagtOppEllerRedusertStillingMapper.tilDto(situasjon = it) }
 
         return VilkårGrunnlagDto(
+            personalia = PersonaliaDto(
+                navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
+                personIdent = personident,
+                bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) }
+            ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,
             sivilstand = sivilstand,

@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.opplysninger.mapper.adresseMapper
 import no.nav.familie.ef.sak.opplysninger.mapper.barnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
@@ -57,8 +58,13 @@ internal class VilkårGrunnlagServiceTest {
         mockk()
     )
 
-    private val service =
-        VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService, fagsakService, barnMedSamværMapper())
+    private val service = VilkårGrunnlagService(
+        medlemskapMapper = medlemskapMapper,
+        grunnlagsdataService = grunnlagsdataService,
+        fagsakService = fagsakService,
+        barnMedsamværMapper = barnMedSamværMapper(),
+        adresseMapper = adresseMapper()
+    )
     private val behandling = behandling(fagsak())
     private val behandlingId = behandling.id
 
@@ -164,5 +170,17 @@ internal class VilkårGrunnlagServiceTest {
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.fra).isEqualTo(LocalDate.of(2021, 1, 1))
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.til).isEqualTo(LocalDate.of(2021, 6, 30))
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.type).isEqualTo("barnehageOgLiknende")
+    }
+
+    @Test
+    internal fun `skal mappe registergrunnlag`() {
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
+        every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
+
+        val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
+        assertThat(grunnlag.personalia.personIdent).isEqualTo(søknadOvergangsstønad.fødselsnummer)
+        assertThat(grunnlag.personalia.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
+        assertThat(grunnlag.personalia.bostedsadresse!!.visningsadresse)
+            .isEqualTo("c/o CONAVN, Charlies vei 13 b, 0575 Oslo")
     }
 }
