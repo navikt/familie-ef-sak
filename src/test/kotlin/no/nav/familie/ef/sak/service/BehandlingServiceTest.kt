@@ -66,7 +66,7 @@ internal class BehandlingServiceTest {
         } answers {
             behandlingSlot.captured
         }
-        every { SikkerhetContext.hentSaksbehandler(true) } returns "bob"
+        every { SikkerhetContext.hentSaksbehandler() } returns "bob"
     }
 
     @AfterAll

@@ -54,12 +54,12 @@ class BeslutteVedtakSteg(
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
         val saksbehandler =
             totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
-        val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
+        val beslutter = SikkerhetContext.hentSaksbehandler()
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
             validerGodkjentVedtak(data)
-            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
+            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)

@@ -65,7 +65,7 @@ class BrevMellomlagerController(
     fun mellomlagreFrittstaendeBrev(@PathVariable fagsakId: UUID): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.DELETE)
         tilgangService.validerHarSaksbehandlerrolle()
-        mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsakId, SikkerhetContext.hentSaksbehandler(true))
+        mellomlagringBrevService.slettMellomlagretFrittståendeBrev(fagsakId, SikkerhetContext.hentSaksbehandler())
         return Ressurs.success(fagsakId)
     }
 

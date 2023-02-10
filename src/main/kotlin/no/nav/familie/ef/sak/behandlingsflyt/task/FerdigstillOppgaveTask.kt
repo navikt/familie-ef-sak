@@ -45,7 +45,7 @@ class FerdigstillOppgaveTask(private val oppgaveService: OppgaveService) : Async
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(FerdigstillOppgaveTaskData(behandlingId, oppgavetype)),
                 properties = Properties().apply {
-                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
                     this["behandlingId"] = behandlingId.toString()
                     this["oppgavetype"] = oppgavetype.name
                     this["oppgaveId"] = oppgaveId.toString()

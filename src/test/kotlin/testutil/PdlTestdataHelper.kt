@@ -143,7 +143,7 @@ object PdlTestdataHelper {
     fun folkeregisteridentifikator(
         ident: String,
         status: FolkeregisteridentifikatorStatus = FolkeregisteridentifikatorStatus.I_BRUK,
-        gjeldende: Boolean = true,
+        gjeldende: Boolean = true
     ) = Folkeregisteridentifikator(
         ident,
         status,

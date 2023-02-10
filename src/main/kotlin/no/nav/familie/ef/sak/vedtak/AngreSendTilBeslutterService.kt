@@ -54,7 +54,7 @@ class AngreSendTilBeslutterService(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.BehandleSak,
                     beskrivelse = "Angret send til beslutter",
-                    tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(strict = true)
+                    tilordnetNavIdent = SikkerhetContext.hentSaksbehandler()
                 )
             )
         )
@@ -74,7 +74,7 @@ class AngreSendTilBeslutterService(
     }
 
     private fun validerKanAngreSendTilBeslutter(saksbehandling: Saksbehandling) {
-        val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler(strict = true)
+        val innloggetSaksbehandler = SikkerhetContext.hentSaksbehandler()
         val saksbehandlerSendtTilBeslutter = totrinnskontrollService.hentSaksbehandlerSomSendteTilBeslutter(saksbehandling.id)
 
         brukerfeilHvis(saksbehandlerSendtTilBeslutter != innloggetSaksbehandler) {
