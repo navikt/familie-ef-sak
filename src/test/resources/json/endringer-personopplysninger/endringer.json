@@ -84,6 +84,10 @@
         "felt" : "Dødsdato",
         "tidligere" : "Mangler verdi",
         "ny" : "01.01.2022"
+      }, {
+        "felt" : "Bostedsadresse",
+        "tidligere" : "Adresse 1",
+        "ny" : "Annen adresse"
       } ],
       "ny" : false,
       "fjernet" : false

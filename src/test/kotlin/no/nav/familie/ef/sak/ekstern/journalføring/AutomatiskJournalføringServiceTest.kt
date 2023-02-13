@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.ekstern.journalføring.AutomatiskJournalføringServ
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -46,7 +45,6 @@ internal class AutomatiskJournalføringServiceTest {
     val infotrygdService: InfotrygdService = mockk()
     val arbeidsfordelingService: ArbeidsfordelingService = mockk()
     val journalpostService: JournalpostService = mockk()
-    val featureToggleService: FeatureToggleService = mockk()
 
     val automatiskJournalføringService = AutomatiskJournalføringService(
         journalføringService = journalføringService,
@@ -55,8 +53,7 @@ internal class AutomatiskJournalføringServiceTest {
         personService = personService,
         infotrygdService = infotrygdService,
         arbeidsfordelingService = arbeidsfordelingService,
-        journalpostService = journalpostService,
-        featureToggleService = featureToggleService
+        journalpostService = journalpostService
     )
 
     val enhet = "4489"
@@ -78,7 +75,6 @@ internal class AutomatiskJournalføringServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        every { featureToggleService.isEnabled(any()) } returns true
         every { personService.hentPersonIdenter(any()) } returns PdlIdenter(
             identer = listOf(
                 PdlIdent(personIdent, false),
@@ -158,22 +154,6 @@ internal class AutomatiskJournalføringServiceTest {
         val kanOppretteBehandling =
             automatiskJournalføringService.kanOppretteBehandling(personIdent, StønadType.OVERGANGSSTØNAD)
         assertThat(kanOppretteBehandling).isTrue
-    }
-
-    @Test
-    internal fun `kan ikke opprette behandling hvis det alle behandlinger i ny løsning er ferdigstilt, men featuretoggle er av`() {
-        every { featureToggleService.isEnabled(any()) } returns false
-        every { infotrygdService.eksisterer(any(), any()) } returns false
-        every { behandlingService.hentBehandlinger(fagsak.id) } returns listOf(
-            behandling(
-                resultat = INNVILGET,
-                status = BehandlingStatus.FERDIGSTILT
-            ),
-            behandling(resultat = AVSLÅTT, status = BehandlingStatus.FERDIGSTILT)
-        )
-        val kanOppretteBehandling =
-            automatiskJournalføringService.kanOppretteBehandling(personIdent, StønadType.OVERGANGSSTØNAD)
-        assertThat(kanOppretteBehandling).isFalse
     }
 
     @Test

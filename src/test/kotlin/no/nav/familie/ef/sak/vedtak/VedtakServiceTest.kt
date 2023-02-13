@@ -22,7 +22,7 @@ class VedtakServiceTest {
 
     private val vedtakService = VedtakService(
         vedtakRepository,
-        tilkjentYtelseRepository,
+        tilkjentYtelseRepository
     )
     private val behandlingId = UUID.randomUUID()
     private val inntektsperiodeUtenInntekt = inntektsperiode(

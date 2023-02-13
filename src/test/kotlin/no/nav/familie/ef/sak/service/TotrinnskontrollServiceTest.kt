@@ -133,7 +133,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAv = SikkerhetContext.hentSaksbehandler()
+                opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)

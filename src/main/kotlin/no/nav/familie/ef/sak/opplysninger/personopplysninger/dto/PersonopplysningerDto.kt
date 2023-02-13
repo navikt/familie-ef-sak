@@ -19,7 +19,6 @@ data class PersonopplysningerDto(
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
     val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?,
-    val telefonnummer: TelefonnummerDto?,
     val statsborgerskap: List<StatsborgerskapDto>,
     val sivilstand: List<SivilstandDto>,
     val adresse: List<AdresseDto>,
@@ -52,12 +51,8 @@ data class BarnMinimumDto(
 data class AnnenForelderMinimumDto(
     val personIdent: String,
     val navn: String,
-    val dødsdato: LocalDate?
-)
-
-data class TelefonnummerDto(
-    val landskode: String,
-    val nummer: String
+    val dødsdato: LocalDate?,
+    val bostedsadresse: String?
 )
 
 data class SivilstandDto(

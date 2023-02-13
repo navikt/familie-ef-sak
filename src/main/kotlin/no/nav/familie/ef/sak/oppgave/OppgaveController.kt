@@ -96,7 +96,7 @@ class OppgaveController(
 
     @GetMapping("{behandlingId}/tilordnet-ressurs")
     fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
         if (oppgave != null && saksbehandlerIdentIOppgaveSystemet != saksbehandlerIdent) {

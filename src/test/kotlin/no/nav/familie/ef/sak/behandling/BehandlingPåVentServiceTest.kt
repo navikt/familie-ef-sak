@@ -52,7 +52,7 @@ internal class BehandlingPåVentServiceTest {
     @BeforeEach
     internal fun setUp() {
         mockkObject(SikkerhetContext)
-        every { SikkerhetContext.hentSaksbehandler(true) } returns "bob"
+        every { SikkerhetContext.hentSaksbehandler() } returns "bob"
         mockFinnSisteIverksatteBehandling(null)
     }
 

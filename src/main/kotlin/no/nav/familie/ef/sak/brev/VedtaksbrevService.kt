@@ -83,7 +83,7 @@ class VedtaksbrevService(
             brevmal = brevmal,
             saksbehandlersignatur = saksbehandlersignatur,
             enhet = enhet,
-            saksbehandlerident = SikkerhetContext.hentSaksbehandler(true)
+            saksbehandlerident = SikkerhetContext.hentSaksbehandler()
         )
 
         return when (brevRepository.existsById(behandlingId)) {
@@ -109,7 +109,7 @@ class VedtaksbrevService(
     fun lagEndeligBeslutterbrev(saksbehandling: Saksbehandling, vedtakErUtenBeslutter: VedtakErUtenBeslutter): Fil {
         val vedtaksbrev = brevRepository.findByIdOrThrow(saksbehandling.id)
         val saksbehandlerHtml = hentSaksbehandlerHtml(vedtaksbrev, saksbehandling)
-        val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
+        val beslutterIdent = SikkerhetContext.hentSaksbehandler()
         validerKanLageBeslutterbrev(saksbehandling, vedtaksbrev, beslutterIdent, vedtakErUtenBeslutter)
         val signaturMedEnhet = brevsignaturService.lagSignaturMedEnhet(saksbehandling, vedtakErUtenBeslutter)
         val beslutterPdf = lagBeslutterPdfMedSignatur(saksbehandlerHtml, signaturMedEnhet)

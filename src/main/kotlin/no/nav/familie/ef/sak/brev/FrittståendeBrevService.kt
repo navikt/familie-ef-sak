@@ -32,7 +32,7 @@ class FrittståendeBrevService(
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         val mottakere = validerOgMapBrevmottakere(frittståendeBrevDto.mottakere)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(frittståendeBrevDto.fagsakId)
         val ident = fagsak.hentAktivIdent()

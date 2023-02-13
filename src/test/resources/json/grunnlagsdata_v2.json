@@ -891,28 +891,6 @@
         },
         "nullable" : false
       },
-      "telefonnummer" : {
-        "name" : "telefonnummer",
-        "type" : "Collection",
-        "fields" : {
-          "landskode" : {
-            "name" : "landskode",
-            "type" : "String",
-            "nullable" : false
-          },
-          "nummer" : {
-            "name" : "nummer",
-            "type" : "String",
-            "nullable" : false
-          },
-          "prioritet" : {
-            "name" : "prioritet",
-            "type" : "Int",
-            "nullable" : false
-          }
-        },
-        "nullable" : false
-      },
       "tilrettelagtKommunikasjon" : {
         "name" : "tilrettelagtKommunikasjon",
         "type" : "Collection",

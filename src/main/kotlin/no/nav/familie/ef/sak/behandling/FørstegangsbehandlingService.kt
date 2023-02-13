@@ -9,8 +9,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBeha
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettService
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
@@ -31,15 +29,11 @@ class FørstegangsbehandlingService(
     private val barnService: BarnService,
     private val taskService: TaskService,
     private val iverksettService: IverksettService,
-    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
-    private val featureToggleService: FeatureToggleService
+    private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService
 ) {
 
     @Transactional
     fun opprettFørstegangsbehandling(fagsakId: UUID, førstegangsBehandlingRequest: FørstegangsbehandlingDto): Behandling {
-        feilHvisIkke(featureToggleService.isEnabled(Toggle.FØRSTEGANGSBEHANDLING)) {
-            "Opprettelse av førstegangsbehandling er skrudd av"
-        }
         validerGyldigÅrsak(førstegangsBehandlingRequest.behandlingsårsak)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(fagsakId)
         infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
@@ -52,7 +46,7 @@ class FørstegangsbehandlingService(
             OpprettOppgaveForOpprettetBehandlingTask.opprettTask(
                 OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData(
                     behandlingId = behandling.id,
-                    saksbehandler = SikkerhetContext.hentSaksbehandler(true),
+                    saksbehandler = SikkerhetContext.hentSaksbehandler(),
                     beskrivelse = "Førstegangsbehandling - manuelt opprettet"
                 )
             )

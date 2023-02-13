@@ -15,7 +15,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
@@ -53,8 +52,6 @@ class PersonopplysningerMapper(
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
             personIdent = gjeldendePersonIdent,
-            telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
-                ?.let { TelefonnummerDto(it.landskode, it.nummer) },
             statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
             sivilstand = søker.sivilstand.map {
                 SivilstandDto(
@@ -134,10 +131,13 @@ class PersonopplysningerMapper(
             personIdent = barn.personIdent,
             navn = barn.navn.visningsnavn(),
             annenForelder = annenForelderIdent?.let {
+                val annenForelder = annenForelderMap[it]
                 AnnenForelderMinimumDto(
                     personIdent = it,
-                    navn = annenForelderMap[it]?.navn?.visningsnavn() ?: "Finner ikke navn",
-                    dødsdato = annenForelderMap[it]?.dødsfall?.gjeldende()?.dødsdato
+                    navn = annenForelder?.navn?.visningsnavn() ?: "Finner ikke navn",
+                    dødsdato = annenForelder?.dødsfall?.gjeldende()?.dødsdato,
+                    bostedsadresse = annenForelder?.bostedsadresse?.gjeldende()
+                        ?.let { adresseMapper.tilAdresse(it).visningsadresse }
                 )
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
