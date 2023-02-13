@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.felles.integration
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 
 internal class PdlSaksbehandlerClientTest {
@@ -25,7 +23,6 @@ internal class PdlSaksbehandlerClientTest {
     companion object {
 
         private val restOperations: RestOperations = RestTemplateBuilder().build()
-        private val webClient: WebClient = WebClient.create()
         lateinit var pdlClient: PdlSaksbehandlerClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -36,9 +33,7 @@ internal class PdlSaksbehandlerClientTest {
             wiremockServerItem.start()
             pdlClient = PdlSaksbehandlerClient(
                 PdlConfig(URI.create(wiremockServerItem.baseUrl())),
-                restOperations,
-                webClient,
-                mockFeatureToggleService()
+                restOperations
             )
         }
 

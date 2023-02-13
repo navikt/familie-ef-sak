@@ -8,7 +8,6 @@ import no.nav.familie.http.interceptor.ConsumerIdClientInterceptor
 import no.nav.familie.http.interceptor.MdcValuesPropagatingClientInterceptor
 import no.nav.familie.log.filter.LogFilter
 import no.nav.familie.log.filter.RequestTimeFilter
-import no.nav.familie.webflux.builder.AzureWebClientConfig
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -33,7 +32,7 @@ import java.time.temporal.ChronoUnit
 @ConfigurationPropertiesScan
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.ef.sak", "no.nav.familie.sikkerhet")
 @EnableJwtTokenValidation(ignore = ["org.springframework", "org.springdoc"])
-@Import(RestTemplateAzure::class, AzureWebClientConfig::class)
+@Import(RestTemplateAzure::class)
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableScheduling
 class ApplicationConfig {

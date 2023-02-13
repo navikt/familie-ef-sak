@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
 import org.apache.http.entity.ContentType
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +15,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 
 class SigrunClientTest {
@@ -24,7 +22,6 @@ class SigrunClientTest {
     companion object {
 
         private val restOperations: RestOperations = RestTemplateBuilder().build()
-        private val webClient: WebClient = WebClient.create()
         lateinit var sigrunClient: SigrunClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -33,7 +30,7 @@ class SigrunClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            sigrunClient = SigrunClient(URI.create(wiremockServerItem.baseUrl()), restOperations, webClient, mockFeatureToggleService())
+            sigrunClient = SigrunClient(URI.create(wiremockServerItem.baseUrl()), restOperations)
         }
 
         @AfterAll

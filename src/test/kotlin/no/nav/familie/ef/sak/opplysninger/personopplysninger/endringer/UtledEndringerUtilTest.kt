@@ -430,7 +430,7 @@ internal class UtledEndringerUtilTest {
     private fun assertPersonHarEndringerMedDetaljer(
         endringer: Endringer,
         ident: String,
-        felt: (Endringer) -> Endring<List<Personendring>>,
+        felt: (Endringer) -> Endring<List<Personendring>>
     ) {
         assertThat(endringer.harEndringer).isTrue
         val person = felt(endringer)

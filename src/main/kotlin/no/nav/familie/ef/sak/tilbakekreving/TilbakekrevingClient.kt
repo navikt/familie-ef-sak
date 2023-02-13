@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.tilbakekreving
 
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.http.AbstractRestWebClient
+import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -19,18 +18,15 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class TilbakekrevingClient(
     @Qualifier("azure") restOperations: RestOperations,
-    @Qualifier("azureWebClient") webClient: WebClient,
-    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI,
-    featureToggleService: FeatureToggleService
+    @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI
 ) :
-    AbstractRestWebClient(restOperations, webClient, "familie.tilbakekreving", featureToggleService) {
+    AbstractRestClient(restOperations, "familie.tilbakekreving") {
 
     private val hentForhåndsvisningVarselbrevUri: URI = UriComponentsBuilder.fromUri(familieTilbakeUri)
         .pathSegment("api/dokument/forhandsvis-varselbrev")

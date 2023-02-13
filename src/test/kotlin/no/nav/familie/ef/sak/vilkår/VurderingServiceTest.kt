@@ -122,7 +122,7 @@ internal class VurderingServiceTest {
             "navn",
             "fnr",
             false,
-            AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge","Vei 1B", null, null, AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT)),
+            AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge", "Vei 1B", null, null, AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT)),
             null,
             null
         ),
