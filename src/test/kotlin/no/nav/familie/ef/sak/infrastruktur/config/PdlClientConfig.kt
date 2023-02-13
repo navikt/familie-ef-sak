@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerCli
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
@@ -216,6 +217,22 @@ class PdlClientConfig {
             mapOf(
                 barnFnr to pdlBarn(
                     bostedsadresse = bostedsadresse(),
+                    deltBosted = listOf(
+                        DeltBosted(
+                            LocalDate.now().minusDays(2),
+                            LocalDate.now().plusDays(2),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                        ),
+                        DeltBosted(
+                            LocalDate.now().minusDays(20),
+                            LocalDate.now().minusDays(10),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                        )
+                    ),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
                     navn = lagNavn("Barn", null, "Barnesen")

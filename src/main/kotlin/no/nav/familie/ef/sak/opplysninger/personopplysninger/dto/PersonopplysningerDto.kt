@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.dto
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
@@ -38,6 +39,8 @@ data class BarnDto(
     val annenForelder: AnnenForelderMinimumDto?,
     val adresse: List<AdresseDto>,
     val borHosSøker: Boolean,
+    val deltBosted: List<DeltBosted>,
+    val harDeltBostedNå: Boolean,
     val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?
 )

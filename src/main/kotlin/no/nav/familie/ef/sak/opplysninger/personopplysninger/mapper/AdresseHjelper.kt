@@ -17,10 +17,6 @@ object AdresseHjelper {
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
-        if (harDeltBosted(barn)) {
-            return false
-        }
-
         return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
     }
@@ -36,7 +32,7 @@ object AdresseHjelper {
             bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
     }
 
-    private fun harDeltBosted(barn: BarnMedIdent): Boolean {
+    fun harDeltBosted(barn: BarnMedIdent): Boolean {
         return barn.deltBosted.any {
             it.startdatoForKontrakt.isBefore(LocalDate.now()) &&
                 (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDate.now()))
