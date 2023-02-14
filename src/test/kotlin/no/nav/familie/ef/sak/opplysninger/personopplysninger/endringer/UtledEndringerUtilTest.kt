@@ -18,8 +18,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
