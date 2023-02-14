@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -330,7 +331,7 @@ internal class VedtaksbrevServiceTest {
         every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
-        val now = LocalDateTime.now()
+        val now = SporbarUtils.now()
         vedtaksbrevService.lagSaksbehandlerSanitybrev(
             saksbehandling(fagsak, behandling),
             objectMapper.createObjectNode(),
