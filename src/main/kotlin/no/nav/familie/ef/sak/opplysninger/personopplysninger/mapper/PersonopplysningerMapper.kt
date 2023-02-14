@@ -127,6 +127,7 @@ class PersonopplysningerMapper(
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
+
         return BarnDto(
             personIdent = barn.personIdent,
             navn = barn.navn.visningsnavn(),
