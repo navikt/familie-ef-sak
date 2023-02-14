@@ -483,6 +483,5 @@ fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
         listOf(),
         listOf(),
         listOf(),
-        listOf(),
         listOf()
     )

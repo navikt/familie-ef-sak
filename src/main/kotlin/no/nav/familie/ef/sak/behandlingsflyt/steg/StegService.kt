@@ -138,13 +138,22 @@ class StegService(
     @Transactional
     fun angreSendTilBeslutter(behandlingId: UUID) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val beslutter = vedtakService.hentVedtak(behandlingId).beslutterIdent
 
-        feilHvis(saksbehandling.steg != StegType.BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}" }
-        feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) { "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}" }
+        feilHvis(saksbehandling.steg != BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
+            if (saksbehandling.steg.kommerEtter(BESLUTTE_VEDTAK)) {
+                "Kan ikke angre send til beslutter da vedtaket er godkjent av $beslutter"
+            } else {
+                "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}"
+            }
+        }
+
+        feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
+            "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}"
+        }
 
         behandlingService.oppdaterStegPåBehandling(behandlingId, SEND_TIL_BESLUTTER)
         behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
-
     }
 
     private fun validerAtStegKanResettes(
@@ -154,7 +163,7 @@ class StegService(
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
         val harTilgangTilNesteSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, steg.tillattFor)
         if (!harTilgangTilSteg || !harTilgangTilNesteSteg) {
-            val saksbehandler = SikkerhetContext.hentSaksbehandler()
+            val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             error(
                 "$saksbehandler kan ikke endre" +
                     " fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()}" +
@@ -170,7 +179,7 @@ class StegService(
         data: T
     ): Behandling {
         val stegType = behandlingSteg.stegType()
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         try {
             valider(saksbehandling, stegType, saksbehandlerIdent, behandlingSteg)
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(saksbehandling, data)
@@ -233,7 +242,9 @@ class StegService(
     ) {
         behandlingSteg.validerSteg(saksbehandling)
         feilHvis(!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
-            "Kan ikke utføre '${behandlingSteg.stegType().displayName()}' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
+            "Kan ikke utføre '${
+            behandlingSteg.stegType().displayName()
+            }' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
         }
     }
 

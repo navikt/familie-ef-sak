@@ -101,7 +101,7 @@ class SendTilBeslutterSteg(
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, BehandlingStatus.FATTER_VEDTAK)
-        vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
+        vedtakService.oppdaterSaksbehandler(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
         if (!vedtakService.hentVedtak(saksbehandling.id).erVedtakUtenBeslutter()) {
             opprettGodkjennVedtakOppgave(saksbehandling)
         }
@@ -144,7 +144,7 @@ class SendTilBeslutterSteg(
 
         val vedtaksbrev = vedtaksbrevRepository.findByIdOrThrow(saksbehandling.id)
 
-        brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler(true)) {
+        brukerfeilHvis(vedtaksbrev.saksbehandlerident != SikkerhetContext.hentSaksbehandler()) {
             "En annen saksbehandler har signert vedtaksbrevet"
         }
     }

@@ -169,7 +169,7 @@ class BehandlingsstatistikkTask(
         fun opprettMottattTask(
             behandlingId: UUID,
             hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
-            saksbehandler: String = SikkerhetContext.hentSaksbehandler(),
+            saksbehandler: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             oppgaveId: Long?
         ): Task =
             opprettTask(
@@ -185,7 +185,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.PÅBEGYNT,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
             )
 
         fun opprettVenterTask(behandlingId: UUID): Task =
@@ -193,7 +193,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.VENTER,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
             )
 
         fun opprettVedtattTask(behandlingId: UUID): Task =

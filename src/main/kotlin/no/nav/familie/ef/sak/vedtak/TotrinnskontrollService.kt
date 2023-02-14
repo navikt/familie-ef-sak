@@ -81,15 +81,10 @@ class TotrinnskontrollService(
     }
 
     fun hentSaksbehandlerSomSendteTilBeslutter(behandlingId: UUID): String {
-        val sisteBehandlingshistorikk = behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId)
-        if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
-            throw Feil(
-                message = "Kan ikke utlede hvem som sendte til beslutter. Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
-                frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt",
-                httpStatus = HttpStatus.BAD_REQUEST
-            )
-        }
-        return sisteBehandlingshistorikk.opprettetAv
+        val sisteBehandlingshistorikk =
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)
+
+        return sisteBehandlingshistorikk?.opprettetAv ?: throw Feil("Fant ikke saksbehandler som sendte til beslutter")
     }
 
     fun hentBeslutter(behandlingId: UUID): String? {
@@ -175,5 +170,5 @@ class TotrinnskontrollService(
     }
 
     private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) =
-        SikkerhetContext.hentSaksbehandler() == beslutteVedtakHendelse.opprettetAv
+        SikkerhetContext.hentSaksbehandlerEllerSystembruker() == beslutteVedtakHendelse.opprettetAv
 }

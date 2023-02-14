@@ -12,8 +12,6 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.journalføring.JournalføringService
 import no.nav.familie.ef.sak.journalføring.JournalpostService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -36,8 +34,7 @@ class AutomatiskJournalføringService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val journalpostService: JournalpostService,
     private val infotrygdService: InfotrygdService,
-    private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService
+    private val behandlingService: BehandlingService
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -84,7 +81,7 @@ class AutomatiskJournalføringService(
     private fun kanAutomatiskJournalføreRevurdering(behandlinger: List<Behandling>, fagsak: Fagsak?): Boolean {
         return if (!harÅpenBehandling(behandlinger)) {
             secureLogger.info("Kan automatisk journalføre for fagsak: ${fagsak?.id}")
-            featureToggleService.isEnabled(Toggle.AUTOMATISK_JOURNALFØR_REVURDERING)
+            true
         } else {
             secureLogger.info("Kan ikke automatisk journalføre for fagsak: ${fagsak?.id}")
             false

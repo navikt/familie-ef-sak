@@ -62,7 +62,7 @@ internal class TotrinnskontrollServiceTest {
     @Test
     internal fun `skal utlede saksbehandler som sendte behandling til besluttning`() {
         val opprettetAv = "Behandler"
-        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.SEND_TIL_BESLUTTER) } returns
             behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
         val response = totrinnskontrollService
             .hentSaksbehandlerSomSendteTilBeslutter(UUID.randomUUID())
@@ -133,7 +133,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAv = SikkerhetContext.hentSaksbehandler()
+                opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)

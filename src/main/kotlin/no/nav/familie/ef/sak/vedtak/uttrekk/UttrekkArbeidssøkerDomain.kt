@@ -31,7 +31,7 @@ data class UttrekkArbeidssøkere(
         return this.copy(
             kontrollert = kontrollert,
             kontrollertTid = SporbarUtils.now(),
-            kontrollertAv = SikkerhetContext.hentSaksbehandler()
+            kontrollertAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         )
     }
 }

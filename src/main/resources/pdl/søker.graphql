@@ -220,11 +220,6 @@ query($ident: ID!){
             gyldigFraOgMed
             gyldigTilOgMed
         }
-        telefonnummer {
-            landskode
-            nummer
-            prioritet
-        }
         tilrettelagtKommunikasjon {
             talespraaktolk {
                 spraak

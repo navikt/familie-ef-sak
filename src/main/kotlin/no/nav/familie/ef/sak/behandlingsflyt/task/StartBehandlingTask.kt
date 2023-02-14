@@ -48,7 +48,7 @@ class StartBehandlingTask(
                 type = TYPE,
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
-                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandler()
+                    this["saksbehandler"] = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
                     this["behandlingId"] = behandlingId.toString()
                     this["fagsakId"] = fagsakId.toString()
                     this["personIdent"] = personIdent

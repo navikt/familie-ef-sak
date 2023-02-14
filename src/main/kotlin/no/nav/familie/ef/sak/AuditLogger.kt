@@ -63,7 +63,7 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
         return "CEF:0|$applicationName|auditLog|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
-            "suid=${SikkerhetContext.hentSaksbehandler(strict = true)} " +
+            "suid=${SikkerhetContext.hentSaksbehandler()} " +
             "duid=${data.personIdent} " +
             "sproc=${getCallId()} " +
             "requestMethod=${request.method} " +

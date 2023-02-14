@@ -10,7 +10,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
-import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.journalføring.JournalpostClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
@@ -26,9 +25,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.net.URI
 
 internal class JournalpostClientTest {
@@ -36,7 +34,6 @@ internal class JournalpostClientTest {
     companion object {
 
         private val restOperations: RestOperations = RestTemplateBuilder().build()
-        private val webClient: WebClient = WebClient.create()
         lateinit var journalpostClient: JournalpostClient
         lateinit var wiremockServerItem: WireMockServer
         lateinit var integrasjonerConfig: IntegrasjonerConfig
@@ -48,7 +45,7 @@ internal class JournalpostClientTest {
             wiremockServerItem.start()
             integrasjonerConfig = IntegrasjonerConfig(URI.create(wiremockServerItem.baseUrl()))
             journalpostClient =
-                JournalpostClient(restOperations, webClient, integrasjonerConfig, mockFeatureToggleService())
+                JournalpostClient(restOperations, integrasjonerConfig)
         }
 
         @AfterAll
@@ -133,7 +130,7 @@ internal class JournalpostClientTest {
                 .withQueryParam("variantFormat", equalTo("ARKIV"))
                 .willReturn(okJson(objectMapper.writeValueAsString(Ressurs.success(vedlegg))))
         )
-        assertThrows<WebClientResponseException> {
+        assertThrows<HttpClientErrorException> {
             journalpostClient.hentDokument("123", "abc", DokumentVariantformat.ARKIV)
         }
     }

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pensjon
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,17 +19,11 @@ class HistoriskPensjonController(
 
     @GetMapping("{fagsakPersonId}")
     fun hentHistoriskPensjon(@PathVariable fagsakPersonId: UUID): Ressurs<HistoriskPensjonResponse> {
-        if (featureToggleService.isEnabled(Toggle.HISTORISK_PENSJON)) {
-            return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
-        }
-        return Ressurs.success(HistoriskPensjonResponse(false, ""))
+        return Ressurs.success(historiskPensjonService.hentHistoriskPensjon(fagsakPersonId))
     }
 
     @GetMapping("fagsak/{fagsakId}")
     fun hentHistoriskPensjonForFagsak(@PathVariable fagsakId: UUID): Ressurs<HistoriskPensjonResponse> {
-        if (featureToggleService.isEnabled(Toggle.HISTORISK_PENSJON)) {
-            return Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
-        }
-        return Ressurs.success(HistoriskPensjonResponse(false, ""))
+        return Ressurs.success(historiskPensjonService.hentHistoriskPensjonForFagsak(fagsakId))
     }
 }

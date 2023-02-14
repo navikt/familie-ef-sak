@@ -203,7 +203,7 @@ internal class VedtaksbrevServiceTest {
 
     @Test
     internal fun `skal lage brev med innlogget beslutterident beslutterident `() {
-        val beslutterIdent = SikkerhetContext.hentSaksbehandler(true)
+        val beslutterIdent = SikkerhetContext.hentSaksbehandler()
         every { vedtaksbrevRepository.findByIdOrThrow(any()) } returns vedtaksbrev.copy(beslutterident = "tilfeldigvisFeilIdent")
         val brevSlot = slot<Vedtaksbrev>()
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()

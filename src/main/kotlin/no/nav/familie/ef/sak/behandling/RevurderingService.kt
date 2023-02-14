@@ -78,7 +78,7 @@ class RevurderingService(
         )
         val forrigeBehandlingId = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)?.id
             ?: error("Revurdering må ha eksisterende iverksatt behandling")
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
 
         søknadService.kopierSøknad(forrigeBehandlingId, revurdering.id)
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(revurdering.id)

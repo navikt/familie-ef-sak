@@ -69,7 +69,7 @@ class GjenbrukVilkårService(
             forrigeBarnIdTilNåværendeBarnMap
         )
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandler()} gjenbruker vurderinger fra behandling $tidligereBehandlingId " +
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $tidligereBehandlingId " +
                 "for å oppdatere vurderinger på inngangsvilkår for behandling $nåværendeBehandlingId"
         )
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)

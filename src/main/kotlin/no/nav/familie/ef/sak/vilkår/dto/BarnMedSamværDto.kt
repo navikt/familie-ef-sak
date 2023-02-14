@@ -54,6 +54,7 @@ data class AnnenForelderDto(
     val fødselsdato: LocalDate?,
     val bosattINorge: Boolean?,
     val land: String?,
+    val visningsadresse: String?,
     val dødsfall: LocalDate? = null,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
     val avstandTilSøker: AvstandTilSøkerDto

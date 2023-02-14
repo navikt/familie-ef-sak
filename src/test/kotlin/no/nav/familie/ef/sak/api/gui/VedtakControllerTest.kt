@@ -298,7 +298,6 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
             angreSendTilBeslutter(SAKSBEHANDLER, responseBadRequest())
         }
 
-
         @Test
         internal fun `skal feile hvis oppgave er plukket av noen andre`() {
             opprettBehandling(steg = StegType.SEND_TIL_BESLUTTER, status = BehandlingStatus.UTREDES)
@@ -356,7 +355,7 @@ internal class VedtakControllerTest : OppslagSpringRunnerTest() {
         vedtakRepository.insert(
             vedtak(lagretBehandling.id, vedtakResultatType).copy(
                 avslåÅrsak = avlsåÅrsak,
-                saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             )
         )
         tilkjentYtelseRepository.insert(tilkjentYtelse(behandlingId = lagretBehandling.id, fagsak.hentAktivIdent()))

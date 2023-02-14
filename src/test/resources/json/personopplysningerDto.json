@@ -11,10 +11,6 @@
   "folkeregisterpersonstatus" : "BOSATT",
   "fødselsdato" : "2018-01-01",
   "dødsdato" : null,
-  "telefonnummer" : {
-    "landskode" : "+47",
-    "nummer" : "98999923"
-  },
   "statsborgerskap" : [ {
     "land" : "Norge",
     "gyldigFraOgMedDato" : "2020-01-01",
@@ -62,7 +58,8 @@
     "annenForelder" : {
       "personIdent" : "17097926735",
       "navn" : "Bob  Burger",
-      "dødsdato" : "2021-09-22"
+      "dødsdato" : "2021-09-22",
+      "bostedsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
@@ -81,7 +78,8 @@
     "annenForelder" : {
       "personIdent" : "17097926735",
       "navn" : "Bob  Burger",
-      "dødsdato" : "2021-09-22"
+      "dødsdato" : "2021-09-22",
+      "bostedsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo"
     },
     "adresse" : [ {
       "visningsadresse" : "c/o CONAVN, Charlies vei 13 b, 0575 Oslo",
