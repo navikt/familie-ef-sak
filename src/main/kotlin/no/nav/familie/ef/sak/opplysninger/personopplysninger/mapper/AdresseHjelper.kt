@@ -33,7 +33,7 @@ object AdresseHjelper {
     }
 
     fun harDeltBosted(barn: BarnMedIdent): Boolean {
-        return barn.deltBosted.any {
+        return barn.deltBosted.filter { !it.metadata.historisk }.any {
             it.startdatoForKontrakt.isBefore(LocalDate.now()) &&
                 (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDate.now()))
         }

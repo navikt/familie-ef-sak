@@ -17,17 +17,12 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(
@@ -147,11 +142,10 @@ class PersonopplysningerMapper(
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
             borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
-            deltBosted = barn.deltBosted,
+            deltBosted = barn.deltBosted.filter { !it.metadata.historisk },
             harDeltBostedNå = AdresseHjelper.harDeltBosted(barn),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
         )
     }
 }
-
