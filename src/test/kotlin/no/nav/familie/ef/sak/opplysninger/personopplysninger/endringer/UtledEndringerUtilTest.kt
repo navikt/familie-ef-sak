@@ -18,6 +18,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.UtflyttingDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.UtledEndringerUtil.finnEndringer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -38,7 +40,8 @@ internal class UtledEndringerUtilTest {
         val annenForelder2 = AnnenForelderMinimumDto("2", "", null, null)
         val barnsForelderBlirEndret =
             BarnDto("forelderFårEndring", "2", annenForelder, emptyList(), true, emptyList(), false, null, null)
-        val barnFårEndring = BarnDto("barnFårEndretBorHosSøker", "2", null, emptyList(), true, emptyList(), false, null, null)
+        val barnFårEndring =
+            BarnDto("barnFårEndretBorHosSøker", "2", null, emptyList(), true, emptyList(), false, null, null)
         val barnFårForelder = BarnDto("barnFårForelder", "2", null, emptyList(), true, emptyList(), false, null, null)
         val nyttBarn = BarnDto("nyttBarn", "2", null, emptyList(), true, emptyList(), false, null, null)
         val tidligere = dto(
@@ -321,6 +324,66 @@ internal class UtledEndringerUtilTest {
         }
 
         @Test
+        internal fun `søkers barn får delt bosted trigger endring`() {
+            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
+            val barn2 = barn.copy(harDeltBostedNå = true)
+            val endringer = finnEndringer(
+                dto(barn = listOf(barn)),
+                dto(barn = listOf(barn2))
+            )
+            val detaljer = endringer.barn.detaljer!!
+            assertBarnHarEndringerMedDetaljer(endringer)
+
+            val endringsdetaljer = detaljer[0].endringer
+            assertThat(endringsdetaljer).hasSize(1)
+            assertThat(endringsdetaljer[0].felt).isEqualTo("Har delt bosted nå")
+            assertThat(endringsdetaljer[0].tidligere).isEqualTo("Nei")
+            assertThat(endringsdetaljer[0].ny).isEqualTo("Ja")
+
+            assertIngenAndreEndringer(endringer, "barn")
+        }
+
+        @Test
+        internal fun `søkers barn får ny, utvidet, periode i delt bosted - trigger endring`() {
+
+            val startdatoForOpprinneligKontrakt = LocalDate.now().minusYears(1)
+            val sluttdatoForOpprinneligKontrakt = LocalDate.now().plusYears(1)
+            val deltBostedGammel = DeltBosted(
+                startdatoForOpprinneligKontrakt,
+                sluttdatoForOpprinneligKontrakt,
+                null,
+                null,
+                Metadata(false)
+            )
+
+            val deltBostedNy = DeltBosted(
+                sluttdatoForOpprinneligKontrakt,
+                sluttdatoForOpprinneligKontrakt.plusYears(5),
+                null,
+                null,
+                Metadata(false)
+            )
+
+            val barn = BarnDto(
+                barnIdent, "", null, emptyList(), true, listOf(deltBostedGammel), true, null, null
+            )
+
+            val barn2 = barn.copy(deltBosted = listOf(deltBostedGammel, deltBostedNy))
+            val endringer = finnEndringer(
+                dto(barn = listOf(barn)),
+                dto(barn = listOf(barn2))
+            )
+            val detaljer = endringer.barn.detaljer!!
+            assertBarnHarEndringerMedDetaljer(endringer)
+
+            val endringsdetaljer = detaljer[0].endringer
+            assertThat(endringsdetaljer).hasSize(1)
+            assertThat(endringsdetaljer[0].felt).isEqualTo("Delt bosted")
+
+            assertIngenAndreEndringer(endringer, "barn")
+        }
+
+        @Test
         internal fun `endring dødsdato på barn trigger kun endring på barn`() {
             val dødsdato = LocalDate.now()
             val annenForelder = AnnenForelderMinimumDto(forelderIdent, "Navn", null, null)
@@ -345,7 +408,17 @@ internal class UtledEndringerUtilTest {
         @Test
         internal fun `endring av personident på annen forelder trigger endring både på barn og annen forelder`() {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
-            val barn2 = BarnDto(barnIdent, "2", AnnenForelderMinimumDto("1", "", null, null), emptyList(), true, emptyList(), false, null, null)
+            val barn2 = BarnDto(
+                barnIdent,
+                "2",
+                AnnenForelderMinimumDto("1", "", null, null),
+                emptyList(),
+                true,
+                emptyList(),
+                false,
+                null,
+                null
+            )
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
                 dto(barn = listOf(barn2))
