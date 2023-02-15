@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeListe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import java.time.LocalDate
 
@@ -32,10 +33,11 @@ object AdresseHjelper {
             bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
     }
 
-    fun harDeltBosted(barn: BarnMedIdent): Boolean {
-        return barn.deltBosted.filter { !it.metadata.historisk }.any {
-            it.startdatoForKontrakt.isBefore(LocalDate.now()) &&
-                (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDate.now()))
+    fun harDeltBostedNå(barn: BarnMedIdent): Boolean {
+        return barn.deltBosted.gjeldendeListe().any {
+            val nå = LocalDate.now()
+            it.startdatoForKontrakt.isBefore(nå) &&
+                (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(nå))
         }
     }
 }
