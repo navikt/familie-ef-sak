@@ -269,6 +269,7 @@ internal class AdresseHjelperTest {
 
             assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
         }
+
         @Test
         internal fun `delt bosted er innenfor nåtid, forvent harDeltBosted lik true`() {
             val barnMedDeltBosted = BarnMedIdent(
@@ -283,6 +284,7 @@ internal class AdresseHjelperTest {
             )
             assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isTrue
         }
+
         @Test
         internal fun `delt bosted er utenfor nåtid, forvent harDeltBosted lik false`() {
             val barnMedDeltBosted = BarnMedIdent(

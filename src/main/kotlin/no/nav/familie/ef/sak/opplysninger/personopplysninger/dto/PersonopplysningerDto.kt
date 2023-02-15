@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.dto
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
@@ -32,6 +31,7 @@ data class PersonopplysningerDto(
     val oppholdstillatelse: List<OppholdstillatelseDto>,
     val vergemål: List<VergemålDto>
 )
+
 data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?)
 
 data class BarnDto(
