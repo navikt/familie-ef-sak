@@ -71,16 +71,16 @@
     } ],
     "borHosSøker" : true,
     "deltBosted" : [ {
-      "startdatoForKontrakt" : "2023-02-12",
-      "sluttdatoForKontrakt" : "2023-02-16",
+      "startdatoForKontrakt" : "2023-02-13",
+      "sluttdatoForKontrakt" : "2023-02-17",
       "vegadresse" : null,
       "ukjentBosted" : null,
       "metadata" : {
         "historisk" : false
       }
     }, {
-      "startdatoForKontrakt" : "2023-01-25",
-      "sluttdatoForKontrakt" : "2023-02-04",
+      "startdatoForKontrakt" : "2023-01-26",
+      "sluttdatoForKontrakt" : "2023-02-05",
       "vegadresse" : null,
       "ukjentBosted" : null,
       "metadata" : {

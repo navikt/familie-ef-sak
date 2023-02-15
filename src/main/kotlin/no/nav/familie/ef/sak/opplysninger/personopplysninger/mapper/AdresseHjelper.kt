@@ -33,9 +33,9 @@ object AdresseHjelper {
     }
 
     fun harDeltBosted(barn: BarnMedIdent): Boolean {
-        return barn.deltBosted.gjeldende().any {
-            it.startdatoForKontrakt <= LocalDate.now() &&
-                (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt >= LocalDate.now())
-        }
+        return barn.deltBosted.gjeldende()?.let { deltBosted ->
+            deltBosted.startdatoForKontrakt <= LocalDate.now() &&
+                (deltBosted.sluttdatoForKontrakt == null || deltBosted.sluttdatoForKontrakt >= LocalDate.now())
+        } ?: false
     }
 }
