@@ -98,6 +98,24 @@ internal class AdresseHjelperTest {
         }
 
         @Test
+        internal fun `hvis delt bosted, men annen adresse, forvent borPåSammeAdresse lik true`() {
+            val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse(2)))
+            val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(3)))
+
+            val barn = BarnMedIdent(
+                emptyList(),
+                barnAdresser,
+                listOf(DeltBosted(LocalDate.MIN, null, null, null, metadataGjeldende)),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                Navn("", "", "", Metadata(false)),
+                ""
+            )
+            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+        }
+
+        @Test
         internal fun `returnere false for matrikkeladresser med samme matrikkelId men forskjellig bruksenhetsnummer`() {
             val barnAdresser = listOf(
                 lagAdresse(

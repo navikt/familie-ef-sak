@@ -20,6 +20,9 @@ object AdresseHjelper {
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
+        if (harDeltBostedNå(barn)) {
+            return true
+        }
         return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
     }
