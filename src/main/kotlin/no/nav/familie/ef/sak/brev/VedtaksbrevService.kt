@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -22,6 +23,7 @@ import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -83,7 +85,8 @@ class VedtaksbrevService(
             brevmal = brevmal,
             saksbehandlersignatur = saksbehandlersignatur,
             enhet = enhet,
-            saksbehandlerident = SikkerhetContext.hentSaksbehandler()
+            saksbehandlerident = SikkerhetContext.hentSaksbehandler(),
+            opprettetTid = SporbarUtils.now()
         )
 
         return when (brevRepository.existsById(behandlingId)) {
@@ -117,7 +120,8 @@ class VedtaksbrevService(
             besluttersignatur = signaturMedEnhet.navn,
             enhet = signaturMedEnhet.enhet,
             beslutterident = beslutterIdent,
-            beslutterPdf = beslutterPdf
+            beslutterPdf = beslutterPdf,
+            besluttetTid = LocalDateTime.now()
         )
         brevRepository.update(besluttervedtaksbrev)
         return Fil(bytes = beslutterPdf.bytes)
