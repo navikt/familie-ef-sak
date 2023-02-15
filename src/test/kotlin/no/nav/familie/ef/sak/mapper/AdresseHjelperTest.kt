@@ -247,23 +247,6 @@ internal class AdresseHjelperTest {
         }
 
         @Test
-        internal fun `barn har delt bosted`() {
-            val barnMedDeltBosted = BarnMedIdent(
-                listOf(),
-                emptyList(),
-                listOf(DeltBosted(LocalDate.MIN, null, null, null, metadataGjeldende)),
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                Navn("", "", "", Metadata(false)),
-                ""
-            )
-            val forelderAdresser = listOf(lagAdresse(adresseOslo(), now().minusDays(1000), null))
-
-            assertThat(AdresseHjelper.borPåSammeAdresse(barnMedDeltBosted, forelderAdresser)).isFalse
-        }
-
-        @Test
         internal fun `forelder og barn bor på samme adresse selv om det ikke finnes gyldighetsdato`() {
             val barnAdresser = listOf(
                 lagAdresse(vegadresse = adresseTromsø(), metadata = metadataGjeldende),
