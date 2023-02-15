@@ -269,6 +269,49 @@ internal class AdresseHjelperTest {
 
             assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
         }
+        @Test
+        internal fun `delt bosted er innenfor nåtid, forvent harDeltBosted lik true`() {
+            val barnMedDeltBosted = BarnMedIdent(
+                listOf(),
+                emptyList(),
+                listOf(DeltBosted(now(), null, null, null, metadataGjeldende)),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                Navn("", "", "", Metadata(false)),
+                ""
+            )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isTrue
+        }
+        @Test
+        internal fun `delt bosted er utenfor nåtid, forvent harDeltBosted lik false`() {
+            val barnMedDeltBosted = BarnMedIdent(
+                listOf(),
+                emptyList(),
+                listOf(DeltBosted(now().plusDays(1), null, null, null, metadataGjeldende)),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                Navn("", "", "", Metadata(false)),
+                ""
+            )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
+        }
+
+        @Test
+        internal fun `delt bosted finnes ikke, forvent harDeltBosted lik false`() {
+            val barnMedDeltBosted = BarnMedIdent(
+                listOf(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                Navn("", "", "", Metadata(false)),
+                ""
+            )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
+        }
     }
 
     @Nested
