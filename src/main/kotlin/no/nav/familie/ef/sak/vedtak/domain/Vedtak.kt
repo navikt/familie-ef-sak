@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
@@ -39,8 +41,8 @@ data class Vedtak(
     val skolepenger: SkolepengerWrapper? = null,
     val beslutterIdent: String? = null,
     val internBegrunnelse: String? = null,
-    val opprettetTid: LocalDateTime? = null, // TODO sett not null default
-    val opprettetAv: String? = null // TODO sett not null default
+    val opprettetTid: LocalDateTime = SporbarUtils.now(),
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
 ) {
     fun erVedtakUtenBeslutter(): Boolean =
         resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER
