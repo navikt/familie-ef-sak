@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
@@ -20,6 +21,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeListe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.slf4j.LoggerFactory
@@ -146,7 +148,8 @@ class PersonopplysningerMapper(
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
             borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
-            deltBosted = barn.deltBosted.filter { !it.metadata.historisk },
+            deltBosted = barn.deltBosted.gjeldendeListe()
+                .map { DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt) },
             harDeltBostedNå = AdresseHjelper.harDeltBostedNå(barn),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato

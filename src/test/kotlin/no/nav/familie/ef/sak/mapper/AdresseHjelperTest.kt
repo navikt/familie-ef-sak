@@ -281,7 +281,7 @@ internal class AdresseHjelperTest {
                 Navn("", "", "", Metadata(false)),
                 ""
             )
-            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isTrue
+            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isTrue
         }
         @Test
         internal fun `delt bosted er utenfor nåtid, forvent harDeltBosted lik false`() {
@@ -295,7 +295,7 @@ internal class AdresseHjelperTest {
                 Navn("", "", "", Metadata(false)),
                 ""
             )
-            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isFalse
         }
 
         @Test
@@ -310,7 +310,7 @@ internal class AdresseHjelperTest {
                 Navn("", "", "", Metadata(false)),
                 ""
             )
-            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isFalse
         }
     }
 
