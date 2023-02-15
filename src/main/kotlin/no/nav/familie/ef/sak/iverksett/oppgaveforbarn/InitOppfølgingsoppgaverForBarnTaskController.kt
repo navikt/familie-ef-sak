@@ -12,12 +12,12 @@ import java.time.LocalDate
 @RestController
 @RequestMapping(
     path = ["/api/oppgaverforbarn"],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    produces = [MediaType.APPLICATION_JSON_VALUE],
 )
 @Unprotected
 class InitOppfølgingsoppgaverForBarnTaskController(
     private val taskService: TaskService,
-    private val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService
+    private val barnFyllerÅrOppfølgingsoppgaveService: BarnFyllerÅrOppfølgingsoppgaveService,
 ) {
 
     @PostMapping("/initialiser")

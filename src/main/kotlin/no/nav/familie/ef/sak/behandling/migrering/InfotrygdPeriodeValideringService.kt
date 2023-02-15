@@ -20,7 +20,7 @@ import java.time.YearMonth
 @Service
 class InfotrygdPeriodeValideringService(
     private val infotrygdService: InfotrygdService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) {
 
     fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
@@ -29,7 +29,7 @@ class InfotrygdPeriodeValideringService(
                 StønadType.OVERGANGSSTØNAD ->
                     validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                         fagsak.hentAktivIdent(),
-                        fagsak.stønadstype
+                        fagsak.stønadstype,
                     )
                 StønadType.BARNETILSYN, StønadType.SKOLEPENGER ->
                     validerHarIkkeÅpenSakIInfotrygd(fagsak)
@@ -45,7 +45,7 @@ class InfotrygdPeriodeValideringService(
             throw ApiFeil(
                 "Det eksisterer perioder i infotrygd for denne personen. " +
                     "Vennligst søk opp personen og migrer før du journalfører denne journalposten",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             )
         }
     }
@@ -68,7 +68,7 @@ class InfotrygdPeriodeValideringService(
     fun hentPeriodeForMigrering(
         personIdent: String,
         stønadType: StønadType,
-        kjøremåned: YearMonth = YearMonth.now()
+        kjøremåned: YearMonth = YearMonth.now(),
     ): SummertInfotrygdPeriodeDto {
         validerSakerIInfotrygd(personIdent, stønadType)
         val dtoPerioder = infotrygdService.hentDtoPerioder(personIdent)
@@ -83,7 +83,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun periodeFremEllerBakITiden(
         perioder: InfotrygdStønadPerioderDto,
-        kjøremåned: YearMonth
+        kjøremåned: YearMonth,
     ): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = perioder.summert
         val perioderFremITiden = gjeldendePerioder.filter { it.stønadsperiode.tomDato >= kjøremåned.atDay(1) }
@@ -94,14 +94,14 @@ class InfotrygdPeriodeValideringService(
         if (gjeldendePerioder.isEmpty()) {
             throw MigreringException(
                 "Har ikke noen perioder å migrere",
-                MigreringExceptionType.MANGLER_PERIODER
+                MigreringExceptionType.MANGLER_PERIODER,
             )
         }
         val perioderMedBeløp = gjeldendePerioder.filter { it.månedsbeløp != 0 }
         if (perioderMedBeløp.isEmpty()) {
             throw MigreringException(
                 "Har ikke noen perioder med beløp å migrere",
-                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP
+                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP,
             )
         }
         val sistePeriode = perioderMedBeløp.maxByOrNull { it.stønadsperiode.fom } ?: error("Finner ikke noen perioder")
@@ -114,13 +114,13 @@ class InfotrygdPeriodeValideringService(
      */
     private fun gjeldendePeriodeFremITiden(
         perioderFremITiden: List<SummertInfotrygdPeriodeDto>,
-        kjøremåned: YearMonth
+        kjøremåned: YearMonth,
     ): SummertInfotrygdPeriodeDto {
         val gjeldendePerioder = slåSammenFremtidligePerioderHvisLike(perioderFremITiden)
         if (gjeldendePerioder.size > 1) {
             throw MigreringException(
                 "Har fler enn 1 (${gjeldendePerioder.size}) aktiv periode",
-                MigreringExceptionType.FLERE_AKTIVE_PERIODER
+                MigreringExceptionType.FLERE_AKTIVE_PERIODER,
             )
         }
         val periode = gjeldendePerioder.single()
@@ -129,16 +129,16 @@ class InfotrygdPeriodeValideringService(
         if (periode.månedsbeløp < 1) {
             throw MigreringException(
                 "Kan ikke migrere perioder frem i tiden med månedsbløp=${periode.månedsbeløp}",
-                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP_FREM_I_TIDEN
+                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP_FREM_I_TIDEN,
             )
         }
         return periode.copy(
             stønadsperiode = periode.stønadsperiode.copy(
                 fom = maxOf(
                     kjøremåned,
-                    periode.stønadsperiode.fom
-                )
-            )
+                    periode.stønadsperiode.fom,
+                ),
+            ),
         )
     }
 
@@ -164,7 +164,7 @@ class InfotrygdPeriodeValideringService(
      */
     private fun perioderErSammenhengendeMedSammeAktivitetOgMånedsbeløp(
         last: SummertInfotrygdPeriodeDto,
-        periode: SummertInfotrygdPeriodeDto
+        periode: SummertInfotrygdPeriodeDto,
     ) =
         last.stønadsperiode påfølgesAv periode.stønadsperiode &&
             sammeAktivitetEllerIkkeArbeidssøker(last, periode) &&
@@ -172,7 +172,7 @@ class InfotrygdPeriodeValideringService(
 
     private fun sammeAktivitetEllerIkkeArbeidssøker(
         last: SummertInfotrygdPeriodeDto,
-        periode: SummertInfotrygdPeriodeDto
+        periode: SummertInfotrygdPeriodeDto,
     ) =
         last.aktivitet == periode.aktivitet ||
             (last.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER && periode.aktivitet != TILMELDT_SOM_REELL_ARBEIDSSØKER)
@@ -190,13 +190,13 @@ class InfotrygdPeriodeValideringService(
         if (stønadFom > nyFomDato) {
             throw MigreringException(
                 "Startdato er annet enn første i måneden, dato=$stønadFom",
-                MigreringExceptionType.FEIL_FOM_DATO
+                MigreringExceptionType.FEIL_FOM_DATO,
             )
         }
         if (periode.månedsbeløp == 0) {
             throw MigreringException(
                 "Beløp er 0 på siste perioden, har ikke støtte for det ennå. fom=$stønadFom",
-                MigreringExceptionType.BELØP_0
+                MigreringExceptionType.BELØP_0,
             )
         }
         return periode.copy(stønadsperiode = periode.stønadsperiode.copy(fom = tomMåned))
@@ -206,7 +206,7 @@ class InfotrygdPeriodeValideringService(
         if (periode.stønadFom.dayOfMonth != 1) {
             throw MigreringException(
                 "Startdato er annet enn første i måneden, dato=${periode.stønadFom}",
-                MigreringExceptionType.FEIL_FOM_DATO
+                MigreringExceptionType.FEIL_FOM_DATO,
             )
         }
     }
@@ -216,13 +216,13 @@ class InfotrygdPeriodeValideringService(
         if (YearMonth.of(dato.year, dato.month).atEndOfMonth() != dato) {
             throw MigreringException(
                 "Sluttdato er annet enn siste i måneden, dato=$dato",
-                MigreringExceptionType.FEIL_TOM_DATO
+                MigreringExceptionType.FEIL_TOM_DATO,
             )
         }
         if (dato.isBefore(LocalDate.now().minusYears(3))) {
             throw MigreringException(
                 "Kan ikke migrere når forrige utbetaling i infotrygd er mer enn 3 år tilbake i tid, dato=$dato",
-                MigreringExceptionType.ELDRE_PERIODER
+                MigreringExceptionType.ELDRE_PERIODER,
             )
         }
     }
@@ -237,27 +237,27 @@ class InfotrygdPeriodeValideringService(
 
     private fun validerHarKunEnIdentPåPerioder(
         perioder: InfotrygdStønadPerioderDto,
-        personIdent: String
+        personIdent: String,
     ) {
         perioder.perioder.find { it.personIdent != personIdent }?.let {
             throw MigreringException(
                 "Det finnes perioder som inneholder annet fnr=${it.personIdent}. " +
                     "Disse vedtaken må endres til aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER_VEDTAK
+                MigreringExceptionType.FLERE_IDENTER_VEDTAK,
             )
         }
     }
 
     private fun validerSakerInneholderKunEnIdent(
         sakerForOvergangsstønad: List<InfotrygdSak>,
-        personIdent: String
+        personIdent: String,
     ) {
         sakerForOvergangsstønad.find { it.personIdent != personIdent }?.let {
             throw MigreringException(
                 "Finnes sak med annen personIdent for personen. ${lagSakFeilinfo(it)} " +
                     "personIdent=${it.personIdent}. " +
                     "Disse sakene må oppdateres med aktivt fnr i Infotrygd",
-                MigreringExceptionType.FLERE_IDENTER
+                MigreringExceptionType.FLERE_IDENTER,
             )
         }
     }
@@ -269,10 +269,11 @@ class InfotrygdPeriodeValideringService(
                     it.type != InfotrygdSakType.KLAGE_TILBAKEBETALING &&
                     it.type != InfotrygdSakType.ANKE
             }
-            .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }?.let {
+            .find { it.resultat == InfotrygdSakResultat.ÅPEN_SAK }
+            ?.let {
                 throw MigreringException(
                     "Har åpen sak. ${lagSakFeilinfo(it)}",
-                    MigreringExceptionType.ÅPEN_SAK
+                    MigreringExceptionType.ÅPEN_SAK,
                 )
             }
     }

@@ -28,7 +28,7 @@ internal class OpprettBehandlingUtilTest {
             val behandling = behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
+                status = BehandlingStatus.FERDIGSTILT,
             )
             validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
         }
@@ -39,7 +39,7 @@ internal class OpprettBehandlingUtilTest {
                 fagsak = fagsak,
                 resultat = BehandlingResultat.INNVILGET,
                 status = BehandlingStatus.FERDIGSTILT,
-                type = BehandlingType.REVURDERING
+                type = BehandlingType.REVURDERING,
             )
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
@@ -51,7 +51,7 @@ internal class OpprettBehandlingUtilTest {
             val behandling = behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
+                status = BehandlingStatus.FERDIGSTILT,
             )
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
@@ -63,7 +63,7 @@ internal class OpprettBehandlingUtilTest {
             val behandling = behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.IKKE_SATT,
-                status = BehandlingStatus.SATT_PÅ_VENT
+                status = BehandlingStatus.SATT_PÅ_VENT,
             )
 
             assertThatThrownBy {
@@ -76,7 +76,7 @@ internal class OpprettBehandlingUtilTest {
             val behandling = behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.IKKE_SATT,
-                status = BehandlingStatus.SATT_PÅ_VENT
+                status = BehandlingStatus.SATT_PÅ_VENT,
             )
 
             assertThatThrownBy {
@@ -93,17 +93,17 @@ internal class OpprettBehandlingUtilTest {
                 behandling(
                     fagsak = fagsak,
                     status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET
+                    resultat = BehandlingResultat.INNVILGET,
                 ),
                 behandling(
                     fagsak = fagsak,
-                    status = BehandlingStatus.UTREDES
+                    status = BehandlingStatus.UTREDES,
                 ),
                 behandling(
                     fagsak = fagsak,
                     status = BehandlingStatus.FERDIGSTILT,
-                    resultat = BehandlingResultat.INNVILGET
-                )
+                    resultat = BehandlingResultat.INNVILGET,
+                ),
             )
             assertThatThrownBy { validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger) }
                 .hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
@@ -114,13 +114,13 @@ internal class OpprettBehandlingUtilTest {
             val behandlinger = listOf(
                 behandling(
                     fagsak = fagsak,
-                    status = BehandlingStatus.FERDIGSTILT
+                    status = BehandlingStatus.FERDIGSTILT,
                 ),
                 behandling(
                     fagsak = fagsak,
                     status = BehandlingStatus.SATT_PÅ_VENT,
-                    type = BehandlingType.REVURDERING
-                )
+                    type = BehandlingType.REVURDERING,
+                ),
             )
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger)
         }
@@ -130,7 +130,7 @@ internal class OpprettBehandlingUtilTest {
             val behandling = behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.AVSLÅTT,
-                status = BehandlingStatus.FERDIGSTILT
+                status = BehandlingStatus.FERDIGSTILT,
             )
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(behandling))
         }
@@ -140,7 +140,7 @@ internal class OpprettBehandlingUtilTest {
             val behandling = behandling(
                 fagsak = fagsak,
                 resultat = BehandlingResultat.HENLAGT,
-                status = BehandlingStatus.FERDIGSTILT
+                status = BehandlingStatus.FERDIGSTILT,
             )
             assertThatThrownBy {
                 validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(behandling))
@@ -170,7 +170,7 @@ internal class OpprettBehandlingUtilTest {
                     validerKanOppretteNyBehandling(
                         BehandlingType.REVURDERING,
                         listOf(it),
-                        erMigrering = true
+                        erMigrering = true,
                     )
                 }.hasMessage("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før")
             }

@@ -58,8 +58,8 @@ internal class VedleggServiceTest {
                 Behandlingsjournalpost(
                     behandlingId,
                     journalpostEttersendelse.journalpostId,
-                    journalpostEttersendelse.journalposttype
-                )
+                    journalpostEttersendelse.journalposttype,
+                ),
             )
         }
     }
@@ -130,10 +130,10 @@ internal class VedleggServiceTest {
         dokumentvarianter = listOf(
             Dokumentvariant(
                 filnavn = "FilnavnDok1",
-                variantformat = Dokumentvariantformat.ARKIV
+                variantformat = Dokumentvariantformat.ARKIV,
             ),
-            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL)
-        )
+            Dokumentvariant(variantformat = Dokumentvariantformat.ORIGINAL),
+        ),
     )
 
     private val syktBarnDokument = DokumentInfo(
@@ -142,15 +142,15 @@ internal class VedleggServiceTest {
         dokumentvarianter = listOf(
             Dokumentvariant(
                 filnavn = "FilnavnDok2",
-                variantformat = Dokumentvariantformat.ARKIV
-            )
-        )
+                variantformat = Dokumentvariantformat.ARKIV,
+            ),
+        ),
     )
 
     private val ukjentDokument = DokumentInfo(
         dokumentInfoId = "404",
         tittel = "Ukjent tittel",
-        dokumentvarianter = null
+        dokumentvarianter = null,
     )
 
     private val samboerdokument = DokumentInfo(
@@ -160,9 +160,9 @@ internal class VedleggServiceTest {
         dokumentvarianter = listOf(
             Dokumentvariant(
                 filnavn = "FilnavnDok3",
-                variantformat = Dokumentvariantformat.ARKIV
-            )
-        )
+                variantformat = Dokumentvariantformat.ARKIV,
+            ),
+        ),
     )
     private val skilsmissedokument = DokumentInfo(
         dokumentInfoId = "444",
@@ -171,22 +171,22 @@ internal class VedleggServiceTest {
         listOf(
             Dokumentvariant(
                 filnavn = "FilnavnDok4",
-                variantformat = Dokumentvariantformat.ARKIV
-            )
-        )
+                variantformat = Dokumentvariantformat.ARKIV,
+            ),
+        ),
     )
 
     private val journalpostSøknad = Journalpost(
         journalpostId = "1",
         journalposttype = Journalposttype.I,
         journalstatus = Journalstatus.MOTTATT,
-        dokumenter = listOf(søknadsdokument, syktBarnDokument, ukjentDokument)
+        dokumenter = listOf(søknadsdokument, syktBarnDokument, ukjentDokument),
     )
 
     private val journalpostEttersendelse = Journalpost(
         journalpostId = "2",
         journalposttype = Journalposttype.I,
         journalstatus = Journalstatus.MOTTATT,
-        dokumenter = listOf(samboerdokument, skilsmissedokument)
+        dokumenter = listOf(samboerdokument, skilsmissedokument),
     )
 }

@@ -6,5 +6,5 @@ data class JournalføringResponse(
     val journalpost: Journalpost,
     val personIdent: String,
     val navn: String,
-    val harStrukturertSøknad: Boolean
+    val harStrukturertSøknad: Boolean,
 )

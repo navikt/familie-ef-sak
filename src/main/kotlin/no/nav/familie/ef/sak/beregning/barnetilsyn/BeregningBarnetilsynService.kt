@@ -21,7 +21,7 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
         tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
-        erMigrering: Boolean = false
+        erMigrering: Boolean = false,
     ): List<BeløpsperiodeBarnetilsynDto> {
         validerGyldigePerioder(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder, erMigrering)
         validerFornuftigeBeløp(utgiftsperioder, kontantstøttePerioder, tilleggsstønadsperioder)
@@ -30,7 +30,7 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         return utgiftsperioder.tilBeløpsperioderPerUtgiftsmåned(
             kontantstøttePerioder,
             tilleggsstønadsperioder,
-            brukIkkeVedtatteSatser
+            brukIkkeVedtatteSatser,
         )
             .values.toList()
             .mergeSammenhengendePerioder()
@@ -43,7 +43,7 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
     private fun validerFornuftigeBeløp(
         utgiftsperioder: List<UtgiftsperiodeDto>,
         kontantstøttePerioder: List<PeriodeMedBeløpDto>,
-        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>
+        tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
     ) {
         brukerfeilHvis(utgiftsperioder.any { it.utgifter < 0 }) { "Utgifter kan ikke være mindre enn 0" }
         brukerfeilHvis(utgiftsperioder.any { it.utgifter > 40000 }) { "Utgifter på mer enn 40000 støttes ikke" }
@@ -64,7 +64,7 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
         utgiftsperioderDto: List<UtgiftsperiodeDto>,
         kontantstøttePerioderDto: List<PeriodeMedBeløpDto>,
         tilleggsstønadsperioderDto: List<PeriodeMedBeløpDto>,
-        erMigrering: Boolean
+        erMigrering: Boolean,
     ) {
         val utgiftsperioder = utgiftsperioderDto.tilPerioder()
         val kontantstøttePerioder = kontantstøttePerioderDto.tilPerioder()
@@ -108,7 +108,7 @@ class BeregningBarnetilsynService(private val featureToggleService: FeatureToggl
 
     private fun harUrelevantReduksjonsPeriode(
         utgiftsperioder: List<Månedsperiode>,
-        reduksjonsperioder: List<Månedsperiode>
+        reduksjonsperioder: List<Månedsperiode>,
     ): Boolean {
         return reduksjonsperioder.isNotEmpty() && !reduksjonsperioder.any {
             utgiftsperioder.any { ut ->
@@ -126,19 +126,19 @@ fun InnvilgelseBarnetilsyn.tilBeløpsperioderPerUtgiftsmåned(brukIkkeVedtatteSa
     this.perioder.tilBeløpsperioderPerUtgiftsmåned(
         this.perioderKontantstøtte,
         this.tilleggsstønad.perioder,
-        brukIkkeVedtatteSatser
+        brukIkkeVedtatteSatser,
     )
 
 fun List<UtgiftsperiodeDto>.tilBeløpsperioderPerUtgiftsmåned(
     kontantstøttePerioder: List<PeriodeMedBeløpDto>,
     tilleggsstønadsperioder: List<PeriodeMedBeløpDto>,
-    brukIkkeVedtatteSatser: Boolean
+    brukIkkeVedtatteSatser: Boolean,
 ) = this.map { it.split() }
     .flatten().associate { utgiftsMåned ->
         utgiftsMåned.årMåned to utgiftsMåned.tilBeløpsperiodeBarnetilsynDto(
             kontantstøttePerioder,
             tilleggsstønadsperioder,
-            brukIkkeVedtatteSatser
+            brukIkkeVedtatteSatser,
         )
     }
 
@@ -175,8 +175,8 @@ fun List<BeløpsperiodeBarnetilsynDto>.mergeSammenhengendePerioder(): List<Belø
             acc.removeLast()
             acc.add(
                 last.copy(
-                    periode = last.periode union entry.periode
-                )
+                    periode = last.periode union entry.periode,
+                ),
             )
         } else {
             acc.add(entry)

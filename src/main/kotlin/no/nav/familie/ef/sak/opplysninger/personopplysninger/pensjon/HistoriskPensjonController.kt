@@ -14,7 +14,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class HistoriskPensjonController(
     val historiskPensjonService: HistoriskPensjonService,
-    val featureToggleService: FeatureToggleService
+    val featureToggleService: FeatureToggleService,
 ) {
 
     @GetMapping("{fagsakPersonId}")

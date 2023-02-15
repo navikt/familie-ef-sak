@@ -88,7 +88,7 @@ fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error(
 fun <T, R> CacheManager.getCachedOrLoad(
     cacheName: String,
     values: List<T>,
-    valueLoader: (List<T>) -> Map<T, R>
+    valueLoader: (List<T>) -> Map<T, R>,
 ): Map<T, R> {
     val cache = this.getCacheOrThrow(cacheName)
     val previousValues: List<Pair<T, R?>> = values.distinct().map { it to cache.get(it)?.get() as R? }.toList()

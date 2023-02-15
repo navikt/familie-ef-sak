@@ -18,7 +18,7 @@ import java.util.UUID
 class EndringerIPersonOpplysningerService(
     private val behandlingService: BehandlingService,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -34,7 +34,7 @@ class EndringerIPersonOpplysningerService(
 
     private fun hentEndringerPersonopplysninger(
         behandling: Saksbehandling,
-        grunnlagsdata: Grunnlagsdata
+        grunnlagsdata: Grunnlagsdata,
     ): EndringerIPersonopplysningerDto {
         val nyGrunnlagsdata = hentOppdatertGrunnlagsdata(behandling, grunnlagsdata)
             ?: return EndringerIPersonopplysningerDto(grunnlagsdata.oppdaterteDataHentetTid, Endringer())
@@ -42,18 +42,18 @@ class EndringerIPersonOpplysningerService(
         val endringer = personopplysningerService.finnEndringerIPersonopplysninger(
             behandling,
             grunnlagsdata.tilGrunnlagsdataMedMetadata(),
-            nyGrunnlagsdata
+            nyGrunnlagsdata,
         )
         if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
             logger.info(
                 "Endringer i fagsak=${behandling.fagsakId} behandling=${behandling.id}" +
-                    " ${endringer.endringer.felterMedEndringerString()}"
+                    " ${endringer.endringer.felterMedEndringerString()}",
             )
             grunnlagsdataService.oppdaterEndringer(
                 grunnlagsdata.copy(
                     oppdaterteDataHentetTid = LocalDateTime.now(),
-                    oppdaterteData = if (endringer.endringer.harEndringer) nyGrunnlagsdata.grunnlagsdata else null
-                )
+                    oppdaterteData = if (endringer.endringer.harEndringer) nyGrunnlagsdata.grunnlagsdata else null,
+                ),
             )
         }
         return endringer
@@ -61,7 +61,7 @@ class EndringerIPersonOpplysningerService(
 
     private fun hentOppdatertGrunnlagsdata(
         behandling: Saksbehandling,
-        grunnlagsdata: Grunnlagsdata
+        grunnlagsdata: Grunnlagsdata,
     ) = if (grunnlagsdata.skalSjekkeDataFraRegisteret()) {
         grunnlagsdataService.hentFraRegister(behandling.id)
     } else {

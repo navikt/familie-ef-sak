@@ -27,7 +27,7 @@ class GjenbrukVilkårService(
     private val fagsakService: FagsakService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val barnService: BarnService
+    private val barnService: BarnService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -45,11 +45,11 @@ class GjenbrukVilkårService(
     @Transactional
     fun gjenbrukInngangsvilkårVurderinger(
         nåværendeBehandlingId: UUID,
-        tidligereBehandlingId: UUID
+        tidligereBehandlingId: UUID,
     ) {
         validerBehandlingForGjenbruk(
             nåværendeBehandlingId,
-            tidligereBehandlingId
+            tidligereBehandlingId,
         )
         val forrigeBarnIdTilNåværendeBarnMap =
             finnBarnPåBeggeBehandlinger(nåværendeBehandlingId, tidligereBehandlingId)
@@ -58,7 +58,7 @@ class GjenbrukVilkårService(
         val tidligereVurderinger = hentVurderingerSomSkalGjenbrukes(
             sivilstandErLik,
             tidligereBehandlingId,
-            forrigeBarnIdTilNåværendeBarnMap
+            forrigeBarnIdTilNåværendeBarnMap,
         )
         val nåværendeVurderinger =
             vilkårsvurderingRepository.findByBehandlingId(nåværendeBehandlingId)
@@ -66,11 +66,11 @@ class GjenbrukVilkårService(
             nåværendeBehandlingId,
             nåværendeVurderinger,
             tidligereVurderinger,
-            forrigeBarnIdTilNåværendeBarnMap
+            forrigeBarnIdTilNåværendeBarnMap,
         )
         secureLogger.info(
             "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} gjenbruker vurderinger fra behandling $tidligereBehandlingId " +
-                "for å oppdatere vurderinger på inngangsvilkår for behandling $nåværendeBehandlingId"
+                "for å oppdatere vurderinger på inngangsvilkår for behandling $nåværendeBehandlingId",
         )
         vilkårsvurderingRepository.updateAll(vurderingerSomSkalLagres)
     }
@@ -79,7 +79,7 @@ class GjenbrukVilkårService(
         behandlingId: UUID,
         nåværendeVurderinger: List<Vilkårsvurdering>,
         tidligereVurderinger: List<Vilkårsvurdering>,
-        forrigeBarnIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>
+        forrigeBarnIdTilNåværendeBarnMap: Map<UUID, BehandlingBarn>,
     ) = tidligereVurderinger.mapNotNull { tidligereVurdering ->
         /* Dersom tidligere vurdering og matchende nåværende vurdering ikke gjelder barn vil tidligere vurdering kopieres */
         val barnForVurdering = forrigeBarnIdTilNåværendeBarnMap[tidligereVurdering.barnId]
@@ -89,14 +89,14 @@ class GjenbrukVilkårService(
                     id = it.id,
                     behandlingId = behandlingId,
                     sporbar = it.sporbar,
-                    barnId = it.barnId
+                    barnId = it.barnId,
                 )
             }
     }
 
     private fun finnBarnPåBeggeBehandlinger(
         behandlingId: UUID,
-        tidligereBehandlingId: UUID
+        tidligereBehandlingId: UUID,
     ): Map<UUID, BehandlingBarn> {
         val behandlingBarn = barnService.finnBarnPåBehandling(behandlingId).associateBy { it.personIdent }
         val barnPåForrigeBehandling = barnService.finnBarnPåBehandling(tidligereBehandlingId)
@@ -108,14 +108,14 @@ class GjenbrukVilkårService(
     private fun hentVurderingerSomSkalGjenbrukes(
         sivilstandErLik: Boolean,
         tidligereBehandlingId: UUID,
-        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>
+        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
     ): List<Vilkårsvurdering> = vilkårsvurderingRepository.findByBehandlingId(tidligereBehandlingId)
         .filter { it.type.erInngangsvilkår() }
         .filter { skalGjenbrukeVurdering(it, sivilstandErLik, barnPåBeggeBehandlinger) }
 
     private fun erSivilstandUforandretSidenForrigeBehandling(
         behandlingId: UUID,
-        tidligereBehandlingId: UUID
+        tidligereBehandlingId: UUID,
     ): Boolean {
         val tidligereGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(tidligereBehandlingId)
         val nåværendeGrunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
@@ -124,7 +124,7 @@ class GjenbrukVilkårService(
 
     private fun validerBehandlingForGjenbruk(
         behandlingId: UUID,
-        tidligereBehandlingId: UUID
+        tidligereBehandlingId: UUID,
     ) {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
@@ -146,7 +146,7 @@ class GjenbrukVilkårService(
     private fun skalGjenbrukeVurdering(
         vurdering: Vilkårsvurdering,
         sivilstandErLik: Boolean,
-        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>
+        barnPåBeggeBehandlinger: Map<UUID, BehandlingBarn>,
     ): Boolean {
         return when (vurdering.type) {
             VilkårType.SIVILSTAND -> sivilstandErLik

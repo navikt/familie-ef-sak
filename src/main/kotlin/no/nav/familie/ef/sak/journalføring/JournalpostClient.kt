@@ -31,7 +31,7 @@ import java.net.URI
 @Component
 class JournalpostClient(
     @Qualifier("azure") restOperations: RestOperations,
-    integrasjonerConfig: IntegrasjonerConfig
+    integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "journalpost") {
 
@@ -62,11 +62,11 @@ class JournalpostClient(
             UriComponentsBuilder
                 .fromUriString(
                     "$journalpostURI/hentdokument/" +
-                        "$journalpostId/$dokumentInfoId"
+                        "$journalpostId/$dokumentInfoId",
                 )
                 .queryParam("variantFormat", dokumentVariantformat)
                 .build()
-                .toUri()
+                .toUri(),
         )
             .getDataOrThrow()
     }
@@ -98,12 +98,12 @@ class JournalpostClient(
     fun oppdaterJournalpost(
         oppdaterJournalpostRequest: OppdaterJournalpostRequest,
         journalpostId: String,
-        saksbehandler: String?
+        saksbehandler: String?,
     ): OppdaterJournalpostResponse {
         return putForEntity<Ressurs<OppdaterJournalpostResponse>>(
             URI.create("$dokarkivUri/v2/$journalpostId"),
             oppdaterJournalpostRequest,
-            headerMedSaksbehandler(saksbehandler)
+            headerMedSaksbehandler(saksbehandler),
         ).data
             ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
     }
@@ -112,7 +112,7 @@ class JournalpostClient(
         return postForEntity<Ressurs<ArkiverDokumentResponse>>(
             URI.create("$dokarkivUri/v4/"),
             arkiverDokumentRequest,
-            headerMedSaksbehandler(saksbehandler)
+            headerMedSaksbehandler(saksbehandler),
         ).data
             ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
     }
@@ -122,7 +122,7 @@ class JournalpostClient(
             putForEntity<Ressurs<OppdaterJournalpostResponse>>(
                 URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
                 "",
-                headerMedSaksbehandler(saksbehandler)
+                headerMedSaksbehandler(saksbehandler),
             )
         } catch (e: RessursException) {
             brukerfeilHvis(e.ressurs.melding.contains("DokumentInfo.tittel")) {

@@ -56,7 +56,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten riktig`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("søker.json")))
+                .willReturn(okJson(readFile("søker.json"))),
         )
 
         val response = pdlClient.hentSøker("")
@@ -68,13 +68,13 @@ class PdlClientTest {
     fun `pdlClient håndterer response for andreForeldre-query mot pdl-tjenesten riktig`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("andreForeldre.json")))
+                .willReturn(okJson(readFile("andreForeldre.json"))),
         )
 
         val response = pdlClient.hentAndreForeldre(listOf("11111122222"))
 
         assertThat(response["11111122222"]?.bostedsadresse?.get(0)?.gyldigFraOgMed).isEqualTo(
-            LocalDate.of(1966, 11, 18)
+            LocalDate.of(1966, 11, 18),
         )
     }
 
@@ -82,7 +82,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for barn-query mot pdl-tjenesten riktig`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("barn.json")))
+                .willReturn(okJson(readFile("barn.json"))),
         )
 
         val response = pdlClient.hentPersonForelderBarnRelasjon(listOf("11111122222"))
@@ -94,7 +94,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for personKortBolk-query mot pdl-tjenesten riktig`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("person_kort_bolk.json")))
+                .willReturn(okJson(readFile("person_kort_bolk.json"))),
         )
 
         val response = pdlClient.hentPersonKortBolk(listOf("11111122222"))
@@ -106,7 +106,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for uthenting av identer`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("hent_identer.json")))
+                .willReturn(okJson(readFile("hent_identer.json"))),
         )
         val response = pdlClient.hentAktørIder("12345")
         assertThat(response.identer.first().ident).isEqualTo("12345678901")
@@ -116,7 +116,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der person i data er null`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson("{\"data\": {}}"))
+                .willReturn(okJson("{\"data\": {}}")),
         )
         assertThat(Assertions.catchThrowable { pdlClient.hentSøker("") })
             .hasMessageStartingWith("Manglende ")
@@ -127,7 +127,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for søker-query mot pdl-tjenesten der data er null og har errors`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("pdlErrorResponse.json")))
+                .willReturn(okJson(readFile("pdlErrorResponse.json"))),
         )
         assertThat(Assertions.catchThrowable { pdlClient.hentSøker("") })
             .hasMessageStartingWith("Feil ved henting av")
@@ -138,7 +138,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for bolk-query mot pdl-tjenesten der person er null og har errors`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("pdlBolkErrorResponse.json")))
+                .willReturn(okJson(readFile("pdlBolkErrorResponse.json"))),
         )
         assertThat(Assertions.catchThrowable { pdlClient.hentPersonForelderBarnRelasjon(listOf("")) })
             .hasMessageStartingWith("Feil ved henting av")
@@ -149,7 +149,7 @@ class PdlClientTest {
     fun `pdlClient håndterer response for bolk-query mot pdl-tjenesten der data er null og har errors`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(okJson(readFile("pdlBolkErrorResponse_nullData.json")))
+                .willReturn(okJson(readFile("pdlBolkErrorResponse_nullData.json"))),
         )
         assertThat(Assertions.catchThrowable { pdlClient.hentPersonForelderBarnRelasjon(listOf("")) })
             .hasMessageStartingWith("Data er null fra PDL")
@@ -163,7 +163,7 @@ class PdlClientTest {
         fun `håndterer response for uthenting av identer i bolk`() {
             wiremockServerItem.stubFor(
                 post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                    .willReturn(okJson(readFile("hent_identer_bolk.json")))
+                    .willReturn(okJson(readFile("hent_identer_bolk.json"))),
             )
             val response = pdlClient.hentIdenterBolk(listOf("12345"))
             assertThat(response["12345678910"]?.ident).isEqualTo("11223344556677")
@@ -180,7 +180,7 @@ class PdlClientTest {
         fun `kjører feilfritt hvis antall identer er lik MAKS_ANTALL_IDENTER`() {
             wiremockServerItem.stubFor(
                 post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                    .willReturn(okJson(readFile("hent_identer_bolk.json")))
+                    .willReturn(okJson(readFile("hent_identer_bolk.json"))),
             )
             assertDoesNotThrow { pdlClient.hentIdenterBolk((1..PdlClient.MAKS_ANTALL_IDENTER).map { "$it" }) }
         }
@@ -189,7 +189,7 @@ class PdlClientTest {
         fun `skal håndtere hentIdenter hvor det ikke finnes en person`() {
             wiremockServerItem.stubFor(
                 post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                    .willReturn(okJson(readFile("hent_identer_finnes_ikke.json")))
+                    .willReturn(okJson(readFile("hent_identer_finnes_ikke.json"))),
             )
 
             assertThrows<PdlNotFoundException> { pdlClient.hentPersonidenter("12345678901") }

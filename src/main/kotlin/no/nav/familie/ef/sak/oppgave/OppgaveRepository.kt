@@ -20,7 +20,7 @@ interface OppgaveRepository : RepositoryInterface<Oppgave, Long>, InsertUpdateRe
             FROM oppgave o         
             WHERE o.alder is not null
                 AND o.barn_person_ident IN (:barnPersonIdenter)
-                AND o.type=:oppgavetype"""
+                AND o.type=:oppgavetype""",
     )
     fun findByTypeAndAlderIsNotNullAndBarnPersonIdenter(oppgavetype: Oppgavetype, barnPersonIdenter: List<String>?): List<Oppgave>
     fun findByGsakOppgaveId(gsakOppgaveId: Long): Oppgave?

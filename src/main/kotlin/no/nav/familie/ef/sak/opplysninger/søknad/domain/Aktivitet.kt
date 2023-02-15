@@ -22,7 +22,7 @@ data class Aktivitet(
     val erIArbeid: String? = null,
     val erIArbeidDokumentasjon: Dokumentasjon? = null,
     @MappedCollection(idColumn = "soknadsskjema_id")
-    val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet()
+    val tidligereUtdanninger: Set<TidligereUtdanning> = emptySet(),
 )
 
 @Table("soknad_arbeidsgiver")
@@ -31,7 +31,7 @@ data class Arbeidsgiver(
     val arbeidsmengde: Int? = null,
     val fastEllerMidlertidig: String? = null,
     val harSluttdato: Boolean?,
-    val sluttdato: LocalDate? = null
+    val sluttdato: LocalDate? = null,
 )
 
 @Table("soknad_selvstendig")
@@ -40,18 +40,18 @@ data class Selvstendig(
     val organisasjonsnummer: String,
     val etableringsdato: LocalDate,
     val arbeidsmengde: Int? = null,
-    val hvordanSerArbeidsukenUt: String
+    val hvordanSerArbeidsukenUt: String,
 )
 
 data class Virksomhet(
     val virksomhetsbeskrivelse: String,
-    val dokumentasjon: Dokumentasjon? = null
+    val dokumentasjon: Dokumentasjon? = null,
 )
 
 @Table("soknad_aksjeselskap")
 data class Aksjeselskap(
     val navn: String,
-    val arbeidsmengde: Int? = null
+    val arbeidsmengde: Int? = null,
 )
 
 data class Arbeidssituasjon(val verdier: List<String>)

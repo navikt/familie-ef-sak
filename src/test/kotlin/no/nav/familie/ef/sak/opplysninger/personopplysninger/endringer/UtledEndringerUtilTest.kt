@@ -43,7 +43,7 @@ internal class UtledEndringerUtilTest {
         val nyttBarn = BarnDto("nyttBarn", "2", null, emptyList(), true, null, null)
         val tidligere = dto(
             dødsdato = LocalDate.of(2021, 1, 1),
-            barn = listOf(barnBlirFjernet, barnsForelderBlirEndret, barnFårForelder, barnFårEndring)
+            barn = listOf(barnBlirFjernet, barnsForelderBlirEndret, barnFårForelder, barnFårEndring),
         )
         val nye = dto(
             status = Folkeregisterpersonstatus.UKJENT,
@@ -57,21 +57,21 @@ internal class UtledEndringerUtilTest {
                 barnsForelderBlirEndret.copy(
                     annenForelder = annenForelder.copy(
                         dødsdato = LocalDate.of(2022, 1, 1),
-                        bostedsadresse = "Annen adresse"
-                    )
+                        bostedsadresse = "Annen adresse",
+                    ),
                 ),
                 barnFårForelder.copy(annenForelder = annenForelder2),
                 barnFårEndring.copy(
                     borHosSøker = false,
                     fødselsdato = LocalDate.of(2020, 1, 1),
-                    dødsdato = LocalDate.of(2021, 1, 1)
+                    dødsdato = LocalDate.of(2021, 1, 1),
                 ),
-                nyttBarn
+                nyttBarn,
             ),
             innflyttingTilNorge = listOf(InnflyttingDto("", null, null)),
             utflyttingFraNorge = listOf(UtflyttingDto(null, null, null)),
             oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null)),
-            vergemål = listOf(VergemålDto(null, null, null, null, null))
+            vergemål = listOf(VergemålDto(null, null, null, null, null)),
         )
         val endringer = finnEndringer(tidligere, nye)
         val expected =
@@ -105,7 +105,7 @@ internal class UtledEndringerUtilTest {
         internal fun `folkeregisterpersonstatus endret fra et verdi til annet verdi`() {
             val endringer = finnEndringer(
                 dto(status = Folkeregisterpersonstatus.DØD),
-                dto(status = Folkeregisterpersonstatus.BOSATT)
+                dto(status = Folkeregisterpersonstatus.BOSATT),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
@@ -125,7 +125,7 @@ internal class UtledEndringerUtilTest {
         internal fun `2 lister med de liknende data`() {
             val endringer = finnEndringer(
                 dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
-                dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null)))
+                dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
             )
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.statsborgerskap.harEndringer).isFalse
@@ -164,7 +164,7 @@ internal class UtledEndringerUtilTest {
         internal fun statsborgerskap() {
             val endringer = finnEndringer(
                 dto(statsborgerskap = listOf(StatsborgerskapDto("land 1", null, null))),
-                dto(statsborgerskap = listOf(StatsborgerskapDto("land 2", null, null)))
+                dto(statsborgerskap = listOf(StatsborgerskapDto("land 2", null, null))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.statsborgerskap.harEndringer).isTrue
@@ -175,7 +175,7 @@ internal class UtledEndringerUtilTest {
         internal fun sivilstand() {
             val endringer = finnEndringer(
                 dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.UGIFT, null, null, null, null, true))),
-                dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true)))
+                dto(sivilstand = listOf(SivilstandDto(Sivilstandstype.GIFT, null, null, null, null, true))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.sivilstand.harEndringer).isTrue
@@ -186,7 +186,7 @@ internal class UtledEndringerUtilTest {
         internal fun adresse() {
             val endringer = finnEndringer(
                 dto(adresse = listOf(AdresseDto("1", AdresseType.BOSTEDADRESSE, null, null, null, true))),
-                dto(adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true)))
+                dto(adresse = listOf(AdresseDto("2", AdresseType.BOSTEDADRESSE, null, null, null, true))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.adresse.harEndringer).isTrue
@@ -198,7 +198,7 @@ internal class UtledEndringerUtilTest {
             val fullmaktDto = FullmaktDto(LocalDate.now(), LocalDate.now(), "1", null, emptyList())
             val endringer = finnEndringer(
                 dto(fullmakt = listOf(fullmaktDto)),
-                dto(fullmakt = listOf(fullmaktDto.copy(motpartsPersonident = "2")))
+                dto(fullmakt = listOf(fullmaktDto.copy(motpartsPersonident = "2"))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fullmakt.harEndringer).isTrue
@@ -209,7 +209,7 @@ internal class UtledEndringerUtilTest {
         internal fun innflyttingTilNorge() {
             val endringer = finnEndringer(
                 dto(innflyttingTilNorge = listOf(InnflyttingDto(null, null, null))),
-                dto(innflyttingTilNorge = listOf(InnflyttingDto("", null, null)))
+                dto(innflyttingTilNorge = listOf(InnflyttingDto("", null, null))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.innflyttingTilNorge.harEndringer).isTrue
@@ -220,7 +220,7 @@ internal class UtledEndringerUtilTest {
         internal fun utflyttingFraNorge() {
             val endringer = finnEndringer(
                 dto(utflyttingFraNorge = listOf(UtflyttingDto(null, null, null))),
-                dto(utflyttingFraNorge = listOf(UtflyttingDto("", null, null)))
+                dto(utflyttingFraNorge = listOf(UtflyttingDto("", null, null))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.utflyttingFraNorge.harEndringer).isTrue
@@ -231,7 +231,7 @@ internal class UtledEndringerUtilTest {
         internal fun oppholdstillatelse() {
             val endringer = finnEndringer(
                 dto(oppholdstillatelse = listOf()),
-                dto(oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null)))
+                dto(oppholdstillatelse = listOf(OppholdstillatelseDto(OppholdType.UKJENT, null, null))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.oppholdstillatelse.harEndringer).isTrue
@@ -242,7 +242,7 @@ internal class UtledEndringerUtilTest {
         internal fun vergemål() {
             val endringer = finnEndringer(
                 dto(vergemål = listOf()),
-                dto(vergemål = listOf(VergemålDto(null, null, null, null, null)))
+                dto(vergemål = listOf(VergemålDto(null, null, null, null, null))),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.vergemål.harEndringer).isTrue
@@ -257,7 +257,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto(barnIdent, "", null, emptyList(), true, null, null)
             val endringer = finnEndringer(
                 dto(barn = listOf()),
-                dto(barn = listOf(barn))
+                dto(barn = listOf(barn)),
             )
             assertThat(endringer.harEndringer).isTrue
             assertNyPerson(endringer.barn, barnIdent)
@@ -270,7 +270,7 @@ internal class UtledEndringerUtilTest {
             val barn = BarnDto("ident", "", null, emptyList(), true, null, null)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf())
+                dto(barn = listOf()),
             )
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.barn.harEndringer).isTrue
@@ -290,7 +290,7 @@ internal class UtledEndringerUtilTest {
             val barn2 = BarnDto(barnIdent, "2", null, emptyList(), true, null, null)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2))
+                dto(barn = listOf(barn2)),
             )
             assertThat(endringer.harEndringer).isFalse
             assertThat(endringer.barn.harEndringer).isFalse
@@ -306,7 +306,7 @@ internal class UtledEndringerUtilTest {
             val barn2 = barn.copy(borHosSøker = false)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2))
+                dto(barn = listOf(barn2)),
             )
             val detaljer = endringer.barn.detaljer!!
             assertBarnHarEndringerMedDetaljer(endringer)
@@ -328,7 +328,7 @@ internal class UtledEndringerUtilTest {
             val barn2 = barn.copy(dødsdato = dødsdato)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2))
+                dto(barn = listOf(barn2)),
             )
             val detaljer = endringer.barn.detaljer!!
             assertBarnHarEndringerMedDetaljer(endringer)
@@ -348,7 +348,7 @@ internal class UtledEndringerUtilTest {
             val barn2 = BarnDto(barnIdent, "2", AnnenForelderMinimumDto("1", "", null, null), emptyList(), true, null, null)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2))
+                dto(barn = listOf(barn2)),
             )
             assertBarnHarEndringerMedDetaljer(endringer)
 
@@ -372,7 +372,7 @@ internal class UtledEndringerUtilTest {
             val barn2 = barn.copy(annenForelder = annenForelder.copy(dødsdato = dødsdato))
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2))
+                dto(barn = listOf(barn2)),
             )
             assertForelderHarEndringerMedDetaljer(endringer)
 
@@ -393,7 +393,7 @@ internal class UtledEndringerUtilTest {
             val barn2 = barn.copy(annenForelder = annenForelder.copy(bostedsadresse = "Adresse 2"))
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
-                dto(barn = listOf(barn2))
+                dto(barn = listOf(barn2)),
             )
             assertThat(endringer.barn.harEndringer).isFalse
             val detaljer = endringer.annenForelder.detaljer!!
@@ -430,7 +430,7 @@ internal class UtledEndringerUtilTest {
     private fun assertPersonHarEndringerMedDetaljer(
         endringer: Endringer,
         ident: String,
-        felt: (Endringer) -> Endring<List<Personendring>>
+        felt: (Endringer) -> Endring<List<Personendring>>,
     ) {
         assertThat(endringer.harEndringer).isTrue
         val person = felt(endringer)
@@ -474,7 +474,7 @@ internal class UtledEndringerUtilTest {
         innflyttingTilNorge: List<InnflyttingDto> = emptyList(),
         utflyttingFraNorge: List<UtflyttingDto> = emptyList(),
         oppholdstillatelse: List<OppholdstillatelseDto> = emptyList(),
-        vergemål: List<VergemålDto> = emptyList()
+        vergemål: List<VergemålDto> = emptyList(),
     ) = PersonopplysningerDto(
         personIdent = "",
         navn = NavnDto("", "", "", ""),
@@ -493,6 +493,6 @@ internal class UtledEndringerUtilTest {
         innflyttingTilNorge = innflyttingTilNorge,
         utflyttingFraNorge = utflyttingFraNorge,
         oppholdstillatelse = oppholdstillatelse,
-        vergemål = vergemål
+        vergemål = vergemål,
     )
 }

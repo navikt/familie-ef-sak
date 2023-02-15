@@ -28,7 +28,7 @@ internal class ÅrsakRevurderingsRepositoryTest : OppslagSpringRunnerTest() {
             behandling.id,
             Opplysningskilde.MELDING_MODIA,
             Revurderingsårsak.ENDRING_AKTIVITET,
-            "beskrivelse"
+            "beskrivelse",
         )
         repository.insert(årsakRevurdering)
 

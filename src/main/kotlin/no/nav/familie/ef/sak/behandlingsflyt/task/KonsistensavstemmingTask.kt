@@ -16,13 +16,13 @@ import java.time.LocalDateTime
 
 data class KonsistensavstemmingPayload(
     val stønadstype: StønadType,
-    val datoForAvstemming: LocalDate
+    val datoForAvstemming: LocalDate,
 )
 
 @Service
 @TaskStepBeskrivelse(taskStepType = KonsistensavstemmingTask.TYPE, beskrivelse = "Utfører konsistensavstemming mot økonomi.")
 class KonsistensavstemmingTask(
-    private val avstemmingService: AvstemmingService
+    private val avstemmingService: AvstemmingService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -38,13 +38,13 @@ class KonsistensavstemmingTask(
             val task = Task(
                 type = TYPE,
                 payload = objectMapper.writeValueAsString(payload),
-                triggerTid = triggerTid
+                triggerTid = triggerTid,
             )
             val properties = PropertiesWrapper(
                 task.metadata.apply {
                     this["stønadstype"] = payload.stønadstype.name
                     this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-                }
+                },
             )
             return task.copy(metadataWrapper = properties)
         }

@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(
     taskStepType = OpprettOppgaveTerminbarnTask.TYPE,
-    beskrivelse = "Oppretter oppgave for terminbarn som ikke er født"
+    beskrivelse = "Oppretter oppgave for terminbarn som ikke er født",
 )
 class OpprettOppgaveTerminbarnTask(
     val taskService: TaskService,
     val opprettOppgaverForTerminbarnService: OpprettOppgaverTerminbarnService,
-    val featureToggleService: FeatureToggleService
+    val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

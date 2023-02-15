@@ -30,7 +30,7 @@ class VurderingStegService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val stegService: StegService,
     private val taskService: TaskService,
-    private val blankettRepository: BlankettRepository
+    private val blankettRepository: BlankettRepository,
 ) {
 
     @Transactional
@@ -43,7 +43,7 @@ class VurderingStegService(
 
         val nyVilkårsvurdering = OppdaterVilkår.lagNyOppdatertVilkårsvurdering(
             vilkårsvurdering,
-            vilkårsvurderingDto.delvilkårsvurderinger
+            vilkårsvurderingDto.delvilkårsvurderinger,
         )
         blankettRepository.deleteById(behandlingId)
         val oppdatertVilkårsvurderingDto = vilkårsvurderingRepository.update(nyVilkårsvurdering).tilDto()
@@ -108,7 +108,7 @@ class VurderingStegService(
 
     private fun nullstillVilkårMedNyeHovedregler(
         behandlingId: UUID,
-        vilkårsvurdering: Vilkårsvurdering
+        vilkårsvurdering: Vilkårsvurdering,
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(metadata)
@@ -116,26 +116,26 @@ class VurderingStegService(
         return vilkårsvurderingRepository.update(
             vilkårsvurdering.copy(
                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                delvilkårsvurdering = delvilkårsvurdering
-            )
+                delvilkårsvurdering = delvilkårsvurdering,
+            ),
         ).tilDto()
     }
 
     private fun oppdaterVilkårsvurderingTilSkalIkkeVurderes(
         behandlingId: UUID,
-        vilkårsvurdering: Vilkårsvurdering
+        vilkårsvurdering: Vilkårsvurdering,
     ): VilkårsvurderingDto {
         val metadata = hentHovedregelMetadata(behandlingId)
         val nyeDelvilkår = hentVilkårsregel(vilkårsvurdering.type).initiereDelvilkårsvurdering(
             metadata,
-            Vilkårsresultat.SKAL_IKKE_VURDERES
+            Vilkårsresultat.SKAL_IKKE_VURDERES,
         )
         val delvilkårsvurdering = DelvilkårsvurderingWrapper(nyeDelvilkår)
         return vilkårsvurderingRepository.update(
             vilkårsvurdering.copy(
                 resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
-                delvilkårsvurdering = delvilkårsvurdering
-            )
+                delvilkårsvurdering = delvilkårsvurdering,
+            ),
         ).tilDto()
     }
 
@@ -156,7 +156,7 @@ class VurderingStegService(
             throw Feil(
                 "BehandlingId=$requestBehandlingId er ikke lik vilkårets sin behandlingId=$behandlingId",
                 "BehandlingId er feil, her har noe gått galt",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
     }

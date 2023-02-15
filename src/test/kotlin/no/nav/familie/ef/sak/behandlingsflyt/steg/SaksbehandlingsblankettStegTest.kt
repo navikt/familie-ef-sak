@@ -42,7 +42,7 @@ internal class SaksbehandlingsblankettStegTest {
         totrinnskontrollService = totrinnskontrollServiceMock,
         journalpostClient = journalpostClientMock,
         behandlingService = behandlingServiceMock,
-        fagsakService = fagsakServiceMock
+        fagsakService = fagsakServiceMock,
     )
 
     val arkiverDokumentRequestSlot = slot<ArkiverDokumentRequest>()
@@ -55,7 +55,7 @@ internal class SaksbehandlingsblankettStegTest {
         every {
             journalpostClientMock.arkiverDokument(
                 capture(arkiverDokumentRequestSlot),
-                any()
+                any(),
             )
         } returns arkiverDokumentResponse
         every { arbeidsfordelingServiceMock.hentNavEnhetIdEllerBrukMaskinellEnhetHvisNull(any()) } returns "4489"
@@ -89,7 +89,7 @@ internal class SaksbehandlingsblankettStegTest {
     internal fun `skal journalføre blankett for barnetilsyn hvis det er revurdering`() {
         every { fagsakServiceMock.hentFagsak(any()) } returns fagsak(
             fagsakpersoner(setOf("12345678912")),
-            stønadstype = StønadType.BARNETILSYN
+            stønadstype = StønadType.BARNETILSYN,
         )
         val behandling = saksbehandling(type = BehandlingType.REVURDERING).copy(stønadstype = StønadType.BARNETILSYN)
         saksbehandlingsblankettSteg.utførSteg(behandling, null)

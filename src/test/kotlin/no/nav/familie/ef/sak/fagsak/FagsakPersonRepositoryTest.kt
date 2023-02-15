@@ -72,9 +72,9 @@ internal class FagsakPersonRepositoryTest : OppslagSpringRunnerTest() {
                 identer = setOf(
                     PersonIdent("1", sporbarEnDagSiden),
                     PersonIdent("2"),
-                    PersonIdent("3", sporbarEnDagSiden)
-                )
-            )
+                    PersonIdent("3", sporbarEnDagSiden),
+                ),
+            ),
         )
         assertThat(fagsakPersonRepository.hentAktivIdent(person.id)).isEqualTo("2")
     }

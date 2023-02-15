@@ -25,7 +25,7 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
         WHERE b.fagsak_id = :fagsakId
          AND b.status = 'FERDIGSTILT'
          AND b.resultat IN ('OPPHØRT', 'INNVILGET') 
-        """
+        """,
     )
     fun finnAlleIverksatteForFagsak(fagsakId: UUID): List<TilkjentYtelse>
 
@@ -39,10 +39,10 @@ interface TilkjentYtelseRepository : RepositoryInterface<TilkjentYtelse, UUID>, 
                         WHERE ty.id = aty.tilkjent_ytelse
                          AND aty.stonad_tom >= :datoForAvstemming
                          AND aty.belop > 0)
-          """
+          """,
     )
     fun finnTilkjentYtelserTilKonsistensavstemming(
         stønadstype: StønadType,
-        datoForAvstemming: LocalDate
+        datoForAvstemming: LocalDate,
     ): List<TilkjentYtelse>
 }

@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service
 class GrunnlagsdataRegisterService(
     private val personService: PersonService,
     private val personopplysningerIntegrasjonerClient: PersonopplysningerIntegrasjonerClient,
-    private val tidligereVedaksperioderService: TidligereVedaksperioderService
+    private val tidligereVedaksperioderService: TidligereVedaksperioderService,
 ) {
 
     fun hentGrunnlagsdataFraRegister(
         personIdent: String,
-        barneforeldreFraSøknad: List<String>
+        barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataDomene {
         val pdlSøker = personService.hentSøker(personIdent)
         val pdlBarn = hentPdlBarn(pdlSøker)
@@ -40,12 +40,12 @@ class GrunnlagsdataRegisterService(
             annenForelder = mapAnnenForelder(barneForeldre, tidligereVedtasksperioderAnnenForelder),
             medlUnntak = medlUnntak,
             barn = mapBarn(pdlBarn),
-            tidligereVedtaksperioder = tidligereVedtaksperioder
+            tidligereVedtaksperioder = tidligereVedtaksperioder,
         )
     }
 
     private fun hentTidligereVedtaksperioderAnnenForelder(
-        barneForeldre: Map<String, PdlAnnenForelder>
+        barneForeldre: Map<String, PdlAnnenForelder>,
     ): Map<String, TidligereVedtaksperioder> {
         return loggTid("antall=${barneForeldre.size}") {
             barneForeldre.entries.associate { (ident, annenForelder) ->
@@ -65,7 +65,7 @@ class GrunnlagsdataRegisterService(
     private fun hentPdlBarneForeldre(
         barn: Map<String, PdlPersonForelderBarn>,
         personIdent: String,
-        barneforeldrePersonIdentFraSøknad: List<String>
+        barneforeldrePersonIdentFraSøknad: List<String>,
     ): Map<String, PdlAnnenForelder> {
         return barn.flatMap { it.value.forelderBarnRelasjon }
             .filter { it.relatertPersonsIdent != personIdent && it.relatertPersonsRolle != Familierelasjonsrolle.BARN }

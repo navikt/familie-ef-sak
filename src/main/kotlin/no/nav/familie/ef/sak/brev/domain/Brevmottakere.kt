@@ -9,20 +9,20 @@ data class Brevmottakere(
     @Id
     val behandlingId: UUID,
     val personer: PersonerWrapper,
-    val organisasjoner: OrganisasjonerWrapper
+    val organisasjoner: OrganisasjonerWrapper,
 )
 
 enum class MottakerRolle {
     BRUKER,
     VERGE,
-    FULLMAKT
+    FULLMAKT,
 }
 
 data class BrevmottakerPerson(val personIdent: String, val navn: String, val mottakerRolle: MottakerRolle)
 data class BrevmottakerOrganisasjon(
     val organisasjonsnummer: String,
     val navnHosOrganisasjon: String,
-    val mottakerRolle: MottakerRolle
+    val mottakerRolle: MottakerRolle,
 )
 
 data class PersonerWrapper(val personer: List<BrevmottakerPerson>)

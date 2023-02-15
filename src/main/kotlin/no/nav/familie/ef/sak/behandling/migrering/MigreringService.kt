@@ -81,7 +81,7 @@ class MigreringService(
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
     private val infotrygdPeriodeValideringService: InfotrygdPeriodeValideringService,
-    private val barnRepository: BarnRepository
+    private val barnRepository: BarnRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -97,7 +97,7 @@ class MigreringService(
             return MigreringInfo(
                 kanMigreres = false,
                 e.årsak,
-                kanGåVidereTilJournalføring = e.type.kanGåVidereTilJournalføring
+                kanGåVidereTilJournalføring = e.type.kanGåVidereTilJournalføring,
             )
         }
         logger.info("Kan migrere fagsakPerson=$fagsakPersonId")
@@ -111,7 +111,7 @@ class MigreringService(
             stønadsperiode = periode.stønadsperiode,
             inntektsgrunnlag = periode.inntektsgrunnlag,
             samordningsfradrag = periode.samordningsfradrag,
-            beløpsperioder = beregnYtelse
+            beløpsperioder = beregnYtelse,
         )
     }
 
@@ -130,7 +130,7 @@ class MigreringService(
             return migrerFagsakPerson(
                 fagsakPersonId = fagsakPersonId,
                 stønadType = StønadType.OVERGANGSSTØNAD,
-                ignorerFeilISimulering = request.ignorerFeilISimulering
+                ignorerFeilISimulering = request.ignorerFeilISimulering,
             )
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
@@ -151,7 +151,7 @@ class MigreringService(
             return migrerFagsakPerson(
                 fagsakPersonId = fagsakPersonId,
                 stønadType = StønadType.BARNETILSYN,
-                ignorerFeilISimulering = request.ignorerFeilISimulering
+                ignorerFeilISimulering = request.ignorerFeilISimulering,
             )
         } catch (e: MigreringException) {
             logger.warn("Kan ikke migrere fagsakPerson=$fagsakPersonId årsak=${e.type}")
@@ -164,7 +164,7 @@ class MigreringService(
         fagsakPersonId: UUID,
         stønadType: StønadType,
         kunAktivStønad: Boolean = false,
-        ignorerFeilISimulering: Boolean = false
+        ignorerFeilISimulering: Boolean = false,
     ): UUID {
         val fagsakPerson = fagsakPersonService.hentPerson(fagsakPersonId)
         val personIdent = fagsakPerson.hentAktivIdent()
@@ -175,7 +175,7 @@ class MigreringService(
             secureLogger.info("Har ikke aktiv stønad $periode")
             throw MigreringException(
                 "Har ikke aktiv stønad (${periode.stønadsperiode.tom})",
-                MigreringExceptionType.INGEN_AKTIV_STØNAD
+                MigreringExceptionType.INGEN_AKTIV_STØNAD,
             )
         }
         return when (stønadType) {
@@ -188,24 +188,24 @@ class MigreringService(
     private fun opprettMigreringOvergangsstønad(
         fagsak: Fagsak,
         periode: SummertInfotrygdPeriodeDto,
-        ignorerFeilISimulering: Boolean
+        ignorerFeilISimulering: Boolean,
     ) = opprettMigrering(
         fagsak = fagsak,
         periode = periode.stønadsperiode,
         inntektsgrunnlag = periode.inntektsgrunnlag,
         samordningsfradrag = periode.samordningsfradrag,
         erReellArbeidssøker = erReellArbeidssøker(periode),
-        ignorerFeilISimulering = ignorerFeilISimulering
+        ignorerFeilISimulering = ignorerFeilISimulering,
     )
 
     private fun opprettMigreringBarnetilsyn(
         fagsak: Fagsak,
         periode: SummertInfotrygdPeriodeDto,
-        ignorerFeilISimulering: Boolean
+        ignorerFeilISimulering: Boolean,
     ) = opprettMigrering(
         fagsak = fagsak,
         periode = periode.stønadsperiode,
-        ignorerFeilISimulering = ignorerFeilISimulering
+        ignorerFeilISimulering = ignorerFeilISimulering,
     ) { saksbehandling, grunnlagsdata ->
         val behandlingBarn = opprettBehandlingBarn(saksbehandling, grunnlagsdata, periode)
         InnvilgelseBarnetilsyn(
@@ -218,18 +218,18 @@ class MigreringService(
                     utgifter = periode.utgifterBarnetilsyn,
                     sanksjonsårsak = null,
                     periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                    aktivitetstype = null
-                )
+                    aktivitetstype = null,
+                ),
             ),
             perioderKontantstøtte = emptyList(),
-            tilleggsstønad = TilleggsstønadDto(false, begrunnelse = null)
+            tilleggsstønad = TilleggsstønadDto(false, begrunnelse = null),
         )
     }
 
     private fun opprettBehandlingBarn(
         saksbehandling: Saksbehandling,
         grunnlagsdata: GrunnlagsdataMedMetadata,
-        periode: SummertInfotrygdPeriodeDto
+        periode: SummertInfotrygdPeriodeDto,
     ): List<BehandlingBarn> {
         val barnIdenter = periode.barnIdenter
         val grunnlagsbarn = grunnlagsdata.grunnlagsdata.barn.associateBy { it.personIdent }
@@ -238,7 +238,7 @@ class MigreringService(
             BehandlingBarn(
                 behandlingId = saksbehandling.id,
                 personIdent = barnIdent,
-                navn = barnFraGrunnlag.navn.visningsnavn()
+                navn = barnFraGrunnlag.navn.visningsnavn(),
             )
         }
         return barnRepository.insertAll(behandlingBarn)
@@ -254,12 +254,12 @@ class MigreringService(
         inntektsgrunnlag: Int,
         samordningsfradrag: Int,
         erReellArbeidssøker: Boolean = false,
-        ignorerFeilISimulering: Boolean = false
+        ignorerFeilISimulering: Boolean = false,
     ): Behandling {
         return opprettMigrering(
             fagsak,
             periode,
-            ignorerFeilISimulering = ignorerFeilISimulering
+            ignorerFeilISimulering = ignorerFeilISimulering,
         ) { saksbehandling, grunnlagsdata ->
             val inntekter = inntekter(periode.fom, inntektsgrunnlag, samordningsfradrag)
             val vedtaksperioder = vedtaksperioder(periode, erReellArbeidssøker)
@@ -267,7 +267,7 @@ class MigreringService(
                 periodeBegrunnelse = null,
                 inntektBegrunnelse = null,
                 perioder = vedtaksperioder,
-                inntekter = inntekter
+                inntekter = inntekter,
             )
         }
     }
@@ -277,7 +277,7 @@ class MigreringService(
         fagsak: Fagsak,
         periode: Månedsperiode,
         ignorerFeilISimulering: Boolean = false,
-        vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto
+        vedtak: (saksbehandling: Saksbehandling, grunnlagsdata: GrunnlagsdataMedMetadata) -> VedtakDto,
     ): Behandling {
         feilHvisIkke(featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
@@ -286,7 +286,7 @@ class MigreringService(
         val behandling = behandlingService.opprettMigrering(fagsak.id)
         logger.info(
             "Migrerer fagsakPerson=${fagsak.fagsakPersonId} fagsak=${fagsak.id} behandling=${behandling.id} " +
-                "fra=${periode.fomDato} til=${periode.tomDato}"
+                "fra=${periode.fomDato} til=${periode.tomDato}",
         )
         iverksettService.startBehandling(behandling, fagsak)
 
@@ -311,8 +311,8 @@ class MigreringService(
                 SjekkMigrertStatusIInfotrygdTask.opprettTask(
                     behandling.id,
                     periode.fom.minusMonths(1),
-                    fagsak.hentAktivIdent()
-                )
+                    fagsak.hentAktivIdent(),
+                ),
             )
         }
 
@@ -327,24 +327,24 @@ class MigreringService(
         if (oppsummering.feilutbetaling.compareTo(BigDecimal.ZERO) != 0) {
             throw MigreringException(
                 "Feilutbetaling er ${oppsummering.feilutbetaling}",
-                MigreringExceptionType.SIMULERING_FEILUTBETALING
+                MigreringExceptionType.SIMULERING_FEILUTBETALING,
             )
         } else if (inneholderEtterbetaling && !ignorerFeilISimulering) {
             throw MigreringException(
                 "Etterbetaling er ${oppsummering.etterbetaling}",
-                MigreringExceptionType.SIMULERING_ETTERBETALING
+                MigreringExceptionType.SIMULERING_ETTERBETALING,
             )
         } else if (inneholderDebettrekk(simulering)) {
             throw MigreringException(
                 "Simuleringen inneholder posteringstypen TREKK med betalingstypen DEBET. " +
                     "Dette blir en uønsket utbetaling pga en feil. Denne kan migreres på nytt i neste måned.",
-                MigreringExceptionType.SIMULERING_DEBET_TREKK
+                MigreringExceptionType.SIMULERING_DEBET_TREKK,
             )
         }
         if (inneholderEtterbetaling) {
             logger.warn(
                 "Migrering inneholder etterbetaling fagsakPersonId=${fagsak.fagsakPersonId} " +
-                    "fagsak=${fagsak.id} behandling=${behandling.id} etterbetaling=${oppsummering.etterbetaling}"
+                    "fagsak=${fagsak.id} behandling=${behandling.id} etterbetaling=${oppsummering.etterbetaling}",
             )
         }
     }
@@ -372,7 +372,7 @@ class MigreringService(
         ) {
             logger.info(
                 "erOpphørtIInfotrygd behandling=$behandlingId erOpphørt=true - " +
-                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadsperiode?.tom}"
+                    "sisteSummertePeriodenTom=${sisteSummertePerioden?.stønadsperiode?.tom}",
             )
             return true
         }
@@ -384,7 +384,7 @@ class MigreringService(
         behandlingId: UUID,
         perioder: InfotrygdStønadPerioderDto,
         sisteSummertePerioden: SummertInfotrygdPeriodeDto,
-        opphørsmåned: YearMonth
+        opphørsmåned: YearMonth,
     ) {
         val overførtNyLøsningOpphørsdato =
             perioder.perioder.find { it.kode == InfotrygdEndringKode.OVERTFØRT_NY_LØSNING }?.opphørsdato
@@ -405,7 +405,7 @@ class MigreringService(
     private fun hentGjeldendePeriodeOgValiderState(
         fagsakPerson: FagsakPerson,
         stønadType: StønadType,
-        kjøremåned: YearMonth
+        kjøremåned: YearMonth,
     ): SummertInfotrygdPeriodeDto {
         val personIdent = fagsakPerson.hentAktivIdent()
         val fagsaker = fagsakService.finnFagsakerForFagsakPersonId(fagsakPerson.id)
@@ -422,7 +422,7 @@ class MigreringService(
         if (fagsak.stønadstype == StønadType.SKOLEPENGER) {
             throw MigreringException(
                 "Kan ikke migrere skolepenger",
-                MigreringExceptionType.FEIL_STØNADSTYPE
+                MigreringExceptionType.FEIL_STØNADSTYPE,
             )
         } else if (fagsak.migrert) {
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
@@ -431,7 +431,7 @@ class MigreringService(
             if (behandlinger.isNotEmpty()) {
                 throw MigreringException(
                     "Fagsaken har allerede behandlinger",
-                    MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER
+                    MigreringExceptionType.HAR_ALLEREDE_BEHANDLINGER,
                 )
             }
         }
@@ -442,14 +442,14 @@ class MigreringService(
     private fun inntekter(
         fra: YearMonth,
         inntektsgrunnlag: Int,
-        samordningsfradrag: Int
+        samordningsfradrag: Int,
     ) =
         listOf(
             Inntekt(
                 årMånedFra = fra,
                 forventetInntekt = BigDecimal(inntektsgrunnlag),
-                samordningsfradrag = BigDecimal(samordningsfradrag)
-            )
+                samordningsfradrag = BigDecimal(samordningsfradrag),
+            ),
         )
 
     private fun erReellArbeidssøker(periode: SummertInfotrygdPeriodeDto): Boolean =
@@ -457,7 +457,7 @@ class MigreringService(
 
     private fun vedtaksperioder(
         periode: Månedsperiode,
-        erReellArbeidssøker: Boolean
+        erReellArbeidssøker: Boolean,
     ): List<VedtaksperiodeDto> {
         val aktivitet = if (erReellArbeidssøker) AktivitetType.FORSØRGER_REELL_ARBEIDSSØKER else AktivitetType.MIGRERING
         return listOf(
@@ -467,8 +467,8 @@ class MigreringService(
                 periode = periode,
                 aktivitet = aktivitet,
                 periodeType = VedtaksperiodeType.MIGRERING,
-                sanksjonsårsak = null
-            )
+                sanksjonsårsak = null,
+            ),
         )
     }
 }

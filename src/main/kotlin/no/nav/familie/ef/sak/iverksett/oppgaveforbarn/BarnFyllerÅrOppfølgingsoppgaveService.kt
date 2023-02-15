@@ -19,7 +19,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val gjeldendeBarnRepository: GjeldendeBarnRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val taskService: TaskService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -43,7 +43,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
             skalOpprettes.forEach {
                 secureLogger.info(
                     "Ville opprettet oppgave for barn med fødselsnummer: " +
-                        "${it.fødselsnummer} med alder ${it.alder}"
+                        "${it.fødselsnummer} med alder ${it.alder}",
                 )
             }
         }
@@ -89,7 +89,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                     it.fødselsnummerBarn!!,
                     it.fødselsnummerSøker,
                     alder,
-                    it.behandlingId
+                    it.behandlingId,
                 )
             }
         }
@@ -100,7 +100,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
         return oppgaveRepository.findByTypeAndAlderIsNotNullAndBarnPersonIdenter(
             Oppgavetype.InnhentDokumentasjon,
-            oppgaverForBarn.map { it.fødselsnummer }
+            oppgaverForBarn.map { it.fødselsnummer },
         ).mapNotNull {
             if (it.barnPersonIdent != null && it.alder != null) {
                 FødselsnummerOgAlder(it.barnPersonIdent, it.alder)
@@ -118,7 +118,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 it.behandlingId,
                 it.fødselsnummer,
                 it.fødselsnummerSøker,
-                it.alder
+                it.alder,
             )
         }.forEach {
             try {
@@ -127,7 +127,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
                 if (e.cause is DuplicateKeyException) {
                     logger.info(
                         "Oppgave finnes allerede for barn fylt ${it.alder} " +
-                            "på behandling ${it.behandlingId}. Oppretter ikke task."
+                            "på behandling ${it.behandlingId}. Oppretter ikke task.",
                     )
                 } else {
                     throw e

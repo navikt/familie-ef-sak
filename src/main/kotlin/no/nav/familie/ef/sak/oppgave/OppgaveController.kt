@@ -37,7 +37,7 @@ import java.util.UUID
 class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val tilgangService: TilgangService,
-    private val personService: PersonService
+    private val personService: PersonService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -46,7 +46,7 @@ class OppgaveController(
     @PostMapping(
         path = ["/soek"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentOppgaver(@RequestBody finnOppgaveRequest: FinnOppgaveRequestDto): Ressurs<OppgaveResponseDto> {
         validerOptionalIdent(finnOppgaveRequest.ident)
@@ -62,7 +62,7 @@ class OppgaveController(
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
-        @RequestParam("saksbehandler") saksbehandler: String
+        @RequestParam("saksbehandler") saksbehandler: String,
     ): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
@@ -84,7 +84,7 @@ class OppgaveController(
         return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
             ?: Ressurs.funksjonellFeil(
                 "Denne oppgaven må behandles i Gosys og Infotrygd",
-                "Denne oppgaven må behandles i Gosys og Infotrygd"
+                "Denne oppgaven må behandles i Gosys og Infotrygd",
             )
     }
 
@@ -104,7 +104,7 @@ class OppgaveController(
                 "(Eier av behandling/oppgave) " +
                     "Saksbehandler $saksbehandlerIdent er inne i behandling=$behandlingId " +
                     "mens oppgaven=${oppgave.id} er tilordnet $saksbehandlerIdentIOppgaveSystemet " +
-                    "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}"
+                    "sekunderSidenEndret=${sekunderSidenEndret(oppgave)}",
             )
         }
         return Ressurs.success(saksbehandlerIdentIOppgaveSystemet)
@@ -159,6 +159,6 @@ private fun Oppgave.tilDto(): OppgaveEfDto {
         ferdigstiltTidspunkt = ferdigstiltTidspunkt,
         endretTidspunkt = endretTidspunkt,
         prioritet = prioritet,
-        status = status
+        status = status,
     )
 }

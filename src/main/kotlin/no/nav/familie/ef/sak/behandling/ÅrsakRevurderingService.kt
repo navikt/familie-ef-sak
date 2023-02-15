@@ -18,14 +18,14 @@ import java.util.UUID
 @Service
 class ÅrsakRevurderingService(
     private val behandlingService: BehandlingService,
-    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository
+    private val årsakRevurderingsRepository: ÅrsakRevurderingsRepository,
 ) {
 
     private val årsakerSomIkkeHarRevurderingsinformasjon = setOf(
         BehandlingÅrsak.G_OMREGNING,
         BehandlingÅrsak.SATSENDRING,
         BehandlingÅrsak.MIGRERING,
-        BehandlingÅrsak.SANKSJON_1_MND
+        BehandlingÅrsak.SANKSJON_1_MND,
     )
 
     fun validerHarGyldigRevurderingsinformasjon(saksbehandling: Saksbehandling) {
@@ -49,7 +49,7 @@ class ÅrsakRevurderingService(
         return RevurderingsinformasjonDto(
             kravMottatt = kravMottatt,
             årsakRevurdering = årsakRevurdering?.tilDto(),
-            endretTid = årsakRevurdering?.sporbar?.endret?.endretTid
+            endretTid = årsakRevurdering?.sporbar?.endret?.endretTid,
         )
     }
 
@@ -57,7 +57,7 @@ class ÅrsakRevurderingService(
     fun oppdaterRevurderingsinformasjon(
         saksbehandling: Saksbehandling,
         kravMottatt: LocalDate,
-        årsakRevurdering: ÅrsakRevurderingDto
+        årsakRevurdering: ÅrsakRevurderingDto,
     ) {
         feilHvis(saksbehandling.status.behandlingErLåstForVidereRedigering()) {
             "Behandlingen er låst og kan ikke oppdatere revurderingsinformasjon"

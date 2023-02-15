@@ -83,7 +83,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         val terminBarn = listOf(opprettTerminbarn())
         val pdlBarn = listOf(
             opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(1)),
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2))
+            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
         )
 
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
@@ -100,7 +100,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         val terminBarn = listOf(opprettTerminbarn())
         val pdlBarn = listOf(
             opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2))
+            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
         )
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
@@ -116,7 +116,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         val terminBarn = emptyList<TerminbarnTilUtplukkForOppgave>()
         val pdlBarn = listOf(
             opprettPdlBarn(fødselsdato = LocalDate.now().plusWeeks(3)),
-            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2))
+            opprettPdlBarn(fødselsdato = LocalDate.now().minusYears(2)),
         )
         every { personService.hentPersonMedBarn(any()).barn.values } returns pdlBarn
         every { terminbarnRepository.finnBarnAvGjeldendeIverksatteBehandlingerUtgåtteTerminbarn(StønadType.OVERGANGSSTØNAD) } returns terminBarn
@@ -130,7 +130,7 @@ internal class ForberedOppgaverTerminbarnServiceTest {
         behandlingId: UUID = UUID.randomUUID(),
         fagsakId: UUID = UUID.randomUUID(),
         eksternId: Long = 0,
-        termindato: LocalDate = LocalDate.now()
+        termindato: LocalDate = LocalDate.now(),
     ): TerminbarnTilUtplukkForOppgave {
         return TerminbarnTilUtplukkForOppgave(behandlingId, fagsakId, eksternId, termindato)
     }

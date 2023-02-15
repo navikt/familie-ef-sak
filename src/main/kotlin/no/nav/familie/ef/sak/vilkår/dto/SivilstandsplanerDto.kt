@@ -6,5 +6,5 @@ import java.time.LocalDate
 data class SivilstandsplanerDto(
     val harPlaner: Boolean?,
     val fraDato: LocalDate?,
-    val vordendeSamboerEktefelle: PersonMinimumDto?
+    val vordendeSamboerEktefelle: PersonMinimumDto?,
 )

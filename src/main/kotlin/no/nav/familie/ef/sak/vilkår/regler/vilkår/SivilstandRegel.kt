@@ -25,21 +25,21 @@ class SivilstandRegel : Vilkårsregel(
         KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
         SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-        UNNTAK
+        UNNTAK,
     ),
     hovedregler = regelIder(
         KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
         KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
         SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON,
         SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
-        UNNTAK
-    )
+        UNNTAK,
+    ),
 ) {
 
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
-        barnId: UUID?
+        barnId: UUID?,
     ): List<Delvilkårsvurdering> {
         val (sivilstandSøknad: Sivilstand?, sivilstandstype: Sivilstandstype) = metadata
 
@@ -73,8 +73,8 @@ class SivilstandRegel : Vilkårsregel(
                 regelId = regelId,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE = påkrevdBegrunnelse(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE)
@@ -83,8 +83,8 @@ class SivilstandRegel : Vilkårsregel(
                 regelId = RegelId.KRAV_SIVILSTAND_UTEN_PÅKREVD_BEGRUNNELSE,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_VALGFRI_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON = påkrevdBegrunnelse(RegelId.SAMLIVSBRUDD_LIKESTILT_MED_SEPARASJON)
@@ -94,8 +94,8 @@ class SivilstandRegel : Vilkårsregel(
                 regelId = RegelId.SAMSVAR_DATO_SEPARASJON_OG_FRAFLYTTING,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = NesteRegel(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE.regelId)
-                )
+                    hvisNei = NesteRegel(KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE.regelId),
+                ),
             )
 
         private val UNNTAK =
@@ -104,8 +104,8 @@ class SivilstandRegel : Vilkårsregel(
                 svarMapping = mapOf(
                     SvarId.GJENLEVENDE_IKKE_RETT_TIL_YTELSER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.GJENLEVENDE_OVERTAR_OMSORG to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
     }
 }

@@ -13,7 +13,7 @@ data class FagsakDto(
     val erLøpende: Boolean,
     val erMigrert: Boolean,
     val behandlinger: List<BehandlingDto>,
-    val eksternId: Long
+    val eksternId: Long,
 )
 
 fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): FagsakDto =
@@ -25,5 +25,5 @@ fun Fagsak.tilDto(behandlinger: List<BehandlingDto>, erLøpende: Boolean): Fagsa
         erLøpende = erLøpende,
         erMigrert = this.migrert,
         behandlinger = behandlinger,
-        eksternId = this.eksternId.id
+        eksternId = this.eksternId.id,
     )

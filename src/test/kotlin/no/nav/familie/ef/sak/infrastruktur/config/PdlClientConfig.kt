@@ -69,7 +69,7 @@ class PdlClientConfig {
         val pdlPersonFraSøk = PdlPersonFraSøk(
             listOf(element = FolkeregisteridentifikatorFraSøk(fnrPåAdresseSøk)),
             bostedsadresse(),
-            listOf(lagNavn())
+            listOf(lagNavn()),
         )
         every { pdlSaksbehandlerClient.søkPersonerMedSammeAdresse(any()) } returns
             PersonSøkResultat(listOf(PersonSøkTreff(pdlPersonFraSøk)), 1, 1, 1)
@@ -115,24 +115,24 @@ class PdlClientConfig {
             .returns(
                 mapOf(
                     "123" to PdlIdent("ny123", false),
-                    "456" to PdlIdent("ny456", false)
-                )
+                    "456" to PdlIdent("ny456", false),
+                ),
             )
 
         every { pdlClient.hentIdenterBolk(listOf("456", "123")) }
             .returns(
                 mapOf(
                     "123" to PdlIdent("ny123", false),
-                    "456" to PdlIdent("ny456", false)
-                )
+                    "456" to PdlIdent("ny456", false),
+                ),
             )
 
         every { pdlClient.hentIdenterBolk(listOf("111", "222")) }
             .returns(
                 mapOf(
                     "111" to PdlIdent("111", false),
-                    "222" to PdlIdent("222", false)
-                )
+                    "222" to PdlIdent("222", false),
+                ),
             )
 
         return pdlClient
@@ -153,17 +153,17 @@ class PdlClientConfig {
                 listOf(
                     Adressebeskyttelse(
                         gradering = AdressebeskyttelseGradering.UGRADERT,
-                        metadata = metadataGjeldende
-                    )
+                        metadata = metadataGjeldende,
+                    ),
                 ),
                 listOf(lagNavn(fornavn = it)),
-                emptyList()
+                emptyList(),
             )
 
         val folkeregisteridentifikatorSøker = Folkeregisteridentifikator(
             søkerFnr,
             FolkeregisteridentifikatorStatus.I_BRUK,
-            metadataGjeldende
+            metadataGjeldende,
         )
 
         fun opprettPdlSøker() =
@@ -171,8 +171,8 @@ class PdlClientConfig {
                 adressebeskyttelse = listOf(
                     Adressebeskyttelse(
                         gradering = AdressebeskyttelseGradering.UGRADERT,
-                        metadata = metadataGjeldende
-                    )
+                        metadata = metadataGjeldende,
+                    ),
                 ),
                 bostedsadresse = bostedsadresse(),
                 dødsfall = listOf(),
@@ -183,8 +183,8 @@ class PdlClientConfig {
                     Folkeregisterpersonstatus(
                         "bosatt",
                         "bosattEtterFolkeregisterloven",
-                        metadataGjeldende
-                    )
+                        metadataGjeldende,
+                    ),
                 ),
                 fullmakt = fullmakter(),
                 kjønn = lagKjønn(KjønnType.KVINNE),
@@ -201,15 +201,15 @@ class PdlClientConfig {
                         tilflyttingsland = "SWE",
                         tilflyttingsstedIUtlandet = "Stockholm",
                         utflyttingsdato = LocalDate.of(2021, 1, 1),
-                        folkeregistermetadata = folkeregistermetadata
-                    )
+                        folkeregistermetadata = folkeregistermetadata,
+                    ),
                 ),
-                vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt()
+                vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt(),
             )
 
         private val folkeregistermetadata = Folkeregistermetadata(
             LocalDateTime.of(2010, Month.AUGUST, 30, 10, 10),
-            LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55)
+            LocalDateTime.of(2018, Month.JANUARY, 15, 12, 55),
         )
 
         private fun barn(): Map<String, PdlPersonForelderBarn> =
@@ -218,14 +218,14 @@ class PdlClientConfig {
                     bostedsadresse = bostedsadresse(),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
-                    navn = lagNavn("Barn", null, "Barnesen")
+                    navn = lagNavn("Barn", null, "Barnesen"),
                 ),
                 barn2Fnr to pdlBarn(
                     bostedsadresse = bostedsadresse(),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
-                    navn = lagNavn("Barn2", null, "Barnesen")
-                )
+                    navn = lagNavn("Barn2", null, "Barnesen"),
+                ),
             )
 
         private fun annenForelder(): PdlAnnenForelder =
@@ -239,9 +239,9 @@ class PdlClientConfig {
                     Folkeregisteridentifikator(
                         annenForelderFnr,
                         FolkeregisteridentifikatorStatus.I_BRUK,
-                        metadataGjeldende
-                    )
-                )
+                        metadataGjeldende,
+                    ),
+                ),
             )
 
         private fun forelderBarnRelasjoner(): List<ForelderBarnRelasjon> =
@@ -249,13 +249,13 @@ class PdlClientConfig {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = barnFnr,
                     relatertPersonsRolle = Familierelasjonsrolle.BARN,
-                    minRolleForPerson = Familierelasjonsrolle.MOR
+                    minRolleForPerson = Familierelasjonsrolle.MOR,
                 ),
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = barn2Fnr,
                     relatertPersonsRolle = Familierelasjonsrolle.BARN,
-                    minRolleForPerson = Familierelasjonsrolle.MOR
-                )
+                    minRolleForPerson = Familierelasjonsrolle.MOR,
+                ),
             )
 
         private fun familierelasjonerBarn(): List<ForelderBarnRelasjon> =
@@ -263,13 +263,13 @@ class PdlClientConfig {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = søkerFnr,
                     relatertPersonsRolle = Familierelasjonsrolle.MOR,
-                    minRolleForPerson = Familierelasjonsrolle.BARN
+                    minRolleForPerson = Familierelasjonsrolle.BARN,
                 ),
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = annenForelderFnr,
                     relatertPersonsRolle = Familierelasjonsrolle.FAR,
-                    minRolleForPerson = Familierelasjonsrolle.BARN
-                )
+                    minRolleForPerson = Familierelasjonsrolle.BARN,
+                ),
             )
 
         private fun kontaktadresse(): List<Kontaktadresse> =
@@ -283,8 +283,8 @@ class PdlClientConfig {
                     type = KontaktadresseType.INNLAND,
                     utenlandskAdresse = null,
                     utenlandskAdresseIFrittFormat = null,
-                    vegadresse = vegadresse()
-                )
+                    vegadresse = vegadresse(),
+                ),
             )
 
         private fun statsborgerskap(): List<Statsborgerskap> =
@@ -292,13 +292,13 @@ class PdlClientConfig {
                 Statsborgerskap(
                     land = "NOR",
                     gyldigFraOgMed = startdato,
-                    gyldigTilOgMed = null
+                    gyldigTilOgMed = null,
                 ),
                 Statsborgerskap(
                     land = "SWE",
                     gyldigFraOgMed = startdato.minusYears(3),
-                    gyldigTilOgMed = startdato
-                )
+                    gyldigTilOgMed = startdato,
+                ),
             )
 
         private fun sivilstand(): List<Sivilstand> =
@@ -308,8 +308,8 @@ class PdlClientConfig {
                     gyldigFraOgMed = startdato,
                     relatertVedSivilstand = "11111122222",
                     bekreftelsesdato = LocalDate.of(2020, 1, 1),
-                    metadata = metadataGjeldende
-                )
+                    metadata = metadataGjeldende,
+                ),
             )
 
         private fun fullmakter(): List<Fullmakt> =
@@ -319,8 +319,8 @@ class PdlClientConfig {
                     gyldigFraOgMed = sluttdato,
                     motpartsPersonident = "11111133333",
                     motpartsRolle = MotpartsRolle.FULLMEKTIG,
-                    omraader = listOf()
-                )
+                    omraader = listOf(),
+                ),
             )
         val defaultKoordinater = Koordinater(x = 601372f, y = 6629367f, z = null, kvalitet = null)
         private fun bostedsadresse(koordinater: Koordinater = defaultKoordinater): List<Bostedsadresse> =
@@ -334,8 +334,8 @@ class PdlClientConfig {
                     vegadresse = vegadresse(koordinater),
                     ukjentBosted = null,
                     matrikkeladresse = null,
-                    metadata = metadataGjeldende
-                )
+                    metadata = metadataGjeldende,
+                ),
             )
 
         private fun vegadresse(koordinater: Koordinater = defaultKoordinater): Vegadresse =
@@ -348,7 +348,7 @@ class PdlClientConfig {
                 bruksenhetsnummer = "",
                 tilleggsnavn = null,
                 koordinater = koordinater,
-                matrikkelId = 0
+                matrikkelId = 0,
             )
 
         private fun vergemaalEllerFremtidsfullmakt(): List<VergemaalEllerFremtidsfullmakt> {
@@ -362,8 +362,8 @@ class PdlClientConfig {
                         motpartsPersonident = annenForelderFnr,
                         navn = null,
                         omfang = "personligeOgOekonomiskeInteresser",
-                        omfangetErInnenPersonligOmraade = false
-                    )
+                        omfangetErInnenPersonligOmraade = false,
+                    ),
                 ),
                 VergemaalEllerFremtidsfullmakt(
                     embete = null,
@@ -374,9 +374,9 @@ class PdlClientConfig {
                         motpartsPersonident = annenForelderFnr,
                         navn = null,
                         omfang = "personligeOgOekonomiskeInteresser",
-                        omfangetErInnenPersonligOmraade = false
-                    )
-                )
+                        omfangetErInnenPersonligOmraade = false,
+                    ),
+                ),
             )
         }
     }

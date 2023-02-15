@@ -21,30 +21,30 @@ data class HovedregelMetadata(
     val erMigrering: Boolean = false,
     val barn: List<BehandlingBarn>,
     val søktOmBarnetilsyn: List<UUID>,
-    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf()
+    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
 )
 
 data class BarnForelderLangAvstandTilSøker(
     val barnId: UUID,
-    val langAvstandTilSøker: LangAvstandTilSøker
+    val langAvstandTilSøker: LangAvstandTilSøker,
 )
 
 abstract class Vilkårsregel(
     val vilkårType: VilkårType,
     val regler: Map<RegelId, RegelSteg>,
     @JsonIgnore
-    val hovedregler: Set<RegelId>
+    val hovedregler: Set<RegelId>,
 ) {
 
     open fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-        barnId: UUID? = null
+        barnId: UUID? = null,
     ): List<Delvilkårsvurdering> {
         return hovedregler.map {
             Delvilkårsvurdering(
                 resultat,
-                vurderinger = listOf(Vurdering(it))
+                vurderinger = listOf(Vurdering(it)),
             )
         }
     }

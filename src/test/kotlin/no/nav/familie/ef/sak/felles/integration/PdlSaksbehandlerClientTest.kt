@@ -33,7 +33,7 @@ internal class PdlSaksbehandlerClientTest {
             wiremockServerItem.start()
             pdlClient = PdlSaksbehandlerClient(
                 PdlConfig(URI.create(wiremockServerItem.baseUrl())),
-                restOperations
+                restOperations,
             )
         }
 
@@ -53,7 +53,7 @@ internal class PdlSaksbehandlerClientTest {
     fun `pdlClient håndterer response for person søk gitt bostedsadresse`() {
         wiremockServerItem.stubFor(
             WireMock.post(WireMock.urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
-                .willReturn(WireMock.okJson(readFile("person_søk.json")))
+                .willReturn(WireMock.okJson(readFile("person_søk.json"))),
         )
         val bostedsadresse = Bostedsadresse(
             vegadresse = Vegadresse(
@@ -65,7 +65,7 @@ internal class PdlSaksbehandlerClientTest {
                 husbokstav = null,
                 kommunenummer = null,
                 tilleggsnavn = null,
-                koordinater = null
+                koordinater = null,
             ),
             matrikkeladresse = null,
             angittFlyttedato = null,
@@ -74,7 +74,7 @@ internal class PdlSaksbehandlerClientTest {
             coAdressenavn = null,
             utenlandskAdresse = null,
             ukjentBosted = null,
-            metadata = Metadata(false)
+            metadata = Metadata(false),
         )
         val response =
             pdlClient.søkPersonerMedSammeAdresse(PdlPersonSøkHjelper.lagPdlPersonSøkKriterier(bostedsadresse))

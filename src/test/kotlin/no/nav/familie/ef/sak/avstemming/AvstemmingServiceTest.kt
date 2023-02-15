@@ -27,8 +27,8 @@ internal class AvstemmingServiceTest {
                     1,
                     1L,
                     "1",
-                    listOf()
-                )
+                    listOf(),
+                ),
             )
         service.konsistensavstemOppdrag(StønadType.OVERGANGSSTØNAD, LocalDateTime.now())
 

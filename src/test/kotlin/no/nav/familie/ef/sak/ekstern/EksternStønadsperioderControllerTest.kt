@@ -23,7 +23,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             restTemplate.exchange(
                 localhost("/api/ekstern/perioder"),
                 HttpMethod.POST,
-                HttpEntity(PerioderOvergangsstønadRequest("1"), headers)
+                HttpEntity(PerioderOvergangsstønadRequest("1"), headers),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -38,7 +38,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             restTemplate.exchange(
                 localhost("/api/ekstern/perioder"),
                 HttpMethod.POST,
-                HttpEntity(PerioderOvergangsstønadRequest("1"), headers)
+                HttpEntity(PerioderOvergangsstønadRequest("1"), headers),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -53,7 +53,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             restTemplate.exchange(
                 localhost("/api/ekstern/perioder/full-overgangsstonad"),
                 HttpMethod.POST,
-                HttpEntity(PersonIdent("1"), headers)
+                HttpEntity(PersonIdent("1"), headers),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -66,7 +66,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             restTemplate.exchange(
                 localhost("/api/ekstern/perioder/full-overgangsstonad"),
                 HttpMethod.POST,
-                HttpEntity(PersonIdent("1"), headers)
+                HttpEntity(PersonIdent("1"), headers),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -81,7 +81,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             restTemplate.exchange(
                 localhost("/api/ekstern/perioder/full-overgangsstonad"),
                 HttpMethod.POST,
-                HttpEntity(PersonIdent("1"), headers)
+                HttpEntity(PersonIdent("1"), headers),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -96,7 +96,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
             restTemplate.exchange(
                 localhost("/api/ekstern/perioder/full-overgangsstonad"),
                 HttpMethod.POST,
-                HttpEntity(PersonIdent("ikkeTilgang"), headers)
+                HttpEntity(PersonIdent("ikkeTilgang"), headers),
             )
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)

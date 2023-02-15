@@ -35,14 +35,14 @@ class VilkårGrunnlagService(
     private val grunnlagsdataService: GrunnlagsdataService,
     private val fagsakService: FagsakService,
     private val barnMedsamværMapper: BarnMedSamværMapper,
-    private val adresseMapper: AdresseMapper
+    private val adresseMapper: AdresseMapper,
 ) {
 
     fun hentGrunnlag(
         behandlingId: UUID,
         søknad: Søknadsverdier?,
         personident: String,
-        barn: List<BehandlingBarn>
+        barn: List<BehandlingBarn>,
     ): VilkårGrunnlagDto {
         val registergrunnlagData = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val grunnlagsdata = registergrunnlagData.grunnlagsdata
@@ -56,7 +56,7 @@ class VilkårGrunnlagService(
             grunnlagsdata,
             barn,
             søknadsbarn,
-            stønadstype
+            stønadstype,
         )
         val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)
         val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad?.sivilstand)
@@ -67,7 +67,7 @@ class VilkårGrunnlagService(
             personalia = PersonaliaDto(
                 navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
                 personIdent = personident,
-                bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) }
+                bostedsadresse = grunnlagsdata.søker.bostedsadresse.gjeldende()?.let { adresseMapper.tilAdresse(it) },
             ),
             tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder.tilDto(),
             medlemskap = medlemskap,
@@ -79,7 +79,7 @@ class VilkårGrunnlagService(
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             registeropplysningerOpprettetTid = registergrunnlagData.opprettetTidspunkt,
             adresseopplysninger = AdresseopplysningerMapper.tilDto(søknad?.adresseopplysninger),
-            dokumentasjon = søknad?.dokumentasjon
+            dokumentasjon = søknad?.dokumentasjon,
         )
     }
 
@@ -88,7 +88,7 @@ class VilkårGrunnlagService(
         grunnlagsdata: GrunnlagsdataDomene,
         barn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ): List<BarnMedSamværDto> {
         val barnMedSamværRegistergrunnlag = barnMedsamværMapper.mapRegistergrunnlag(
             personIdentSøker,
@@ -96,7 +96,7 @@ class VilkårGrunnlagService(
             grunnlagsdata.annenForelder,
             barn,
             søknadsbarn,
-            grunnlagsdata.søker.bostedsadresse
+            grunnlagsdata.søker.bostedsadresse,
         )
         val søknadsgrunnlag = barnMedsamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
         val barnepass: List<BarnepassDto> = when (stønadstype) {

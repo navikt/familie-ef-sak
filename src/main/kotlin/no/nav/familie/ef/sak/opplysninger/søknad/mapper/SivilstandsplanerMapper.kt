@@ -13,7 +13,7 @@ object SivilstandsplanerMapper {
         return SivilstandsplanerDto(
             sivilstandsplaner?.harPlaner,
             sivilstandsplaner?.fraDato,
-            samboerDto
+            samboerDto,
         )
     }
 }

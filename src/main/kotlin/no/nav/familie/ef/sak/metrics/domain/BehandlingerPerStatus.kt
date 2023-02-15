@@ -6,5 +6,5 @@ import no.nav.familie.kontrakter.felles.ef.StønadType
 data class BehandlingerPerStatus(
     val stonadstype: StønadType,
     val status: BehandlingStatus,
-    val antall: Int
+    val antall: Int,
 )

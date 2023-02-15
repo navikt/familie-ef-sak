@@ -10,7 +10,7 @@ object SagtOppEllerRedusertStillingMapper {
         return SagtOppEllerRedusertStillingDto(
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             årsak = situasjon.oppsigelseReduksjonÅrsak,
-            dato = situasjon.oppsigelseReduksjonTidspunkt
+            dato = situasjon.oppsigelseReduksjonTidspunkt,
         )
     }
 }

@@ -19,13 +19,13 @@ data class Søknad(
     val sporbar: Sporbar = Sporbar(),
     @MappedCollection(idColumn = "grunnlag_soknad_id")
     val søker: Søker,
-    val relaterteFnr: Set<String>
+    val relaterteFnr: Set<String>,
 )
 
 enum class SøknadType {
     OVERGANGSSTØNAD,
     BARNETILSYN,
-    SKOLEPENGER
+    SKOLEPENGER,
 }
 
 object SøknadMapper {
@@ -33,7 +33,7 @@ object SøknadMapper {
     fun toDomain(
         journalpostId: String,
         søknad: ISøknadsskjema,
-        behandlingId: UUID
+        behandlingId: UUID,
     ): Søknad {
         return Søknad(
             soknadsskjemaId = søknad.id,
@@ -44,7 +44,7 @@ object SøknadMapper {
             relaterteFnr = søknad.barn.map { listOf(it.fødselsnummer, it.annenForelder?.person?.fødselsnummer) }
                 .flatten()
                 .filterNotNull()
-                .toSet()
+                .toSet(),
         )
     }
 }

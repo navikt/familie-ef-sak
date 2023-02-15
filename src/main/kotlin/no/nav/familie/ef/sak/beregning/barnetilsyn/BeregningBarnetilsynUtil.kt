@@ -11,7 +11,7 @@ import java.util.UUID
 
 data class MaxbeløpBarnetilsynSats(
     val periode: Datoperiode,
-    val maxbeløp: Map<Int, Int>
+    val maxbeløp: Map<Int, Int>,
 )
 
 object BeregningBarnetilsynUtil {
@@ -20,32 +20,32 @@ object BeregningBarnetilsynUtil {
         listOf(
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 12)),
-                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284),
             ),
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2021, 1), YearMonth.of(2021, 12)),
-                maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203)
+                maxbeløp = mapOf(1 to 4195, 2 to 5474, 3 to 6203),
             ),
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 12)),
-                maxbeløp = mapOf(1 to 4053, 2 to 5289, 3 to 5993)
-            )
+                maxbeløp = mapOf(1 to 4053, 2 to 5289, 3 to 5993),
+            ),
         )
 
     val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
                 Datoperiode(LocalDate.of(2023, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460)
-            )
+                maxbeløp = mapOf(1 to 4369, 2 to 5700, 3 to 6460),
+            ),
         ) + eldreBarnetilsynsatser
 
     val ikkeGjeldendeSatserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
                 Datoperiode(LocalDate.of(2022, 1, 1), LocalDate.MAX),
-                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284)
-            )
+                maxbeløp = mapOf(1 to 4250, 2 to 5545, 3 to 6284),
+            ),
         ) + eldreBarnetilsynsatser.filter { !it.periode.inneholder(LocalDate.of(2022, 1, 1)) }
 
     fun lagBeløpsPeriodeBarnetilsyn(
@@ -53,7 +53,7 @@ object BeregningBarnetilsynUtil {
         kontantstøtteBeløp: BigDecimal,
         tilleggsstønadBeløp: BigDecimal,
         barn: List<UUID>,
-        brukIkkeVedtatteSatser: Boolean
+        brukIkkeVedtatteSatser: Boolean,
     ): BeløpsperiodeBarnetilsynDto {
         val beregnedeBeløp: BeregnedeBeløp =
             beregnPeriodeBeløp(
@@ -62,7 +62,7 @@ object BeregningBarnetilsynUtil {
                 tilleggsstønadBeløp,
                 barn.size,
                 utgiftsperiode.årMåned,
-                brukIkkeVedtatteSatser
+                brukIkkeVedtatteSatser,
             )
 
         return BeløpsperiodeBarnetilsynDto(
@@ -75,10 +75,10 @@ object BeregningBarnetilsynUtil {
                 kontantstøttebeløp = kontantstøtteBeløp,
                 tilleggsstønadsbeløp = tilleggsstønadBeløp,
                 antallBarn = barn.size,
-                barn = barn
+                barn = barn,
             ),
             aktivitetstype = utgiftsperiode.aktivitetstype,
-            periodetype = utgiftsperiode.periodetype
+            periodetype = utgiftsperiode.periodetype,
         )
     }
 
@@ -90,7 +90,7 @@ object BeregningBarnetilsynUtil {
         tilleggsstønadBeløp: BigDecimal,
         antallBarn: Int,
         årMåned: YearMonth,
-        brukIkkeVedtatteSatser: Boolean
+        brukIkkeVedtatteSatser: Boolean,
     ): BeregnedeBeløp {
         val beløpFørFratrekkOgSatsjustering =
             kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(periodeutgift, kontantstøtteBeløp)
@@ -106,13 +106,13 @@ object BeregningBarnetilsynUtil {
         return BeregnedeBeløp(
             utbetaltBeløp = maxOf(ZERO, utbetaltBeløp),
             beløpFørFratrekkOgSatsjustering = beløpFørFratrekkOgSatsjustering,
-            maxSatsBeløp.toInt()
+            maxSatsBeløp.toInt(),
         )
     }
 
     fun kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
         periodeutgift: BigDecimal,
-        kontantstøtteBeløp: BigDecimal
+        kontantstøtteBeløp: BigDecimal,
     ) =
         maxOf(ZERO, (periodeutgift - kontantstøtteBeløp).multiply(0.64.toBigDecimal()))
 }

@@ -52,7 +52,7 @@ internal class GjenbrukVilkårServiceTest {
         fagsakService = fagsakService,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
         grunnlagsdataService = grunnlagsdataService,
-        barnService = barnService
+        barnService = barnService,
     )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())
@@ -62,17 +62,17 @@ internal class GjenbrukVilkårServiceTest {
         TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Barn Nummer En", barn1),
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2)
-            )
-        ).build().søknadOvergangsstønad
+                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
+            ),
+        ).build().søknadOvergangsstønad,
     ).tilSøknadsverdier()
     private val søknadBT = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Barn Nummer To", barn2),
-                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3)
-            )
-        ).build().søknadBarnetilsyn
+                TestsøknadBuilder.Builder().defaultBarn("Barn Nummer Tre", barn3),
+            ),
+        ).build().søknadBarnetilsyn,
     ).tilSøknadsverdier()
 
     private val fagsakPersonId = UUID.randomUUID()
@@ -111,7 +111,7 @@ internal class GjenbrukVilkårServiceTest {
         }
         every { behandlingService.hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId) } returns listOf(
             ferdigstiltBehandlingOS,
-            nyBehandlingBT
+            nyBehandlingBT,
         )
 
         every { vilkårsvurderingRepository.updateAll(capture(vilkårsvurderingerSlot)) } answers { firstArg() }
@@ -203,14 +203,14 @@ internal class GjenbrukVilkårServiceTest {
     private fun gjenbrukVilkår() {
         gjenbrukVilkårService.gjenbrukInngangsvilkårVurderinger(
             nyBT.behandling.id,
-            ferdigstiltOS.behandling.id
+            ferdigstiltOS.behandling.id,
         )
     }
 
     private fun mockGrunnlagsdata(behandlingId: UUID, sivilstandstype: Sivilstandstype) {
         val grunnlagsdata = opprettGrunnlagsdata().copy(
             søker = søker(sivilstand = listOf(sivilstand(sivilstandstype))),
-            barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn"))
+            barn = listOf(barnMedIdent(fnr = "123", navn = "fornavn etternavn")),
         )
         every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns
             GrunnlagsdataMedMetadata(grunnlagsdata, LocalDateTime.now())
@@ -220,7 +220,7 @@ internal class GjenbrukVilkårServiceTest {
         val fagsak: Fagsak,
         val behandling: Behandling,
         val søknad: Søknadsverdier,
-        val vilkårsresultat: Vilkårsresultat
+        val vilkårsresultat: Vilkårsresultat,
     ) {
         val saksbehandling: Saksbehandling = saksbehandling(fagsak, behandling)
         val behandlingBarn = søknadBarnTilBehandlingBarn(søknad.barn)
@@ -236,7 +236,7 @@ internal class GjenbrukVilkårServiceTest {
                     behandling.id,
                     vilkårsresultat,
                     type = VilkårType.ALENEOMSORG,
-                    barnId = it.id
+                    barnId = it.id,
                 )
             }
             aktivitetsvilkår = vilkårsvurdering(behandling.id, vilkårsresultat, type = VilkårType.AKTIVITET)

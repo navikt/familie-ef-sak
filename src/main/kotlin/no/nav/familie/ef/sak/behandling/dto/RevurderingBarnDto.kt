@@ -7,7 +7,7 @@ import java.util.UUID
 data class RevurderingBarnDto(
     val personIdent: String? = null,
     val navn: String? = null,
-    val fødselTerminDato: LocalDate? = null
+    val fødselTerminDato: LocalDate? = null,
 ) {
 
     fun tilBehandlingBarn(behandlingId: UUID): BehandlingBarn = BehandlingBarn(
@@ -15,7 +15,7 @@ data class RevurderingBarnDto(
         søknadBarnId = null,
         personIdent = this.personIdent,
         navn = this.navn,
-        fødselTermindato = this.fødselTerminDato
+        fødselTermindato = this.fødselTerminDato,
     )
 }
 

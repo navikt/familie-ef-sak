@@ -67,15 +67,15 @@ internal class VurderingServiceTest {
         grunnlagsdataService = grunnlagsdataService,
         barnService = barnService,
         fagsakService = fagsakService,
-        featureToggleService = featureToggleService
+        featureToggleService = featureToggleService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-            )
-        ).build().søknadOvergangsstønad
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050"),
+            ),
+        ).build().søknadOvergangsstønad,
     ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
@@ -93,8 +93,8 @@ internal class VurderingServiceTest {
                     personIdent = søknad.fødselsnummer,
                     gyldigePerioder = emptyList(),
                     uavklartePerioder = emptyList(),
-                    avvistePerioder = emptyList()
-                )
+                    avvistePerioder = emptyList(),
+                ),
             )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         every { featureToggleService.isEnabled(any()) } returns true
@@ -102,7 +102,7 @@ internal class VurderingServiceTest {
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
-            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null)
+            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null),
         )
 
         val barnMedSamvær = barn.map { lagBarnetilsynBarn(it.id) }
@@ -110,7 +110,7 @@ internal class VurderingServiceTest {
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
             mockVilkårGrunnlagDto(
                 sivilstand = sivilstand,
-                barnMedSamvær = barnMedSamvær
+                barnMedSamvær = barnMedSamvær,
             )
     }
 
@@ -124,14 +124,14 @@ internal class VurderingServiceTest {
             false,
             AnnenForelderDto("navn", "fnr2", LocalDate.now().minusYears(23), true, "Norge", "Vei 1B", null, null, AvstandTilSøkerDto(null, LangAvstandTilSøker.UKJENT)),
             null,
-            null
+            null,
         ),
         barnepass = BarnepassDto(
             barnId,
             skalHaBarnepass = true,
             barnepassordninger = listOf(),
-            årsakBarnepass = null
-        )
+            årsakBarnepass = null,
+        ),
     )
 
     @Test
@@ -154,7 +154,7 @@ internal class VurderingServiceTest {
         assertThat(nyeVilkårsvurderinger.captured.filter { it.barnId != null }).hasSize(2)
         assertThat(
             nyeVilkårsvurderinger.captured.map { it.resultat }
-                .toSet()
+                .toSet(),
         ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
@@ -178,12 +178,12 @@ internal class VurderingServiceTest {
         assertThat(
             nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALENEOMSORG }
                 .map { it.resultat }
-                .toSet()
+                .toSet(),
         ).containsOnly(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(
             nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
                 .map { it.resultat }
-                .toSet()
+                .toSet(),
         ).containsOnly(Vilkårsresultat.OPPFYLT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
@@ -195,8 +195,8 @@ internal class VurderingServiceTest {
                 vilkårsvurdering(
                     resultat = OPPFYLT,
                     type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                    behandlingId = behandlingId
-                )
+                    behandlingId = behandlingId,
+                ),
             )
 
         vurderingService.hentEllerOpprettVurderinger(behandlingId)
@@ -213,16 +213,16 @@ internal class VurderingServiceTest {
                     mockk(),
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
-                )
+                    søktOmBarnetilsyn = emptyList(),
+                ),
             )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns
             listOf(
                 Vilkårsvurdering(
                     behandlingId = behandlingId,
                     type = VilkårType.SIVILSTAND,
-                    delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)
-                )
+                    delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
+                ),
             )
 
         val vilkår = vurderingService.hentEllerOpprettVurderinger(behandlingId)
@@ -244,8 +244,8 @@ internal class VurderingServiceTest {
             vilkårsvurdering(
                 resultat = OPPFYLT,
                 type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                behandlingId = behandlingId
-            )
+                behandlingId = behandlingId,
+            ),
         )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
 
@@ -262,8 +262,8 @@ internal class VurderingServiceTest {
             vilkårsvurdering(
                 resultat = OPPFYLT,
                 type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-                behandlingId = behandlingId
-            )
+                behandlingId = behandlingId,
+            ),
         )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns vilkårsvurderinger
         val erAlleVilkårOppfylt = vurderingService.erAlleVilkårOppfylt(behandlingId)
@@ -299,16 +299,16 @@ internal class VurderingServiceTest {
                 delvilkårsvurdering = listOf(
                     Delvilkårsvurdering(
                         OPPFYLT,
-                        listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
-                    )
-                )
+                        listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
+                    ),
+                ),
             )
         }
 
         every {
             vilkårsvurderingRepository.findByTypeAndBehandlingIdIn(
                 VilkårType.AKTIVITET_ARBEID,
-                listOf(behandlingId)
+                listOf(behandlingId),
             )
         } returns vilkårsvurderingList
 
@@ -319,21 +319,21 @@ internal class VurderingServiceTest {
 
     private fun lagVilkårsvurderingerMedResultat(
         resultat1: Vilkårsresultat = OPPFYLT,
-        resultat2: Vilkårsresultat = SKAL_IKKE_VURDERES
+        resultat2: Vilkårsresultat = SKAL_IKKE_VURDERES,
     ) =
         lagVilkårsvurderinger(behandlingId, resultat1).subList(fromIndex = 0, toIndex = 3) +
             lagVilkårsvurderinger(behandlingId, resultat2).subList(fromIndex = 3, toIndex = 10)
 
     private fun lagVilkårsvurderinger(
         behandlingId: UUID,
-        resultat: Vilkårsresultat = OPPFYLT
+        resultat: Vilkårsresultat = OPPFYLT,
     ): List<Vilkårsvurdering> {
         return VilkårType.hentVilkårForStønad(OVERGANGSSTØNAD).map {
             vilkårsvurdering(
                 behandlingId = behandlingId,
                 resultat = resultat,
                 type = it,
-                delvilkårsvurdering = listOf()
+                delvilkårsvurdering = listOf(),
             )
         }
     }

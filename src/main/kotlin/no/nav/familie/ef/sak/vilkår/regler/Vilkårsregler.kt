@@ -48,7 +48,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
             NyttBarnSammePartnerRegel(),
             AktivitetRegel(),
             SagtOppEllerRedusertRegel(),
-            TidligareVedtaksperioderRegel()
+            TidligareVedtaksperioderRegel(),
         )
         BARNETILSYN -> listOf(
             ForutgåendeMedlemskapRegel(),
@@ -61,7 +61,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
             AktivitetArbeidRegel(),
             InntektRegel(),
             AlderPåBarnRegel(),
-            DokumentasjonTilsynsutgifterRegel()
+            DokumentasjonTilsynsutgifterRegel(),
         )
 
         SKOLEPENGER -> listOf(
@@ -74,7 +74,7 @@ fun vilkårsreglerForStønad(stønadstype: StønadType): List<Vilkårsregel> =
             NyttBarnSammePartnerRegel(),
             RettTilOvergangsstønadRegel(),
             DokumentasjonAvUtdanningRegel(),
-            UtdanningErHensiktsmessigRegel()
+            UtdanningErHensiktsmessigRegel(),
         )
     }
 

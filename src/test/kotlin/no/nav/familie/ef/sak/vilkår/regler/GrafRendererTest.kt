@@ -22,33 +22,33 @@ internal class GrafRendererTest {
             val regler = it.value.regler
             mapOf(
                 "name" to it.key,
-                "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) }
+                "children" to it.value.hovedregler.map { regelId -> mapSpørsmål(regler, regelId) },
             )
         }
         println(
             objectMapper.writeValueAsString(
                 mapOf(
                     "name" to "vilkår",
-                    "children" to vilkårsregler.toList()
-                )
-            )
+                    "children" to vilkårsregler.toList(),
+                ),
+            ),
         )
     }
 
     enum class SivilstandData(val sivilstandstype: Sivilstandstype, val søknad: SøknadsskjemaOvergangsstønad = søknadBuilder()) {
         UGIFT__UFORMELT_GIFT__ELLER__UFORMELT_SKILT(
             Sivilstandstype.UGIFT,
-            søknadBuilder { it.copy(erUformeltGift = true) }
+            søknadBuilder { it.copy(erUformeltGift = true) },
         ),
         UGIFT(Sivilstandstype.UGIFT),
         GIFT__SØKT_OM_SKILSMISSE(
             Sivilstandstype.GIFT,
-            søknadBuilder { it.copy(søktOmSkilsmisseSeparasjon = true) }
+            søknadBuilder { it.copy(søktOmSkilsmisseSeparasjon = true) },
         ),
         GIFT(Sivilstandstype.GIFT),
         SEPARERT(Sivilstandstype.SEPARERT),
         SKILT(Sivilstandstype.SKILT),
-        ENKE(Sivilstandstype.ENKE_ELLER_ENKEMANN)
+        ENKE(Sivilstandstype.ENKE_ELLER_ENKEMANN),
     }
 
     @Test
@@ -60,8 +60,8 @@ internal class GrafRendererTest {
                     it.søknad.sivilstand,
                     it.sivilstandstype,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
-                )
+                    søktOmBarnetilsyn = emptyList(),
+                ),
             )
             val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->
                 delvilkårsvurdering.resultat != Vilkårsresultat.IKKE_AKTUELL
@@ -69,16 +69,16 @@ internal class GrafRendererTest {
 
             mapOf(
                 "name" to it.name,
-                "children" to hovedregler
+                "children" to hovedregler,
             )
         }
         println(
             objectMapper.writeValueAsString(
                 mapOf(
                     "name" to "vilkår",
-                    "children" to sivilstandregler.toList()
-                )
-            )
+                    "children" to sivilstandregler.toList(),
+                ),
+            ),
         )
     }
 
@@ -87,7 +87,7 @@ internal class GrafRendererTest {
      */
     data class Spørsmål(
         val name: RegelId,
-        val children: List<Svar>
+        val children: List<Svar>,
     ) {
 
         val type = "spørsmål"
@@ -97,7 +97,7 @@ internal class GrafRendererTest {
         val name: SvarId,
         val begrunnelseType: BegrunnelseType,
         val children: List<Spørsmål>,
-        val resultat: Vilkårsresultat? = null
+        val resultat: Vilkårsresultat? = null,
     ) {
 
         val type = "svar"
@@ -130,7 +130,7 @@ internal class GrafRendererTest {
             builder.setSivilstandsdetaljer(
                 erUformeltGift = false,
                 erUformeltSeparertEllerSkilt = false,
-                søktOmSkilsmisseSeparasjon = false
+                søktOmSkilsmisseSeparasjon = false,
             )
             val søknad = SøknadsskjemaMapper.tilDomene(builder.build().søknadOvergangsstønad)
             return søknad.copy(sivilstand = changeSivilstand.invoke(søknad.sivilstand))

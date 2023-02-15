@@ -14,7 +14,7 @@ object InternPeriodeTestUtil {
         stønadFom: LocalDate = LocalDate.now(),
         stønadTom: LocalDate = LocalDate.now().plusDays(1),
         opphørdato: LocalDate? = null,
-        datakilde: PeriodeOvergangsstønad.Datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD
+        datakilde: PeriodeOvergangsstønad.Datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD,
     ): InternPeriode {
         return InternPeriode(
             personIdent = "1",
@@ -26,7 +26,7 @@ object InternPeriodeTestUtil {
             stønadFom = stønadFom,
             stønadTom = stønadTom,
             opphørsdato = opphørdato,
-            datakilde = datakilde
+            datakilde = datakilde,
         )
     }
 }

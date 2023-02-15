@@ -8,7 +8,7 @@ data class HendelseshistorikkDto(
     var hendelse: Hendelse,
     val endretAvNavn: String,
     val endretTid: LocalDateTime,
-    val metadata: Map<String, Any>? = null
+    val metadata: Map<String, Any>? = null,
 )
 
 enum class Hendelse {
@@ -22,5 +22,5 @@ enum class Hendelse {
     VEDTAK_AVSLÅTT,
     HENLAGT,
     UKJENT,
-    ANGRE_SEND_TIL_BESLUTTER
+    ANGRE_SEND_TIL_BESLUTTER,
 }

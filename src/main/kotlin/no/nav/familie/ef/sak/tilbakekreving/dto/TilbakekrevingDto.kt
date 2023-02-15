@@ -7,12 +7,12 @@ import java.util.UUID
 data class TilbakekrevingDto(
     val valg: Tilbakekrevingsvalg,
     val varseltekst: String? = null,
-    var begrunnelse: String
+    var begrunnelse: String,
 )
 
 fun TilbakekrevingDto.tilDomene(behandlingId: UUID) = Tilbakekreving(
     behandlingId = behandlingId,
     valg = this.valg,
     varseltekst = this.varseltekst,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
 )

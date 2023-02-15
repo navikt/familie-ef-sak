@@ -13,5 +13,5 @@ data class PersonMinimum(
     @Column("fodselsnummer")
     override val fødselsnummer: String? = null,
     @Column("fodselsdato")
-    val fødselsdato: LocalDate? = null
+    val fødselsdato: LocalDate? = null,
 ) : IPersonMinimum

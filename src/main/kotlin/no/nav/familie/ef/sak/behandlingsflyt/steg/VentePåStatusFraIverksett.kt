@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class VentePåStatusFraIverksett(
     private val iverksettClient: IverksettClient,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : BehandlingSteg<Void?> {
 
     override fun utførSteg(saksbehandling: Saksbehandling, data: Void?) {

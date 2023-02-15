@@ -12,7 +12,7 @@ object AdresseHjelper {
         return adresser.sortedWith(
             compareBy<AdresseDto> { it.type.rekkefølge }
                 .thenByDescending { it.erGjeldende }
-                .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed }
+                .thenByDescending { it.angittFlyttedato ?: it.gyldigFraOgMed },
         )
     }
 

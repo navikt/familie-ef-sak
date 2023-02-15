@@ -52,7 +52,7 @@ internal class PersonopplysningerServiceTest {
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
             personService,
             personopplysningerIntegrasjonerClient,
-            tidligereVedaksperioderService
+            tidligereVedaksperioderService,
         )
 
         grunnlagsdataService = GrunnlagsdataService(
@@ -60,14 +60,14 @@ internal class PersonopplysningerServiceTest {
             søknadService,
             grunnlagsdataRegisterService,
             behandlingService,
-            mockk()
+            mockk(),
         )
         val personopplysningerMapper =
             PersonopplysningerMapper(
                 adresseMapper,
                 StatsborgerskapMapper(kodeverkService),
                 InnflyttingUtflyttingMapper(kodeverkService),
-                arbeidsfordelingService
+                arbeidsfordelingService,
             )
         personopplysningerService = PersonopplysningerService(
             personService,
@@ -75,7 +75,7 @@ internal class PersonopplysningerServiceTest {
             personopplysningerIntegrasjonerClient,
             grunnlagsdataService,
             personopplysningerMapper,
-            ConcurrentMapCacheManager()
+            ConcurrentMapCacheManager(),
         )
     }
 
@@ -86,7 +86,7 @@ internal class PersonopplysningerServiceTest {
             "01010172272",
             emptyList(),
             emptyList(),
-            emptyList()
+            emptyList(),
         )
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet("1", "Enhet")
         val søker = personopplysningerService.hentPersonopplysninger("01010172272")

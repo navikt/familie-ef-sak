@@ -11,7 +11,7 @@ import java.util.UUID
 @Service
 @TaskStepBeskrivelse(
     taskStepType = PubliserVedtakshendelseTask.TYPE,
-    beskrivelse = "Sender hendelse om vedtak"
+    beskrivelse = "Sender hendelse om vedtak",
 )
 class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncTaskStep {
 
@@ -27,7 +27,7 @@ class PubliserVedtakshendelseTask(private val stegService: StegService) : AsyncT
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
-                }
+                },
             )
 
         const val TYPE = "publiserVedtakshendelse"

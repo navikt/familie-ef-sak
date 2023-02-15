@@ -44,22 +44,22 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
                         LocalDate.now(),
                         LocalDate.now(),
                         AktivitetType.FORSØRGER_ETABLERER_VIRKSOMHET,
-                        VedtaksperiodeType.HOVEDPERIODE
-                    )
-                )
+                        VedtaksperiodeType.HOVEDPERIODE,
+                    ),
+                ),
             ),
             inntekter = InntektWrapper(
                 listOf(
                     Inntektsperiode(
                         periode = Månedsperiode(YearMonth.now()),
                         inntekt = BigDecimal(100),
-                        samordningsfradrag = BigDecimal(0)
-                    )
-                )
+                        samordningsfradrag = BigDecimal(0),
+                    ),
+                ),
             ),
             saksbehandlerIdent = "VL",
             opprettetAv = "VL",
-            opprettetTid = LocalDateTime.now()
+            opprettetTid = LocalDateTime.now(),
         )
 
         vedtakRepository.insert(vedtak)

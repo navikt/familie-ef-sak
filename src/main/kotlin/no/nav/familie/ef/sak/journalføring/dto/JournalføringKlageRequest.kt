@@ -8,12 +8,12 @@ data class JournalføringKlageRequest(
     val fagsakId: UUID,
     val oppgaveId: String,
     val behandling: JournalføringKlageBehandling,
-    val journalførendeEnhet: String
+    val journalførendeEnhet: String,
 )
 
 data class JournalføringKlageBehandling(
     val behandlingId: UUID? = null,
-    val mottattDato: LocalDate? = null
+    val mottattDato: LocalDate? = null,
 )
 
 fun JournalføringKlageRequest.skalJournalførePåEksisterendeBehandling(): Boolean = this.behandling.behandlingId != null

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class InfotrygdController(
     private val tilgangService: TilgangService,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
 ) {
 
     @PostMapping("perioder")

@@ -71,7 +71,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
         assertThat(finnÅpneBehandlinger).containsExactlyInAnyOrder(
             ForekomsterPerUke(år, uke, SKOLEPENGER, 15),
             ForekomsterPerUke(år, uke, OVERGANGSSTØNAD, 15),
-            ForekomsterPerUke(år, uke, BARNETILSYN, 15)
+            ForekomsterPerUke(år, uke, BARNETILSYN, 15),
         )
     }
 
@@ -96,7 +96,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.SATT_PÅ_VENT, 3),
             BehandlingerPerStatus(OVERGANGSSTØNAD, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
             BehandlingerPerStatus(BARNETILSYN, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
-            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.IVERKSETTER_VEDTAK, 3)
+            BehandlingerPerStatus(SKOLEPENGER, BehandlingStatus.IVERKSETTER_VEDTAK, 3),
         )
     }
 
@@ -121,7 +121,7 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             VedtakPerUke(år, uke, SKOLEPENGER, OPPHØRT, BehandlingÅrsak.SØKNAD, null, 3),
             VedtakPerUke(år, uke, OVERGANGSSTØNAD, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3),
             VedtakPerUke(år, uke, BARNETILSYN, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3),
-            VedtakPerUke(år, uke, SKOLEPENGER, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3)
+            VedtakPerUke(år, uke, SKOLEPENGER, IKKE_SATT, BehandlingÅrsak.SØKNAD, null, 3),
         )
     }
 
@@ -149,8 +149,8 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             lagAndelTilkjentYtelse(
                 10_000,
                 fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
-            )
+                tilOgMed = now.atEndOfMonth(),
+            ),
         )
 
         lagreTilkjentYtelse(
@@ -158,34 +158,34 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
             lagAndelTilkjentYtelse(
                 10_000,
                 fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
-            )
+                tilOgMed = now.atEndOfMonth(),
+            ),
         )
         lagreTilkjentYtelse(
             behandling2,
             lagAndelTilkjentYtelse(
                 2_000,
                 fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
-            )
+                tilOgMed = now.atEndOfMonth(),
+            ),
         )
         lagreTilkjentYtelse(
             behandling1Fagsak2,
             lagAndelTilkjentYtelse(
                 3_000,
                 fraOgMed = now.atDay(1),
-                tilOgMed = now.atEndOfMonth()
+                tilOgMed = now.atEndOfMonth(),
             ),
             lagAndelTilkjentYtelse(
                 3_000,
                 fraOgMed = now.plusMonths(1).atDay(1),
-                tilOgMed = now.plusMonths(1).atEndOfMonth()
+                tilOgMed = now.plusMonths(1).atEndOfMonth(),
             ),
             lagAndelTilkjentYtelse(
                 20_000,
                 fraOgMed = now.plusMonths(3).atDay(1),
-                tilOgMed = now.plusMonths(3).atEndOfMonth()
-            )
+                tilOgMed = now.plusMonths(3).atEndOfMonth(),
+            ),
         )
 
         val løpendeSaker = målerRepository.finnAntallLøpendeSaker(now.atDay(1), now.plusMonths(1).atDay(1))
@@ -204,8 +204,8 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
                 fagsak,
                 status = BehandlingStatus.FERDIGSTILT,
                 resultat = INNVILGET,
-                opprettetTid = opprettetTid
-            )
+                opprettetTid = opprettetTid,
+            ),
         )
 
     private fun lagreTilkjentYtelse(behandling: Behandling, vararg andelTilkjentYtelse: AndelTilkjentYtelse) {
@@ -227,8 +227,8 @@ class MålerRepositoryTest : OppslagSpringRunnerTest() {
                                     fagsak = fagsak,
                                     status = status,
                                     resultat = resultat,
-                                    henlagtÅrsak = henlagtÅrsak
-                                )
+                                    henlagtÅrsak = henlagtÅrsak,
+                                ),
                             )
                         }
                     } else {

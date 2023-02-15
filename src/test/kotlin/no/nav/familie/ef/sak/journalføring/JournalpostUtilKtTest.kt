@@ -19,7 +19,7 @@ internal class JournalpostUtilKtTest {
         val journalpostUtenAvsenderMottaker = lagjournalpost(
             behandlingstemaOvergangsstønad,
             emptyList(),
-            journalposttype = Journalposttype.I
+            journalposttype = Journalposttype.I,
         )
         assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue
     }
@@ -29,7 +29,7 @@ internal class JournalpostUtilKtTest {
         val journalpostUtenAvsenderMottaker = lagjournalpost(
             behandlingstemaOvergangsstønad,
             emptyList(),
-            journalposttype = Journalposttype.U
+            journalposttype = Journalposttype.U,
         )
         assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue
     }
@@ -39,7 +39,7 @@ internal class JournalpostUtilKtTest {
         val journalpostUtenAvsenderMottaker = lagjournalpost(
             behandlingstemaOvergangsstønad,
             emptyList(),
-            journalposttype = Journalposttype.N
+            journalposttype = Journalposttype.N,
         )
         assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isFalse
     }
@@ -55,8 +55,8 @@ internal class JournalpostUtilKtTest {
                 type = AvsenderMottakerIdType.FNR,
                 navn = "Ola",
                 land = "Norge",
-                erLikBruker = true
-            )
+                erLikBruker = true,
+            ),
         )
         assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isFalse
     }
@@ -72,8 +72,8 @@ internal class JournalpostUtilKtTest {
                 type = AvsenderMottakerIdType.FNR,
                 navn = "",
                 land = "Norge",
-                erLikBruker = true
-            )
+                erLikBruker = true,
+            ),
         )
         assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue()
     }
@@ -89,8 +89,8 @@ internal class JournalpostUtilKtTest {
                 type = AvsenderMottakerIdType.FNR,
                 navn = "",
                 land = "Norge",
-                erLikBruker = true
-            )
+                erLikBruker = true,
+            ),
         )
         assertThat(journalpostUtenAvsenderMottaker.harUgyldigAvsenderMottaker()).isTrue()
     }
@@ -99,7 +99,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - overgangsstønad med søknad skal returnere true`() {
         val journalpost = lagjournalpost(
             behandlingstemaOvergangsstønad,
-            listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD))
+            listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)),
         )
         assertThat(journalpost.harStrukturertSøknad()).isTrue
     }
@@ -108,7 +108,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - barnetilsyn med søknad skal returnere true`() {
         val journalpost = lagjournalpost(
             behandlingstemaBarnetilsyn,
-            listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN))
+            listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN)),
         )
         assertThat(journalpost.harStrukturertSøknad()).isTrue
     }
@@ -117,7 +117,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - skolepenger med søknad skal returnere true`() {
         val journalpost = lagjournalpost(
             behandlingstemaSkolepenger,
-            listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER))
+            listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER)),
         )
         assertThat(journalpost.harStrukturertSøknad()).isTrue
     }
@@ -129,8 +129,8 @@ internal class JournalpostUtilKtTest {
             listOf(
                 dokumentUkjent,
                 dokumentEttersending(DokumentBrevkode.OVERGANGSSTØNAD),
-                dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)
-            )
+                dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD),
+            ),
         )
         assertThat(journalpost.harStrukturertSøknad()).isTrue
     }
@@ -139,7 +139,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode skolepenger skal returnere true`() {
         val journalpostSkolepengeSøknad = lagjournalpost(
             behandlingstema = null,
-            listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER))
+            listOf(dokumentSøknad(DokumentBrevkode.SKOLEPENGER)),
         )
         assertThat(journalpostSkolepengeSøknad.harStrukturertSøknad()).isTrue
     }
@@ -148,7 +148,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode overgangsstønad skal returnere true`() {
         val journalpostOvergangsstønad = lagjournalpost(
             behandlingstema = null,
-            listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD))
+            listOf(dokumentSøknad(DokumentBrevkode.OVERGANGSSTØNAD)),
         )
         assertThat(journalpostOvergangsstønad.harStrukturertSøknad()).isTrue
     }
@@ -157,7 +157,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - journalpost uten behandlingstema, men brevkode barnetilsyn skal returnere true`() {
         val journalpostBarnetilsynSøknad = lagjournalpost(
             behandlingstema = null,
-            listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN))
+            listOf(dokumentSøknad(DokumentBrevkode.BARNETILSYN)),
         )
         assertThat(journalpostBarnetilsynSøknad.harStrukturertSøknad()).isTrue
     }
@@ -166,7 +166,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - overgangsstønad med med ukjent dokument skal returnere false`() {
         val journalpost = lagjournalpost(
             behandlingstemaOvergangsstønad,
-            listOf(dokumentUkjent)
+            listOf(dokumentUkjent),
         )
         assertThat(journalpost.harStrukturertSøknad()).isFalse
     }
@@ -175,7 +175,7 @@ internal class JournalpostUtilKtTest {
     internal fun `harStrukturertSøknad - overgangsstønad med med ettersendingsdokument skal returnere false`() {
         val journalpost = lagjournalpost(
             behandlingstemaOvergangsstønad,
-            listOf(dokumentEttersending(DokumentBrevkode.OVERGANGSSTØNAD))
+            listOf(dokumentEttersending(DokumentBrevkode.OVERGANGSSTØNAD)),
         )
         assertThat(journalpost.harStrukturertSøknad()).isFalse
     }
@@ -193,8 +193,8 @@ internal class JournalpostUtilKtTest {
         dokumentvarianter =
         listOf(
             Dokumentvariant(Dokumentvariantformat.ORIGINAL),
-            Dokumentvariant(Dokumentvariantformat.ARKIV)
-        )
+            Dokumentvariant(Dokumentvariantformat.ARKIV),
+        ),
     )
 
     fun dokumentEttersending(brevkode: DokumentBrevkode) = DokumentInfo(
@@ -202,20 +202,20 @@ internal class JournalpostUtilKtTest {
         "Vedlegg2",
         brevkode = brevkode.verdi,
         dokumentvarianter =
-        listOf(Dokumentvariant(Dokumentvariantformat.ARKIV))
+        listOf(Dokumentvariant(Dokumentvariantformat.ARKIV)),
     )
 
     val dokumentUkjent = DokumentInfo(
         "23456",
         "Vedlegg3",
-        brevkode = "XYZ"
+        brevkode = "XYZ",
     )
 
     fun lagjournalpost(
         behandlingstema: String?,
         dokumenter: List<DokumentInfo>,
         journalposttype: Journalposttype = Journalposttype.I,
-        avsenderMottaker: AvsenderMottaker? = null
+        avsenderMottaker: AvsenderMottaker? = null,
     ) =
         Journalpost(
             journalpostId = journalpostId,
@@ -225,6 +225,6 @@ internal class JournalpostUtilKtTest {
             tema = "ENF",
             behandlingstema = behandlingstema,
             dokumenter = dokumenter,
-            tittel = "Tittel"
+            tittel = "Tittel",
         )
 }

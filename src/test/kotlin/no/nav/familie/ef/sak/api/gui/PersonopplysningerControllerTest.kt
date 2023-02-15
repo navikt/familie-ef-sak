@@ -35,7 +35,7 @@ internal class PersonopplysningerControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/personopplysninger"),
             HttpMethod.POST,
-            HttpEntity(personopplysningerRequest, headers)
+            HttpEntity(personopplysningerRequest, headers),
         )
     }
 }

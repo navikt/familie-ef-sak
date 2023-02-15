@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class OpprettOppgaverTerminbarnService(
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -19,7 +19,7 @@ class OpprettOppgaverTerminbarnService(
             oppgavetype = Oppgavetype.InnhentDokumentasjon,
             fristFerdigstillelse = oppgaveForBarn.aktivFra,
             beskrivelse = oppgaveForBarn.beskrivelse,
-            tilordnetNavIdent = null
+            tilordnetNavIdent = null,
         )
         logger.info("Opprettet oppgave med oppgaveId=$opprettetOppgaveId for behandling=${oppgaveForBarn.behandlingId}")
     }

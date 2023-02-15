@@ -25,13 +25,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class BarnMedSamværMapper(
-    private val adresseMapper: AdresseMapper
+    private val adresseMapper: AdresseMapper,
 ) {
 
     fun slåSammenBarnMedSamvær(
         søknadsgrunnlag: List<BarnMedSamværSøknadsgrunnlagDto>,
         registergrunnlag: List<BarnMedSamværRegistergrunnlagDto>,
-        barnepass: List<BarnepassDto>
+        barnepass: List<BarnepassDto>,
     ): List<BarnMedSamværDto> {
         val registergrunnlagPaaId = registergrunnlag.associateBy { it.id }
         val barnepassPaaId = barnepass.associateBy { it.id }
@@ -41,14 +41,14 @@ class BarnMedSamværMapper(
                 barnId = id,
                 søknadsgrunnlag = it,
                 registergrunnlag = registergrunnlagPaaId[id] ?: error("Savner registergrunnlag for barn=$id"),
-                barnepass = barnepassPaaId[id]
+                barnepass = barnepassPaaId[id],
             )
         }
     }
 
     fun mapSøknadsgrunnlag(
         behandlingBarn: List<BehandlingBarn>,
-        søknadBarn: Collection<SøknadBarn>
+        søknadBarn: Collection<SøknadBarn>,
     ): List<BarnMedSamværSøknadsgrunnlagDto> {
         val søknadsbarn = søknadBarn.associateBy { it.id }
         return behandlingBarn.map { barn -> mapSøknadsgrunnlag(barn, barn.søknadBarnId?.let { søknadsbarn[it] }) }
@@ -64,7 +64,7 @@ class BarnMedSamværMapper(
             id = behandlingBarn.id,
             skalHaBarnepass = søknadBarn?.skalHaBarnepass ?: false,
             barnepassordninger = søknadBarn?.barnepassordninger?.map(this::mapBarnepassordning) ?: emptyList(),
-            årsakBarnepass = søknadBarn?.årsakBarnepass
+            årsakBarnepass = søknadBarn?.årsakBarnepass,
         )
     }
 
@@ -74,7 +74,7 @@ class BarnMedSamværMapper(
             navn = it.navn,
             fra = it.datoperiode.fra,
             til = it.datoperiode.til,
-            beløp = it.beløp
+            beløp = it.beløp,
         )
 
     private fun mapSøknadsgrunnlag(behandlingBarn: BehandlingBarn, søknadsbarn: SøknadBarn?): BarnMedSamværSøknadsgrunnlagDto {
@@ -96,7 +96,7 @@ class BarnMedSamværMapper(
             harDereTidligereBoddSammen = samvær?.harDereTidligereBoddSammen,
             nårFlyttetDereFraHverandre = samvær?.nårFlyttetDereFraHverandre,
             hvorMyeErDuSammenMedAnnenForelder = samvær?.hvorMyeErDuSammenMedAnnenForelder,
-            beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn
+            beskrivSamværUtenBarn = samvær?.beskrivSamværUtenBarn,
         )
     }
 
@@ -106,7 +106,7 @@ class BarnMedSamværMapper(
         barneforeldre: List<AnnenForelderMedIdent>,
         behandlingBarn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
-        søkerAdresse: List<Bostedsadresse>
+        søkerAdresse: List<Bostedsadresse>,
     ): List<BarnMedSamværRegistergrunnlagDto> {
         val alleBarn: List<MatchetBehandlingBarn> = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
         val forelderMap = barneforeldre.associateBy { it.personIdent }
@@ -122,7 +122,7 @@ class BarnMedSamværMapper(
     private fun utledFnrForAnnenForelder(
         barn: MatchetBehandlingBarn,
         personIdentSøker: String,
-        søknadsbarn: Collection<SøknadBarn>
+        søknadsbarn: Collection<SøknadBarn>,
     ): String? {
         val fnr = barn.barn?.forelderBarnRelasjon?.firstOrNull {
             it.relatertPersonsIdent != personIdentSøker && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
@@ -135,7 +135,7 @@ class BarnMedSamværMapper(
         matchetBarn: MatchetBehandlingBarn,
         søkerAdresse: List<Bostedsadresse>,
         pdlAnnenForelder: AnnenForelderMedIdent?,
-        annenForelderFnr: String?
+        annenForelderFnr: String?,
     ): BarnMedSamværRegistergrunnlagDto {
         return BarnMedSamværRegistergrunnlagDto(
             id = matchetBarn.behandlingBarn.id,
@@ -146,7 +146,7 @@ class BarnMedSamværMapper(
             },
             forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
             dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
-            fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato
+            fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato,
         )
     }
 
@@ -158,14 +158,14 @@ class BarnMedSamværMapper(
             bosattINorge = annenForelder.bosattNorge,
             land = annenForelder.land,
             visningsadresse = null,
-            avstandTilSøker = AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
+            avstandTilSøker = AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT),
         )
     }
 
     private fun tilAnnenForelderDto(
         pdlAnnenForelder: AnnenForelderMedIdent,
         annenForelderFnr: String?,
-        søkerAdresse: List<Bostedsadresse>
+        søkerAdresse: List<Bostedsadresse>,
     ): AnnenForelderDto {
         return AnnenForelderDto(
             navn = pdlAnnenForelder.navn.visningsnavn(),
@@ -176,7 +176,7 @@ class BarnMedSamværMapper(
             land = pdlAnnenForelder.bostedsadresse.gjeldende()?.utenlandskAdresse?.landkode,
             visningsadresse = visningsadresse(pdlAnnenForelder),
             tidligereVedtaksperioder = pdlAnnenForelder.tidligereVedtaksperioder?.tilDto(),
-            avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende())
+            avstandTilSøker = langAvstandTilSøker(søkerAdresse, pdlAnnenForelder.bostedsadresse.gjeldende()),
         )
     }
 
@@ -186,7 +186,7 @@ class BarnMedSamværMapper(
 
     private fun langAvstandTilSøker(
         søkerAdresse: List<Bostedsadresse>,
-        bostedsadresse: Bostedsadresse?
+        bostedsadresse: Bostedsadresse?,
     ): AvstandTilSøkerDto =
         bostedsadresse
             ?.vegadresse

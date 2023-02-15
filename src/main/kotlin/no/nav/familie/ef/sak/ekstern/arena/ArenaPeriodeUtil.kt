@@ -19,7 +19,7 @@ object ArenaPeriodeUtil {
 
     fun slåSammenPerioderFraEfOgInfotrygd(
         request: PerioderOvergangsstønadRequest,
-        perioder: InternePerioder
+        perioder: InternePerioder,
     ): List<PeriodeOvergangsstønad> {
         val måneder = finnUnikeÅrMånedForPerioder(perioder)
         val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
@@ -28,7 +28,7 @@ object ArenaPeriodeUtil {
                 personIdent = request.personIdent,
                 fomDato = it.first.atDay(1),
                 tomDato = it.second.atEndOfMonth(),
-                datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                datakilde = PeriodeOvergangsstønad.Datakilde.EF,
             )
         }.filter { overlapper(request, it) }
     }

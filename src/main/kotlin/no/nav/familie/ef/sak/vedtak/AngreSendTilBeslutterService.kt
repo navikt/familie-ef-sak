@@ -25,7 +25,7 @@ class AngreSendTilBeslutterService(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
     private val stegService: StegService,
-    private val totrinnskontrollService: TotrinnskontrollService
+    private val totrinnskontrollService: TotrinnskontrollService,
 ) {
 
     @Transactional
@@ -38,7 +38,7 @@ class AngreSendTilBeslutterService(
             behandlingId = behandlingId,
             stegtype = saksbehandling.steg,
             utfall = StegUtfall.ANGRE_SEND_TIL_BESLUTTER,
-            metadata = null
+            metadata = null,
         )
 
         ferdigstillGodkjenneVedtakOppgave(saksbehandling)
@@ -54,9 +54,9 @@ class AngreSendTilBeslutterService(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.BehandleSak,
                     beskrivelse = "Angret send til beslutter",
-                    tilordnetNavIdent = SikkerhetContext.hentSaksbehandler()
-                )
-            )
+                    tilordnetNavIdent = SikkerhetContext.hentSaksbehandler(),
+                ),
+            ),
         )
     }
 
@@ -67,8 +67,8 @@ class AngreSendTilBeslutterService(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     it.gsakOppgaveId,
-                    personIdent = null
-                )
+                    personIdent = null,
+                ),
             )
         }
     }
@@ -83,7 +83,7 @@ class AngreSendTilBeslutterService(
 
         val efOppgave = oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
             oppgavetype = Oppgavetype.GodkjenneVedtak,
-            saksbehandling = saksbehandling
+            saksbehandling = saksbehandling,
         )
             ?: throw ApiFeil(feil = "Systemet har ikke rukket å opprette godkjenne vedtak oppgaven enda. Prøv igjen om litt.", httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
 

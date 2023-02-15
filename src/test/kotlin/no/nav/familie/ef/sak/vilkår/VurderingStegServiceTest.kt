@@ -73,7 +73,7 @@ internal class VurderingStegServiceTest {
         vilkårGrunnlagService,
         grunnlagsdataService,
         fagsakService,
-        featureToggleService
+        featureToggleService,
     )
     private val vurderingStegService = VurderingStegService(
         behandlingService = behandlingService,
@@ -81,15 +81,15 @@ internal class VurderingStegServiceTest {
         vilkårsvurderingRepository = vilkårsvurderingRepository,
         blankettRepository = blankettRepository,
         stegService = stegService,
-        taskService = taskService
+        taskService = taskService,
     )
     private val søknad = SøknadsskjemaMapper.tilDomene(
         TestsøknadBuilder.Builder().setBarn(
             listOf(
                 TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
-                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-            )
-        ).build().søknadOvergangsstønad
+                TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050"),
+            ),
+        ).build().søknadOvergangsstønad,
     ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
     val fagsak = fagsak()
@@ -113,13 +113,13 @@ internal class VurderingStegServiceTest {
                     personIdent = søknad.fødselsnummer,
                     gyldigePerioder = emptyList(),
                     uavklartePerioder = emptyList(),
-                    avvistePerioder = emptyList()
-                )
+                    avvistePerioder = emptyList(),
+                ),
             )
         every { vilkårsvurderingRepository.insertAll(any()) } answers { firstArg() }
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
-            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null)
+            SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null),
         )
         every { vilkårGrunnlagService.hentGrunnlag(any(), any(), any(), any()) } returns
             mockVilkårGrunnlagDto(sivilstand = sivilstand)
@@ -142,10 +142,10 @@ internal class VurderingStegServiceTest {
                     SvarPåVurderingerDto(
                         id = vurderingId,
                         behandlingId = behandlingId,
-                        delvilkårsvurderinger = listOf()
-                    )
+                        delvilkårsvurderinger = listOf(),
+                    ),
                 )
-            }
+            },
         ).hasMessageContaining("Finner ikke Vilkårsvurdering med id")
     }
 
@@ -161,17 +161,17 @@ internal class VurderingStegServiceTest {
                     VurderingDto(
                         RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                         SvarId.JA,
-                        "a"
-                    )
-                )
-            )
+                        "a",
+                    ),
+                ),
+            ),
         )
         vurderingStegService.oppdaterVilkår(
             SvarPåVurderingerDto(
                 id = vilkårsvurdering.id,
                 behandlingId = behandlingId,
-                delvilkårsvurderinger = delvilkårDto
-            )
+                delvilkårsvurderinger = delvilkårDto,
+            ),
         )
 
         assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -193,8 +193,8 @@ internal class VurderingStegServiceTest {
         vurderingStegService.settVilkårTilSkalIkkeVurderes(
             OppdaterVilkårsvurderingDto(
                 id = vilkårsvurdering.id,
-                behandlingId = behandlingId
-            )
+                behandlingId = behandlingId,
+            ),
         )
 
         assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
@@ -213,7 +213,7 @@ internal class VurderingStegServiceTest {
         val vilkårsvurdering = vilkårsvurdering(
             behandlingId,
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            VilkårType.FORUTGÅENDE_MEDLEMSKAP
+            VilkårType.FORUTGÅENDE_MEDLEMSKAP,
         )
         every { vilkårsvurderingRepository.findByIdOrNull(vilkårsvurdering.id) } returns vilkårsvurdering
 
@@ -223,10 +223,10 @@ internal class VurderingStegServiceTest {
                     SvarPåVurderingerDto(
                         id = vilkårsvurdering.id,
                         behandlingId = behandlingId,
-                        listOf()
-                    )
+                        listOf(),
+                    ),
                 )
-            }
+            },
         ).isInstanceOf(ApiFeil::class.java)
             .hasMessageContaining("er låst for videre redigering")
         verify(exactly = 0) { vilkårsvurderingRepository.insertAll(any()) }
@@ -236,7 +236,7 @@ internal class VurderingStegServiceTest {
     internal fun `skal oppdatere status fra OPPRETTET til UTREDES for første vilkår`() {
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             fagsak(),
-            status = BehandlingStatus.OPPRETTET
+            status = BehandlingStatus.OPPRETTET,
         )
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
@@ -247,17 +247,17 @@ internal class VurderingStegServiceTest {
                     VurderingDto(
                         RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                         SvarId.JA,
-                        "a"
-                    )
-                )
-            )
+                        "a",
+                    ),
+                ),
+            ),
         )
         vurderingStegService.oppdaterVilkår(
             SvarPåVurderingerDto(
                 id = vilkårsvurdering.id,
                 behandlingId = behandlingId,
-                delvilkårsvurderinger = delvilkårDto
-            )
+                delvilkårsvurderinger = delvilkårDto,
+            ),
         )
 
         verify(exactly = 1) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
@@ -268,7 +268,7 @@ internal class VurderingStegServiceTest {
         val fagsak = fagsak()
         every { behandlingService.hentSaksbehandling(behandlingId) } returns saksbehandling(
             fagsak,
-            status = BehandlingStatus.UTREDES
+            status = BehandlingStatus.UTREDES,
         )
         val lagretVilkårsvurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(lagretVilkårsvurdering)
@@ -279,17 +279,17 @@ internal class VurderingStegServiceTest {
                     VurderingDto(
                         RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN,
                         SvarId.JA,
-                        "a"
-                    )
-                )
-            )
+                        "a",
+                    ),
+                ),
+            ),
         )
         vurderingStegService.oppdaterVilkår(
             SvarPåVurderingerDto(
                 id = vilkårsvurdering.id,
                 behandlingId = behandlingId,
-                delvilkårsvurderinger = delvilkårDto
-            )
+                delvilkårsvurderinger = delvilkårDto,
+            ),
         )
 
         verify(exactly = 0) { behandlingService.oppdaterStatusPåBehandling(any(), BehandlingStatus.UTREDES) }
@@ -304,9 +304,9 @@ internal class VurderingStegServiceTest {
                     null,
                     Sivilstandstype.UGIFT,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
                 ),
-                OVERGANGSSTØNAD
+                OVERGANGSSTØNAD,
             )
 
         assertThat(vilkårsvurderinger).hasSize(vilkårsreglerForStønad(OVERGANGSSTØNAD).size)
@@ -323,9 +323,9 @@ internal class VurderingStegServiceTest {
                 listOf(
                     Delvilkårsvurdering(
                         Vilkårsresultat.OPPFYLT,
-                        listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN))
-                    )
-                )
+                        listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN)),
+                    ),
+                ),
             )
         val vilkårsvurderinger =
             opprettNyeVilkårsvurderinger(
@@ -334,9 +334,9 @@ internal class VurderingStegServiceTest {
                     søknad.sivilstand,
                     Sivilstandstype.UGIFT,
                     barn = barn,
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
                 ),
-                OVERGANGSSTØNAD
+                OVERGANGSSTØNAD,
             )
                 .map { if (it.type == vilkårsvurdering.type) vilkårsvurdering else it }
 

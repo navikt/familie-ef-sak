@@ -24,7 +24,7 @@ data class Behandlingshistorikk(
     val metadata: JsonWrapper? = null,
     val opprettetAvNavn: String = SikkerhetContext.hentSaksbehandlerNavn(),
     val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
-    val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+    val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
 )
 
 fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
@@ -35,7 +35,7 @@ fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
         endretAv = this.opprettetAv,
         endretTid = this.endretTid,
         utfall = this.utfall,
-        metadata = this.metadata.tilJson()
+        metadata = this.metadata.tilJson(),
     )
 }
 
@@ -47,7 +47,7 @@ fun Behandlingshistorikk.tilHendelseshistorikkDto(saksbehandling: Saksbehandling
         hendelse = hendelse,
         endretAvNavn = this.opprettetAvNavn,
         endretTid = this.endretTid,
-        metadata = this.metadata.tilJson()
+        metadata = this.metadata.tilJson(),
     )
 }
 
@@ -103,5 +103,5 @@ enum class StegUtfall {
     HENLAGT,
     SATT_PÅ_VENT,
     TATT_AV_VENT,
-    ANGRE_SEND_TIL_BESLUTTER
+    ANGRE_SEND_TIL_BESLUTTER,
 }

@@ -19,7 +19,7 @@ fun TilkjentYtelse.tilDto(): TilkjentYtelseDto {
     return TilkjentYtelseDto(
         behandlingId = this.behandlingId,
         andeler = this.andelerTilkjentYtelse.map { andel -> andel.tilDto() },
-        samordningsfradragType = this.samordningsfradragType
+        samordningsfradragType = this.samordningsfradragType,
     )
 }
 
@@ -29,7 +29,7 @@ fun AndelTilkjentYtelse.tilDto(): AndelTilkjentYtelseDto {
         periode = this.periode,
         inntekt = this.inntekt,
         inntektsreduksjon = this.inntektsreduksjon,
-        samordningsfradrag = this.samordningsfradrag
+        samordningsfradrag = this.samordningsfradrag,
     )
 }
 
@@ -42,9 +42,9 @@ fun TilkjentYtelse.tilBeløpsperiode(startDato: LocalDate): List<Beløpsperiode>
                 inntekt = andel.inntekt.toBigDecimal(),
                 samordningsfradrag = andel.samordningsfradrag.toBigDecimal(),
                 samordningsfradragType = this.samordningsfradragType,
-                avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal()
+                avkortningPerMåned = andel.inntektsreduksjon.toBigDecimal(),
             ),
-            beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal()
+            beløpFørSamordning = andel.beløp.plus(andel.samordningsfradrag).toBigDecimal(),
         )
     }
 }
@@ -60,14 +60,14 @@ fun TilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak: InnvilgelseBarnetilsyn, 
             beløp = it.beløp,
             beløpFørFratrekkOgSatsjustering = BeregningBarnetilsynUtil.kalkulerUtbetalingsbeløpFørFratrekkOgSatsjustering(
                 beløpsperiodeBarnetilsynDto.beregningsgrunnlag.utgifter,
-                beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp
+                beløpsperiodeBarnetilsynDto.beregningsgrunnlag.kontantstøttebeløp,
             )
                 .roundUp()
                 .toInt(),
             sats = beløpsperiodeBarnetilsynDto.sats,
             beregningsgrunnlag = beløpsperiodeBarnetilsynDto.beregningsgrunnlag,
             aktivitetstype = beløpsperiodeBarnetilsynDto.aktivitetstype,
-            periodetype = beløpsperiodeBarnetilsynDto.periodetype
+            periodetype = beløpsperiodeBarnetilsynDto.periodetype,
         )
     }
 }
@@ -77,7 +77,7 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
     eksternBehandlingId: Long,
     stønadstype: StønadType,
     eksternFagsakId: Long,
-    vedtaksdato: LocalDate
+    vedtaksdato: LocalDate,
 ): TilkjentYtelseMedMetadata {
     return TilkjentYtelseMedMetadata(
         tilkjentYtelse = this.tilIverksettDto(),
@@ -87,6 +87,6 @@ fun TilkjentYtelse.tilTilkjentYtelseMedMetaData(
         eksternFagsakId = eksternFagsakId,
         personIdent = this.personident,
         behandlingId = this.behandlingId,
-        vedtaksdato = vedtaksdato
+        vedtaksdato = vedtaksdato,
     )
 }

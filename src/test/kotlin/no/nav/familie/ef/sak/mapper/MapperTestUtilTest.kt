@@ -34,7 +34,7 @@ class MapperTestUtilTest {
 
     private fun forventetFeilmeldingTomListe(
         klassenavn: String,
-        feltnavn: String
+        feltnavn: String,
     ) = "$klassenavn har en tom liste i felt $feltnavn"
 
     private fun forventetFeilmelding(klassenavn: String, feltnavn: String) = "$klassenavn har ingen verdi i felt $feltnavn"

@@ -58,7 +58,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
             Sivilstandstype.SKILT,
             false,
             barnPåRevurdering,
-            emptyList()
+            emptyList(),
         )
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
@@ -94,7 +94,7 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
             Sivilstandstype.SKILT,
             false,
             emptyList(),
-            emptyList()
+            emptyList(),
         )
         assertThat(
             catchThrowable {
@@ -102,9 +102,9 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                     tidligereBehandlingId,
                     revurdering.id,
                     metadata,
-                    StønadType.OVERGANGSSTØNAD
+                    StønadType.OVERGANGSSTØNAD,
                 )
-            }
+            },
         )
             .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
     }
@@ -121,9 +121,9 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
             listOf(
                 Delvilkårsvurdering(
                     Vilkårsresultat.OPPFYLT,
-                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
-                )
-            )
+                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
+                ),
+            ),
         )
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
@@ -134,14 +134,14 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
     private fun opprettVilkårsvurderinger(
         søknadskjema: SøknadsskjemaOvergangsstønad,
         behandling: Behandling,
-        barn: List<BehandlingBarn>
+        barn: List<BehandlingBarn>,
     ): List<Vilkårsvurdering> {
         val hovedregelMetadata =
             HovedregelMetadata(
                 søknadskjema.sivilstand,
                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
                 barn = barn,
-                søktOmBarnetilsyn = emptyList()
+                søktOmBarnetilsyn = emptyList(),
             )
         val delvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(
@@ -150,15 +150,15 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                 type = VilkårType.SIVILSTAND,
                 behandlingId = behandling.id,
                 barnId = barn.first().id,
-                delvilkårsvurdering = delvilkårsvurdering
-            )
+                delvilkårsvurdering = delvilkårsvurdering,
+            ),
         )
         return vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 
     private fun lagreSøknad(
         behandling: Behandling,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)!!

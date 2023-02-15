@@ -31,7 +31,7 @@ class VurderingController(
     private val vurderingService: VurderingService,
     private val vurderingStegService: VurderingStegService,
     private val tilgangService: TilgangService,
-    private val gjenbrukVilkårService: GjenbrukVilkårService
+    private val gjenbrukVilkårService: GjenbrukVilkårService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -52,7 +52,7 @@ class VurderingController(
             secureLogger.warn(
                 "id=${vilkårsvurdering.id}" +
                     " behandlingId=${vilkårsvurdering.behandlingId}" +
-                    " svar=$delvilkårJson"
+                    " svar=$delvilkårJson",
             )
             throw e
         }

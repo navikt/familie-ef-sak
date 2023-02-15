@@ -27,7 +27,7 @@ import java.util.UUID
 class SøkController(
     private val søkService: SøkService,
     private val personService: PersonService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PostMapping("", "/person")

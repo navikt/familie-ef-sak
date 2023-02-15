@@ -20,7 +20,7 @@ import java.util.UUID
 class FagsakPersonController(
     private val tilgangService: TilgangService,
     private val fagsakPersonService: FagsakPersonService,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     @GetMapping("{fagsakPersonId}")
@@ -33,8 +33,8 @@ class FagsakPersonController(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.id,
                 barnetilsyn = fagsaker.barnetilsyn?.id,
-                skolepenger = fagsaker.skolepenger?.id
-            )
+                skolepenger = fagsaker.skolepenger?.id,
+            ),
         )
     }
 
@@ -48,8 +48,8 @@ class FagsakPersonController(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
                 barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
-                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) }
-            )
+                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) },
+            ),
         )
     }
 }

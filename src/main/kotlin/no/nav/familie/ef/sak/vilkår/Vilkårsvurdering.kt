@@ -31,7 +31,7 @@ data class Vilkårsvurdering(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     @Column("delvilkar")
-    val delvilkårsvurdering: DelvilkårsvurderingWrapper
+    val delvilkårsvurdering: DelvilkårsvurderingWrapper,
 ) {
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
@@ -43,7 +43,7 @@ data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilk�
 
 data class Delvilkårsvurdering(
     val resultat: Vilkårsresultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-    val vurderinger: List<Vurdering>
+    val vurderinger: List<Vurdering>,
 ) {
 
     // regelId for første svaret er det samme som hovedregel
@@ -53,7 +53,7 @@ data class Delvilkårsvurdering(
 data class Vurdering(
     val regelId: RegelId,
     val svar: SvarId? = null,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 )
 
 val inngangsvilkår = listOf(
@@ -63,7 +63,7 @@ val inngangsvilkår = listOf(
     VilkårType.SIVILSTAND,
     VilkårType.SAMLIV,
     VilkårType.ALENEOMSORG,
-    VilkårType.NYTT_BARN_SAMME_PARTNER
+    VilkårType.NYTT_BARN_SAMME_PARTNER,
 )
 
 enum class Vilkårsresultat(val beskrivelse: String) {
@@ -72,7 +72,8 @@ enum class Vilkårsresultat(val beskrivelse: String) {
     IKKE_OPPFYLT("Vilkåret er ikke oppfylt hvis alle delvilkår er oppfylt eller ikke oppfylt, men minimum 1 ikke oppfylt"),
     IKKE_AKTUELL("Hvis søknaden/pdl data inneholder noe som gjør att delvilkåret ikke må besvares"),
     IKKE_TATT_STILLING_TIL("Init state, eller att brukeren ikke svaret på hele delvilkåret"),
-    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes");
+    SKAL_IKKE_VURDERES("Saksbehandleren kan sette att ett delvilkår ikke skal vurderes"),
+    ;
 
     fun oppfyltEllerIkkeOppfylt() = this == OPPFYLT || this == IKKE_OPPFYLT
     fun erIkkeDelvilkårsresultat() = this != AUTOMATISK_OPPFYLT
@@ -98,7 +99,8 @@ enum class VilkårType(val beskrivelse: String, val gjelderStønader: List<Støn
     DOKUMENTASJON_TILSYNSUTGIFTER("Dokumentasjon av tilsynsutgifter", listOf(BARNETILSYN)),
     RETT_TIL_OVERGANGSSTØNAD("Er vilkårene for rett til overgangsstønad oppfylt?", listOf(SKOLEPENGER)),
     DOKUMENTASJON_AV_UTDANNING("Dokumentasjon av utdanning", listOf(SKOLEPENGER)),
-    ER_UTDANNING_HENSIKTSMESSIG("Er utdanning hensiktsmessig?", listOf(SKOLEPENGER))
+    ER_UTDANNING_HENSIKTSMESSIG("Er utdanning hensiktsmessig?", listOf(SKOLEPENGER)),
+
     ;
 
     fun gjelderFlereBarn(): Boolean = this == ALENEOMSORG || this == ALDER_PÅ_BARN

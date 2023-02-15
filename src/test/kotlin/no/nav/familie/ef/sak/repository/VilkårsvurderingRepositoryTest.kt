@@ -32,8 +32,8 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
             vilkårsvurdering(
                 behandling.id,
                 Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                VilkårType.FORUTGÅENDE_MEDLEMSKAP
-            )
+                VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+            ),
         )
 
         assertThat(vilkårsvurderingRepository.findByBehandlingId(UUID.randomUUID())).isEmpty()
@@ -49,15 +49,15 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
             vilkårsvurdering(
                 behandling.id,
                 Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                VilkårType.FORUTGÅENDE_MEDLEMSKAP
-            )
+                VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+            ),
         )
         val nyttTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.MILLIS)
 
         vilkårsvurderingRepository.oppdaterEndretTid(vilkårsvurdering.id, nyttTidspunkt)
 
         assertThat(vilkårsvurderingRepository.findByIdOrThrow(vilkårsvurdering.id).sporbar.endret.endretTid).isEqualTo(
-            nyttTidspunkt
+            nyttTidspunkt,
         )
     }
 
@@ -69,7 +69,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
 
         val vilkårsvurdering: Vilkårsvurdering = testWithBrukerContext(preferredUsername = saksbehandler) {
             vilkårsvurderingRepository.insert(
-                vilkårsvurdering(behandling.id, Vilkårsresultat.IKKE_TATT_STILLING_TIL, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
+                vilkårsvurdering(behandling.id, Vilkårsresultat.IKKE_TATT_STILLING_TIL, VilkårType.FORUTGÅENDE_MEDLEMSKAP),
             )
         }
         assertThat(vilkårsvurdering.sporbar.opprettetAv).isEqualTo(saksbehandler)

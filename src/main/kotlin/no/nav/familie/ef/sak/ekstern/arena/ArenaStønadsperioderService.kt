@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class ArenaStønadsperioderService(
-    private val periodeService: PeriodeService
+    private val periodeService: PeriodeService,
 ) {
 
     /**

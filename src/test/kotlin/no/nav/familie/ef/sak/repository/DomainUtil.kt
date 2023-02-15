@@ -72,13 +72,13 @@ fun oppgave(
     behandling: Behandling,
     erFerdigstilt: Boolean = false,
     gsakOppgaveId: Long = 123,
-    type: Oppgavetype = Oppgavetype.Journalføring
+    type: Oppgavetype = Oppgavetype.Journalføring,
 ): Oppgave =
     Oppgave(
         behandlingId = behandling.id,
         gsakOppgaveId = gsakOppgaveId,
         type = type,
-        erFerdigstilt = erFerdigstilt
+        erFerdigstilt = erFerdigstilt,
     )
 
 fun behandling(
@@ -94,7 +94,7 @@ fun behandling(
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
     eksternId: EksternBehandlingId = EksternBehandlingId(),
     vedtakstidspunkt: LocalDateTime? = null,
-    kravMottatt: LocalDate? = null
+    kravMottatt: LocalDate? = null,
 ): Behandling =
     Behandling(
         fagsakId = fagsak.id,
@@ -110,7 +110,7 @@ fun behandling(
         eksternId = eksternId,
         vedtakstidspunkt = vedtakstidspunkt
             ?: if (resultat != BehandlingResultat.IKKE_SATT) SporbarUtils.now() else null,
-        kravMottatt = kravMottatt
+        kravMottatt = kravMottatt,
     )
 
 fun saksbehandling(
@@ -124,7 +124,7 @@ fun saksbehandling(
     forrigeBehandlingId: UUID? = null,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     henlagtÅrsak: HenlagtÅrsak? = HenlagtÅrsak.FEILREGISTRERT,
-    kravMottatt: LocalDate? = null
+    kravMottatt: LocalDate? = null,
 ): Saksbehandling =
     saksbehandling(
         fagsak,
@@ -139,13 +139,13 @@ fun saksbehandling(
             sporbar = Sporbar(opprettetTid = opprettetTid),
             årsak = årsak,
             henlagtÅrsak = henlagtÅrsak,
-            kravMottatt = kravMottatt
-        )
+            kravMottatt = kravMottatt,
+        ),
     )
 
 fun saksbehandling(
     fagsak: Fagsak = fagsak(),
-    behandling: Behandling = behandling()
+    behandling: Behandling = behandling(),
 ): Saksbehandling =
     Saksbehandling(
         id = behandling.id,
@@ -166,19 +166,19 @@ fun saksbehandling(
         opprettetAv = behandling.sporbar.opprettetAv,
         opprettetTid = behandling.sporbar.opprettetTid,
         endretTid = behandling.sporbar.endret.endretTid,
-        kravMottatt = behandling.kravMottatt
+        kravMottatt = behandling.kravMottatt,
     )
 
 fun Behandling.innvilgetOgFerdigstilt() =
     this.copy(
         resultat = BehandlingResultat.INNVILGET,
         status = BehandlingStatus.FERDIGSTILT,
-        vedtakstidspunkt = SporbarUtils.now()
+        vedtakstidspunkt = SporbarUtils.now(),
     )
 
 val defaultIdenter = setOf(PersonIdent("15"))
 fun fagsakPerson(
-    identer: Set<PersonIdent> = defaultIdenter
+    identer: Set<PersonIdent> = defaultIdenter,
 ) = FagsakPerson(identer = identer)
 
 fun fagsak(
@@ -188,7 +188,7 @@ fun fagsak(
     eksternId: EksternFagsakId = EksternFagsakId(),
     sporbar: Sporbar = Sporbar(),
     migrert: Boolean = false,
-    fagsakPersonId: UUID = UUID.randomUUID()
+    fagsakPersonId: UUID = UUID.randomUUID(),
 ): Fagsak {
     return fagsak(stønadstype, id, FagsakPerson(id = fagsakPersonId, identer = identer), eksternId, sporbar, migrert = migrert)
 }
@@ -199,7 +199,7 @@ fun fagsak(
     person: FagsakPerson,
     eksternId: EksternFagsakId = EksternFagsakId(),
     sporbar: Sporbar = Sporbar(),
-    migrert: Boolean = false
+    migrert: Boolean = false,
 ): Fagsak {
     return Fagsak(
         id = id,
@@ -208,7 +208,7 @@ fun fagsak(
         stønadstype = stønadstype,
         eksternId = eksternId,
         migrert = migrert,
-        sporbar = sporbar
+        sporbar = sporbar,
     )
 }
 
@@ -216,13 +216,13 @@ fun fagsakDomain(
     id: UUID = UUID.randomUUID(),
     stønadstype: StønadType = StønadType.OVERGANGSSTØNAD,
     personId: UUID = UUID.randomUUID(),
-    eksternId: EksternFagsakId = EksternFagsakId()
+    eksternId: EksternFagsakId = EksternFagsakId(),
 ): FagsakDomain =
     FagsakDomain(
         id = id,
         fagsakPersonId = personId,
         stønadstype = stønadstype,
-        eksternId = eksternId
+        eksternId = eksternId,
     )
 
 fun Fagsak.tilFagsakDomain() =
@@ -231,7 +231,7 @@ fun Fagsak.tilFagsakDomain() =
         fagsakPersonId = fagsakPersonId,
         stønadstype = stønadstype,
         eksternId = eksternId,
-        sporbar = sporbar
+        sporbar = sporbar,
     )
 
 fun vilkårsvurdering(
@@ -239,14 +239,14 @@ fun vilkårsvurdering(
     resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
     type: VilkårType = VilkårType.LOVLIG_OPPHOLD,
     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
-    barnId: UUID? = null
+    barnId: UUID? = null,
 ): Vilkårsvurdering =
     Vilkårsvurdering(
         behandlingId = behandlingId,
         resultat = resultat,
         type = type,
         barnId = barnId,
-        delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)
+        delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
     )
 
 fun fagsakpersoner(vararg identer: String): Set<PersonIdent> = identer.map {
@@ -265,18 +265,18 @@ fun årsakRevurdering(
     behandlingId: UUID = UUID.randomUUID(),
     opplysningskilde: Opplysningskilde = Opplysningskilde.MELDING_MODIA,
     årsak: Revurderingsårsak = Revurderingsårsak.ANNET,
-    beskrivelse: String? = null
+    beskrivelse: String? = null,
 ) =
     ÅrsakRevurdering(
         behandlingId = behandlingId,
         opplysningskilde = opplysningskilde,
         årsak = årsak,
-        beskrivelse = beskrivelse
+        beskrivelse = beskrivelse,
     )
 
 fun revurderingsinformasjon() = RevurderingsinformasjonDto(
     LocalDate.now(),
-    ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse")
+    ÅrsakRevurderingDto(Opplysningskilde.MELDING_MODIA, Revurderingsårsak.ANNET, "beskrivelse"),
 )
 
 fun tilkjentYtelse(
@@ -286,7 +286,7 @@ fun tilkjentYtelse(
     startdato: LocalDate? = null,
     grunnbeløpsmåned: YearMonth = YearMonth.of(stønadsår - 1, 5),
     samordningsfradrag: Int = 0,
-    beløp: Int = 11554
+    beløp: Int = 11554,
 ): TilkjentYtelse {
     val andeler = listOf(
         AndelTilkjentYtelse(
@@ -297,15 +297,15 @@ fun tilkjentYtelse(
             inntektsreduksjon = 8396,
             inntekt = 277100,
             samordningsfradrag = samordningsfradrag,
-            kildeBehandlingId = behandlingId
-        )
+            kildeBehandlingId = behandlingId,
+        ),
     )
     return TilkjentYtelse(
         behandlingId = behandlingId,
         personident = personIdent,
         startdato = min(startdato, andeler.minOfOrNull { it.stønadFom }) ?: error("Må sette startdato"),
         andelerTilkjentYtelse = andeler,
-        grunnbeløpsmåned = grunnbeløpsmåned
+        grunnbeløpsmåned = grunnbeløpsmåned,
     )
 }
 
@@ -314,7 +314,7 @@ fun vedtak(
     resultatType: ResultatType = ResultatType.INNVILGE,
     år: Int = 2021,
     inntekter: InntektWrapper = InntektWrapper(listOf(inntektsperiode(år = år))),
-    perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(år = år)))
+    perioder: PeriodeWrapper = PeriodeWrapper(listOf(vedtaksperiode(år = år))),
 ): Vedtak =
     Vedtak(
         behandlingId = behandlingId,
@@ -326,7 +326,7 @@ fun vedtak(
         inntekter = inntekter,
         saksbehandlerIdent = "VL",
         opprettetAv = "VL",
-        opprettetTid = LocalDateTime.now()
+        opprettetTid = LocalDateTime.now(),
     )
 
 fun vedtakBarnetilsyn(
@@ -336,7 +336,7 @@ fun vedtakBarnetilsyn(
     beløp: Int = 1000,
     kontantstøtteWrapper: KontantstøtteWrapper = KontantstøtteWrapper(emptyList()),
     fom: YearMonth,
-    tom: YearMonth
+    tom: YearMonth,
 ) = Vedtak(
     behandlingId = behandlingId,
     resultatType = resultatType,
@@ -345,7 +345,7 @@ fun vedtakBarnetilsyn(
     tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
     saksbehandlerIdent = "VL",
     opprettetAv = "VL",
-    opprettetTid = LocalDateTime.now()
+    opprettetTid = LocalDateTime.now(),
 )
 
 fun barnetilsynperiode(
@@ -356,14 +356,14 @@ fun barnetilsynperiode(
     barn: List<UUID>,
     sanksjonsårsak: Sanksjonsårsak? = null,
     periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
-    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID,
 ) = Barnetilsynperiode(
     periode = Månedsperiode(fom, tom),
     utgifter = beløp,
     barn = barn,
     sanksjonsårsak = sanksjonsårsak,
     periodetype = periodetype,
-    aktivitet = aktivitetstype
+    aktivitet = aktivitetstype,
 )
 
 fun inntektsperiode(
@@ -371,7 +371,7 @@ fun inntektsperiode(
     startDato: LocalDate = LocalDate.of(år, 1, 1),
     sluttDato: LocalDate = LocalDate.of(år, 12, 1),
     inntekt: BigDecimal = BigDecimal.valueOf(100000),
-    samordningsfradrag: BigDecimal = BigDecimal.valueOf(500)
+    samordningsfradrag: BigDecimal = BigDecimal.valueOf(500),
 ) =
     Inntektsperiode(periode = Månedsperiode(startDato, sluttDato), inntekt = inntekt, samordningsfradrag = samordningsfradrag)
 
@@ -383,7 +383,7 @@ fun vedtaksperiode(
     aktivitetstype: AktivitetType =
         if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) AktivitetType.IKKE_AKTIVITETSPLIKT else AktivitetType.BARN_UNDER_ETT_ÅR,
     sanksjonsårsak: Sanksjonsårsak? =
-        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) Sanksjonsårsak.SAGT_OPP_STILLING else null
+        if (vedtaksperiodeType == VedtaksperiodeType.SANKSJON) Sanksjonsårsak.SAGT_OPP_STILLING else null,
 ) =
     Vedtaksperiode(startDato, sluttDato, aktivitetstype, vedtaksperiodeType, sanksjonsårsak)
 
@@ -391,27 +391,27 @@ fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
     årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
     periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
 ) =
     vedtaksperiodeDto(
         årMånedFra = YearMonth.from(årMånedFra),
         årMånedTil = YearMonth.from(årMånedTil),
         periodeType = periodeType,
-        aktivitet = aktivitet
+        aktivitet = aktivitet,
     )
 
 fun vedtaksperiodeDto(
     årMånedFra: YearMonth = YearMonth.of(2021, 1),
     årMånedTil: YearMonth = YearMonth.of(2021, 12),
     periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
 ) =
     VedtaksperiodeDto(
         årMånedFra = årMånedFra,
         årMånedTil = årMånedTil,
         periode = Månedsperiode(årMånedFra, årMånedTil),
         aktivitet = aktivitet,
-        periodeType = periodeType
+        periodeType = periodeType,
     )
 
 fun behandlingBarn(
@@ -420,7 +420,7 @@ fun behandlingBarn(
     søknadBarnId: UUID? = null,
     personIdent: String? = null,
     navn: String? = null,
-    fødselTermindato: LocalDate? = null
+    fødselTermindato: LocalDate? = null,
 ): BehandlingBarn {
     return BehandlingBarn(
         id = id,
@@ -429,7 +429,7 @@ fun behandlingBarn(
         personIdent = personIdent,
         navn = navn,
         fødselTermindato = fødselTermindato,
-        sporbar = Sporbar(opprettetAv = "opprettetAv")
+        sporbar = Sporbar(opprettetAv = "opprettetAv"),
     )
 }
 
@@ -446,10 +446,10 @@ fun barnMedIdent(fnr: String, navn: String, fødsel: Fødsel = fødsel(LocalDate
             mellomnavn = null,
             etternavn = navn.split(" ")[1],
             metadata = Metadata(
-                historisk = false
-            )
+                historisk = false,
+            ),
         ),
-        personIdent = fnr
+        personIdent = fnr,
     )
 
 fun sivilstand(type: Sivilstandstype, gyldigFraOgMed: LocalDate = LocalDate.now(), metadata: Metadata = metadataGjeldende) =
@@ -460,7 +460,7 @@ fun sivilstand(type: Sivilstandstype, gyldigFraOgMed: LocalDate = LocalDate.now(
         bekreftelsesdato = null,
         dødsfall = null,
         navn = null,
-        metadata = metadata
+        metadata = metadata,
     )
 
 fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
@@ -483,5 +483,5 @@ fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
         listOf(),
         listOf(),
         listOf(),
-        listOf()
+        listOf(),
     )

@@ -72,7 +72,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-tilbakekreving",
     "mock-sigrun",
     "mock-dokument",
-    "mock-historiskpensjon"
+    "mock-historiskpensjon",
 )
 @EnableMockOAuth2Server
 abstract class OppslagSpringRunnerTest {
@@ -159,7 +159,7 @@ abstract class OppslagSpringRunnerTest {
             FagsakPerson::class,
             TaskLogg::class,
             Task::class,
-            Migreringsstatus::class
+            Migreringsstatus::class,
         ).forEach { jdbcAggregateOperations.deleteAll(it.java) }
     }
 
@@ -182,7 +182,7 @@ abstract class OppslagSpringRunnerTest {
 
     protected fun onBehalfOfToken(
         role: String = rolleConfig.beslutterRolle,
-        saksbehandler: String = "julenissen"
+        saksbehandler: String = "julenissen",
     ): String {
         return TokenUtil.onBehalfOfToken(mockOAuth2Server, role, saksbehandler)
     }

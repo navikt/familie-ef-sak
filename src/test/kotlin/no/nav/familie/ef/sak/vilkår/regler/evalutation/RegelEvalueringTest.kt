@@ -23,9 +23,9 @@ internal class RegelEvalueringTest {
             RegelEvaluering.utledVilkårResultat(
                 mapOf(
                     RegelId.OPPHOLD_UNNTAK to Vilkårsresultat.OPPFYLT,
-                    RegelId.MEDLEMSKAP_UNNTAK to Vilkårsresultat.IKKE_OPPFYLT
-                )
-            )
+                    RegelId.MEDLEMSKAP_UNNTAK to Vilkårsresultat.IKKE_OPPFYLT,
+                ),
+            ),
         )
             .isEqualTo(Vilkårsresultat.IKKE_OPPFYLT)
     }
@@ -35,9 +35,9 @@ internal class RegelEvalueringTest {
         assertThat(
             RegelEvaluering.utledVilkårResultat(
                 mapOf(
-                    RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI to Vilkårsresultat.AUTOMATISK_OPPFYLT
-                )
-            )
+                    RegelId.HAR_ALDER_LAVERE_ENN_GRENSEVERDI to Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                ),
+            ),
         )
             .isEqualTo(Vilkårsresultat.OPPFYLT)
     }
@@ -64,9 +64,9 @@ internal class RegelEvalueringTest {
                     RegelId.OPPHOLD_UNNTAK to Vilkårsresultat.OPPFYLT,
                     RegelId.MEDLEMSKAP_UNNTAK to Vilkårsresultat.IKKE_OPPFYLT,
                     RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE to
-                        Vilkårsresultat.IKKE_TATT_STILLING_TIL
-                )
-            )
+                        Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                ),
+            ),
         )
             .isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
     }

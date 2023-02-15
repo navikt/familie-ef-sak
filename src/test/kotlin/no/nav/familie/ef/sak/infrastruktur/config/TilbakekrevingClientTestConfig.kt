@@ -42,8 +42,8 @@ class TilbakekrevingClientTestConfig {
                 type = Behandlingstype.TILBAKEKREVING,
                 status = Behandlingsstatus.OPPRETTET,
                 vedtaksdato = null,
-                resultat = null
-            )
+                resultat = null,
+            ),
         )
 
         every { tilbakekrevingClient.finnVedtak(any()) } returns listOf(
@@ -53,8 +53,8 @@ class TilbakekrevingClientTestConfig {
                 resultat = "Delvis tilbakebetaling",
                 vedtakstidspunkt = LocalDateTime.now(),
                 fagsystemType = FagsystemType.TILBAKEKREVING,
-                regelverk = Regelverk.NASJONAL
-            )
+                regelverk = Regelverk.NASJONAL,
+            ),
         )
 
         val dummyPdf = this::class.java.classLoader.getResource("dummy/pdf_dummy.pdf")!!.readBytes()

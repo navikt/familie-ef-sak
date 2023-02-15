@@ -21,7 +21,7 @@ object SaksbehandlingDomeneParser {
 
     fun mapSaksbehandlinger(
         dataTable: DataTable,
-        stønadstype: StønadType
+        stønadstype: StønadType,
     ): Map<UUID, Pair<Behandling, Saksbehandling>> {
         val fagsak = fagsak(stønadstype = stønadstype)
         var forrigeBehandlingId: UUID? = null
@@ -37,7 +37,7 @@ object SaksbehandlingDomeneParser {
                 forrigeBehandlingId = forrigeBehandlingIdFraRad,
                 type = parseBehandlingstype(rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
                 vedtakstidspunkt = parseValgfriDato(SaksbehandlingDomeneBegrep.VEDTAKSDATO, rad)?.atStartOfDay()
-                    ?: LocalDateTime.now()
+                    ?: LocalDateTime.now(),
             )
             behandling.id to Pair(behandling, saksbehandling(fagsak, behandling))
         }.toMap()
@@ -47,7 +47,7 @@ object SaksbehandlingDomeneParser {
 enum class SaksbehandlingDomeneBegrep(val nøkkel: String) : Domenenøkkel {
     BEHANDLINGSTYPE("Behandlingstype"),
     FORRIGE_BEHANDLING("Forrige behandling"),
-    VEDTAKSDATO("Vedtaksdato")
+    VEDTAKSDATO("Vedtaksdato"),
     ;
 
     override fun nøkkel(): String {

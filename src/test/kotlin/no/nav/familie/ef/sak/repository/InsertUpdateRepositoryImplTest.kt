@@ -26,14 +26,14 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
             catchThrowable {
                 @Suppress("DEPRECATION")
                 fagsakRepository.save(fagsakDomain())
-            }
+            },
         ).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(
             catchThrowable {
                 @Suppress("DEPRECATION")
                 fagsakRepository.saveAll(listOf(fagsakDomain(), fagsakDomain()))
-            }
+            },
         ).isInstanceOf(DbActionExecutionException::class.java)
     }
 
@@ -72,8 +72,8 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
             fagsakRepository.insertAll(
                 listOf(
                     fagsakDomain(stønadstype = StønadType.BARNETILSYN, personId = person1.id),
-                    fagsakDomain(stønadstype = StønadType.SKOLEPENGER, personId = person2.id)
-                )
+                    fagsakDomain(stønadstype = StønadType.SKOLEPENGER, personId = person2.id),
+                ),
             )
         fagsakRepository.updateAll(fagsaker.map { it.copy(stønadstype = StønadType.OVERGANGSSTØNAD) })
 
@@ -99,8 +99,8 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
             fagsakPersonRepository.update(
                 person.copy(
                     identer = person.identer.map { it.copy(ident = nyPersonIdent) }
-                        .toSet() + PersonIdent(annenIdent)
-                )
+                        .toSet() + PersonIdent(annenIdent),
+                ),
             )
         val oppdatertSøkerIdent = oppdatertPerson.identer.first { it.ident == nyPersonIdent }
         val originalSøkerIdent = person.identer.first { it.ident == personIdent }
@@ -114,13 +114,13 @@ internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
         assertThat(
             catchThrowable {
                 fagsakRepository.update(fagsakDomain())
-            }
+            },
         ).isInstanceOf(DbActionExecutionException::class.java)
 
         assertThat(
             catchThrowable {
                 fagsakRepository.updateAll(listOf(fagsakDomain(), fagsakDomain()))
-            }
+            },
         ).isInstanceOf(DbActionExecutionException::class.java)
     }
 
