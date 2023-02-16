@@ -219,8 +219,8 @@ class PdlClientConfig {
                     bostedsadresse = bostedsadresse(),
                     deltBosted = listOf(
                         DeltBosted(
-                            LocalDate.now().minusDays(2),
-                            LocalDate.now().plusDays(2),
+                            LocalDate.of(2023,1,1),
+                            LocalDate.of(2053,1,1),
                             null,
                             null,
                             no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)

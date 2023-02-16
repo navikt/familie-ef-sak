@@ -71,11 +71,8 @@
     } ],
     "borHosSøker" : true,
     "deltBosted" : [ {
-      "startdatoForKontrakt" : "2023-02-13",
-      "sluttdatoForKontrakt" : "2023-02-17"
-    }, {
-      "startdatoForKontrakt" : "2023-01-26",
-      "sluttdatoForKontrakt" : "2023-02-05"
+      "startdatoForKontrakt" : "2023-01-01",
+      "sluttdatoForKontrakt" : "2053-01-01"
     } ],
     "harDeltBostedNå" : true,
     "fødselsdato" : "2018-01-01",
