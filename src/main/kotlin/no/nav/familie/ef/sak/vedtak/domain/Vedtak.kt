@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.vedtak.domain
 
 import no.nav.familie.ef.sak.beregning.Inntektsperiode
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
@@ -11,6 +13,7 @@ import no.nav.familie.kontrakter.felles.annotasjoner.Improvement
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -37,7 +40,9 @@ data class Vedtak(
     val tilleggsstønad: TilleggsstønadWrapper? = null,
     val skolepenger: SkolepengerWrapper? = null,
     val beslutterIdent: String? = null,
-    val internBegrunnelse: String? = null
+    val internBegrunnelse: String? = null,
+    val opprettetTid: LocalDateTime = SporbarUtils.now(),
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
 ) {
     fun erVedtakUtenBeslutter(): Boolean =
         resultatType == ResultatType.AVSLÅ && avslåÅrsak == AvslagÅrsak.MINDRE_INNTEKTSENDRINGER

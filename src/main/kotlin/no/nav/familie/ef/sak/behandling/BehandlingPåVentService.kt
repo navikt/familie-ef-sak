@@ -54,9 +54,6 @@ class BehandlingPåVentService(
                     HttpStatus.BAD_REQUEST
                 )
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
-                feilHvisIkke(featureToggleService.isEnabled(Toggle.PÅ_VENT_NULLSTILL_VEDTAK)) {
-                    "Toggle 'På vent - Nullstill vedtak' er ikke aktivert"
-                }
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")
                 behandlingService.oppdaterForrigeBehandlingId(behandlingId, nyForrigeBehandlingId)
                 nullstillVedtakService.nullstillVedtak(behandlingId)

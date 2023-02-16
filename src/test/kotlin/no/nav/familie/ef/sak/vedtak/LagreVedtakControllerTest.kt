@@ -87,12 +87,18 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 begrunnelse = ""
             ),
             kontantstøtte = KontantstøtteWrapper(emptyList()),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            saksbehandlerIdent = "julenissen",
+            opprettetAv = "julenissen"
+
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
+            .isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(vedtakRespons.body?.data).isNotNull
         Assertions.assertThat(vedtakRespons.body?.data?.resultatType).isEqualTo(ResultatType.INNVILGE)
@@ -138,12 +144,16 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     )
                 )
             ),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            saksbehandlerIdent = "julenissen",
+            opprettetAv = "julenissen",
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+            .usingRecursiveComparison().ignoringFields("opprettetTid")
+            .isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(vedtakRespons.body?.data).isNotNull
         Assertions.assertThat(vedtakRespons.body?.data?.resultatType).isEqualTo(ResultatType.INNVILGE_UTEN_UTBETALING)

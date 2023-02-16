@@ -17,6 +17,7 @@ import no.nav.familie.ef.sak.brev.dto.FrittståendeBrevAvsnitt
 import no.nav.familie.ef.sak.brev.dto.VedtaksbrevFritekstDto
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Fil
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import java.time.LocalDateTime
 
 internal class VedtaksbrevServiceTest {
 
@@ -119,7 +121,8 @@ internal class VedtaksbrevServiceTest {
         every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
-        vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto, saksbehandling(fagsak, behandlingForSaksbehandler))
+        vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto,
+            saksbehandling(fagsak, behandlingForSaksbehandler))
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(beslutterNavn)
     }
 
@@ -207,7 +210,8 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()
         // Når
-        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter), vedtakKreverBeslutter)
+        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter),
+            vedtakKreverBeslutter)
 
         assertThat(beslutterIdent).isNotNull()
         assertThat(brevSlot.captured.beslutterident).isEqualTo(beslutterIdent)
@@ -317,5 +321,22 @@ internal class VedtaksbrevServiceTest {
         )
 
         assertThat(vedtaksbrevSlot.captured.saksbehandlerHtml).isEqualTo(html)
+    }
+
+    @Test
+    internal fun `skal oppdatere vedtaksbrev med nytt tidspunkt`() {
+        val vedtaksbrevSlot = slot<Vedtaksbrev>()
+        every { vedtaksbrevRepository.existsById(any()) } returns true
+        every { vedtaksbrevRepository.update(capture(vedtaksbrevSlot)) } answers { firstArg() }
+        every { brevClient.genererHtml(any(), any(), any(), any(), any()) } returns "html"
+        every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
+
+        val now = SporbarUtils.now()
+        vedtaksbrevService.lagSaksbehandlerSanitybrev(
+            saksbehandling(fagsak, behandling),
+            objectMapper.createObjectNode(),
+            "brevmal"
+        )
+        assertThat(vedtaksbrevSlot.captured.opprettetTid).isAfterOrEqualTo(now)
     }
 }
