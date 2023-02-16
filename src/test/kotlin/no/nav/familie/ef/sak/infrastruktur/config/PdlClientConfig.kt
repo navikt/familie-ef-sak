@@ -242,15 +242,6 @@ class PdlClientConfig {
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
                     navn = lagNavn("Barn2", null, "Barnesen"),
-                    deltBosted = listOf(
-                        DeltBosted(
-                            LocalDate.now().minusYears(2),
-                            LocalDate.now().minusYears(1),
-                            null,
-                            null,
-                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
-                        )
-                    ),
                 )
             )
 
