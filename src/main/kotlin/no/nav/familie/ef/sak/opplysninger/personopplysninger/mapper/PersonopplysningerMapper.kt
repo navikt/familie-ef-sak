@@ -132,7 +132,6 @@ class PersonopplysningerMapper(
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
-        barn.deltBosted.find { it.metadata.historisk }.let { logger.info("Historisk delt bosted funnet") }
         return BarnDto(
             personIdent = barn.personIdent,
             navn = barn.navn.visningsnavn(),
