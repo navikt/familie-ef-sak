@@ -24,13 +24,13 @@ fun List<Oppholdsadresse>.gjeldende(): Oppholdsadresse? = this.find { !it.metada
 fun List<Sivilstand>.gjeldende(): Sivilstand = this.find { !it.metadata.historisk } ?: this.first()
 fun List<Fødsel>.gjeldende(): Fødsel = this.first()
 fun List<DeltBosted>.gjeldende(): DeltBosted? = this.find { !it.metadata.historisk }
-fun List<DeltBosted>.gjeldendeListe(): List<DeltBosted> = this.filter { !it.metadata.historisk }
 
 fun List<Folkeregisterpersonstatus>.gjeldende(): Folkeregisterpersonstatus? = this.find { !it.metadata.historisk }
 fun List<Dødsfall>.gjeldende(): Dødsfall? = this.firstOrNull()
 fun List<Adressebeskyttelse>.gjeldende(): Adressebeskyttelse? = this.find { !it.metadata.historisk }
 fun List<FolkeregisteridentifikatorFraSøk>.gjeldende(): FolkeregisteridentifikatorFraSøk =
-    this.distinct().single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
+    this.distinct()
+        .single() // Distinkt luker vekk feilen med at samme person kan ha flere identiske identer som begge er i bruk
 
 fun List<Folkeregisteridentifikator>.gjeldende(): Folkeregisteridentifikator =
     this.single { it.status == FolkeregisteridentifikatorStatus.I_BRUK && !it.metadata.historisk }

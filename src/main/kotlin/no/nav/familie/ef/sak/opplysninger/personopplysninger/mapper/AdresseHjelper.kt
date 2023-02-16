@@ -6,7 +6,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeListe
 import java.time.LocalDate
 
 object AdresseHjelper {
@@ -27,7 +26,10 @@ object AdresseHjelper {
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
     }
 
-    private fun sammeMatrikkeladresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
+    private fun sammeMatrikkeladresse(
+        bostedsadresseForelder: Bostedsadresse?,
+        bostedsadresseBarn: Bostedsadresse?
+    ): Boolean {
         return bostedsadresseBarn?.matrikkelId != null && bostedsadresseForelder?.matrikkelId != null &&
             bostedsadresseBarn.matrikkelId == bostedsadresseForelder.matrikkelId &&
             bostedsadresseBarn.bruksenhetsnummer == bostedsadresseForelder.bruksenhetsnummer
@@ -39,10 +41,10 @@ object AdresseHjelper {
     }
 
     fun harDeltBostedNå(barn: BarnMedIdent): Boolean {
-        return barn.deltBosted.gjeldendeListe().any {
-            val nå = LocalDate.now()
-            it.startdatoForKontrakt.isEqualOrBefore(nå) &&
-                (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isEqualOrAfter(nå))
-        }
+        val gjeldende = barn.deltBosted.gjeldende() ?: return false
+        val nå = LocalDate.now()
+        return gjeldende.startdatoForKontrakt.isEqualOrBefore(nå) &&
+            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(nå))
     }
 }
+

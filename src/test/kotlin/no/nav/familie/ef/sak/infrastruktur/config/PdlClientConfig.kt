@@ -230,7 +230,7 @@ class PdlClientConfig {
                             LocalDate.now().minusDays(10),
                             null,
                             null,
-                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(true)
                         )
                     ),
                     forelderBarnRelasjon = familierelasjonerBarn(),
@@ -241,7 +241,16 @@ class PdlClientConfig {
                     bostedsadresse = bostedsadresse(),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
-                    navn = lagNavn("Barn2", null, "Barnesen")
+                    navn = lagNavn("Barn2", null, "Barnesen"),
+                    deltBosted = listOf(
+                        DeltBosted(
+                            LocalDate.now().minusYears(2),
+                            LocalDate.now().minusYears(1),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                        )
+                    ),
                 )
             )
 
@@ -339,6 +348,7 @@ class PdlClientConfig {
                     omraader = listOf()
                 )
             )
+
         val defaultKoordinater = Koordinater(x = 601372f, y = 6629367f, z = null, kvalitet = null)
         private fun bostedsadresse(koordinater: Koordinater = defaultKoordinater): List<Bostedsadresse> =
             listOf(

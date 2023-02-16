@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -21,7 +22,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeListe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.slf4j.LoggerFactory
@@ -132,6 +132,12 @@ class PersonopplysningerMapper(
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
+
+        feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
+        val bostedDto =
+            barn.deltBosted.gjeldende()?.let { listOf(DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt)) }
+                ?: emptyList()
+
         return BarnDto(
             personIdent = barn.personIdent,
             navn = barn.navn.visningsnavn(),
@@ -147,8 +153,7 @@ class PersonopplysningerMapper(
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
             borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
-            deltBosted = barn.deltBosted.gjeldendeListe()
-                .map { DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt) },
+            deltBosted = bostedDto,
             harDeltBostedNå = AdresseHjelper.harDeltBostedNå(barn),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
