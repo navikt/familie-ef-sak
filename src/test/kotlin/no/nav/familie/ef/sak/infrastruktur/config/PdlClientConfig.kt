@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerCli
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
@@ -216,6 +217,22 @@ class PdlClientConfig {
             mapOf(
                 barnFnr to pdlBarn(
                     bostedsadresse = bostedsadresse(),
+                    deltBosted = listOf(
+                        DeltBosted(
+                            LocalDate.of(2023,1,1),
+                            LocalDate.of(2053,1,1),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                        ),
+                        DeltBosted(
+                            LocalDate.now().minusDays(20),
+                            LocalDate.now().minusDays(10),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(true)
+                        )
+                    ),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
                     navn = lagNavn("Barn", null, "Barnesen")
@@ -224,7 +241,7 @@ class PdlClientConfig {
                     bostedsadresse = bostedsadresse(),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
-                    navn = lagNavn("Barn2", null, "Barnesen")
+                    navn = lagNavn("Barn2", null, "Barnesen"),
                 )
             )
 
@@ -322,6 +339,7 @@ class PdlClientConfig {
                     omraader = listOf()
                 )
             )
+
         val defaultKoordinater = Koordinater(x = 601372f, y = 6629367f, z = null, kvalitet = null)
         private fun bostedsadresse(koordinater: Koordinater = defaultKoordinater): List<Bostedsadresse> =
             listOf(

@@ -70,6 +70,11 @@
       "erGjeldende" : true
     } ],
     "borHosSøker" : true,
+    "deltBosted" : [ {
+      "startdatoForKontrakt" : "2023-01-01",
+      "sluttdatoForKontrakt" : "2053-01-01"
+    } ],
+    "harDeltBostedNå" : true,
     "fødselsdato" : "2018-01-01",
     "dødsdato" : null
   }, {
@@ -90,6 +95,8 @@
       "erGjeldende" : true
     } ],
     "borHosSøker" : true,
+    "deltBosted" : [ ],
+    "harDeltBostedNå" : false,
     "fødselsdato" : "2018-01-01",
     "dødsdato" : null
   } ],

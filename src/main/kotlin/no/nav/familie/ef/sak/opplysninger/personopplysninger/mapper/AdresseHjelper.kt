@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
+import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
+import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -17,15 +19,17 @@ object AdresseHjelper {
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
-        if (harDeltBosted(barn)) {
-            return false
+        if (harDeltBostedNå(barn)) {
+            return true
         }
-
         return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
     }
 
-    private fun sammeMatrikkeladresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
+    private fun sammeMatrikkeladresse(
+        bostedsadresseForelder: Bostedsadresse?,
+        bostedsadresseBarn: Bostedsadresse?
+    ): Boolean {
         return bostedsadresseBarn?.matrikkelId != null && bostedsadresseForelder?.matrikkelId != null &&
             bostedsadresseBarn.matrikkelId == bostedsadresseForelder.matrikkelId &&
             bostedsadresseBarn.bruksenhetsnummer == bostedsadresseForelder.bruksenhetsnummer
@@ -36,10 +40,11 @@ object AdresseHjelper {
             bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
     }
 
-    private fun harDeltBosted(barn: BarnMedIdent): Boolean {
-        return barn.deltBosted.any {
-            it.startdatoForKontrakt.isBefore(LocalDate.now()) &&
-                (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDate.now()))
-        }
+    fun harDeltBostedNå(barn: BarnMedIdent): Boolean {
+        val gjeldende = barn.deltBosted.gjeldende() ?: return false
+        val nå = LocalDate.now()
+        return gjeldende.startdatoForKontrakt.isEqualOrBefore(nå) &&
+            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(nå))
     }
 }
+
