@@ -62,13 +62,14 @@ class OppgaveController(
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
-        @RequestParam("saksbehandler") saksbehandler: String
+        @RequestParam("saksbehandler") saksbehandler: String,
+        @RequestParam("versjon") versjon: Int?
     ): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
             throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
         }
-        return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler))
+        return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler, versjon))
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
