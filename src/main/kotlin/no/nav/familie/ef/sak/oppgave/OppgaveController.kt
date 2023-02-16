@@ -72,9 +72,12 @@ class OppgaveController(
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<Long> {
+    fun tilbakestillFordelingPåOppgave(
+        @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
+        @RequestParam(name = "versjon") versjon: Int?
+    ): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId))
+        return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId, versjon))
     }
 
     @GetMapping(path = ["/{gsakOppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])

@@ -165,8 +165,8 @@ class OppgaveService(
         return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
     }
 
-    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long): Long {
-        return oppgaveClient.fordelOppgave(gsakOppgaveId, null)
+    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long, versjon: Int? = null): Long {
+        return oppgaveClient.fordelOppgave(gsakOppgaveId, null, versjon = versjon)
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, saksbehandling: Saksbehandling): EfOppgave? {
