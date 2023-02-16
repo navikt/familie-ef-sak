@@ -53,6 +53,9 @@ object UtledEndringerUtil {
         formatterEndring(BarnDto::dødsdato, "Dødsdato"),
         formatterEndring(BarnDto::fødselsdato, "Fødselsdato"),
         formatterEndring({ it.annenForelder?.personIdent }, "Annen forelder")
+        // Todo Mattis - ta med disse i neste PR (delt bosted i vilkår)
+        // formatterEndring(BarnDto::harDeltBostedNå, "Har delt bosted nå"),
+        // formatterEndring(BarnDto::deltBosted, "Delt bosted"),
         // TODO adresse ?? Er den interessant å vise som endret hvis man ikke har endring i borHosSøker ? si eks at barnet på > 18 flytter
     )
 
