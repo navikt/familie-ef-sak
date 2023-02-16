@@ -75,6 +75,8 @@ class OppgaveClient(
                     "Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.",
                     HttpStatus.BAD_REQUEST
                 )
+            } else if (e.httpStatus == HttpStatus.CONFLICT) {
+                throw ApiFeil("Oppgaven har endret seg siden du sist hentet oppgaver. For å kunne gjøre endringer må du hente oppgaver på nytt.", HttpStatus.CONFLICT)
             }
             throw e
         }
