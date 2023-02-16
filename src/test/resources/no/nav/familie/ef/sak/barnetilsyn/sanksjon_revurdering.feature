@@ -136,7 +136,7 @@ Egenskap: Andelhistorikk: Revurdere sanksjon for barnetilsyn
       | 3            | 01.2021         | 03.2021         |              |                       |                | 01.03.2021  |
       | 1            | 02.2021         | 03.2021         | FJERNET      | 2                     |                | 01.01.2021  |
       | 2            | 02.2021         | 02.2021         | FJERNET      | 3                     | SANKSJON_1_MND | 01.02.2021  |
-      | 2            | 03.2021         | 03.2021         | FJERNET      | 3                     |                | 01.02.2021  |
+      | 1            | 03.2021         | 03.2021         | FJERNET      | 3                     |                | 01.01.2021  |
 
   Scenario: Revurder før sanksjon med periode før og etter, beholde sanksjon
 
@@ -162,7 +162,7 @@ Egenskap: Andelhistorikk: Revurdere sanksjon for barnetilsyn
       | 3            | 01.2021         | 01.2021         |              |                       |                | 01.03.2021  |
       | 1            | 02.2021         | 03.2021         | FJERNET      | 2                     |                | 01.01.2021  |
       | 2            | 02.2021         | 02.2021         |              |                       | SANKSJON_1_MND | 01.02.2021  |
-      | 2            | 03.2021         | 03.2021         | FJERNET      | 3                     |                | 01.02.2021  |
+      | 1            | 03.2021         | 03.2021         | FJERNET      | 3                     |                | 01.01.2021  |
       | 3            | 03.2021         | 03.2021         |              |                       |                | 01.03.2021  |
 
   Scenario: 2 sanksjoner revurderer før begge og begge fjernes
