@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
-internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
+internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
