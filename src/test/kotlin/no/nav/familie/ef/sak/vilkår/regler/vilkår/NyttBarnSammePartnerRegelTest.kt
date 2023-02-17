@@ -49,5 +49,4 @@ class NyttBarnSammePartnerRegelTest {
         assertThat(listDelvilkårsvurdering.first().vurderinger.first().svar).isNull()
         assertThat(listDelvilkårsvurdering.first().vurderinger.first().begrunnelse).isNull()
     }
-
 }
