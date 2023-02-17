@@ -47,4 +47,3 @@ object AdresseHjelper {
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(nå))
     }
 }
-

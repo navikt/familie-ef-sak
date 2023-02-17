@@ -21,7 +21,8 @@ data class HovedregelMetadata(
     val erMigrering: Boolean = false,
     val barn: List<BehandlingBarn>,
     val søktOmBarnetilsyn: List<UUID>,
-    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf()
+    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
+    val terminbarnISøknad: Boolean = false
 )
 
 data class BarnForelderLangAvstandTilSøker(
