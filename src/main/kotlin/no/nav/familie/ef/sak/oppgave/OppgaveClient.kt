@@ -35,7 +35,8 @@ class OppgaveClient(
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
         val uri = URI.create("$oppgaveUri/opprett")
 
-        val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
+        val respons =
+            postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
         return pakkUtRespons(respons, uri, "opprettOppgave").oppgaveId
     }
 
@@ -50,21 +51,19 @@ class OppgaveClient(
         val uri = URI.create("$oppgaveUri/v4")
 
         val respons =
-            postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+            postForEntity<Ressurs<FinnOppgaveResponseDto>>(
+                uri,
+                finnOppgaveRequest,
+                HttpHeaders().medContentTypeJsonUTF8()
+            )
         return pakkUtRespons(respons, uri, "hentOppgaver")
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?, versjon: Int? = null): Long {
         val baseUri = URI.create("$oppgaveUri/$oppgaveId/fordel")
-        var uri = baseUri
-
-        if (saksbehandler != null) {
-            uri = UriComponentsBuilder.fromUri(uri).queryParam("saksbehandler", saksbehandler).build().toUri()
-        }
-
-        if (versjon != null) {
-            uri = UriComponentsBuilder.fromUri(uri).queryParam("versjon", versjon).build().toUri()
-        }
+        val uri = UriComponentsBuilder.fromUri(baseUri)
+            .queryParam("saksbehandler", saksbehandler)
+            .queryParam("versjon", versjon).build().toUri()
 
         try {
             val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, HttpHeaders().medContentTypeJsonUTF8())
@@ -76,7 +75,10 @@ class OppgaveClient(
                     HttpStatus.BAD_REQUEST
                 )
             } else if (e.ressurs.melding.contains("Versjonskonflikt")) {
-                throw ApiFeil("Oppgaven har endret seg siden du sist hentet oppgaver. For å kunne gjøre endringer må du hente oppgaver på nytt.", HttpStatus.CONFLICT)
+                throw ApiFeil(
+                    "Oppgaven har endret seg siden du sist hentet oppgaver. For å kunne gjøre endringer må du hente oppgaver på nytt.",
+                    HttpStatus.CONFLICT
+                )
             }
             throw e
         }
