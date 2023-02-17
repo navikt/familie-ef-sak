@@ -34,7 +34,7 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId - terminbarn: ${metadata.terminbarnISøknad}")
-        if (metadata.barn.size == 1 && !metadata.terminbarnISøknad) { // Og sjekk på at det ikke er meldt om terminbarn
+        if (metadata.barn.size == 1 && !metadata.terminbarnISøknad) {
             return listOf(
                 Delvilkårsvurdering(
                     resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
