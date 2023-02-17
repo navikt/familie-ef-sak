@@ -213,7 +213,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                     sivilstandstype = Sivilstandstype.UGIFT,
                     erMigrering = false,
                     barn = listOf(barn),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    terminbarnISøknad = true
                 )
             )
             Vilkårsvurdering(
