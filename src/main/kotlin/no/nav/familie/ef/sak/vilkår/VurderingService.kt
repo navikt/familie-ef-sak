@@ -130,7 +130,7 @@ class VurderingService(
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
-            terminbarnISøknad = søknad?.barn?.any { it.fødselTermindato != null } ?: false
+            terminbarnISøknad = barn.any { it.fødselTermindato != null }
         )
         return Pair(grunnlag, metadata)
     }
