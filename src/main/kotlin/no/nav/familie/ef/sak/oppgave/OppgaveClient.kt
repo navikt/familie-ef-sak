@@ -60,8 +60,7 @@ class OppgaveClient(
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String?, versjon: Int? = null): Long {
-        val baseUri = URI.create("$oppgaveUri/$oppgaveId/fordel")
-        var uri = baseUri
+        var uri = URI.create("$oppgaveUri/$oppgaveId/fordel")
 
         if (saksbehandler != null) {
             uri = UriComponentsBuilder.fromUri(uri).queryParam("saksbehandler", saksbehandler).build().toUri()
