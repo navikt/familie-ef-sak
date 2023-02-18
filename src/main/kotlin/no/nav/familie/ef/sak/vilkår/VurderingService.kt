@@ -121,7 +121,7 @@ class VurderingService(
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
-        // grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.annenForelder.filter { it.tidligereVedtaksperioder }
+
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
         val harBrukerEllerAnnenForelderTidligereVedtak =
