@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.felles.util.grunnlagsdata
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
@@ -45,6 +46,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderingServiceTest {
@@ -100,6 +102,9 @@ internal class VurderingServiceTest {
         every { featureToggleService.isEnabled(any()) } returns true
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak(stønadstype = OVERGANGSSTØNAD)
+        every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns
+            grunnlagsdata(UUID.randomUUID(), LocalDateTime.now()).tilGrunnlagsdataMedMetadata()
+
         val sivilstand = SivilstandInngangsvilkårDto(
             mockk(relaxed = true),
             SivilstandRegistergrunnlagDto(Sivilstandstype.GIFT, "Navn", null)

@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.blankett.BlankettRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.felles.util.grunnlagsdata
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderingStegServiceTest {
@@ -187,6 +189,8 @@ internal class VurderingStegServiceTest {
     @Test
     internal fun `skal oppdatere vilkårsvurdering med resultat SKAL_IKKE_VURDERES`() {
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
+        every { grunnlagsdataService.hentGrunnlagsdata(behandlingId) } returns
+            grunnlagsdata(UUID.randomUUID(), LocalDateTime.now()).tilGrunnlagsdataMedMetadata()
         val oppdatertVurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(oppdatertVurdering)
 

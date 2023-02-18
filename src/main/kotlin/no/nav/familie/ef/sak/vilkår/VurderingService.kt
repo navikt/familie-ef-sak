@@ -121,8 +121,13 @@ class VurderingService(
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
+        // grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.annenForelder.filter { it.tidligereVedtaksperioder }
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
+        val harBrukerEllerAnnenForelderTidligereVedtak =
+            grunnlagsdataService.hentGrunnlagsdata(behandlingId).grunnlagsdata.annenForelder.any {
+                it.tidligereVedtaksperioder.tilDto().harTidligereVedtaksperioder()
+            } || grunnlag.tidligereVedtaksperioder.harTidligereVedtaksperioder()
 
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
@@ -130,7 +135,8 @@ class VurderingService(
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
-            terminbarnISøknad = barn.any { it.fødselTermindato != null && it.personIdent == null }
+            terminbarnISøknad = barn.any { it.fødselTermindato != null && it.personIdent == null },
+            harBrukerEllerAnnenForelderTidligereVedtak = harBrukerEllerAnnenForelderTidligereVedtak
         )
         return Pair(grunnlag, metadata)
     }

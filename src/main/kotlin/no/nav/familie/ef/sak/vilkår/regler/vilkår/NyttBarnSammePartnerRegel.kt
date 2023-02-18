@@ -42,7 +42,20 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
                         Vurdering(
                             regelId = RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
                             svar = SvarId.NEI,
-                            begrunnelse = "Automatisk vurdert: Ut ifra at søker har kun ett barn og at det ikke er oppgitt noen terminbarn i søknad, vurderes vilkåret til oppfylt"
+                            begrunnelse = "Automatisk vurdert: Ut ifra at bruker har kun ett barn og at det ikke er oppgitt noen terminbarn i søknad, vurderes vilkåret til oppfylt"
+                        )
+                    )
+                )
+            )
+        } else if (!metadata.harBrukerEllerAnnenForelderTidligereVedtak) {
+            return listOf(
+                Delvilkårsvurdering(
+                    resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                    listOf(
+                        Vurdering(
+                            regelId = RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
+                            svar = SvarId.NEI,
+                            begrunnelse = "Automatisk vurdert: Hverken bruker eller annen forelder har mottatt stønad tidligere."
                         )
                     )
                 )
