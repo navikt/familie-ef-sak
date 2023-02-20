@@ -46,5 +46,13 @@ object AdresseHjelper {
         return gjeldende.startdatoForKontrakt.isEqualOrBefore(nå) &&
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(nå))
     }
-}
 
+    fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
+        if (barn == null) {
+            return false
+        }
+        val gjeldende = barn.deltBosted.gjeldende() ?: return false
+        return gjeldende.startdatoForKontrakt.isEqualOrBefore(dato) &&
+            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(dato))
+    }
+}
