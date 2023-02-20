@@ -22,7 +22,6 @@ data class HovedregelMetadata(
     val barn: List<BehandlingBarn>,
     val søktOmBarnetilsyn: List<UUID>,
     val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
-    val terminbarnISøknad: Boolean = false,
     val harBrukerEllerAnnenForelderTidligereVedtak: Boolean = false
 )
 
@@ -57,4 +56,13 @@ abstract class Vilkårsregel(
     fun regel(regelId: RegelId): RegelSteg {
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
+
+    protected fun ubesvartDelvilkårsvurdering(regelId: RegelId) = Delvilkårsvurdering(
+        resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+        vurderinger = listOf(
+            Vurdering(
+                regelId = regelId
+            )
+        )
+    )
 }

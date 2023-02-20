@@ -214,7 +214,6 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                     erMigrering = false,
                     barn = listOf(barn),
                     søktOmBarnetilsyn = emptyList(),
-                    terminbarnISøknad = true,
                     harBrukerEllerAnnenForelderTidligereVedtak = true
                 )
             )
