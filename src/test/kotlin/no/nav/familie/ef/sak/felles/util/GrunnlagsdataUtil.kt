@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.felles.util
 
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
@@ -15,8 +14,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
-import java.time.LocalDateTime
-import java.util.UUID
 
 fun opprettGrunnlagsdata(
     bostedsadresse: List<Bostedsadresse> = emptyList(),
@@ -81,14 +78,3 @@ fun opprettBarnMedIdent(
         navn = Navn("", "", "", Metadata(false)),
         personIdent = personIdent
     )
-
-fun grunnlagsdata(
-    behandlingId: UUID,
-    endringerSjekket: LocalDateTime,
-    endringer: GrunnlagsdataDomene? = opprettGrunnlagsdata()
-) = Grunnlagsdata(
-    behandlingId,
-    opprettGrunnlagsdata(),
-    oppdaterteDataHentetTid = endringerSjekket,
-    oppdaterteData = endringer
-)
