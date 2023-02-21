@@ -23,7 +23,10 @@ data class VilkårGrunnlagDto(
     val registeropplysningerOpprettetTid: LocalDateTime,
     val adresseopplysninger: AdresseopplysningerDto?,
     val dokumentasjon: DokumentasjonFraSøknadDto?
-)
+) {
+    fun finnesBarnUtenRegistrertForelder() = barnMedSamvær.any { it.registergrunnlag.forelder == null }
+    fun finnesFlereBarnMedSammeAnnenForelder() = barnMedSamvær.groupingBy { it.registergrunnlag.forelder?.fødselsnummer }.eachCount().any { it.value > 1 }
+}
 
 data class PersonaliaDto(
     val navn: NavnDto,

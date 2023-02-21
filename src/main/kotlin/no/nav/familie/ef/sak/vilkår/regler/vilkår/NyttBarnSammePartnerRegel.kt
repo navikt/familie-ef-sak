@@ -34,34 +34,38 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId - terminbarn: ${ingenTerminbarn(metadata.barn)}")
-        if (metadata.erSøknadSomBehandlingÅrsak && metadata.barn.size == 1 && ingenTerminbarn(metadata.barn)) {
-            return listOf(
-                Delvilkårsvurdering(
-                    resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-                    listOf(
-                        Vurdering(
-                            regelId = RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
-                            svar = SvarId.NEI,
-                            begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Bruker har kun ett barn og det er ikke oppgitt nytt terminbarn i søknaden."
-                        )
-                    )
-                )
-            )
-        } else if (metadata.erSøknadSomBehandlingÅrsak && !metadata.harBrukerEllerAnnenForelderTidligereVedtak) {
-            return listOf(
-                Delvilkårsvurdering(
-                    resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-                    listOf(
-                        Vurdering(
-                            regelId = RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
-                            svar = SvarId.NEI,
-                            begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): Verken bruker eller annen forelder får eller har fått stønad for felles barn."
-                        )
-                    )
-                )
-            )
+        if (metadata.erSøknadSomBehandlingÅrsak) {
+            if (harEttBarnSomIkkeErTerminbarn(metadata)) {
+                return automatiskVurdertDelvilkårList("Bruker har kun ett barn og det er ikke oppgitt nytt terminbarn i søknaden.")
+            } else if (harFlereBarnHvorIngenHarSammeAnnenForelder(metadata) && !metadata.finnesBarnUtenRegistrertForelder) {
+                return automatiskVurdertDelvilkårList("Bruker har flere barn, men ingen har samme annen forelder.")
+            } else if (!metadata.harBrukerEllerAnnenForelderTidligereVedtak && !metadata.finnesBarnUtenRegistrertForelder) {
+                return automatiskVurdertDelvilkårList("Verken bruker eller annen forelder får eller har fått stønad for felles barn.")
+            }
         }
+
         return listOf(ubesvartDelvilkårsvurdering(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER))
+    }
+
+    private fun harFlereBarnHvorIngenHarSammeAnnenForelder(metadata: HovedregelMetadata) =
+        metadata.barn.size > 1 && !metadata.finnesFlereBarnMedSammeAnnenForelder
+
+    private fun harEttBarnSomIkkeErTerminbarn(metadata: HovedregelMetadata) =
+        metadata.barn.size == 1 && ingenTerminbarn(metadata.barn)
+
+    private fun automatiskVurdertDelvilkårList(begrunnelse: String): List<Delvilkårsvurdering> {
+        return listOf(
+            Delvilkårsvurdering(
+                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+                listOf(
+                    Vurdering(
+                        regelId = RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER,
+                        svar = SvarId.NEI,
+                        begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): $begrunnelse"
+                    )
+                )
+            )
+        )
     }
 
     private fun ingenTerminbarn(barn: List<BehandlingBarn>) =

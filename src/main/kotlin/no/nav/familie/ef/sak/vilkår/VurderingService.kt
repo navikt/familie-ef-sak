@@ -132,7 +132,9 @@ class VurderingService(
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
             harBrukerEllerAnnenForelderTidligereVedtak = harBrukerEllerAnnenForelderTidligereVedtak(grunnlag),
-            erSøknadSomBehandlingÅrsak = erSøknadSomBehandlingÅrsak
+            erSøknadSomBehandlingÅrsak = erSøknadSomBehandlingÅrsak,
+            finnesBarnUtenRegistrertForelder = grunnlag.finnesBarnUtenRegistrertForelder(),
+            finnesFlereBarnMedSammeAnnenForelder = grunnlag.finnesFlereBarnMedSammeAnnenForelder()
         )
         return Pair(grunnlag, metadata)
     }

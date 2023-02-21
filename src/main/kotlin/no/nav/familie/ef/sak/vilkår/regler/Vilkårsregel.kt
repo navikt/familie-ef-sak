@@ -23,7 +23,9 @@ data class HovedregelMetadata(
     val søktOmBarnetilsyn: List<UUID>,
     val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
     val harBrukerEllerAnnenForelderTidligereVedtak: Boolean = false,
-    val erSøknadSomBehandlingÅrsak: Boolean = false
+    val erSøknadSomBehandlingÅrsak: Boolean = false,
+    val finnesBarnUtenRegistrertForelder: Boolean = false,
+    val finnesFlereBarnMedSammeAnnenForelder: Boolean = false
 )
 
 data class BarnForelderLangAvstandTilSøker(
