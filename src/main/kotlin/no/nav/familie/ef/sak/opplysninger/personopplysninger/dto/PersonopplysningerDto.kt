@@ -41,6 +41,7 @@ data class BarnDto(
     val adresse: List<AdresseDto>,
     val borHosSøker: Boolean,
     val deltBosted: List<DeltBostedDto>,
+    /** TODO : Endre på denne, siden delt bosted ikke nødvendigvis gjelder nåtid */
     val harDeltBostedNå: Boolean,
     val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?
