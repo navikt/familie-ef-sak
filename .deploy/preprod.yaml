@@ -64,6 +64,9 @@ spec:
           namespace: teamfamilie
           cluster: dev-fss
         - application: familie-ba-sak
+        - application: bidrag-grunnlag
+          namespace: bidrag
+          cluster: dev-gcp
         - application: bidrag-grunnlag-feature
           namespace: bidrag
           cluster: dev-gcp
