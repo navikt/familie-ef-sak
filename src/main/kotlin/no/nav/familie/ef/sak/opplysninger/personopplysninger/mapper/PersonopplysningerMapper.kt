@@ -154,7 +154,7 @@ class PersonopplysningerMapper(
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
             borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
             deltBosted = bostedDto,
-            harDeltBostedNå = AdresseHjelper.harDeltBostedNå(barn),
+            harDeltBostedNå = AdresseHjelper.harDeltBosted(barn),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
         )

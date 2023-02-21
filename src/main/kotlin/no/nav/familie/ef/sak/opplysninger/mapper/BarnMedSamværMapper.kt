@@ -113,7 +113,7 @@ class BarnMedSamværMapper(
         behandlingBarn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
         søkerAdresse: List<Bostedsadresse>,
-        registergrunnlagData: LocalDate
+        opprettetRegistergrunnlag: LocalDate
     ): List<BarnMedSamværRegistergrunnlagDto> {
         val alleBarn: List<MatchetBehandlingBarn> =
             BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
@@ -122,7 +122,7 @@ class BarnMedSamværMapper(
         return alleBarn.map { barn ->
             val fnr = utledFnrForAnnenForelder(barn, personIdentSøker, søknadsbarn)
             val pdlAnnenForelder = forelderMap[fnr]
-            mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr, registergrunnlagData)
+            mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr, opprettetRegistergrunnlag)
         }
     }
 
@@ -207,7 +207,7 @@ class BarnMedSamværMapper(
             ?: AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
 }
 
-fun DeltBosted?.tilDto(): DeltBostedDto? {
+private fun DeltBosted?.tilDto(): DeltBostedDto? {
     return this?.let {
         DeltBostedDto(this.startdatoForKontrakt, this.sluttdatoForKontrakt)
     } ?: null

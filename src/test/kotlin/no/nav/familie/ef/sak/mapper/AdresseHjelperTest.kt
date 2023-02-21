@@ -156,29 +156,29 @@ internal class AdresseHjelperTest {
         }
 
         @Test
-        internal fun `delt bosted er innenfor nåtid, forvent harDeltBostedNå lik true`() {
+        internal fun `delt bosted er innenfor nåtid uten angitt dato, forvent harDeltBosted lik true`() {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
                     deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende))
                 )
-            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isTrue
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isTrue
         }
 
         @Test
-        internal fun `delt bosted er utenfor nåtid, forvent harDeltBostedNå lik false`() {
+        internal fun `delt bosted er utenfor nåtid uten angitt dato, forvent harDeltBosted lik false`() {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
                     deltBosted = listOf(DeltBosted(now().plusDays(1), null, null, null, metadataGjeldende))
                 )
-            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
         }
 
         @Test
-        internal fun `delt bosted finnes ikke, forvent harDeltBostedNå lik false`() {
+        internal fun `delt bosted finnes ikke, forvent harDeltBosted lik false`() {
             val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList())
-            assertThat(AdresseHjelper.harDeltBostedNå(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
         }
 
         @Test

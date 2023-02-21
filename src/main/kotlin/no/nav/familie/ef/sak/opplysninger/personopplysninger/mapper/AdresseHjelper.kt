@@ -1,7 +1,5 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
-import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
-import no.nav.familie.ef.sak.felles.util.isEqualOrBefore
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
@@ -19,7 +17,7 @@ object AdresseHjelper {
     }
 
     fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
-        if (harDeltBostedNå(barn)) {
+        if (harDeltBosted(barn)) {
             return true
         }
         return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
@@ -40,18 +38,12 @@ object AdresseHjelper {
             bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
     }
 
-    fun harDeltBostedNå(barn: BarnMedIdent): Boolean {
-        val gjeldende = barn.deltBosted.gjeldende() ?: return false
-        val nå = LocalDate.now()
-        return gjeldende.startdatoForKontrakt.isEqualOrBefore(nå) &&
-            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(nå))
-    }
-
-    fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
+    fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate = LocalDate.now()): Boolean {
         if (barn == null) {
             return false
         }
         val gjeldende = barn.deltBosted.gjeldende() ?: return false
         return gjeldende.startdatoForKontrakt <= dato &&
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
+    }
 }
