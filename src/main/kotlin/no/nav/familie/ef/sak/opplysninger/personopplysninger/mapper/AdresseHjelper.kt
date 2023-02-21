@@ -36,11 +36,17 @@ object AdresseHjelper {
     }
 
     fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
-        if (barn == null) {
+        if (barn == null || barn.erOver18År()) {
             return false
         }
+
         val gjeldende = barn.deltBosted.gjeldende() ?: return false
         return gjeldende.startdatoForKontrakt <= dato &&
             (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
     }
+
+    private fun BarnMedIdent.erOver18År(): Boolean {
+        return !fødsel.gjeldende().erUnder18År()
+    }
+
 }
