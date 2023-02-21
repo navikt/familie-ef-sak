@@ -25,5 +25,5 @@ Egenskap: Andelhistorikk: Sanksjon av barnetilsyn
       | 1            | SPLITTET     | 01.2021         | 01.2021         | ORDINÆR        | 2                     | 10            | 15             | 1           | 200      | 107   | I_ARBEID  |                       |
       | 1            | FJERNET      | 02.2021         | 03.2021         | ORDINÆR        | 2                     | 10            | 15             | 1           | 200      | 107   | I_ARBEID  |                       |
       | 2            |              | 02.2021         | 02.2021         | SANKSJON_1_MND |                       | 0             | 0              | 0           | 0        | 0     |           | NEKTET_TILBUDT_ARBEID |
-      | 2            |              | 03.2021         | 03.2021         | ORDINÆR        |                       | 10            | 15             | 1           | 200      | 107   | I_ARBEID  |                       |
+      | 1            |              | 03.2021         | 03.2021         | ORDINÆR        |                       | 10            | 15             | 1           | 200      | 107   | I_ARBEID  |                       |
 

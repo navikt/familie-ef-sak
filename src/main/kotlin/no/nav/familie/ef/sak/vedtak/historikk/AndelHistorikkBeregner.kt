@@ -29,9 +29,15 @@ object AndelHistorikkBeregner {
         var kontrollert: UUID
     )
 
+    /**
+     * @param kontrollertId peker til tilkjent ytelse som man prosesserer, for å kunne markere riktige perioder som fjernet
+     * @param tilkjentYtelse er TY(tilkjente ytelsen) som prosesseres, eller TY koblet til andelen sin [kildeBehandlingId]
+     * @param vedtaksdata liknende som [tilkjentYtelse]
+     */
     private data class TilkjentYtelseMedVedtakstidspunkt(
+        val kontrollertId: UUID,
         val tilkjentYtelse: TilkjentYtelse,
-        val vedtakstidspunkt: LocalDateTime
+        val vedtaksdata: Vedtaksdata
     )
 
     fun lagHistorikk(
@@ -142,11 +148,12 @@ object AndelHistorikkBeregner {
 
         val vedtaksdataPerBehandling = lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
 
-        tilkjentYtelser.forEach { tilkjentYtelse ->
-            val vedtaksdata = vedtaksdataPerBehandling.getValue(tilkjentYtelse.behandlingId)
+        tilkjentYtelser.map {
+            TilkjentYtelseMedVedtakstidspunkt(it.id, it, vedtaksdataPerBehandling.getValue(it.behandlingId))
+        }.forEach { tilkjentYtelseMedVedtakstidspunkt ->
+            val tilkjentYtelse = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse
+            val vedtaksdata = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata
             val vedtaksperioder = vedtaksdata.perioder
-            val tilkjentYtelseMedVedtakstidspunkt =
-                TilkjentYtelseMedVedtakstidspunkt(tilkjentYtelse, vedtaksdata.vedtakstidspunkt)
 
             val andelerFraSanksjonOgOpphør = lagAndelerFraSanksjonerOgOpphør(vedtaksperioder, tilkjentYtelse)
             (tilkjentYtelse.andelerTilkjentYtelse + andelerFraSanksjonOgOpphør).sortedBy { it.stønadFom }.forEach { andel ->
@@ -157,21 +164,46 @@ object AndelHistorikkBeregner {
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
                 if (andelFraHistorikk == null) {
-                    historikk.add(index, lagNyAndel(tilkjentYtelseMedVedtakstidspunkt, andel, vedtaksperiode))
+                    val kildeTilkjentYtelse = tilkjentYtelseForKildeBehandlingId(andel,
+                        vedtaksdataPerBehandling,
+                        tilkjentYtelser,
+                        tilkjentYtelseMedVedtakstidspunkt)
+                    historikk.add(index, lagNyAndel(kildeTilkjentYtelse, andel, vedtaksperiode))
                 } else {
                     markerTidligereMedEndringOgReturnerNyAndel(
                         tilkjentYtelseMedVedtakstidspunkt,
                         andel,
                         andelFraHistorikk,
                         vedtaksperiode
-                    )
-                        ?.let { historikk.add(index, it) }
+                    )?.let { historikk.add(index, it) }
                 }
             }
 
             markerAndelerSomErFjernet(tilkjentYtelseMedVedtakstidspunkt, historikk)
         }
         return historikk
+    }
+
+    /**
+     * Hvis man har en andel jan-mars, og får en sakjson i februar, så splittes det i 2 andeler, jan og mars.
+     * Marsperioden beholder kildeBehandlingId til den behandling den ble opprinnelig opprettet fra
+     * Hvis då kildebehandlingId er annet enn det som tilkjent ytelse peker til, så skal man bruke dataen til den opprinnelige tilkjente ytelsen og vedtaksdata
+     * Men man skal beholde [kontrollertId] til TilkjentYtelse som man looper over for å ikke markere mars-andelen som fjernet
+     */
+    private fun tilkjentYtelseForKildeBehandlingId(
+        andel: AndelTilkjentYtelse,
+        vedtaksdataPerBehandling: Map<UUID, Vedtaksdata>,
+        tilkjentYtelser: List<TilkjentYtelse>,
+        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
+    ): TilkjentYtelseMedVedtakstidspunkt {
+        return if (andel.kildeBehandlingId != tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId) {
+            tilkjentYtelseMedVedtakstidspunkt.copy(
+                tilkjentYtelse = tilkjentYtelser.single { it.behandlingId == andel.kildeBehandlingId },
+                vedtaksdata = vedtaksdataPerBehandling.getValue(andel.kildeBehandlingId)
+            )
+        } else {
+            tilkjentYtelseMedVedtakstidspunkt
+        }
     }
 
     /**
@@ -260,12 +292,12 @@ object AndelHistorikkBeregner {
     ) =
         AndelHistorikkHolder(
             behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
-            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtakstidspunkt,
+            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata.vedtakstidspunkt,
             saksbehandler = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.sporbar.opprettetAv,
             andel = andel,
             endring = null,
             vedtaksperiode = vedtaksperiode,
-            kontrollert = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.id
+            kontrollert = tilkjentYtelseMedVedtakstidspunkt.kontrollertId
         )
 
     private fun AndelHistorikkHolder.finnEndringstype(
@@ -337,7 +369,7 @@ object AndelHistorikkBeregner {
         HistorikkEndring(
             type = type,
             behandlingId = tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId,
-            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtakstidspunkt
+            vedtakstidspunkt = tilkjentYtelseMedVedtakstidspunkt.vedtaksdata.vedtakstidspunkt
         )
 
     /**
