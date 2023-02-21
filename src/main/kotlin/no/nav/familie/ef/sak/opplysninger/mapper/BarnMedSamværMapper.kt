@@ -150,7 +150,7 @@ class BarnMedSamværMapper(
             navn = matchetBarn.barn?.navn?.visningsnavn(),
             fødselsnummer = matchetBarn.fødselsnummer,
             harSammeAdresse = matchetBarn.barn?.let {
-                AdresseHjelper.borPåSammeAdresse(it, søkerAdresse)
+                AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
             },
             deltBosted = matchetBarn.barn?.deltBosted?.gjeldende().tilDto(),
             harDeltBostedVedGrunnlagsdataopprettelse = AdresseHjelper.harDeltBosted(

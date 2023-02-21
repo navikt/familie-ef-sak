@@ -43,7 +43,7 @@ internal class AdresseHjelperTest {
                 lagAdresse(adresseTromsø(), now().minusDays(1), null, null, metadataGjeldende)
             )
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
@@ -55,7 +55,7 @@ internal class AdresseHjelperTest {
                 lagAdresse(adresseTromsøMatrikkel(), now().minusDays(1))
             )
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
@@ -63,15 +63,7 @@ internal class AdresseHjelperTest {
             val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
-        }
-
-        @Test
-        internal fun `hvis delt bosted, men annen adresse, forvent borPåSammeAdresse lik true`() {
-            val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse(2)))
-            val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(3)))
-            val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser, deltBosted = listOf(DeltBosted(LocalDate.MIN, null, null, null, metadataGjeldende)))
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
@@ -86,7 +78,7 @@ internal class AdresseHjelperTest {
             )
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse()))
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse()
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isFalse()
         }
 
         @Test
@@ -95,7 +87,7 @@ internal class AdresseHjelperTest {
             val forelderAdresser =
                 listOf(lagAdresse(adresseBergen().copy(matrikkelId = 123, bruksenhetsnummer = "H1701")))
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse()
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isFalse()
         }
 
         @Test
@@ -103,7 +95,7 @@ internal class AdresseHjelperTest {
             val barnAdresser = listOf(lagAdresse(adresseBergen(), now().minusDays(1), null, matrikkeladresse()))
             val forelderAdresser = listOf(lagAdresse(null, now().minusDays(1), null, matrikkeladresse(999L)))
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isFalse
         }
 
         @Test
@@ -132,11 +124,11 @@ internal class AdresseHjelperTest {
             val barn3 = opprettBarnMedIdent(personIdent = "", bostedsadresse = ugyldigeAdresser)
             val barn4 = opprettBarnMedIdent(personIdent = "")
 
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn1, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn2, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn3, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn4, forelderAdresser)).isFalse
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn4, emptyList())).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn1, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn2, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn3, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn4, forelderAdresser)).isFalse
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn4, emptyList())).isFalse
         }
 
         @Test
@@ -152,33 +144,33 @@ internal class AdresseHjelperTest {
             )
             val barn = opprettBarnMedIdent(personIdent = "", bostedsadresse = barnAdresser)
 
-            assertThat(AdresseHjelper.borPåSammeAdresse(barn, forelderAdresser)).isTrue
+            assertThat(AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, forelderAdresser)).isTrue
         }
 
         @Test
-        internal fun `delt bosted er innenfor nåtid uten angitt dato, forvent harDeltBosted lik true`() {
+        internal fun `delt bosted er innenfor nåtid med angitt dato now, forvent harDeltBosted lik true`() {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
                     deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende))
                 )
-            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isTrue
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isTrue
         }
 
         @Test
-        internal fun `delt bosted er utenfor nåtid uten angitt dato, forvent harDeltBosted lik false`() {
+        internal fun `delt bosted er utenfor nåtid med angitt dato now, forvent harDeltBosted lik false`() {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
                     deltBosted = listOf(DeltBosted(now().plusDays(1), null, null, null, metadataGjeldende))
                 )
-            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
         }
 
         @Test
         internal fun `delt bosted finnes ikke, forvent harDeltBosted lik false`() {
             val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList())
-            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted)).isFalse
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
         }
 
         @Test
