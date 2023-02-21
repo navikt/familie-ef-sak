@@ -121,7 +121,7 @@ class VurderingService(
         val personIdent = behandlingService.hentAktivIdent(behandlingId)
         val barn = barnService.finnBarnPåBehandling(behandlingId)
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
-
+        val erSøknadSomBehandlingÅrsak = behandlingService.hentBehandling(behandlingId).årsak == BehandlingÅrsak.SØKNAD
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
 
@@ -131,7 +131,8 @@ class VurderingService(
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
-            harBrukerEllerAnnenForelderTidligereVedtak = harBrukerEllerAnnenForelderTidligereVedtak(grunnlag)
+            harBrukerEllerAnnenForelderTidligereVedtak = harBrukerEllerAnnenForelderTidligereVedtak(grunnlag),
+            erSøknadSomBehandlingÅrsak = erSøknadSomBehandlingÅrsak
         )
         return Pair(grunnlag, metadata)
     }

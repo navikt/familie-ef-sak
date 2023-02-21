@@ -21,6 +21,7 @@ class NyttBarnSammePartnerRegelTest {
     @Test
     fun `gitt bruker med ett barn, uten registrert terminbarn, når initereDelvilkårvurdering, så skal vilkår automatisk oppfylles`() {
         every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn)
+        every { hovedregelMetadataMock.erSøknadSomBehandlingÅrsak } returns true
 
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
@@ -39,6 +40,7 @@ class NyttBarnSammePartnerRegelTest {
     fun `gitt bruker med flere enn ett barn og uten tidligere vedtaksperioder, når initereDelvilkårvurdering, så skal vilkår automatisk oppfylles`() {
         every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn, behandlingBarnMedTermindato)
         every { hovedregelMetadataMock.harBrukerEllerAnnenForelderTidligereVedtak } returns false
+        every { hovedregelMetadataMock.erSøknadSomBehandlingÅrsak } returns true
 
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,
@@ -57,6 +59,7 @@ class NyttBarnSammePartnerRegelTest {
     fun `initiereDelvilkårsvurdering - kan ikke automatisk vurdere bruker med ett barn med termindato og tidligere vedtak`() {
         every { hovedregelMetadataMock.barn } returns listOf(behandlingBarnMedTermindato)
         every { hovedregelMetadataMock.harBrukerEllerAnnenForelderTidligereVedtak } returns true
+        every { hovedregelMetadataMock.erSøknadSomBehandlingÅrsak } returns true
 
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
             hovedregelMetadataMock,

@@ -34,7 +34,7 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId - terminbarn: ${ingenTerminbarn(metadata.barn)}")
-        if (metadata.barn.size == 1 && ingenTerminbarn(metadata.barn)) {
+        if (metadata.erSøknadSomBehandlingÅrsak && metadata.barn.size == 1 && ingenTerminbarn(metadata.barn)) {
             return listOf(
                 Delvilkårsvurdering(
                     resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
@@ -47,7 +47,7 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
                     )
                 )
             )
-        } else if (!metadata.harBrukerEllerAnnenForelderTidligereVedtak) {
+        } else if (metadata.erSøknadSomBehandlingÅrsak && !metadata.harBrukerEllerAnnenForelderTidligereVedtak) {
             return listOf(
                 Delvilkårsvurdering(
                     resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
