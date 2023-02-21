@@ -52,7 +52,6 @@ object AdresseHjelper {
             return false
         }
         val gjeldende = barn.deltBosted.gjeldende() ?: return false
-        return gjeldende.startdatoForKontrakt.isEqualOrBefore(dato) &&
-            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt.isEqualOrAfter(dato))
-    }
+        return gjeldende.startdatoForKontrakt <= dato &&
+            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
 }
