@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -31,12 +32,19 @@ data class Vilkårsvurdering(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     @Column("delvilkar")
-    val delvilkårsvurdering: DelvilkårsvurderingWrapper
+    val delvilkårsvurdering: DelvilkårsvurderingWrapper,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "gjenbrukt_")
+    val gjenbrukt: Gjenbrukt? = null
 ) {
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
     }
 }
+
+data class Gjenbrukt(
+    val behandlingId: UUID,
+    val endretTid: LocalDateTime
+)
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)
