@@ -164,7 +164,6 @@ internal class PersonopplysningerMapperTest {
 
     @Test
     internal fun `skal mappe barnets harDeltBostedNå til true når grunnlagsdata er opprettet i periode med delt bosted`() {
-
         val deltBostedStart = LocalDate.of(2022, 1, 1)
         val deltBostedSlutt = LocalDate.of(2023, 1, 1)
         val grunnlagsdata = grunnlagsdataMedBarnMedDeltBosted(deltBostedStart, deltBostedSlutt)
@@ -182,7 +181,6 @@ internal class PersonopplysningerMapperTest {
 
     @Test
     internal fun `skal mappe barnets harDeltBostedNå til false når grunnlagsdata ikke er opprettet i periode med delt bosted`() {
-
         val deltBostedStart = LocalDate.of(2022, 1, 1)
         val deltBostedSlutt = LocalDate.of(2023, 1, 1)
         val grunnlagsdata = grunnlagsdataMedBarnMedDeltBosted(deltBostedStart, deltBostedSlutt)

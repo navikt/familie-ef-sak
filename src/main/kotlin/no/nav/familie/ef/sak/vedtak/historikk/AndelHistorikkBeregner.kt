@@ -164,10 +164,12 @@ object AndelHistorikkBeregner {
                 val andelFraHistorikk = finnTilsvarendeAndelIHistorikk(historikk, andel)
                 val index = finnIndeksForNyAndel(historikk, andel)
                 if (andelFraHistorikk == null) {
-                    val kildeTilkjentYtelse = tilkjentYtelseForKildeBehandlingId(andel,
+                    val kildeTilkjentYtelse = tilkjentYtelseForKildeBehandlingId(
+                        andel,
                         vedtaksdataPerBehandling,
                         tilkjentYtelser,
-                        tilkjentYtelseMedVedtakstidspunkt)
+                        tilkjentYtelseMedVedtakstidspunkt
+                    )
                     historikk.add(index, lagNyAndel(kildeTilkjentYtelse, andel, vedtaksperiode))
                 } else {
                     markerTidligereMedEndringOgReturnerNyAndel(
@@ -194,7 +196,7 @@ object AndelHistorikkBeregner {
         andel: AndelTilkjentYtelse,
         vedtaksdataPerBehandling: Map<UUID, Vedtaksdata>,
         tilkjentYtelser: List<TilkjentYtelse>,
-        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt,
+        tilkjentYtelseMedVedtakstidspunkt: TilkjentYtelseMedVedtakstidspunkt
     ): TilkjentYtelseMedVedtakstidspunkt {
         return if (andel.kildeBehandlingId != tilkjentYtelseMedVedtakstidspunkt.tilkjentYtelse.behandlingId) {
             tilkjentYtelseMedVedtakstidspunkt.copy(
