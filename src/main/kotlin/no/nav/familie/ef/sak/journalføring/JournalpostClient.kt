@@ -110,7 +110,7 @@ class JournalpostClient(
 
     fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest, saksbehandler: String?): ArkiverDokumentResponse {
         return postForEntity<Ressurs<ArkiverDokumentResponse>>(
-            URI.create("$dokarkivUri/v4/"),
+            URI.create("$dokarkivUri/v4"),
             arkiverDokumentRequest,
             headerMedSaksbehandler(saksbehandler)
         ).data

@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
-import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -152,21 +151,16 @@ class OppgaveService(
         return mappe.id.toLong()
     }
 
-    fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
-        val gsakOppgave = hentOppgave(gsakOppgaveId)
-        val tidligereSaksbehandler = gsakOppgave.tilordnetRessurs
-        if (tidligereSaksbehandler != saksbehandler && tidligereSaksbehandler != null) {
-            logger.info(
-                "(Eier av behandling/oppgave) Fordeler oppgave=$gsakOppgaveId " +
-                    "fra=$tidligereSaksbehandler til=$saksbehandler " +
-                    "sekunderSidenEndret=${sekunderSidenEndret(gsakOppgave)}"
-            )
-        }
-        return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
+    fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String, versjon: Int? = null): Long {
+        return oppgaveClient.fordelOppgave(
+            gsakOppgaveId,
+            saksbehandler,
+            versjon
+        )
     }
 
-    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long): Long {
-        return oppgaveClient.fordelOppgave(gsakOppgaveId, null)
+    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long, versjon: Int? = null): Long {
+        return oppgaveClient.fordelOppgave(gsakOppgaveId, null, versjon = versjon)
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, saksbehandling: Saksbehandling): EfOppgave? {

@@ -58,6 +58,25 @@ internal class OppgaveControllerTest {
     }
 
     @Test
+    internal fun `skal sende med versjon i request `() {
+        val versjonSlot = slot<Int>()
+        val oppgaveIdSlot = slot<Long>()
+        tilgangOgRolleJustRuns()
+        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), capture(versjonSlot)) } returns 123
+        oppgaveController.fordelOppgave(123, "saksbehandler", 1)
+        assertThat(versjonSlot.captured).isEqualTo(1)
+    }
+
+    @Test
+    internal fun `skal ikke feile hvis versjon er null `() {
+        val versjonSlot = slot<Int>()
+        val oppgaveIdSlot = slot<Long>()
+        tilgangOgRolleJustRuns()
+        every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any()) } returns 123
+        oppgaveController.fordelOppgave(123, "saksbehandler", versjon = null)
+    }
+
+    @Test
     internal fun `skal ikke feile hvis ident er tom`() {
         val finnOppgaveRequestSlot = slot<FinnOppgaveRequest>()
         tilgangOgRolleJustRuns()
@@ -88,7 +107,7 @@ internal class OppgaveControllerTest {
         } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang")
 
         assertThrows<ManglerTilgang> {
-            oppgaveController.fordelOppgave(123, "dummy saksbehandler")
+            oppgaveController.fordelOppgave(123, "dummy saksbehandler", null)
         }
     }
 
@@ -154,5 +173,9 @@ internal class OppgaveControllerTest {
         every {
             tilgangService.validerHarSaksbehandlerrolle()
         } just Runs
+
+        every {
+            tilgangService.validerSaksbehandler(any())
+        } returns true
     }
 }
