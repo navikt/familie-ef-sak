@@ -9,6 +9,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Matrikkeladresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -152,6 +153,7 @@ internal class AdresseHjelperTest {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
                     deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende))
                 )
             assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isTrue
@@ -162,14 +164,26 @@ internal class AdresseHjelperTest {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
                     deltBosted = listOf(DeltBosted(now().plusDays(1), null, null, null, metadataGjeldende))
                 )
             assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
         }
 
         @Test
+        internal fun `Barn over 18, skal ikke ha delt bosted`() {
+            val barnMedDeltBosted =
+                opprettBarnMedIdent(
+                    personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(18)),
+                    deltBosted = listOf(DeltBosted(now().minusDays(1), null, null, null, metadataGjeldende))
+                )
+            assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
+        }
+
+        @Test
         internal fun `delt bosted finnes ikke, forvent harDeltBosted lik false`() {
-            val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList())
+            val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList(), fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),)
             assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
         }
 
@@ -178,6 +192,7 @@ internal class AdresseHjelperTest {
             val barnMedDeltBosted =
                 opprettBarnMedIdent(
                     personIdent = "",
+                    fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
                     deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende))
                 )
             assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now().minusDays(1))).isFalse
@@ -187,6 +202,7 @@ internal class AdresseHjelperTest {
         internal fun `delt bosted er innenfor dato for delt bosted, forvent harDeltBosted lik true`() {
             val barnMedDeltBosted = opprettBarnMedIdent(
                 personIdent = "",
+                fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),
                 deltBosted = listOf(DeltBosted(now(), null, null, null, metadataGjeldende))
             )
             assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now().plusDays(1))).isTrue
