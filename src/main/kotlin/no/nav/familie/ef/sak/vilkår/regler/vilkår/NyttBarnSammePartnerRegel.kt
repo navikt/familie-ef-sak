@@ -37,9 +37,14 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         if (metadata.erSøknadSomBehandlingÅrsak) {
             if (harEttBarnSomIkkeErTerminbarn(metadata)) {
                 return automatiskVurdertDelvilkårList("Bruker har kun ett barn og det er ikke oppgitt nytt terminbarn i søknaden.")
-            } else if (harFlereBarnHvorIngenHarSammeAnnenForelder(metadata) && !metadata.finnesBarnUtenRegistrertForelder) {
+            }
+            if (metadata.finnesBarnUtenRegistrertForelder) return listOf(ubesvartDelvilkårsvurdering(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER))
+
+            if (harFlereBarnHvorIngenHarSammeAnnenForelder(metadata)) {
                 return automatiskVurdertDelvilkårList("Bruker har flere barn, men ingen har samme annen forelder.")
-            } else if (!metadata.harBrukerEllerAnnenForelderTidligereVedtak && !metadata.finnesBarnUtenRegistrertForelder) {
+            }
+
+            if (!metadata.harBrukerEllerAnnenForelderTidligereVedtak) {
                 return automatiskVurdertDelvilkårList("Verken bruker eller annen forelder får eller har fått stønad for felles barn.")
             }
         }
