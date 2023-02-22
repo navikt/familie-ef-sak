@@ -20,6 +20,7 @@ import java.util.UUID
  *
  * Hver vilkårsvurdering har delvilkår. Hvert delvilkår har vurderinger med svar, og kanskje begrunnelse.
  *
+ * Husk at [gjenbrukt] må tas stilling til når man kopierer denne
  */
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(
@@ -39,6 +40,12 @@ data class Vilkårsvurdering(
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
     }
+
+    /**
+     * Brukes når man skal gjenbruke denne vilkårsvurderingen i en annan vilkårsvurdering
+     */
+    fun lagGjenbrukt(): Gjenbrukt =
+        gjenbrukt ?: Gjenbrukt(behandlingId, sporbar.endret.endretTid)
 }
 
 data class Gjenbrukt(

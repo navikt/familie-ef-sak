@@ -43,7 +43,8 @@ object OppdaterVilkår {
         val oppdaterteDelvilkår = oppdaterDelvilkår(vilkårsvurdering, vilkårsresultat, oppdatering)
         return vilkårsvurdering.copy(
             resultat = vilkårsresultat.vilkår,
-            delvilkårsvurdering = oppdaterteDelvilkår
+            delvilkårsvurdering = oppdaterteDelvilkår,
+            gjenbrukt = null
         )
     }
 
@@ -199,7 +200,8 @@ object OppdaterVilkår {
             type = vilkårsregel.vilkårType,
             barnId = barnId,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
-            resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår
+            resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
+            gjenbrukt = null
         )
     }
 }

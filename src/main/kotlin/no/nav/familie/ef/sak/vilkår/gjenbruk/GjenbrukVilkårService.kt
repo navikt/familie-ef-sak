@@ -89,7 +89,8 @@ class GjenbrukVilkårService(
                     id = it.id,
                     behandlingId = behandlingId,
                     sporbar = it.sporbar,
-                    barnId = it.barnId
+                    barnId = it.barnId,
+                    gjenbrukt = tidligereVurdering.lagGjenbrukt()
                 )
             }
     }
