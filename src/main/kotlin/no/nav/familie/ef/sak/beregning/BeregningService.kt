@@ -75,6 +75,6 @@ class BeregningService(
 
         val vedtakForBehandling = vedtakService.hentVedtak(forrigeIverksatteBehandling.id)
 
-        return vedtakForBehandling.inntekter?.inntekter?.last()?.inntekt ?: throw Feil("Ingen inntekt")
+        return vedtakForBehandling.inntekter?.inntekter?.last()?.inntekt ?: throw Feil("Finner ingen inntak på behandling med id=${vedtakForBehandling.behandlingId}")
     }
 }
