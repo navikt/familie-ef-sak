@@ -1,6 +1,9 @@
 package no.nav.familie.ef.sak.beregning
 
+import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -10,8 +13,9 @@ import java.math.RoundingMode
 import java.time.LocalDate
 
 internal class BeregningServiceTest {
-
-    private val beregningService = BeregningService()
+    private val behandlingService = mockk<BehandlingService>()
+    private val vedtakService = mockk<VedtakService>()
+    private val beregningService = BeregningService(behandlingService, vedtakService)
 
     @Test
     internal fun `skal beregne full ytelse når det ikke foreligger inntekt`() {

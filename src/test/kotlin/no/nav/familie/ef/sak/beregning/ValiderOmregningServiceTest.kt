@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.beregning
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.beregning.BeregningService
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
@@ -36,8 +37,9 @@ import java.util.UUID
 class ValiderOmregningServiceTest {
 
     val vedtakService = mockk<VedtakService>()
+    val behandlingService = mockk<BehandlingService>()
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    val beregningService = BeregningService()
+    val beregningService = BeregningService(behandlingService, vedtakService)
     val vedtakHistorikkService = mockk<VedtakHistorikkService>()
     val featureToggleService = mockFeatureToggleService()
     val validerOmregningService = ValiderOmregningService(

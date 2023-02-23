@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.vedtaksperiodeDto
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -27,9 +28,10 @@ internal class BeregningControllerUnitTest {
 
     val tilkjentytelseService = mockk<TilkjentYtelseService>()
     val vedtakService = mockk<VedtakService>()
+    val behandlingService = mockk<BehandlingService>()
 
     val beregningController = BeregningController(
-        beregningService = BeregningService(),
+        beregningService = BeregningService(behandlingService, vedtakService),
         tilgangService = mockk(relaxed = true),
         tilkjentYtelseService = tilkjentytelseService,
         vedtakService = vedtakService
