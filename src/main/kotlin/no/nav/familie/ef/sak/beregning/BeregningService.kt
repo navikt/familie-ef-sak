@@ -68,7 +68,7 @@ class BeregningService(
         ) { "Inntektsperioder $inntektsperioder overlapper eller er ikke sammenhengde" }
     }
 
-    fun hentInntektFraForrigeIverksatteBehandling(behandlingId: UUID): BigDecimal {
+    fun hentSisteInntektFraForrigeIverksatteBehandling(behandlingId: UUID): BigDecimal {
         val fagsakId = behandlingService.hentBehandling(behandlingId).fagsakId
         val forrigeIverksatteBehandling = behandlingService.finnSisteIverksatteBehandling(fagsakId)
             ?: throw Feil("Finnes ikke en tidligere vedtak med beløpsperioder for fagsak med id=$fagsakId")

@@ -56,9 +56,9 @@ class BeregningController(
     }
 
     @GetMapping("/{behandlingId}/forrigeInntektsgrunnlag")
-    fun hentInntektFraForrigeIverksatteBehandling(@PathVariable behandlingId: UUID): Ressurs<BigDecimal> {
+    fun hentSisteInntektFraForrigeIverksatteBehandling(@PathVariable behandlingId: UUID): Ressurs<BigDecimal> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
 
-        return Ressurs.success(beregningService.hentInntektFraForrigeIverksatteBehandling(behandlingId = behandlingId))
+        return Ressurs.success(beregningService.hentSisteInntektFraForrigeIverksatteBehandling(behandlingId = behandlingId))
     }
 }
