@@ -37,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
-import java.time.LocalDateTime
 
 internal class VedtaksbrevServiceTest {
 
@@ -121,8 +120,10 @@ internal class VedtaksbrevServiceTest {
         every { brevClient.genererHtmlFritekstbrev(any(), any(), any()) } returns "html"
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "123".toByteArray()
 
-        vedtaksbrevService.lagSaksbehandlerFritekstbrev(fritekstBrevDto,
-            saksbehandling(fagsak, behandlingForSaksbehandler))
+        vedtaksbrevService.lagSaksbehandlerFritekstbrev(
+            fritekstBrevDto,
+            saksbehandling(fagsak, behandlingForSaksbehandler)
+        )
         assertThat(vedtaksbrevSlot.captured.saksbehandlersignatur).isEqualTo(beslutterNavn)
     }
 
@@ -210,8 +211,10 @@ internal class VedtaksbrevServiceTest {
         every { vedtaksbrevRepository.update(capture(brevSlot)) } returns mockk()
         every { familieDokumentClient.genererPdfFraHtml(any()) } returns "brev".toByteArray()
         // Når
-        vedtaksbrevService.lagEndeligBeslutterbrev(saksbehandling(fagsak, behandlingForBeslutter),
-            vedtakKreverBeslutter)
+        vedtaksbrevService.lagEndeligBeslutterbrev(
+            saksbehandling(fagsak, behandlingForBeslutter),
+            vedtakKreverBeslutter
+        )
 
         assertThat(beslutterIdent).isNotNull()
         assertThat(brevSlot.captured.beslutterident).isEqualTo(beslutterIdent)

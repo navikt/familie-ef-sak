@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(
@@ -86,7 +87,8 @@ class PersonopplysningerMapper(
                     it,
                     søkerIdenter.identer(),
                     søker.bostedsadresse,
-                    annenForelderMap
+                    annenForelderMap,
+                    grunnlagsdataMedMetadata.opprettetTidspunkt.toLocalDate()
                 )
             }.sortedBy { it.fødselsdato },
             innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
@@ -127,7 +129,8 @@ class PersonopplysningerMapper(
         barn: BarnMedIdent,
         søkerIdenter: Set<String>,
         bostedsadresserForelder: List<Bostedsadresse>,
-        annenForelderMap: Map<String, AnnenForelderMedIdent>
+        annenForelderMap: Map<String, AnnenForelderMedIdent>,
+        grunnlagsdataOpprettet: LocalDate
     ): BarnDto {
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
@@ -152,9 +155,9 @@ class PersonopplysningerMapper(
                 )
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
-            borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
+            borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
             deltBosted = bostedDto,
-            harDeltBostedNå = AdresseHjelper.harDeltBostedNå(barn),
+            harDeltBostedNå = AdresseHjelper.harDeltBosted(barn, grunnlagsdataOpprettet),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
         )
