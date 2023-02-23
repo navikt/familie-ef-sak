@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 import java.util.UUID
 
 @RestController
@@ -52,5 +53,12 @@ class BeregningController(
         val startDatoForVedtak = vedtakForBehandling.perioder?.perioder?.minByOrNull { it.datoFra }?.datoFra
             ?: error("Fant ingen startdato for vedtak på behandling med id=$behandlingId")
         return Ressurs.success(tilkjentYtelseService.hentForBehandling(behandlingId).tilBeløpsperiode(startDatoForVedtak))
+    }
+
+    @GetMapping("/{behandlingId}/forrigeInntektsgrunnlag")
+    fun hentInntektFraForrigeIverksatteBehandling(@PathVariable behandlingId: UUID): Ressurs<BigDecimal> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+
+        return Ressurs.success(beregningService.hentInntektFraForrigeIverksatteBehandling(behandlingId = behandlingId))
     }
 }
