@@ -137,11 +137,6 @@ class VurderingService(
         return Pair(grunnlag, metadata)
     }
 
-    private fun harBrukerEllerAnnenForelderTidligereVedtak(grunnlag: VilkårGrunnlagDto) =
-        grunnlag.barnMedSamvær.mapNotNull { it.søknadsgrunnlag.forelder?.tidligereVedtaksperioder }
-            .any { it.harTidligereVedtaksperioder() } ||
-            grunnlag.tidligereVedtaksperioder.harTidligereVedtaksperioder()
-
     private fun hentEllerOpprettVurderinger(
         behandlingId: UUID,
         metadata: HovedregelMetadata

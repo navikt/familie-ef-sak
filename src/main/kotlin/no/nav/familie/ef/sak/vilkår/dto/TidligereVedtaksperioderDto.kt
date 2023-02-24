@@ -9,7 +9,7 @@ data class TidligereVedtaksperioderDto(
     val historiskPensjon: Boolean?
 ) {
     fun harTidligereVedtaksperioder() =
-        infotrygd?.harTidligereInnvilgetVedtak() ?: false || sak?.harTidligereInnvilgetVedtak() ?: false
+        infotrygd?.harTidligereInnvilgetVedtak() ?: false || sak?.harTidligereInnvilgetVedtak() ?: false || historiskPensjon ?: true
 }
 
 data class TidligereInnvilgetVedtakDto(

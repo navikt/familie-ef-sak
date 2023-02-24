@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.RegelSteg
 import no.nav.familie.ef.sak.vilkår.regler.SluttSvarRegel
+import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.Vilkårsregel
 import no.nav.familie.ef.sak.vilkår.regler.jaNeiSvarRegel
 import no.nav.familie.ef.sak.vilkår.regler.regelIder
@@ -35,9 +36,9 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId")
         if (metadata.behandling.erSøknadSomBehandlingÅrsak() &&
             !metadata.vilkårgrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() &&
-            !metadata.vilkårgrunnlagDto.barnMedSamvær.finnesBarnUtenRegistrertAnnenForelder()
+            metadata.vilkårgrunnlagDto.barnMedSamvær.alleBarnHarRegistrertAnnenForelder()
         ) {
-            return automatiskVurdertDelvilkårList(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, "Verken bruker eller annen forelder får eller har fått stønad for felles barn.")
+            return automatiskVurdertDelvilkårList(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, SvarId.NEI, "Verken bruker eller annen forelder får eller har fått stønad for felles barn.")
         }
 
         return listOf(ubesvartDelvilkårsvurdering(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER))
@@ -56,11 +57,11 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
     }
 }
 
-fun Behandling.erSøknadSomBehandlingÅrsak() = this.årsak == BehandlingÅrsak.SØKNAD
+private fun Behandling.erSøknadSomBehandlingÅrsak() = this.årsak == BehandlingÅrsak.SØKNAD
 
-fun VilkårGrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() =
+private fun VilkårGrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() =
     this.barnMedSamvær.mapNotNull { it.søknadsgrunnlag.forelder?.tidligereVedtaksperioder }
         .any { it.harTidligereVedtaksperioder() } ||
         this.tidligereVedtaksperioder.harTidligereVedtaksperioder()
 
-fun List<BarnMedSamværDto>.finnesBarnUtenRegistrertAnnenForelder() = this.any { it.registergrunnlag.forelder == null }
+private fun List<BarnMedSamværDto>.alleBarnHarRegistrertAnnenForelder() = this.all { it.registergrunnlag.forelder?.fødselsnummer != null }

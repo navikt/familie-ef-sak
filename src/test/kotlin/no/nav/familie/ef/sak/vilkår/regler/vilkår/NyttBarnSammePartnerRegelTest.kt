@@ -29,12 +29,12 @@ class NyttBarnSammePartnerRegelTest {
 
     @BeforeEach
     fun setup() {
+        every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn)
         every { hovedregelMetadataMock.behandling } returns behandling()
     }
 
     @Test
     fun `Gitt at bruker eller annen foreldre ikke har tidligere vedtak, og alle barn har registrert annen forelder, når initiereDelvilkår, så skal vilkåret automatisk oppfylles`() {
-        every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn)
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto()
 
         val listDelvilkårsvurdering = NyttBarnSammePartnerRegel().initiereDelvilkårsvurdering(
@@ -54,7 +54,7 @@ class NyttBarnSammePartnerRegelTest {
     fun `Gitt at bruker eller annen foreldre har tidligere vedtak, og alle barn har registrert annen forelder, når initiereDelvilkår, så skal vilkåret ikke automatisk oppfylles`() {
         val barnMedSamværSøknadsgrunnlagDto = mockk<BarnMedSamværSøknadsgrunnlagDto>()
         val annenForelderDto = mockk<AnnenForelderDto>()
-        every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn)
+
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
             barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, mockk())),
             tidligereVedtaksperioder = TidligereVedtaksperioderDto(TidligereInnvilgetVedtakDto(true, false, false), TidligereInnvilgetVedtakDto(false, false, false), false)
@@ -79,7 +79,7 @@ class NyttBarnSammePartnerRegelTest {
         val barnMedSamværSøknadsgrunnlagDto = mockk<BarnMedSamværSøknadsgrunnlagDto>()
         val barnMedSamværRegistergrunnlagDto = mockk<BarnMedSamværRegistergrunnlagDto>()
         val annenForelderDto = mockk<AnnenForelderDto>()
-        every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn)
+
         every { hovedregelMetadataMock.vilkårgrunnlagDto } returns VilkårTestUtil.mockVilkårGrunnlagDto(
             barnMedSamvær = listOf(BarnMedSamværDto(UUID.randomUUID(), barnMedSamværSøknadsgrunnlagDto, barnMedSamværRegistergrunnlagDto))
         )
