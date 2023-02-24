@@ -46,8 +46,9 @@ class NyttBarnSammePartnerRegelTest {
         assertThat(listDelvilkårsvurdering.size).isEqualTo(1)
         assertThat(listDelvilkårsvurdering.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
         assertThat(listDelvilkårsvurdering.first().vurderinger.size).isEqualTo(1)
-        assertThat(listDelvilkårsvurdering.first().vurderinger.first().svar).isEqualTo(SvarId.NEI)
-        assertThat(listDelvilkårsvurdering.first().vurderinger.first().begrunnelse).startsWith("Automatisk vurdert (${LocalDate.now().norskFormat()}):")
+        val delvilkårsvurdering = listDelvilkårsvurdering.first().vurderinger.first()
+        assertThat(delvilkårsvurdering.svar).isEqualTo(SvarId.NEI)
+        assertThat(delvilkårsvurdering.begrunnelse).startsWith("Automatisk vurdert (${LocalDate.now().norskFormat()}):")
     }
 
     @Test
