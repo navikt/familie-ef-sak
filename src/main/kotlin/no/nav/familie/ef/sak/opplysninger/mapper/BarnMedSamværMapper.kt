@@ -153,6 +153,7 @@ class BarnMedSamværMapper(
                 AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
             },
             deltBosted = matchetBarn.barn?.deltBosted?.gjeldende().tilDto(),
+            deltBostedPerioder = matchetBarn.barn?.deltBosted?.tilDto() ?: emptyList(),
             harDeltBostedVedGrunnlagsdataopprettelse = AdresseHjelper.harDeltBosted(
                 matchetBarn.barn,
                 grunnlagsdataOpprettet
@@ -205,10 +206,16 @@ class BarnMedSamværMapper(
             ?.vegadresse
             ?.fjerneBoforhold(søkerAdresse.gjeldende()?.vegadresse)
             ?: AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
+
+    private fun List<DeltBosted>.tilDto(): List<DeltBostedDto> {
+        return this.mapNotNull { deltBosted -> deltBosted.tilDto()  }
+    }
 }
 
 private fun DeltBosted?.tilDto(): DeltBostedDto? {
     return this?.let {
-        DeltBostedDto(this.startdatoForKontrakt, this.sluttdatoForKontrakt)
+        DeltBostedDto(this.startdatoForKontrakt, this.sluttdatoForKontrakt, this.metadata.historisk)
     } ?: null
 }
+
+
