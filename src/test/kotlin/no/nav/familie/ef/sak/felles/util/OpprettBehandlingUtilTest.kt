@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOpprette
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.henlagtFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørstegangsbehandling
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.repository.behandling
@@ -161,6 +162,15 @@ internal class OpprettBehandlingUtilTest {
         @Test
         internal fun `skal kunne opprette en migrering uten tidligere behandlinger`() {
             validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(), erMigrering = true)
+        }
+
+        @Test
+        internal fun `skal kunne migrere når det kun finnes henlagte behandlinger`() {
+            validerKanOppretteNyBehandling(
+                BehandlingType.REVURDERING,
+                listOf(henlagtFørstegangsbehandling),
+                erMigrering = true
+            )
         }
 
         @Test
