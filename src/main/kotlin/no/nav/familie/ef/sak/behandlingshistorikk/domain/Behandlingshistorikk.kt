@@ -23,7 +23,7 @@ data class Behandlingshistorikk(
     val utfall: StegUtfall? = null,
     val metadata: JsonWrapper? = null,
     val opprettetAvNavn: String = SikkerhetContext.hentSaksbehandlerNavn(),
-    val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
     val endretTid: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
 )
 
@@ -40,14 +40,7 @@ fun Behandlingshistorikk.tilDto(): BehandlingshistorikkDto {
 }
 
 fun Behandlingshistorikk.tilHendelseshistorikkDto(saksbehandling: Saksbehandling): HendelseshistorikkDto {
-    val hendelse: Hendelse = when (this.steg) {
-        StegType.VILKÅR -> Hendelse.OPPRETTET
-        StegType.SEND_TIL_BESLUTTER -> Hendelse.SENDT_TIL_BESLUTTER
-        StegType.BEHANDLING_FERDIGSTILT -> mapFraFerdigstiltTilHendelse(saksbehandling.resultat)
-        StegType.FERDIGSTILLE_BEHANDLING -> mapFraFerdigstilleTilHendelse(saksbehandling.resultat)
-        StegType.BESLUTTE_VEDTAK -> mapFraBeslutteTilHendelse(this.utfall)
-        else -> Hendelse.UKJENT
-    }
+    val hendelse: Hendelse = mapUtfallTilHendelse() ?: mapStegTilHendelse(saksbehandling)
 
     return HendelseshistorikkDto(
         behandlingId = this.behandlingId,
@@ -57,6 +50,24 @@ fun Behandlingshistorikk.tilHendelseshistorikkDto(saksbehandling: Saksbehandling
         metadata = this.metadata.tilJson()
     )
 }
+
+private fun Behandlingshistorikk.mapUtfallTilHendelse() =
+    when (this.utfall) {
+        StegUtfall.SATT_PÅ_VENT -> Hendelse.SATT_PÅ_VENT
+        StegUtfall.TATT_AV_VENT -> Hendelse.TATT_AV_VENT
+        StegUtfall.ANGRE_SEND_TIL_BESLUTTER -> Hendelse.ANGRE_SEND_TIL_BESLUTTER
+        else -> null
+    }
+
+private fun Behandlingshistorikk.mapStegTilHendelse(saksbehandling: Saksbehandling) =
+    when (this.steg) {
+        StegType.VILKÅR -> Hendelse.OPPRETTET
+        StegType.SEND_TIL_BESLUTTER -> Hendelse.SENDT_TIL_BESLUTTER
+        StegType.BEHANDLING_FERDIGSTILT -> mapFraFerdigstiltTilHendelse(saksbehandling.resultat)
+        StegType.FERDIGSTILLE_BEHANDLING -> mapFraFerdigstilleTilHendelse(saksbehandling.resultat)
+        StegType.BESLUTTE_VEDTAK -> mapFraBeslutteTilHendelse(this.utfall)
+        else -> Hendelse.UKJENT
+    }
 
 fun mapFraFerdigstiltTilHendelse(resultat: BehandlingResultat): Hendelse {
     return when (resultat) {
@@ -89,5 +100,8 @@ fun JsonWrapper?.tilJson(): Map<String, Any>? {
 enum class StegUtfall {
     BESLUTTE_VEDTAK_GODKJENT,
     BESLUTTE_VEDTAK_UNDERKJENT,
-    HENLAGT
+    HENLAGT,
+    SATT_PÅ_VENT,
+    TATT_AV_VENT,
+    ANGRE_SEND_TIL_BESLUTTER
 }

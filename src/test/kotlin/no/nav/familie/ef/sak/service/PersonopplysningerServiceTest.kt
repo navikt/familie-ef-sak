@@ -47,10 +47,10 @@ internal class PersonopplysningerServiceTest {
         adresseMapper = AdresseMapper(kodeverkService)
         arbeidsfordelingService = mockk(relaxed = true)
         søknadService = mockk()
-        val pdlClient = PdlClientConfig().pdlClient()
+        val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
 
         val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-            pdlClient,
+            personService,
             personopplysningerIntegrasjonerClient,
             tidligereVedaksperioderService
         )
@@ -69,7 +69,6 @@ internal class PersonopplysningerServiceTest {
                 InnflyttingUtflyttingMapper(kodeverkService),
                 arbeidsfordelingService
             )
-        val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
         personopplysningerService = PersonopplysningerService(
             personService,
             behandlingService,

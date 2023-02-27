@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.iverksett.oppgaveforbarn
 
 import no.nav.familie.ef.sak.oppgave.OppgaveRepository
 import no.nav.familie.ef.sak.opplysninger.mapper.finnBesteMatchPåFødselsnummerForTermindato
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -19,7 +19,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
     private val gjeldendeBarnRepository: GjeldendeBarnRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val taskService: TaskService,
-    private val pdlClient: PdlClient
+    private val personService: PersonService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -59,7 +59,7 @@ class BarnFyllerÅrOppfølgingsoppgaveService(
 
     private fun finnFødselsnummerTilTerminbarn(barnMedTermindato: List<BarnTilUtplukkForOppgave>): List<BarnTilUtplukkForOppgave> {
         val pdlPersonMedForelderBarnRelasjon =
-            pdlClient.hentPersonForelderBarnRelasjon(barnMedTermindato.map { it.fødselsnummerSøker })
+            personService.hentPersonForelderBarnRelasjon(barnMedTermindato.map { it.fødselsnummerSøker })
 
         return barnMedTermindato.map { barn ->
             val termindato = barn.termindatoBarn!!

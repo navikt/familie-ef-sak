@@ -7,9 +7,12 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.opplysninger.mapper.adresseMapper
+import no.nav.familie.ef.sak.opplysninger.mapper.barnMedSamværMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Grunnlagsdata
@@ -25,13 +28,14 @@ import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
 internal class VilkårGrunnlagServiceTest {
 
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
-    private val pdlClient = PdlClientConfig().pdlClient()
+    private val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val søknadService = mockk<SøknadService>()
     private val featureToggleService = mockk<FeatureToggleService>()
@@ -40,7 +44,7 @@ internal class VilkårGrunnlagServiceTest {
     private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
 
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-        pdlClient,
+        personService,
         personopplysningerIntegrasjonerClient,
         tidligereVedaksperioderService
     )
@@ -54,7 +58,13 @@ internal class VilkårGrunnlagServiceTest {
         mockk()
     )
 
-    private val service = VilkårGrunnlagService(medlemskapMapper, grunnlagsdataService, fagsakService)
+    private val service = VilkårGrunnlagService(
+        medlemskapMapper = medlemskapMapper,
+        grunnlagsdataService = grunnlagsdataService,
+        fagsakService = fagsakService,
+        barnMedsamværMapper = barnMedSamværMapper(),
+        adresseMapper = adresseMapper()
+    )
     private val behandling = behandling(fagsak())
     private val behandlingId = behandling.id
 
@@ -108,14 +118,14 @@ internal class VilkårGrunnlagServiceTest {
 
     @Test
     internal fun `mapping går ok`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
         service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
     }
 
     @Test
     internal fun `sortering av barnMedSamvær`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
 
         val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
@@ -127,7 +137,7 @@ internal class VilkårGrunnlagServiceTest {
 
     @Test
     internal fun `skal ikke ha barnepass for overgangsstønad`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
 
         val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
@@ -139,7 +149,7 @@ internal class VilkårGrunnlagServiceTest {
 
     @Test
     internal fun `skal ha barnepass for barnetilsyn`() {
-        val data = grunnlagsdataService.hentGrunnlagsdataFraRegister("1", emptyList())
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
         every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
         every { fagsakService.hentFagsakForBehandling(behandlingId) } returns fagsak.copy(stønadstype = StønadType.BARNETILSYN)
 
@@ -160,5 +170,17 @@ internal class VilkårGrunnlagServiceTest {
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.fra).isEqualTo(LocalDate.of(2021, 1, 1))
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.til).isEqualTo(LocalDate.of(2021, 6, 30))
         assertThat(grunnlag.barnMedSamvær[1].barnepass?.barnepassordninger?.first()?.type).isEqualTo("barnehageOgLiknende")
+    }
+
+    @Test
+    internal fun `skal mappe registergrunnlag`() {
+        val data = grunnlagsdataService.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
+        every { grunnlagsdataRepository.findByIdOrNull(behandlingId) } returns Grunnlagsdata(behandlingId, data)
+
+        val grunnlag = service.hentGrunnlag(behandlingId, søknadOvergangsstønad, søknadOvergangsstønad.fødselsnummer, barn)
+        assertThat(grunnlag.personalia.personIdent).isEqualTo(søknadOvergangsstønad.fødselsnummer)
+        assertThat(grunnlag.personalia.navn.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
+        assertThat(grunnlag.personalia.bostedsadresse!!.visningsadresse)
+            .isEqualTo("c/o CONAVN, Charlies vei 13 b, 0575 Oslo")
     }
 }

@@ -22,28 +22,37 @@ object SikkerhetContext {
     }
 
     fun kallKommerFraFamilieEfMottak(): Boolean {
+        return kallKommerFra("teamfamilie:familie-ef-mottak")
+    }
+
+    fun kallKommerFraKlage(): Boolean {
+        return kallKommerFra("teamfamilie:familie-klage")
+    }
+
+    private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
         val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
         val applikasjonsnavn = claims.get("azp_name")?.toString() ?: "" // e.g. dev-gcp:some-team:application-name
         secureLogger.info("Applikasjonsnavn: $applikasjonsnavn")
-        return applikasjonsnavn.endsWith("teamfamilie:familie-ef-mottak")
+        return applikasjonsnavn.endsWith(forventetApplikasjonsSuffix)
     }
 
-    /**
-     * @param strict hvis true - skal kaste feil hvis token ikke inneholder NAVident
-     */
-    fun hentSaksbehandler(strict: Boolean = false): String {
-        val result = Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+    fun hentSaksbehandler(): String {
+        val result = hentSaksbehandlerEllerSystembruker()
+
+        if (result == SYSTEM_FORKORTELSE) {
+            error("Finner ikke NAVident i token")
+        }
+        return result
+    }
+
+    fun hentSaksbehandlerEllerSystembruker() =
+        Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = {
                     it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
                 },
                 onFailure = { SYSTEM_FORKORTELSE }
             )
-        if (strict && result == SYSTEM_FORKORTELSE) {
-            error("Finner ikke NAVident i token")
-        }
-        return result
-    }
 
     fun hentSaksbehandlerNavn(strict: Boolean = false): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
@@ -71,7 +80,7 @@ object SikkerhetContext {
     fun harTilgangTilGittRolle(rolleConfig: RolleConfig, minimumsrolle: BehandlerRolle): Boolean {
         val rollerFraToken = hentGrupperFraToken()
         val rollerForBruker = when {
-            hentSaksbehandler() == SYSTEM_FORKORTELSE -> listOf(
+            hentSaksbehandlerEllerSystembruker() == SYSTEM_FORKORTELSE -> listOf(
                 BehandlerRolle.SYSTEM,
                 BehandlerRolle.BESLUTTER,
                 BehandlerRolle.SAKSBEHANDLER,

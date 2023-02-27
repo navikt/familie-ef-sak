@@ -12,10 +12,12 @@ import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
@@ -77,18 +79,26 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     Barnetilsynperiode(
                         periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
-                        barn = utgiftsperiode.barn
+                        barn = utgiftsperiode.barn,
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 ),
                 begrunnelse = ""
             ),
             kontantstøtte = KontantstøtteWrapper(emptyList()),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            saksbehandlerIdent = "julenissen",
+            opprettetAv = "julenissen"
+
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
+            .isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(vedtakRespons.body?.data).isNotNull
         Assertions.assertThat(vedtakRespons.body?.data?.resultatType).isEqualTo(ResultatType.INNVILGE)
@@ -118,7 +128,9 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     Barnetilsynperiode(
                         periode = utgiftsperiode.periode,
                         utgifter = utgiftsperiode.utgifter,
-                        barn = utgiftsperiode.barn
+                        barn = utgiftsperiode.barn,
+                        periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID
                     )
                 ),
                 begrunnelse = ""
@@ -132,12 +144,16 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                     )
                 )
             ),
-            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+            tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+            saksbehandlerIdent = "julenissen",
+            opprettetAv = "julenissen"
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
 
-        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
+        Assertions.assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+            .usingRecursiveComparison().ignoringFields("opprettetTid")
+            .isEqualTo(vedtak)
         Assertions.assertThat(vedtakRespons.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(vedtakRespons.body?.data).isNotNull
         Assertions.assertThat(vedtakRespons.body?.data?.resultatType).isEqualTo(ResultatType.INNVILGE_UTEN_UTBETALING)
@@ -204,7 +220,9 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
             barn = listOf(barn.id),
             utgifter = 2500,
-            erMidlertidigOpphør = false
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+            sanksjonsårsak = null
         )
         return utgiftsperiode
     }

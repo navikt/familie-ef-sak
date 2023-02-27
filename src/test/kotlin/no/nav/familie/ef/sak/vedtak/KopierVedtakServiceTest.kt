@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.vedtak.KopierVedtakService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -67,7 +68,7 @@ internal class KopierVedtakServiceTest {
         fødselTermindato = LocalDate.now()
     )
 
-    val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.ikkeVedtatteSatserForBarnetilsyn.maxOf { it.periode.fom })
+    val forventetFomYearMonth = YearMonth.from(BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom })
     val førsteAndelFraOgMedDato = forventetFomYearMonth.minusMonths(2)
     val førsteAndelTilOgMedDato = forventetFomYearMonth.plusMonths(6)
     val andreAndelFraOgMed = førsteAndelTilOgMedDato.plusMonths(1)
@@ -82,12 +83,15 @@ internal class KopierVedtakServiceTest {
         every { barnRepository.findAllById(listOf(historiskBehandlingsbarn.id)) } returns listOf(historiskBehandlingsbarn)
         every { vedtakService.lagreVedtak(any(), revurdering.id, StønadType.BARNETILSYN) } returns revurdering.id
         every { vedtakService.hentVedtak(forrigeBehandling.id) } returns vedtak(forrigeBehandling.id, ResultatType.INNVILGE).copy(tilleggsstønad = TilleggsstønadWrapper(false, listOf(), "Testbegrunnelse tilleggsstønad"))
-        every { vedtakService.hentVedtak(not(forrigeBehandling.id)) } returns vedtak(UUID.randomUUID(), ResultatType.INNVILGE).copy(
-            barnetilsyn = BarnetilsynWrapper(
-                listOf(Barnetilsynperiode(periode = Månedsperiode(YearMonth.now()), erMidlertidigOpphør = false, utgifter = 1000, barn = listOf())),
-                "begrunnelse"
-            )
+        val barnetilsynperiode = Barnetilsynperiode(
+            periode = Månedsperiode(YearMonth.now()),
+            utgifter = 1000,
+            barn = listOf(),
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR
         )
+        every { vedtakService.hentVedtak(not(forrigeBehandling.id)) } returns
+            vedtak(UUID.randomUUID(), ResultatType.INNVILGE)
+                .copy(barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode), "begrunnelse"))
     }
 
     @Test
@@ -169,7 +173,7 @@ internal class KopierVedtakServiceTest {
         assertThat(vedtakDto.perioder).hasSize(3)
         assertThat(vedtakDto.perioder[1].utgifter).isEqualTo(0)
         assertThat(vedtakDto.perioder[1].barn).hasSize(0)
-        assertThat(vedtakDto.perioder[1].erMidlertidigOpphør).isEqualTo(true)
+        assertThat(vedtakDto.perioder[1].periodetype).isEqualTo(PeriodetypeBarnetilsyn.OPPHØR)
         assertThat(vedtakDto.perioder.erSammenhengende()).isTrue
     }
 }

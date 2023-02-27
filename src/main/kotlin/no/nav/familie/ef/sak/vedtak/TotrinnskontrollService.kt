@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.Behandlingshistorikk
+import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.ANGRE_SEND_TIL_BESLUTTER
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_GODKJENT
 import no.nav.familie.ef.sak.behandlingshistorikk.domain.StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT
 import no.nav.familie.ef.sak.beregning.ValiderOmregningService
@@ -79,6 +80,13 @@ class TotrinnskontrollService(
         return sisteBehandlingshistorikk.opprettetAv
     }
 
+    fun hentSaksbehandlerSomSendteTilBeslutter(behandlingId: UUID): String {
+        val sisteBehandlingshistorikk =
+            behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.SEND_TIL_BESLUTTER)
+
+        return sisteBehandlingshistorikk?.opprettetAv ?: throw Feil("Fant ikke saksbehandler som sendte til beslutter")
+    }
+
     fun hentBeslutter(behandlingId: UUID): String? {
         return behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId, StegType.BESLUTTE_VEDTAK)
             ?.opprettetAv
@@ -102,6 +110,7 @@ class TotrinnskontrollService(
     private fun behandlingErGodkjentEllerOpprettet(behandlingStatus: BehandlingStatus) =
         behandlingStatus == BehandlingStatus.FERDIGSTILT ||
             behandlingStatus == BehandlingStatus.IVERKSETTER_VEDTAK ||
+            behandlingStatus == BehandlingStatus.SATT_PÅ_VENT ||
             behandlingStatus == BehandlingStatus.OPPRETTET
 
     /**
@@ -147,10 +156,12 @@ class TotrinnskontrollService(
                         besluttetVedtakHendelse.opprettetAvNavn,
                         besluttetVedtakHendelse.endretTid,
                         beslutt.godkjent,
-                        beslutt.begrunnelse
+                        beslutt.begrunnelse,
+                        beslutt.årsakerUnderkjent
                     )
                 )
             }
+            ANGRE_SEND_TIL_BESLUTTER -> TotrinnskontrollStatusDto(UAKTUELT)
             else -> error(
                 "Skal ikke kunne være annen status enn UNDERKJENT når " +
                     "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}"
@@ -159,5 +170,5 @@ class TotrinnskontrollService(
     }
 
     private fun beslutterErLikBehandler(beslutteVedtakHendelse: Behandlingshistorikk) =
-        SikkerhetContext.hentSaksbehandler() == beslutteVedtakHendelse.opprettetAv
+        SikkerhetContext.hentSaksbehandlerEllerSystembruker() == beslutteVedtakHendelse.opprettetAv
 }

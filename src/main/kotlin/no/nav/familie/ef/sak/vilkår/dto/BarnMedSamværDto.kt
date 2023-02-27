@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
 import no.nav.familie.ef.sak.vilkår.regler.BarnForelderLangAvstandTilSøker
 import java.time.LocalDate
 import java.util.UUID
@@ -43,6 +44,8 @@ data class BarnMedSamværRegistergrunnlagDto(
     val navn: String?,
     val fødselsnummer: String?,
     val harSammeAdresse: Boolean?,
+    val deltBosted: DeltBostedDto?,
+    val harDeltBostedVedGrunnlagsdataopprettelse: Boolean,
     val forelder: AnnenForelderDto?,
     val dødsdato: LocalDate? = null,
     val fødselsdato: LocalDate?
@@ -54,6 +57,7 @@ data class AnnenForelderDto(
     val fødselsdato: LocalDate?,
     val bosattINorge: Boolean?,
     val land: String?,
+    val visningsadresse: String?,
     val dødsfall: LocalDate? = null,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto? = null,
     val avstandTilSøker: AvstandTilSøkerDto

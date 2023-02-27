@@ -92,37 +92,67 @@ internal class VedtakTest {
     inner class Barnetilsyn {
 
         @Test
+        internal fun `ordinær periode kan ikke inneholde sanksjonsårsak`() {
+            assertThatThrownBy {
+                Barnetilsynperiode(
+                    periode,
+                    1,
+                    emptyList(),
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                    PeriodetypeBarnetilsyn.OPPHØR
+                )
+            }.hasMessageContaining("Ugyldig kombinasjon av sanksjon periodeType=OPPHØR sanksjonsårsak=SAGT_OPP_STILLING")
+        }
+
+        @Test
+        internal fun `opphørsperiode kan ikke inneholde sanksjonsårsak`() {
+            assertThatThrownBy {
+                Barnetilsynperiode(
+                    periode,
+                    1,
+                    emptyList(),
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                    PeriodetypeBarnetilsyn.OPPHØR
+                )
+            }.hasMessageContaining("Ugyldig kombinasjon av sanksjon periodeType=OPPHØR sanksjonsårsak=SAGT_OPP_STILLING")
+        }
+
+        @Test
         internal fun `gyldig sanksjon`() {
             val periode = Barnetilsynperiode(
                 periode,
                 1,
                 emptyList(),
-                true,
-                Sanksjonsårsak.SAGT_OPP_STILLING
+                Sanksjonsårsak.SAGT_OPP_STILLING,
+                PeriodetypeBarnetilsyn.SANKSJON_1_MND
             )
             assertThat(periode).isNotNull
         }
 
         @Test
-        internal fun `skal sette erMidlertidigOpphør til true hvis sanksjon`() {
+        internal fun `sanksjon kan ikke ha periode over 1 måned`() {
+            assertThatThrownBy {
+                Barnetilsynperiode(
+                    Månedsperiode(januar, januarNesteÅr),
+                    1,
+                    emptyList(),
+                    Sanksjonsårsak.SAGT_OPP_STILLING,
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
+                )
+            }.hasMessageContaining("Sanksjon må være en måned, fra=2022-01-01 til=2023-01-31")
+        }
+
+        @Test
+        internal fun `sanksjon må sette sanksjonsårsak`() {
             assertThatThrownBy {
                 Barnetilsynperiode(
                     periode,
                     1,
                     emptyList(),
                     null,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
+                    PeriodetypeBarnetilsyn.SANKSJON_1_MND
                 )
-            }.hasMessageContaining("MidlerTidigOpphør må settes hvis sanksjon")
-            assertThatThrownBy {
-                Barnetilsynperiode(
-                    periode,
-                    1,
-                    emptyList(),
-                    false,
-                    Sanksjonsårsak.SAGT_OPP_STILLING
-                )
-            }.hasMessageContaining("MidlerTidigOpphør må settes hvis sanksjon")
+            }.hasMessageContaining("Ugyldig kombinasjon av sanksjon periodeType=SANKSJON_1_MND sanksjonsårsak=null")
         }
     }
 }

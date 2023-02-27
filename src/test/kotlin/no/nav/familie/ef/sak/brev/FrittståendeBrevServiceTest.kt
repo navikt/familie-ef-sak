@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.brev.dto.SignaturDto
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.tilIverksettDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.api.assertThrows
 import no.nav.familie.kontrakter.ef.felles.FrittståendeBrevDto as KontrakterFrittståendeBrevDto
 
 internal class FrittståendeBrevServiceTest {
@@ -158,22 +160,26 @@ internal class FrittståendeBrevServiceTest {
         private val person = BrevmottakerPerson("ident", "navn", MottakerRolle.BRUKER)
 
         @Test
-        internal fun `skal sette mottakere til null hvis mottakere i dto er null`() {
-            frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(mottakere = null))
-            assertThat(frittståendeBrevSlot.captured.mottakere).isNull()
+        internal fun `skal kaste feil dersom mottakere i dto er null`() {
+            val feil = assertThrows<ApiFeil> {
+                frittståendeBrevService.sendFrittståendeBrev(frittståendeBrevDto.copy(mottakere = null))
+            }
+            assertThat(feil.message).contains("Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til")
         }
 
         @Test
-        internal fun `skal sette mottakere til null hvis mottakere i dto inneholder tom liste då iverksett kaster feil hvis listen er tom`() {
-            frittståendeBrevService.sendFrittståendeBrev(
-                frittståendeBrevDto.copy(
-                    mottakere = BrevmottakereDto(
-                        emptyList(),
-                        emptyList()
+        internal fun `skal kaste feil dersom både personer og organisasjoner i mottakere i dto er tomme lister`() {
+            val feil = assertThrows<ApiFeil> {
+                frittståendeBrevService.sendFrittståendeBrev(
+                    frittståendeBrevDto.copy(
+                        mottakere = BrevmottakereDto(
+                            emptyList(),
+                            emptyList()
+                        )
                     )
                 )
-            )
-            assertThat(frittståendeBrevSlot.captured.mottakere).isNull()
+            }
+            assertThat(feil.message).contains("Kan ikke sende frittstående brev uten at minst en brevmottaker er lagt til")
         }
 
         @Test

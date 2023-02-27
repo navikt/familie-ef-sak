@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.vedtak.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import no.nav.familie.kontrakter.felles.erSammenhengende
@@ -46,8 +48,13 @@ data class UtgiftsperiodeDto(
     ),
     val barn: List<UUID>,
     val utgifter: Int,
-    val erMidlertidigOpphør: Boolean
-)
+    val sanksjonsårsak: Sanksjonsårsak?,
+    val periodetype: PeriodetypeBarnetilsyn,
+    val aktivitetstype: AktivitetstypeBarnetilsyn?
+) {
+
+    val erMidlertidigOpphørEllerSanksjon get() = periodetype.midlertidigOpphørEllerSanksjon()
+}
 
 fun List<UtgiftsperiodeDto>.tilPerioder(): List<Månedsperiode> = this.map(UtgiftsperiodeDto::periode)
 
@@ -58,7 +65,9 @@ fun UtgiftsperiodeDto.tilDomene(): Barnetilsynperiode =
         periode = this.periode,
         utgifter = this.utgifter,
         barn = this.barn,
-        erMidlertidigOpphør = this.erMidlertidigOpphør
+        sanksjonsårsak = this.sanksjonsårsak,
+        periodetype = this.periodetype,
+        aktivitet = this.aktivitetstype
     )
 
 fun PeriodeMedBeløpDto.tilDomene(): PeriodeMedBeløp =
@@ -80,7 +89,9 @@ fun Vedtak.mapInnvilgelseBarnetilsyn(resultatType: ResultatType = ResultatType.I
                 periode = it.periode,
                 utgifter = it.utgifter,
                 barn = it.barn,
-                erMidlertidigOpphør = it.erMidlertidigOpphør ?: false
+                sanksjonsårsak = it.sanksjonsårsak,
+                periodetype = it.periodetype,
+                aktivitetstype = it.aktivitetstype
             )
         },
         perioderKontantstøtte = this.kontantstøtte.perioder.map { it.tilDto() },

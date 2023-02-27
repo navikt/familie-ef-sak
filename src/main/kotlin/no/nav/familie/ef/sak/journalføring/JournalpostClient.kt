@@ -4,9 +4,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.http.AbstractPingableRestWebClient
 import no.nav.familie.ef.sak.journalføring.dto.DokumentVariantformat
+import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ef.søknad.SøknadBarnetilsyn
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønad
@@ -26,18 +25,15 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class JournalpostClient(
     @Qualifier("azure") restOperations: RestOperations,
-    @Qualifier("azureWebClient") webClient: WebClient,
-    integrasjonerConfig: IntegrasjonerConfig,
-    featureToggleService: FeatureToggleService
+    integrasjonerConfig: IntegrasjonerConfig
 ) :
-    AbstractPingableRestWebClient(restOperations, webClient, "journalpost", featureToggleService) {
+    AbstractPingableRestClient(restOperations, "journalpost") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
@@ -114,7 +110,7 @@ class JournalpostClient(
 
     fun arkiverDokument(arkiverDokumentRequest: ArkiverDokumentRequest, saksbehandler: String?): ArkiverDokumentResponse {
         return postForEntity<Ressurs<ArkiverDokumentResponse>>(
-            URI.create("$dokarkivUri/v4/"),
+            URI.create("$dokarkivUri/v4"),
             arkiverDokumentRequest,
             headerMedSaksbehandler(saksbehandler)
         ).data

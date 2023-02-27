@@ -24,12 +24,12 @@ class KlageController(
     private val klageService: KlageService
 ) {
 
-    @PostMapping("/{behandlingId}")
-    fun opprettKlage(@PathVariable behandlingId: UUID, @RequestBody opprettKlageDto: OpprettKlageDto): Ressurs<UUID> {
-        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
+    @PostMapping("/fagsak/{fagsakId}")
+    fun opprettKlage(@PathVariable fagsakId: UUID, @RequestBody opprettKlageDto: OpprettKlageDto): Ressurs<UUID> {
+        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
-        klageService.opprettKlage(behandlingId, opprettKlageDto)
-        return Ressurs.success(behandlingId)
+        klageService.opprettKlage(fagsakId, opprettKlageDto)
+        return Ressurs.success(fagsakId)
     }
 
     @GetMapping("/fagsak-person/{fagsakPersonId}")

@@ -19,7 +19,11 @@ class VedtakServiceTest {
 
     private val vedtakRepository = mockk<VedtakRepository>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val vedtakService = VedtakService(vedtakRepository, tilkjentYtelseRepository)
+
+    private val vedtakService = VedtakService(
+        vedtakRepository,
+        tilkjentYtelseRepository
+    )
     private val behandlingId = UUID.randomUUID()
     private val inntektsperiodeUtenInntekt = inntektsperiode(
         startDato = LocalDate.of(2021, 1, 1),

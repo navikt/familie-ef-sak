@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.behandling
 
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunkt
+import no.nav.familie.ef.sak.behandling.BehandlingUtil.sortertEtterVedtakstidspunktEllerEndretTid
 import no.nav.familie.ef.sak.behandling.OpprettBehandlingUtil.validerKanOppretteNyBehandling
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
@@ -78,6 +80,8 @@ class BehandlingService(
 
     fun hentBehandlingerForGjenbrukAvVilkår(fagsakPersonId: UUID): List<Behandling> {
         return behandlingRepository.finnBehandlingerForGjenbrukAvVilkår(fagsakPersonId)
+            .sortertEtterVedtakstidspunktEllerEndretTid()
+            .reversed()
     }
 
     @Transactional
@@ -100,6 +104,9 @@ class BehandlingService(
         kravMottatt: LocalDate? = null,
         erMigrering: Boolean = false
     ): Behandling {
+        brukerfeilHvis(kravMottatt != null && kravMottatt.isAfter(LocalDate.now())) {
+            "Kan ikke sette krav mottattdato frem i tid"
+        }
         feilHvis(erMigrering && !featureToggleService.isEnabled(Toggle.MIGRERING)) {
             "Feature toggle for migrering er disabled"
         }
@@ -159,16 +166,28 @@ class BehandlingService(
     fun oppdaterStatusPåBehandling(behandlingId: UUID, status: BehandlingStatus): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandler()} endrer status på behandling $behandlingId " +
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer status på behandling $behandlingId " +
                 "fra ${behandling.status} til $status"
         )
         return behandlingRepository.update(behandling.copy(status = status))
     }
 
+    fun oppdaterForrigeBehandlingId(behandlingId: UUID, forrigeBehandlingId: UUID): Behandling {
+        val behandling = hentBehandling(behandlingId)
+        feilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
+            "Kan ikke endre forrigeBehandlingId når behandlingen er låst"
+        }
+        secureLogger.info(
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer forrigeBehandlingId på behandling $behandlingId " +
+                "fra ${behandling.forrigeBehandlingId} til $forrigeBehandlingId"
+        )
+        return behandlingRepository.update(behandling.copy(forrigeBehandlingId = forrigeBehandlingId))
+    }
+
     fun oppdaterStegPåBehandling(behandlingId: UUID, steg: StegType): Behandling {
         val behandling = hentBehandling(behandlingId)
         secureLogger.info(
-            "${SikkerhetContext.hentSaksbehandler()} endrer steg på behandling $behandlingId " +
+            "${SikkerhetContext.hentSaksbehandlerEllerSystembruker()} endrer steg på behandling $behandlingId " +
                 "fra ${behandling.steg} til $steg"
         )
         return behandlingRepository.update(behandling.copy(steg = steg))
@@ -182,7 +201,7 @@ class BehandlingService(
         behandlingRepository.existsByFagsakId(fagsakId)
 
     fun hentBehandlinger(fagsakId: UUID): List<Behandling> {
-        return behandlingRepository.findByFagsakId(fagsakId).sortedBy { it.sporbar.opprettetTid }
+        return behandlingRepository.findByFagsakId(fagsakId).sortertEtterVedtakstidspunkt()
     }
 
     fun leggTilBehandlingsjournalpost(journalpostId: String, journalposttype: Journalposttype, behandlingId: UUID) {
@@ -222,7 +241,7 @@ class BehandlingService(
             BehandlingsstatistikkTask.opprettHenlagtTask(
                 behandlingId = behandling.id,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
             )
         )
     }
@@ -253,26 +272,5 @@ class BehandlingService(
                 vedtakstidspunkt = SporbarUtils.now()
             )
         )
-    }
-
-    @Transactional
-    fun settPåVent(behandlingId: UUID) {
-        val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status.behandlingErLåstForVidereRedigering()) {
-            "Kan ikke sette behandling med status ${behandling.status} på vent"
-        }
-
-        behandlingRepository.update(behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT))
-        taskService.save(BehandlingsstatistikkTask.opprettVenterTask(behandlingId))
-    }
-
-    @Transactional
-    fun taAvVent(behandlingId: UUID) {
-        val behandling = hentBehandling(behandlingId)
-        brukerfeilHvis(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
-            "Kan ikke ta behandling med status ${behandling.status} av vent"
-        }
-        behandlingRepository.update(behandling.copy(status = BehandlingStatus.UTREDES))
-        taskService.save(BehandlingsstatistikkTask.opprettPåbegyntTask(behandlingId))
     }
 }

@@ -84,11 +84,15 @@ class BeregningControllerTest : OppslagSpringRunnerTest() {
             behandlingId = behandling.id,
             avslåBegrunnelse = "avslår vedtaket",
             avslåÅrsak = AvslagÅrsak.VILKÅR_IKKE_OPPFYLT,
-            resultatType = ResultatType.AVSLÅ
+            resultatType = ResultatType.AVSLÅ,
+            saksbehandlerIdent = "julenissen",
+            opprettetAv = "julenissen"
         )
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
 
-        assertThat(vedtakService.hentVedtak(respons.body?.data!!)).isEqualTo(vedtak)
+        assertThat(vedtakService.hentVedtak(respons.body?.data!!))
+            .usingRecursiveComparison().ignoringFields("opprettetTid")
+            .isEqualTo(vedtak)
     }
 
     @Test

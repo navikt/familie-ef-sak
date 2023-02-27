@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.Søker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fødsel
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.InnflyttingTilNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
@@ -34,7 +35,6 @@ fun opprettGrunnlagsdata(
         oppholdsadresse = emptyList(),
         sivilstand = emptyList(),
         statsborgerskap = emptyList(),
-        telefonnummer = emptyList(),
         tilrettelagtKommunikasjon = emptyList(),
         innflyttingTilNorge = innflyttingTilNorge,
         utflyttingFraNorge = utflyttingFraNorge,
@@ -55,12 +55,14 @@ fun opprettGrunnlagsdata(
 
 fun opprettBarnMedIdent(
     personIdent: String,
-    fødsel: Fødsel? = null
+    bostedsadresse: List<Bostedsadresse> = emptyList(),
+    fødsel: Fødsel? = null,
+    deltBosted: List<DeltBosted> = emptyList()
 ) =
     BarnMedIdent(
         adressebeskyttelse = emptyList(),
-        bostedsadresse = emptyList(),
-        deltBosted = emptyList(),
+        bostedsadresse = bostedsadresse,
+        deltBosted = deltBosted,
         dødsfall = emptyList(),
         forelderBarnRelasjon = emptyList(),
         fødsel = listOfNotNull(fødsel),

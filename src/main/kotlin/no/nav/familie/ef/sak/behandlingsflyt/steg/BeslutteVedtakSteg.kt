@@ -11,6 +11,8 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.brev.VedtaksbrevService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
@@ -38,6 +40,9 @@ class BeslutteVedtakSteg(
 ) : BehandlingSteg<BeslutteVedtakDto> {
 
     override fun validerSteg(saksbehandling: Saksbehandling) {
+        brukerfeilHvis(saksbehandling.steg.kommerEtter(stegType())) {
+            "Behandlingen er allerede besluttet. Status på behandling er '${saksbehandling.status.visningsnavn()}'"
+        }
         if (saksbehandling.steg != stegType()) {
             throw Feil("Behandling er i feil steg=${saksbehandling.steg}")
         }
@@ -49,11 +54,12 @@ class BeslutteVedtakSteg(
         val vedtakErUtenBeslutter = vedtak.utledVedtakErUtenBeslutter()
         val saksbehandler =
             totrinnskontrollService.lagreTotrinnskontrollOgReturnerBehandler(saksbehandling, data, vedtakErUtenBeslutter)
-        val beslutter = SikkerhetContext.hentSaksbehandler(strict = true)
+        val beslutter = SikkerhetContext.hentSaksbehandler()
         val oppgaveId = ferdigstillOppgave(saksbehandling)
 
         return if (data.godkjent) {
-            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler(strict = true))
+            validerGodkjentVedtak(data)
+            vedtakService.oppdaterBeslutter(saksbehandling.id, SikkerhetContext.hentSaksbehandler())
             val iverksettDto = iverksettingDtoMapper.tilDto(saksbehandling, beslutter)
             oppdaterResultatPåBehandling(saksbehandling.id)
             opprettPollForStatusOppgave(saksbehandling.id)
@@ -66,8 +72,24 @@ class BeslutteVedtakSteg(
             }
             StegType.VENTE_PÅ_STATUS_FRA_IVERKSETT
         } else {
+            validerUnderkjentVedtak(data)
             opprettBehandleUnderkjentVedtakOppgave(saksbehandling, saksbehandler)
             StegType.SEND_TIL_BESLUTTER
+        }
+    }
+
+    private fun validerGodkjentVedtak(data: BeslutteVedtakDto) {
+        feilHvisIkke(data.årsakerUnderkjent.isEmpty() && data.begrunnelse.isNullOrBlank()) {
+            "Årsaker til underkjennelse eller begrunnelse for underkjennelse kan ikke være valgt."
+        }
+    }
+
+    private fun validerUnderkjentVedtak(data: BeslutteVedtakDto) {
+        brukerfeilHvis(data.begrunnelse.isNullOrBlank()) {
+            "Beggrunnelse er påkrevd ved underkjennelse av vedtak"
+        }
+        brukerfeilHvis(data.årsakerUnderkjent.isEmpty()) {
+            "Minst en årsak for underkjennelse av vedtak må velges."
         }
     }
 

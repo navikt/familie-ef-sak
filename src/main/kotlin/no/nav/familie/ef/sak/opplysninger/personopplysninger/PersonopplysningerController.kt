@@ -7,6 +7,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonOpplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,6 +28,7 @@ import java.util.UUID
 @Validated
 class PersonopplysningerController(
     private val personopplysningerService: PersonopplysningerService,
+    private val endringerIPersonOpplysningerService: EndringerIPersonOpplysningerService,
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
@@ -42,6 +45,12 @@ class PersonopplysningerController(
     fun personopplysninger(@PathVariable behandlingId: UUID): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(personopplysningerService.hentPersonopplysninger(behandlingId))
+    }
+
+    @GetMapping("/behandling/{behandlingId}/endringer")
+    fun hentEndringerPersonopplysninger(@PathVariable behandlingId: UUID): Ressurs<EndringerIPersonopplysningerDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(endringerIPersonOpplysningerService.hentEndringerPersonopplysninger(behandlingId))
     }
 
     @GetMapping("/fagsak/{fagsakId}")

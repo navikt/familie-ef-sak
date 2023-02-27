@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
@@ -55,11 +56,16 @@ internal class VedtakRepositoryTest : OppslagSpringRunnerTest() {
                         samordningsfradrag = BigDecimal(0)
                     )
                 )
-            )
+            ),
+            saksbehandlerIdent = "VL",
+            opprettetAv = "VL",
+            opprettetTid = LocalDateTime.now()
         )
 
         vedtakRepository.insert(vedtak)
 
-        assertThat(vedtakRepository.findById(behandling.id)).get().usingRecursiveComparison().isEqualTo(vedtak)
+        assertThat(vedtakRepository.findById(behandling.id)).get()
+            .usingRecursiveComparison().ignoringFields("opprettetTid")
+            .isEqualTo(vedtak)
     }
 }

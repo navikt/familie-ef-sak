@@ -44,7 +44,7 @@ class JournalføringKlageService(
         journalpost: Journalpost
     ) {
         val behandlingId = journalføringRequest.behandling.behandlingId ?: error("Mangler behandlingId")
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         validerKlagebehandlinger(fagsak, behandlingId)
 
@@ -68,7 +68,7 @@ class JournalføringKlageService(
         journalføringRequest: JournalføringKlageRequest,
         journalpost: Journalpost
     ) {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         val mottattDato = journalføringRequest.behandling.mottattDato
         logger.info(

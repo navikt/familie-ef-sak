@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 data class Sporbar(
-    val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
     val opprettetTid: LocalDateTime = SporbarUtils.now(),
     @LastModifiedBy
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
@@ -15,7 +15,7 @@ data class Sporbar(
 )
 
 data class Endret(
-    val endretAv: String = SikkerhetContext.hentSaksbehandler(),
+    val endretAv: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
     val endretTid: LocalDateTime = SporbarUtils.now()
 )
 

@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.infrastruktur.featuretoggle
 
-import no.finn.unleash.strategy.Strategy
+import io.getunleash.strategy.Strategy
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 
 class ByUserIdStrategy : Strategy {
@@ -12,7 +12,7 @@ class ByUserIdStrategy : Strategy {
     override fun isEnabled(map: MutableMap<String, String>): Boolean {
         return map["user"]
             ?.split(',')
-            ?.any { SikkerhetContext.hentSaksbehandler(strict = true) == it }
+            ?.any { SikkerhetContext.hentSaksbehandler() == it }
             ?: false
     }
 }

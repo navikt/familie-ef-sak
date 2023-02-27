@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.vilkår.dto
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.DokumentasjonFraSøknadDto
 import java.time.LocalDateTime
 
@@ -9,6 +11,7 @@ data class VilkårDto(
 )
 
 data class VilkårGrunnlagDto(
+    val personalia: PersonaliaDto,
     val tidligereVedtaksperioder: TidligereVedtaksperioderDto,
     val medlemskap: MedlemskapDto,
     val sivilstand: SivilstandInngangsvilkårDto,
@@ -17,10 +20,15 @@ data class VilkårGrunnlagDto(
     val sivilstandsplaner: SivilstandsplanerDto,
     val aktivitet: AktivitetDto?,
     val sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto?, // Gjelder OS
-    val lagtTilEtterFerdigstilling: Boolean,
     val registeropplysningerOpprettetTid: LocalDateTime,
     val adresseopplysninger: AdresseopplysningerDto?,
     val dokumentasjon: DokumentasjonFraSøknadDto?
+)
+
+data class PersonaliaDto(
+    val navn: NavnDto,
+    val personIdent: String,
+    val bostedsadresse: AdresseDto?
 )
 
 data class AdresseopplysningerDto(

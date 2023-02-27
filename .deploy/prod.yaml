@@ -36,7 +36,7 @@ spec:
     enabled: true
   gcp:
     sqlInstances:
-      - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+      - type: POSTGRES_14 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         tier: db-custom-1-3840
         diskAutoresize: true
         cascadingDelete: false
@@ -63,6 +63,9 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: prod-gcp
+        - application: tiltakspenger-overgangsstonad
+          namespace: tpts
+          cluster: prod-gcp
     outbound:
       rules:
         - application: familie-tilbake
@@ -71,6 +74,8 @@ spec:
         - application: familie-ef-blankett
         - application: familie-ef-iverksett
         - application: familie-dokument
+        - application: historisk-pensjon
+          namespace: historisk
         - application: familie-ef-proxy
           cluster: prod-fss
         - application: veilarbregistrering
@@ -104,5 +109,4 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
   envFrom:
-    - secret: familie
     - secret: familie-ef-sak

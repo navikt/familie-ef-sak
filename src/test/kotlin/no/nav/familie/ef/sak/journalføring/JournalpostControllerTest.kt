@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringBehandling
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequest
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.ef.sak.DokumentBrevkode
@@ -39,7 +39,7 @@ internal class JournalpostControllerTest {
     private val journalføringService = mockk<JournalføringService>()
     private val journalføringKlageService = mockk<JournalføringKlageService>()
     private val journalpostService = mockk<JournalpostService>()
-    private val pdlClient = mockk<PdlClient>()
+    private val personService = mockk<PersonService>()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
     private val journalpostController =
@@ -47,7 +47,7 @@ internal class JournalpostControllerTest {
             journalføringService,
             journalføringKlageService,
             journalpostService,
-            pdlClient,
+            personService,
             tilgangService,
             featureToggleService
         )
@@ -57,7 +57,7 @@ internal class JournalpostControllerTest {
         every {
             tilgangService.validerTilgangTilPersonMedBarn(any(), any())
         } just Runs
-        every { pdlClient.hentPersonKortBolk(any()) } answers {
+        every { personService.hentPersonKortBolk(any()) } answers {
             firstArg<List<String>>().associateWith { lagPersonKort(it) }
         }
     }
@@ -65,7 +65,7 @@ internal class JournalpostControllerTest {
     @Test
     internal fun `skal hente journalpost med personident utledet fra pdl`() {
         every {
-            pdlClient.hentPersonidenter(aktørId)
+            personService.hentPersonIdenter(aktørId)
         } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
 
         every {
@@ -76,13 +76,13 @@ internal class JournalpostControllerTest {
 
         assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
         assertThat(journalpostResponse.data?.journalpost?.journalpostId).isEqualTo(journalpostId)
-        verify(exactly = 1) { pdlClient.hentPersonKortBolk(any()) }
+        verify(exactly = 1) { personService.hentPersonKortBolk(any()) }
     }
 
     @Test
     internal fun `hentJournalpost skal ikke hente person fra pdl hvis avsender er lik bruker `() {
         every {
-            pdlClient.hentPersonidenter(aktørId)
+            personService.hentPersonIdenter(aktørId)
         } returns PdlIdenter(listOf(PdlIdent(personIdentFraPdl, false)))
         every {
             journalpostService.hentJournalpost(any())
@@ -91,7 +91,7 @@ internal class JournalpostControllerTest {
         val journalpostResponse = journalpostController.hentJournalPost(journalpostId)
 
         assertThat(journalpostResponse.data?.personIdent).isEqualTo(personIdentFraPdl)
-        verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
+        verify(exactly = 0) { personService.hentPersonKortBolk(any()) }
     }
 
     @Test

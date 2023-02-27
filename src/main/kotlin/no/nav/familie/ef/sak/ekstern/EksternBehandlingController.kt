@@ -1,8 +1,17 @@
 package no.nav.familie.ef.sak.ekstern
 
+import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
+import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,10 +20,11 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(
     path = ["/api/ekstern/behandling"],
-    consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
+@ProtectedWithClaims(issuer = "azuread")
 class EksternBehandlingController(
+    private val tilgangService: TilgangService,
     private val eksternBehandlingService: EksternBehandlingService
 ) {
 
@@ -32,5 +42,25 @@ class EksternBehandlingController(
             return Ressurs.failure("Støtter kun identer av typen fnr/dnr")
         }
         return Ressurs.success(eksternBehandlingService.harLøpendeStønad(personidenter))
+    }
+
+    @GetMapping("kan-opprette-revurdering-klage/{eksternFagsakId}")
+    fun kanOppretteRevurdering(@PathVariable eksternFagsakId: Long): Ressurs<KanOppretteRevurderingResponse> {
+        tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
+            "Kallet utføres ikke av en autorisert klient"
+        }
+        return Ressurs.success(eksternBehandlingService.kanOppretteRevurdering(eksternFagsakId))
+    }
+
+    @PostMapping("opprett-revurdering-klage/{eksternFagsakId}")
+    fun opprettRevurderingKlage(@PathVariable eksternFagsakId: Long): Ressurs<OpprettRevurderingResponse> {
+        tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
+        tilgangService.validerHarSaksbehandlerrolle()
+        feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
+            "Kallet utføres ikke av en autorisert klient"
+        }
+        return Ressurs.success(eksternBehandlingService.opprettRevurderingKlage(eksternFagsakId))
     }
 }

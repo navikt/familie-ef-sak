@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.beregning.barnetilsyn.BeregningBarnetilsynUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
@@ -44,7 +45,7 @@ class KopierVedtakService(
     }
 
     fun mapTilBarnetilsynVedtak(fagsakId: UUID, behandlingBarn: List<BehandlingBarn>, forrigeBehandlingId: UUID): VedtakDto {
-        val fraDato = BeregningBarnetilsynUtil.ikkeVedtatteSatserForBarnetilsyn.maxOf { it.periode.fom }
+        val fraDato = BeregningBarnetilsynUtil.satserForBarnetilsyn.maxOf { it.periode.fom }
         val historikk = vedtakHistorikkService.hentAktivHistorikk(fagsakId).fraDato(YearMonth.from(fraDato))
 
         return InnvilgelseBarnetilsyn(
@@ -77,13 +78,18 @@ class KopierVedtakService(
 
     private fun mapUtgiftsperioder(historikk: List<AndelHistorikkDto>, behandlingBarn: List<BehandlingBarn>): List<UtgiftsperiodeDto> {
         val map = historikk.map {
+            feilHvis(it.erSanksjon) {
+                "Støtter ikke sanksjon. Både erMidlertidigOpphør og sanksjonsårsak burde då settes"
+            }
             UtgiftsperiodeDto(
                 årMånedFra = it.andel.periode.fom,
                 årMånedTil = it.andel.periode.tom,
                 periode = it.andel.periode,
                 barn = finnBehandlingBarnIdsGittTidligereAndelBarn(it.andel.barn, behandlingBarn),
                 utgifter = it.andel.utgifter.toInt(),
-                erMidlertidigOpphør = false
+                sanksjonsårsak = null,
+                periodetype = it.periodetypeBarnetilsyn ?: error("Mangler periodetype $it"),
+                aktivitetstype = it.aktivitetBarnetilsyn
             )
         }
         return map.fyllUtPerioderUtenStønad()
@@ -111,7 +117,9 @@ private fun List<UtgiftsperiodeDto>.fyllUtPerioderUtenStønad(): List<Utgiftsper
                     periode = Månedsperiode(fom = denne.periode.tom.plusMonths(1), tom = neste.periode.fom.minusMonths(1)),
                     barn = emptyList(),
                     utgifter = 0,
-                    erMidlertidigOpphør = true
+                    sanksjonsårsak = null,
+                    periodetype = PeriodetypeBarnetilsyn.OPPHØR,
+                    aktivitetstype = null
                 )
             )
         }

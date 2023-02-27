@@ -17,6 +17,8 @@ import no.nav.familie.ef.sak.repository.behandlingBarn
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.vedtak.VedtakService
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -135,7 +137,9 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 4)),
             barn = listOf(barn.id),
             utgifter = 2500,
-            erMidlertidigOpphør = false
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+            sanksjonsårsak = null
         )
 
         val vedtakDto = InnvilgelseBarnetilsyn(
@@ -199,7 +203,9 @@ internal class BeregningBarnetilsynControllerTest : OppslagSpringRunnerTest() {
             periode = Månedsperiode(YearMonth.of(2022, 3), YearMonth.of(2022, 6)),
             barn = barn.map { it.id },
             utgifter = 3000,
-            erMidlertidigOpphør = false
+            periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
+            sanksjonsårsak = null
         )
 
         val vedtakDto = InnvilgelseBarnetilsyn(

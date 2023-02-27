@@ -26,6 +26,7 @@ import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -134,6 +135,27 @@ class StegService(
         behandlingService.oppdaterStegPåBehandling(behandlingId, steg)
     }
 
+    @Transactional
+    fun angreSendTilBeslutter(behandlingId: UUID) {
+        val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
+        val beslutter = vedtakService.hentVedtak(behandlingId).beslutterIdent
+
+        feilHvis(saksbehandling.steg != BESLUTTE_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
+            if (saksbehandling.steg.kommerEtter(BESLUTTE_VEDTAK)) {
+                "Kan ikke angre send til beslutter da vedtaket er godkjent av $beslutter"
+            } else {
+                "Kan ikke angre send til beslutter når behandling er i steg ${saksbehandling.steg}"
+            }
+        }
+
+        feilHvis(saksbehandling.status != BehandlingStatus.FATTER_VEDTAK, httpStatus = HttpStatus.BAD_REQUEST) {
+            "Kan ikke angre send til beslutter når behandlingen har status ${saksbehandling.status}"
+        }
+
+        behandlingService.oppdaterStegPåBehandling(behandlingId, SEND_TIL_BESLUTTER)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId, BehandlingStatus.UTREDES)
+    }
+
     private fun validerAtStegKanResettes(
         behandling: Behandling,
         steg: StegType
@@ -141,7 +163,7 @@ class StegService(
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, behandling.steg.tillattFor)
         val harTilgangTilNesteSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, steg.tillattFor)
         if (!harTilgangTilSteg || !harTilgangTilNesteSteg) {
-            val saksbehandler = SikkerhetContext.hentSaksbehandler()
+            val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             error(
                 "$saksbehandler kan ikke endre" +
                     " fra steg=${behandling.steg.displayName()} til steg=${steg.displayName()}" +
@@ -157,7 +179,7 @@ class StegService(
         data: T
     ): Behandling {
         val stegType = behandlingSteg.stegType()
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         try {
             valider(saksbehandling, stegType, saksbehandlerIdent, behandlingSteg)
             val nesteSteg = behandlingSteg.utførOgReturnerNesteSteg(saksbehandling, data)
@@ -188,11 +210,9 @@ class StegService(
         saksbehandlerIdent: String,
         behandlingSteg: BehandlingSteg<T>
     ) {
-        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
-
-        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
-
         utførBehandlingsvalidering(behandlingSteg, saksbehandling)
+        validerHarTilgang(saksbehandling, stegType, saksbehandlerIdent)
+        validerGyldigTilstand(saksbehandling, stegType, saksbehandlerIdent)
     }
 
     private fun oppdaterMetrikk(stegType: StegType, metrikk: Map<StegType, Counter>) {
@@ -220,10 +240,12 @@ class StegService(
         behandlingSteg: BehandlingSteg<T>,
         saksbehandling: Saksbehandling
     ) {
-        if (!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
-            error("Kan ikke utføre ${behandlingSteg.stegType()} når behandlingstatus er ${saksbehandling.status}")
-        }
         behandlingSteg.validerSteg(saksbehandling)
+        feilHvis(!behandlingSteg.stegType().erGyldigIKombinasjonMedStatus(saksbehandling.status)) {
+            "Kan ikke utføre '${
+            behandlingSteg.stegType().displayName()
+            }' når behandlingstatus er ${saksbehandling.status.visningsnavn()}"
+        }
     }
 
     private fun validerGyldigTilstand(
@@ -253,7 +275,6 @@ class StegService(
         saksbehandlerIdent: String
     ) {
         val rolleForSteg: BehandlerRolle = utledRolleForSteg(stegType, saksbehandling)
-
         val harTilgangTilSteg = SikkerhetContext.harTilgangTilGittRolle(rolleConfig, rolleForSteg)
 
         logger.info("Starter håndtering av $stegType på behandling ${saksbehandling.id}")

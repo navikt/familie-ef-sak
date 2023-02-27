@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.arbeidsfordeling.Arbeidsfordelingsenhet
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.EksternBehandlingId
 import no.nav.familie.ef.sak.brev.BrevsignaturService.Companion.ENHET_NAY
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
@@ -47,8 +46,6 @@ import java.util.UUID
 
 internal class KlageServiceTest {
 
-    private val behandlingService = mockk<BehandlingService>()
-
     private val fagsakService = mockk<FagsakService>()
 
     private val fagsakPersonService = mockk<FagsakPersonService>()
@@ -61,7 +58,6 @@ internal class KlageServiceTest {
 
     private val klageService =
         KlageService(
-            behandlingService,
             fagsakService,
             fagsakPersonService,
             klageClient,
@@ -84,7 +80,6 @@ internal class KlageServiceTest {
     @BeforeEach
     internal fun setUp() {
         opprettKlageSlot.clear()
-        every { behandlingService.hentSaksbehandling(any<UUID>()) } returns saksbehandling
         every { fagsakService.hentFagsak(fagsak.id) } returns fagsak
         every { fagsakService.hentAktivIdent(saksbehandling.fagsakId) } returns personIdent
         every { fagsakPersonService.hentPerson(any()) } returns fagsakPerson
@@ -97,7 +92,7 @@ internal class KlageServiceTest {
 
         @Test
         internal fun `skal mappe riktige verdier ved manuelt opprettet klage`() {
-            klageService.opprettKlage(UUID.randomUUID(), OpprettKlageDto(LocalDate.now()))
+            klageService.opprettKlage(fagsak.id, OpprettKlageDto(LocalDate.now()))
 
             val request = opprettKlageSlot.captured
 
@@ -316,7 +311,7 @@ internal class KlageServiceTest {
             val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now().plusDays(1))
             val feil = assertThrows<ApiFeil> { klageService.opprettKlage(UUID.randomUUID(), opprettKlageDto) }
 
-            assertThat(feil.feil).contains("Kan ikke opprette klage med krav mottatt frem i tid for behandling med id=")
+            assertThat(feil.feil).contains("Kan ikke opprette klage med krav mottatt frem i tid for fagsak=")
         }
 
         @Test
@@ -324,7 +319,7 @@ internal class KlageServiceTest {
             every { arbeidsfordelingService.hentNavEnhet(any()) } returns null
 
             val opprettKlageDto = OpprettKlageDto(mottattDato = LocalDate.now())
-            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(UUID.randomUUID(), opprettKlageDto) }
+            val feil = assertThrows<ApiFeil> { klageService.opprettKlage(fagsak.id, opprettKlageDto) }
 
             assertThat(feil.feil).isEqualTo("Finner ikke behandlende enhet for personen")
         }

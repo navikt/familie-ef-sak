@@ -6,9 +6,6 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
@@ -49,7 +46,7 @@ class VedtakController(
     private val vedtakHistorikkService: VedtakHistorikkService,
     private val behandlingRepository: BehandlingRepository,
     private val nullstillVedtakService: NullstillVedtakService,
-    private val featureToggleService: FeatureToggleService
+    private val angreSendTilBeslutterService: AngreSendTilBeslutterService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -61,13 +58,17 @@ class VedtakController(
         val vedtakErUtenBeslutter = vedtakService.hentVedtak(behandlingId).utledVedtakErUtenBeslutter()
 
         return if (vedtakErUtenBeslutter.value) {
-            feilHvis(!featureToggleService.isEnabled(Toggle.AVSLAG_MINDRE_INNTEKTSENDRINGER)) {
-                "Avslag pga mindre inntektsendringer er skrudd av"
-            }
             Ressurs.success(stegService.håndterFerdigstilleVedtakUtenBeslutter(behandling).id)
         } else {
             Ressurs.success(stegService.håndterSendTilBeslutter(behandling).id)
         }
+    }
+
+    @PostMapping("/{behandlingId}/angre-send-til-beslutter")
+    fun angreSendTilBeslutter(@PathVariable behandlingId: UUID): Ressurs<UUID> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
+        angreSendTilBeslutterService.angreSendTilBeslutter(behandlingId)
+        return Ressurs.success(behandlingId)
     }
 
     @PostMapping("/{behandlingId}/beslutte-vedtak")
@@ -100,9 +101,18 @@ class VedtakController(
     fun hentVedtak(
         @PathVariable fagsakId: UUID,
         @PathVariable fra: YearMonth
-    ): Ressurs<VedtakDto> {
+    ): Ressurs<InnvilgelseOvergangsstønad> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(fagsakId, fra))
+    }
+
+    @GetMapping("{behandlingId}/historikk/{fra}")
+    fun hentVedtakForBehandling(
+        @PathVariable behandlingId: UUID,
+        @PathVariable fra: YearMonth
+    ): Ressurs<VedtakDto> {
+        tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
+        return Ressurs.success(vedtakHistorikkService.hentVedtakFraDato(behandlingId, fra))
     }
 
     @PostMapping("/{behandlingId}/lagre-vedtak")

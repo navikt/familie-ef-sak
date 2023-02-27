@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.behandling.migrering.OpprettOppgaveForMigrertFødtB
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -35,7 +36,8 @@ class NyeBarnService(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val barnService: BarnService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
@@ -100,11 +102,10 @@ class NyeBarnService(
 
     private fun finnKobledeBarn(forrigeBehandlingId: UUID, personIdent: String): NyeBarnData {
         val alleBarnPåBehandlingen = barnService.finnBarnPåBehandling(forrigeBehandlingId)
-        val pdlBarnUnder18år = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
-            .filter { it.fødsel.gjeldende().erUnder18År() }
-        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarnUnder18år)
+        val pdlBarn = GrunnlagsdataMapper.mapBarn(personService.hentPersonMedBarn(personIdent).barn)
+        val kobledeBarn = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(alleBarnPåBehandlingen, pdlBarn)
 
-        return NyeBarnData(pdlBarnUnder18år, kobledeBarn)
+        return NyeBarnData(pdlBarn, kobledeBarn)
     }
 
     private fun finnForTidligtFødteBarn(kobledeBarn: NyeBarnData, stønadstype: StønadType): List<NyttBarn> {
@@ -128,12 +129,12 @@ class NyeBarnService(
     }
 
     private data class NyeBarnData(
-        val pdlBarnUnder18år: List<BarnMedIdent>,
+        val pdlBarn: List<BarnMedIdent>,
         val kobledeBarn: List<MatchetBehandlingBarn>
     )
 
     private fun filtrerNyeBarn(data: NyeBarnData) =
-        data.pdlBarnUnder18år
+        data.pdlBarn
             .filter { pdlBarn -> data.kobledeBarn.none { it.barn?.personIdent == pdlBarn.personIdent } }
             .map { barnMinimumDto(it) }
 

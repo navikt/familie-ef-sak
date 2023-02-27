@@ -19,6 +19,8 @@ import no.nav.familie.ef.sak.repository.fagsakpersoner
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseRepository
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.InnvilgelseBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.TilleggsstønadDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
@@ -118,7 +120,7 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
         val feil: ApiFeil = assertThrows {
             innvilge(saksbehandling, listOf(utgiftsperiode))
         }
-        assertThat(feil.feil).contains("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør, på behandling=")
+        assertThat(feil.feil).contains("Kan ikke ha null utgifter på en periode som ikke er et midlertidig opphør eller sanksjon, på behandling=")
     }
 
     fun settBehandlingTilIverksatt(behandling: Behandling) {
@@ -134,8 +136,24 @@ internal class BeregnYtelseStegBarnetilsynIntegrationTest : OppslagSpringRunnerT
     private fun hentAndeler(behandlingId: UUID): List<AndelTilkjentYtelse> =
         tilkjentytelseRepository.findByBehandlingId(behandlingId)!!.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
-    private fun opprettUtgiftsperiode(fra: YearMonth, til: YearMonth, barnId: List<UUID>, beløp: BigDecimal) =
-        UtgiftsperiodeDto(fra, til, Månedsperiode(fra, til), barnId, beløp.toInt(), false)
+    private fun opprettUtgiftsperiode(
+        fra: YearMonth,
+        til: YearMonth,
+        barnId: List<UUID>,
+        beløp: BigDecimal,
+        periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+        aktivitetstype: AktivitetstypeBarnetilsyn? = AktivitetstypeBarnetilsyn.I_ARBEID
+    ) =
+        UtgiftsperiodeDto(
+            fra,
+            til,
+            Månedsperiode(fra, til),
+            barnId,
+            beløp.toInt(),
+            null,
+            periodetype,
+            aktivitetstype
+        )
 
     private fun innvilge(
         saksbehandling: Saksbehandling,

@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.klage
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -23,7 +22,6 @@ import java.util.UUID
 
 @Service
 class KlageService(
-    private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
     private val klageClient: KlageClient,
@@ -55,14 +53,12 @@ class KlageService(
         )
     }
 
-    fun opprettKlage(behandlingId: UUID, opprettKlageDto: OpprettKlageDto) {
+    fun opprettKlage(fagsakId: UUID, opprettKlageDto: OpprettKlageDto) {
         val klageMottatt = opprettKlageDto.mottattDato
         brukerfeilHvis(klageMottatt.isAfter(LocalDate.now())) {
-            "Kan ikke opprette klage med krav mottatt frem i tid for behandling med id=$behandlingId"
+            "Kan ikke opprette klage med krav mottatt frem i tid for fagsak=$fagsakId"
         }
-        val behandling = behandlingService.hentSaksbehandling(behandlingId)
-        val fagsak = fagsakService.hentFagsak(behandling.fagsakId)
-        opprettKlage(fagsak, klageMottatt)
+        opprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto.mottattDato)
     }
 
     fun opprettKlage(fagsak: Fagsak, klageMottatt: LocalDate) {

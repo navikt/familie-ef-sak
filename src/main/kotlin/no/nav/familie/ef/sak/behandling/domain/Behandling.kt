@@ -46,6 +46,9 @@ data class Behandling(
 
     fun erAvsluttet(): Boolean = status == BehandlingStatus.FERDIGSTILT
 
+    fun vedtakstidspunktEllerFeil(): LocalDateTime =
+        this.vedtakstidspunkt ?: error("Mangler vedtakstidspunkt for behandling=$id")
+
     init {
         if (resultat == BehandlingResultat.HENLAGT) {
             brukerfeilHvis(henlagtÅrsak == null) { "Kan ikke henlegge behandling uten en årsak" }
@@ -78,6 +81,10 @@ enum class BehandlingStatus {
     SATT_PÅ_VENT
     ;
 
+    fun visningsnavn(): String {
+        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
+    }
+
     fun behandlingErLåstForVidereRedigering(): Boolean =
-        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT).contains(this)
+        setOf(FATTER_VEDTAK, IVERKSETTER_VEDTAK, FERDIGSTILT, SATT_PÅ_VENT).contains(this)
 }

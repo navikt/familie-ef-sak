@@ -29,16 +29,16 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <java.version>17</java.version>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.8.10</kotlin.version>
         <kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
-        <springdoc.version>1.6.13</springdoc.version>
-        <mockk.version>1.13.3</mockk.version>
+        <springdoc.version>1.6.14</springdoc.version>
+        <mockk.version>1.13.4</mockk.version>
         <felles.version>1.20221202080911_bcf8f33</felles.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>2.0_20221202084337_d05f555</kontrakter.version>
+        <kontrakter.version>2.0_20230214140648_f5fa479</kontrakter.version>
         <eksterne.kontrakter.bisys.version>2.0_20221118130052_e2abd9f</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.9.0</cucumber.version>
+        <cucumber.version>7.11.0</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -47,7 +47,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <nav.security.version>2.1.8</nav.security.version> <!-- Denne burde være samme versjon som i felles -->
         <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
-        <unleash.version>4.4.1</unleash.version>
+        <unleash.version>7.1.0</unleash.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
@@ -141,11 +141,6 @@
             <version>${felles.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>web-client</artifactId>
-            <version>${felles.version}</version>
-        </dependency>
-        <dependency>
             <groupId>no.nav.familie</groupId>
             <artifactId>prosessering-core</artifactId>
             <version>${prosessering.version}</version>
@@ -212,7 +207,7 @@
         <dependency>
             <groupId>dev.akkinoc.spring.boot</groupId>
             <artifactId>logback-access-spring-boot-starter</artifactId>
-            <version>3.4.2</version>
+            <version>3.4.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -224,12 +219,12 @@
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>
             <artifactId>kotlin-csv-jvm</artifactId>
-            <version>1.6.0</version>
+            <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>no.finn.unleash</groupId>
+            <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash.version}</version>
         </dependency>
@@ -337,7 +332,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.0.0-M8</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

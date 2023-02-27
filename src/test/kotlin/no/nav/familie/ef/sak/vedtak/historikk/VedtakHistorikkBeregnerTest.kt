@@ -29,7 +29,7 @@ internal class VedtakHistorikkBeregnerTest {
     private val førsteVedtak = lagVedtak(perioder = listOf(førstePeriode))
 
     @Test
-    internal fun `opphør har ikke periodeWrapper inne på vedtak`() {
+    internal fun `opphør avkorter tidligere vedtak og lager egen opphørsperiode`() {
         val opphørFom = YearMonth.of(2021, 2)
         val andreVedtak = lagVedtak(perioder = null, opphørFom = opphørFom)
 
@@ -39,7 +39,10 @@ internal class VedtakHistorikkBeregnerTest {
         validerPeriode(
             vedtaksperioderPerBehandling,
             andreVedtak.behandlingId,
-            listOf(førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk())
+            listOf(
+                førstePeriode.copy(datoTil = LocalDate.of(2021, 1, 31)).tilHistorikk(),
+                Opphørsperiode(Månedsperiode(opphørFom))
+            )
         )
     }
 
@@ -138,7 +141,8 @@ internal class VedtakHistorikkBeregnerTest {
                 tilkjentYtelse = tilkjenteytelser.getValue(it.behandlingId)
             )
         }
-        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, false)
+        val konfigurasjon = HistorikkKonfigurasjon(true)
+        return VedtakHistorikkBeregner.lagVedtaksperioderPerBehandling(behandlingHistorikkData, konfigurasjon)
             .map { it.key to it.value.perioder }
             .toMap()
     }
@@ -153,7 +157,6 @@ internal class VedtakHistorikkBeregnerTest {
 
     private fun Vedtaksperiode.tilHistorikk() = VedtakshistorikkperiodeOvergangsstønad(
         Månedsperiode(this.datoFra, this.datoTil),
-        sanksjonsårsak = null,
         this.aktivitet,
         this.periodeType
     )

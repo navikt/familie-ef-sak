@@ -12,7 +12,8 @@ enum class BeregningBarnetilsynDomenebegrep(val nøkkel: String) : Domenenøkkel
     TIL_OG_MED_MND("Til og med måned"),
     BELØP("Beløp"),
     HAR_KONTANTSTØTTE("Har kontantstøtte"),
-    HAR_TILLEGGSSTØNAD("Har tilleggsstønad")
+    HAR_TILLEGGSSTØNAD("Har tilleggsstønad"),
+    PERIODETYPE("Periodetype")
     ;
 
     override fun nøkkel(): String {

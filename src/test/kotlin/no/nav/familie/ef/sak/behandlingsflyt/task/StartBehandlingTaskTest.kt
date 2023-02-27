@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil
 import no.nav.familie.ef.sak.iverksett.IverksettClient
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.repository.behandling
@@ -33,7 +33,7 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
     private lateinit var fagsakService: FagsakService
 
     private val iverksettClient = mockk<IverksettClient>()
-    private val pdlClient = mockk<PdlClient>()
+    private val personService = mockk<PersonService>()
 
     private lateinit var startBehandlingTask: StartBehandlingTask
 
@@ -45,10 +45,10 @@ class StartBehandlingTaskTest : OppslagSpringRunnerTest() {
     fun setup() {
         testoppsettService.lagreFagsak(fagsak)
 
-        every { pdlClient.hentPersonidenter(personIdent, true) } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
+        every { personService.hentPersonIdenter(personIdent) } returns PdlIdenter(listOf(PdlIdent(personIdent, false)))
         justRun { iverksettClient.startBehandling(capture(opprettStartBehandlingHendelseDtoSlot)) }
 
-        startBehandlingTask = StartBehandlingTask(iverksettClient, pdlClient, fagsakService, behandlingRepository)
+        startBehandlingTask = StartBehandlingTask(iverksettClient, personService, fagsakService, behandlingRepository)
     }
 
     @Test

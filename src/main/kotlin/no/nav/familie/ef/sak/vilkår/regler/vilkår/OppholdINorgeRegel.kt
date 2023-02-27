@@ -24,6 +24,7 @@ class OppholdINorgeRegel : Vilkårsregel(
                 svarMapping = mapOf(
                     SvarId.ARBEID_NORSK_ARBEIDSGIVER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.UTENLANDSOPPHOLD_MINDRE_ENN_6_UKER to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                    SvarId.OPPHOLDER_SEG_I_ANNET_EØS_LAND to SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
                     SvarId.NEI to SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
                 )
             )

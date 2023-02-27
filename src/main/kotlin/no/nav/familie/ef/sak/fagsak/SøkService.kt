@@ -136,7 +136,7 @@ class SøkService(
     }
 
     fun søkPersonUtenFagsak(personIdent: String): SøkeresultatUtenFagsak {
-        return personService.hentPdlPersonKort(listOf(personIdent))[personIdent]?.let {
+        return personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
                 personIdent = personIdent,
                 navn = it.navn.gjeldende().visningsnavn()

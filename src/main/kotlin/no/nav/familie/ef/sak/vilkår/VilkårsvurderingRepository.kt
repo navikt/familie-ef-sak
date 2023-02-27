@@ -14,6 +14,10 @@ interface VilkårsvurderingRepository : RepositoryInterface<Vilkårsvurdering, U
     fun findByBehandlingId(behandlingId: UUID): List<Vilkårsvurdering>
 
     @Modifying
+    @Query("DELETE from vilkarsvurdering where behandling_id = :behandlingId")
+    fun deleteByBehandlingId(behandlingId: UUID)
+
+    @Modifying
     @Query("UPDATE vilkarsvurdering SET endret_tid = :nyttTidspunkt WHERE id = :id")
     fun oppdaterEndretTid(id: UUID, nyttTidspunkt: LocalDateTime)
 

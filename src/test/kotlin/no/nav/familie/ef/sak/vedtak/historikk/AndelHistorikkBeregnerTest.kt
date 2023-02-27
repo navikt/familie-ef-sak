@@ -8,8 +8,10 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
 import no.nav.familie.ef.sak.vedtak.domain.VedtaksperiodeType
@@ -30,6 +32,7 @@ import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.TYPE_ENDRING
 import no.nav.familie.ef.sak.vedtak.historikk.AndelHistorikkHeader.values
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.Månedsperiode
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -125,12 +128,13 @@ object AndelHistorikkRunner {
         val behandlingId = tilOgMedBehandlingId?.let { generateBehandlingId(it) }
 
         val output = AndelHistorikkBeregner.lagHistorikk(
+            StønadType.OVERGANGSSTØNAD,
             grupper.input,
             grupper.vedtaksliste,
             behandlinger,
             behandlingId,
             mapOf(),
-            false
+            HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true)
         )
 
         assertThat(toString(output)).isEqualTo(toString(grupper.expectedOutput))
@@ -384,7 +388,10 @@ object AndelHistorikkParser {
             },
             aktivitetArbeid = null,
             erSanksjon = false,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
+            erOpphør = false,
+            periodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+            aktivitetBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
         )
 
     data class AndelTilkjentHolder(val behandlingId: UUID, val andeler: MutableList<AndelTilkjentYtelse?>)

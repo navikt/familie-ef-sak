@@ -4,8 +4,7 @@ import no.nav.familie.ef.sak.felles.util.medContentTypeJsonUTF8
 import no.nav.familie.ef.sak.infrastruktur.config.IntegrasjonerConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.http.AbstractPingableRestWebClient
+import no.nav.familie.http.client.AbstractPingableRestClient
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -20,18 +19,15 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
-import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class OppgaveClient(
     @Qualifier("azure") restOperations: RestOperations,
-    @Qualifier("azureWebClient") webClient: WebClient,
-    integrasjonerConfig: IntegrasjonerConfig,
-    featureToggleService: FeatureToggleService
+    integrasjonerConfig: IntegrasjonerConfig
 ) :
-    AbstractPingableRestWebClient(restOperations, webClient, "oppgave", featureToggleService) {
+    AbstractPingableRestClient(restOperations, "oppgave") {
 
     override val pingUri: URI = integrasjonerConfig.pingUri
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
@@ -39,7 +35,8 @@ class OppgaveClient(
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
         val uri = URI.create("$oppgaveUri/opprett")
 
-        val respons = postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
+        val respons =
+            postForEntity<Ressurs<OppgaveResponse>>(uri, opprettOppgave, HttpHeaders().medContentTypeJsonUTF8())
         return pakkUtRespons(respons, uri, "opprettOppgave").oppgaveId
     }
 
@@ -54,16 +51,23 @@ class OppgaveClient(
         val uri = URI.create("$oppgaveUri/v4")
 
         val respons =
-            postForEntity<Ressurs<FinnOppgaveResponseDto>>(uri, finnOppgaveRequest, HttpHeaders().medContentTypeJsonUTF8())
+            postForEntity<Ressurs<FinnOppgaveResponseDto>>(
+                uri,
+                finnOppgaveRequest,
+                HttpHeaders().medContentTypeJsonUTF8()
+            )
         return pakkUtRespons(respons, uri, "hentOppgaver")
     }
 
-    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?): Long {
-        val baseUri = URI.create("$oppgaveUri/$oppgaveId/fordel")
-        val uri = if (saksbehandler == null) {
-            baseUri
-        } else {
-            UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+    fun fordelOppgave(oppgaveId: Long, saksbehandler: String?, versjon: Int? = null): Long {
+        var uri = URI.create("$oppgaveUri/$oppgaveId/fordel")
+
+        if (saksbehandler != null) {
+            uri = UriComponentsBuilder.fromUri(uri).queryParam("saksbehandler", saksbehandler).build().toUri()
+        }
+
+        if (versjon != null) {
+            uri = UriComponentsBuilder.fromUri(uri).queryParam("versjon", versjon).build().toUri()
         }
 
         try {
@@ -74,6 +78,11 @@ class OppgaveClient(
                 throw ApiFeil(
                     "Oppgaven med id=$oppgaveId er allerede ferdigstilt. Prøv å hente oppgaver på nytt.",
                     HttpStatus.BAD_REQUEST
+                )
+            } else if (e.httpStatus == HttpStatus.CONFLICT) {
+                throw ApiFeil(
+                    "Oppgaven har endret seg siden du sist hentet oppgaver. For å kunne gjøre endringer må du hente oppgaver på nytt.",
+                    HttpStatus.CONFLICT
                 )
             }
             throw e

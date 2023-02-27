@@ -125,8 +125,8 @@ class BehandlingsstatistikkTask(
             return saksbehandling.henlagtÅrsak?.name ?: error("Mangler henlagtårsak for henlagt behandling")
         }
         return when (hendelse) {
-            Hendelse.PÅBEGYNT, Hendelse.MOTTATT -> null
-            else -> {
+            Hendelse.PÅBEGYNT, Hendelse.MOTTATT, Hendelse.VENTER -> null
+            Hendelse.VEDTATT, Hendelse.BESLUTTET, Hendelse.HENLAGT, Hendelse.FERDIG -> {
                 return when (vedtak?.resultatType) {
                     ResultatType.INNVILGE, ResultatType.INNVILGE_UTEN_UTBETALING -> utledBegrunnelseForInnvilgetVedtak(
                         saksbehandling.stønadstype,
@@ -166,12 +166,17 @@ class BehandlingsstatistikkTask(
 
     companion object {
 
-        fun opprettMottattTask(behandlingId: UUID, oppgaveId: Long?): Task =
+        fun opprettMottattTask(
+            behandlingId: UUID,
+            hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
+            saksbehandler: String = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+            oppgaveId: Long?
+        ): Task =
             opprettTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.MOTTATT,
-                hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(),
+                hendelseTidspunkt = hendelseTidspunkt,
+                gjeldendeSaksbehandler = saksbehandler,
                 oppgaveId = oppgaveId
             )
 
@@ -180,7 +185,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.PÅBEGYNT,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
             )
 
         fun opprettVenterTask(behandlingId: UUID): Task =
@@ -188,7 +193,7 @@ class BehandlingsstatistikkTask(
                 behandlingId = behandlingId,
                 hendelse = Hendelse.VENTER,
                 hendelseTidspunkt = LocalDateTime.now(),
-                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler(true)
+                gjeldendeSaksbehandler = SikkerhetContext.hentSaksbehandler()
             )
 
         fun opprettVedtattTask(behandlingId: UUID): Task =

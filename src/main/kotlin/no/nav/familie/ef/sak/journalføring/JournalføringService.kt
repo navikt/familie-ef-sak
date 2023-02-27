@@ -6,6 +6,8 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.migrering.InfotrygdPeriodeValideringService
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask.OpprettOppgaveTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
@@ -74,7 +76,7 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest,
         journalpost: Journalpost
     ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val behandling: Behandling = hentBehandling(journalføringRequest)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
         logger.info(
@@ -97,7 +99,7 @@ class JournalføringService(
         journalføringRequest: JournalføringRequest,
         journalpost: Journalpost
     ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val behandlingstype = journalføringRequest.behandling.behandlingstype
             ?: throw ApiFeil("Kan ikke journalføre til ny behandling uten behandlingstype", BAD_REQUEST)
         val fagsak = fagsakService.fagsakMedOppdatertPersonIdent(journalføringRequest.fagsakId)
@@ -112,7 +114,7 @@ class JournalføringService(
             journalføringRequest
         )
 
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = behandlingstype,
@@ -138,14 +140,15 @@ class JournalføringService(
     }
 
     @Transactional
-    fun automatiskJournalførFørstegangsbehandling(
+    fun automatiskJournalfør(
         fagsak: Fagsak,
         journalpost: Journalpost,
         journalførendeEnhet: String,
-        mappeId: Long?
+        mappeId: Long?,
+        behandlingstype: BehandlingType
     ): AutomatiskJournalføringResponse {
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingstype = behandlingstype,
             fagsak = fagsak,
             journalpost = journalpost,
             barnSomSkalFødes = emptyList()
@@ -157,18 +160,17 @@ class JournalføringService(
             fagsak = fagsak
         )
 
-        opprettBehandlingsstatistikkTask(behandlingId = behandling.id)
-
-        val oppgaveId = oppgaveService.opprettOppgave(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.BehandleSak,
-            mappeId = mappeId,
-            beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE
+        opprettBehandleSakOppgaveTask(
+            OpprettOppgaveTaskData(
+                behandlingId = behandling.id,
+                saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
+                beskrivelse = AUTOMATISK_JOURNALFØRING_BESKRIVELSE,
+                mappeId = mappeId
+            )
         )
         return AutomatiskJournalføringResponse(
             fagsakId = fagsak.id,
-            behandlingId = behandling.id,
-            behandleSakOppgaveId = oppgaveId
+            behandlingId = behandling.id
         )
     }
 
@@ -177,7 +179,7 @@ class JournalføringService(
         journalføringRequest: JournalføringTilNyBehandlingRequest,
         journalpostId: String
     ): Long {
-        val saksbehandler = SikkerhetContext.hentSaksbehandler(true)
+        val saksbehandler = SikkerhetContext.hentSaksbehandler()
         val journalpost = journalpostService.hentJournalpost(journalpostId)
         brukerfeilHvisIkke(journalpost.journalstatus == Journalstatus.JOURNALFOERT || journalpost.journalstatus == Journalstatus.FERDIGSTILT) {
             "Denne journalposten er ikke journalført og skal håndteres på vanlig måte"
@@ -187,7 +189,7 @@ class JournalføringService(
             "Journalfører ferdigstilt journalpost=${journalpost.journalpostId} på ny behandling på " +
                 "fagsak=${fagsak.id} stønadstype=${fagsak.stønadstype} "
         )
-        infotrygdPeriodeValideringService.validerKanJournalføresGittInfotrygdData(fagsak)
+        infotrygdPeriodeValideringService.validerKanOppretteBehandlingGittInfotrygdData(fagsak)
 
         val behandling = opprettBehandlingOgPopulerGrunnlagsdata(
             behandlingstype = journalføringRequest.behandlingstype,
@@ -244,14 +246,17 @@ class JournalføringService(
         fagsak: Fagsak
     ) {
         val erEttersending = ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING
-        if (erEttersending && behandling.forrigeBehandlingId != null) {
-            val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
-            vurderingService.kopierVurderingerTilNyBehandling(
-                behandling.forrigeBehandlingId,
-                behandling.id,
-                metadata,
-                fagsak.stønadstype
-            )
+        if (erEttersending) {
+            val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsak.id)
+            forrigeBehandling?.let {
+                val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(behandling.id)
+                vurderingService.kopierVurderingerTilNyBehandling(
+                    it.id,
+                    behandling.id,
+                    metadata,
+                    fagsak.stønadstype
+                )
+            }
         }
     }
 
@@ -270,6 +275,10 @@ class JournalføringService(
             oppgavetype = Oppgavetype.BehandleSak,
             tilordnetNavIdent = navIdent
         )
+    }
+
+    private fun opprettBehandleSakOppgaveTask(opprettOppgaveTaskData: OpprettOppgaveTaskData) {
+        taskService.save(OpprettOppgaveForOpprettetBehandlingTask.opprettTask(opprettOppgaveTaskData))
     }
 
     private fun ferdigstillJournalføringsoppgave(journalføringRequest: JournalføringRequest) {
@@ -298,10 +307,12 @@ class JournalføringService(
                 val søknad = journalpostService.hentSøknadFraJournalpostForOvergangsstønad(journalpost)
                 søknadService.lagreSøknadForOvergangsstønad(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
+
             StønadType.BARNETILSYN -> {
                 val søknad = journalpostService.hentSøknadFraJournalpostForBarnetilsyn(journalpost)
                 søknadService.lagreSøknadForBarnetilsyn(søknad, behandlingId, fagsak.id, journalpost.journalpostId)
             }
+
             StønadType.SKOLEPENGER -> {
                 val søknad = journalpostService.hentSøknadFraJournalpostForSkolepenger(journalpost)
                 søknadService.lagreSøknadForSkolepenger(søknad, behandlingId, fagsak.id, journalpost.journalpostId)

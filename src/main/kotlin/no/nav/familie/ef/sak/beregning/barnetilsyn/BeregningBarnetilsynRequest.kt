@@ -1,5 +1,7 @@
 package no.nav.familie.ef.sak.beregning.barnetilsyn
 
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.dto.PeriodeMedBeløpDto
 import no.nav.familie.ef.sak.vedtak.dto.UtgiftsperiodeDto
 import java.math.BigDecimal
@@ -15,7 +17,9 @@ data class BeregningBarnetilsynRequest(
 data class UtgiftsMåned(
     val årMåned: YearMonth,
     val barn: List<UUID>,
-    val utgifter: BigDecimal
+    val utgifter: BigDecimal,
+    val aktivitetstype: AktivitetstypeBarnetilsyn?,
+    val periodetype: PeriodetypeBarnetilsyn
 )
 
 fun UtgiftsMåned.tilBeløpsperiodeBarnetilsynDto(

@@ -16,16 +16,15 @@ object AdresseHjelper {
         )
     }
 
-    fun borPåSammeAdresse(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
-        if (harDeltBosted(barn)) {
-            return false
-        }
-
+    fun harRegistrertSammeBostedsadresseSomForelder(barn: BarnMedIdent, bostedsadresserForelder: List<Bostedsadresse>): Boolean {
         return sammeMatrikkeladresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende()) ||
             sammeVegadresse(bostedsadresserForelder.gjeldende(), barn.bostedsadresse.gjeldende())
     }
 
-    private fun sammeMatrikkeladresse(bostedsadresseForelder: Bostedsadresse?, bostedsadresseBarn: Bostedsadresse?): Boolean {
+    private fun sammeMatrikkeladresse(
+        bostedsadresseForelder: Bostedsadresse?,
+        bostedsadresseBarn: Bostedsadresse?
+    ): Boolean {
         return bostedsadresseBarn?.matrikkelId != null && bostedsadresseForelder?.matrikkelId != null &&
             bostedsadresseBarn.matrikkelId == bostedsadresseForelder.matrikkelId &&
             bostedsadresseBarn.bruksenhetsnummer == bostedsadresseForelder.bruksenhetsnummer
@@ -36,10 +35,18 @@ object AdresseHjelper {
             bostedsadresseBarn.vegadresse == bostedsadresseForelder.vegadresse
     }
 
-    private fun harDeltBosted(barn: BarnMedIdent): Boolean {
-        return barn.deltBosted.any {
-            it.startdatoForKontrakt.isBefore(LocalDate.now()) &&
-                (it.sluttdatoForKontrakt == null || it.sluttdatoForKontrakt.isAfter(LocalDate.now()))
+    fun harDeltBosted(barn: BarnMedIdent?, dato: LocalDate): Boolean {
+        if (barn == null || barn.erOver18År()) {
+            return false
         }
+
+        val gjeldende = barn.deltBosted.gjeldende() ?: return false
+        return gjeldende.startdatoForKontrakt <= dato &&
+            (gjeldende.sluttdatoForKontrakt == null || gjeldende.sluttdatoForKontrakt >= dato)
     }
+
+    private fun BarnMedIdent.erOver18År(): Boolean {
+        return !fødsel.gjeldende().erUnder18År()
+    }
+
 }

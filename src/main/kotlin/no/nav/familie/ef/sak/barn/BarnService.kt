@@ -4,13 +4,13 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.journalføring.dto.BarnSomSkalFødes
 import no.nav.familie.ef.sak.journalføring.dto.UstrukturertDokumentasjonType
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.mapper.BarnMatcher
 import no.nav.familie.ef.sak.opplysninger.mapper.MatchetBehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.repository.findAllByIdOrThrow
@@ -22,7 +22,8 @@ import java.util.UUID
 class BarnService(
     private val barnRepository: BarnRepository,
     private val søknadService: SøknadService,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     /**
@@ -43,15 +44,14 @@ class BarnService(
         barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
     ) {
-        val barnUnder18 = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }
         val barnPåBehandlingen: List<BehandlingBarn> = when (stønadstype) {
-            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, barnUnder18)
+            StønadType.BARNETILSYN -> barnForBarnetilsyn(barnSomSkalFødes, behandlingId, grunnlagsdataBarn)
             StønadType.OVERGANGSSTØNAD, StønadType.SKOLEPENGER ->
                 kobleBarnForOvergangsstønadOgSkolepenger(
                     fagsakId,
                     behandlingId,
                     ustrukturertDokumentasjonType,
-                    barnUnder18,
+                    grunnlagsdataBarn,
                     barnSomSkalFødes,
                     vilkårsbehandleNyeBarn
                 )
@@ -107,11 +107,14 @@ class BarnService(
                 vilkårsbehandleNyeBarn,
                 grunnlagsdataBarn
             )
-            UstrukturertDokumentasjonType.IKKE_VALGT -> kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
-                finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
-                grunnlagsdataBarn,
-                behandlingId
-            )
+            UstrukturertDokumentasjonType.IKKE_VALGT -> {
+                val kobledeBarn = kobleBehandlingBarnOgRegisterBarnTilBehandlingBarn(
+                    finnSøknadsbarnOgMapTilBehandlingBarn(behandlingId = behandlingId),
+                    grunnlagsdataBarn,
+                    behandlingId
+                )
+                kobledeBarnPlusRegisterbarn(behandlingId, grunnlagsdataBarn, kobledeBarn)
+            }
         }
     }
 
@@ -120,24 +123,33 @@ class BarnService(
         behandlingId: UUID,
         vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
         grunnlagsdataBarn: List<BarnMedIdent>
-    ): List<BehandlingBarn> = when (vilkårsbehandleNyeBarn) {
-        VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE ->
-            vilkårsbehandleBarnForEttersending(fagsakId, behandlingId, grunnlagsdataBarn)
-        VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
-        VilkårsbehandleNyeBarn.IKKE_VALGT ->
-            throw Feil("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
-    }
-
-    private fun vilkårsbehandleBarnForEttersending(
-        fagsakId: UUID,
-        behandlingId: UUID,
-        grunnlagsdataBarn: List<BarnMedIdent>
     ): List<BehandlingBarn> {
         val forrigeBehandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
         feilHvis(forrigeBehandling == null) {
-            "Kan ikke behandle ettersending når det ikke finnes en tidligere behandling"
+            "Det finnes ingen iverksatte behandlinger for fagsak=$fagsakId"
         }
-        val barnSomSkalFødesFraForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandling.id)
+        val barnFraForrigeBehandling = barnRepository.findByBehandlingId(forrigeBehandling.id)
+        return when (vilkårsbehandleNyeBarn) {
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> {
+                vilkårsbehandleBarnForEttersending(behandlingId, barnFraForrigeBehandling, grunnlagsdataBarn)
+            }
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> {
+                feilHvis(barnFraForrigeBehandling.isNotEmpty()) {
+                    "Må behandle nye barn hvis det finnes barn på forrige behandling fagsak=$fagsakId"
+                }
+                return emptyList()
+            }
+            VilkårsbehandleNyeBarn.IKKE_VALGT ->
+                throw Feil("Må ha valgt om man skal vilkårsbehandle nye barn når man ettersender på ny behandling")
+        }
+    }
+
+    private fun vilkårsbehandleBarnForEttersending(
+        behandlingId: UUID,
+        barnFraForrigeBehandlingen: List<BehandlingBarn>,
+        grunnlagsdataBarn: List<BarnMedIdent>
+    ): List<BehandlingBarn> {
+        val barnSomSkalFødesFraForrigeBehandling = barnFraForrigeBehandlingen
             .filter { it.personIdent == null }
             .mapNotNull { it.fødselTermindato }
             .map { BarnSomSkalFødes(it) }
@@ -239,7 +251,7 @@ class BarnService(
         kobledeBarn: List<BehandlingBarn>,
         grunnlagsdataBarn: List<BarnMedIdent>
     ) {
-        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.filter { it.fødsel.gjeldende().erUnder18År() }.map { it.personIdent }
+        val grunnlagsdataBarnIdenter = grunnlagsdataBarn.map { it.personIdent }
         val kobledeBarnIdenter = kobledeBarn.mapNotNull { it.personIdent }
 
         feilHvisIkke(kobledeBarnIdenter.containsAll(grunnlagsdataBarnIdenter)) {
@@ -290,5 +302,25 @@ class BarnService(
 
     fun hentBehandlingBarnForBarnIder(barnId: List<UUID>): List<BehandlingBarn> {
         return barnRepository.findAllByIdOrThrow(barnId.toSet()) { it.id }
+    }
+
+    /**
+     * Kan strengt tatt kun brukes for barnetilsyn då den er avhengig av at personIdent finnes
+     * peronIdent skal finnes på alle barn på barnetilsyn
+     */
+    fun kobleBarnForBarnetilsyn(
+        behandlingId: UUID,
+        tidligereBarnIder: Set<UUID>
+    ): Map<UUID, UUID> {
+        val behandlingBarn = barnRepository.findByBehandlingId(behandlingId).associate {
+            val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")
+            personIdent to it.id
+        }
+        val tidligereBarn = barnRepository.findAllByIdOrThrow(tidligereBarnIder) { it.id }
+        return tidligereBarn.associate {
+            val personIdent = it.personIdent ?: error("Mangler ident for barn=${it.id}")
+            val matchetBarn = behandlingBarn[personIdent]
+            it.id to (matchetBarn ?: error("Fant ikke match for barn med ident=$personIdent "))
+        }
     }
 }

@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerCli
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.AdressebeskyttelseGradering
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
@@ -40,7 +41,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
@@ -104,7 +104,7 @@ class PdlClientConfig {
         }
 
         val personIdent = slot<String>()
-        every { pdlClient.hentPersonidenter(capture(personIdent), eq(true)) } answers {
+        every { pdlClient.hentPersonidenter(capture(personIdent)) } answers {
             if (personIdent.captured == "19117313797") {
                 throw PdlNotFoundException()
             } else {
@@ -195,7 +195,6 @@ class PdlClientConfig {
                 oppholdsadresse = listOf(),
                 sivilstand = sivilstand(),
                 statsborgerskap = statsborgerskap(),
-                telefonnummer = listOf(Telefonnummer(landskode = "+47", nummer = "98999923", prioritet = 1)),
                 tilrettelagtKommunikasjon = listOf(),
                 innflyttingTilNorge = listOf(InnflyttingTilNorge("SWE", "Stockholm", folkeregistermetadata)),
                 utflyttingFraNorge = listOf(
@@ -218,6 +217,22 @@ class PdlClientConfig {
             mapOf(
                 barnFnr to pdlBarn(
                     bostedsadresse = bostedsadresse(),
+                    deltBosted = listOf(
+                        DeltBosted(
+                            LocalDate.of(2023, 1, 1),
+                            LocalDate.of(2053, 1, 1),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                        ),
+                        DeltBosted(
+                            LocalDate.now().minusDays(20),
+                            LocalDate.now().minusDays(10),
+                            null,
+                            null,
+                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(true)
+                        )
+                    ),
                     forelderBarnRelasjon = familierelasjonerBarn(),
                     fødsel = fødsel(),
                     navn = lagNavn("Barn", null, "Barnesen")
@@ -324,6 +339,7 @@ class PdlClientConfig {
                     omraader = listOf()
                 )
             )
+
         val defaultKoordinater = Koordinater(x = 601372f, y = 6629367f, z = null, kvalitet = null)
         private fun bostedsadresse(koordinater: Koordinater = defaultKoordinater): List<Bostedsadresse> =
             listOf(

@@ -23,11 +23,11 @@ class InfotrygdPeriodeValideringService(
     private val behandlingService: BehandlingService
 ) {
 
-    fun validerKanJournalføresGittInfotrygdData(fagsak: Fagsak) {
+    fun validerKanOppretteBehandlingGittInfotrygdData(fagsak: Fagsak) {
         if (!behandlingService.finnesBehandlingForFagsak(fagsak.id)) {
             when (fagsak.stønadstype) {
                 StønadType.OVERGANGSSTØNAD ->
-                    validerKanJournalføreUtenÅMigrereOvergangsstønad(
+                    validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(
                         fagsak.hentAktivIdent(),
                         fagsak.stønadstype
                     )
@@ -37,7 +37,7 @@ class InfotrygdPeriodeValideringService(
         }
     }
 
-    fun validerKanJournalføreUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
+    fun validerKanOppretteBehandlingUtenÅMigrereOvergangsstønad(personIdent: String, stønadType: StønadType) {
         feilHvis(stønadType != StønadType.OVERGANGSSTØNAD) {
             "Har ikke støtte for å sjekke migrering av stønadstypen $stønadType"
         }
@@ -129,7 +129,7 @@ class InfotrygdPeriodeValideringService(
         if (periode.månedsbeløp < 1) {
             throw MigreringException(
                 "Kan ikke migrere perioder frem i tiden med månedsbløp=${periode.månedsbeløp}",
-                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP
+                MigreringExceptionType.MANGLER_PERIODER_MED_BELØP_FREM_I_TIDEN
             )
         }
         return periode.copy(

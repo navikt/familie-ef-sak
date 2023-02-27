@@ -37,11 +37,13 @@ import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.metadataGjeldende
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
+import no.nav.familie.ef.sak.vedtak.domain.AktivitetstypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.domain.Vedtaksperiode
@@ -234,8 +236,8 @@ fun Fagsak.tilFagsakDomain() =
 
 fun vilkårsvurdering(
     behandlingId: UUID,
-    resultat: Vilkårsresultat,
-    type: VilkårType,
+    resultat: Vilkårsresultat = Vilkårsresultat.OPPFYLT,
+    type: VilkårType = VilkårType.LOVLIG_OPPHOLD,
     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
     barnId: UUID? = null
 ): Vilkårsvurdering =
@@ -321,7 +323,10 @@ fun vedtak(
         inntektBegrunnelse = "OK",
         avslåBegrunnelse = null,
         perioder = perioder,
-        inntekter = inntekter
+        inntekter = inntekter,
+        saksbehandlerIdent = "VL",
+        opprettetAv = "VL",
+        opprettetTid = LocalDateTime.now()
     )
 
 fun vedtakBarnetilsyn(
@@ -337,7 +342,10 @@ fun vedtakBarnetilsyn(
     resultatType = resultatType,
     barnetilsyn = BarnetilsynWrapper(listOf(barnetilsynperiode(barn = barn, beløp = beløp, fom = fom, tom = tom)), "begrunnelse"),
     kontantstøtte = kontantstøtteWrapper,
-    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null)
+    tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
+    saksbehandlerIdent = "VL",
+    opprettetAv = "VL",
+    opprettetTid = LocalDateTime.now()
 )
 
 fun barnetilsynperiode(
@@ -345,8 +353,18 @@ fun barnetilsynperiode(
     fom: YearMonth = YearMonth.of(år, 1),
     tom: YearMonth = YearMonth.of(år, 12),
     beløp: Int = 1000,
-    barn: List<UUID>
-) = Barnetilsynperiode(Månedsperiode(fom, tom), beløp, barn, false)
+    barn: List<UUID>,
+    sanksjonsårsak: Sanksjonsårsak? = null,
+    periodetype: PeriodetypeBarnetilsyn = PeriodetypeBarnetilsyn.ORDINÆR,
+    aktivitetstype: AktivitetstypeBarnetilsyn = AktivitetstypeBarnetilsyn.I_ARBEID
+) = Barnetilsynperiode(
+    periode = Månedsperiode(fom, tom),
+    utgifter = beløp,
+    barn = barn,
+    sanksjonsårsak = sanksjonsårsak,
+    periodetype = periodetype,
+    aktivitet = aktivitetstype
+)
 
 fun inntektsperiode(
     år: Int = 2021,
@@ -372,21 +390,21 @@ fun vedtaksperiode(
 fun vedtaksperiodeDto(
     årMånedFra: LocalDate = LocalDate.of(2021, 1, 1),
     årMånedTil: LocalDate = LocalDate.of(2021, 12, 1),
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
 ) =
     vedtaksperiodeDto(
         årMånedFra = YearMonth.from(årMånedFra),
         årMånedTil = YearMonth.from(årMånedTil),
-        aktivitet = aktivitet,
-        periodeType = periodeType
+        periodeType = periodeType,
+        aktivitet = aktivitet
     )
 
 fun vedtaksperiodeDto(
     årMånedFra: YearMonth = YearMonth.of(2021, 1),
     årMånedTil: YearMonth = YearMonth.of(2021, 12),
-    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR,
-    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE
+    periodeType: VedtaksperiodeType = VedtaksperiodeType.HOVEDPERIODE,
+    aktivitet: AktivitetType = AktivitetType.BARN_UNDER_ETT_ÅR
 ) =
     VedtaksperiodeDto(
         årMånedFra = årMånedFra,
@@ -460,7 +478,6 @@ fun søker(sivilstand: List<SivilstandMedNavn> = emptyList()): Søker =
         listOf(),
         listOf(),
         sivilstand = sivilstand,
-        listOf(),
         listOf(),
         listOf(),
         listOf(),

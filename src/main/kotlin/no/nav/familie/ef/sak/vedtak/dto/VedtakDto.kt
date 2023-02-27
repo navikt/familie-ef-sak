@@ -11,12 +11,14 @@ import no.nav.familie.ef.sak.beregning.tilInntekt
 import no.nav.familie.ef.sak.beregning.tilInntektsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vedtak.domain.AktivitetType
 import no.nav.familie.ef.sak.vedtak.domain.BarnetilsynWrapper
 import no.nav.familie.ef.sak.vedtak.domain.Barnetilsynperiode
 import no.nav.familie.ef.sak.vedtak.domain.InntektWrapper
 import no.nav.familie.ef.sak.vedtak.domain.KontantstøtteWrapper
 import no.nav.familie.ef.sak.vedtak.domain.PeriodeWrapper
+import no.nav.familie.ef.sak.vedtak.domain.PeriodetypeBarnetilsyn
 import no.nav.familie.ef.sak.vedtak.domain.SamordningsfradragType
 import no.nav.familie.ef.sak.vedtak.domain.SkolepengerWrapper
 import no.nav.familie.ef.sak.vedtak.domain.TilleggsstønadWrapper
@@ -63,12 +65,7 @@ fun ResultatType.tilVedtaksresultat(): Vedtaksresultat = when (this) {
 /*@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
               include = JsonTypeInfo.As.PROPERTY,
               property = "_type")*/
-sealed class VedtakDto(open val resultatType: ResultatType, open val _type: String) {
-
-    fun erInnvilgeMedOpphør(): Boolean {
-        return this is InnvilgelseOvergangsstønad && this.perioder.any { it.periodeType == VedtaksperiodeType.MIDLERTIDIG_OPPHØR }
-    }
-}
+sealed class VedtakDto(open val resultatType: ResultatType, open val _type: String)
 
 // Rename til dto? InnvilgelseOvergangsstønadDto, AvslagDto, OpphørDto, SanksjoneringDto
 data class InnvilgelseOvergangsstønad(
@@ -115,7 +112,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
         behandlingId = behandlingId,
         avslåÅrsak = this.avslåÅrsak,
         avslåBegrunnelse = this.avslåBegrunnelse,
-        resultatType = this.resultatType
+        resultatType = this.resultatType,
+        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
     )
     is InnvilgelseOvergangsstønad ->
         Vedtak(
@@ -125,7 +123,8 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
             resultatType = this.resultatType,
             perioder = PeriodeWrapper(perioder = this.perioder.tilDomene()),
             inntekter = InntektWrapper(inntekter = this.inntekter.tilInntektsperioder()),
-            samordningsfradragType = this.samordningsfradragType
+            samordningsfradragType = this.samordningsfradragType,
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         )
     is InnvilgelseBarnetilsyn ->
         Vedtak(
@@ -140,16 +139,19 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
                 harTilleggsstønad = this.tilleggsstønad.harTilleggsstønad,
                 perioder = this.tilleggsstønad.perioder.map { it.tilDomene() },
                 begrunnelse = this.tilleggsstønad.begrunnelse
-            )
+            ),
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         )
     is InnvilgelseSkolepenger ->
         Vedtak(
             resultatType = this.resultatType,
             behandlingId = behandlingId,
             skolepenger = SkolepengerWrapper(
-                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }.sortedBy { it.perioder.first().periode },
+                skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() }
+                    .sortedBy { it.perioder.first().periode },
                 begrunnelse = this.begrunnelse
-            )
+            ),
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         )
     is OpphørSkolepenger -> Vedtak(
         resultatType = this.resultatType,
@@ -157,14 +159,16 @@ fun VedtakDto.tilVedtak(behandlingId: UUID, stønadstype: StønadType): Vedtak =
         skolepenger = SkolepengerWrapper(
             skoleårsperioder = this.skoleårsperioder.map { it.tilDomene() },
             begrunnelse = this.begrunnelse
-        )
+        ),
+        saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
     )
     is Opphør ->
         Vedtak(
             behandlingId = behandlingId,
             avslåBegrunnelse = begrunnelse,
             resultatType = ResultatType.OPPHØRT,
-            opphørFom = opphørFom
+            opphørFom = opphørFom,
+            saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         )
     is Sanksjonert -> sanksjonertTilVedtak(behandlingId, stønadstype)
 }
@@ -185,7 +189,8 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 behandlingId = behandlingId,
                 perioder = PeriodeWrapper(listOf(vedtaksperiode)),
                 internBegrunnelse = this.internBegrunnelse,
-                resultatType = ResultatType.SANKSJONERE
+                resultatType = ResultatType.SANKSJONERE,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             )
         }
         StønadType.BARNETILSYN -> {
@@ -193,14 +198,15 @@ private fun Sanksjonert.sanksjonertTilVedtak(
                 periode = periode.tilPeriode(),
                 utgifter = 0,
                 barn = emptyList(),
-                erMidlertidigOpphør = true,
-                this.sanksjonsårsak
+                sanksjonsårsak = this.sanksjonsårsak,
+                periodetype = PeriodetypeBarnetilsyn.SANKSJON_1_MND
             )
             Vedtak(
                 behandlingId = behandlingId,
                 barnetilsyn = BarnetilsynWrapper(listOf(vedtaksperiode), begrunnelse = null),
                 internBegrunnelse = this.internBegrunnelse,
-                resultatType = ResultatType.SANKSJONERE
+                resultatType = ResultatType.SANKSJONERE,
+                saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             )
         }
         StønadType.SKOLEPENGER -> error("Håndterer ikke sanksjon for skolepenger")

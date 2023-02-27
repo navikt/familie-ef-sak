@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper
 
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -9,13 +10,13 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Adressebeskyttelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.SivilstandDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.TelefonnummerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.VergemålDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
@@ -23,7 +24,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(
@@ -32,6 +35,8 @@ class PersonopplysningerMapper(
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun tilPersonopplysninger(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
@@ -44,7 +49,6 @@ class PersonopplysningerMapper(
 
         val gjeldendePersonIdent = søkerIdenter.gjeldende().ident
         return PersonopplysningerDto(
-            lagtTilEtterFerdigstilling = grunnlagsdataMedMetadata.lagtTilEtterFerdigstilling,
             adressebeskyttelse = søker.adressebeskyttelse
                 ?.let { Adressebeskyttelse.valueOf(it.gradering.name) },
             folkeregisterpersonstatus = søker.folkeregisterpersonstatus.gjeldende()
@@ -54,8 +58,6 @@ class PersonopplysningerMapper(
             navn = NavnDto.fraNavn(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
             personIdent = gjeldendePersonIdent,
-            telefonnummer = søker.telefonnummer.find { it.prioritet == 1 }
-                ?.let { TelefonnummerDto(it.landskode, it.nummer) },
             statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),
             sivilstand = søker.sivilstand.map {
                 SivilstandDto(
@@ -85,7 +87,8 @@ class PersonopplysningerMapper(
                     it,
                     søkerIdenter.identer(),
                     søker.bostedsadresse,
-                    annenForelderMap
+                    annenForelderMap,
+                    grunnlagsdataMedMetadata.opprettetTidspunkt.toLocalDate()
                 )
             }.sortedBy { it.fødselsdato },
             innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
@@ -126,23 +129,35 @@ class PersonopplysningerMapper(
         barn: BarnMedIdent,
         søkerIdenter: Set<String>,
         bostedsadresserForelder: List<Bostedsadresse>,
-        annenForelderMap: Map<String, AnnenForelderMedIdent>
+        annenForelderMap: Map<String, AnnenForelderMedIdent>,
+        grunnlagsdataOpprettet: LocalDate
     ): BarnDto {
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
+
+        feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
+        val bostedDto =
+            barn.deltBosted.gjeldende()?.let { listOf(DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt)) }
+                ?: emptyList()
+
         return BarnDto(
             personIdent = barn.personIdent,
             navn = barn.navn.visningsnavn(),
             annenForelder = annenForelderIdent?.let {
+                val annenForelder = annenForelderMap[it]
                 AnnenForelderMinimumDto(
                     personIdent = it,
-                    navn = annenForelderMap[it]?.navn?.visningsnavn() ?: "Finner ikke navn",
-                    dødsdato = annenForelderMap[it]?.dødsfall?.gjeldende()?.dødsdato
+                    navn = annenForelder?.navn?.visningsnavn() ?: "Finner ikke navn",
+                    dødsdato = annenForelder?.dødsfall?.gjeldende()?.dødsdato,
+                    bostedsadresse = annenForelder?.bostedsadresse?.gjeldende()
+                        ?.let { adresseMapper.tilAdresse(it).visningsadresse }
                 )
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
-            borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
+            borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
+            deltBosted = bostedDto,
+            harDeltBostedNå = AdresseHjelper.harDeltBosted(barn, grunnlagsdataOpprettet),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
         )

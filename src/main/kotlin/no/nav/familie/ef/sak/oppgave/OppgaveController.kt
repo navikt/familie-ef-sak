@@ -11,7 +11,7 @@ import no.nav.familie.ef.sak.oppgave.dto.FinnOppgaveRequestDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveEfDto
 import no.nav.familie.ef.sak.oppgave.dto.OppgaveResponseDto
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
@@ -37,7 +37,7 @@ import java.util.UUID
 class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val tilgangService: TilgangService,
-    private val pdlClient: PdlClient
+    private val personService: PersonService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -52,7 +52,7 @@ class OppgaveController(
         validerOptionalIdent(finnOppgaveRequest.ident)
 
         val aktørId = finnOppgaveRequest.ident.takeUnless { it.isNullOrBlank() }
-            ?.let { pdlClient.hentAktørIder(it).identer.first().ident }
+            ?.let { personService.hentAktørIder(it).identer.first().ident }
 
         secureLogger.info("AktoerId: $aktørId, Ident: ${finnOppgaveRequest.ident}")
         val oppgaveRepons = oppgaveService.hentOppgaver(finnOppgaveRequest.tilFinnOppgaveRequest(aktørId))
@@ -62,19 +62,23 @@ class OppgaveController(
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
-        @RequestParam("saksbehandler") saksbehandler: String
+        @RequestParam("saksbehandler") saksbehandler: String,
+        @RequestParam("versjon") versjon: Int?
     ): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
             throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
         }
-        return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler))
+        return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler, versjon))
     }
 
     @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun tilbakestillFordelingPåOppgave(@PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long): Ressurs<Long> {
+    fun tilbakestillFordelingPåOppgave(
+        @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
+        @RequestParam(name = "versjon") versjon: Int?
+    ): Ressurs<Long> {
         tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId))
+        return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId, versjon))
     }
 
     @GetMapping(path = ["/{gsakOppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -96,7 +100,7 @@ class OppgaveController(
 
     @GetMapping("{behandlingId}/tilordnet-ressurs")
     fun hentTilordnetRessursForBehandlingId(@PathVariable behandlingId: UUID): Ressurs<String?> {
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
         val oppgave = oppgaveService.hentIkkeFerdigstiltOppgaveForBehandling(behandlingId)
         val saksbehandlerIdentIOppgaveSystemet = oppgave?.tilordnetRessurs
         if (oppgave != null && saksbehandlerIdentIOppgaveSystemet != saksbehandlerIdent) {

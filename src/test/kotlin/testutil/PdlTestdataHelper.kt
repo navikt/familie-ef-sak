@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Dødsfall
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorStatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
@@ -21,7 +22,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForeld
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UkjentBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
@@ -64,7 +64,6 @@ object PdlTestdataHelper {
         oppholdsadresse: List<Oppholdsadresse> = emptyList(),
         sivilstand: List<Sivilstand> = emptyList(),
         statsborgerskap: List<Statsborgerskap> = emptyList(),
-        telefonnummer: List<Telefonnummer> = emptyList(),
         tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon> = emptyList(),
         innflyttingTilNorge: List<InnflyttingTilNorge> = emptyList(),
         utflyttingFraNorge: List<UtflyttingFraNorge> = emptyList(),
@@ -87,7 +86,6 @@ object PdlTestdataHelper {
             oppholdsadresse,
             sivilstand,
             statsborgerskap,
-            telefonnummer,
             tilrettelagtKommunikasjon,
             innflyttingTilNorge,
             utflyttingFraNorge,
@@ -141,4 +139,14 @@ object PdlTestdataHelper {
             matrikkeladresse = null,
             metadata = Metadata(historisk)
         )
+
+    fun folkeregisteridentifikator(
+        ident: String,
+        status: FolkeregisteridentifikatorStatus = FolkeregisteridentifikatorStatus.I_BRUK,
+        gjeldende: Boolean = true
+    ) = Folkeregisteridentifikator(
+        ident,
+        status,
+        if (gjeldende) metadataGjeldende else metadataHistorisk
+    )
 }

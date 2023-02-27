@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.blankett
 
+import no.nav.familie.ef.sak.behandling.dto.ÅrsakRevurderingDto
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadDatoerDto
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
 import no.nav.familie.ef.sak.vilkår.dto.VilkårDto
@@ -16,7 +17,8 @@ data class BlankettPdfRequest(
 
 data class BlankettPdfBehandling(
     val årsak: BehandlingÅrsak,
-    val stønadstype: StønadType
+    val stønadstype: StønadType,
+    val årsakRevurdering: ÅrsakRevurderingDto?
 )
 
 data class PersonopplysningerDto(

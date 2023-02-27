@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
-import io.mockk.verify
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.Behandling
@@ -18,15 +17,16 @@ import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.FEILREGISTRERT
 import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak.TRUKKET_TILBAKE
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
-import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.behandlingshistorikk.BehandlingshistorikkService
+import no.nav.familie.ef.sak.felles.domain.Endret
+import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
-import no.nav.familie.kontrakter.ef.iverksett.Hendelse
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -38,6 +38,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -64,7 +66,7 @@ internal class BehandlingServiceTest {
         } answers {
             behandlingSlot.captured
         }
-        every { SikkerhetContext.hentSaksbehandler(true) } returns "bob"
+        every { SikkerhetContext.hentSaksbehandler() } returns "bob"
     }
 
     @AfterAll
@@ -75,6 +77,21 @@ internal class BehandlingServiceTest {
     @BeforeEach
     fun reset() {
         clearAllMocks(answers = false)
+    }
+
+    @Test
+    internal fun `skal feile hvis krav mottatt er frem i tid`() {
+        assertThrows<ApiFeil> {
+            behandlingService.opprettBehandling(
+                status = BehandlingStatus.OPPRETTET,
+                stegType = StegType.VILKÅR,
+                behandlingsårsak = BehandlingÅrsak.PAPIRSØKNAD,
+                kravMottatt = LocalDate.now().plusDays(1),
+                erMigrering = false,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                fagsakId = UUID.randomUUID()
+            )
+        }
     }
 
     @Nested
@@ -147,78 +164,6 @@ internal class BehandlingServiceTest {
     }
 
     @Nested
-    inner class SettPåVent {
-
-        private val behandling = behandling()
-
-        @Test
-        fun `skal sette behandling på vent hvis den kan redigeres og sende melding til DVH`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.UTREDES)
-
-            behandlingService.settPåVent(UUID.randomUUID())
-
-            assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
-            verify {
-                taskService.save(
-                    coWithArg {
-                        assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-                        assertThat(it.payload).contains(Hendelse.VENTER.name)
-                    }
-                )
-            }
-        }
-
-        @Test
-        fun `skal ikke sette behandling på vent hvis den er sperret for redigering`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.FATTER_VEDTAK)
-
-            val feil: ApiFeil = assertThrows { behandlingService.settPåVent(UUID.randomUUID()) }
-
-            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @Nested
-    inner class TaAvVent {
-
-        private val behandling = behandling()
-
-        @Test
-        fun `skal ta behandling av vent og sende melding til DVH`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.SATT_PÅ_VENT)
-
-            behandlingService.taAvVent(UUID.randomUUID())
-
-            assertThat(behandlingSlot.captured.status).isEqualTo(BehandlingStatus.UTREDES)
-            verify {
-                taskService.save(
-                    coWithArg {
-                        assertThat(it.type).isEqualTo(BehandlingsstatistikkTask.TYPE)
-                        assertThat(it.payload).contains(Hendelse.PÅBEGYNT.name)
-                    }
-                )
-            }
-        }
-
-        @Test
-        fun `skal feile hvis behandling ikke er på vent`() {
-            every {
-                behandlingRepository.findByIdOrThrow(any())
-            } returns behandling.copy(status = BehandlingStatus.FATTER_VEDTAK)
-
-            val feil: ApiFeil = assertThrows { behandlingService.taAvVent(UUID.randomUUID()) }
-
-            assertThat(feil.httpStatus).isEqualTo(HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @Nested
     inner class oppdaterResultatPåBehandling {
 
         private val behandling = behandling()
@@ -247,5 +192,37 @@ internal class BehandlingServiceTest {
                 behandlingService.oppdaterResultatPåBehandling(UUID.randomUUID(), BehandlingResultat.IKKE_SATT)
             }.hasMessageContaining("Må sette et endelig resultat")
         }
+    }
+
+    @Nested
+    inner class hentBehandlinger {
+
+        @Test
+        internal fun `skal sortere behandlinger etter vedtakstidspunkt og til sist uten vedtakstidspunkt`() {
+            val tiDagerSiden = LocalDateTime.now().minusDays(10)
+            val femFagerSiden = LocalDateTime.now().minusDays(5)
+            val now = LocalDateTime.now()
+            val behandling1 = opprettBehandling(femFagerSiden, tiDagerSiden, tiDagerSiden)
+            val behandling2 = opprettBehandling(null, femFagerSiden, femFagerSiden)
+            val behandling3 = opprettBehandling(tiDagerSiden, now, now)
+            every {
+                behandlingRepository.findByFagsakId(any())
+            } returns listOf(behandling1, behandling2, behandling3)
+
+            val hentBehandlinger = behandlingService.hentBehandlinger(UUID.randomUUID())
+            assertThat(hentBehandlinger)
+                .containsExactly(behandling3, behandling1, behandling2)
+        }
+
+        private fun opprettBehandling(
+            vedtakstidspunkt: LocalDateTime?,
+            opprettetTid: LocalDateTime,
+            endretTid: LocalDateTime
+        ) = behandling(vedtakstidspunkt = vedtakstidspunkt).copy(
+            sporbar = Sporbar(
+                opprettetTid = opprettetTid,
+                endret = Endret(endretTid = endretTid)
+            )
+        )
     }
 }

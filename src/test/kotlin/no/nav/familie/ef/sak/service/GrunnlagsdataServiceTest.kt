@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRepository
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
@@ -22,12 +23,14 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikator
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
 
@@ -37,11 +40,12 @@ internal class GrunnlagsdataServiceTest {
     private val grunnlagsdataRepository = mockk<GrunnlagsdataRepository>()
     private val behandlingService = mockk<BehandlingService>()
     private val pdlClient = PdlClientConfig().pdlClient()
+    private val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
     private val søknadService = mockk<SøknadService>()
     private val personopplysningerIntegrasjonerClient = mockk<PersonopplysningerIntegrasjonerClient>()
     private val tidligereVedaksperioderService = mockk<TidligereVedaksperioderService>(relaxed = true)
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
-        pdlClient,
+        personService,
         personopplysningerIntegrasjonerClient,
         tidligereVedaksperioderService
     )
@@ -85,7 +89,7 @@ internal class GrunnlagsdataServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
 
-        verify(exactly = 0) { pdlClient.hentSøker(any()) }
+        verify(exactly = 0) { personService.hentSøker(any()) }
     }
 
     @Test
@@ -96,9 +100,9 @@ internal class GrunnlagsdataServiceTest {
             vergemaalEllerFremtidsfullmakt = emptyList()
         )
         val fullmakt = pdlSøker.fullmakt.map { it.motpartsPersonident }
-        every { pdlClient.hentSøker(any()) } returns pdlSøker
+        every { personService.hentSøker(any()) } returns pdlSøker
 
-        service.hentGrunnlagsdataFraRegister("1", emptyList())
+        service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 1) { pdlClient.hentPersonKortBolk(listOf(sivilstand.relatertVedSivilstand!!) + fullmakt) }
     }
@@ -106,39 +110,42 @@ internal class GrunnlagsdataServiceTest {
     @Test
     internal fun `skal ikke hente navn til relatertVedSivilstand fra sivilstand når det ikke finnes sivilstand`() {
         val sivilstand = Sivilstand(Sivilstandstype.UOPPGITT, null, null, null, Metadata(false))
-        every { pdlClient.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
+        every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
             .copy(
                 sivilstand = listOf(sivilstand),
                 fullmakt = emptyList(),
                 vergemaalEllerFremtidsfullmakt = emptyList()
             )
 
-        service.hentGrunnlagsdataFraRegister("1", emptyList())
+        service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }
     }
 
     @Test
     internal fun `skal sjekke om personen har historikk i infotrygd`() {
-        val personIdent = PdlClientConfig.søkerFnr
+        val identifikatorSøker = folkeregisteridentifikator(PdlClientConfig.søkerFnr)
+        val folkeregisteridentifikatorAnnenForelder = folkeregisteridentifikator(annenForelderFnr)
         val defaultTidligereInnvilgetVedtak = TidligereInnvilgetVedtak(true, true, false)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(setOf(personIdent))) } returns
+        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(eq(listOf(identifikatorSøker))) } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak)
 
-        every { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr)) } returns
+        every {
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
+        } returns
             TidligereVedtaksperioder(defaultTidligereInnvilgetVedtak, defaultTidligereInnvilgetVedtak)
 
-        val grunnlagsdata = service.hentGrunnlagsdataFraRegister(personIdent, emptyList())
+        val grunnlagsdata = service.hentFraRegisterForPersonOgAndreForeldre(identifikatorSøker.ident, emptyList())
 
         val tidligereVedtaksperioder = grunnlagsdata.tidligereVedtaksperioder!!
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereOvergangsstønad).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereBarnetilsyn).isTrue
         assertThat(tidligereVedtaksperioder.infotrygd.harTidligereSkolepenger).isFalse
 
-        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(personIdent)) }
+        verify(exactly = 1) { tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(identifikatorSøker)) }
         verify(exactly = 1) {
-            tidligereVedaksperioderService.hentTidligereVedtaksperioder(setOf(annenForelderFnr))
+            tidligereVedaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
         }
     }
 }

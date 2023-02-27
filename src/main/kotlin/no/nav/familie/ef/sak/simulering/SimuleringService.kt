@@ -84,7 +84,7 @@ class SimuleringService(
 
         val tilkjentYtelseMedMedtadata =
             tilkjentYtelse.tilTilkjentYtelseMedMetaData(
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler(),
+                saksbehandlerId = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
                 eksternBehandlingId = saksbehandling.eksternId,
                 stønadstype = saksbehandling.stønadstype,
                 eksternFagsakId = saksbehandling.eksternFagsakId,

@@ -17,7 +17,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Statsborgerskap
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Telefonnummer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.TilrettelagtKommunikasjon
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNorge
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
@@ -32,9 +31,40 @@ import java.time.LocalDateTime
 
 data class GrunnlagsdataMedMetadata(
     val grunnlagsdata: GrunnlagsdataDomene,
-    val lagtTilEtterFerdigstilling: Boolean,
     val opprettetTidspunkt: LocalDateTime
-)
+) {
+
+    fun endringerMellom(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): List<GrunnlagsdataEndring> {
+        return GrunnlagsdataEndring.values().filter {
+            when (it) {
+                GrunnlagsdataEndring.BARN -> erBarnForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.SIVILSTAND -> erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.ADRESSE_SØKER -> erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata)
+                GrunnlagsdataEndring.ADRESSE_ANNEN_FORELDER -> erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata)
+            }
+        }
+    }
+
+    private fun erAdresseForSøkerForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return tidligereGrunnlagsdata.grunnlagsdata.søker.bostedsadresse != this.grunnlagsdata.søker.bostedsadresse
+    }
+
+    private fun erAdresserForAnnenForelderForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        val harAnnenForelderEndretAdresse = tidligereGrunnlagsdata.grunnlagsdata.annenForelder.any { tidligereAnnenForelder ->
+            val annenForelder = this.grunnlagsdata.annenForelder.find { it.personIdent == tidligereAnnenForelder.personIdent }
+            tidligereAnnenForelder.bostedsadresse != annenForelder?.bostedsadresse
+        }
+        return harAnnenForelderEndretAdresse
+    }
+
+    private fun erSivilstandOppdatertForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return this.grunnlagsdata.søker.sivilstand != tidligereGrunnlagsdata.grunnlagsdata.søker.sivilstand
+    }
+
+    private fun erBarnForskjelligMed(tidligereGrunnlagsdata: GrunnlagsdataMedMetadata): Boolean {
+        return this.grunnlagsdata.barn != tidligereGrunnlagsdata.grunnlagsdata.barn
+    }
+}
 
 data class GrunnlagsdataDomene(
     val søker: Søker,
@@ -59,7 +89,6 @@ data class Søker(
     val oppholdsadresse: List<Oppholdsadresse>,
     val sivilstand: List<SivilstandMedNavn>,
     val statsborgerskap: List<Statsborgerskap>,
-    val telefonnummer: List<Telefonnummer>,
     val tilrettelagtKommunikasjon: List<TilrettelagtKommunikasjon>,
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val utflyttingFraNorge: List<UtflyttingFraNorge>,
@@ -119,9 +148,13 @@ data class FullmaktMedNavn(
     val områder: List<String>?
 )
 
+/**
+ * @param historiskPensjon kalles også Infotrygd PE PP, infotrygdperioder før desember 2008
+ */
 data class TidligereVedtaksperioder(
     val infotrygd: TidligereInnvilgetVedtak,
-    val sak: TidligereInnvilgetVedtak? = null
+    val sak: TidligereInnvilgetVedtak? = null,
+    val historiskPensjon: Boolean? = null
 )
 
 data class TidligereInnvilgetVedtak(
@@ -129,3 +162,10 @@ data class TidligereInnvilgetVedtak(
     val harTidligereBarnetilsyn: Boolean = false,
     val harTidligereSkolepenger: Boolean = false
 )
+
+enum class GrunnlagsdataEndring {
+    BARN,
+    ADRESSE_ANNEN_FORELDER,
+    ADRESSE_SØKER,
+    SIVILSTAND
+}

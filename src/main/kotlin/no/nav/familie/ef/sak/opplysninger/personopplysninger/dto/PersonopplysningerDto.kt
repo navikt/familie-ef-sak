@@ -19,7 +19,6 @@ data class PersonopplysningerDto(
     val folkeregisterpersonstatus: Folkeregisterpersonstatus?,
     val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?,
-    val telefonnummer: TelefonnummerDto?,
     val statsborgerskap: List<StatsborgerskapDto>,
     val sivilstand: List<SivilstandDto>,
     val adresse: List<AdresseDto>,
@@ -30,9 +29,10 @@ data class PersonopplysningerDto(
     val innflyttingTilNorge: List<InnflyttingDto>,
     val utflyttingFraNorge: List<UtflyttingDto>,
     val oppholdstillatelse: List<OppholdstillatelseDto>,
-    val vergemål: List<VergemålDto>,
-    val lagtTilEtterFerdigstilling: Boolean
+    val vergemål: List<VergemålDto>
 )
+
+data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?)
 
 data class BarnDto(
     val personIdent: String,
@@ -40,6 +40,9 @@ data class BarnDto(
     val annenForelder: AnnenForelderMinimumDto?,
     val adresse: List<AdresseDto>,
     val borHosSøker: Boolean,
+    val deltBosted: List<DeltBostedDto>,
+    /** TODO : Endre på denne, siden delt bosted ikke nødvendigvis gjelder nåtid */
+    val harDeltBostedNå: Boolean,
     val fødselsdato: LocalDate?,
     val dødsdato: LocalDate?
 )
@@ -53,12 +56,8 @@ data class BarnMinimumDto(
 data class AnnenForelderMinimumDto(
     val personIdent: String,
     val navn: String,
-    val dødsdato: LocalDate?
-)
-
-data class TelefonnummerDto(
-    val landskode: String,
-    val nummer: String
+    val dødsdato: LocalDate?,
+    val bostedsadresse: String?
 )
 
 data class SivilstandDto(
@@ -125,17 +124,17 @@ enum class Adressebeskyttelse {
 }
 
 @Suppress("unused")
-enum class Folkeregisterpersonstatus(private val pdlStatus: String) {
+enum class Folkeregisterpersonstatus(private val pdlStatus: String, val visningsnavn: String) {
 
-    BOSATT("bosatt"),
-    UTFLYTTET("utflyttet"),
-    FORSVUNNET("forsvunnet"),
-    DØD("doed"),
-    OPPHØRT("opphoert"),
-    FØDSELSREGISTRERT("foedselsregistrert"),
-    MIDLERTIDIG("midlertidig"),
-    INAKTIV("inaktiv"),
-    UKJENT("ukjent");
+    BOSATT("bosatt", "Bosatt"),
+    UTFLYTTET("utflyttet", "Utflyttet"),
+    FORSVUNNET("forsvunnet", "Forsvunnet"),
+    DØD("doed", "Død"),
+    OPPHØRT("opphoert", "Opphørt"),
+    FØDSELSREGISTRERT("foedselsregistrert", "Fødselsregistrert"),
+    MIDLERTIDIG("midlertidig", "Midlertidig"),
+    INAKTIV("inaktiv", "Inaktiv"),
+    UKJENT("ukjent", "Ukjent");
 
     companion object {
 

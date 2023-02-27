@@ -8,8 +8,7 @@ import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattFørsteg
 import no.nav.familie.ef.sak.felles.util.BehandlingOppsettUtil.iverksattRevurdering
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -21,65 +20,68 @@ internal class OpprettBehandlingUtilTest {
     inner class Førstegangsbehandling {
         @Test
         fun `mulig å lage behandling når det ikke finnes behandling fra før`() {
-            assertThat(
-                catchThrowable {
-                    validerKanOppretteNyBehandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        listOf()
-                    )
-                }
-            ).doesNotThrowAnyException()
+            validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf())
         }
 
         @Test
         fun `det skal være mulig å opprette hvis eksisterende behandling er henlagt førstegangsbehandling`() {
-            validerKanOppretteNyBehandling(
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                listOf(
-                    behandling(
-                        fagsak = fagsak,
-                        resultat = BehandlingResultat.HENLAGT,
-                        status = BehandlingStatus.FERDIGSTILT
-                    )
-                )
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.HENLAGT,
+                status = BehandlingStatus.FERDIGSTILT
             )
+            validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
         }
 
         @Test
         fun `det skal ikke være mulig å opprette hvis eksisterende behandling er en revurdering`() {
-            assertThat(
-                catchThrowable {
-                    validerKanOppretteNyBehandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        listOf(
-                            behandling(
-                                fagsak = fagsak,
-                                resultat = BehandlingResultat.INNVILGET,
-                                status = BehandlingStatus.FERDIGSTILT,
-                                type = BehandlingType.REVURDERING
-                            )
-                        )
-                    )
-                }
-            ).hasMessage("Kan ikke opprette en førstegangsbehandling når forrige behandling ikke er en førstegangsbehandling")
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.INNVILGET,
+                status = BehandlingStatus.FERDIGSTILT,
+                type = BehandlingType.REVURDERING
+            )
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
+            }.hasMessage("Kan ikke opprette en førstegangsbehandling når forrige behandling ikke er en førstegangsbehandling")
         }
 
         @Test
         fun `det skal ikke være mulig å opprette hvis eksisterende behandling er avslått førstegangsbehandling`() {
-            assertThat(
-                catchThrowable {
-                    validerKanOppretteNyBehandling(
-                        BehandlingType.FØRSTEGANGSBEHANDLING,
-                        listOf(
-                            behandling(
-                                fagsak = fagsak,
-                                resultat = BehandlingResultat.AVSLÅTT,
-                                status = BehandlingStatus.FERDIGSTILT
-                            )
-                        )
-                    )
-                }
-            ).hasMessage("Kan ikke opprette en førstegangsbehandling når siste behandling ikke er henlagt")
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.AVSLÅTT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
+            }.hasMessage("Kan ikke opprette en førstegangsbehandling når siste behandling ikke er henlagt")
+        }
+
+        @Test
+        fun `det skal ikke være mulig å opprette en førstegangsbehandling når det finnes en behandling på vent`() {
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.IKKE_SATT,
+                status = BehandlingStatus.SATT_PÅ_VENT
+            )
+
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
+        }
+
+        @Test
+        fun `det skal ikke være mulig å opprette en revurdering når det finnes en førstegangsbehandling på vent`() {
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.IKKE_SATT,
+                status = BehandlingStatus.SATT_PÅ_VENT
+            )
+
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, listOf(behandling))
+            }.hasMessage("Kan ikke opprette ny behandling når det finnes en førstegangsbehandling på vent")
         }
     }
 
@@ -87,68 +89,69 @@ internal class OpprettBehandlingUtilTest {
     inner class Revurdering {
         @Test
         fun `det skal ikke være mulig å opprette en revurdering hvis forrige behandling ikke er ferdigstilt`() {
-            assertThat(
-                catchThrowable {
-                    validerKanOppretteNyBehandling(
-                        BehandlingType.REVURDERING,
-                        listOf(
-                            behandling(
-                                fagsak = fagsak,
-                                status = BehandlingStatus.FERDIGSTILT
-                            ),
-                            behandling(
-                                fagsak = fagsak,
-                                status = BehandlingStatus.UTREDES
-                            ),
-                            behandling(
-                                fagsak = fagsak,
-                                status = BehandlingStatus.FERDIGSTILT
-                            )
-                        )
-                    )
-                }
-            ).hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
+            val behandlinger = listOf(
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET
+                ),
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.UTREDES
+                ),
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.FERDIGSTILT,
+                    resultat = BehandlingResultat.INNVILGET
+                )
+            )
+            assertThatThrownBy { validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger) }
+                .hasMessage("Det finnes en behandling på fagsaken som ikke er ferdigstilt")
+        }
+
+        @Test
+        internal fun `skal kunne opprette en ny behandling hvis en tidligere behandling er satt på vent`() {
+            val behandlinger = listOf(
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.FERDIGSTILT
+                ),
+                behandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.SATT_PÅ_VENT,
+                    type = BehandlingType.REVURDERING
+                )
+            )
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING, behandlinger)
         }
 
         @Test
         fun `det skal være mulig å opprette en revurdering hvis eksisterende behandling er avslått førstegangsbehandling`() {
-            validerKanOppretteNyBehandling(
-                BehandlingType.REVURDERING,
-                listOf(
-                    behandling(
-                        fagsak = fagsak,
-                        resultat = BehandlingResultat.AVSLÅTT,
-                        status = BehandlingStatus.FERDIGSTILT
-                    )
-                )
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.AVSLÅTT,
+                status = BehandlingStatus.FERDIGSTILT
             )
+            validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(behandling))
         }
 
         @Test
         fun `det skal ikke være mulig å opprette en revurdering om eksisterende behandling er henlagt`() {
-            assertThat(
-                catchThrowable {
-                    validerKanOppretteNyBehandling(
-                        BehandlingType.REVURDERING,
-                        listOf(
-                            behandling(
-                                fagsak = fagsak,
-                                resultat = BehandlingResultat.HENLAGT,
-                                status = BehandlingStatus.FERDIGSTILT
-                            )
-                        )
-                    )
-                }
-            ).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
+            val behandling = behandling(
+                fagsak = fagsak,
+                resultat = BehandlingResultat.HENLAGT,
+                status = BehandlingStatus.FERDIGSTILT
+            )
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf(behandling))
+            }.hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
         }
 
         @Test
         fun `skal ikke være mulig å opprette en revurdering hvis det ikke finnes en behandling fra før`() {
-            assertThat(
-                catchThrowable {
-                    validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf())
-                }
-            ).hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
+            assertThatThrownBy {
+                validerKanOppretteNyBehandling(BehandlingType.REVURDERING, listOf())
+            }.hasMessage("Det finnes ikke en tidligere behandling på fagsaken")
         }
     }
 
@@ -163,15 +166,13 @@ internal class OpprettBehandlingUtilTest {
         @Test
         internal fun `kan ikke opprette en migrering når tidligere behanding ikke er blankett`() {
             listOf(iverksattFørstegangsbehandling, iverksattRevurdering).forEach {
-                assertThat(
-                    catchThrowable {
-                        validerKanOppretteNyBehandling(
-                            BehandlingType.REVURDERING,
-                            listOf(it),
-                            erMigrering = true
-                        )
-                    }
-                ).hasMessage("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før")
+                assertThatThrownBy {
+                    validerKanOppretteNyBehandling(
+                        BehandlingType.REVURDERING,
+                        listOf(it),
+                        erMigrering = true
+                    )
+                }.hasMessage("Det er ikke mulig å opprette en migrering når det finnes en behandling fra før")
             }
         }
     }

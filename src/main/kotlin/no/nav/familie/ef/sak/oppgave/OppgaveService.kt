@@ -5,7 +5,6 @@ import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.oppgave.OppgaveUtil.ENHET_NR_NAY
-import no.nav.familie.ef.sak.oppgave.OppgaveUtil.sekunderSidenEndret
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -57,12 +56,12 @@ class OppgaveService(
         } else {
             val opprettetOppgaveId =
                 opprettOppgaveUtenÅLagreIRepository(
-                    behandlingId,
-                    oppgavetype,
-                    null,
-                    lagOppgaveTekst(beskrivelse),
-                    tilordnetNavIdent,
-                    mappeId
+                    behandlingId = behandlingId,
+                    oppgavetype = oppgavetype,
+                    fristFerdigstillelse = null,
+                    beskrivelse = lagOppgaveTekst(beskrivelse),
+                    tilordnetNavIdent = tilordnetNavIdent,
+                    mappeId = mappeId
                 )
             val oppgave = EfOppgave(
                 gsakOppgaveId = opprettetOppgaveId,
@@ -85,6 +84,13 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
     ): Long {
+        val settBehandlesAvApplikasjon = when (oppgavetype) {
+            Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.GodkjenneVedtak -> true
+            Oppgavetype.InnhentDokumentasjon -> false
+            else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
+        }
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
         val enhetsnummer = arbeidsfordelingService.hentNavEnhet(personIdent)?.enhetId
@@ -98,7 +104,7 @@ class OppgaveService(
             enhetsnummer = enhetsnummer,
             behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
             tilordnetRessurs = tilordnetNavIdent,
-            behandlesAvApplikasjon = "familie-ef-sak",
+            behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
             mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype)
         )
 
@@ -145,21 +151,16 @@ class OppgaveService(
         return mappe.id.toLong()
     }
 
-    fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String): Long {
-        val gsakOppgave = hentOppgave(gsakOppgaveId)
-        val tidligereSaksbehandler = gsakOppgave.tilordnetRessurs
-        if (tidligereSaksbehandler != saksbehandler && tidligereSaksbehandler != null) {
-            logger.info(
-                "(Eier av behandling/oppgave) Fordeler oppgave=$gsakOppgaveId " +
-                    "fra=$tidligereSaksbehandler til=$saksbehandler " +
-                    "sekunderSidenEndret=${sekunderSidenEndret(gsakOppgave)}"
-            )
-        }
-        return oppgaveClient.fordelOppgave(gsakOppgaveId, saksbehandler)
+    fun fordelOppgave(gsakOppgaveId: Long, saksbehandler: String, versjon: Int? = null): Long {
+        return oppgaveClient.fordelOppgave(
+            gsakOppgaveId,
+            saksbehandler,
+            versjon
+        )
     }
 
-    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long): Long {
-        return oppgaveClient.fordelOppgave(gsakOppgaveId, null)
+    fun tilbakestillFordelingPåOppgave(gsakOppgaveId: Long, versjon: Int? = null): Long {
+        return oppgaveClient.fordelOppgave(gsakOppgaveId, null, versjon = versjon)
     }
 
     fun hentOppgaveSomIkkeErFerdigstilt(oppgavetype: Oppgavetype, saksbehandling: Saksbehandling): EfOppgave? {

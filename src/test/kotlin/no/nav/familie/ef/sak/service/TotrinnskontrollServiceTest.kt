@@ -21,6 +21,7 @@ import no.nav.familie.ef.sak.vedtak.TotrinnskontrollService
 import no.nav.familie.ef.sak.vedtak.domain.VedtakErUtenBeslutter
 import no.nav.familie.ef.sak.vedtak.dto.BeslutteVedtakDto
 import no.nav.familie.ef.sak.vedtak.dto.TotrinnkontrollStatus
+import no.nav.familie.ef.sak.vedtak.dto.ÅrsakUnderkjent
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -55,6 +56,16 @@ internal class TotrinnskontrollServiceTest {
                 BeslutteVedtakDto(false, ""),
                 VedtakErUtenBeslutter(false)
             )
+        assertThat(response).isEqualTo(opprettetAv)
+    }
+
+    @Test
+    internal fun `skal utlede saksbehandler som sendte behandling til besluttning`() {
+        val opprettetAv = "Behandler"
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), StegType.SEND_TIL_BESLUTTER) } returns
+            behandlingshistorikk(StegType.SEND_TIL_BESLUTTER, opprettetAv = opprettetAv)
+        val response = totrinnskontrollService
+            .hentSaksbehandlerSomSendteTilBeslutter(UUID.randomUUID())
         assertThat(response).isEqualTo(opprettetAv)
     }
 
@@ -122,7 +133,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAv = SikkerhetContext.hentSaksbehandler()
+                opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -172,6 +183,24 @@ internal class TotrinnskontrollServiceTest {
 
         assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
             .hasMessageContaining("Skal ikke kunne være annen status enn UNDERKJENT")
+    }
+
+    @Test
+    internal fun `skal returnere begrunnelse og årsaker underkjent når vedtak er underkjent`() {
+        every { behandlingService.hentBehandling(any()) } returns behandling(BehandlingStatus.UTREDES)
+        every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any(), any()) } returns
+            behandlingshistorikk(
+                steg = StegType.BESLUTTE_VEDTAK,
+                utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
+                opprettetAv = "Noe",
+                beslutt = BeslutteVedtakDto(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET))
+
+            )
+
+        val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
+        assertThat(totrinnskontroll.status).isEqualTo(TotrinnkontrollStatus.TOTRINNSKONTROLL_UNDERKJENT)
+        assertThat(totrinnskontroll.totrinnskontroll?.begrunnelse).isEqualTo("begrunnelse")
+        assertThat(totrinnskontroll.totrinnskontroll?.årsakerUnderkjent).containsExactlyInAnyOrder(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET)
     }
 
     private fun behandlingshistorikk(
