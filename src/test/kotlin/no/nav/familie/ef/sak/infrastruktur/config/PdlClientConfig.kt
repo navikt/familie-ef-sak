@@ -45,6 +45,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNo
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata as PldMetadata
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagKjønn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagNavn
@@ -223,14 +224,14 @@ class PdlClientConfig {
                             LocalDate.of(2053, 1, 1),
                             null,
                             null,
-                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(false)
+                            PldMetadata(false)
                         ),
                         DeltBosted(
-                            LocalDate.now().minusDays(20),
-                            LocalDate.now().minusDays(10),
+                            LocalDate.of(2020, 1, 1),
+                            LocalDate.of(2023, 3, 31),
                             null,
                             null,
-                            no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata(true)
+                            PldMetadata(true)
                         )
                     ),
                     forelderBarnRelasjon = familierelasjonerBarn(),
