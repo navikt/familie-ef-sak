@@ -34,7 +34,9 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId")
-        if (metadata.behandling.erSøknadSomBehandlingÅrsak() &&
+
+        if (metadata.skalAutomatiskVurdereNyttBarnSammePartner == true &&
+            metadata.behandling.erSøknadSomBehandlingÅrsak() &&
             !metadata.vilkårgrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() &&
             metadata.vilkårgrunnlagDto.barnMedSamvær.alleBarnHarRegistrertAnnenForelder()
         ) {

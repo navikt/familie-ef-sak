@@ -27,7 +27,8 @@ data class HovedregelMetadata(
     val søktOmBarnetilsyn: List<UUID>,
     val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
     val vilkårgrunnlagDto: VilkårGrunnlagDto,
-    val behandling: Behandling
+    val behandling: Behandling,
+    val skalAutomatiskVurdereNyttBarnSammePartner: Boolean? = true
 )
 
 data class BarnForelderLangAvstandTilSøker(

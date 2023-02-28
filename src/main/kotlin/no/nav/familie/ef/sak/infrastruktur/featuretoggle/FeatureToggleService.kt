@@ -21,7 +21,7 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser"),
 
     OPPRETT_BEHANDLING_FERDIGSTILT_JOURNALPOST("familie.ef.sak.opprett-behandling-for-ferdigstilt-journalpost", "Permission"),
-
+    AUTOMATISK_VURDER_NYTT_BARN_SAMME_PARTNER("familie.ef.sak.nytt-barn-samme-partner"),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
