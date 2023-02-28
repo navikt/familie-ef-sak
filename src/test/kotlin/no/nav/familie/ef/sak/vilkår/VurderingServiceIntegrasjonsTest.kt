@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 
-internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
+internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
 
     @Autowired
     lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
@@ -58,7 +59,10 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
             Sivilstandstype.SKILT,
             false,
             barnPåRevurdering,
-            emptyList()
+            emptyList(),
+            listOf(),
+            mockk(),
+            mockk()
         )
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
@@ -94,7 +98,10 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
             Sivilstandstype.SKILT,
             false,
             emptyList(),
-            emptyList()
+            emptyList(),
+            emptyList(),
+            mockk(),
+            mockk()
         )
         assertThat(
             catchThrowable {
@@ -141,7 +148,9 @@ internal class VurderingServiceIntegratsjonsTest : OppslagSpringRunnerTest() {
                 søknadskjema.sivilstand,
                 Sivilstandstype.ENKE_ELLER_ENKEMANN,
                 barn = barn,
-                søktOmBarnetilsyn = emptyList()
+                søktOmBarnetilsyn = emptyList(),
+                vilkårgrunnlagDto = mockk(),
+                behandling = mockk()
             )
         val delvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(

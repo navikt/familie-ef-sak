@@ -138,7 +138,7 @@
             "vurderinger": [
               {
                 "regelId": "HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER",
-                "svar": null,
+                "svar": "NEI",
                 "begrunnelse": "Godkjent"
               }
             ]

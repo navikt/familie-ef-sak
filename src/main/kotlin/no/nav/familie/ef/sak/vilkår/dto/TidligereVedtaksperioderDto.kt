@@ -7,13 +7,18 @@ data class TidligereVedtaksperioderDto(
     val infotrygd: TidligereInnvilgetVedtakDto?,
     val sak: TidligereInnvilgetVedtakDto?,
     val historiskPensjon: Boolean?
-)
+) {
+    fun harTidligereVedtaksperioder() =
+        infotrygd?.harTidligereInnvilgetVedtak() ?: false || sak?.harTidligereInnvilgetVedtak() ?: false || historiskPensjon ?: true
+}
 
 data class TidligereInnvilgetVedtakDto(
     val harTidligereOvergangsstønad: Boolean,
     val harTidligereBarnetilsyn: Boolean,
     val harTidligereSkolepenger: Boolean
-)
+) {
+    fun harTidligereInnvilgetVedtak() = harTidligereOvergangsstønad || harTidligereBarnetilsyn || harTidligereSkolepenger
+}
 
 fun TidligereVedtaksperioder?.tilDto(): TidligereVedtaksperioderDto = this?.let {
     TidligereVedtaksperioderDto(

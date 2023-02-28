@@ -48,5 +48,4 @@ object AdresseHjelper {
     private fun BarnMedIdent.erOver18År(): Boolean {
         return !fødsel.gjeldende().erUnder18År()
     }
-
 }

@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataEndring
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -123,12 +124,17 @@ class VurderingService(
         val grunnlag = vilkårGrunnlagService.hentGrunnlag(behandlingId, søknad, personIdent, barn)
         val søktOmBarnetilsyn =
             grunnlag.barnMedSamvær.filter { it.barnepass?.skalHaBarnepass == true }.map { it.barnId }
+        val behandling = behandlingService.hentBehandling(behandlingId)
+
         val metadata = HovedregelMetadata(
             sivilstandstype = grunnlag.sivilstand.registergrunnlag.type,
             sivilstandSøknad = søknad?.sivilstand,
             barn = barn,
             søktOmBarnetilsyn = søktOmBarnetilsyn,
-            langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() }
+            langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
+            vilkårgrunnlagDto = grunnlag,
+            behandling = behandling,
+            skalAutomatiskVurdereNyttBarnSammePartner = featureToggleService.isEnabled(Toggle.AUTOMATISK_VURDER_NYTT_BARN_SAMME_PARTNER)
         )
         return Pair(grunnlag, metadata)
     }

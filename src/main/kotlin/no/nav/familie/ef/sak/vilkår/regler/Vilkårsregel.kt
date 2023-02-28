@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.vilkår.regler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.behandling.domain.Behandling
+import no.nav.familie.ef.sak.felles.util.norskFormat
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
@@ -10,6 +12,8 @@ import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vurdering
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
+import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
+import java.time.LocalDate
 import java.util.UUID
 
 /**
@@ -21,7 +25,10 @@ data class HovedregelMetadata(
     val erMigrering: Boolean = false,
     val barn: List<BehandlingBarn>,
     val søktOmBarnetilsyn: List<UUID>,
-    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf()
+    val langAvstandTilSøker: List<BarnForelderLangAvstandTilSøker> = listOf(),
+    val vilkårgrunnlagDto: VilkårGrunnlagDto,
+    val behandling: Behandling,
+    val skalAutomatiskVurdereNyttBarnSammePartner: Boolean? = true
 )
 
 data class BarnForelderLangAvstandTilSøker(
@@ -55,4 +62,26 @@ abstract class Vilkårsregel(
     fun regel(regelId: RegelId): RegelSteg {
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
+
+    protected fun automatiskVurdertDelvilkår(regelId: RegelId, svarId: SvarId, begrunnelse: String): Delvilkårsvurdering {
+        return Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = regelId,
+                    svar = svarId,
+                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): $begrunnelse"
+                )
+            )
+        )
+    }
+
+    protected fun ubesvartDelvilkårsvurdering(regelId: RegelId) = Delvilkårsvurdering(
+        resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+        vurderinger = listOf(
+            Vurdering(
+                regelId = regelId
+            )
+        )
+    )
 }
