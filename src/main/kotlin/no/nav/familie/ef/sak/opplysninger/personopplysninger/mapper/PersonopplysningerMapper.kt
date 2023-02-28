@@ -24,7 +24,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -35,8 +34,6 @@ class PersonopplysningerMapper(
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun tilPersonopplysninger(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
@@ -156,7 +153,6 @@ class PersonopplysningerMapper(
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
             borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
             deltBosted = deltBostedDto,
-            deltBostedPerioder = deltBostedDto,
             harDeltBostedNå = AdresseHjelper.harDeltBosted(barn, grunnlagsdataOpprettet),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
