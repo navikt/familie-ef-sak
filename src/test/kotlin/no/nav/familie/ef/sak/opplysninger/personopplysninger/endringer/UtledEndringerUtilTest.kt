@@ -432,7 +432,7 @@ internal class UtledEndringerUtilTest {
             assertBarnHarEndringerMedDetaljer(endringer)
             val endringsdetaljer = detaljer[0].endringer
             assertThat(endringsdetaljer).hasSize(1)
-            assertThat(endringsdetaljer[0].felt).isEqualTo("Har delt bosted nå")
+            assertThat(endringsdetaljer[0].felt).isEqualTo("Har delt bosted")
             assertThat(endringsdetaljer[0].tidligere).isEqualTo("Nei")
             assertThat(endringsdetaljer[0].ny).isEqualTo("Ja")
             assertIngenAndreEndringer(endringer, "barn")
