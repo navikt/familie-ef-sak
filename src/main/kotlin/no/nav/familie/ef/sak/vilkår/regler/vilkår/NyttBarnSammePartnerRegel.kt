@@ -35,16 +35,16 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
     ): List<Delvilkårsvurdering> {
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId")
 
-        if (metadata.skalAutomatiskVurdereNyttBarnSammePartner == true &&
-            metadata.behandling.erSøknadSomBehandlingÅrsak() &&
-            !metadata.vilkårgrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() &&
-            metadata.vilkårgrunnlagDto.barnMedSamvær.alleBarnHarRegistrertAnnenForelder()
-        ) {
-            return automatiskVurdertDelvilkårList(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, SvarId.NEI, "Verken bruker eller annen forelder får eller har fått stønad for felles barn.")
+        if (metadata.skalAutomatiskVurdereNyttBarnSammePartner == true && kanAutomatiskInnvilges(metadata)) {
+            return listOf(automatiskVurdertDelvilkår(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, SvarId.NEI, "Verken bruker eller annen forelder får eller har fått stønad for felles barn."))
         }
 
         return listOf(ubesvartDelvilkårsvurdering(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER))
     }
+
+    private fun kanAutomatiskInnvilges(metadata: HovedregelMetadata) = metadata.behandling.erSøknadSomBehandlingÅrsak() &&
+        !metadata.vilkårgrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() &&
+        metadata.vilkårgrunnlagDto.barnMedSamvær.alleBarnHarRegistrertAnnenForelder()
 
     companion object {
 

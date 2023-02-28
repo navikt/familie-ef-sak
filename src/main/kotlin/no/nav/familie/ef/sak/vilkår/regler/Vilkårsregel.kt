@@ -63,16 +63,14 @@ abstract class Vilkårsregel(
         return regler[regelId] ?: throw Feil("Finner ikke regelId=$regelId for vilkårType=$vilkårType")
     }
 
-    protected fun automatiskVurdertDelvilkårList(regelId: RegelId, svarId: SvarId, begrunnelse: String): List<Delvilkårsvurdering> {
-        return listOf(
-            Delvilkårsvurdering(
-                resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
-                listOf(
-                    Vurdering(
-                        regelId = regelId,
-                        svar = svarId,
-                        begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): $begrunnelse"
-                    )
+    protected fun automatiskVurdertDelvilkår(regelId: RegelId, svarId: SvarId, begrunnelse: String): Delvilkårsvurdering {
+        return Delvilkårsvurdering(
+            resultat = Vilkårsresultat.AUTOMATISK_OPPFYLT,
+            listOf(
+                Vurdering(
+                    regelId = regelId,
+                    svar = svarId,
+                    begrunnelse = "Automatisk vurdert (${LocalDate.now().norskFormat()}): $begrunnelse"
                 )
             )
         )
