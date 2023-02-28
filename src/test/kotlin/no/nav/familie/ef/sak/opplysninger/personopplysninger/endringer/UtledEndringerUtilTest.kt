@@ -99,7 +99,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.detaljer!!.tidligere).isEqualTo("Mangler verdi")
-            assertThat(endringer.folkeregisterpersonstatus.detaljer.ny).isEqualTo("Bosatt")
+            assertThat(endringer.folkeregisterpersonstatus.detaljer!!.ny).isEqualTo("Bosatt")
             assertIngenAndreEndringer(endringer, "folkeregisterpersonstatus")
         }
 
@@ -112,7 +112,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.harEndringer).isTrue
             assertThat(endringer.folkeregisterpersonstatus.detaljer!!.tidligere).isEqualTo("Død")
-            assertThat(endringer.folkeregisterpersonstatus.detaljer.ny).isEqualTo("Bosatt")
+            assertThat(endringer.folkeregisterpersonstatus.detaljer!!.ny).isEqualTo("Bosatt")
         }
 
         @Test
@@ -146,7 +146,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.fødselsdato.harEndringer).isTrue
             assertThat(endringer.fødselsdato.detaljer!!.tidligere).isEqualTo(tidligere.norskFormat())
-            assertThat(endringer.fødselsdato.detaljer.ny).isEqualTo(ny.norskFormat())
+            assertThat(endringer.fødselsdato.detaljer!!.ny).isEqualTo(ny.norskFormat())
             assertIngenAndreEndringer(endringer, "fødselsdato")
         }
 
@@ -158,7 +158,7 @@ internal class UtledEndringerUtilTest {
             assertThat(endringer.harEndringer).isTrue
             assertThat(endringer.dødsdato.harEndringer).isTrue
             assertThat(endringer.dødsdato.detaljer!!.tidligere).isEqualTo(tidligere.norskFormat())
-            assertThat(endringer.dødsdato.detaljer.ny).isEqualTo(ny.norskFormat())
+            assertThat(endringer.dødsdato.detaljer!!.ny).isEqualTo(ny.norskFormat())
             assertIngenAndreEndringer(endringer, "dødsdato")
         }
 
