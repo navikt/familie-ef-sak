@@ -34,17 +34,22 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
         barnId: UUID?
     ): List<Delvilkårsvurdering> {
         logger.info("Initiering av nytt barn samme partner regel. Antall barn: ${metadata.barn.size} - barnId: $barnId")
-
-        if (metadata.skalAutomatiskVurdereNyttBarnSammePartner == true && kanAutomatiskInnvilges(metadata)) {
-            return listOf(automatiskVurdertDelvilkår(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, SvarId.NEI, "Verken bruker eller annen forelder får eller har fått stønad for felles barn."))
+        if (metadata.skalAutomatiskVurdereNyttBarnSammePartner == true) {
+            if (metadata.barn.size == 1) {
+                return listOf(automatiskVurdertDelvilkår(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, SvarId.NEI, "Bruker har kun ett barn."))
+            }
+            if (kanAutomatiskInnvilgesForBrukerMedFlereBarn(metadata)) {
+                return listOf(automatiskVurdertDelvilkår(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER, SvarId.NEI, "Verken bruker eller annen forelder får eller har fått stønad for felles barn."))
+            }
         }
 
         return listOf(ubesvartDelvilkårsvurdering(RegelId.HAR_FÅTT_ELLER_VENTER_NYTT_BARN_MED_SAMME_PARTNER))
     }
 
-    private fun kanAutomatiskInnvilges(metadata: HovedregelMetadata) = metadata.behandling.erSøknadSomBehandlingÅrsak() &&
-        !metadata.vilkårgrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() &&
-        metadata.vilkårgrunnlagDto.barnMedSamvær.alleBarnHarRegistrertAnnenForelder()
+    private fun kanAutomatiskInnvilgesForBrukerMedFlereBarn(metadata: HovedregelMetadata) =
+        metadata.behandling.erSøknadSomBehandlingÅrsak() &&
+            !metadata.vilkårgrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() &&
+            metadata.vilkårgrunnlagDto.barnMedSamvær.alleRegisterBarnHarRegistrertAnnenForelder()
 
     companion object {
 
@@ -62,8 +67,11 @@ class NyttBarnSammePartnerRegel : Vilkårsregel(
 private fun Behandling.erSøknadSomBehandlingÅrsak() = this.årsak == BehandlingÅrsak.SØKNAD
 
 private fun VilkårGrunnlagDto.harBrukerEllerAnnenForelderTidligereVedtak() =
-    this.barnMedSamvær.mapNotNull { it.søknadsgrunnlag.forelder?.tidligereVedtaksperioder }
+    this.barnMedSamvær.filter { it.registergrunnlag.fødselsnummer != null }
+        .mapNotNull { it.registergrunnlag.forelder?.tidligereVedtaksperioder }
         .any { it.harTidligereVedtaksperioder() } ||
         this.tidligereVedtaksperioder.harTidligereVedtaksperioder()
 
-private fun List<BarnMedSamværDto>.alleBarnHarRegistrertAnnenForelder() = this.all { it.registergrunnlag.forelder?.fødselsnummer != null }
+private fun List<BarnMedSamværDto>.alleRegisterBarnHarRegistrertAnnenForelder() =
+    this.filter { it.registergrunnlag.fødselsnummer != null }
+        .all { it.registergrunnlag.forelder?.fødselsnummer != null }
