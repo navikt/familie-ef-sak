@@ -124,6 +124,7 @@ internal class VurderingServiceTest {
             "fnr",
             false,
             null,
+            emptyList(),
             false,
             AnnenForelderDto(
                 "navn",
