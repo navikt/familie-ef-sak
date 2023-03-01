@@ -52,7 +52,7 @@ query($identer: [ID!]!){
                     bostedskommune
                 }
             }
-            deltBosted {
+            deltBosted (historikk: true){
                 startdatoForKontrakt
                 sluttdatoForKontrakt
                 vegadresse {

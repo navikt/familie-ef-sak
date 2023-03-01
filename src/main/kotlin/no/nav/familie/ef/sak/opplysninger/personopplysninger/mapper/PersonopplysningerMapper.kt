@@ -37,7 +37,7 @@ class PersonopplysningerMapper(
 ) {
 
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun tilPersonopplysninger(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
@@ -126,7 +126,7 @@ class PersonopplysningerMapper(
         return AdresseHjelper.sorterAdresser(adresser)
     }
 
-    fun mapBarn(
+    private fun mapBarn(
         barn: BarnMedIdent,
         søkerIdenter: Set<String>,
         bostedsadresserForelder: List<Bostedsadresse>,
@@ -138,7 +138,12 @@ class PersonopplysningerMapper(
         }?.relatertPersonsIdent
 
         barn.deltBosted.forEach(){
-            logger.info("${it.startdatoForKontrakt} historisk: ${it.metadata.historisk}")
+            secureLogger.info("${barn.personIdent} : ${it.startdatoForKontrakt} historisk: ${it.metadata.historisk}")
+        }
+
+        if (barn.deltBosted.size == 0 ){
+            secureLogger.info("barn: ${barn.personIdent} , ikke funnet delt bosted")
+
         }
 
         feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
