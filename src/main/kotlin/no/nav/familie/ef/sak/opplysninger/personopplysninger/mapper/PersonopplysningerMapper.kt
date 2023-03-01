@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -34,6 +35,9 @@ class PersonopplysningerMapper(
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
+
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun tilPersonopplysninger(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
@@ -132,6 +136,10 @@ class PersonopplysningerMapper(
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
+
+        barn.deltBosted.forEach(){
+            logger.info("${it.startdatoForKontrakt} historisk: ${it.metadata.historisk}")
+        }
 
         feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
         val deltBostedDto =
