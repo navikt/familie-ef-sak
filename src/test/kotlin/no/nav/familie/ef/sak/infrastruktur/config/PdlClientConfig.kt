@@ -45,7 +45,6 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.UtflyttingFraNo
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergeEllerFullmektig
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.VergemaalEllerFremtidsfullmakt
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata as PldMetadata
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.fødsel
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagKjønn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagNavn
@@ -59,6 +58,7 @@ import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata as PldMetadata
 
 @Configuration
 @Profile("mock-pdl")

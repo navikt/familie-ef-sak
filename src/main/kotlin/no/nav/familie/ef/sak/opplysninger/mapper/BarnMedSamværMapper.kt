@@ -208,7 +208,7 @@ class BarnMedSamværMapper(
             ?: AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
 
     private fun List<DeltBosted>.tilDto(): List<DeltBostedDto> {
-        return this.mapNotNull { deltBosted -> deltBosted.tilDto()  }
+        return this.mapNotNull { deltBosted -> deltBosted.tilDto() }
     }
 }
 
@@ -217,5 +217,3 @@ private fun DeltBosted?.tilDto(): DeltBostedDto? {
         DeltBostedDto(this.startdatoForKontrakt, this.sluttdatoForKontrakt, this.metadata.historisk)
     } ?: null
 }
-
-

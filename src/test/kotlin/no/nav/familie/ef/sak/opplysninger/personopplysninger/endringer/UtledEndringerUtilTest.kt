@@ -269,7 +269,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `fjernet barn`() {
-            val barn = BarnDto("ident", "", null, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto("ident", "", null, emptyList(), true, emptyList(), false, null, null)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
                 dto(barn = listOf())
@@ -288,7 +288,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `endring på navn trigger ikke endring`() {
-            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = BarnDto(barnIdent, "2", null, emptyList(), true, emptyList(), false, null, null)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
@@ -304,7 +304,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `endring bor hos søker trigger endring`() {
-            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(borHosSøker = false)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
@@ -326,7 +326,7 @@ internal class UtledEndringerUtilTest {
         internal fun `endring dødsdato på barn trigger kun endring på barn`() {
             val dødsdato = LocalDate.now()
             val annenForelder = AnnenForelderMinimumDto(forelderIdent, "Navn", null, null)
-            val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto(barnIdent, "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(dødsdato = dødsdato)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
@@ -346,7 +346,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `endring av personident på annen forelder trigger endring både på barn og annen forelder`() {
-            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = BarnDto(
                 barnIdent,
                 "2",
@@ -354,7 +354,7 @@ internal class UtledEndringerUtilTest {
                 emptyList(),
                 true,
                 emptyList(),
-               false,
+                false,
                 null,
                 null
             )
@@ -380,7 +380,7 @@ internal class UtledEndringerUtilTest {
         internal fun `dødsdato på annen forelder skal kun trigge endring på annen forelder`() {
             val annenForelder = AnnenForelderMinimumDto(forelderIdent, "", null, null)
             val dødsdato = LocalDate.now()
-            val barn = BarnDto("ident", "", annenForelder, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto("ident", "", annenForelder, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(annenForelder = annenForelder.copy(dødsdato = dødsdato))
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
@@ -422,7 +422,7 @@ internal class UtledEndringerUtilTest {
 
         @Test
         internal fun `søkers barn får delt bosted trigger endring`() {
-            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(),  false, null, null)
+            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
             val barn2 = barn.copy(harDeltBostedNå = true)
             val endringer = finnEndringer(
                 dto(barn = listOf(barn)),
