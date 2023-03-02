@@ -91,7 +91,7 @@ class VilkårGrunnlagService(
         barn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
         stønadstype: StønadType,
-        opprettetRegistergrunnlag: LocalDate
+        grunnlagsdataOpprettet: LocalDate
     ): List<BarnMedSamværDto> {
         val barnMedSamværRegistergrunnlag = barnMedsamværMapper.mapRegistergrunnlag(
             personIdentSøker,
@@ -100,7 +100,7 @@ class VilkårGrunnlagService(
             barn,
             søknadsbarn,
             grunnlagsdata.søker.bostedsadresse,
-            opprettetRegistergrunnlag
+            grunnlagsdataOpprettet
         )
         val søknadsgrunnlag = barnMedsamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
         val barnepass: List<BarnepassDto> = when (stønadstype) {
