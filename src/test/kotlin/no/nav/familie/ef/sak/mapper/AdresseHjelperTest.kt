@@ -183,7 +183,7 @@ internal class AdresseHjelperTest {
 
         @Test
         internal fun `delt bosted finnes ikke, forvent harDeltBosted lik false`() {
-            val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList(), fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)),)
+            val barnMedDeltBosted = opprettBarnMedIdent(personIdent = "", deltBosted = emptyList(), fødsel = PdlTestdataHelper.fødsel(now().minusYears(2)))
             assertThat(AdresseHjelper.harDeltBosted(barnMedDeltBosted, now())).isFalse
         }
 

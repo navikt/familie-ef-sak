@@ -432,7 +432,7 @@ internal class UtledEndringerUtilTest {
             assertBarnHarEndringerMedDetaljer(endringer)
             val endringsdetaljer = detaljer[0].endringer
             assertThat(endringsdetaljer).hasSize(1)
-            assertThat(endringsdetaljer[0].felt).isEqualTo("Har delt bosted nå")
+            assertThat(endringsdetaljer[0].felt).isEqualTo("Har delt bosted")
             assertThat(endringsdetaljer[0].tidligere).isEqualTo("Nei")
             assertThat(endringsdetaljer[0].ny).isEqualTo("Ja")
             assertIngenAndreEndringer(endringer, "barn")
@@ -443,12 +443,14 @@ internal class UtledEndringerUtilTest {
             val startdatoForOpprinneligKontrakt = LocalDate.now().minusYears(1)
             val sluttdatoForOpprinneligKontrakt = LocalDate.now().plusYears(1)
             val deltBostedGammel = DeltBostedDto(
-                startdatoForOpprinneligKontrakt,
-                sluttdatoForOpprinneligKontrakt
+                startdatoForKontrakt = startdatoForOpprinneligKontrakt,
+                sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
+                historisk = true
             )
             val deltBostedNy = DeltBostedDto(
-                sluttdatoForOpprinneligKontrakt,
-                sluttdatoForOpprinneligKontrakt.plusYears(5)
+                startdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
+                sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt.plusYears(5),
+                historisk = false
             )
             val barn = BarnDto(
                 barnIdent, "", null, emptyList(), true, listOf(deltBostedGammel), true, null, null

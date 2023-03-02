@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.vilkår.regler
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstand
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.SøknadsskjemaOvergangsstønad
@@ -60,7 +61,9 @@ internal class GrafRendererTest {
                     it.søknad.sivilstand,
                     it.sivilstandstype,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockk(),
+                    behandling = mockk()
                 )
             )
             val hovedregler = initereDelvilkårsvurdering.filter { delvilkårsvurdering ->

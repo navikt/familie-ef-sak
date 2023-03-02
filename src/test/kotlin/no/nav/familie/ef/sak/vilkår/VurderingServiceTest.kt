@@ -37,6 +37,7 @@ import no.nav.familie.ef.sak.vilkår.regler.HovedregelMetadata
 import no.nav.familie.ef.sak.vilkår.regler.RegelId
 import no.nav.familie.ef.sak.vilkår.regler.SvarId
 import no.nav.familie.ef.sak.vilkår.regler.vilkår.SivilstandRegel
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
 import no.nav.familie.kontrakter.felles.ef.StønadType.BARNETILSYN
 import no.nav.familie.kontrakter.felles.ef.StønadType.OVERGANGSSTØNAD
@@ -78,7 +79,7 @@ internal class VurderingServiceTest {
         ).build().søknadOvergangsstønad
     ).tilSøknadsverdier()
     private val barn = søknadBarnTilBehandlingBarn(søknad.barn)
-    private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET)
+    private val behandling = behandling(fagsak(), BehandlingStatus.OPPRETTET, årsak = BehandlingÅrsak.PAPIRSØKNAD)
     private val behandlingId = UUID.randomUUID()
 
     @BeforeEach
@@ -123,6 +124,7 @@ internal class VurderingServiceTest {
             "fnr",
             false,
             null,
+            emptyList(),
             false,
             AnnenForelderDto(
                 "navn",
@@ -231,7 +233,9 @@ internal class VurderingServiceTest {
                     mockk(),
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockk(),
+                    behandling = mockk()
                 )
             )
         every { vilkårsvurderingRepository.findByBehandlingId(behandlingId) } returns

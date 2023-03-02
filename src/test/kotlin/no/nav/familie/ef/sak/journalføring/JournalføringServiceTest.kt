@@ -449,7 +449,7 @@ internal class JournalføringServiceTest {
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
-                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList())
+                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk())
                 )
 
             fullførJournalpost(
@@ -487,7 +487,7 @@ internal class JournalføringServiceTest {
             every { vurderingService.hentGrunnlagOgMetadata(behandlingId) } returns
                 Pair(
                     mockVilkårGrunnlagDto(),
-                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList())
+                    HovedregelMetadata(null, Sivilstandstype.UGIFT, false, emptyList(), emptyList(), emptyList(), mockk(), mockk())
                 )
             fullførJournalpost(
                 JournalføringBehandling(

@@ -1,9 +1,12 @@
 package no.nav.familie.ef.sak.vilkår.regler.evalutation
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.barn.BehandlingBarn
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype.GIFT
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
@@ -50,7 +53,9 @@ internal class OppdaterVilkårTest {
             sivilstandstype = GIFT,
             erMigrering = false,
             barn = listOf(barn, barnUtenSøknad),
-            søktOmBarnetilsyn = listOf(barn.id)
+            søktOmBarnetilsyn = listOf(barn.id),
+            vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+            behandling = behandling()
         )
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
@@ -84,7 +89,9 @@ internal class OppdaterVilkårTest {
             sivilstandstype = GIFT,
             erMigrering = false,
             barn = listOf(barn, barnUtenSøknad),
-            søktOmBarnetilsyn = listOf(barn.id)
+            søktOmBarnetilsyn = listOf(barn.id),
+            vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+            behandling = behandling()
         )
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
@@ -119,7 +126,9 @@ internal class OppdaterVilkårTest {
             sivilstandstype = GIFT,
             erMigrering = false,
             barn = listOf(barn, barnUtenSøknad),
-            søktOmBarnetilsyn = listOf(barn.id)
+            søktOmBarnetilsyn = listOf(barn.id),
+            vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+            behandling = behandling()
         )
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
@@ -149,7 +158,9 @@ internal class OppdaterVilkårTest {
             sivilstandstype = GIFT,
             erMigrering = false,
             barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
-            søktOmBarnetilsyn = emptyList()
+            søktOmBarnetilsyn = emptyList(),
+            vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+            behandling = behandling()
         )
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
@@ -177,7 +188,9 @@ internal class OppdaterVilkårTest {
             sivilstandstype = GIFT,
             erMigrering = false,
             barn = listOf(barn, barn.copy(id = UUID.randomUUID())),
-            søktOmBarnetilsyn = emptyList()
+            søktOmBarnetilsyn = emptyList(),
+            vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+            behandling = behandling()
         )
 
         val nyeVilkårsvurderinger = opprettNyeVilkårsvurderinger(
@@ -312,7 +325,9 @@ internal class OppdaterVilkårTest {
                 søknad.sivilstand,
                 Sivilstandstype.SKILT,
                 barn = barn,
-                søktOmBarnetilsyn = emptyList()
+                søktOmBarnetilsyn = emptyList(),
+                vilkårgrunnlagDto = mockk(),
+                behandling = mockk()
             )
         )
         val aktuelleDelvilkår = initDelvilkår.filter { it.resultat == Vilkårsresultat.IKKE_TATT_STILLING_TIL }
@@ -347,7 +362,9 @@ internal class OppdaterVilkårTest {
                 søknad.sivilstand,
                 Sivilstandstype.SKILT,
                 barn = barn,
-                søktOmBarnetilsyn = emptyList()
+                søktOmBarnetilsyn = emptyList(),
+                vilkårgrunnlagDto = mockk(),
+                behandling = mockk()
             )
         )
 
