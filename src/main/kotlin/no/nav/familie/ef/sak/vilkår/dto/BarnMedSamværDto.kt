@@ -44,7 +44,6 @@ data class BarnMedSamværRegistergrunnlagDto(
     val navn: String?,
     val fødselsnummer: String?,
     val harSammeAdresse: Boolean?,
-    val deltBosted: DeltBostedDto?,
     val deltBostedPerioder: List<DeltBostedDto>,
     val harDeltBostedVedGrunnlagsdataopprettelse: Boolean,
     val forelder: AnnenForelderDto?,

@@ -123,7 +123,6 @@ internal class VurderingServiceTest {
             "navn",
             "fnr",
             false,
-            null,
             emptyList(),
             false,
             AnnenForelderDto(
@@ -204,7 +203,7 @@ internal class VurderingServiceTest {
             nyeVilkårsvurderinger.captured.filter { it.type == VilkårType.ALDER_PÅ_BARN }
                 .map { it.resultat }
                 .toSet()
-        ).containsOnly(Vilkårsresultat.OPPFYLT)
+        ).containsOnly(OPPFYLT)
         assertThat(nyeVilkårsvurderinger.captured.map { it.behandlingId }.toSet()).containsOnly(behandlingId)
     }
 
