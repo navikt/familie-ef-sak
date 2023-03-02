@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-
 @RestController
 @RequestMapping("/api/naeringsinntekt")
 @ProtectedWithClaims(issuer = "azuread")
@@ -27,5 +26,4 @@ class SigrunController(
         val inntektSisteTreÅr = sigrunService.hentInntektSisteTreÅr(fagsakId)
         return Ressurs.success(inntektSisteTreÅr)
     }
-
 }

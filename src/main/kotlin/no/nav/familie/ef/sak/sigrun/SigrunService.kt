@@ -12,7 +12,7 @@ import java.util.UUID
 class SigrunService(val sigrunClient: SigrunClient, val fagsakService: FagsakService) {
 
     val forrigeÅr = YearMonth.now().year - 1
-    val listInntektsår = listOf(forrigeÅr, forrigeÅr-1, forrigeÅr-2)
+    val listInntektsår = listOf(forrigeÅr, forrigeÅr - 1, forrigeÅr - 2)
 
     fun hentInntektSisteTreÅr(fagsakId: UUID): List<PensjonsgivendeInntektVisning> {
         val aktivIdent = fagsakService.hentAktivIdent(fagsakId)

@@ -21,7 +21,7 @@ class SigrunClient(
             .build().toUri()
 
         val response = postForEntity<SummertSkattegrunnlag>(uri, PersonIdent(fødselsnummer))
-        secureLogger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response") //Fjernes når det er litt mer kjennskap til dataene
+        secureLogger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
 
@@ -31,7 +31,7 @@ class SigrunClient(
             .build().toUri()
 
         val response = postForEntity<List<BeregnetSkatt>>(uri, PersonIdent(fødselsnummer))
-        secureLogger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response") //Fjernes når det er litt mer kjennskap til dataene
+        secureLogger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
 }

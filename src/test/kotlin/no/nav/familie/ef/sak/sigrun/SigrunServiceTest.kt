@@ -25,9 +25,14 @@ internal class SigrunServiceTest {
     fun setup() {
         every { fagsakService.hentAktivIdent(any()) } returns "123"
         every { sigrunClient.hentBeregnetSkatt(any(), any()) } returns listOf(BeregnetSkatt("personinntektNaering", "50000"), BeregnetSkatt("personinntektLoenn", "50000"))
-        every { sigrunClient.hentSummertSkattegrunnlag(any(), any()) } returns SummertSkattegrunnlag(listOf(), svalbardGrunnlag = listOf(
-            Grunnlag("personinntektBarePensjonsdel", 50000), Grunnlag("svalbardPersoninntektNaering", 50000)
-        ), "skatteoppgjoersdato")
+        every { sigrunClient.hentSummertSkattegrunnlag(any(), any()) } returns SummertSkattegrunnlag(
+            listOf(),
+            svalbardGrunnlag = listOf(
+                Grunnlag("personinntektBarePensjonsdel", 50000),
+                Grunnlag("svalbardPersoninntektNaering", 50000)
+            ),
+            "skatteoppgjoersdato"
+        )
     }
 
     @Test
