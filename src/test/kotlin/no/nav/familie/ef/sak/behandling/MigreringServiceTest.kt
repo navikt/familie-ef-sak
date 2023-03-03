@@ -6,9 +6,6 @@ import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
-import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
-import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
@@ -859,7 +856,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         migrerTilDato: YearMonth = til,
         erReellArbeidssøker: Boolean = false,
         mockPerioder: () -> Unit = { mockPerioder(opphørsdato) },
-        ignorerFeilISimulering: Boolean = false,
+        ignorerFeilISimulering: Boolean = false
     ): Behandling {
         mockPerioder()
 
@@ -887,7 +884,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         stønadFom: YearMonth = periodeFraMåned,
         stønadTom: YearMonth = til,
         aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
-        utgifterBarnetilsyn: Int = 0,
+        utgifterBarnetilsyn: Int = 0
     ) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             vedtakId = 1,

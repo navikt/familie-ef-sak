@@ -16,7 +16,7 @@ class SigrunClient(
 ) : AbstractRestClient(restOperations, "sigrun") {
 
     fun hentSummertSkattegrunnlag(fødselsnummer: String, inntektsår: Int): SummertSkattegrunnlag {
-        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/summertskattegrunnlag")
+        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/sigrun/summertskattegrunnlag")
             .queryParam("inntektsaar", inntektsår.toString())
             .build().toUri()
 
@@ -26,7 +26,7 @@ class SigrunClient(
     }
 
     fun hentBeregnetSkatt(fødselsnummer: String, inntektsår: Int): List<BeregnetSkatt> {
-        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/v1/beregnetskatt")
+        val uri = UriComponentsBuilder.fromUri(uri).pathSegment("api/sigrun/beregnetskatt")
             .queryParam("inntektsaar", inntektsår)
             .build().toUri()
 
