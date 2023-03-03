@@ -3,9 +3,11 @@ package no.nav.familie.ef.sak.opplysninger.mapper
 import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.AnnenForelderMedIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.BarnMedIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.DeltBosted
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
@@ -22,6 +24,7 @@ import no.nav.familie.ef.sak.vilkår.dto.BarnepassordningDto
 import no.nav.familie.ef.sak.vilkår.dto.LangAvstandTilSøker
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class BarnMedSamværMapper(
@@ -77,7 +80,10 @@ class BarnMedSamværMapper(
             beløp = it.beløp
         )
 
-    private fun mapSøknadsgrunnlag(behandlingBarn: BehandlingBarn, søknadsbarn: SøknadBarn?): BarnMedSamværSøknadsgrunnlagDto {
+    private fun mapSøknadsgrunnlag(
+        behandlingBarn: BehandlingBarn,
+        søknadsbarn: SøknadBarn?
+    ): BarnMedSamværSøknadsgrunnlagDto {
         val samvær = søknadsbarn?.samvær
         return BarnMedSamværSøknadsgrunnlagDto(
             id = behandlingBarn.id,
@@ -106,16 +112,17 @@ class BarnMedSamværMapper(
         barneforeldre: List<AnnenForelderMedIdent>,
         behandlingBarn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
-        søkerAdresse: List<Bostedsadresse>
+        søkerAdresse: List<Bostedsadresse>,
+        grunnlagsdataOpprettet: LocalDate
     ): List<BarnMedSamværRegistergrunnlagDto> {
-        val alleBarn: List<MatchetBehandlingBarn> = BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
+        val alleBarn: List<MatchetBehandlingBarn> =
+            BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
         val forelderMap = barneforeldre.associateBy { it.personIdent }
 
         return alleBarn.map { barn ->
             val fnr = utledFnrForAnnenForelder(barn, personIdentSøker, søknadsbarn)
             val pdlAnnenForelder = forelderMap[fnr]
-
-            mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr)
+            mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr, grunnlagsdataOpprettet)
         }
     }
 
@@ -135,15 +142,21 @@ class BarnMedSamværMapper(
         matchetBarn: MatchetBehandlingBarn,
         søkerAdresse: List<Bostedsadresse>,
         pdlAnnenForelder: AnnenForelderMedIdent?,
-        annenForelderFnr: String?
+        annenForelderFnr: String?,
+        grunnlagsdataOpprettet: LocalDate
     ): BarnMedSamværRegistergrunnlagDto {
         return BarnMedSamværRegistergrunnlagDto(
             id = matchetBarn.behandlingBarn.id,
             navn = matchetBarn.barn?.navn?.visningsnavn(),
             fødselsnummer = matchetBarn.fødselsnummer,
             harSammeAdresse = matchetBarn.barn?.let {
-                AdresseHjelper.borPåSammeAdresse(it, søkerAdresse)
+                AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(it, søkerAdresse)
             },
+            deltBostedPerioder = matchetBarn.barn?.deltBosted.tilDto(),
+            harDeltBostedVedGrunnlagsdataopprettelse = AdresseHjelper.harDeltBosted(
+                matchetBarn.barn,
+                grunnlagsdataOpprettet
+            ),
             forelder = pdlAnnenForelder?.let { tilAnnenForelderDto(it, annenForelderFnr, søkerAdresse) },
             dødsdato = matchetBarn.barn?.dødsfall?.gjeldende()?.dødsdato,
             fødselsdato = matchetBarn.barn?.fødsel?.gjeldende()?.fødselsdato
@@ -192,4 +205,10 @@ class BarnMedSamværMapper(
             ?.vegadresse
             ?.fjerneBoforhold(søkerAdresse.gjeldende()?.vegadresse)
             ?: AvstandTilSøkerDto(avstandIKm = null, langAvstandTilSøker = LangAvstandTilSøker.UKJENT)
+
+    private fun List<DeltBosted>?.tilDto(): List<DeltBostedDto> {
+        return this?.map {
+            DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt, it.metadata.historisk)
+        } ?: emptyList()
+    }
 }

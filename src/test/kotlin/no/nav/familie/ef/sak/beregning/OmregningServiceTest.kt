@@ -18,6 +18,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.config.ObjectMapperProvider
 import no.nav.familie.ef.sak.iverksett.IverksettClient
+import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -213,7 +214,10 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                     sivilstandstype = Sivilstandstype.UGIFT,
                     erMigrering = false,
                     barn = listOf(barn),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    langAvstandTilSøker = listOf(),
+                    vilkårgrunnlagDto = VilkårTestUtil.mockVilkårGrunnlagDto(),
+                    behandling = behandling()
                 )
             )
             Vilkårsvurdering(

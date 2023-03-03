@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AdresseType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.AnnenForelderMinimumDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.DeltBostedDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Folkeregisterpersonstatus
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FullmaktDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.InnflyttingDto
@@ -417,6 +418,54 @@ internal class UtledEndringerUtilTest {
             assertThat(endringsdetaljer[0].ny).isEqualTo("Adresse 2")
 
             assertIngenAndreEndringer(endringer, "annenForelder")
+        }
+
+        @Test
+        internal fun `søkers barn får delt bosted trigger endring`() {
+            val barn = BarnDto(barnIdent, "", null, emptyList(), true, emptyList(), false, null, null)
+            val barn2 = barn.copy(harDeltBostedNå = true)
+            val endringer = finnEndringer(
+                dto(barn = listOf(barn)),
+                dto(barn = listOf(barn2))
+            )
+            val detaljer = endringer.barn.detaljer!!
+            assertBarnHarEndringerMedDetaljer(endringer)
+            val endringsdetaljer = detaljer[0].endringer
+            assertThat(endringsdetaljer).hasSize(1)
+            assertThat(endringsdetaljer[0].felt).isEqualTo("Har delt bosted")
+            assertThat(endringsdetaljer[0].tidligere).isEqualTo("Nei")
+            assertThat(endringsdetaljer[0].ny).isEqualTo("Ja")
+            assertIngenAndreEndringer(endringer, "barn")
+        }
+
+        @Test
+        internal fun `søkers barn får ny, utvidet, periode i delt bosted - trigger endring`() {
+            val startdatoForOpprinneligKontrakt = LocalDate.now().minusYears(1)
+            val sluttdatoForOpprinneligKontrakt = LocalDate.now().plusYears(1)
+            val deltBostedGammel = DeltBostedDto(
+                startdatoForKontrakt = startdatoForOpprinneligKontrakt,
+                sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
+                historisk = true
+            )
+            val deltBostedNy = DeltBostedDto(
+                startdatoForKontrakt = sluttdatoForOpprinneligKontrakt,
+                sluttdatoForKontrakt = sluttdatoForOpprinneligKontrakt.plusYears(5),
+                historisk = false
+            )
+            val barn = BarnDto(
+                barnIdent, "", null, emptyList(), true, listOf(deltBostedGammel), true, null, null
+            )
+            val barn2 = barn.copy(deltBosted = listOf(deltBostedGammel, deltBostedNy))
+            val endringer = finnEndringer(
+                dto(barn = listOf(barn)),
+                dto(barn = listOf(barn2))
+            )
+            val detaljer = endringer.barn.detaljer!!
+            assertBarnHarEndringerMedDetaljer(endringer)
+            val endringsdetaljer = detaljer[0].endringer
+            assertThat(endringsdetaljer).hasSize(1)
+            assertThat(endringsdetaljer[0].felt).isEqualTo("Delt bosted")
+            assertIngenAndreEndringer(endringer, "barn")
         }
     }
 

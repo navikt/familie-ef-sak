@@ -24,6 +24,7 @@ import no.nav.familie.ef.sak.vilkår.dto.tilDto
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 /**
@@ -56,7 +57,8 @@ class VilkårGrunnlagService(
             grunnlagsdata,
             barn,
             søknadsbarn,
-            stønadstype
+            stønadstype,
+            registergrunnlagData.opprettetTidspunkt.toLocalDate()
         )
         val medlemskap = medlemskapMapper.tilDto(grunnlagsdata, søknad?.medlemskap)
         val sivilstand = SivilstandMapper.tilDto(grunnlagsdata, søknad?.sivilstand)
@@ -88,7 +90,8 @@ class VilkårGrunnlagService(
         grunnlagsdata: GrunnlagsdataDomene,
         barn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
-        stønadstype: StønadType
+        stønadstype: StønadType,
+        grunnlagsdataOpprettet: LocalDate
     ): List<BarnMedSamværDto> {
         val barnMedSamværRegistergrunnlag = barnMedsamværMapper.mapRegistergrunnlag(
             personIdentSøker,
@@ -96,7 +99,8 @@ class VilkårGrunnlagService(
             grunnlagsdata.annenForelder,
             barn,
             søknadsbarn,
-            grunnlagsdata.søker.bostedsadresse
+            grunnlagsdata.søker.bostedsadresse,
+            grunnlagsdataOpprettet
         )
         val søknadsgrunnlag = barnMedsamværMapper.mapSøknadsgrunnlag(barn, søknadsbarn)
         val barnepass: List<BarnepassDto> = when (stønadstype) {

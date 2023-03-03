@@ -304,7 +304,9 @@ internal class VurderingStegServiceTest {
                     null,
                     Sivilstandstype.UGIFT,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockVilkårGrunnlagDto(),
+                    behandling = behandling
                 ),
                 OVERGANGSSTØNAD
             )
@@ -334,7 +336,9 @@ internal class VurderingStegServiceTest {
                     søknad.sivilstand,
                     Sivilstandstype.UGIFT,
                     barn = barn,
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockVilkårGrunnlagDto(),
+                    behandling = behandling
                 ),
                 OVERGANGSSTØNAD
             )

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.service
 
+import io.mockk.mockk
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.barn.BehandlingBarn
@@ -379,7 +380,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     sivilstand,
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
                     barn = barn,
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockk(),
+                    behandling = mockk()
                 )
             )
         return delvilkårsvurderingAleneomsorg
@@ -392,7 +395,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
                     sivilstand,
                     Sivilstandstype.ENKE_ELLER_ENKEMANN,
                     barn = emptyList(),
-                    søktOmBarnetilsyn = emptyList()
+                    søktOmBarnetilsyn = emptyList(),
+                    vilkårgrunnlagDto = mockk(),
+                    behandling = mockk()
                 )
             )
         return delvilkårsvurdering

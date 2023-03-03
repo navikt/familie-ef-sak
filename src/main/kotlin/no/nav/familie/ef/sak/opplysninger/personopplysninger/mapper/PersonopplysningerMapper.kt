@@ -24,8 +24,8 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class PersonopplysningerMapper(
@@ -34,8 +34,6 @@ class PersonopplysningerMapper(
     private val innflyttingUtflyttingMapper: InnflyttingUtflyttingMapper,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun tilPersonopplysninger(
         grunnlagsdataMedMetadata: GrunnlagsdataMedMetadata,
@@ -86,7 +84,8 @@ class PersonopplysningerMapper(
                     it,
                     søkerIdenter.identer(),
                     søker.bostedsadresse,
-                    annenForelderMap
+                    annenForelderMap,
+                    grunnlagsdataMedMetadata.opprettetTidspunkt.toLocalDate()
                 )
             }.sortedBy { it.fødselsdato },
             innflyttingTilNorge = innflyttingUtflyttingMapper.mapInnflytting(søker.innflyttingTilNorge),
@@ -123,20 +122,20 @@ class PersonopplysningerMapper(
         return AdresseHjelper.sorterAdresser(adresser)
     }
 
-    fun mapBarn(
+    private fun mapBarn(
         barn: BarnMedIdent,
         søkerIdenter: Set<String>,
         bostedsadresserForelder: List<Bostedsadresse>,
-        annenForelderMap: Map<String, AnnenForelderMedIdent>
+        annenForelderMap: Map<String, AnnenForelderMedIdent>,
+        grunnlagsdataOpprettet: LocalDate
     ): BarnDto {
         val annenForelderIdent = barn.forelderBarnRelasjon.find {
             !søkerIdenter.contains(it.relatertPersonsIdent) && it.relatertPersonsRolle != Familierelasjonsrolle.BARN
         }?.relatertPersonsIdent
 
         feilHvis(barn.deltBosted.filter { !it.metadata.historisk }.size > 1) { "Fant mer enn en ikke-historisk delt bosted." }
-        val bostedDto =
-            barn.deltBosted.gjeldende()?.let { listOf(DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt)) }
-                ?: emptyList()
+        val deltBostedDto =
+            barn.deltBosted.map { DeltBostedDto(it.startdatoForKontrakt, it.sluttdatoForKontrakt, it.metadata.historisk) }
 
         return BarnDto(
             personIdent = barn.personIdent,
@@ -152,9 +151,9 @@ class PersonopplysningerMapper(
                 )
             },
             adresse = barn.bostedsadresse.map(adresseMapper::tilAdresse),
-            borHosSøker = AdresseHjelper.borPåSammeAdresse(barn, bostedsadresserForelder),
-            deltBosted = bostedDto,
-            harDeltBostedNå = AdresseHjelper.harDeltBostedNå(barn),
+            borHosSøker = AdresseHjelper.harRegistrertSammeBostedsadresseSomForelder(barn, bostedsadresserForelder),
+            deltBosted = deltBostedDto,
+            harDeltBostedNå = AdresseHjelper.harDeltBosted(barn, grunnlagsdataOpprettet),
             fødselsdato = barn.fødsel.gjeldende().fødselsdato,
             dødsdato = barn.dødsfall.gjeldende()?.dødsdato
         )

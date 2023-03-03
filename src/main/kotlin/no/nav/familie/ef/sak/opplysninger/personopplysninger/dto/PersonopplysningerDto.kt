@@ -32,7 +32,7 @@ data class PersonopplysningerDto(
     val vergemål: List<VergemålDto>
 )
 
-data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?)
+data class DeltBostedDto(val startdatoForKontrakt: LocalDate, val sluttdatoForKontrakt: LocalDate?, val historisk: Boolean)
 
 data class BarnDto(
     val personIdent: String,

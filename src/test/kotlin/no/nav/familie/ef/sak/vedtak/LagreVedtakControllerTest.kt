@@ -146,7 +146,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             ),
             tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
             saksbehandlerIdent = "julenissen",
-            opprettetAv = "julenissen",
+            opprettetAv = "julenissen"
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
