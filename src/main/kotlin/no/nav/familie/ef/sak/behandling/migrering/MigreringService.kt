@@ -428,6 +428,7 @@ class MigreringService(
             throw MigreringException("Fagsak er allerede migrert", MigreringExceptionType.ALLEREDE_MIGRERT)
         } else {
             val behandlinger = behandlingService.hentBehandlinger(fagsak.id)
+                .filterNot { it.erAvsluttet() && it.resultat == BehandlingResultat.HENLAGT }
             if (behandlinger.isNotEmpty()) {
                 throw MigreringException(
                     "Fagsaken har allerede behandlinger",

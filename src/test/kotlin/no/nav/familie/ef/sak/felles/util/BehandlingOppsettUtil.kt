@@ -14,7 +14,7 @@ object BehandlingOppsettUtil {
 
     private val fagsak = fagsak(setOf(PersonIdent("1")))
 
-    private val henlagtFørstegangsbehandling = behandling(fagsak)
+    val henlagtFørstegangsbehandling = behandling(fagsak)
         .copy(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             status = BehandlingStatus.FERDIGSTILT,

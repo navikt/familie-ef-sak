@@ -113,7 +113,7 @@ class BarnMedSamværMapper(
         behandlingBarn: List<BehandlingBarn>,
         søknadsbarn: Collection<SøknadBarn>,
         søkerAdresse: List<Bostedsadresse>,
-        opprettetRegistergrunnlag: LocalDate
+        grunnlagsdataOpprettet: LocalDate
     ): List<BarnMedSamværRegistergrunnlagDto> {
         val alleBarn: List<MatchetBehandlingBarn> =
             BarnMatcher.kobleBehandlingBarnOgRegisterBarn(behandlingBarn, barnMedIdent)
@@ -122,7 +122,7 @@ class BarnMedSamværMapper(
         return alleBarn.map { barn ->
             val fnr = utledFnrForAnnenForelder(barn, personIdentSøker, søknadsbarn)
             val pdlAnnenForelder = forelderMap[fnr]
-            mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr, opprettetRegistergrunnlag)
+            mapRegistergrunnlag(barn, søkerAdresse, pdlAnnenForelder, fnr, grunnlagsdataOpprettet)
         }
     }
 

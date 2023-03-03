@@ -122,7 +122,7 @@ class PersonopplysningerMapper(
         return AdresseHjelper.sorterAdresser(adresser)
     }
 
-    fun mapBarn(
+    private fun mapBarn(
         barn: BarnMedIdent,
         søkerIdenter: Set<String>,
         bostedsadresserForelder: List<Bostedsadresse>,

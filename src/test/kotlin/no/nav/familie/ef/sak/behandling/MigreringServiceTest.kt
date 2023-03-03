@@ -6,6 +6,9 @@ import no.nav.familie.ef.sak.barn.BarnRepository
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
+import no.nav.familie.ef.sak.behandling.domain.BehandlingType
+import no.nav.familie.ef.sak.behandling.dto.HenlagtDto
+import no.nav.familie.ef.sak.behandling.dto.HenlagtÅrsak
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.migrering.MigreringService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
@@ -31,6 +34,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
+import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
 import no.nav.familie.ef.sak.repository.saksbehandling
 import no.nav.familie.ef.sak.simulering.SimuleringsresultatRepository
@@ -81,6 +85,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    private lateinit var behandlingRepository: BehandlingRepository
 
     @Autowired
     private lateinit var revurderingService: RevurderingService
@@ -525,25 +532,53 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         assertThat(migreringInfo.årsak).contains("Har åpen sak. ")
     }
 
-    @Test
-    internal fun `hentMigreringInfo - har ikke fagsak, men fagsakPerson`() {
-        every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns
-            InfotrygdPeriodeResponse(
-                listOf(
-                    InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
-                        stønadFom = YearMonth.now().plusMonths(1).atDay(1),
-                        stønadTom = YearMonth.now().plusMonths(1).atEndOfMonth(),
-                        inntektsgrunnlag = 10,
-                        samordningsfradrag = 5
-                    )
-                ),
-                emptyList(),
-                emptyList()
-            )
+    @Nested
+    inner class StateIEfSak {
 
-        val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+        private fun henlagtBehandling() =
+            behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.HENLAGT)
 
-        assertThat(migreringInfo.kanMigreres).isTrue
+        @Test
+        internal fun `har ikke fagsak, men fagsakPerson`() {
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+            assertThat(migreringInfo.kanMigreres).isTrue
+        }
+
+        @Test
+        internal fun `skal kunne migrere når det kun finnes henlagte behandlinger`() {
+            behandlingRepository.insert(henlagtBehandling())
+            val migrering = opprettOgIverksettMigrering()
+
+            verifiserBehandlingErFerdigstilt(migrering)
+        }
+
+        @Test
+        internal fun `skal kunne migrere når det finnes en henlagt behandling som er ferdigstilt`() {
+            behandlingRepository.insert(henlagtBehandling())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+            assertThat(migreringInfo.kanMigreres).isTrue
+        }
+
+        @Test
+        internal fun `skal ikke kunne migrere når det finnes en behandling som ikke ferdigstilt, men ikke henlagt`() {
+            behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.INNVILGET))
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+            assertThat(migreringInfo.kanMigreres).isFalse
+        }
+
+        @Test
+        internal fun `skal ikke kunne migrere når det finnes en behandling som ikke er ferdigstilt`() {
+            behandlingRepository.insert(behandling(fagsak, status = BehandlingStatus.UTREDES))
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+            assertThat(migreringInfo.kanMigreres).isFalse
+        }
     }
 
     @Nested
@@ -824,7 +859,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         migrerTilDato: YearMonth = til,
         erReellArbeidssøker: Boolean = false,
         mockPerioder: () -> Unit = { mockPerioder(opphørsdato) },
-        ignorerFeilISimulering: Boolean = false
+        ignorerFeilISimulering: Boolean = false,
     ): Behandling {
         mockPerioder()
 
@@ -852,7 +887,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         stønadFom: YearMonth = periodeFraMåned,
         stønadTom: YearMonth = til,
         aktivitetstype: InfotrygdAktivitetstype = InfotrygdAktivitetstype.BRUKERKONTAKT,
-        utgifterBarnetilsyn: Int = 0
+        utgifterBarnetilsyn: Int = 0,
     ) {
         val periode = InfotrygdPeriodeTestUtil.lagInfotrygdPeriode(
             vedtakId = 1,
