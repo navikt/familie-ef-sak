@@ -48,7 +48,7 @@ class SigrunClientTest {
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/v1/beregnetskatt?inntektsaar=2022"))
+            WireMock.post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -65,7 +65,7 @@ class SigrunClientTest {
     @Test
     fun `hent summertskattegrunnlag fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/v1/summertskattegrunnlag?inntektsaar=2018"))
+            WireMock.post(urlEqualTo("/api/sigrun/summertskattegrunnlag?inntektsaar=2018"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
