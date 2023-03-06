@@ -242,7 +242,8 @@ internal class VurderingServiceTest {
                 Vilkårsvurdering(
                     behandlingId = behandlingId,
                     type = VilkårType.SIVILSTAND,
-                    delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering)
+                    delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
+                    gjenbrukt = null
                 )
             )
 

@@ -234,7 +234,8 @@ internal class OmregningServiceTest : OppslagSpringRunnerTest() {
                             }
                         )
                     }
-                )
+                ),
+                gjenbrukt = null
             )
         }
         return vilkårsvurderinger

@@ -35,7 +35,7 @@ data class Vilkårsvurdering(
     @Column("delvilkar")
     val delvilkårsvurdering: DelvilkårsvurderingWrapper,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "gjenbrukt_")
-    val gjenbrukt: Gjenbrukt? = null
+    val gjenbrukt: Gjenbrukt?
 ) {
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
@@ -48,6 +48,14 @@ data class Vilkårsvurdering(
         gjenbrukt ?: Gjenbrukt(behandlingId, sporbar.endret.endretTid)
 }
 
+/**
+ * Inneholder informasjon fra hvilken behandling dette vilkår ble gjenrukt fra
+ * Hvis man gjenbruker et vilkår som allerede er gjenbrukt fra en annen behandling,
+ * så skal man peke til den opprinnelige behandlingen. Dvs
+ * Behandling A
+ * Behandling B gjenbruker fra behandling A
+ * Behandling C gjenbruker fra B, men peker mot A sitt vilkår
+ */
 data class Gjenbrukt(
     val behandlingId: UUID,
     val endretTid: LocalDateTime

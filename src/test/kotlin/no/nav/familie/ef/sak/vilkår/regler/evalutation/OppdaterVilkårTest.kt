@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
+import no.nav.familie.ef.sak.vilkår.Gjenbrukt
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -32,6 +33,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class OppdaterVilkårTest {
@@ -266,6 +268,21 @@ internal class OppdaterVilkårTest {
     }
 
     @Test
+    internal fun `skal fjerne gjenbrukt når man oppdaterer et vilkår`() {
+        val regel = VilkårsregelEnHovedregel()
+        val vilkårsvurdering = opprettVurdering(regel)
+            .copy(gjenbrukt = Gjenbrukt(UUID.randomUUID(), LocalDateTime.now()))
+        val resultat = validerOgOppdater(
+            vilkårsvurdering,
+            regel,
+            VurderingDto(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE, SvarId.NEI, "a"),
+            VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI)
+        )
+
+        assertThat(resultat.gjenbrukt).isNull()
+    }
+
+    @Test
     fun `två rotRegler - en IKKE_OPPFYLT og en OPPFYLT`() {
         val regel = VilkårsregelToHovedregler()
         val vilkårsvurdering = opprettVurdering(regel)
@@ -339,7 +356,8 @@ internal class OppdaterVilkårTest {
             behandlingId = UUID.randomUUID(),
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.SIVILSTAND,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår)
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår),
+            gjenbrukt = null
         )
 
         val oppdatering = listOf(
@@ -372,7 +390,8 @@ internal class OppdaterVilkårTest {
             behandlingId = UUID.randomUUID(),
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.SIVILSTAND,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår)
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår),
+            gjenbrukt = null
         )
 
         val oppdatering = listOf(
@@ -593,7 +612,8 @@ internal class OppdaterVilkårTest {
             behandlingId = UUID.randomUUID(),
             resultat = vilkårsresultat,
             type = VilkårType.ALENEOMSORG,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList())
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
+            gjenbrukt = null
         )
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
@@ -633,7 +653,8 @@ internal class OppdaterVilkårTest {
             behandlingId = UUID.randomUUID(),
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.ALENEOMSORG,
-            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger)
+            delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger),
+            gjenbrukt = null
         )
     }
 }
