@@ -466,6 +466,8 @@ internal class UtledEndringerUtilTest {
             assertThat(endringsdetaljer).hasSize(1)
             assertThat(endringsdetaljer[0].felt).isEqualTo("Delt bosted")
             assertIngenAndreEndringer(endringer, "barn")
+            assertThat(endringsdetaljer[0].ny).isEqualTo("")
+            assertThat(endringsdetaljer[0].tidligere).isEqualTo("")
         }
     }
 

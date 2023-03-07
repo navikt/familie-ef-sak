@@ -128,6 +128,7 @@ object UtledEndringerUtil {
         is Boolean -> if (verdi) "Ja" else "Nei"
         is LocalDate -> verdi.norskFormat()
         is Folkeregisterpersonstatus -> verdi.visningsnavn
+        is List<*> -> ""
         else -> "$verdi"
     }
 }
