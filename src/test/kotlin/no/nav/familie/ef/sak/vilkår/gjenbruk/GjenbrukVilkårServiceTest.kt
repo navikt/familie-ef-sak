@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
+import no.nav.familie.ef.sak.felles.util.mockFeatureToggleService
 import no.nav.familie.ef.sak.felles.util.opprettGrunnlagsdata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
@@ -52,7 +53,8 @@ internal class GjenbrukVilkårServiceTest {
         fagsakService = fagsakService,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
         grunnlagsdataService = grunnlagsdataService,
-        barnService = barnService
+        barnService = barnService,
+        mockFeatureToggleService()
     )
 
     private val barn1 = FnrGenerator.generer(LocalDate.now())

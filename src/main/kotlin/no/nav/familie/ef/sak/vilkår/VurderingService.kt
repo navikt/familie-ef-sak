@@ -249,7 +249,7 @@ class VurderingService(
                     behandlingId = nyBehandlingsId,
                     sporbar = Sporbar(),
                     barnId = finnBarnId(vurdering.barnId, barnIdMap),
-                    gjenbrukt = vurdering.lagGjenbrukt()
+                    gjenbrukt = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) vurdering.lagGjenbrukt() else null
                 )
             }
 
