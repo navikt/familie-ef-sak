@@ -61,7 +61,7 @@ class FagsakPersonController(
         )
     }
 
-    @PostMapping("", "/person")
+    @PostMapping
     fun hentFagsakPersonIdForPerson(@RequestBody personIdentRequest: PersonIdentDto): Ressurs<UUID> {
         validerIdent(personIdentRequest.personIdent)
         val personIdenter = personService.hentPersonIdenter(personIdentRequest.personIdent)
