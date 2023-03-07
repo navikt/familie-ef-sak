@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.OppslagSpringRunnerTest
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
@@ -41,7 +42,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
                 type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                 delvilkårsvurdering = listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, vurderinger)),
                 barnId = null,
-                gjenbrukt = Gjenbrukt(behandling.id, LocalDateTime.now())
+                gjenbrukt = Gjenbrukt(behandling.id, SporbarUtils.now())
             )
         )
 
