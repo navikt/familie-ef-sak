@@ -24,7 +24,11 @@ internal class SigrunServiceTest {
     @BeforeEach
     fun setup() {
         every { fagsakService.hentAktivIdent(any()) } returns "123"
-        every { sigrunClient.hentBeregnetSkatt(any(), any()) } returns listOf(BeregnetSkatt("personinntektNaering", "50000"), BeregnetSkatt("personinntektLoenn", "50000"))
+        every { sigrunClient.hentBeregnetSkatt(any(), any()) } returns listOf(
+            BeregnetSkatt("skatteoppgjoersdato", "2022-05-01"),
+            BeregnetSkatt("personinntektNaering", "50000"),
+            BeregnetSkatt("personinntektLoenn", "50000")
+        )
         every { sigrunClient.hentSummertSkattegrunnlag(any(), any()) } returns SummertSkattegrunnlag(
             listOf(),
             svalbardGrunnlag = listOf(
@@ -41,7 +45,7 @@ internal class SigrunServiceTest {
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektSisteTreÅr(fagsakId)
         assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(3)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsaar).isEqualTo(YearMonth.now().year - 1)
-        assertThat(pensjonsgivendeInntektVisning.first().verdi).isEqualTo(200_000)
+        assertThat(pensjonsgivendeInntektVisning.first().verdi).isEqualTo(100_000)
         assertThat(pensjonsgivendeInntektVisning.last().inntektsaar).isEqualTo(YearMonth.now().year - 3)
     }
 }
