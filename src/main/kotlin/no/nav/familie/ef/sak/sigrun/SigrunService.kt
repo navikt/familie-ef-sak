@@ -38,6 +38,8 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
 }
 
 private fun List<BeregnetSkatt>.mapTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
+    // Skatteoppgjørsdato er en del av response, og bruker samme felter som inntekt. Verdi er datoen for skatteoppgjøret og teknisk navn er "skatteoppgjoersdato".
+    // Dette filtreres vekk for at summeringen av inntekt skal gå bra, i tillegg til at det ikke er sett behov for å vise skatteoppgjørsdato i frontend.
     val sum = this.filter { it.tekniskNavn != "skatteoppgjoersdato" }.sumOf { it.verdi.toInt() }
     return PensjonsgivendeInntektVisning(inntektsaar, sum)
 }
