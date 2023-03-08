@@ -14,7 +14,6 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/naeringsinntekt")
 @ProtectedWithClaims(issuer = "azuread")
-@Validated
 class SigrunController(
     private val tilgangService: TilgangService,
     private val sigrunService: SigrunService
