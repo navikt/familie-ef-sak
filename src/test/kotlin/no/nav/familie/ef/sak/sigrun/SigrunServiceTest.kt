@@ -2,7 +2,7 @@ package no.nav.familie.ef.sak.no.nav.familie.ef.sak.sigrun
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.sigrun.SigrunService
 import no.nav.familie.ef.sak.sigrun.ekstern.BeregnetSkatt
 import no.nav.familie.ef.sak.sigrun.ekstern.Grunnlag
@@ -17,13 +17,13 @@ import java.util.UUID
 internal class SigrunServiceTest {
 
     private val sigrunClient = mockk<SigrunClient>()
-    private val fagsakService = mockk<FagsakService>()
+    private val fagsakPersonService = mockk<FagsakPersonService>()
 
-    private val sigrunService = SigrunService(sigrunClient, fagsakService)
+    private val sigrunService = SigrunService(sigrunClient, fagsakPersonService)
 
     @BeforeEach
     fun setup() {
-        every { fagsakService.hentAktivIdent(any()) } returns "123"
+        every { fagsakPersonService.hentAktivIdent(any()) } returns "123"
         every { sigrunClient.hentBeregnetSkatt(any(), any()) } returns listOf(
             BeregnetSkatt("skatteoppgjoersdato", "2022-05-01"),
             BeregnetSkatt("personinntektNaering", "50000"),

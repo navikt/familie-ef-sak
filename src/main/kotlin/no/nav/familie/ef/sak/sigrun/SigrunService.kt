@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.sigrun
 
-import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.sigrun.ekstern.BeregnetSkatt
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
 import no.nav.familie.ef.sak.sigrun.ekstern.SummertSkattegrunnlag
@@ -9,24 +9,23 @@ import java.time.YearMonth
 import java.util.UUID
 
 @Service
-class SigrunService(val sigrunClient: SigrunClient, val fagsakService: FagsakService) {
+class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: FagsakPersonService) {
 
     val forrigeÅr = YearMonth.now().year - 1
     val listInntektsår = listOf(forrigeÅr, forrigeÅr - 1, forrigeÅr - 2)
 
-    fun hentInntektSisteTreÅr(fagsakId: UUID): List<PensjonsgivendeInntektVisning> {
-        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+    fun hentInntektSisteTreÅr(fagsakPersonId: UUID): List<PensjonsgivendeInntektVisning> {
+        val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
 
         val beregnetSkattegrunnlagSisteTreÅr = listInntektsår.map { sigrunClient.hentBeregnetSkatt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
-        val inntektFraSvalbard = hentInntektFraSvalbardSisteTreÅr(fagsakId)
+        val inntektFraSvalbard = hentInntektFraSvalbardSisteTreÅr(aktivIdent)
         beregnetSkattegrunnlagSisteTreÅr.forEach {
             it.verdi += inntektFraSvalbard.find { svalbard -> svalbard.inntektsaar == it.inntektsaar }?.verdi ?: 0
         }
         return beregnetSkattegrunnlagSisteTreÅr
     }
 
-    private fun hentInntektFraSvalbardSisteTreÅr(fagsakId: UUID): List<PensjonsgivendeInntektVisning> {
-        val aktivIdent = fagsakService.hentAktivIdent(fagsakId)
+    private fun hentInntektFraSvalbardSisteTreÅr(aktivIdent: String): List<PensjonsgivendeInntektVisning> {
         val inntektFraSvalbardSisteTreÅr = listInntektsår.map {
             sigrunClient.hentSummertSkattegrunnlag(aktivIdent, it).mapSvalbardGrunnlagTilPensjonsgivendeInntektVisning(it)
         }

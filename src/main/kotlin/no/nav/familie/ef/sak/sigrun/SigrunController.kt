@@ -20,10 +20,10 @@ class SigrunController(
     private val sigrunService: SigrunService
 ) {
 
-    @GetMapping("fagsak/{fagsakId}")
-    fun hentBeregnetSkatt(@PathVariable("fagsakId") fagsakId: UUID): Ressurs<List<PensjonsgivendeInntektVisning>> {
-        tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-        val inntektSisteTreÅr = sigrunService.hentInntektSisteTreÅr(fagsakId)
+    @GetMapping("fagsak-person/{fagsakPersonId}")
+    fun hentBeregnetSkatt(@PathVariable fagsakPersonId: UUID): Ressurs<List<PensjonsgivendeInntektVisning>> {
+        tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
+        val inntektSisteTreÅr = sigrunService.hentInntektSisteTreÅr(fagsakPersonId)
         return Ressurs.success(inntektSisteTreÅr)
     }
 }
