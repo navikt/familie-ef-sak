@@ -36,12 +36,12 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakService: FagsakSer
 }
 
 private fun List<BeregnetSkatt>.mapTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
-    val sum = this.filter { it.tekniskNavn == "personinntektNaering" || it.tekniskNavn == "svalbardPersoninntektNaering" }.sumOf { it.verdi.toInt() }
+    val sum = this.filter { it.tekniskNavn != "skatteoppgjoersdato" }.sumOf { it.verdi.toInt() }
     return PensjonsgivendeInntektVisning(inntektsaar, sum)
 }
 
 private fun SummertSkattegrunnlag.mapSvalbardGrunnlagTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
-    val sum = this.svalbardGrunnlag.filter { it.tekniskNavn == "svalbardPersoninntektNaering" }.sumOf { it.beloep }
+    val sum = this.svalbardGrunnlag.filter { it.tekniskNavn != "skatteoppgjoersdato" }.sumOf { it.beloep }
     return PensjonsgivendeInntektVisning(inntektsaar, sum)
 }
 

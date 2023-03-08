@@ -45,7 +45,7 @@ internal class SigrunServiceTest {
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektSisteTreÅr(fagsakId)
         assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(3)
         assertThat(pensjonsgivendeInntektVisning.first().inntektsaar).isEqualTo(YearMonth.now().year - 1)
-        assertThat(pensjonsgivendeInntektVisning.first().verdi).isEqualTo(100_000)
+        assertThat(pensjonsgivendeInntektVisning.first().verdi).isEqualTo(200_000)
         assertThat(pensjonsgivendeInntektVisning.last().inntektsaar).isEqualTo(YearMonth.now().year - 3)
     }
 }
