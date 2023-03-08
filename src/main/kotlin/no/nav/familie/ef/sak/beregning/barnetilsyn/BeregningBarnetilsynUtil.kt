@@ -15,7 +15,7 @@ data class MaxbeløpBarnetilsynSats(
 )
 
 object BeregningBarnetilsynUtil {
-
+    // https://lovdata.no/nav/rundskriv/v7-15-00
     private val eldreBarnetilsynsatser: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
