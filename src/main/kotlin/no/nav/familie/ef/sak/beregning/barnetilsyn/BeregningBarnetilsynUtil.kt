@@ -15,7 +15,7 @@ data class MaxbeløpBarnetilsynSats(
 )
 
 object BeregningBarnetilsynUtil {
-
+    // https://lovdata.no/nav/rundskriv/v7-15-00
     private val eldreBarnetilsynsatser: List<MaxbeløpBarnetilsynSats> =
         listOf(
             MaxbeløpBarnetilsynSats(
@@ -29,7 +29,16 @@ object BeregningBarnetilsynUtil {
             MaxbeløpBarnetilsynSats(
                 Datoperiode(YearMonth.of(2020, 1), YearMonth.of(2020, 12)),
                 maxbeløp = mapOf(1 to 4053, 2 to 5289, 3 to 5993)
-            )
+            ),
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 12)),
+                maxbeløp = mapOf(1 to 3977, 2 to 5190, 3 to 5881)
+            ),
+            // Det samme beløpet for 2016-2018
+            MaxbeløpBarnetilsynSats(
+                Datoperiode(YearMonth.of(2016, 1), YearMonth.of(2018, 12)),
+                maxbeløp = mapOf(1 to 3888, 2 to 5074, 3 to 5749)
+            ),
         )
 
     val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
