@@ -34,18 +34,11 @@ object BeregningBarnetilsynUtil {
                 Datoperiode(YearMonth.of(2019, 1), YearMonth.of(2019, 12)),
                 maxbeløp = mapOf(1 to 3977, 2 to 5190, 3 to 5881)
             ),
+            // Det samme beløpet for 2016-2018
             MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2018, 1), YearMonth.of(2018, 12)),
+                Datoperiode(YearMonth.of(2016, 1), YearMonth.of(2018, 12)),
                 maxbeløp = mapOf(1 to 3888, 2 to 5074, 3 to 5749)
             ),
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2017, 1), YearMonth.of(2017, 12)),
-                maxbeløp = mapOf(1 to 3888, 2 to 5074, 3 to 5749)
-            ),
-            MaxbeløpBarnetilsynSats(
-                Datoperiode(YearMonth.of(2016, 1), YearMonth.of(2016, 12)),
-                maxbeløp = mapOf(1 to 3888, 2 to 5074, 3 to 5749)
-            )
         )
 
     val satserForBarnetilsyn: List<MaxbeløpBarnetilsynSats> =
