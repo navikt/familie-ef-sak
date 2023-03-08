@@ -18,10 +18,13 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
 
         val beregnetSkattegrunnlagSisteTreÅr = listInntektsår.map { sigrunClient.hentBeregnetSkatt(aktivIdent, it).mapTilPensjonsgivendeInntektVisning(it) }
+        /* Venter med kall mot beregnet skattegrunnlag - trenger blant annet eget filter
         val inntektFraSvalbard = hentInntektFraSvalbardSisteTreÅr(aktivIdent)
         beregnetSkattegrunnlagSisteTreÅr.forEach {
             it.verdi += inntektFraSvalbard.find { svalbard -> svalbard.inntektsaar == it.inntektsaar }?.verdi ?: 0
         }
+         */
+
         return beregnetSkattegrunnlagSisteTreÅr
     }
 
