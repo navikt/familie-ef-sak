@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -19,6 +20,7 @@ import java.util.UUID
  *
  * Hver vilkårsvurdering har delvilkår. Hvert delvilkår har vurderinger med svar, og kanskje begrunnelse.
  *
+ * Husk at [opphavsvilkår] må tas stilling til når man kopierer denne
  */
 @Table("vilkarsvurdering")
 data class Vilkårsvurdering(
@@ -31,12 +33,33 @@ data class Vilkårsvurdering(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     @Column("delvilkar")
-    val delvilkårsvurdering: DelvilkårsvurderingWrapper
+    val delvilkårsvurdering: DelvilkårsvurderingWrapper,
+    @Embedded(onEmpty = Embedded.OnEmpty.USE_NULL, prefix = "opphavsvilkaar_")
+    val opphavsvilkår: Opphavsvilkår?
 ) {
     init {
         require(resultat.erIkkeDelvilkårsresultat()) // Verdien AUTOMATISK_OPPFYLT er kun forbeholdt delvilkår
     }
+
+    /**
+     * Brukes når man skal gjenbruke denne vilkårsvurderingen i en annan vilkårsvurdering
+     */
+    fun opprettOpphavsvilkår(): Opphavsvilkår =
+        opphavsvilkår ?: Opphavsvilkår(behandlingId, sporbar.endret.endretTid)
 }
+
+/**
+ * Inneholder informasjon fra hvilken behandling dette vilkår ble gjenrukt fra
+ * Hvis man gjenbruker et vilkår som allerede er gjenbrukt fra en annen behandling,
+ * så skal man peke til den opprinnelige behandlingen. Dvs
+ * Behandling A
+ * Behandling B gjenbruker fra behandling A
+ * Behandling C gjenbruker fra B, men peker mot A sitt vilkår
+ */
+data class Opphavsvilkår(
+    val behandlingId: UUID,
+    val vurderingstidspunkt: LocalDateTime
+)
 
 // Ingen støtte for å ha en liste direkt i entiteten, wrapper+converter virker
 data class DelvilkårsvurderingWrapper(val delvilkårsvurderinger: List<Delvilkårsvurdering>)

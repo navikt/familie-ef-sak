@@ -18,7 +18,13 @@ data class VilkårsvurderingDto(
     val barnId: UUID? = null,
     val endretAv: String,
     val endretTid: LocalDateTime,
-    val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList()
+    val delvilkårsvurderinger: List<DelvilkårsvurderingDto> = emptyList(),
+    val opphavsvilkår: OpphavsvilkårDto?
+)
+
+data class OpphavsvilkårDto(
+    val behandlingId: UUID,
+    val endretTid: LocalDateTime
 )
 
 data class OppdaterVilkårsvurderingDto(val id: UUID, val behandlingId: UUID)
@@ -63,7 +69,8 @@ fun Vilkårsvurdering.tilDto() =
         endretTid = this.sporbar.endret.endretTid,
         delvilkårsvurderinger = this.delvilkårsvurdering.delvilkårsvurderinger
             .filter { it.resultat != Vilkårsresultat.IKKE_AKTUELL }
-            .map { it.tilDto() }
+            .map { it.tilDto() },
+        opphavsvilkår = this.opphavsvilkår?.let { OpphavsvilkårDto(it.behandlingId, it.vurderingstidspunkt) }
     )
 
 fun DelvilkårsvurderingDto.svarTilDomene() = this.vurderinger.map { it.tilDomene() }

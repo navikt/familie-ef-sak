@@ -240,7 +240,7 @@ class VurderingService(
         barnPåGjeldendeBehandling: List<BehandlingBarn>,
         nyBehandlingsId: UUID,
         barnIdMap: Map<UUID, BehandlingBarn>
-    ) =
+    ): Map<UUID, Vilkårsvurdering> =
         tidligereVurderinger.values
             .filter { skalKopiereVurdering(it, barnPåGjeldendeBehandling.isNotEmpty()) }
             .associate { vurdering ->
@@ -248,7 +248,8 @@ class VurderingService(
                     id = UUID.randomUUID(),
                     behandlingId = nyBehandlingsId,
                     sporbar = Sporbar(),
-                    barnId = finnBarnId(vurdering.barnId, barnIdMap)
+                    barnId = finnBarnId(vurdering.barnId, barnIdMap),
+                    opphavsvilkår = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) vurdering.opprettOpphavsvilkår() else null
                 )
             }
 

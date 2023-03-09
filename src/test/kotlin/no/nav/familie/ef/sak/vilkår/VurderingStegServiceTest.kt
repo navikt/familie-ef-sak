@@ -49,6 +49,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class VurderingStegServiceTest {
@@ -176,6 +177,7 @@ internal class VurderingStegServiceTest {
 
         assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
+        assertThat(lagretVilkårsvurdering.captured.opphavsvilkår).isNull()
 
         val delvilkårsvurdering = lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first()
         assertThat(delvilkårsvurdering.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -199,12 +201,26 @@ internal class VurderingStegServiceTest {
 
         assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
         assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
+        assertThat(oppdatertVurdering.captured.opphavsvilkår).isNull()
 
         val delvilkårsvurdering = oppdatertVurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first()
         assertThat(delvilkårsvurdering.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
         assertThat(delvilkårsvurdering.vurderinger).hasSize(1)
         assertThat(delvilkårsvurdering.vurderinger.first().svar).isNull()
         assertThat(delvilkårsvurdering.vurderinger.first().begrunnelse).isNull()
+    }
+
+    @Test
+    internal fun `nullstille skal fjerne opphavsvilkår fra vilkårsvurdering`() {
+        every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
+        val oppdatertVurdering = slot<Vilkårsvurdering>()
+        val vilkårsvurdering = initiererVurderinger(oppdatertVurdering)
+
+        vurderingStegService.nullstillVilkår(OppdaterVilkårsvurderingDto(vilkårsvurdering.id, behandlingId))
+
+        assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
+        assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
+        assertThat(oppdatertVurdering.captured.opphavsvilkår).isNull()
     }
 
     @Test
@@ -320,14 +336,15 @@ internal class VurderingStegServiceTest {
         val vilkårsvurdering =
             vilkårsvurdering(
                 behandlingId,
-                Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                Vilkårsresultat.OPPFYLT,
                 VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                 listOf(
                     Delvilkårsvurdering(
                         Vilkårsresultat.OPPFYLT,
                         listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN))
                     )
-                )
+                ),
+                opphavsvilkår = Opphavsvilkår(UUID.randomUUID(), LocalDateTime.now())
             )
         val vilkårsvurderinger =
             opprettNyeVilkårsvurderinger(

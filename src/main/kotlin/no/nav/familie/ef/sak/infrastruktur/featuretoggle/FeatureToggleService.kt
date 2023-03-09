@@ -24,6 +24,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
     AUTOMATISK_VURDER_NYTT_BARN_SAMME_PARTNER("familie.ef.sak.nytt-barn-samme-partner"),
     BEHANDLING_KORRIGERING("familie.ef.sak.behandling-korrigering", "Permission"),
 
+    VILKÅR_GJENBRUK("familie.ef.sak.vilkaar-gjenruk"),
+
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),

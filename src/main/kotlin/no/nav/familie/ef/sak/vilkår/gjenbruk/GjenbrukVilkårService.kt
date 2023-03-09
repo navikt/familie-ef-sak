@@ -10,6 +10,8 @@ import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
@@ -27,7 +29,8 @@ class GjenbrukVilkårService(
     private val fagsakService: FagsakService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val grunnlagsdataService: GrunnlagsdataService,
-    private val barnService: BarnService
+    private val barnService: BarnService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -89,7 +92,8 @@ class GjenbrukVilkårService(
                     id = it.id,
                     behandlingId = behandlingId,
                     sporbar = it.sporbar,
-                    barnId = it.barnId
+                    barnId = it.barnId,
+                    opphavsvilkår = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) tidligereVurdering.opprettOpphavsvilkår() else null
                 )
             }
     }
