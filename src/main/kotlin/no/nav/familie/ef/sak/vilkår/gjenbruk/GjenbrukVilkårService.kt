@@ -93,7 +93,7 @@ class GjenbrukVilkårService(
                     behandlingId = behandlingId,
                     sporbar = it.sporbar,
                     barnId = it.barnId,
-                    gjenbrukt = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) tidligereVurdering.lagGjenbrukt() else null
+                    opphavsvilkår = if (featureToggleService.isEnabled(Toggle.VILKÅR_GJENBRUK)) tidligereVurdering.opprettOpphavsvilkår() else null
                 )
             }
     }

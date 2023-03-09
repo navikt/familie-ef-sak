@@ -6,7 +6,7 @@ import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.testWithBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.Gjenbrukt
+import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -42,7 +42,7 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
                 type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
                 delvilkårsvurdering = listOf(Delvilkårsvurdering(Vilkårsresultat.OPPFYLT, vurderinger)),
                 barnId = null,
-                gjenbrukt = Gjenbrukt(behandling.id, SporbarUtils.now())
+                opphavsvilkår = Opphavsvilkår(behandling.id, SporbarUtils.now())
             )
         )
 
@@ -51,14 +51,14 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    internal fun `vilkårsvurdering uten gjenbrukt`() {
+    internal fun `vilkårsvurdering uten opphavsvilkår`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
         val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(
             behandlingId = behandling.id,
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-            gjenbrukt = null
+            opphavsvilkår = null
         ))
         assertThat(vilkårsvurderingRepository.findByBehandlingId(behandling.id)).containsOnly(vilkårsvurdering)
     }

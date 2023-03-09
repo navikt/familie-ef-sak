@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.no.nav.familie.ef.sak.repository
 
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.Gjenbrukt
+import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
@@ -15,28 +15,28 @@ internal class VilkårsvurderingTest {
     private val behandlingIdRevurdering = UUID.randomUUID()
 
     @Test
-    internal fun `lagGjenbrukt - et vilkår som ikke er gjenbrukt skal peke til behandlingen`() {
+    internal fun `opprettOpphavsvilkår - et vilkår som ikke er gjenbrukt skal peke til behandlingen`() {
         val vilkårsvurdering = Vilkårsvurdering(
             behandlingId = behandlingIdFørstegangsbehandling,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
             type = VilkårType.MOR_ELLER_FAR,
-            gjenbrukt = null
+            opphavsvilkår = null
         )
-        val gjenbrukt = vilkårsvurdering.lagGjenbrukt()
-        assertThat(gjenbrukt).isEqualTo(Gjenbrukt(behandlingIdFørstegangsbehandling,
+        val opphavsvilkår = vilkårsvurdering.opprettOpphavsvilkår()
+        assertThat(opphavsvilkår).isEqualTo(Opphavsvilkår(behandlingIdFørstegangsbehandling,
             vilkårsvurdering.sporbar.endret.endretTid))
     }
 
     @Test
-    internal fun `lagGjenbrukt - skal bruke gjenbrukt hvis den finnes og ikke lage en ny, for å peke til den opprinnelige behandlingen`() {
-        val gjenbrukt = Gjenbrukt(behandlingIdFørstegangsbehandling, LocalDateTime.now())
+    internal fun `opprettOpphavsvilkår - skal bruke opphavsvilkår hvis den finnes og ikke lage en ny, for å peke til den opprinnelige behandlingen`() {
+        val opphavsvilkår = Opphavsvilkår(behandlingIdFørstegangsbehandling, LocalDateTime.now())
         val vilkårsvurdering = Vilkårsvurdering(
             behandlingId = behandlingIdRevurdering,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
             type = VilkårType.MOR_ELLER_FAR,
-            gjenbrukt = gjenbrukt
+            opphavsvilkår = opphavsvilkår
         )
-        val nyGjenbrukt = vilkårsvurdering.lagGjenbrukt()
-        assertThat(nyGjenbrukt).isEqualTo(gjenbrukt)
+        val nyttOpphavsvilkår = vilkårsvurdering.opprettOpphavsvilkår()
+        assertThat(nyttOpphavsvilkår).isEqualTo(opphavsvilkår)
     }
 }

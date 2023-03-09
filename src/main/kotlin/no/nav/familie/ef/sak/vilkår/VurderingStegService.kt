@@ -117,7 +117,7 @@ class VurderingStegService(
             vilkårsvurdering.copy(
                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
                 delvilkårsvurdering = delvilkårsvurdering,
-                gjenbrukt = null
+                opphavsvilkår = null
             )
         ).tilDto()
     }
@@ -136,7 +136,7 @@ class VurderingStegService(
             vilkårsvurdering.copy(
                 resultat = Vilkårsresultat.SKAL_IKKE_VURDERES,
                 delvilkårsvurdering = delvilkårsvurdering,
-                gjenbrukt = null
+                opphavsvilkår = null
             )
         ).tilDto()
     }

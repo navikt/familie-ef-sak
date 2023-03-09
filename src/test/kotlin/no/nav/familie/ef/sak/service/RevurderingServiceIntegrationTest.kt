@@ -39,7 +39,7 @@ import no.nav.familie.ef.sak.vedtak.domain.PeriodeMedBeløp
 import no.nav.familie.ef.sak.vedtak.domain.Vedtak
 import no.nav.familie.ef.sak.vedtak.dto.tilVedtakDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
-import no.nav.familie.ef.sak.vilkår.Gjenbrukt
+import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.VilkårsvurderingRepository
@@ -182,9 +182,9 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(sivilstandVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(sivilstandVilkårForRevurdering.sporbar.endret.endretTid)
         assertThat(sivilstandVilkårForRevurdering.barnId).isNull()
         assertThat(sivilstandVilkårForBehandling.barnId).isNull()
-        assertThat(sivilstandVilkårForBehandling.gjenbrukt).isNull()
-        assertThat(sivilstandVilkårForRevurdering.gjenbrukt)
-            .isEqualTo(Gjenbrukt(behandling.id, sivilstandVilkårForBehandling.sporbar.endret.endretTid))
+        assertThat(sivilstandVilkårForBehandling.opphavsvilkår).isNull()
+        assertThat(sivilstandVilkårForRevurdering.opphavsvilkår)
+            .isEqualTo(Opphavsvilkår(behandling.id, sivilstandVilkårForBehandling.sporbar.endret.endretTid))
 
         assertThat(aleneomsorgVilkårForBehandling.id).isNotEqualTo(aleneomsorgVilkårForRevurdering.id)
         assertThat(aleneomsorgVilkårForBehandling.barnId).isNotEqualTo(aleneomsorgVilkårForRevurdering.barnId)
@@ -193,15 +193,15 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(aleneomsorgVilkårForBehandling.sporbar.endret.endretTid).isEqualTo(aleneomsorgVilkårForRevurdering.sporbar.endret.endretTid)
         assertThat(aleneomsorgVilkårForBehandling.barnId).isNotNull
         assertThat(aleneomsorgVilkårForRevurdering.barnId).isEqualTo(barnPåBehandling.id)
-        assertThat(aleneomsorgVilkårForBehandling.gjenbrukt).isNull()
-        assertThat(aleneomsorgVilkårForRevurdering.gjenbrukt)
-            .isEqualTo(Gjenbrukt(behandling.id, aleneomsorgVilkårForBehandling.sporbar.endret.endretTid))
+        assertThat(aleneomsorgVilkårForBehandling.opphavsvilkår).isNull()
+        assertThat(aleneomsorgVilkårForRevurdering.opphavsvilkår)
+            .isEqualTo(Opphavsvilkår(behandling.id, aleneomsorgVilkårForBehandling.sporbar.endret.endretTid))
 
         assertThat(sivilstandVilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "gjenbrukt")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
             .isEqualTo(sivilstandVilkårForRevurdering)
         assertThat(aleneomsorgVilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "gjenbrukt")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
             .isEqualTo(aleneomsorgVilkårForRevurdering)
     }
 
@@ -280,7 +280,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
         assertThat(vilkårForBehandling.first { it.type == VilkårType.SIVILSTAND }).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "gjenbrukt")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
             .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
     }
 

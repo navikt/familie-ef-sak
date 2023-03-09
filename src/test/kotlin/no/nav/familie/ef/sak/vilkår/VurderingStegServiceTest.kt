@@ -177,7 +177,7 @@ internal class VurderingStegServiceTest {
 
         assertThat(lagretVilkårsvurdering.captured.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
         assertThat(lagretVilkårsvurdering.captured.type).isEqualTo(vilkårsvurdering.type)
-        assertThat(lagretVilkårsvurdering.captured.gjenbrukt).isNull()
+        assertThat(lagretVilkårsvurdering.captured.opphavsvilkår).isNull()
 
         val delvilkårsvurdering = lagretVilkårsvurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first()
         assertThat(delvilkårsvurdering.resultat).isEqualTo(Vilkårsresultat.OPPFYLT)
@@ -201,7 +201,7 @@ internal class VurderingStegServiceTest {
 
         assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
         assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
-        assertThat(oppdatertVurdering.captured.gjenbrukt).isNull()
+        assertThat(oppdatertVurdering.captured.opphavsvilkår).isNull()
 
         val delvilkårsvurdering = oppdatertVurdering.captured.delvilkårsvurdering.delvilkårsvurderinger.first()
         assertThat(delvilkårsvurdering.resultat).isEqualTo(Vilkårsresultat.SKAL_IKKE_VURDERES)
@@ -211,7 +211,7 @@ internal class VurderingStegServiceTest {
     }
 
     @Test
-    internal fun `nullstille skal fjerne gjenbrukt fra vilkårsvurdering`() {
+    internal fun `nullstille skal fjerne opphavsvilkår fra vilkårsvurdering`() {
         every { barnService.finnBarnPåBehandling(behandlingId) } returns barn
         val oppdatertVurdering = slot<Vilkårsvurdering>()
         val vilkårsvurdering = initiererVurderinger(oppdatertVurdering)
@@ -220,7 +220,7 @@ internal class VurderingStegServiceTest {
 
         assertThat(oppdatertVurdering.captured.resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         assertThat(oppdatertVurdering.captured.type).isEqualTo(vilkårsvurdering.type)
-        assertThat(oppdatertVurdering.captured.gjenbrukt).isNull()
+        assertThat(oppdatertVurdering.captured.opphavsvilkår).isNull()
     }
 
     @Test
@@ -344,7 +344,7 @@ internal class VurderingStegServiceTest {
                         listOf(Vurdering(RegelId.SØKER_MEDLEM_I_FOLKETRYGDEN))
                     )
                 ),
-                gjenbrukt = Gjenbrukt(UUID.randomUUID(), LocalDateTime.now())
+                opphavsvilkår = Opphavsvilkår(UUID.randomUUID(), LocalDateTime.now())
             )
         val vilkårsvurderinger =
             opprettNyeVilkårsvurderinger(

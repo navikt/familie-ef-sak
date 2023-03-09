@@ -44,7 +44,7 @@ object OppdaterVilkår {
         return vilkårsvurdering.copy(
             resultat = vilkårsresultat.vilkår,
             delvilkårsvurdering = oppdaterteDelvilkår,
-            gjenbrukt = null
+            opphavsvilkår = null
         )
     }
 
@@ -201,7 +201,7 @@ object OppdaterVilkår {
             barnId = barnId,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
             resultat = utledResultat(vilkårsregel, delvilkårsvurdering.map { it.tilDto() }).vilkår,
-            gjenbrukt = null
+            opphavsvilkår = null
         )
     }
 }

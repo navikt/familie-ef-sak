@@ -53,7 +53,7 @@ import no.nav.familie.ef.sak.vedtak.dto.Sanksjonsårsak
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.Gjenbrukt
+import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -241,7 +241,7 @@ fun vilkårsvurdering(
     type: VilkårType = VilkårType.LOVLIG_OPPHOLD,
     delvilkårsvurdering: List<Delvilkårsvurdering> = emptyList(),
     barnId: UUID? = null,
-    gjenbrukt: Gjenbrukt? = null
+    opphavsvilkår: Opphavsvilkår? = null
 ): Vilkårsvurdering =
     Vilkårsvurdering(
         behandlingId = behandlingId,
@@ -249,7 +249,7 @@ fun vilkårsvurdering(
         type = type,
         barnId = barnId,
         delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurdering),
-        gjenbrukt = gjenbrukt
+        opphavsvilkår = opphavsvilkår
     )
 
 fun fagsakpersoner(vararg identer: String): Set<PersonIdent> = identer.map {

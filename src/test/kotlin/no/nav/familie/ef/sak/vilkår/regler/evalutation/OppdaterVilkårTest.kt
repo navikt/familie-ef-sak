@@ -10,7 +10,7 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.testutil.søknadBarnTilBehandlingBarn
 import no.nav.familie.ef.sak.vilkår.Delvilkårsvurdering
 import no.nav.familie.ef.sak.vilkår.DelvilkårsvurderingWrapper
-import no.nav.familie.ef.sak.vilkår.Gjenbrukt
+import no.nav.familie.ef.sak.vilkår.Opphavsvilkår
 import no.nav.familie.ef.sak.vilkår.VilkårType
 import no.nav.familie.ef.sak.vilkår.Vilkårsresultat
 import no.nav.familie.ef.sak.vilkår.Vilkårsvurdering
@@ -268,10 +268,10 @@ internal class OppdaterVilkårTest {
     }
 
     @Test
-    internal fun `skal fjerne gjenbrukt når man oppdaterer et vilkår`() {
+    internal fun `skal fjerne opphavsvilkår når man oppdaterer et vilkår`() {
         val regel = VilkårsregelEnHovedregel()
         val vilkårsvurdering = opprettVurdering(regel)
-            .copy(gjenbrukt = Gjenbrukt(UUID.randomUUID(), LocalDateTime.now()))
+            .copy(opphavsvilkår = Opphavsvilkår(UUID.randomUUID(), LocalDateTime.now()))
         val resultat = validerOgOppdater(
             vilkårsvurdering,
             regel,
@@ -279,7 +279,7 @@ internal class OppdaterVilkårTest {
             VurderingDto(RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE, SvarId.NEI)
         )
 
-        assertThat(resultat.gjenbrukt).isNull()
+        assertThat(resultat.opphavsvilkår).isNull()
     }
 
     @Test
@@ -357,7 +357,7 @@ internal class OppdaterVilkårTest {
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.SIVILSTAND,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår),
-            gjenbrukt = null
+            opphavsvilkår = null
         )
 
         val oppdatering = listOf(
@@ -391,7 +391,7 @@ internal class OppdaterVilkårTest {
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.SIVILSTAND,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(initDelvilkår),
-            gjenbrukt = null
+            opphavsvilkår = null
         )
 
         val oppdatering = listOf(
@@ -613,7 +613,7 @@ internal class OppdaterVilkårTest {
             resultat = vilkårsresultat,
             type = VilkårType.ALENEOMSORG,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(emptyList()),
-            gjenbrukt = null
+            opphavsvilkår = null
         )
 
     private fun Vilkårsvurdering.delvilkår(regelId: RegelId) =
@@ -654,7 +654,7 @@ internal class OppdaterVilkårTest {
             resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
             type = VilkårType.ALENEOMSORG,
             delvilkårsvurdering = DelvilkårsvurderingWrapper(delvilkårsvurderinger),
-            gjenbrukt = null
+            opphavsvilkår = null
         )
     }
 }
