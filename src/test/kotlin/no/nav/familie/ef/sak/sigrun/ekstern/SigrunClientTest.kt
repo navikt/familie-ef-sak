@@ -1,4 +1,4 @@
-package no.nav.familie.ef.sak.no.nav.familie.ef.sak.sigrun
+package no.nav.familie.ef.sak.no.nav.familie.ef.sak.sigrun.ekstern
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -48,7 +48,7 @@ class SigrunClientTest {
     @Test
     fun `hent beregnetskatt fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/v1/beregnetskatt?inntektsaar=2022"))
+            WireMock.post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -63,9 +63,26 @@ class SigrunClientTest {
     }
 
     @Test
+    fun `hent beregnetskatt fra sigrun og map til objekt med skatteoppgjørsdato`() {
+        wiremockServerItem.stubFor(
+            WireMock.post(urlEqualTo("/api/sigrun/beregnetskatt?inntektsaar=2022"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
+                        .withBody(beregnetSkattMedOppgjørsdatoJson)
+                )
+        )
+        val beregnetSkatt = sigrunClient.hentBeregnetSkatt("123", 2022)
+        assertThat(beregnetSkatt.size).isEqualTo(2)
+        assertThat(beregnetSkatt.last().verdi).isEqualTo("200000")
+        assertThat(beregnetSkatt.last().tekniskNavn).isEqualTo("personinntektNaering")
+    }
+
+    @Test
     fun `hent summertskattegrunnlag fra sigrun og map til objekt`() {
         wiremockServerItem.stubFor(
-            WireMock.post(urlEqualTo("/api/v1/summertskattegrunnlag?inntektsaar=2018"))
+            WireMock.post(urlEqualTo("/api/sigrun/summertskattegrunnlag?inntektsaar=2018"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -80,6 +97,19 @@ class SigrunClientTest {
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().tekniskNavn).isEqualTo("samledePaaloepteRenter")
         assertThat(summertSkattegrunnlag.svalbardGrunnlag.first().beloep).isEqualTo(779981)
     }
+
+    private val beregnetSkattMedOppgjørsdatoJson = """
+        [
+          {
+            "tekniskNavn": "skatteoppgjoersdato",
+            "verdi": "2022-05-01"
+          },
+          {
+            "tekniskNavn": "personinntektNaering",
+            "verdi": "200000"
+          }
+        ]
+    """.trimIndent()
 
     private val beregnetSkattRessursResponseJson = """
         [
