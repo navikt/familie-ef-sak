@@ -37,19 +37,27 @@ class SigrunService(val sigrunClient: SigrunClient, val fagsakPersonService: Fag
     }
 }
 
+val næringKodeverdiBeregnetSkatt = "personinntektNaering"
+val skatteoppgjørsdatoKodeverdi = "skatteoppgjoersdato"
+
 private fun List<BeregnetSkatt>.mapTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
     // Skatteoppgjørsdato er en del av response, og bruker samme felter som inntekt. Verdi er datoen for skatteoppgjøret og teknisk navn er "skatteoppgjoersdato".
     // Dette filtreres vekk for at summeringen av inntekt skal gå bra, i tillegg til at det ikke er sett behov for å vise skatteoppgjørsdato i frontend.
-    val sum = this.filter { it.tekniskNavn != "skatteoppgjoersdato" }.sumOf { it.verdi.toInt() }
-    return PensjonsgivendeInntektVisning(inntektsaar, sum)
+    val inntekt = this.filter { it.tekniskNavn != skatteoppgjørsdatoKodeverdi }
+
+    val næring = inntekt.filter { it.tekniskNavn == næringKodeverdiBeregnetSkatt }.sumOf { it.verdi.toInt() }
+    val person = inntekt.filter { it.tekniskNavn != næringKodeverdiBeregnetSkatt }.sumOf { it.verdi.toInt() }
+    return PensjonsgivendeInntektVisning(inntektsaar, næring, person)
 }
 
 private fun SummertSkattegrunnlag.mapSvalbardGrunnlagTilPensjonsgivendeInntektVisning(inntektsaar: Int): PensjonsgivendeInntektVisning {
-    val sum = this.svalbardGrunnlag.filter { it.tekniskNavn != "skatteoppgjoersdato" }.sumOf { it.beloep }
-    return PensjonsgivendeInntektVisning(inntektsaar, sum)
+    val inntekt = this.svalbardGrunnlag.filter { it.tekniskNavn != skatteoppgjørsdatoKodeverdi }
+    // Andre kodeverdier enn i bregnet skatt, må avklares hva som skal brukes
+    return PensjonsgivendeInntektVisning(inntektsaar, 0, 0)
 }
 
 data class PensjonsgivendeInntektVisning(
     val inntektsaar: Int,
-    var verdi: Int
+    var næring: Int,
+    var person: Int
 )

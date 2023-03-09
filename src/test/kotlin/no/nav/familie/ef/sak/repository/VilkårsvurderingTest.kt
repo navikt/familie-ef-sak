@@ -23,8 +23,12 @@ internal class VilkårsvurderingTest {
             opphavsvilkår = null
         )
         val opphavsvilkår = vilkårsvurdering.opprettOpphavsvilkår()
-        assertThat(opphavsvilkår).isEqualTo(Opphavsvilkår(behandlingIdFørstegangsbehandling,
-            vilkårsvurdering.sporbar.endret.endretTid))
+        assertThat(opphavsvilkår).isEqualTo(
+            Opphavsvilkår(
+                behandlingIdFørstegangsbehandling,
+                vilkårsvurdering.sporbar.endret.endretTid
+            )
+        )
     }
 
     @Test
