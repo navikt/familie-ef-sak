@@ -53,8 +53,8 @@ object UtledEndringerUtil {
         formatterEndring(BarnDto::dødsdato, "Dødsdato"),
         formatterEndring(BarnDto::fødselsdato, "Fødselsdato"),
         formatterEndring({ it.annenForelder?.personIdent }, "Annen forelder"),
-        formatterEndring(BarnDto::harDeltBostedNå, "Har delt bosted"),
-        formatterEndring(BarnDto::deltBosted, "Delt bosted")
+        formatterEndring(BarnDto::harDeltBostedNå, "Delt bosted"),
+        formatterEndring(BarnDto::deltBosted, "Delt bosted perioder")
         // TODO adresse ?? Er den interessant å vise som endret hvis man ikke har endring i borHosSøker ? si eks at barnet på > 18 flytter
     )
 
@@ -128,6 +128,7 @@ object UtledEndringerUtil {
         is Boolean -> if (verdi) "Ja" else "Nei"
         is LocalDate -> verdi.norskFormat()
         is Folkeregisterpersonstatus -> verdi.visningsnavn
+        is List<*> -> ""
         else -> "$verdi"
     }
 }
