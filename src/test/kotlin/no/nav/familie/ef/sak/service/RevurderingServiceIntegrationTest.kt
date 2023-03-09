@@ -198,10 +198,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             .isEqualTo(Opphavsvilkår(behandling.id, aleneomsorgVilkårForBehandling.sporbar.endret.endretTid))
 
         assertThat(sivilstandVilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(sivilstandVilkårForRevurdering)
         assertThat(aleneomsorgVilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(aleneomsorgVilkårForRevurdering)
     }
 
@@ -280,7 +280,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
         assertThat(vilkårForBehandling.first { it.type == VilkårType.SIVILSTAND }).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(vilkårForRevurdering.first { it.type == VilkårType.SIVILSTAND })
     }
 

@@ -80,7 +80,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
             .isEqualTo(Opphavsvilkår(behandling.id, vilkårForBehandling.sporbar.endret.endretTid))
 
         assertThat(vilkårForBehandling).usingRecursiveComparison()
-            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkaar")
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(vilkårForRevurdering)
     }
 
