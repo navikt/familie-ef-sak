@@ -27,4 +27,8 @@ data class SøkeKriterier(
 
 data class Paging(val pageNumber: Int, val resultsPerPage: Int)
 
-data class SearchRule(val equals: String? = null)
+sealed interface SearchRule
+
+data class SearchRuleEquals(val equals: String): SearchRule
+
+data class SearchRuleExists(val exists: Boolean): SearchRule
