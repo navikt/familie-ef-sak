@@ -33,6 +33,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.GjeldendeBarnRepository
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.infotrygd.InfotrygdPeriodeTestUtil
 import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.revurderingsinformasjon
@@ -795,7 +796,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             fagsakId = migrering.fagsakId,
             behandlingsårsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             kravMottatt = LocalDate.now(),
-            emptyList()
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
         )
         val revurdering = testWithBrukerContext { revurderingService.opprettRevurderingManuelt(revurderingDto) }
         val saksbehandling = saksbehandling(fagsak, revurdering)

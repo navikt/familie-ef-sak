@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.barn.BarnService
+import no.nav.familie.ef.sak.barn.BehandlingBarn
 import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
-import no.nav.familie.ef.sak.behandling.dto.tilBehandlingBarn
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.behandlingsflyt.steg.StegType
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.vedtak.KopierVedtakService
@@ -40,7 +41,8 @@ class RevurderingService(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val stegService: StegService,
     private val kopierVedtakService: KopierVedtakService,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
+    private val nyeBarnService: NyeBarnService,
 ) {
 
     fun hentRevurderingsinformasjon(behandlingId: UUID): RevurderingsinformasjonDto {
@@ -49,7 +51,7 @@ class RevurderingService(
 
     fun lagreRevurderingsinformasjon(
         behandlingId: UUID,
-        revurderingsinformasjonDto: RevurderingsinformasjonDto
+        revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): RevurderingsinformasjonDto {
         stegService.håndterÅrsakRevurdering(behandlingId, revurderingsinformasjonDto)
         return hentRevurderingsinformasjon(behandlingId)
@@ -86,7 +88,7 @@ class RevurderingService(
         barnService.opprettBarnForRevurdering(
             behandlingId = revurdering.id,
             forrigeBehandlingId = forrigeBehandlingId,
-            nyeBarnPåRevurdering = revurderingInnhold.barn.tilBehandlingBarn(revurdering.id),
+            nyeBarnPåRevurdering = vilkårsbehandleNyeBarn(revurdering, revurderingInnhold.vilkårsbehandleNyeBarn),
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
             stønadstype = fagsak.stønadstype
         )
@@ -122,6 +124,47 @@ class RevurderingService(
         }
 
         return revurdering
+    }
+
+    private fun vilkårsbehandleNyeBarn(
+        revurdering: Behandling,
+        vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
+    ): List<BehandlingBarn> {
+        val nyeBarn = nyeBarnService.finnNyeBarnSidenGjeldendeBehandlingForFagsak(revurdering.fagsakId)
+        if (revurdering.årsak != BehandlingÅrsak.G_OMREGNING) {
+            feilHvis(
+                nyeBarn.harBarnISisteIverksatteBehandling &&
+                    vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            ) {
+                "Må vilkårsbehandle nye barn når det finnes barn på forrige behandling"
+            }
+            brukerfeilHvis(
+                !nyeBarn.harBarnISisteIverksatteBehandling &&
+                    nyeBarn.nyeBarn.isNotEmpty() &&
+                    vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
+            ) {
+                "Må ta stilling til nye barn"
+            }
+        } else {
+            feilHvis(vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE) {
+                "Skal ikke vilkårsbehandle nye barn for g-omregning"
+            }
+        }
+        return when (vilkårsbehandleNyeBarn) {
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE -> {
+                nyeBarn.nyeBarn.map {
+                    BehandlingBarn(
+                        behandlingId = revurdering.id,
+                        søknadBarnId = null,
+                        personIdent = it.personIdent,
+                        navn = it.navn,
+                        fødselTermindato = null
+                    )
+                }
+            }
+            VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE -> emptyList()
+            VilkårsbehandleNyeBarn.IKKE_VALGT -> emptyList()
+        }
     }
 
     private fun validerOpprettRevurdering(fagsak: Fagsak, revurderingInnhold: RevurderingDto) {

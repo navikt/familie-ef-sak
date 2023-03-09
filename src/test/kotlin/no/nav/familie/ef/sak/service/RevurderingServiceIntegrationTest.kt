@@ -10,7 +10,6 @@ import no.nav.familie.ef.sak.behandling.domain.Behandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingResultat
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
-import no.nav.familie.ef.sak.behandling.dto.RevurderingBarnDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandlingsflyt.steg.BeregnYtelseSteg
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
@@ -19,6 +18,7 @@ import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.RolleConfig
+import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -99,7 +99,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     fun setUp() {
         mockBrukerContext(preferredUsername = "Heider", groups = listOf(rolleConfig.saksbehandlerRolle))
         fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer))
-        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, emptyList())
+        revurderingDto = RevurderingDto(fagsak.id, behandlingsårsak, kravMottatt, VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE)
     }
 
     @AfterEach
@@ -241,7 +241,10 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
 
     private fun opprettBarnetilsynBehandling(): Pair<Fagsak, Behandling> {
         val fagsakBarnetilsyn = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = StønadType.BARNETILSYN))
-        revurderingDto = RevurderingDto(fagsakBarnetilsyn.id, BehandlingÅrsak.SATSENDRING, kravMottatt, emptyList())
+        revurderingDto = RevurderingDto(fagsakBarnetilsyn.id,
+            BehandlingÅrsak.SATSENDRING,
+            kravMottatt,
+            VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE)
 
         val behandling = behandling(fagsakBarnetilsyn)
         behandlingRepository.insert(behandling)
@@ -253,22 +256,19 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `revurdering med nye barn - skal kopiere vilkår`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
         opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
-        val nyttBarn = RevurderingBarnDto(personIdent = "44445555666")
 
-        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto.copy(barn = listOf(nyttBarn)))
+        val revurdering = revurderingService.opprettRevurderingManuelt(revurderingDto)
         val vilkårForBehandling = vilkårsvurderingRepository.findByBehandlingId(behandling.id)
         val vilkårForRevurdering = vilkårsvurderingRepository.findByBehandlingId(revurdering.id)
-        val barnPåBehandling = barnRepository.findByBehandlingId(revurdering.id)
+        val barnPåRevurdering = barnRepository.findByBehandlingId(revurdering.id)
 
         assertThat(vilkårForBehandling).hasSize(2)
-        assertThat(vilkårForRevurdering).hasSize(3)
+        assertThat(vilkårForRevurdering).hasSize(4)
         assertThat(vilkårForBehandling.filter { it.barnId != null }).hasSize(1)
-        assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(2)
-        assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåBehandling.map { it.id })
-        assertThat(vilkårForRevurdering.mapNotNull { it.barnId }.sorted()).isEqualTo(
-            barnPåBehandling.map { it.id }
-                .sorted()
-        )
+        assertThat(vilkårForRevurdering.filter { it.barnId != null }).hasSize(3)
+        assertThat(vilkårForBehandling.mapNotNull { it.barnId }).isNotIn(barnPåRevurdering.map { it.id })
+        assertThat(vilkårForRevurdering.mapNotNull { it.barnId })
+            .containsExactlyInAnyOrderElementsOf(barnPåRevurdering.map { it.id })
         assertThat(vilkårForBehandling.map { it.behandlingId }).isNotIn(vilkårForRevurdering.map { it.behandlingId })
         assertThat(vilkårForBehandling.map { it.sporbar.opprettetTid }).isNotIn(vilkårForRevurdering.map { it.sporbar.opprettetTid })
 
@@ -297,7 +297,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
             val fagsak = testoppsettService.lagreFagsak(fagsak(identer = identer, stønadstype = it))
             val behandling = opprettFerdigstiltBehandling(fagsak)
             opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
-            val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+            val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE)
 
             assertThatThrownBy {
                 revurderingService.opprettRevurderingManuelt(revurderingInnhold)
@@ -309,7 +309,7 @@ internal class RevurderingServiceIntegrationTest : OppslagSpringRunnerTest() {
     internal fun `kan opprette g-omregning for overgangsstønad`() {
         val behandling = opprettFerdigstiltBehandling(fagsak)
         opprettVilkår(behandling, lagreSøknad(behandling).sivilstand)
-        val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, emptyList())
+        val revurderingInnhold = RevurderingDto(fagsak.id, BehandlingÅrsak.G_OMREGNING, kravMottatt, VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE)
 
         val revurdering = revurderingService.opprettRevurderingManuelt(revurderingInnhold)
 
