@@ -4,7 +4,7 @@ spring:
 DEPLOY_ENV: dev
 ON_PREM_URL_ENV: dev
 
-FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.dev.intern.nav.no/oppgavebenk
+FRONTEND_OPPGAVE_URL: https://ensligmorellerfar.intern.dev.nav.no/oppgavebenk
 G_OMREGNING_CRON_EXPRESSION: 0 0 * * * ?
 
 rolle:
