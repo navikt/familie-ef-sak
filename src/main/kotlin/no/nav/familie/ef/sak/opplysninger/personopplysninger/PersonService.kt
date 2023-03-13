@@ -15,7 +15,6 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
-@CacheConfig(cacheManager = "longCache")
 class PersonService(
     private val pdlClient: PdlClient,
     @Qualifier("shortCache")
