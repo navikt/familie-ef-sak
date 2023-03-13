@@ -44,9 +44,9 @@ internal class SigrunServiceTest {
         val fagsakId = UUID.randomUUID()
         val pensjonsgivendeInntektVisning = sigrunService.hentInntektSisteTreÅr(fagsakId)
         assertThat(pensjonsgivendeInntektVisning.size).isEqualTo(3)
-        assertThat(pensjonsgivendeInntektVisning.first().inntektsaar).isEqualTo(YearMonth.now().year - 1)
+        assertThat(pensjonsgivendeInntektVisning.first().inntektsår).isEqualTo(YearMonth.now().year - 1)
         assertThat(pensjonsgivendeInntektVisning.first().næring).isEqualTo(40_000)
         assertThat(pensjonsgivendeInntektVisning.first().person).isEqualTo(50_000)
-        assertThat(pensjonsgivendeInntektVisning.last().inntektsaar).isEqualTo(YearMonth.now().year - 3)
+        assertThat(pensjonsgivendeInntektVisning.last().inntektsår).isEqualTo(YearMonth.now().year - 3)
     }
 }
