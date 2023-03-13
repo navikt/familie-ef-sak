@@ -4,7 +4,6 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonDto
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonUtvidetDto
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
-import no.nav.familie.ef.sak.felles.util.FnrUtil
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -28,7 +27,7 @@ class FagsakPersonController(
     private val tilgangService: TilgangService,
     private val fagsakPersonService: FagsakPersonService,
     private val fagsakService: FagsakService,
-    private val personService: PersonService,
+    private val personService: PersonService
 ) {
 
     @GetMapping("{fagsakPersonId}")
@@ -41,8 +40,8 @@ class FagsakPersonController(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.id,
                 barnetilsyn = fagsaker.barnetilsyn?.id,
-                skolepenger = fagsaker.skolepenger?.id,
-            ),
+                skolepenger = fagsaker.skolepenger?.id
+            )
         )
     }
 
@@ -56,8 +55,8 @@ class FagsakPersonController(
                 person.id,
                 overgangsstønad = fagsaker.overgangsstønad?.let { fagsakService.fagsakTilDto(it) },
                 barnetilsyn = fagsaker.barnetilsyn?.let { fagsakService.fagsakTilDto(it) },
-                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) },
-            ),
+                skolepenger = fagsaker.skolepenger?.let { fagsakService.fagsakTilDto(it) }
+            )
         )
     }
 
@@ -68,10 +67,10 @@ class FagsakPersonController(
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
         val fagsakPersonId = fagsakPersonService.hentEllerOpprettPerson(
             personIdenter.identer(),
-            personIdenter.gjeldende().ident,
+            personIdenter.gjeldende().ident
         ).id
         return Ressurs.success(
-            fagsakPersonId,
+            fagsakPersonId
         )
     }
 }
