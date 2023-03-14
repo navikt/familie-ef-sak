@@ -1,0 +1,34 @@
+package no.nav.familie.ef.sak.behandling.fremleggsoppgave
+
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
+
+@RestController
+@RequestMapping("/api/fremleggsoppgave")
+@ProtectedWithClaims(issuer = "azuread")
+class FremleggsoppgaveController(private val fremleggsOppgaveService: FremleggsoppgaveService) {
+
+    @GetMapping("/kanopprettes/{behandlingid}")
+    fun skalOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
+        return Ressurs.success(fremleggsOppgaveService.kanOpprettes(behandlingid))
+    }
+
+    @GetMapping("/{behandlingid}")
+    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto> {
+        return Ressurs.success(fremleggsOppgaveService.hentFremleggsoppgave(behandlingid).tilDto())
+    }
+
+    @PostMapping("/{behandlingid}/opprettfremleggsoppgave/{skalopprette}")
+    fun opprettFremleggsoppgave(
+        @PathVariable behandlingId: UUID,
+        @PathVariable opprettFremleggsoppgave: Boolean
+    ): Ressurs<Unit> {
+        return Ressurs.success(fremleggsOppgaveService.opprettFremleggsoppgave(behandlingId, opprettFremleggsoppgave))
+    }
+}
