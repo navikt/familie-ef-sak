@@ -45,6 +45,8 @@ data class Inntektsperiode(
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
     Inntektsperiode(
+        dagsats = inntektsperiode.dagsats ?: BigDecimal.ZERO,
+        månedsinntekt = inntektsperiode.månedsinntekt ?: BigDecimal.ZERO,
         inntekt = inntektsperiode.forventetInntekt ?: BigDecimal.ZERO,
         samordningsfradrag = inntektsperiode.samordningsfradrag ?: BigDecimal.ZERO,
         periode = Månedsperiode(

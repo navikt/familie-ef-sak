@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
+import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
@@ -53,8 +54,7 @@ object BeregningUtils {
         val totalInntekt = inntektsperiode.inntekt +
             (inntektsperiode.dagsats ?: BigDecimal.ZERO).multiply(DAGSATS_ANTALL_DAGER) +
             (inntektsperiode.månedsinntekt ?: BigDecimal.ZERO).multiply(ANTALL_MÅNEDER_ÅR)
-        // rund ned
-        return totalInntekt
+        return BigDecimal(rundNedTilNærmeste1000(totalInntekt))
     }
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
