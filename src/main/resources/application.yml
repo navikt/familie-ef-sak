@@ -228,7 +228,7 @@ rolle:
   beslutter: "5fcc0e1d-a4c2-49f0-93dc-27c9fea41e54"
   kode6: "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
-  egenAnsatt: "73ff0e76-f2b1-4586-8387-b33f15617381" # 0000-GA-GOSYS_UTVIDET egen ansatt
+  egenAnsatt: "e750ceb5-b70b-4d94-b4fa-9d22467b786b" # 0000-GA-Egne_ansatte
 
 funksjonsbrytere:
   enabled: true
