@@ -62,6 +62,7 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
 
 fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
     Inntekt(
+        // TODO map?
         forventetInntekt = inntektsperiode.inntekt,
         samordningsfradrag = inntektsperiode.samordningsfradrag,
         årMånedFra = inntektsperiode.periode.fom
