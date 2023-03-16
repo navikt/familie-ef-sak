@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.beregning
 
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
@@ -8,7 +9,23 @@ import java.time.YearMonth
 
 data class BeregningRequest(val inntekt: List<Inntekt>, val vedtaksperioder: List<VedtaksperiodeDto>)
 
-data class Inntekt(val årMånedFra: YearMonth, val forventetInntekt: BigDecimal?, val samordningsfradrag: BigDecimal?)
+data class Inntekt(
+    val årMånedFra: YearMonth,
+    val forventetInntekt: BigDecimal?,
+    val samordningsfradrag: BigDecimal?,
+    val dagsats: BigDecimal? = null,
+    val månedsinntekt: BigDecimal? = null,
+    val årsinntekt: BigDecimal? = null,
+) {
+    init {
+        feilHvis(årsinntekt == null && forventetInntekt == null) {
+            ""
+        }
+        feilHvis(årsinntekt != null && forventetInntekt != null && årsinntekt != forventetInntekt) {
+            ""
+        }
+    }
+}
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(
@@ -19,6 +36,9 @@ data class Inntektsperiode(
             startDato ?: error("periode eller startDato må ha verdi"),
             sluttDato ?: error("periode eller sluttDato må ha verdi")
         ),
+    val dagsats: BigDecimal? = null,
+    val månedsinntekt: BigDecimal? = null,
+    // Vurder å endre til årsinntekt / bruke @JsonProperty
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
 )
