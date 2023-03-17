@@ -1,8 +1,9 @@
-package no.nav.familie.ef.sak.ekstern.arena
+package no.nav.familie.ef.sak.ekstern.stønadsperiode.util
 
 import no.nav.familie.ef.sak.infotrygd.InternePerioder
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -18,22 +19,22 @@ import java.time.YearMonth
 object ArenaPeriodeUtil {
 
     fun slåSammenPerioderFraEfOgInfotrygd(
-        request: PerioderOvergangsstønadRequest,
-        perioder: InternePerioder
-    ): List<PeriodeOvergangsstønad> {
+        request: EksternePerioderRequest,
+        perioder: InternePerioder,
+    ): List<EksternPeriode> {
         val måneder = finnUnikeÅrMånedForPerioder(perioder)
         val sammenslåtteÅrMåneder = slåSammenÅrMåneder(måneder)
         return sammenslåtteÅrMåneder.map {
-            PeriodeOvergangsstønad(
+            EksternPeriode(
                 personIdent = request.personIdent,
                 fomDato = it.first.atDay(1),
                 tomDato = it.second.atEndOfMonth(),
-                datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                datakilde = Datakilde.EF,
             )
         }.filter { overlapper(request, it) }
     }
 
-    private fun overlapper(request: PerioderOvergangsstønadRequest, periode: PeriodeOvergangsstønad): Boolean {
+    private fun overlapper(request: EksternePerioderRequest, periode: EksternPeriode): Boolean {
         val requestFom = request.fomDato ?: LocalDate.now() // Arena sender alltid fom/tom-datoer, burde endre kontraktet
         val requestTom = request.tomDato ?: LocalDate.now()
         val range = periode.fomDato..periode.tomDato

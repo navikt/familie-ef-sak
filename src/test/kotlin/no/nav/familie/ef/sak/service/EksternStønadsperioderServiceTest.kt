@@ -3,7 +3,7 @@ package no.nav.familie.ef.sak.service
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ef.sak.behandling.BehandlingService
-import no.nav.familie.ef.sak.ekstern.arena.ArenaStønadsperioderService
+import no.nav.familie.ef.sak.ekstern.stønadsperiode.EksternStønadsperioderService
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
@@ -18,9 +18,9 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.økonomi.lagAndelTilkjentYtelse
 import no.nav.familie.ef.sak.økonomi.lagTilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad.Datakilde
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadRequest
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderRequest
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +30,7 @@ import java.time.LocalDate.now
 import java.time.LocalDate.of
 import java.time.YearMonth
 
-internal class ArenaStønadsperioderServiceTest {
+internal class EksternStønadsperioderServiceTest {
 
     private val personService = mockk<PersonService>()
     private val infotrygdReplikaClient = mockk<InfotrygdReplikaClient>(relaxed = true)
@@ -42,10 +42,10 @@ internal class ArenaStønadsperioderServiceTest {
         fagsakService,
         behandlingService,
         tilkjentYtelseService,
-        InfotrygdService(infotrygdReplikaClient, personService)
+        InfotrygdService(infotrygdReplikaClient, personService),
     )
 
-    private val service = ArenaStønadsperioderService(periodeService = periodeService)
+    private val service = EksternStønadsperioderService(periodeService = periodeService)
 
     private val ident = "01234567890"
 
@@ -57,7 +57,7 @@ internal class ArenaStønadsperioderServiceTest {
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),
             emptyList(),
-            emptyList()
+            emptyList(),
         )
         every { behandlingService.finnSisteIverksatteBehandling(any()) } returns null
         every { fagsakService.finnFagsak(any(), any()) } returns null
@@ -67,7 +67,7 @@ internal class ArenaStønadsperioderServiceTest {
     @Test
     internal fun `finner ikke perioder i infotrygd eller ny løsning`() {
         mockPdl()
-        val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, now(), now()))
+        val perioder = service.hentPerioderForAlleStønader(EksternePerioderRequest(ident, now(), now()))
         assertThat(perioder.perioder.isEmpty())
     }
 
@@ -77,7 +77,7 @@ internal class ArenaStønadsperioderServiceTest {
         val tom = YearMonth.of(2021, 3)
         mockPdl()
         mockInfotrygd(fom.atDay(1), tom.atEndOfMonth())
-        val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
+        val perioder = service.hentPerioderForAlleStønader(EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
     }
@@ -88,7 +88,7 @@ internal class ArenaStønadsperioderServiceTest {
         val tom = YearMonth.of(2021, 3)
         mockPdl()
         mockNyLøsning(fom.atDay(1), tom.atEndOfMonth())
-        val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
+        val perioder = service.hentPerioderForAlleStønader(EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
     }
@@ -100,7 +100,7 @@ internal class ArenaStønadsperioderServiceTest {
         mockPdl()
         mockInfotrygd(of(2021, 1, 1), of(2021, 1, 31))
         mockNyLøsning(of(2021, 2, 1), of(2021, 3, 31))
-        val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
+        val perioder = service.hentPerioderForAlleStønader(EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
     }
@@ -112,9 +112,28 @@ internal class ArenaStønadsperioderServiceTest {
         mockPdl()
         mockInfotrygd(fom.atDay(1), tom.atEndOfMonth())
         mockNyLøsning(fom.atDay(1), tom.atEndOfMonth())
-        val perioder = service.hentPerioder(PerioderOvergangsstønadRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
+        val perioder = service.hentPerioderForAlleStønader(EksternePerioderRequest(ident, fom.atDay(1), tom.atEndOfMonth()))
         assertThat(perioder.perioder).hasSize(1)
         assertThat(perioder.perioder).containsExactly(lagResultatPeriode(fom, tom))
+    }
+
+    @Test
+    internal fun `finner perioder med beløp`() {
+        val infoTrygd = YearMonth.of(2021, 1)
+        val nyLøsning = YearMonth.of(2021, 3)
+        mockPdl()
+        mockInfotrygd(infoTrygd.atDay(1), infoTrygd.atEndOfMonth())
+        mockNyLøsning(nyLøsning.atDay(1), nyLøsning.atEndOfMonth())
+        val perioder = service.hentPerioderForOvergangsstønadMedBeløp(EksternePerioderRequest(ident))
+        assertThat(perioder).hasSize(2)
+
+        assertThat(perioder.last().beløp).isEqualTo(1)
+        assertThat(perioder.last().fomDato).isEqualTo(infoTrygd.atDay(1))
+        assertThat(perioder.last().tomDato).isEqualTo(infoTrygd.atEndOfMonth())
+
+        assertThat(perioder.first().beløp).isEqualTo(1000)
+        assertThat(perioder.first().fomDato).isEqualTo(nyLøsning.atDay(1))
+        assertThat(perioder.first().tomDato).isEqualTo(nyLøsning.atEndOfMonth())
     }
 
     private fun mockInfotrygd(stønadFom: LocalDate, stønadTom: LocalDate) {
@@ -126,7 +145,7 @@ internal class ArenaStønadsperioderServiceTest {
     private fun mockNyLøsning(stønadFom: LocalDate, stønadTom: LocalDate) {
         every { behandlingService.finnSisteIverksatteBehandling(fagsakOvergangsstønad.id) } returns behandlingOvergangsstønad
         every { tilkjentYtelseService.hentForBehandling(behandlingOvergangsstønad.id) } returns
-            lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(0, stønadFom, stønadTom, ident)))
+            lagTilkjentYtelse(listOf(lagAndelTilkjentYtelse(1000, stønadFom, stønadTom, ident)))
     }
 
     private fun mockPdl() {
@@ -134,10 +153,10 @@ internal class ArenaStønadsperioderServiceTest {
     }
 
     private fun lagResultatPeriode(fom: YearMonth, tom: YearMonth) =
-        PeriodeOvergangsstønad(
+        EksternPeriode(
             personIdent = ident,
             fomDato = fom.atDay(1),
             tomDato = tom.atEndOfMonth(),
-            datakilde = Datakilde.EF
+            datakilde = Datakilde.EF,
         )
 }

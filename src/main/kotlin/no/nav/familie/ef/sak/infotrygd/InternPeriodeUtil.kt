@@ -8,7 +8,7 @@ object InternPeriodeUtil {
      */
     fun slåSammenPerioder(
         efPerioder: EfInternPerioder?,
-        infotrygdperioder: List<InternPeriode>
+        infotrygdperioder: List<InternPeriode>,
     ): List<InternPeriode> {
         val startdato = efPerioder?.startdato ?: return infotrygdperioder
         val perioderFraInfotrygdSomBeholdes = infotrygdperioder.mapNotNull {

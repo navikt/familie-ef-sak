@@ -54,12 +54,14 @@ internal class VilkårsvurderingRepositoryTest : OppslagSpringRunnerTest() {
     internal fun `vilkårsvurdering uten opphavsvilkår`() {
         val fagsak = testoppsettService.lagreFagsak(fagsak())
         val behandling = behandlingRepository.insert(behandling(fagsak))
-        val vilkårsvurdering = vilkårsvurderingRepository.insert(vilkårsvurdering(
-            behandlingId = behandling.id,
-            resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-            type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
-            opphavsvilkår = null
-        ))
+        val vilkårsvurdering = vilkårsvurderingRepository.insert(
+            vilkårsvurdering(
+                behandlingId = behandling.id,
+                resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
+                type = VilkårType.FORUTGÅENDE_MEDLEMSKAP,
+                opphavsvilkår = null
+            )
+        )
         assertThat(vilkårsvurderingRepository.findByBehandlingId(behandling.id)).containsOnly(vilkårsvurdering)
     }
 
