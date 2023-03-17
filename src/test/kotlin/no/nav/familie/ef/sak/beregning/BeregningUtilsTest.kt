@@ -311,4 +311,66 @@ internal class BeregningUtilsTest {
             assertThat(indeksjusterInntekt[1].samordningsfradrag).isEqualTo(inntektsperioder[1].samordningsfradrag)
         }
     }
+
+    @Nested
+    inner class BeregningAvTotalinntekt {
+        val inntektsperiode =
+            Inntektsperiode(
+                periode = Månedsperiode(
+                    LocalDate.of(2021, 1, 1),
+                    LocalDate.of(2021, 4, 30)
+                ),
+                inntekt = BigDecimal.ZERO,
+                samordningsfradrag = BigDecimal.ZERO
+            )
+
+        @Test
+        internal fun `skal multiplisere dagsats med 260`() {
+            val dagsats = 100.toBigDecimal()
+            val inntektsperiodeMedDagsats = inntektsperiode.copy(dagsats = dagsats)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedDagsats).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo(dagsats.multiply(BigDecimal(260)))
+        }
+
+        @Test
+        internal fun `skal multiplisere månedsinntekt med 12`() {
+            val månedsinntekt = 100_000.toBigDecimal()
+            val inntektsperiodeMedMånedsinntekt = inntektsperiode.copy(månedsinntekt = månedsinntekt)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedMånedsinntekt).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((månedsinntekt.multiply(BigDecimal(12))))
+        }
+
+        @Test
+        internal fun `skal returnere årsinntekt direkte som inntekt om det er eneste type`() {
+            val årsinntekt = 500_000.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((årsinntekt))
+        }
+
+        @Test
+        internal fun `skal bruke totalinntekten for å beregne beløp`() {
+            val dagsats = 500.toBigDecimal()
+            val månedsinntekt = 10_000.toBigDecimal()
+            val årsinntekt = 100_000.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = årsinntekt)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
+            val forventetTotalinntekt = dagsats.multiply(BigDecimal(260)) + månedsinntekt.multiply(BigDecimal(12)) + årsinntekt
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((forventetTotalinntekt))
+            assertThat(resultat.beløp).isEqualTo(7778.toBigDecimal())
+        }
+
+        @Test
+        internal fun `skal runde beregnet inntekt ned til nærmeste 1000`() {
+            val årsinntekt = 500_500.toBigDecimal()
+            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
+
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
+            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((500_000.toBigDecimal()))
+        }
+    }
 }
