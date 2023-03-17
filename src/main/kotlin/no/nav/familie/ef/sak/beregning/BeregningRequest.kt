@@ -14,18 +14,8 @@ data class Inntekt(
     val forventetInntekt: BigDecimal?,
     val samordningsfradrag: BigDecimal?,
     val dagsats: BigDecimal? = null,
-    val månedsinntekt: BigDecimal? = null,
-    val årsinntekt: BigDecimal? = null,
-) {
-    init {
-        feilHvis(årsinntekt == null && forventetInntekt == null) {
-            ""
-        }
-        feilHvis(årsinntekt != null && forventetInntekt != null && årsinntekt != forventetInntekt) {
-            ""
-        }
-    }
-}
+    val månedsinntekt: BigDecimal? = null
+)
 
 // TODO Dette er en domeneklasse og burde flyttes til Vedtak.kt.
 data class Inntektsperiode(
@@ -63,6 +53,8 @@ fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperio
 fun List<Inntektsperiode>.tilInntekt() = this.map { inntektsperiode ->
     Inntekt(
         // TODO map?
+        dagsats = inntektsperiode.dagsats,
+        månedsinntekt = inntektsperiode.månedsinntekt,
         forventetInntekt = inntektsperiode.inntekt,
         samordningsfradrag = inntektsperiode.samordningsfradrag,
         årMånedFra = inntektsperiode.periode.fom
