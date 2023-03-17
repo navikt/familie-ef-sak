@@ -14,10 +14,10 @@ object BeregningUtils {
     private val DAGSATS_ANTALL_DAGER = BigDecimal(260)
     private val ANTALL_MÅNEDER_ÅR = BigDecimal(12)
 
-    fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode): List<Beløpsperiode> {
+    fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): List<Beløpsperiode> {
         val periode = inntektsperiode.periode
         val samordningsfradrag = inntektsperiode.samordningsfradrag
-        val totalInntekt = beregnTotalinntekt(inntektsperiode)
+        val totalInntekt = beregnTotalinntekt(inntektsperiode, skalRundeNedTotalInntekt)
         return finnGrunnbeløpsPerioder(periode).map {
             val avkortningPerMåned = beregnAvkortning(it.beløp, totalInntekt).divide(ANTALL_MÅNEDER_ÅR)
                 .setScale(0, RoundingMode.HALF_DOWN)
@@ -50,11 +50,11 @@ object BeregningUtils {
         }
     }
 
-    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode): BigDecimal {
+    private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
         val totalInntekt = inntektsperiode.inntekt +
             (inntektsperiode.dagsats ?: BigDecimal.ZERO).multiply(DAGSATS_ANTALL_DAGER) +
             (inntektsperiode.månedsinntekt ?: BigDecimal.ZERO).multiply(ANTALL_MÅNEDER_ÅR)
-        return BigDecimal(rundNedTilNærmeste1000(totalInntekt))
+        return if(skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {

@@ -39,6 +39,8 @@ object VedtakDtoUtil {
             listOf(
                 Inntekt(
                     årMånedFra = YearMonth.of(2021, 1),
+                    dagsats = BigDecimal.ZERO,
+                    månedsinntekt = BigDecimal.ZERO,
                     forventetInntekt = BigDecimal(100_000),
                     samordningsfradrag = BigDecimal(500)
                 )

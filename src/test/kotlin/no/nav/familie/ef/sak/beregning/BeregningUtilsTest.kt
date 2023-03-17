@@ -329,7 +329,7 @@ internal class BeregningUtilsTest {
             val dagsats = 100.toBigDecimal()
             val inntektsperiodeMedDagsats = inntektsperiode.copy(dagsats = dagsats)
 
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedDagsats).single()
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedDagsats, true).single()
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo(dagsats.multiply(BigDecimal(260)))
         }
 
@@ -338,7 +338,7 @@ internal class BeregningUtilsTest {
             val månedsinntekt = 100_000.toBigDecimal()
             val inntektsperiodeMedMånedsinntekt = inntektsperiode.copy(månedsinntekt = månedsinntekt)
 
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedMånedsinntekt).single()
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedMånedsinntekt, true).single()
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((månedsinntekt.multiply(BigDecimal(12))))
         }
 
@@ -347,7 +347,7 @@ internal class BeregningUtilsTest {
             val årsinntekt = 500_000.toBigDecimal()
             val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
 
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((årsinntekt))
         }
 
@@ -358,7 +358,7 @@ internal class BeregningUtilsTest {
             val årsinntekt = 100_000.toBigDecimal()
             val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(dagsats = dagsats, månedsinntekt = månedsinntekt, inntekt = årsinntekt)
 
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
             val forventetTotalinntekt = dagsats.multiply(BigDecimal(260)) + månedsinntekt.multiply(BigDecimal(12)) + årsinntekt
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((forventetTotalinntekt))
             assertThat(resultat.beløp).isEqualTo(7778.toBigDecimal())
@@ -369,7 +369,7 @@ internal class BeregningUtilsTest {
             val årsinntekt = 500_500.toBigDecimal()
             val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
 
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt).single()
+            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
             assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((500_000.toBigDecimal()))
         }
     }
