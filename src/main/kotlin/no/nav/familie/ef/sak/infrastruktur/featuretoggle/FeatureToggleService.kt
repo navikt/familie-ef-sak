@@ -26,6 +26,8 @@ enum class Toggle(val toggleId: String, val beskrivelse: String? = null) {
 
     VILKÅR_GJENBRUK("familie.ef.sak.vilkaar-gjenruk"),
 
+    ULIKE_INNTEKTER("familie.ef.sak-ulike-inntekter"),
+
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER("familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler"),
     FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR("familie.ef.sak.frontend-automatisk-utfylle-vilkar"),
     FRONTEND_SATSENDRING("familie.ef.sak.frontend-vis-satsendring"),

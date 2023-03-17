@@ -22,7 +22,8 @@ class FeatureToggleController(private val featureToggleService: FeatureToggleSer
         Toggle.FRONTEND_AUTOMATISK_UTFYLLE_VILKÅR,
         Toggle.FRONTEND_SATSENDRING,
         Toggle.FRONTEND_VIS_INNTEKT_PERSONOVERSIKT,
-        Toggle.PERSONOPPLYSNINGER_ENDRINGER
+        Toggle.PERSONOPPLYSNINGER_ENDRINGER,
+        Toggle.ULIKE_INNTEKTER
     )
 
     @GetMapping
