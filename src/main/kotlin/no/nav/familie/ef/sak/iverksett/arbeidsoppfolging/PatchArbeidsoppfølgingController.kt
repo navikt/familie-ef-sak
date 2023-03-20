@@ -37,6 +37,7 @@ class PatchArbeidsoppfølgingController(
         val tasks = behandlingIds.map { PatchSendTilArbeidsoppfølgingTask.opprettTask(it) }
         if (liveRun) {
             taskService.saveAll(tasks)
+            logger.info("Lagret ${tasks.size} patchSendTilArbeidsoppfølging-tasks")
         }
     }
 }
@@ -61,7 +62,7 @@ class PatchSendTilArbeidsoppfølgingTask(val iverksettClient: IverksettClient) :
 
         fun opprettTask(behandlingId: UUID): Task {
             return Task(
-                type = OpprettOppgaveForOpprettetBehandlingTask.TYPE,
+                type = PatchSendTilArbeidsoppfølgingTask.TYPE,
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
