@@ -30,9 +30,9 @@ class PatchArbeidsoppfølgingController(
 
     @GetMapping
     fun patchSendArbeidsoppfølgingInfoForPersonerMedAktivOvergangsstønad(@PathVariable liveRun: Boolean = false) {
-        logger.info("Starter patch for sending av aktive iverksatte behandlinger til arbeidsoppfølging (liverun=$liveRun")
+        logger.info("Starter patch for sending av aktive iverksatte behandlinger til arbeidsoppfølging (liverun=$liveRun)")
         val behandlingIds = behandlingRepository.finnBehandlingerForPersonerMedAktivStønad(StønadType.OVERGANGSSTØNAD)
-        logger.info("Antall aktive behandlinger for overgangsstønad funnet: $behandlingIds")
+        logger.info("Antall aktive behandlinger for overgangsstønad funnet: ${behandlingIds.size}")
 
         val tasks = behandlingIds.map { PatchSendTilArbeidsoppfølgingTask.opprettTask(it) }
         if (liveRun) {
