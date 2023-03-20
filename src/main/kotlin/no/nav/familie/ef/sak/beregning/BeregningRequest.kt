@@ -1,6 +1,5 @@
 package no.nav.familie.ef.sak.beregning
 
-import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.vedtak.dto.VedtaksperiodeDto
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal

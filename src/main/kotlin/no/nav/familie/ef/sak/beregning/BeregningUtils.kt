@@ -53,7 +53,7 @@ object BeregningUtils {
 
     private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
         val totalInntekt = inntektsperiode.totalinntekt()
-        return if(skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
+        return if (skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
     private fun beregnAvkortning(grunnbeløp: BigDecimal, inntekt: BigDecimal): BigDecimal {
@@ -83,10 +83,10 @@ object BeregningUtils {
     ): List<Inntektsperiode> {
         val inntekt = inntektsperiode.inntekt
         val samordningsfradrag = inntektsperiode.samordningsfradrag
-        feilHvis(inntektsperiode.dagsats !=  null && inntektsperiode.dagsats > BigDecimal.ZERO) {
+        feilHvis(inntektsperiode.dagsats != null && inntektsperiode.dagsats > BigDecimal.ZERO) {
             "Mangler indeksjustering av dagsats?"
         }
-        feilHvis(inntektsperiode.månedsinntekt !=  null && inntektsperiode.månedsinntekt > BigDecimal.ZERO) {
+        feilHvis(inntektsperiode.månedsinntekt != null && inntektsperiode.månedsinntekt > BigDecimal.ZERO) {
             "Mangler indeksjustering av månedsinntekt?"
         }
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
