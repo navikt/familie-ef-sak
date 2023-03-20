@@ -105,7 +105,6 @@ class ValiderOmregningService(
             .forEach { andel ->
                 val inntektsperiodeForAndel = Inntektsperiode(
                     periode = andel.periode,
-                    // TODO andre innteker her ??
                     inntekt = andel.inntekt.toBigDecimal(),
                     samordningsfradrag = andel.samordningsfradrag.toBigDecimal()
                 )

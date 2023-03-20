@@ -81,8 +81,14 @@ object BeregningUtils {
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp
     ): List<Inntektsperiode> {
-        val inntekt = inntektsperiode.inntekt // TODO skal beregne på totalinntekten ?
+        val inntekt = inntektsperiode.inntekt
         val samordningsfradrag = inntektsperiode.samordningsfradrag
+        feilHvis(inntektsperiode.dagsats !=  null && inntektsperiode.dagsats > BigDecimal.ZERO) {
+            "Mangler indeksjustering av dagsats?"
+        }
+        feilHvis(inntektsperiode.månedsinntekt !=  null && inntektsperiode.månedsinntekt > BigDecimal.ZERO) {
+            "Mangler indeksjustering av månedsinntekt?"
+        }
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
             if (grunnbeløp.periode.fom > sistBrukteGrunnbeløp.periode.fom &&
                 grunnbeløp.beløp != sistBrukteGrunnbeløp.grunnbeløp
@@ -92,11 +98,20 @@ object BeregningUtils {
                 val justerInntektAvrundetNedTilNærmeste100 = rundNedTilNærmeste100(justertInntekt) // hvorfor runde ned till 100 her og ikke 1000?
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
+                    dagsats = inntektsperiode.dagsats, // indeksjusrert? avrundet?
+                    månedsinntekt = inntektsperiode.månedsinntekt, // indeksjusrert? avrundet?
                     inntekt = BigDecimal(justerInntektAvrundetNedTilNærmeste100),
                     samordningsfradrag = samordningsfradrag
                 )
             } else {
-                Inntektsperiode(periode = grunnbeløp.periode, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
+                // map andre innteker
+                Inntektsperiode(
+                    periode = grunnbeløp.periode,
+                    dagsats = inntektsperiode.dagsats,
+                    månedsinntekt = inntektsperiode.månedsinntekt,
+                    inntekt = inntekt,
+                    samordningsfradrag = samordningsfradrag
+                )
             }
         }
     }
