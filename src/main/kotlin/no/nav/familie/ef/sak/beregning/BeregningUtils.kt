@@ -78,6 +78,7 @@ object BeregningUtils {
         return inntekter.flatMap { justerInntektsperiode(it, sistBrukteGrunnbeløp) }
     }
 
+    // TODO må kanskje indeksjustere dagsats og månedsinntekt
     private fun justerInntektsperiode(
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp

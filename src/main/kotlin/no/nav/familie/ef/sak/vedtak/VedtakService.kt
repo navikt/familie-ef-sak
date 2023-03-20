@@ -61,6 +61,7 @@ class VedtakService(
         vedtakRepository.update(oppdatertVedtak)
     }
 
+    // TODO andre inntekter
     fun hentForventetInntektForBehandlingIds(behandlingId: UUID, dato: LocalDate): Int? {
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
         if (vedtak?.erVedtakAktivtForDato(dato) == true) {
