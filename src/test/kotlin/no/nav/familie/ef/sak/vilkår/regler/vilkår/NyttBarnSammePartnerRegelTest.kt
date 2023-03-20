@@ -29,7 +29,6 @@ class NyttBarnSammePartnerRegelTest {
 
     @BeforeEach
     fun setup() {
-        every { hovedregelMetadataMock.skalAutomatiskVurdereNyttBarnSammePartner } returns true
         every { hovedregelMetadataMock.barn } returns listOf(behandlingBarn, behandlingBarn2)
         every { hovedregelMetadataMock.behandling } returns behandling()
     }
