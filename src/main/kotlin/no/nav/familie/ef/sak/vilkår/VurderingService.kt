@@ -133,8 +133,7 @@ class VurderingService(
             søktOmBarnetilsyn = søktOmBarnetilsyn,
             langAvstandTilSøker = grunnlag.barnMedSamvær.map { it.mapTilBarnForelderLangAvstandTilSøker() },
             vilkårgrunnlagDto = grunnlag,
-            behandling = behandling,
-            skalAutomatiskVurdereNyttBarnSammePartner = featureToggleService.isEnabled(Toggle.AUTOMATISK_VURDER_NYTT_BARN_SAMME_PARTNER)
+            behandling = behandling
         )
         return Pair(grunnlag, metadata)
     }
