@@ -380,6 +380,7 @@ class StepDefinitions {
                 parseValgfriÅrMånedEllerDato(Domenebegrep.TIL_OG_MED_DATO, rad).sisteDagenIMånedenEllerDefault(fraOgMed)
             val beløpMellom = parseValgfriIntRange(VedtakDomenebegrep.BELØP_MELLOM, rad)
             val beløp = parseValgfriInt(VedtakDomenebegrep.BELØP, rad)
+            val inntekt = parseValgfriInt(VedtakDomenebegrep.INNTEKT, rad)
 
             val gjeldendeAndel = gjeldendeAndelerTilkjentYtelse[index]
 
@@ -393,6 +394,7 @@ class StepDefinitions {
                 }
                 beløp?.let { assertThat(gjeldendeAndel.beløp).isEqualTo(it) }
                 assertThat(kildeBehandlingId).isEqualTo(gjeldendeAndel.kildeBehandlingId)
+                inntekt?.let { assertThat(gjeldendeAndel.inntekt).isEqualTo(it) }
             } catch (e: Throwable) {
                 logger.info("Expected: {}", rad)
                 logger.info("Actual: {}", gjeldendeAndel)
