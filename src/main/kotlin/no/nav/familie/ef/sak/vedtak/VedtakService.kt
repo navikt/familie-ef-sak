@@ -61,13 +61,16 @@ class VedtakService(
         vedtakRepository.update(oppdatertVedtak)
     }
 
-    // TODO andre inntekter
     fun hentForventetInntektForBehandlingIds(behandlingId: UUID, dato: LocalDate): Int? {
         val vedtak = vedtakRepository.findByIdOrNull(behandlingId)
         if (vedtak?.erVedtakAktivtForDato(dato) == true) {
-            return vedtak.inntekter?.inntekter?.firstOrNull {
+            val inntektsperiode = vedtak.inntekter?.inntekter?.firstOrNull {
                 it.periode.inneholder(YearMonth.from(dato))
-            }?.inntekt?.toInt()
+            }
+            if (inntektsperiode?.inntekt == null && inntektsperiode?.månedsinntekt == null) {
+                return null
+            }
+            return (inntektsperiode.inntekt.toInt()) + (inntektsperiode.månedsinntekt?.toInt() ?: 0)
         }
 
         return null
