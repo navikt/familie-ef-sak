@@ -12,8 +12,8 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.Properties
 import java.util.UUID
@@ -29,7 +29,7 @@ class PatchArbeidsoppfølgingController(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @GetMapping
-    fun patchSendArbeidsoppfølgingInfoForPersonerMedAktivOvergangsstønad(@PathVariable liveRun: Boolean = false) {
+    fun patchSendArbeidsoppfølgingInfoForPersonerMedAktivOvergangsstønad(@RequestParam liveRun: Boolean = false) {
         logger.info("Starter patch for sending av aktive iverksatte behandlinger til arbeidsoppfølging (liverun=$liveRun)")
         val behandlingIds = behandlingRepository.finnBehandlingerForPersonerMedAktivStønad(StønadType.OVERGANGSSTØNAD)
         logger.info("Antall aktive behandlinger for overgangsstønad funnet: ${behandlingIds.size}")
