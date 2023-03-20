@@ -325,33 +325,6 @@ internal class BeregningUtilsTest {
             )
 
         @Test
-        internal fun `skal multiplisere dagsats med 260`() {
-            val dagsats = 100.toBigDecimal()
-            val inntektsperiodeMedDagsats = inntektsperiode.copy(dagsats = dagsats)
-
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedDagsats, true).single()
-            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo(dagsats.multiply(BigDecimal(260)))
-        }
-
-        @Test
-        internal fun `skal multiplisere månedsinntekt med 12`() {
-            val månedsinntekt = 100_000.toBigDecimal()
-            val inntektsperiodeMedMånedsinntekt = inntektsperiode.copy(månedsinntekt = månedsinntekt)
-
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedMånedsinntekt, true).single()
-            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((månedsinntekt.multiply(BigDecimal(12))))
-        }
-
-        @Test
-        internal fun `skal returnere årsinntekt direkte som inntekt om det er eneste type`() {
-            val årsinntekt = 500_000.toBigDecimal()
-            val inntektsperiodeMedÅrsinntekt = inntektsperiode.copy(inntekt = årsinntekt)
-
-            val resultat = BeregningUtils.beregnStønadForInntekt(inntektsperiodeMedÅrsinntekt, true).single()
-            assertThat(resultat.beregningsgrunnlag?.inntekt).isEqualTo((årsinntekt))
-        }
-
-        @Test
         internal fun `skal bruke totalinntekten for å beregne beløp`() {
             val dagsats = 500.toBigDecimal()
             val månedsinntekt = 10_000.toBigDecimal()

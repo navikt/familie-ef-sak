@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.beregning
 
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste100
 import no.nav.familie.ef.sak.felles.util.Utregning.rundNedTilNærmeste1000
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.kontrakter.felles.Månedsperiode
 import java.math.BigDecimal
 import java.math.MathContext
@@ -11,8 +12,8 @@ import java.time.YearMonth
 object BeregningUtils {
 
     private val REDUKSJONSFAKTOR = BigDecimal(0.45)
-    private val DAGSATS_ANTALL_DAGER = BigDecimal(260)
-    private val ANTALL_MÅNEDER_ÅR = BigDecimal(12)
+    val DAGSATS_ANTALL_DAGER = BigDecimal(260)
+    val ANTALL_MÅNEDER_ÅR = BigDecimal(12)
 
     fun beregnStønadForInntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): List<Beløpsperiode> {
         val periode = inntektsperiode.periode
@@ -51,9 +52,7 @@ object BeregningUtils {
     }
 
     private fun beregnTotalinntekt(inntektsperiode: Inntektsperiode, skalRundeNedTotalInntekt: Boolean): BigDecimal {
-        val totalInntekt = inntektsperiode.inntekt +
-            (inntektsperiode.dagsats ?: BigDecimal.ZERO).multiply(DAGSATS_ANTALL_DAGER) +
-            (inntektsperiode.månedsinntekt ?: BigDecimal.ZERO).multiply(ANTALL_MÅNEDER_ÅR)
+        val totalInntekt = inntektsperiode.totalinntekt()
         return if(skalRundeNedTotalInntekt) BigDecimal(rundNedTilNærmeste1000(totalInntekt)) else totalInntekt
     }
 
@@ -78,7 +77,6 @@ object BeregningUtils {
         return inntekter.flatMap { justerInntektsperiode(it, sistBrukteGrunnbeløp) }
     }
 
-    // TODO må kanskje indeksjustere dagsats og månedsinntekt
     private fun justerInntektsperiode(
         inntektsperiode: Inntektsperiode,
         sistBrukteGrunnbeløp: Grunnbeløp

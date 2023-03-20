@@ -31,7 +31,14 @@ data class Inntektsperiode(
     // Vurder å endre til årsinntekt / bruke @JsonProperty
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
-)
+) {
+
+    fun totalinntekt(): BigDecimal {
+        return this.inntekt +
+            (this.dagsats ?: BigDecimal.ZERO).multiply(BeregningUtils.DAGSATS_ANTALL_DAGER) +
+            (this.månedsinntekt ?: BigDecimal.ZERO).multiply(BeregningUtils.ANTALL_MÅNEDER_ÅR)
+    }
+}
 
 fun List<Inntekt>.tilInntektsperioder() = this.mapIndexed { index, inntektsperiode ->
     Inntektsperiode(
