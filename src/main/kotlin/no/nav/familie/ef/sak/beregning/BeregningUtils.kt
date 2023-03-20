@@ -95,7 +95,7 @@ object BeregningUtils {
             ) {
                 val faktor = grunnbeløp.beløp.divide(sistBrukteGrunnbeløp.grunnbeløp, MathContext.DECIMAL128)
                 val justertInntekt = inntekt.multiply(faktor)
-                val justerInntektAvrundetNedTilNærmeste100 = rundNedTilNærmeste100(justertInntekt) // hvorfor runde ned till 100 her og ikke 1000?
+                val justerInntektAvrundetNedTilNærmeste100 = rundNedTilNærmeste100(justertInntekt)
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
                     dagsats = inntektsperiode.dagsats, // indeksjusrert? avrundet?
@@ -104,7 +104,6 @@ object BeregningUtils {
                     samordningsfradrag = samordningsfradrag
                 )
             } else {
-                // map andre innteker
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
                     dagsats = inntektsperiode.dagsats,

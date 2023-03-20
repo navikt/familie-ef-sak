@@ -27,7 +27,6 @@ data class Inntektsperiode(
         ),
     val dagsats: BigDecimal? = null,
     val månedsinntekt: BigDecimal? = null,
-    // Vurder å endre til årsinntekt / bruke @JsonProperty
     val inntekt: BigDecimal,
     val samordningsfradrag: BigDecimal
 ) {
