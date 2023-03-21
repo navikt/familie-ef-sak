@@ -33,7 +33,7 @@ class FremleggsoppgaveService(
     }
 
     fun hentFremleggsoppgave(behandlingId: UUID): Fremleggsoppgave? {
-        return fremleggsoppgaveReporitory.findByIdOrNull(behandlingId)?.let { it }
+        return fremleggsoppgaveReporitory.findByIdOrNull(behandlingId)
     }
 
     fun kanOpprettes(behandlingId: UUID): Boolean {
