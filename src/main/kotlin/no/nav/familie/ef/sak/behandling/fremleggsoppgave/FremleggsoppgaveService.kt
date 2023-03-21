@@ -46,9 +46,7 @@ class FremleggsoppgaveService(
         val sisteAndelMedBeløp = sisteAndel.beløp > 0
         val sisteAndel1årFremITid = sisteAndel.stønadTom.minusYears(1) > LocalDate.now()
 
-        val resultatType = vedtakService.hentVedtak(behandlingId).resultatType
-        return resultatType == ResultatType.INNVILGE
-            && behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING
+        return behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING
             && sisteAndelMedBeløp
             && sisteAndel1årFremITid
     }
