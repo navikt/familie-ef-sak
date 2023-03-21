@@ -6,7 +6,5 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface FremleggsoppgaveReporitory : RepositoryInterface<Fremleggsoppgave, UUID>, InsertUpdateRepository<Fremleggsoppgave> {
-
-    fun findByBehandlingId(uuid: UUID): Fremleggsoppgave
-}
+interface FremleggsoppgaveReporitory : RepositoryInterface<Fremleggsoppgave, UUID>,
+    InsertUpdateRepository<Fremleggsoppgave>
