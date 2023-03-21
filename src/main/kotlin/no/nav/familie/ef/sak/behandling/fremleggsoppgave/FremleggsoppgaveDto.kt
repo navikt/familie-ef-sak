@@ -1,7 +1,7 @@
 package no.nav.familie.ef.sak.behandling.fremleggsoppgave
 
 class FremleggsoppgaveDto(
-    private val opprettFremleggsoppgave: Boolean
+    val opprettFremleggsoppgave: Boolean
 )
 
 fun Fremleggsoppgave.tilDto(): FremleggsoppgaveDto {
