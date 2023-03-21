@@ -16,12 +16,12 @@ class FremleggsoppgaveController(private val fremleggspppgaveService: Fremleggso
 
     @GetMapping("{behandlingid}/kan-opprettes")
     fun kanOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
-        return Ressurs.success(fremleggsOppgaveService.kanOpprettes(behandlingid))
+        return Ressurs.success(fremleggspppgaveService.kanOpprettes(behandlingid))
     }
 
     @GetMapping("/{behandlingid}")
     fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
-        return Ressurs.success(fremleggsOppgaveService.hentFremleggsoppgave(behandlingid)?.tilDto())
+        return Ressurs.success(fremleggspppgaveService.hentFremleggsoppgave(behandlingid)?.tilDto())
     }
 
     @PostMapping("/{behandlingid}/inntekt/{skalopprette}")
@@ -30,7 +30,7 @@ class FremleggsoppgaveController(private val fremleggspppgaveService: Fremleggso
         @PathVariable skalopprette: Boolean
     ): Ressurs<Unit> {
         return Ressurs.success(
-            fremleggsOppgaveService.opprettEllerErstattFremleggsoppgave(
+            fremleggspppgaveService.opprettEllerErstattFremleggsoppgave(
                 behandlingid,
                 skalopprette
             )
