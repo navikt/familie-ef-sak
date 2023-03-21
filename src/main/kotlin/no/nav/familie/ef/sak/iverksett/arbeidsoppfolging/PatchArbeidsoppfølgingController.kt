@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.iverksett.arbeidsoppfolging
 
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
-import no.nav.familie.ef.sak.behandlingsflyt.task.OpprettOppgaveForOpprettetBehandlingTask
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -62,7 +61,7 @@ class PatchSendTilArbeidsoppfølgingTask(val iverksettClient: IverksettClient) :
 
         fun opprettTask(behandlingId: UUID): Task {
             return Task(
-                type = PatchSendTilArbeidsoppfølgingTask.TYPE,
+                type = TYPE,
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
