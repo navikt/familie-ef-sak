@@ -15,20 +15,25 @@ import java.util.UUID
 class FremleggsoppgaveController(private val fremleggsOppgaveService: FremleggsoppgaveService) {
 
     @GetMapping("/kanopprettes/{behandlingid}")
-    fun skalOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
+    fun kanOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
         return Ressurs.success(fremleggsOppgaveService.kanOpprettes(behandlingid))
     }
 
     @GetMapping("/{behandlingid}")
-    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto> {
-        return Ressurs.success(fremleggsOppgaveService.hentFremleggsoppgave(behandlingid).tilDto())
+    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
+        return Ressurs.success(fremleggsOppgaveService.hentFremleggsoppgave(behandlingid)?.tilDto())
     }
 
-    @PostMapping("/{behandlingid}/opprettfremleggsoppgave/{skalopprette}")
+    @PostMapping("/{behandlingid}/skalopprettefremleggsoppgave/{skalopprette}")
     fun opprettFremleggsoppgave(
-        @PathVariable behandlingId: UUID,
-        @PathVariable opprettFremleggsoppgave: Boolean
+        @PathVariable behandlingid: UUID,
+        @PathVariable skalopprette: Boolean
     ): Ressurs<Unit> {
-        return Ressurs.success(fremleggsOppgaveService.opprettFremleggsoppgave(behandlingId, opprettFremleggsoppgave))
+        return Ressurs.success(
+            fremleggsOppgaveService.opprettEllerErstattFremleggsoppgave(
+                behandlingid,
+                skalopprette
+            )
+        )
     }
 }
