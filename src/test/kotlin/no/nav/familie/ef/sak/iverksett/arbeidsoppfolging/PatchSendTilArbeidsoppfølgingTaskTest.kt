@@ -38,8 +38,8 @@ class PatchSendTilArbeidsoppfølgingTaskTest : OppslagSpringRunnerTest() {
         patchArbeidsoppfølgingController.patchSendArbeidsoppfølgingInfoForPersonerMedAktivOvergangsstønad(true)
 
         Assertions.assertThat(taskSlot.captured.size).isEqualTo(behandlingIds.size)
-        Assertions.assertThat(taskSlot.captured[600].triggerTid).isAfter(LocalDateTime.now().plusMinutes(19))
-        Assertions.assertThat(taskSlot.captured[1200].triggerTid).isAfter(LocalDateTime.now().plusMinutes(39))
-        // Assertions.assertThat(taskSlot.captured.last().triggerTid).isAfter(LocalDateTime.now().plusMinutes(639))
+        Assertions.assertThat(taskSlot.captured[600].triggerTid).isAfter(LocalDateTime.now().plusMinutes(9))
+        Assertions.assertThat(taskSlot.captured[1200].triggerTid).isAfter(LocalDateTime.now().plusMinutes(19))
+        Assertions.assertThat(taskSlot.captured.last().triggerTid).isAfter(LocalDateTime.now().plusMinutes(319))
     }
 }

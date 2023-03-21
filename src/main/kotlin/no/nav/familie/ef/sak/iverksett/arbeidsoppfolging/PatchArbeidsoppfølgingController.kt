@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.util.Properties
 import java.util.UUID
+import kotlin.math.floor
 
 @RestController
 @RequestMapping(path = ["/api/arbeidsoppfolging-patch"])
@@ -33,7 +35,7 @@ class PatchArbeidsoppfølgingController(
         val behandlingIds = behandlingRepository.finnBehandlingerForPersonerMedAktivStønad(StønadType.OVERGANGSSTØNAD)
         logger.info("Antall aktive behandlinger for overgangsstønad funnet: ${behandlingIds.size}")
 
-        val tasks = behandlingIds.map { PatchSendTilArbeidsoppfølgingTask.opprettTask(it) }
+        val tasks = behandlingIds.mapIndexed { indeks, behandlingId -> PatchSendTilArbeidsoppfølgingTask.opprettTask(indeks, behandlingId) }
         if (liveRun) {
             taskService.saveAll(tasks)
             logger.info("Lagret ${tasks.size} patchSendTilArbeidsoppfølging-tasks")
@@ -59,14 +61,16 @@ class PatchSendTilArbeidsoppfølgingTask(val iverksettClient: IverksettClient) :
 
         const val TYPE = "patchSendTilArbeidsoppfølging"
 
-        fun opprettTask(behandlingId: UUID): Task {
+        fun opprettTask(indeks: Int, behandlingId: UUID): Task {
+            val batchStørrelse = 500.0
+            val triggerTid = floor(indeks / batchStørrelse) * 10
             return Task(
                 type = TYPE,
                 payload = behandlingId.toString(),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
                 }
-            )
+            ).medTriggerTid(LocalDateTime.now().plusMinutes(triggerTid.toLong()))
         }
     }
 }
