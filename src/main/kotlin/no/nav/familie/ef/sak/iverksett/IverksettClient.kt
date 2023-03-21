@@ -88,6 +88,10 @@ class IverksettClient(
     fun sendKonsistensavstemming(request: KonsistensavstemmingDto, transaksjonId: UUID) =
         konsistensavstemming(request, sendStartmelding = false, sendAvsluttmelding = false, transaksjonId)
 
+    fun sendTilArbeidsoppfølging(behandlingId: String) {
+        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/arbeidsoppfolging/patch/$behandlingId"), "")
+    }
+
     private fun konsistensavstemming(
         request: KonsistensavstemmingDto,
         sendStartmelding: Boolean = true,
