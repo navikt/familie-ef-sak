@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -24,6 +25,7 @@ class FremleggsoppgaveService(
             true -> fremleggsoppgaveReporitory.update(
                 Fremleggsoppgave(behandlingId = behandlingId, opprettFremleggsoppgave = opprettFremleggsoppgave)
             )
+
             false -> fremleggsoppgaveReporitory.insert(
                 Fremleggsoppgave(behandlingId = behandlingId, opprettFremleggsoppgave = opprettFremleggsoppgave)
             )
@@ -40,11 +42,14 @@ class FremleggsoppgaveService(
         val behandlingstype = behandling.type
 
         val tilkjentYtelse = tilkjentYtelseService.hentForBehandling(behandlingId)
-        val sisteAndelMedNullbeløp = tilkjentYtelse.andelerTilkjentYtelse.sortedBy { it.stønadTom }.last().beløp > 0
+        val sisteAndel = tilkjentYtelse.andelerTilkjentYtelse.sortedBy { it.stønadTom }.last()
+        val sisteAndelMedBeløp = sisteAndel.beløp > 0
+        val sisteAndel1årFremITid = sisteAndel.stønadTom.minusYears(1) > LocalDate.now()
 
         val resultatType = vedtakService.hentVedtak(behandlingId).resultatType
         return resultatType == ResultatType.INNVILGE
             && behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING
-            && sisteAndelMedNullbeløp
+            && sisteAndelMedBeløp
+            && sisteAndel1årFremITid
     }
 }
