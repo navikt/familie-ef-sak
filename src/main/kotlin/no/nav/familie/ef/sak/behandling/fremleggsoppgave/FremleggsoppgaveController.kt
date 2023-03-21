@@ -12,7 +12,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/fremleggsoppgave")
 @ProtectedWithClaims(issuer = "azuread")
-class FremleggsoppgaveController(private val fremleggsOppgaveService: FremleggsoppgaveService) {
+class FremleggsoppgaveController(private val fremleggspppgaveService: FremleggsoppgaveService) {
 
     @GetMapping("{behandlingid}/kan-opprettes")
     fun kanOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
