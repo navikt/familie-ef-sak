@@ -14,7 +14,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class FremleggsoppgaveController(private val fremleggsOppgaveService: FremleggsoppgaveService) {
 
-    @GetMapping("/kanopprettes/{behandlingid}")
+    @GetMapping("{behandlingid}/kan-opprettes")
     fun kanOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
         return Ressurs.success(fremleggsOppgaveService.kanOpprettes(behandlingid))
     }
