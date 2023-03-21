@@ -83,6 +83,8 @@ object BeregningUtils {
     ): List<Inntektsperiode> {
         val inntekt = inntektsperiode.inntekt
         val samordningsfradrag = inntektsperiode.samordningsfradrag
+        // For å unngå at vi kjører g-omregning og ikke har fikset ev. oppjustering av dagsats/månedsinntekt
+        // så kaster vi feil hvis det kommer inn en vedtak med de
         feilHvis(inntektsperiode.dagsats != null && inntektsperiode.dagsats > BigDecimal.ZERO) {
             "Mangler indeksjustering av dagsats?"
         }
