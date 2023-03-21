@@ -24,7 +24,7 @@ class FremleggsoppgaveController(private val fremleggsOppgaveService: Fremleggso
         return Ressurs.success(fremleggsOppgaveService.hentFremleggsoppgave(behandlingid)?.tilDto())
     }
 
-    @PostMapping("/{behandlingid}/skalopprettefremleggsoppgave/{skalopprette}")
+    @PostMapping("/{behandlingid}/inntekt/{skalopprette}")
     fun opprettFremleggsoppgave(
         @PathVariable behandlingid: UUID,
         @PathVariable skalopprette: Boolean
