@@ -68,9 +68,9 @@ internal class FerdigstillBehandlingStegTest {
             catchThrowable {
                 task.utførSteg(
                     saksbehandling(fagsak, behandling(fagsak, type = BehandlingType.REVURDERING)),
-                    null
+                    null,
                 )
-            }
+            },
         )
     }
 
@@ -81,10 +81,10 @@ internal class FerdigstillBehandlingStegTest {
                 behandling(
                     fagsak,
                     type = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.G_OMREGNING
-                )
+                    årsak = BehandlingÅrsak.G_OMREGNING,
+                ),
             ).copy(opprettetAv = opprettetAv),
-            null
+            null,
         )
     }
 }

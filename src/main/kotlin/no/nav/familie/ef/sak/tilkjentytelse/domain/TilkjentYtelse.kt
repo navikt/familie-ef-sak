@@ -38,7 +38,7 @@ data class TilkjentYtelse(
     @Column("grunnbelopsdato")
     val grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 ) {
 
     fun taMedAndelerFremTilDato(fom: LocalDate): List<AndelTilkjentYtelse> = andelerTilkjentYtelse
@@ -55,5 +55,5 @@ data class TilkjentYtelse(
 enum class TilkjentYtelseType {
     FØRSTEGANGSBEHANDLING,
     OPPHØR,
-    ENDRING
+    ENDRING,
 }

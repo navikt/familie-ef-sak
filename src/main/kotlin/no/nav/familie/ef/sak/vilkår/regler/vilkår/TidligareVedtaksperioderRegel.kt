@@ -18,18 +18,18 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
     vilkårType = VilkårType.TIDLIGERE_VEDTAKSPERIODER,
     regler = setOf(
         HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
+        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
     ),
     hovedregler = regelIder(
         HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD
-    )
+        LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD,
+    ),
 ) {
 
     override fun initiereDelvilkårsvurdering(
         metadata: HovedregelMetadata,
         resultat: Vilkårsresultat,
-        barnId: UUID?
+        barnId: UUID?,
     ): List<Delvilkårsvurdering> {
         val harTidligereMottattOvergangsstønad = if (metadata.erMigrering) null else SvarId.NEI
         return listOf(
@@ -38,14 +38,14 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
                 listOf(
                     Vurdering(
                         regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
-                        svar = harTidligereMottattOvergangsstønad
-                    )
-                )
+                        svar = harTidligereMottattOvergangsstønad,
+                    ),
+                ),
             ),
             Delvilkårsvurdering(
                 resultat = Vilkårsresultat.IKKE_TATT_STILLING_TIL,
-                listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING))
-            )
+                listOf(Vurdering(regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING)),
+            ),
         )
     }
 
@@ -56,8 +56,8 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
                 regelId = RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT
-                )
+                    hvisNei = SluttSvarRegel.OPPFYLT,
+                ),
             )
 
         private val LEVER_IKKE_I_EKTESKAPLIGNENDE_FORHOLD =
@@ -65,8 +65,8 @@ class TidligareVedtaksperioderRegel : Vilkårsregel(
                 regelId = RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.OPPFYLT
-                )
+                    hvisNei = SluttSvarRegel.OPPFYLT,
+                ),
             )
     }
 }

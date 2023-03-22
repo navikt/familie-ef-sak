@@ -22,7 +22,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
                 JOIN andel_tilkjent_ytelse aty ON ty.id = aty.tilkjent_ytelse
                 JOIN GENERATE_SERIES(:fra::DATE, :til::DATE, '1 month') dato 
                   ON dato BETWEEN aty.stonad_fom AND aty.stonad_tom
-              GROUP BY b.stonadstype, dato"""
+              GROUP BY b.stonadstype, dato""",
     )
     fun finnAntallLøpendeSaker(fra: LocalDate, til: LocalDate): List<LøpendeBehandling>
 
@@ -35,7 +35,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               WHERE status <> 'FERDIGSTILT'
-              GROUP BY stonadstype, år, uke"""
+              GROUP BY stonadstype, år, uke""",
     )
     fun finnÅpneBehandlingerPerUke(): List<ForekomsterPerUke>
 
@@ -45,7 +45,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               WHERE status <> 'FERDIGSTILT'
-              GROUP BY stonadstype, status"""
+              GROUP BY stonadstype, status""",
     )
     fun finnÅpneBehandlinger(): List<BehandlingerPerStatus>
 
@@ -61,7 +61,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               FROM fagsak
               JOIN behandling ON fagsak.id = behandling.fagsak_id
               WHERE status = 'FERDIGSTILT'
-              GROUP BY stonadstype, resultat, arsak, henlagt_arsak, år, uke"""
+              GROUP BY stonadstype, resultat, arsak, henlagt_arsak, år, uke""",
     )
     fun finnVedtakPerUke(): List<VedtakPerUke>
 
@@ -71,7 +71,7 @@ interface MålerRepository : CrudRepository<Behandling, UUID> {
               JOIN vedtak v ON v.behandling_id = b.id
               WHERE v.resultat_type = 'SANKSJONERE'
               AND b.status = 'FERDIGSTILT'
-              AND b.resultat = 'INNVILGET'"""
+              AND b.resultat = 'INNVILGET'""",
     )
     fun finnAntallSanksjoner(): Int
 }

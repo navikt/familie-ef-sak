@@ -18,7 +18,7 @@ class ForberedOppgaverTerminbarnService(
     private val personService: PersonService,
     private val fagsakService: FagsakService,
     private val terminbarnRepository: TerminbarnRepository,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -52,7 +52,7 @@ class ForberedOppgaverTerminbarnService(
 
     private fun lagreOgMapTilOppgaverForUgyldigeTerminbarn(
         barnTilUtplukkForOppgave: List<TerminbarnTilUtplukkForOppgave>,
-        fødselsnummerSøker: String
+        fødselsnummerSøker: String,
     ): List<OppgaveForBarn> {
         return barnTilUtplukkForOppgave
             .map {
@@ -62,7 +62,7 @@ class ForberedOppgaverTerminbarnService(
                     it.eksternFagsakId,
                     fødselsnummerSøker,
                     StønadType.OVERGANGSSTØNAD,
-                    OppgaveBeskrivelse.beskrivelseUfødtTerminbarn()
+                    OppgaveBeskrivelse.beskrivelseUfødtTerminbarn(),
                 )
             }
     }
@@ -83,7 +83,7 @@ data class TerminbarnTilUtplukkForOppgave(
     val behandlingId: UUID,
     val fagsakId: UUID,
     val eksternFagsakId: Long,
-    val termindatoBarn: LocalDate
+    val termindatoBarn: LocalDate,
 )
 
 private fun TerminbarnTilUtplukkForOppgave.tilTerminbarnOppgave(): TerminbarnOppgave {

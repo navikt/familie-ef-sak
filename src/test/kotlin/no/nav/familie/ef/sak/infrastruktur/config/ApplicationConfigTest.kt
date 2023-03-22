@@ -31,7 +31,7 @@ internal class ApplicationConfigTest : OppslagSpringRunnerTest() {
         restTemplate.postForEntity<String>("http://localhost:${wiremockServerItem.port()}", TestDto())
         wiremockServerItem.verify(
             postRequestedFor(WireMock.anyUrl())
-                .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """))
+                .withRequestBody(equalToJson("""{"dato" : "2020-01-01"} """)),
         )
     }
 

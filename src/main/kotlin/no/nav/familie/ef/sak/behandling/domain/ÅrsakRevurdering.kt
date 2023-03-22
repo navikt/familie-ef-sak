@@ -18,5 +18,5 @@ data class ÅrsakRevurdering(
     val årsak: Revurderingsårsak,
     val beskrivelse: String?,
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
-    val sporbar: Sporbar = Sporbar()
+    val sporbar: Sporbar = Sporbar(),
 )

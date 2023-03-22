@@ -12,7 +12,7 @@ import no.nav.familie.ef.sak.vilkår.regler.regelIder
 class UtdanningErHensiktsmessigRegel : Vilkårsregel(
     vilkårType = VilkårType.ER_UTDANNING_HENSIKTSMESSIG,
     regler = setOf(NAVKONTOR_VURDERING, SAKSBEHANDLER_VURDERING),
-    hovedregler = regelIder(NAVKONTOR_VURDERING)
+    hovedregler = regelIder(NAVKONTOR_VURDERING),
 ) {
 
     companion object {
@@ -21,8 +21,8 @@ class UtdanningErHensiktsmessigRegel : Vilkårsregel(
                 regelId = RegelId.NAVKONTOR_VURDERING,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = NesteRegel(RegelId.SAKSBEHANDLER_VURDERING),
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
 
         private val SAKSBEHANDLER_VURDERING =
@@ -30,8 +30,8 @@ class UtdanningErHensiktsmessigRegel : Vilkårsregel(
                 regelId = RegelId.SAKSBEHANDLER_VURDERING,
                 svarMapping = jaNeiSvarRegel(
                     hvisJa = SluttSvarRegel.OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
-                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE
-                )
+                    hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE,
+                ),
             )
     }
 }

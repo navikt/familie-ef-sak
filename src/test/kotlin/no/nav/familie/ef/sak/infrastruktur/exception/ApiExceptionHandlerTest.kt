@@ -60,7 +60,7 @@ internal class ApiExceptionHandlerTest : OppslagSpringRunnerTest() {
     private fun gjørKallSomKaster(feil: TestExceptionType) = restTemplate.exchange<Ressurs<String>>(
         localhost("/api/testfeil/$feil"),
         HttpMethod.GET,
-        HttpEntity<Ressurs<String>>(headers)
+        HttpEntity<Ressurs<String>>(headers),
     )
 }
 
@@ -68,7 +68,7 @@ enum class TestExceptionType {
     TIMEOUT,
     MANGLERTILGANG,
     SOCKET_TIMEOUT,
-    RUNTIME
+    RUNTIME,
 }
 
 @RestController

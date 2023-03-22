@@ -17,7 +17,7 @@ import java.util.UUID
 class TilkjentYtelseService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) {
 
     fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
@@ -36,7 +36,7 @@ class TilkjentYtelseService(
 
     fun finnTilkjentYtelserTilKonsistensavstemming(
         stønadstype: StønadType,
-        datoForAvstemming: LocalDate
+        datoForAvstemming: LocalDate,
     ): List<KonsistensavstemmingTilkjentYtelseDto> {
         val tilkjentYtelser = tilkjentYtelseRepository.finnTilkjentYtelserTilKonsistensavstemming(stønadstype, datoForAvstemming)
 
@@ -45,7 +45,7 @@ class TilkjentYtelseService(
 
     private fun mapTilDto(
         tilkjenteYtelser: List<TilkjentYtelse>,
-        datoForAvstemming: LocalDate
+        datoForAvstemming: LocalDate,
     ): List<KonsistensavstemmingTilkjentYtelseDto> {
         val behandlinger = behandlingService.hentBehandlinger(tilkjenteYtelser.map { it.behandlingId }.toSet())
             .associateBy { it.id }
@@ -70,7 +70,7 @@ class TilkjentYtelseService(
                 eksternBehandlingId = behandling.eksternId.id,
                 eksternFagsakId = fagsakMedOppdatertPersonIdent.eksternId.id,
                 personIdent = fagsakMedOppdatertPersonIdent.hentAktivIdent(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
             )
         }
     }

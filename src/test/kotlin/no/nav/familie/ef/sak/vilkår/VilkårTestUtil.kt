@@ -29,7 +29,7 @@ object VilkårTestUtil {
         sagtOppEllerRedusertStilling: SagtOppEllerRedusertStillingDto? = mockk(relaxed = true),
         registeropplysningerOpprettetTid: LocalDateTime = mockk(relaxed = true),
         adresseopplysninger: AdresseopplysningerDto = mockk(relaxed = true),
-        dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true)
+        dokumentasjon: DokumentasjonFraSøknadDto? = mockk(relaxed = true),
     ) =
         VilkårGrunnlagDto(
             personalia = registergrunnlag,
@@ -43,6 +43,6 @@ object VilkårTestUtil {
             sagtOppEllerRedusertStilling = sagtOppEllerRedusertStilling,
             registeropplysningerOpprettetTid = registeropplysningerOpprettetTid,
             adresseopplysninger = adresseopplysninger,
-            dokumentasjon = dokumentasjon
+            dokumentasjon = dokumentasjon,
         )
 }

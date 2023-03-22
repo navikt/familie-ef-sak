@@ -59,9 +59,9 @@ internal class ArbeidsforholdMapperTest {
                     antallTimerPrUke = 37.5,
                     beregnetAntallTimerPrUke = 7.5,
                     bruksperiode = bruksperiode,
-                    gyldighetsperiode = gyldighetsperiode
-                )
-            )
+                    gyldighetsperiode = gyldighetsperiode,
+                ),
+            ),
         )
 
     private val arbeidsforhold2 =
@@ -72,7 +72,7 @@ internal class ArbeidsforholdMapperTest {
             arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "orgnummer", "offentligIdent"),
             type = "type",
             ansettelsesperiode = Ansettelsesperiode(),
-            arbeidsavtaler = listOf(Arbeidsavtaler())
+            arbeidsavtaler = listOf(Arbeidsavtaler()),
         )
     private val arbeidsforholdList = listOf(arbeidsforhold1, arbeidsforhold2)
 }

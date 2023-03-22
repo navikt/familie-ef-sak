@@ -46,7 +46,7 @@ internal class VilkårGrunnlagServiceTest {
     private val grunnlagsdataRegisterService = GrunnlagsdataRegisterService(
         personService,
         personopplysningerIntegrasjonerClient,
-        tidligereVedaksperioderService
+        tidligereVedaksperioderService,
     )
 
     private val fagsakService = mockk<FagsakService>()
@@ -55,7 +55,7 @@ internal class VilkårGrunnlagServiceTest {
         søknadService,
         grunnlagsdataRegisterService,
         behandlingService,
-        mockk()
+        mockk(),
     )
 
     private val service = VilkårGrunnlagService(
@@ -63,7 +63,7 @@ internal class VilkårGrunnlagServiceTest {
         grunnlagsdataService = grunnlagsdataService,
         fagsakService = fagsakService,
         barnMedsamværMapper = barnMedSamværMapper(),
-        adresseMapper = adresseMapper()
+        adresseMapper = adresseMapper(),
     )
     private val behandling = behandling(fagsak())
     private val behandlingId = behandling.id
@@ -74,7 +74,7 @@ internal class VilkårGrunnlagServiceTest {
         navn = "Humpetitten barnehage",
         fraDato = LocalDate.of(2021, 1, 1),
         tilDato = LocalDate.of(2021, 6, 30),
-        beløp = 3000.0
+        beløp = 3000.0,
     )
     val søknadsbarn = listOf(
         søknadsBuilder.defaultBarn(
@@ -82,19 +82,19 @@ internal class VilkårGrunnlagServiceTest {
             fødselTermindato = LocalDate.now().plusMonths(4),
             barnepass = søknadsBuilder.defaultBarnepass(
                 årsakSvarId = "trengerMerPassEnnJevnaldrede",
-                ordninger = listOf(barnepassOrdning)
+                ordninger = listOf(barnepassOrdning),
             ),
-            skalHaBarnepass = true
+            skalHaBarnepass = true,
         ),
         søknadsBuilder.defaultBarn(
             navn = "Navn2 navnesen",
             fødselTermindato = LocalDate.now().plusMonths(6),
             barnepass = søknadsBuilder.defaultBarnepass(
                 årsakSvarId = null,
-                ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0))
+                ordninger = listOf(søknadsBuilder.defaultBarnepassordning(beløp = 2000.0)),
             ),
-            skalHaBarnepass = true
-        )
+            skalHaBarnepass = true,
+        ),
     )
     private val søknadOvergangsstønad =
         SøknadsskjemaMapper.tilDomene(søknadsBuilder.setBarn(søknadsbarn).build().søknadOvergangsstønad)

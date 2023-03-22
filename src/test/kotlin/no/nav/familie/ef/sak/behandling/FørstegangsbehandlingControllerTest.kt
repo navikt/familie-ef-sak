@@ -37,13 +37,13 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         fagsakMedBehandling,
         status = BehandlingStatus.FERDIGSTILT,
         steg = StegType.BEHANDLING_FERDIGSTILT,
-        resultat = BehandlingResultat.INNVILGET
+        resultat = BehandlingResultat.INNVILGET,
     )
     private val henlagtBehandling = behandling(
         fagsakMedBehandling,
         status = BehandlingStatus.FERDIGSTILT,
         steg = StegType.BEHANDLING_FERDIGSTILT,
-        resultat = BehandlingResultat.HENLAGT
+        resultat = BehandlingResultat.HENLAGT,
     )
 
     @Autowired
@@ -63,7 +63,7 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
         every { infotrygdReplikaClient.hentSammenslåttePerioder(any()) } returns InfotrygdPeriodeResponse(
             emptyList(),
             emptyList(),
-            emptyList()
+            emptyList(),
         )
     }
 
@@ -80,9 +80,9 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
                 BehandlingÅrsak.PAPIRSØKNAD,
                 LocalDate.now(),
                 listOf(
-                    BarnSomSkalFødes(LocalDate.now().plusDays(100))
-                )
-            )
+                    BarnSomSkalFødes(LocalDate.now().plusDays(100)),
+                ),
+            ),
         )
     }
 
@@ -93,8 +93,8 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
             FørstegangsbehandlingDto(
                 BehandlingÅrsak.PAPIRSØKNAD,
                 LocalDate.now(),
-                emptyList()
-            )
+                emptyList(),
+            ),
         )
     }
 
@@ -104,8 +104,8 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
             fagsakMedBehandling.id,
             FørstegangsbehandlingDto(
                 BehandlingÅrsak.PAPIRSØKNAD,
-                LocalDate.now()
-            )
+                LocalDate.now(),
+            ),
         ) { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
             assertThat(response.body.frontendFeilmelding).contains("Kan ikke opprette en førstegangsbehandling når siste behandling")
@@ -115,12 +115,12 @@ internal class FørstegangsbehandlingControllerTest : OppslagSpringRunnerTest() 
     private fun opprettBehandling(
         fagsakId: UUID,
         førstegangsbehandlingRequest: FørstegangsbehandlingDto,
-        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK()
+        validator: (ResponseEntity<Ressurs<UUID>>) -> Unit = responseOK(),
     ) {
         val response = restTemplate.exchange<Ressurs<UUID>>(
             localhost("/api/forstegangsbehandling/$fagsakId/opprett"),
             HttpMethod.POST,
-            HttpEntity(førstegangsbehandlingRequest, headers)
+            HttpEntity(førstegangsbehandlingRequest, headers),
         )
         validator.invoke(response)
     }

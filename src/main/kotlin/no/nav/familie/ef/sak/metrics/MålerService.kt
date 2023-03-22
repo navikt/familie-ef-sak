@@ -36,7 +36,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         val now = YearMonth.now()
         val løpendeSaker = målerRepository.finnAntallLøpendeSaker(
             now.minusMonths(2).atDay(1),
-            now.plusMonths(2).atDay(1)
+            now.plusMonths(2).atDay(1),
         )
 
         løpendeBehandlingerGauge.register(
@@ -46,12 +46,12 @@ class MålerService(private val målerRepository: MålerRepository) {
                         "ytelse",
                         it.stonadstype.name,
                         "maned",
-                        it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')
+                        it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0'),
                     ),
-                    it.antall
+                    it.antall,
                 )
             },
-            true
+            true,
         )
 
         løpendeBehandlingerBeløpGauge.register(
@@ -61,12 +61,12 @@ class MålerService(private val målerRepository: MålerRepository) {
                         "ytelse",
                         it.stonadstype.name,
                         "maned",
-                        it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0')
+                        it.dato.year.toString() + "-" + it.dato.monthValue.toString().padStart(2, '0'),
                     ),
-                    it.belop
+                    it.belop,
                 )
             },
-            true
+            true,
         )
     }
 
@@ -87,9 +87,9 @@ class MålerService(private val målerRepository: MålerRepository) {
                     "ytelse",
                     it.stonadstype.name,
                     "uke",
-                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
                 ),
-                it.antall
+                it.antall,
             )
         }
 
@@ -101,7 +101,7 @@ class MålerService(private val målerRepository: MålerRepository) {
         val behandlinger = målerRepository.finnÅpneBehandlinger()
         logger.info(
             "Åpne behandlinger returnerte ${behandlinger.sumOf { it.antall }} " +
-                "fordelt på ${behandlinger.size} statuser."
+                "fordelt på ${behandlinger.size} statuser.",
         )
         val rows = behandlinger.map {
             MultiGauge.Row.of(
@@ -109,9 +109,9 @@ class MålerService(private val målerRepository: MålerRepository) {
                     "ytelse",
                     it.stonadstype.name,
                     "status",
-                    it.status.name
+                    it.status.name,
                 ),
-                it.antall
+                it.antall,
             )
         }
 
@@ -130,9 +130,9 @@ class MålerService(private val målerRepository: MålerRepository) {
                     "resultat", it.resultat.name,
                     "arsak", it.arsak.name,
                     "henlagtarsak", it.henlagt_arsak?.name ?: "",
-                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0')
+                    "uke", it.år.toString() + "-" + it.uke.toString().padStart(2, '0'),
                 ),
-                it.antall
+                it.antall,
             )
         }
         vedtakGauge.register(rows)

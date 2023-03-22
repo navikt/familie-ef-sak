@@ -21,7 +21,7 @@ class TidligereVedaksperioderService(
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val infotrygdService: InfotrygdService,
-    private val historiskPensjonService: HistoriskPensjonService
+    private val historiskPensjonService: HistoriskPensjonService,
 ) {
 
     /**
@@ -35,7 +35,7 @@ class TidligereVedaksperioderService(
         return TidligereVedtaksperioder(
             infotrygd = tidligereInnvilgetVedtak,
             sak = harTidligereMottattStønadEf(alleIdenter),
-            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata
+            historiskPensjon = historiskPensjonService.hentHistoriskPensjon(aktivIdent, alleIdenter).harPensjonsdata,
         )
     }
 
@@ -43,7 +43,7 @@ class TidligereVedaksperioderService(
         TidligereInnvilgetVedtak(
             harTidligereOvergangsstønad = periodeResponse.overgangsstønad.isNotEmpty(),
             harTidligereBarnetilsyn = periodeResponse.barnetilsyn.isNotEmpty(),
-            harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty()
+            harTidligereSkolepenger = periodeResponse.skolepenger.isNotEmpty(),
         )
 
     private fun harTidligereMottattStønadEf(identer: Set<String>): TidligereInnvilgetVedtak {
@@ -53,7 +53,7 @@ class TidligereVedaksperioderService(
                 TidligereInnvilgetVedtak(
                     harTidligereOvergangsstønad = hentTidligereVedtaksperioder(it.overgangsstønad),
                     harTidligereBarnetilsyn = hentTidligereVedtaksperioder(it.barnetilsyn),
-                    harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger)
+                    harTidligereSkolepenger = hentTidligereVedtaksperioder(it.skolepenger),
                 )
             } ?: TidligereInnvilgetVedtak(false, false, false)
     }

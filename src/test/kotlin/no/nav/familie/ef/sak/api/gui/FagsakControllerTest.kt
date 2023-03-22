@@ -47,7 +47,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/fagsak"),
             HttpMethod.POST,
-            HttpEntity(fagsakRequest, headers)
+            HttpEntity(fagsakRequest, headers),
         )
     }
 
@@ -67,7 +67,7 @@ internal class FagsakControllerTest : OppslagSpringRunnerTest() {
         val response = restTemplate.exchange<Ressurs<FagsakDto>>(
             localhost("/api/fagsak/$fagsakId"),
             HttpMethod.GET,
-            HttpEntity<Any>(headers)
+            HttpEntity<Any>(headers),
         )
 
         Assertions.assertThat(response.statusCode).isEqualTo(HttpStatus.OK)

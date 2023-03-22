@@ -16,7 +16,7 @@ fun lagTilkjentYtelse(
     personident: String = "123",
     type: TilkjentYtelseType = TilkjentYtelseType.FØRSTEGANGSBEHANDLING,
     startdato: LocalDate = andelerTilkjentYtelse.minOfOrNull { it.stønadFom } ?: LocalDate.now(),
-    grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom
+    grunnbeløpsmåned: YearMonth = nyesteGrunnbeløp.periode.fom,
 ) =
     TilkjentYtelse(
         id = id,
@@ -25,7 +25,7 @@ fun lagTilkjentYtelse(
         type = type,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
         startdato = startdato,
-        grunnbeløpsmåned = grunnbeløpsmåned
+        grunnbeløpsmåned = grunnbeløpsmåned,
     )
 
 fun lagAndelTilkjentYtelse(
@@ -37,7 +37,7 @@ fun lagAndelTilkjentYtelse(
     kildeBehandlingId: UUID = UUID.randomUUID(),
     inntekt: Int = 0,
     samordningsfradrag: Int = 0,
-    inntektsreduksjon: Int = 0
+    inntektsreduksjon: Int = 0,
 ) =
     AndelTilkjentYtelse(
         beløp = beløp,
@@ -47,5 +47,5 @@ fun lagAndelTilkjentYtelse(
         inntekt = inntekt,
         samordningsfradrag = samordningsfradrag,
         inntektsreduksjon = inntektsreduksjon,
-        kildeBehandlingId = kildeBehandlingId
+        kildeBehandlingId = kildeBehandlingId,
     )

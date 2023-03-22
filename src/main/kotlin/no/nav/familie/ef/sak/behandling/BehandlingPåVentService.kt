@@ -24,7 +24,7 @@ class BehandlingPåVentService(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val taskService: TaskService,
     private val nullstillVedtakService: NullstillVedtakService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
     @Transactional
     fun settPåVent(behandlingId: UUID) {
@@ -49,7 +49,7 @@ class BehandlingPåVentService(
             TaAvVentStatus.ANNEN_BEHANDLING_MÅ_FERDIGSTILLES ->
                 throw ApiFeil(
                     "Annen behandling må ferdigstilles før denne kan aktiveres på nytt",
-                    HttpStatus.BAD_REQUEST
+                    HttpStatus.BAD_REQUEST,
                 )
             TaAvVentStatus.MÅ_NULSTILLE_VEDTAK -> {
                 val nyForrigeBehandlingId = kanTaAvVent.nyForrigeBehandlingId ?: error("Mangler nyForrigeBehandlingId")

@@ -18,16 +18,16 @@ class VilkårsregelEnHovedregel :
                 jaNeiSvarRegel(
                     hvisNei = NesteRegel(
                         RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                        BegrunnelseType.PÅKREVD
-                    )
-                )
+                        BegrunnelseType.PÅKREVD,
+                    ),
+                ),
             ),
             RegelSteg(
                 regelId = RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                svarMapping = jaNeiSvarRegel()
-            )
+                svarMapping = jaNeiSvarRegel(),
+            ),
         ),
-        hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE)
+        hovedregler = setOf(RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE),
     )
 
 class VilkårsregelToHovedregler :
@@ -36,15 +36,15 @@ class VilkårsregelToHovedregler :
         setOf(
             RegelSteg(
                 regelId = RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-                svarMapping = jaNeiSvarRegel(hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE)
+                svarMapping = jaNeiSvarRegel(hvisNei = SluttSvarRegel.IKKE_OPPFYLT_MED_PÅKREVD_BEGRUNNELSE),
             ),
             RegelSteg(
                 regelId = RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
-                svarMapping = jaNeiSvarRegel()
-            )
+                svarMapping = jaNeiSvarRegel(),
+            ),
         ),
         hovedregler = setOf(
             RegelId.BOR_OG_OPPHOLDER_SEG_I_NORGE,
-            RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE
-        )
+            RegelId.KRAV_SIVILSTAND_PÅKREVD_BEGRUNNELSE,
+        ),
     )

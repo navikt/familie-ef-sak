@@ -97,7 +97,7 @@ class StepDefinitions {
     private val beregningBarnetilsynService = BeregningBarnetilsynService(featureToggleService)
     private val beregningSkolepengerService = BeregningSkolepengerService(
         behandlingService = behandlingService,
-        vedtakService = vedtakService
+        vedtakService = vedtakService,
     )
     private val simuleringService = mockk<SimuleringService>(relaxed = true)
     private val tilbakekrevingService = mockk<TilbakekrevingService>(relaxed = true)
@@ -118,7 +118,7 @@ class StepDefinitions {
         barnService,
         fagsakService,
         validerOmregningService,
-        featureToggleService
+        featureToggleService,
     )
 
     private val vedtakHistorikkService =
@@ -249,7 +249,7 @@ class StepDefinitions {
                     saksbehandlinger.values.map { it.first }.toList(),
                     null,
                     behandlingIdsToAktivitetArbeid,
-                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true)
+                    HistorikkKonfigurasjon(brukIkkeVedtatteSatser = true),
                 )
             }
         }
@@ -345,7 +345,7 @@ class StepDefinitions {
     private fun forventFølgendeBeløpsperioder(
         årMåned: String,
         dataTable: DataTable,
-        perioder: (InnvilgelseBarnetilsyn) -> List<PeriodeMedBeløpDto>
+        perioder: (InnvilgelseBarnetilsyn) -> List<PeriodeMedBeløpDto>,
     ) {
         val behandlingId = UUID.randomUUID()
         opprettBarnForNyBehandling(behandlingId)
@@ -427,7 +427,7 @@ class StepDefinitions {
                     opprettetTid = LocalDateTime.now().plusMinutes(index.toLong()),
                     type = if (index == 0) BehandlingType.FØRSTEGANGSBEHANDLING else BehandlingType.REVURDERING,
                     forrigeBehandlingId = acc.lastOrNull()?.id,
-                    vedtakstidspunkt = LocalDateTime.MIN
+                    vedtakstidspunkt = LocalDateTime.MIN,
                 )
             }
             .map { it to saksbehandling(fagsak, it) }
@@ -497,8 +497,8 @@ class StepDefinitions {
                             andel.endring?.type ?: "",
                             andel.endring?.behandlingId?.let { bid -> behandlingIdTilUUID.entries.find { it.value == bid }!!.key }
                                 ?: "",
-                            "opphør=${andel.erOpphør}"
-                        ).joinToString("|", prefix = "|", postfix = "|")
+                            "opphør=${andel.erOpphør}",
+                        ).joinToString("|", prefix = "|", postfix = "|"),
                     )
                 }
 
@@ -512,7 +512,7 @@ class StepDefinitions {
         it: MutableMap<String, String>,
         index: Int,
         forventetHistorikkEndringer: List<VedtakDomeneParser.ForventetHistorikk>,
-        andelHistorikkDto: AndelHistorikkDto
+        andelHistorikkDto: AndelHistorikkDto,
     ) {
         val endringType = parseEndringType(it)
         val endretIBehandlingId = parseValgfriInt(VedtakDomenebegrep.ENDRET_I_BEHANDLING_ID, it)

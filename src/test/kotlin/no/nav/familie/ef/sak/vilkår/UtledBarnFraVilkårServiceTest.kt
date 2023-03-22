@@ -17,7 +17,7 @@ internal class UtledBarnFraVilkårServiceTest {
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarn)
         val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
             alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling
+            alleBarnPåGjeldendeBehandling,
         )
 
         assertThat(utledetBarnIdMap[tidligereBarn.id]?.id).isEqualTo(nyttBarn.id)
@@ -33,7 +33,7 @@ internal class UtledBarnFraVilkårServiceTest {
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarnA, nyttBarnB)
         val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
             alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling
+            alleBarnPåGjeldendeBehandling,
         )
 
         assertThat(utledetBarnIdMap[tidligereBarn.id]?.id).isEqualTo(nyttBarnA.id)
@@ -52,7 +52,7 @@ internal class UtledBarnFraVilkårServiceTest {
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarnB, nyttBarnA)
         val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
             alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling
+            alleBarnPåGjeldendeBehandling,
         )
 
         assertThat(utledetBarnIdMap[tidligereBarnA.id]?.id).isEqualTo(nyttBarnA.id)
@@ -71,7 +71,7 @@ internal class UtledBarnFraVilkårServiceTest {
         val alleBarnPåGjeldendeBehandling = listOf(nyttBarnB, nyttBarnA)
         val utledetBarnIdMap = VurderingService.byggBarnMapFraTidligereTilNyId(
             alleBarnPåForrigeBehandling,
-            alleBarnPåGjeldendeBehandling
+            alleBarnPåGjeldendeBehandling,
         )
 
         assertThat(utledetBarnIdMap[tidligereBarnA.id]?.id).isNotNull
@@ -83,12 +83,12 @@ internal class UtledBarnFraVilkårServiceTest {
         søknadBarnId: UUID? = null,
         navn: String? = null,
         fødselTermindato: LocalDate? = null,
-        personIdent: String? = null
+        personIdent: String? = null,
     ): BehandlingBarn = BehandlingBarn(
         behandlingId = UUID.randomUUID(),
         søknadBarnId = søknadBarnId,
         navn = navn,
         personIdent = personIdent,
-        fødselTermindato = fødselTermindato
+        fødselTermindato = fødselTermindato,
     )
 }

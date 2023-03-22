@@ -8,5 +8,5 @@ data class BosituasjonDto(
     val samboer: PersonMinimumDto?,
     val sammenflyttingsdato: LocalDate?,
     val datoFlyttetFraHverandre: LocalDate?,
-    val tidligereSamboerFortsattRegistrertPåAdresse: DokumentasjonDto?
+    val tidligereSamboerFortsattRegistrertPåAdresse: DokumentasjonDto?,
 )

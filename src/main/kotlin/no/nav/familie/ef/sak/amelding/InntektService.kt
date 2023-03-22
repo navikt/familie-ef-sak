@@ -12,7 +12,7 @@ class InntektService(
     private val aMeldingInntektClient: AMeldingInntektClient,
     private val fagsakService: FagsakService,
     private val fagsakPersonService: FagsakPersonService,
-    private val inntektMapper: InntektMapper
+    private val inntektMapper: InntektMapper,
 ) {
 
     fun hentInntekt(fagsakId: UUID, fom: YearMonth, tom: YearMonth): AMeldingInntektDto {

@@ -24,7 +24,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling as Tilbakekrev
 class TilbakekrevingController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
-    private val tilbakekrevingService: TilbakekrevingService
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     @PostMapping("/{behandlingId}")
@@ -70,7 +70,7 @@ class TilbakekrevingController(
     @PostMapping("/{behandlingId}/brev/generer")
     fun genererTilbakekekrevingBrevMedVarseltekst(
         @PathVariable behandlingId: UUID,
-        @RequestBody varseltekstDto: VarseltekstDto
+        @RequestBody varseltekstDto: VarseltekstDto,
     ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)

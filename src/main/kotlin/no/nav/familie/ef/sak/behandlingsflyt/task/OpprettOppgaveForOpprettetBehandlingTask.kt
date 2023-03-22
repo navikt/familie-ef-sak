@@ -21,12 +21,12 @@ import java.util.UUID
 @TaskStepBeskrivelse(
     taskStepType = OpprettOppgaveForOpprettetBehandlingTask.TYPE,
     beskrivelse = "Opprett oppgave i GOSYS for opprettet revurdering",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class OpprettOppgaveForOpprettetBehandlingTask(
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -36,7 +36,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
         val saksbehandler: String,
         val beskrivelse: String? = null,
         val hendelseTidspunkt: LocalDateTime = LocalDateTime.now(),
-        val mappeId: Long? = null
+        val mappeId: Long? = null,
     )
 
     override fun doTask(task: Task) {
@@ -49,14 +49,14 @@ class OpprettOppgaveForOpprettetBehandlingTask(
                 behandlingId = behandlingId,
                 hendelseTidspunkt = data.hendelseTidspunkt,
                 oppgaveId = oppgaveId,
-                saksbehandler = data.saksbehandler
-            )
+                saksbehandler = data.saksbehandler,
+            ),
         )
     }
 
     private fun opprettOppgave(
         data: OpprettOppgaveTaskData,
-        task: Task
+        task: Task,
     ): Long? {
         val behandling = behandlingService.hentBehandling(data.behandlingId)
         if (behandling.status == BehandlingStatus.OPPRETTET || behandling.status == BehandlingStatus.UTREDES) {
@@ -67,7 +67,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
                 oppgavetype = Oppgavetype.BehandleSak,
                 tilordnetNavIdent = tilordnetNavIdent,
                 beskrivelse = data.beskrivelse,
-                mappeId = data.mappeId
+                mappeId = data.mappeId,
             )
             task.metadata.setProperty("oppgaveId", oppgaveId.toString())
             return oppgaveId
@@ -86,7 +86,7 @@ class OpprettOppgaveForOpprettetBehandlingTask(
                 properties = Properties().apply {
                     this["saksbehandler"] = data.saksbehandler
                     this["behandlingId"] = data.behandlingId.toString()
-                }
+                },
             )
         }
 

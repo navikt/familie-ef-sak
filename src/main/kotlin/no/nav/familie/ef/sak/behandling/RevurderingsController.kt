@@ -24,7 +24,7 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class RevurderingsController(
     private val revurderingService: RevurderingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PostMapping("{fagsakId}")
@@ -39,7 +39,7 @@ class RevurderingsController(
         }
         feilHvis(
             revurderingInnhold.behandlingsårsak == BehandlingÅrsak.G_OMREGNING &&
-                revurderingInnhold.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE
+                revurderingInnhold.vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VILKÅRSBEHANDLE,
         ) {
             "Kan ikke behandle nye barn på revurdering med årsak G-omregning"
         }
@@ -50,7 +50,7 @@ class RevurderingsController(
     @PostMapping("informasjon/{behandlingId}")
     fun lagreRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
-        @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto
+        @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
         tilgangService.validerHarSaksbehandlerrolle()
@@ -72,7 +72,7 @@ class RevurderingsController(
 
     @GetMapping("informasjon/{behandlingId}")
     fun hentRevurderingsinformasjon(
-        @PathVariable behandlingId: UUID
+        @PathVariable behandlingId: UUID,
     ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
         return Ressurs.success(revurderingService.hentRevurderingsinformasjon(behandlingId))

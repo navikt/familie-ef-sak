@@ -14,7 +14,7 @@ import java.util.UUID
 @Service
 class AvstemmingService(
     private val iverksettClient: IverksettClient,
-    private val tilkjentYtelseService: TilkjentYtelseService
+    private val tilkjentYtelseService: TilkjentYtelseService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -39,12 +39,12 @@ class AvstemmingService(
         stønadstype: StønadType,
         konsistensavstemming: List<KonsistensavstemmingTilkjentYtelseDto>,
         transaksjon: UUID,
-        chunks: Int
+        chunks: Int,
     ) {
         val beløp = konsistensavstemming.sumOf { it.andelerTilkjentYtelse.sumOf(AndelTilkjentYtelseDto::beløp) }
         logger.info(
             "Konsistensavstemming stønad=$stønadstype transaksjon=$transaksjon antall=${konsistensavstemming.size} " +
-                "beløp=$beløp chunks=$chunks"
+                "beløp=$beløp chunks=$chunks",
         )
     }
 }

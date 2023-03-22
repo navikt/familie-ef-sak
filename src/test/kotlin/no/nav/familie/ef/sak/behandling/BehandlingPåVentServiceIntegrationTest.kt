@@ -107,7 +107,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
         this.copy(
             status = BehandlingStatus.FERDIGSTILT,
             resultat = BehandlingResultat.INNVILGET,
-            vedtakstidspunkt = LocalDateTime.now()
+            vedtakstidspunkt = LocalDateTime.now(),
         )
 
     private fun opprettRevurdering() =
@@ -116,7 +116,7 @@ internal class BehandlingPåVentServiceIntegrationTest : OppslagSpringRunnerTest
                 fagsak.id,
                 BehandlingÅrsak.NYE_OPPLYSNINGER,
                 kravMottatt = LocalDate.now(),
-                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
-            )
+                vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
+            ),
         )
 }

@@ -30,8 +30,8 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
                     fagsakId = fagsak.id,
                     vedtakId = behandling.id,
                     årMåned = årMåned,
-                    registrertArbeidssøker = false
-                )
+                    registrertArbeidssøker = false,
+                ),
             )
         }
 
@@ -42,8 +42,8 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
                     vedtakId = behandling.id,
                     årMåned = årMåned.plusMonths(1),
                     kontrollert = true,
-                    registrertArbeidssøker = false
-                )
+                    registrertArbeidssøker = false,
+                ),
             )
         }
         for (i in 1..2) {
@@ -52,8 +52,8 @@ internal class UttrekkArbeidssøkerRepositoryTest : OppslagSpringRunnerTest() {
                     fagsakId = fagsak.id,
                     vedtakId = behandling.id,
                     årMåned = årMåned.plusMonths(1),
-                    registrertArbeidssøker = true
-                )
+                    registrertArbeidssøker = true,
+                ),
             )
         }
     }

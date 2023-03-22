@@ -29,7 +29,7 @@ class BeregningController(
     private val beregningService: BeregningService,
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilgangService: TilgangService,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
 ) {
 
     @PostMapping

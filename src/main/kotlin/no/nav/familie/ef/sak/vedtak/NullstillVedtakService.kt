@@ -22,7 +22,7 @@ class NullstillVedtakService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val mellomlagringBrevService: MellomlagringBrevService,
-    private val vedtaksbrevService: VedtaksbrevService
+    private val vedtaksbrevService: VedtaksbrevService,
 ) {
 
     @Transactional

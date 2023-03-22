@@ -15,7 +15,7 @@ import java.net.URI
 @Component
 class KodeverkClient(
     @Qualifier("azure") restOperations: RestOperations,
-    private val integrasjonerConfig: IntegrasjonerConfig
+    private val integrasjonerConfig: IntegrasjonerConfig,
 ) :
     AbstractPingableRestClient(restOperations, "kodeverk") {
 

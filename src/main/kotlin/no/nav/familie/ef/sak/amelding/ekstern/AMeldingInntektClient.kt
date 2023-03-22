@@ -15,7 +15,7 @@ import java.time.YearMonth
 @Component
 class AMeldingInntektClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
-    @Qualifier("azure") restOperations: RestOperations
+    @Qualifier("azure") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "inntekt") {
 
     private fun lagInntektUri(fom: YearMonth, tom: YearMonth) =
@@ -36,7 +36,7 @@ class AMeldingInntektClient(
             PersonIdent(personIdent),
             HttpHeaders().apply {
                 accept = listOf(MediaType.TEXT_PLAIN)
-            }
+            },
         )
     }
 }

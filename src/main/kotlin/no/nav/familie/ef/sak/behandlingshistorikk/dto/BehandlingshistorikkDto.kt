@@ -12,5 +12,5 @@ data class BehandlingshistorikkDto(
     val endretAv: String,
     val endretTid: LocalDateTime = LocalDateTime.now(),
     val utfall: StegUtfall? = null,
-    val metadata: Map<String, Any>? = null
+    val metadata: Map<String, Any>? = null,
 )

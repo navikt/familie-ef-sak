@@ -27,7 +27,7 @@ internal class PdlPersonUtilTest {
         val historiskeAdresser: List<Bostedsadresse> = listOf(
             vegadresse("Historisk gate", "15", true),
             vegadresse("Historisk gate", "13", true),
-            vegadresse("Historisk gate", "1", true)
+            vegadresse("Historisk gate", "1", true),
         )
         val adresser: List<Bostedsadresse> = historiskeAdresser + gjeldendeAdresse
 
@@ -43,7 +43,7 @@ internal class PdlPersonUtilTest {
         val historiskeAdresser: List<Oppholdsadresse> = listOf(
             oppholdsadresse("Historisk gate", "15", true),
             oppholdsadresse("Historisk gate", "13", true),
-            oppholdsadresse("Historisk gate", "1", true)
+            oppholdsadresse("Historisk gate", "1", true),
         )
 
         val adresser = historiskeAdresser + gjeldendeAdresse
@@ -59,7 +59,7 @@ internal class PdlPersonUtilTest {
         val sivilstander = listOf(
             Sivilstand(Sivilstandstype.UGIFT, null, null, null, Metadata(true)),
             Sivilstand(Sivilstandstype.GIFT, null, null, null, Metadata(true)),
-            Sivilstand(Sivilstandstype.SEPARERT, null, null, null, Metadata(false))
+            Sivilstand(Sivilstandstype.SEPARERT, null, null, null, Metadata(false)),
         )
 
         assertThat(sivilstander.gjeldende().type).isEqualTo(Sivilstandstype.SEPARERT)
@@ -75,7 +75,7 @@ internal class PdlPersonUtilTest {
             Vegadresse(nr, null, null, gate, null, null, null, null, null),
             null,
             null,
-            Metadata(historisk)
+            Metadata(historisk),
         )
     }
 
@@ -87,7 +87,7 @@ internal class PdlPersonUtilTest {
             null,
             Vegadresse(nr, null, null, gate, null, null, null, null, null),
             null,
-            Metadata(historisk)
+            Metadata(historisk),
         )
     }
 }

@@ -13,5 +13,5 @@ data class BarnTilUtplukkForOppgave(
     @Column("fodselsnummer_barn")
     val fødselsnummerBarn: String?,
     val termindatoBarn: LocalDate?,
-    val fraMigrering: Boolean
+    val fraMigrering: Boolean,
 )

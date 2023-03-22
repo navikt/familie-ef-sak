@@ -22,7 +22,7 @@ import java.util.UUID
 
 data class Vedtaksdata(
     val vedtakstidspunkt: LocalDateTime,
-    val perioder: List<Vedtakshistorikkperiode>
+    val perioder: List<Vedtakshistorikkperiode>,
 )
 
 sealed class Vedtakshistorikkperiode {
@@ -35,7 +35,7 @@ sealed class Vedtakshistorikkperiode {
 
 data class Sanksjonsperiode(
     override val periode: Månedsperiode,
-    val sanksjonsårsak: Sanksjonsårsak
+    val sanksjonsårsak: Sanksjonsårsak,
 ) : Vedtakshistorikkperiode() {
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -48,7 +48,7 @@ data class Sanksjonsperiode(
 }
 
 data class Opphørsperiode(
-    override val periode: Månedsperiode
+    override val periode: Månedsperiode,
 ) : Vedtakshistorikkperiode() {
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
         error("Kan ikke endre fra-dato på opphør")
@@ -62,14 +62,14 @@ data class Opphørsperiode(
 data class VedtakshistorikkperiodeOvergangsstønad(
     override val periode: Månedsperiode,
     val aktivitet: AktivitetType,
-    val periodeType: VedtaksperiodeType
+    val periodeType: VedtaksperiodeType,
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: VedtaksperiodeDto) :
         this(
             periode = periode.periode,
             aktivitet = periode.aktivitet,
-            periodeType = periode.periodeType
+            periodeType = periode.periodeType,
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -92,7 +92,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
     val sats: Int,
     val beløpFørFratrekkOgSatsjustering: Int,
     val aktivitetstype: AktivitetstypeBarnetilsyn? = null,
-    val periodetype: PeriodetypeBarnetilsyn
+    val periodetype: PeriodetypeBarnetilsyn,
 ) : Vedtakshistorikkperiode() {
 
     constructor(periode: BeløpsperiodeBarnetilsynDto, aktivitetArbeid: SvarId?) :
@@ -107,7 +107,7 @@ data class VedtakshistorikkperiodeBarnetilsyn(
             sats = periode.sats,
             beløpFørFratrekkOgSatsjustering = periode.beløpFørFratrekkOgSatsjustering,
             aktivitetstype = periode.aktivitetstype,
-            periodetype = periode.periodetype
+            periodetype = periode.periodetype,
         )
 
     override fun medFra(fra: YearMonth): Vedtakshistorikkperiode {
@@ -128,14 +128,14 @@ object VedtakHistorikkBeregner {
      */
     fun lagVedtaksperioderPerBehandling(
         vedtaksliste: List<BehandlingHistorikkData>,
-        konfigurasjon: HistorikkKonfigurasjon
+        konfigurasjon: HistorikkKonfigurasjon,
     ): Map<UUID, Vedtaksdata> {
         return vedtaksliste
             .sortedBy { it.tilkjentYtelse.sporbar.opprettetTid }
             .fold(listOf<Pair<UUID, Vedtaksdata>>()) { acc, vedtak ->
                 acc + Pair(
                     vedtak.behandlingId,
-                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon))
+                    Vedtaksdata(vedtak.vedtakstidspunkt, lagTotalbildeForNyttVedtak(vedtak, acc, konfigurasjon)),
                 )
             }
             .toMap()
@@ -144,7 +144,7 @@ object VedtakHistorikkBeregner {
     private fun lagTotalbildeForNyttVedtak(
         data: BehandlingHistorikkData,
         acc: List<Pair<UUID, Vedtaksdata>>,
-        konfigurasjon: HistorikkKonfigurasjon
+        konfigurasjon: HistorikkKonfigurasjon,
     ): List<Vedtakshistorikkperiode> {
         val vedtak = data.vedtakDto
         return when (vedtak) {
@@ -188,13 +188,13 @@ object VedtakHistorikkBeregner {
     private fun perioderFraBeløp(
         vedtak: InnvilgelseBarnetilsyn,
         data: BehandlingHistorikkData,
-        konfigurasjon: HistorikkKonfigurasjon
+        konfigurasjon: HistorikkKonfigurasjon,
     ) = data.tilkjentYtelse.tilBeløpsperiodeBarnetilsyn(vedtak, konfigurasjon.brukIkkeVedtatteSatser)
         .map { VedtakshistorikkperiodeBarnetilsyn(it, data.aktivitetArbeid) }
 
     private fun splitOppPerioderSomErSanksjonert(
         acc: List<Pair<UUID, Vedtaksdata>>,
-        vedtak: Sanksjonert
+        vedtak: Sanksjonert,
     ): List<Vedtakshistorikkperiode> {
         val sanksjonsperiode = vedtak.periode.tilPeriode()
         val perioder = acc.last().second.perioder
@@ -226,7 +226,7 @@ object VedtakHistorikkBeregner {
      */
     private fun avkortTidligerePerioder(
         sisteVedtak: Pair<UUID, Vedtaksdata>?,
-        datoSomTidligerePeriodeOpphør: YearMonth
+        datoSomTidligerePeriodeOpphør: YearMonth,
     ): List<Vedtakshistorikkperiode> {
         if (sisteVedtak == null) return emptyList()
         return sisteVedtak.second.perioder.mapNotNull {

@@ -38,8 +38,8 @@ object BeregningUtils {
                     avkortningPerMåned = avkortningPerMåned,
                     fullOvergangsStønadPerMåned = fullOvergangsStønadPerMåned,
                     inntekt = inntekt,
-                    grunnbeløp = it.beløp
-                )
+                    grunnbeløp = it.beløp,
+                ),
             )
         }
     }
@@ -55,7 +55,7 @@ object BeregningUtils {
 
     fun indeksjusterInntekt(
         sisteBrukteGrunnbeløpsdato: YearMonth,
-        inntekter: List<Inntektsperiode> = emptyList()
+        inntekter: List<Inntektsperiode> = emptyList(),
     ): List<Inntektsperiode> {
         val sistBrukteGrunnbeløp = finnGrunnbeløp(sisteBrukteGrunnbeløpsdato)
         if (nyesteGrunnbeløp == sistBrukteGrunnbeløp) {
@@ -67,7 +67,7 @@ object BeregningUtils {
 
     private fun justerInntektsperiode(
         inntektsperiode: Inntektsperiode,
-        sistBrukteGrunnbeløp: Grunnbeløp
+        sistBrukteGrunnbeløp: Grunnbeløp,
     ): List<Inntektsperiode> {
         val (_, _, _, inntekt, samordningsfradrag) = inntektsperiode
         return finnGrunnbeløpsPerioder(inntektsperiode.periode).map { grunnbeløp ->
@@ -80,7 +80,7 @@ object BeregningUtils {
                 Inntektsperiode(
                     periode = grunnbeløp.periode,
                     inntekt = BigDecimal(justerInntektAvrundetNedTilNærmeste100),
-                    samordningsfradrag = samordningsfradrag
+                    samordningsfradrag = samordningsfradrag,
                 )
             } else {
                 Inntektsperiode(periode = grunnbeløp.periode, inntekt = inntekt, samordningsfradrag = samordningsfradrag)
@@ -90,7 +90,7 @@ object BeregningUtils {
 
     fun finnStartDatoOgSluttDatoForBeløpsperiode(
         beløpForInnteksperioder: List<Beløpsperiode>,
-        vedtaksperiode: Månedsperiode
+        vedtaksperiode: Månedsperiode,
     ): List<Beløpsperiode> {
         return beløpForInnteksperioder.mapNotNull {
             when {

@@ -80,8 +80,8 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(
             Testsøknad.søknadOvergangsstønad.copy(
                 aktivitet = aktivitet.copy(verdi = aktivitetUtenUtdanning),
-                barn = Søknadsfelt("", barnUtenBarnepass)
-            )
+                barn = Søknadsfelt("", barnUtenBarnepass),
+            ),
         )
 
         søknadOvergangsstønadRepository.insert(søknadTilLagring)
@@ -120,9 +120,9 @@ internal class SøknadsskjemaOvergangsstønadRepositoryTest : OppslagSpringRunne
             listOf(
                 builder.defaultBarn(
                     barnepass = Barnepass(barnepassordninger = Søknadsfelt("", emptyList())),
-                    skalHaBarnepass = false
-                )
-            )
+                    skalHaBarnepass = false,
+                ),
+            ),
         )
         val søknadTilLagring = SøknadsskjemaMapper.tilDomene(builder.build().søknadBarnetilsyn)
 

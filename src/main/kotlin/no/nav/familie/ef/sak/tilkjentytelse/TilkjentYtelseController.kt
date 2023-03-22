@@ -16,7 +16,7 @@ import java.util.UUID
 class TilkjentYtelseController(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val andelsHistorikkService: AndelsHistorikkService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping("/behandling/{behandlingId}")

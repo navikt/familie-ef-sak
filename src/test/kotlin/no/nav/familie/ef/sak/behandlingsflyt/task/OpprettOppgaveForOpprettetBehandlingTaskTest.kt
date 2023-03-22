@@ -40,14 +40,14 @@ internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
     @EnumSource(
         value = BehandlingStatus::class,
         names = ["OPPRETTET", "UTREDES"],
-        mode = EnumSource.Mode.INCLUDE
+        mode = EnumSource.Mode.INCLUDE,
     )
     @ParameterizedTest
     internal fun `Skal opprette oppgave hvis behandlingen har status opprettet eller utredes`(behandlingStatus: BehandlingStatus) {
         val behandling = mockBehandling(behandlingStatus)
 
         opprettOppgaveForOpprettetBehandlingTask.doTask(
-            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, ""))
+            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, "")),
         )
 
         val opprettetTaskData =
@@ -60,14 +60,14 @@ internal class OpprettOppgaveForOpprettetBehandlingTaskTest {
     @EnumSource(
         value = BehandlingStatus::class,
         names = ["OPPRETTET", "UTREDES"],
-        mode = EnumSource.Mode.EXCLUDE
+        mode = EnumSource.Mode.EXCLUDE,
     )
     @ParameterizedTest
     internal fun `Skal ikke opprette oppgave hvis behandlingen ikke har status opprettet eller utredes`(behandlingStatus: BehandlingStatus) {
         val behandling = mockBehandling(behandlingStatus)
 
         opprettOppgaveForOpprettetBehandlingTask.doTask(
-            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, ""))
+            OpprettOppgaveForOpprettetBehandlingTask.opprettTask(OpprettOppgaveTaskData(behandling.id, "")),
         )
 
         val opprettetTaskData =

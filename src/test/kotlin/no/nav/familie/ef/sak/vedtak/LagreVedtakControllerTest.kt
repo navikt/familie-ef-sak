@@ -66,7 +66,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             begrunnelse = "",
             perioder = listOf(utgiftsperiode),
             perioderKontantstøtte = listOf(),
-            tilleggsstønad = tomTillegsstønad()
+            tilleggsstønad = tomTillegsstønad(),
         )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
@@ -81,15 +81,15 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn,
                         periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID
-                    )
+                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    ),
                 ),
-                begrunnelse = ""
+                begrunnelse = "",
             ),
             kontantstøtte = KontantstøtteWrapper(emptyList()),
             tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
             saksbehandlerIdent = "julenissen",
-            opprettetAv = "julenissen"
+            opprettetAv = "julenissen",
 
         )
 
@@ -115,7 +115,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             perioder = listOf(utgiftsperiode),
             perioderKontantstøtte = listOf(kontantstøttePeriode),
             tilleggsstønad = tomTillegsstønad(),
-            _type = "InnvilgelseBarnetilsynUtenUtbetaling"
+            _type = "InnvilgelseBarnetilsynUtenUtbetaling",
         )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
@@ -130,23 +130,23 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                         utgifter = utgiftsperiode.utgifter,
                         barn = utgiftsperiode.barn,
                         periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
-                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID
-                    )
+                        aktivitet = AktivitetstypeBarnetilsyn.I_ARBEID,
+                    ),
                 ),
-                begrunnelse = ""
+                begrunnelse = "",
             ),
             kontantstøtte = KontantstøtteWrapper(
                 listOf(
                     PeriodeMedBeløp(
                         periode = kontantstøttePeriode.periode,
-                        beløp = kontantstøttePeriode.beløp
+                        beløp = kontantstøttePeriode.beløp,
 
-                    )
-                )
+                    ),
+                ),
             ),
             tilleggsstønad = TilleggsstønadWrapper(false, emptyList(), null),
             saksbehandlerIdent = "julenissen",
-            opprettetAv = "julenissen"
+            opprettetAv = "julenissen",
         )
 
         val vedtakRespons: ResponseEntity<Ressurs<InnvilgelseBarnetilsyn?>> = hentVedtak(behandling.id)
@@ -170,7 +170,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             perioder = listOf(utgiftsperiode),
             perioderKontantstøtte = listOf(kontantstøttePeriode),
             tilleggsstønad = tomTillegsstønad(),
-            _type = "InnvilgelseBarnetilsynUtenUtbetaling"
+            _type = "InnvilgelseBarnetilsynUtenUtbetaling",
         )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
@@ -190,7 +190,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             perioder = listOf(utgiftsperiode),
             perioderKontantstøtte = listOf(kontantstøttePeriode),
             tilleggsstønad = tomTillegsstønad(),
-            _type = "InnvilgelseBarnetilsyn"
+            _type = "InnvilgelseBarnetilsyn",
         )
 
         val respons: ResponseEntity<Ressurs<UUID>> = fullførVedtak(behandling.id, vedtakDto)
@@ -203,14 +203,14 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
     private fun tomTillegsstønad() = TilleggsstønadDto(
         harTilleggsstønad = false,
         perioder = listOf(),
-        begrunnelse = null
+        begrunnelse = null,
     )
 
     private fun lagKontantstøttePeriode(beløp: Int): PeriodeMedBeløpDto = PeriodeMedBeløpDto(
         årMånedFra = YearMonth.of(2022, 1),
         årMånedTil = YearMonth.of(2022, 3),
         periode = Månedsperiode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
-        beløp = beløp
+        beløp = beløp,
     )
 
     private fun lagUtgiftsperioder(barn: BehandlingBarn): UtgiftsperiodeDto {
@@ -222,7 +222,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
             utgifter = 2500,
             periodetype = PeriodetypeBarnetilsyn.ORDINÆR,
             aktivitetstype = AktivitetstypeBarnetilsyn.I_ARBEID,
-            sanksjonsårsak = null
+            sanksjonsårsak = null,
         )
         return utgiftsperiode
     }
@@ -231,16 +231,16 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         val fagsak = testoppsettService.lagreFagsak(
             fagsak(
                 stønadstype = StønadType.BARNETILSYN,
-                identer = setOf(PersonIdent(""))
-            )
+                identer = setOf(PersonIdent("")),
+            ),
         )
         val behandling = behandlingRepository.insert(
             behandling(
                 fagsak,
                 steg = StegType.BEREGNE_YTELSE,
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                status = BehandlingStatus.UTREDES
-            )
+                status = BehandlingStatus.UTREDES,
+            ),
         )
 
         val barn = barnRepository.insert(
@@ -250,8 +250,8 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
                 UUID.randomUUID(),
                 "01012212345",
                 "Junior",
-                LocalDate.now()
-            )
+                LocalDate.now(),
+            ),
         )
         return Pair(behandling, barn)
     }
@@ -260,7 +260,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/vedtak/$id/lagre-vedtak"),
             HttpMethod.POST,
-            HttpEntity(vedtakDto, headers)
+            HttpEntity(vedtakDto, headers),
         )
     }
 
@@ -268,7 +268,7 @@ internal class LagreVedtakControllerTest : OppslagSpringRunnerTest() {
         return restTemplate.exchange(
             localhost("/api/vedtak/$id"),
             HttpMethod.GET,
-            HttpEntity<Ressurs<InnvilgelseBarnetilsyn?>>(headers)
+            HttpEntity<Ressurs<InnvilgelseBarnetilsyn?>>(headers),
         )
     }
 }

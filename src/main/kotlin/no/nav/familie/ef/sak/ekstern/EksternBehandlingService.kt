@@ -27,7 +27,7 @@ class EksternBehandlingService(
     private val tilkjentYtelseService: TilkjentYtelseService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
-    private val revurderingService: RevurderingService
+    private val revurderingService: RevurderingService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -77,7 +77,7 @@ class EksternBehandlingService(
             fagsakId = fagsak.id,
             behandlingsårsak = BehandlingÅrsak.KLAGE,
             kravMottatt = LocalDate.now(),
-            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
         val behandling = revurderingService.opprettRevurderingManuelt(revurdering)
         OpprettRevurderingResponse(Opprettet(behandling.eksternId.id.toString()))
@@ -106,8 +106,8 @@ private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteR
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,
-    val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak
+    val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak,
 ) {
     ÅPEN_BEHANDLING(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING),
-    INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)
+    INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING),
 }

@@ -35,12 +35,12 @@ object GrunnlagsdataMapper {
             dødsfall = pdlPersonForelderBarn.dødsfall,
             deltBosted = pdlPersonForelderBarn.deltBosted,
             forelderBarnRelasjon = pdlPersonForelderBarn.forelderBarnRelasjon.mapForelderBarnRelasjon(),
-            personIdent = personIdent
+            personIdent = personIdent,
         )
 
     fun mapAnnenForelder(
         barneForeldre: Map<String, PdlAnnenForelder>,
-        tidligereVedtaksperioderAnnenForelder: Map<String, TidligereVedtaksperioder>
+        tidligereVedtaksperioderAnnenForelder: Map<String, TidligereVedtaksperioder>,
     ) =
         barneForeldre.map {
             AnnenForelderMedIdent(
@@ -51,7 +51,7 @@ object GrunnlagsdataMapper {
                 dødsfall = it.value.dødsfall,
                 navn = it.value.navn.gjeldende(),
                 folkeregisteridentifikator = mapFolkeregisteridentifikator(it.value.folkeregisteridentifikator),
-                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.key)
+                tidligereVedtaksperioder = tidligereVedtaksperioderAnnenForelder.getValue(it.key),
             )
         }
 
@@ -74,7 +74,7 @@ object GrunnlagsdataMapper {
         tilrettelagtKommunikasjon = pdlSøker.tilrettelagtKommunikasjon,
         utflyttingFraNorge = pdlSøker.utflyttingFraNorge,
         vergemaalEllerFremtidsfullmakt = mapVergemålEllerFremtidsfullmakt(pdlSøker, andrePersoner),
-        folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator)
+        folkeregisteridentifikator = mapFolkeregisteridentifikator(pdlSøker.folkeregisteridentifikator),
     )
 
     private fun mapFolkeregisteridentifikator(list: List<FolkeregisteridentifikatorPdl>) =
@@ -86,7 +86,7 @@ object GrunnlagsdataMapper {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent,
                     it.relatertPersonsRolle,
-                    it.minRolleForPerson
+                    it.minRolleForPerson,
                 )
             }
         }
@@ -105,7 +105,7 @@ object GrunnlagsdataMapper {
 
     private fun mapSivivilstand(
         pdlSøker: PdlSøker,
-        andrePersoner: Map<String, PdlPersonKort>
+        andrePersoner: Map<String, PdlPersonKort>,
     ): List<SivilstandMedNavn> {
         return pdlSøker.sivilstand.map {
             val person = andrePersoner[it.relatertVedSivilstand]
@@ -116,7 +116,7 @@ object GrunnlagsdataMapper {
                 bekreftelsesdato = it.bekreftelsesdato,
                 dødsfall = person?.dødsfall?.gjeldende(),
                 metadata = it.metadata,
-                navn = person?.navn?.gjeldende()?.visningsnavn()
+                navn = person?.navn?.gjeldende()?.visningsnavn(),
             )
         }
     }
@@ -128,7 +128,7 @@ object GrunnlagsdataMapper {
                 gyldigTilOgMed = it.gyldigTilOgMed,
                 motpartsPersonident = it.motpartsPersonident,
                 navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn(),
-                områder = it.omraader
+                områder = it.omraader,
             )
         }
     }

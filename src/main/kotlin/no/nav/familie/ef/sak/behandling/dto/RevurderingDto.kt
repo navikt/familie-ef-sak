@@ -9,5 +9,5 @@ data class RevurderingDto(
     val fagsakId: UUID,
     val behandlingsårsak: BehandlingÅrsak,
     val kravMottatt: LocalDate,
-    val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn
+    val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn,
 )

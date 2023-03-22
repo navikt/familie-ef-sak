@@ -13,7 +13,7 @@ import java.time.LocalDate
 class ArbeidssøkerClient(
     @Value("\${ARBEIDSSOKER_URL}")
     private val uriGcp: URI,
-    @Qualifier("azure") restOperations: RestOperations
+    @Qualifier("azure") restOperations: RestOperations,
 ) :
     AbstractRestClient(restOperations, "paw.arbeidssoker") {
 
@@ -28,5 +28,5 @@ class ArbeidssøkerClient(
 }
 
 data class FnrArbeidssøker(
-    val fnr: String
+    val fnr: String,
 )

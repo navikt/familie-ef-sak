@@ -23,7 +23,7 @@ import java.util.UUID
     maxAntallFeil = 7,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 120L,
-    beskrivelse = "Sjekker status for migrert sak"
+    beskrivelse = "Sjekker status for migrert sak",
 )
 class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringService) : AsyncTaskStep {
 
@@ -44,7 +44,7 @@ class SjekkMigrertStatusIInfotrygdTask(private val migreringService: MigreringSe
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
                     this["personIdent"] = personIdent
-                }
+                },
             ).copy(triggerTid = LocalDateTime.now().plusMinutes(16))
 
         const val TYPE = "sjekkMigrertStatus"

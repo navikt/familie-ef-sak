@@ -15,7 +15,7 @@ data class Grunnlagsdata(
     @Embedded(onEmpty = Embedded.OnEmpty.USE_EMPTY)
     val sporbar: Sporbar = Sporbar(),
     val oppdaterteDataHentetTid: LocalDateTime = SporbarUtils.now(),
-    val oppdaterteData: GrunnlagsdataDomene? = null
+    val oppdaterteData: GrunnlagsdataDomene? = null,
 ) {
     fun tilGrunnlagsdataMedMetadata() = GrunnlagsdataMedMetadata(data, sporbar.opprettetTid)
 }

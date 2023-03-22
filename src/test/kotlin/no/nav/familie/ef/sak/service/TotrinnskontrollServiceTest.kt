@@ -54,7 +54,7 @@ internal class TotrinnskontrollServiceTest {
             .lagreTotrinnskontrollOgReturnerBehandler(
                 saksbehandling(status = BehandlingStatus.UTREDES),
                 BeslutteVedtakDto(false, ""),
-                VedtakErUtenBeslutter(false)
+                VedtakErUtenBeslutter(false),
             )
         assertThat(response).isEqualTo(opprettetAv)
     }
@@ -105,7 +105,7 @@ internal class TotrinnskontrollServiceTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = "Noe",
-                beslutt = BeslutteVedtakDto(false, "begrunnelse")
+                beslutt = BeslutteVedtakDto(false, "begrunnelse"),
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -119,7 +119,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAv = "Annen saksbehandler"
+                opprettetAv = "Annen saksbehandler",
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -133,7 +133,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+                opprettetAv = SikkerhetContext.hentSaksbehandlerEllerSystembruker(),
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -148,7 +148,7 @@ internal class TotrinnskontrollServiceTest {
         every { behandlingshistorikkService.finnSisteBehandlingshistorikk(any()) } returns
             behandlingshistorikk(
                 steg = StegType.SEND_TIL_BESLUTTER,
-                opprettetAv = "Annen saksbehandler"
+                opprettetAv = "Annen saksbehandler",
             )
 
         val totrinnskontroll = totrinnskontrollService.hentTotrinnskontrollStatus(ID)
@@ -164,7 +164,7 @@ internal class TotrinnskontrollServiceTest {
             behandlingshistorikk(
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
-                opprettetAv = "Annen saksbehandler"
+                opprettetAv = "Annen saksbehandler",
             )
 
         assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
@@ -178,7 +178,7 @@ internal class TotrinnskontrollServiceTest {
             behandlingshistorikk(
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_GODKJENT,
-                opprettetAv = "Annen saksbehandler"
+                opprettetAv = "Annen saksbehandler",
             )
 
         assertThat(catchThrowable { totrinnskontrollService.hentTotrinnskontrollStatus(ID) })
@@ -193,7 +193,7 @@ internal class TotrinnskontrollServiceTest {
                 steg = StegType.BESLUTTE_VEDTAK,
                 utfall = StegUtfall.BESLUTTE_VEDTAK_UNDERKJENT,
                 opprettetAv = "Noe",
-                beslutt = BeslutteVedtakDto(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET))
+                beslutt = BeslutteVedtakDto(godkjent = false, begrunnelse = "begrunnelse", årsakerUnderkjent = listOf(ÅrsakUnderkjent.VEDTAKSBREV, ÅrsakUnderkjent.AKTIVITET)),
 
             )
 
@@ -207,7 +207,7 @@ internal class TotrinnskontrollServiceTest {
         steg: StegType,
         utfall: StegUtfall? = null,
         opprettetAv: String,
-        beslutt: BeslutteVedtakDto? = null
+        beslutt: BeslutteVedtakDto? = null,
     ) =
         Behandlingshistorikk(
             behandlingId = UUID.randomUUID(),
@@ -216,7 +216,7 @@ internal class TotrinnskontrollServiceTest {
             opprettetAv = opprettetAv,
             metadata = beslutt?.let {
                 JsonWrapper(objectMapper.writeValueAsString(it))
-            }
+            },
         )
 
     private fun behandling(status: BehandlingStatus) = behandling(fagsak, status)

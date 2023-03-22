@@ -14,7 +14,7 @@ data class JournalføringRequest(
     val behandling: JournalføringBehandling,
     val journalførendeEnhet: String,
     val barnSomSkalFødes: List<BarnSomSkalFødes> = emptyList(),
-    val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT
+    val vilkårsbehandleNyeBarn: VilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.IKKE_VALGT,
 )
 
 data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
@@ -24,7 +24,7 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
         søknadBarnId = null,
         personIdent = null,
         navn = null,
-        fødselTermindato = this.fødselTerminDato
+        fødselTermindato = this.fødselTerminDato,
     )
 }
 
@@ -34,18 +34,18 @@ data class BarnSomSkalFødes(val fødselTerminDato: LocalDate) {
 enum class UstrukturertDokumentasjonType(val behandlingÅrsak: () -> BehandlingÅrsak) {
     PAPIRSØKNAD({ BehandlingÅrsak.PAPIRSØKNAD }),
     ETTERSENDING({ BehandlingÅrsak.NYE_OPPLYSNINGER }),
-    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") })
+    IKKE_VALGT({ error("Kan ikke bruke behandlingsårsak fra $IKKE_VALGT") }),
 }
 
 enum class VilkårsbehandleNyeBarn {
     VILKÅRSBEHANDLE,
     IKKE_VILKÅRSBEHANDLE,
-    IKKE_VALGT
+    IKKE_VALGT,
 }
 
 data class JournalføringTilNyBehandlingRequest(
     val fagsakId: UUID,
-    val behandlingstype: BehandlingType
+    val behandlingstype: BehandlingType,
 )
 
 fun JournalføringRequest.valider() {
@@ -63,13 +63,13 @@ fun JournalføringRequest.valider() {
     } else {
         feilHvis(
             ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
-                behandling.behandlingstype != BehandlingType.REVURDERING
+                behandling.behandlingstype != BehandlingType.REVURDERING,
         ) {
             "Må journalføre ettersending på ny behandling som revurdering"
         }
         feilHvis(
             ustrukturertDokumentasjonType == UstrukturertDokumentasjonType.ETTERSENDING &&
-                vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT
+                vilkårsbehandleNyeBarn == VilkårsbehandleNyeBarn.IKKE_VALGT,
         ) {
             "Man må velge om man skal vilkårsbehandle nye barn på ny behandling av type ettersending"
         }
@@ -77,14 +77,14 @@ fun JournalføringRequest.valider() {
 
     feilHvis(
         ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.ETTERSENDING &&
-            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT
+            vilkårsbehandleNyeBarn != VilkårsbehandleNyeBarn.IKKE_VALGT,
     ) {
         "Kan ikke sende inn vilkårsbehandleNyeBarn=$vilkårsbehandleNyeBarn når dokumentasjonstype=$ustrukturertDokumentasjonType"
     }
 
     feilHvis(
         behandling.ustrukturertDokumentasjonType != UstrukturertDokumentasjonType.PAPIRSØKNAD &&
-            barnSomSkalFødes.isNotEmpty()
+            barnSomSkalFødes.isNotEmpty(),
     ) {
         "Årsak må være satt til papirsøknad hvis man sender inn barn som skal fødes"
     }
@@ -95,5 +95,5 @@ fun JournalføringRequest.skalJournalførePåEksisterendeBehandling(): Boolean =
 data class JournalføringBehandling(
     val behandlingsId: UUID? = null,
     val behandlingstype: BehandlingType? = null,
-    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT
+    val ustrukturertDokumentasjonType: UstrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
 )

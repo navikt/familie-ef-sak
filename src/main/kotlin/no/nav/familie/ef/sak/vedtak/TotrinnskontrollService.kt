@@ -36,7 +36,7 @@ class TotrinnskontrollService(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val behandlingService: BehandlingService,
     private val tilgangService: TilgangService,
-    private val validerOmregningService: ValiderOmregningService
+    private val validerOmregningService: ValiderOmregningService,
 ) {
 
     /**
@@ -47,7 +47,7 @@ class TotrinnskontrollService(
     fun lagreTotrinnskontrollOgReturnerBehandler(
         saksbehandling: Saksbehandling,
         beslutteVedtak: BeslutteVedtakDto,
-        vedtakErUtenBeslutter: VedtakErUtenBeslutter
+        vedtakErUtenBeslutter: VedtakErUtenBeslutter,
     ): String {
         val sisteBehandlingshistorikk =
             behandlingshistorikkService.finnSisteBehandlingshistorikk(behandlingId = saksbehandling.id)
@@ -55,14 +55,14 @@ class TotrinnskontrollService(
         if (sisteBehandlingshistorikk.steg != StegType.SEND_TIL_BESLUTTER) {
             throw Feil(
                 message = "Siste innslag i behandlingshistorikken har feil steg=${sisteBehandlingshistorikk.steg}",
-                frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt"
+                frontendFeilmelding = "Behandlingen er i feil steg, last siden på nytt",
             )
         }
 
         if (!vedtakErUtenBeslutter.value && beslutterErLikBehandler(sisteBehandlingshistorikk)) {
             throw ApiFeil(
                 "Beslutter kan ikke behandle en behandling som den selv har sendt til beslutter",
-                HttpStatus.BAD_REQUEST
+                HttpStatus.BAD_REQUEST,
             )
         }
 
@@ -73,7 +73,7 @@ class TotrinnskontrollService(
             behandlingId = saksbehandling.id,
             stegtype = saksbehandling.steg,
             utfall = utfall,
-            metadata = beslutteVedtak
+            metadata = beslutteVedtak,
         )
 
         behandlingService.oppdaterStatusPåBehandling(saksbehandling.id, nyStatus)
@@ -121,13 +121,13 @@ class TotrinnskontrollService(
         if (historikkHendelse.steg != StegType.SEND_TIL_BESLUTTER) {
             throw Feil(
                 message = "Siste historikken har feil steg, steg=${historikkHendelse.steg}",
-                frontendFeilmelding = "Feil i historikken, kontakt brukerstøtte id=$behandlingId"
+                frontendFeilmelding = "Feil i historikken, kontakt brukerstøtte id=$behandlingId",
             )
         }
         return if (beslutterErLikBehandler(historikkHendelse) || !tilgangService.harTilgangTilRolle(BehandlerRolle.BESLUTTER)) {
             TotrinnskontrollStatusDto(
                 IKKE_AUTORISERT,
-                TotrinnskontrollDto(historikkHendelse.opprettetAvNavn, historikkHendelse.endretTid)
+                TotrinnskontrollDto(historikkHendelse.opprettetAvNavn, historikkHendelse.endretTid),
             )
         } else {
             TotrinnskontrollStatusDto(KAN_FATTE_VEDTAK)
@@ -146,7 +146,7 @@ class TotrinnskontrollService(
                 if (besluttetVedtakHendelse.metadata == null) {
                     throw Feil(
                         message = "Har underkjent vedtak - savner metadata",
-                        frontendFeilmelding = "Savner metadata, kontakt brukerstøtte id=$behandlingId"
+                        frontendFeilmelding = "Savner metadata, kontakt brukerstøtte id=$behandlingId",
                     )
                 }
                 val beslutt = objectMapper.readValue<BeslutteVedtakDto>(besluttetVedtakHendelse.metadata.json)
@@ -157,14 +157,14 @@ class TotrinnskontrollService(
                         besluttetVedtakHendelse.endretTid,
                         beslutt.godkjent,
                         beslutt.begrunnelse,
-                        beslutt.årsakerUnderkjent
-                    )
+                        beslutt.årsakerUnderkjent,
+                    ),
                 )
             }
             ANGRE_SEND_TIL_BESLUTTER -> TotrinnskontrollStatusDto(UAKTUELT)
             else -> error(
                 "Skal ikke kunne være annen status enn UNDERKJENT når " +
-                    "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}"
+                    "behandligStatus!=${BehandlingStatus.FATTER_VEDTAK}",
             )
         }
     }

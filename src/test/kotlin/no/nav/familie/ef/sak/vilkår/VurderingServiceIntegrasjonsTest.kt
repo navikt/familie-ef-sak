@@ -62,7 +62,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
             emptyList(),
             listOf(),
             mockk(),
-            mockk()
+            mockk(),
         )
         vurderingService.kopierVurderingerTilNyBehandling(behandling.id, revurdering.id, metadata, StønadType.OVERGANGSSTØNAD)
 
@@ -74,9 +74,13 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
         assertThat(vilkårForBehandling.sporbar.endret).isEqualTo(vilkårForRevurdering.sporbar.endret)
         assertThat(vilkårForBehandling.barnId).isNotEqualTo(vilkårForRevurdering.barnId)
         assertThat(vilkårForBehandling.barnId).isEqualTo(barnPåFørsteSøknad.first().id)
+        assertThat(vilkårForBehandling.opphavsvilkår).isNull()
         assertThat(vilkårForRevurdering.barnId).isEqualTo(barnPåRevurdering.first().id)
+        assertThat(vilkårForRevurdering.opphavsvilkår)
+            .isEqualTo(Opphavsvilkår(behandling.id, vilkårForBehandling.sporbar.endret.endretTid))
 
-        assertThat(vilkårForBehandling).usingRecursiveComparison().ignoringFields("id", "sporbar", "behandlingId", "barnId")
+        assertThat(vilkårForBehandling).usingRecursiveComparison()
+            .ignoringFields("id", "sporbar", "behandlingId", "barnId", "opphavsvilkår")
             .isEqualTo(vilkårForRevurdering)
     }
 
@@ -101,7 +105,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
             emptyList(),
             emptyList(),
             mockk(),
-            mockk()
+            mockk(),
         )
         assertThat(
             catchThrowable {
@@ -109,9 +113,9 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                     tidligereBehandlingId,
                     revurdering.id,
                     metadata,
-                    StønadType.OVERGANGSSTØNAD
+                    StønadType.OVERGANGSSTØNAD,
                 )
-            }
+            },
         )
             .hasMessage("Tidligere behandling=$tidligereBehandlingId har ikke noen vilkår")
     }
@@ -128,9 +132,9 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
             listOf(
                 Delvilkårsvurdering(
                     Vilkårsresultat.OPPFYLT,
-                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID))
-                )
-            )
+                    listOf(Vurdering(RegelId.ER_I_ARBEID_ELLER_FORBIGÅENDE_SYKDOM, SvarId.ER_I_ARBEID)),
+                ),
+            ),
         )
         vilkårsvurderingRepository.insert(vilkårsvurdering)
 
@@ -141,7 +145,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
     private fun opprettVilkårsvurderinger(
         søknadskjema: SøknadsskjemaOvergangsstønad,
         behandling: Behandling,
-        barn: List<BehandlingBarn>
+        barn: List<BehandlingBarn>,
     ): List<Vilkårsvurdering> {
         val hovedregelMetadata =
             HovedregelMetadata(
@@ -150,7 +154,7 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                 barn = barn,
                 søktOmBarnetilsyn = emptyList(),
                 vilkårgrunnlagDto = mockk(),
-                behandling = mockk()
+                behandling = mockk(),
             )
         val delvilkårsvurdering = SivilstandRegel().initiereDelvilkårsvurdering(hovedregelMetadata)
         val vilkårsvurderinger = listOf(
@@ -159,15 +163,15 @@ internal class VurderingServiceIntegrasjonsTest : OppslagSpringRunnerTest() {
                 type = VilkårType.SIVILSTAND,
                 behandlingId = behandling.id,
                 barnId = barn.first().id,
-                delvilkårsvurdering = delvilkårsvurdering
-            )
+                delvilkårsvurdering = delvilkårsvurdering,
+            ),
         )
         return vilkårsvurderingRepository.insertAll(vilkårsvurderinger)
     }
 
     private fun lagreSøknad(
         behandling: Behandling,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ): SøknadsskjemaOvergangsstønad {
         søknadService.lagreSøknadForOvergangsstønad(Testsøknad.søknadOvergangsstønad, behandling.id, fagsak.id, "1L")
         return søknadService.hentOvergangsstønad(behandling.id)!!

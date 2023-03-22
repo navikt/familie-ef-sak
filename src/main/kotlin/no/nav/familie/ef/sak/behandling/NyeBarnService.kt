@@ -54,7 +54,7 @@ class NyeBarnService(
             nyttBarnList.addAll(
                 nyeBarn.map {
                     NyttBarn(it.personIdent, fagsak.stønadstype, NyttBarnÅrsak.BARN_FINNES_IKKE_PÅ_BEHANDLING)
-                }
+                },
             )
             nyttBarnList.addAll(finnForTidligtFødteBarn(barnSidenGjeldendeBehandling, fagsak.stønadstype))
         }
@@ -85,7 +85,7 @@ class NyeBarnService(
 
     private fun finnKobledeBarnSidenGjeldendeBehandling(
         fagsakId: UUID,
-        forventerAtBehandlingFinnes: Boolean = true
+        forventerAtBehandlingFinnes: Boolean = true,
     ): NyeBarnData {
         val behandling = behandlingService.finnSisteIverksatteBehandlingMedEventuellAvslått(fagsakId)
         if (behandling == null) {
@@ -128,7 +128,7 @@ class NyeBarnService(
 
     private data class NyeBarnData(
         val pdlBarn: List<BarnMedIdent>,
-        val kobledeBarn: List<MatchetBehandlingBarn>
+        val kobledeBarn: List<MatchetBehandlingBarn>,
     )
 
     private fun filtrerNyeBarn(data: NyeBarnData) =
@@ -140,6 +140,6 @@ class NyeBarnService(
         BarnMinimumDto(
             personIdent = it.personIdent,
             navn = it.navn.visningsnavn(),
-            fødselsdato = it.fødsel.gjeldende().fødselsdato
+            fødselsdato = it.fødsel.gjeldende().fødselsdato,
         )
 }

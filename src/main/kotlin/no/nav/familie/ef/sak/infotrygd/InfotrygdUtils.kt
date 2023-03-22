@@ -8,6 +8,6 @@ object InfotrygdUtils {
         InfotrygdSakType.KLAGE,
         InfotrygdSakType.KLAGE_TILBAKEBETALING,
         InfotrygdSakType.KLAGE_AVREGNING,
-        InfotrygdSakType.KLAGE_ETTERGIVELSE
+        InfotrygdSakType.KLAGE_ETTERGIVELSE,
     )
 }

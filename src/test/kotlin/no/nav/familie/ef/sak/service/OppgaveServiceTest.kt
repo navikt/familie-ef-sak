@@ -60,7 +60,7 @@ internal class OppgaveServiceTest {
             oppgaveRepository,
             arbeidsfordelingService,
             cacheManager,
-            URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk")
+            URI.create("https://ensligmorellerfar.intern.nav.no/oppgavebenk"),
         )
 
     @BeforeEach
@@ -133,7 +133,7 @@ internal class OppgaveServiceTest {
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(
             enhetId = "1234",
-            enhetNavn = ENHETSNAVN
+            enhetNavn = ENHETSNAVN,
         )
         val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
@@ -191,7 +191,7 @@ internal class OppgaveServiceTest {
         assertThatThrownBy {
             oppgaveService.ferdigstillBehandleOppgave(
                 BEHANDLING_ID,
-                Oppgavetype.BehandleSak
+                Oppgavetype.BehandleSak,
             )
         }
             .hasMessage("Finner ikke oppgave for behandling $BEHANDLING_ID")
@@ -255,7 +255,7 @@ internal class OppgaveServiceTest {
             Pair(søndag.morgen(), tirsdagFrist),
             Pair(søndag.kveld(), tirsdagFrist),
             Pair(mandag.morgen(), tirsdagFrist),
-            Pair(mandag.kveld(), onsdagFrist)
+            Pair(mandag.kveld(), onsdagFrist),
         )
 
         frister.forEach {
@@ -298,7 +298,7 @@ internal class OppgaveServiceTest {
             behandlingId,
             Oppgavetype.InnhentDokumentasjon,
             null,
-            Alder.ETT_ÅR.oppgavebeskrivelse
+            Alder.ETT_ÅR.oppgavebeskrivelse,
         )
 
         assertThat(opprettOppgaveRequestSlot.captured.mappeId).isEqualTo(105)
@@ -309,12 +309,12 @@ internal class OppgaveServiceTest {
 
         private val feilregistrertException = RessursException(
             Ressurs.failure("Oppgave har status feilregistrert"),
-            HttpServerErrorException(HttpStatus.BAD_REQUEST)
+            HttpServerErrorException(HttpStatus.BAD_REQUEST),
         )
 
         private val annenException = RessursException(
             Ressurs.failure("Oppgave har status ferdigstilt"),
-            HttpServerErrorException(HttpStatus.BAD_REQUEST)
+            HttpServerErrorException(HttpStatus.BAD_REQUEST),
         )
 
         @BeforeEach
@@ -364,7 +364,7 @@ internal class OppgaveServiceTest {
         } returns null
         every { arbeidsfordelingService.hentNavEnhet(any()) } returns Arbeidsfordelingsenhet(
             enhetId = ENHETSNUMMER,
-            enhetNavn = ENHETSNAVN
+            enhetNavn = ENHETSNAVN,
         )
         every { oppgaveClient.opprettOppgave(capture(slot)) } answers {
             val oppgaveRequest: OpprettOppgaveRequest = firstArg()
@@ -381,7 +381,7 @@ internal class OppgaveServiceTest {
             id = FAGSAK_ID,
             stønadstype = StønadType.OVERGANGSSTØNAD,
             eksternId = EksternFagsakId(FAGSAK_EKSTERN_ID),
-            identer = setOf(PersonIdent(ident = FNR))
+            identer = setOf(PersonIdent(ident = FNR)),
         )
     }
 
@@ -396,7 +396,7 @@ internal class OppgaveServiceTest {
     private fun lagFinnOppgaveResponseDto(): FinnOppgaveResponseDto {
         return FinnOppgaveResponseDto(
             antallTreffTotalt = 1,
-            oppgaver = listOf(lagEksternTestOppgave())
+            oppgaver = listOf(lagEksternTestOppgave()),
         )
     }
 

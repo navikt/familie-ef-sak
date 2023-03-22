@@ -12,16 +12,16 @@ data class BlankettPdfRequest(
     val personopplysninger: PersonopplysningerDto,
     val vilkår: VilkårDto,
     val vedtak: VedtakDto,
-    val søknadsdatoer: SøknadDatoerDto?
+    val søknadsdatoer: SøknadDatoerDto?,
 )
 
 data class BlankettPdfBehandling(
     val årsak: BehandlingÅrsak,
     val stønadstype: StønadType,
-    val årsakRevurdering: ÅrsakRevurderingDto?
+    val årsakRevurdering: ÅrsakRevurderingDto?,
 )
 
 data class PersonopplysningerDto(
     val navn: String,
-    val personIdent: String
+    val personIdent: String,
 )

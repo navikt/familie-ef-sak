@@ -12,7 +12,6 @@ import no.nav.familie.ef.sak.behandlingsflyt.task.PollStatusFraIverksettTask
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.ef.sak.iverksett.IverksettingDtoMapper
-import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataService
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
@@ -45,7 +44,7 @@ class OmregningService(
     private val beregnYtelseSteg: BeregnYtelseSteg,
     private val iverksettingDtoMapper: IverksettingDtoMapper,
     private val søknadService: SøknadService,
-    private val barnService: BarnService
+    private val barnService: BarnService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -62,12 +61,12 @@ class OmregningService(
         val innvilgelseOvergangsstønad =
             vedtakHistorikkService.hentVedtakForOvergangsstønadFraDato(
                 fagsakId,
-                YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed)
+                YearMonth.from(nyesteGrunnbeløpGyldigFraOgMed),
             )
         if (innvilgelseOvergangsstønad.perioder.any { it.periodeType == VedtaksperiodeType.SANKSJON }) {
             logger.warn(
                 MarkerFactory.getMarker("G-Omregning - Manuell"),
-                "Fagsak med id $fagsakId har sanksjon og må manuelt behandles"
+                "Fagsak med id $fagsakId har sanksjon og må manuelt behandles",
             )
             return null
         }
@@ -75,7 +74,7 @@ class OmregningService(
         if (innvilgelseOvergangsstønad.inntekter.any { (it.samordningsfradrag ?: BigDecimal.ZERO) > BigDecimal.ZERO }) {
             logger.warn(
                 MarkerFactory.getMarker("G-Omregning - Manuell"),
-                "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt."
+                "Fagsak med id $fagsakId har samordningsfradrag og må behandles manuelt.",
             )
             return null
         }
@@ -101,14 +100,14 @@ class OmregningService(
     private fun utførGOmregning(
         fagsakId: UUID,
         forrigeTilkjentYtelse: TilkjentYtelse,
-        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad
+        innvilgelseOvergangsstønad: InnvilgelseOvergangsstønad,
     ) {
         logger.info("Starter på g-omregning av fagsak=$fagsakId")
 
         val behandling = behandlingService.opprettBehandling(
             behandlingType = BehandlingType.REVURDERING,
             fagsakId = fagsakId,
-            behandlingsårsak = BehandlingÅrsak.G_OMREGNING
+            behandlingsårsak = BehandlingÅrsak.G_OMREGNING,
         )
         logger.info("G-omregner fagsak=$fagsakId behandling=${behandling.id} ")
 
@@ -117,7 +116,7 @@ class OmregningService(
         val indeksjusterInntekt =
             BeregningUtils.indeksjusterInntekt(
                 forrigeTilkjentYtelse.grunnbeløpsmåned,
-                innvilgelseOvergangsstønad.inntekter.tilInntektsperioder()
+                innvilgelseOvergangsstønad.inntekter.tilInntektsperioder(),
             )
 
         val saksbehandling = behandlingService.hentSaksbehandling(behandling.id)
@@ -128,8 +127,8 @@ class OmregningService(
                 periodeBegrunnelse = null,
                 inntektBegrunnelse = null,
                 perioder = innvilgelseOvergangsstønad.perioder,
-                inntekter = indeksjusterInntekt.tilInntekt()
-            )
+                inntekter = indeksjusterInntekt.tilInntekt(),
+            ),
         )
 
         behandlingService.oppdaterResultatPåBehandling(behandling.id, BehandlingResultat.INNVILGET)
@@ -151,7 +150,7 @@ class OmregningService(
             forrigeBehandlingId = forrigeBehandlingId,
             nyeBarnPåRevurdering = emptyList(),
             grunnlagsdataBarn = grunnlagsdata.grunnlagsdata.barn,
-            stønadstype = StønadType.OVERGANGSSTØNAD
+            stønadstype = StønadType.OVERGANGSSTØNAD,
         )
         vurderingService.opprettVilkårForOmregning(behandling)
     }

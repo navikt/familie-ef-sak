@@ -31,7 +31,7 @@ class IverksettClientMock {
     companion object {
 
         private val simuleringsresultat = objectMapper.readValue<BeriketSimuleringsresultat>(
-            this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText()
+            this::class.java.getResource("/json/simuleringsresultat_beriket.json")!!.readText(),
         )
 
         fun clearMock(iverksettClient: IverksettClient) {
@@ -50,7 +50,7 @@ class IverksettClientMock {
                 tomDatoNestePeriode = null,
                 forfallsdatoNestePeriode = null,
                 tidSimuleringHentet = null,
-                tomSisteUtbetaling = null
+                tomSisteUtbetaling = null,
             )
             every { iverksettClient.simuler(any()) } returns
                 BeriketSimuleringsresultat(DetaljertSimuleringResultat(emptyList()), oppsummering)

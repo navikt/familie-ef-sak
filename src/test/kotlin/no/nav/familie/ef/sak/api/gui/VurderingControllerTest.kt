@@ -107,11 +107,11 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                 søker = grunnlagsdata.data.søker.copy(
                     bostedsadresse = listOf(
                         grunnlagsdata.data.søker.bostedsadresse.first().copy(
-                            vegadresse = nyVegadresse()
-                        )
-                    )
-                )
-            )
+                            vegadresse = nyVegadresse(),
+                        ),
+                    ),
+                ),
+            ),
         )
 
     private fun nyVegadresse() = Vegadresse(
@@ -123,7 +123,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         bruksenhetsnummer = "",
         tilleggsnavn = null,
         koordinater = Koordinater(x = 601371f, y = 6629367f, z = null, kvalitet = null),
-        matrikkelId = 0
+        matrikkelId = 0,
     )
 
     @Test
@@ -134,7 +134,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = behandlingÅrsak
+            behandlingsårsak = behandlingÅrsak,
         )
 
         val oppdaterVilkårsvurdering = lagOppdaterVilkårsvurdering(opprettetVurdering, VilkårType.FORUTGÅENDE_MEDLEMSKAP)
@@ -151,7 +151,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = behandlingÅrsak
+            behandlingsårsak = behandlingÅrsak,
         )
         val nullstillVurdering = OppdaterVilkårsvurderingDto(opprettetVurdering.vurderinger.first().id, behandling.id)
 
@@ -163,7 +163,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             restTemplate.exchange(
                 localhost("/api/vurdering/$path"),
                 HttpMethod.POST,
-                HttpEntity(request, headers)
+                HttpEntity(request, headers),
             )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -178,7 +178,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             restTemplate.exchange(
                 localhost("/api/vurdering/vilkar"),
                 HttpMethod.POST,
-                HttpEntity(oppdatertVilkårsvarMedJa, headers)
+                HttpEntity(oppdatertVilkårsvarMedJa, headers),
             )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
@@ -191,22 +191,22 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         val opprettetVurdering = opprettVilkår().body?.data!!
         val oppdatertVilkårsvarMedJa = OppdaterVilkårsvurderingDto(
             opprettetVurdering.vurderinger.first { it.vilkårType == VilkårType.TIDLIGERE_VEDTAKSPERIODER }.id,
-            opprettetVurdering.vurderinger.first().behandlingId
+            opprettetVurdering.vurderinger.first().behandlingId,
         )
         val respons: ResponseEntity<Ressurs<VilkårsvurderingDto>> =
             restTemplate.exchange(
                 localhost("/api/vurdering/nullstill"),
                 HttpMethod.POST,
-                HttpEntity(oppdatertVilkårsvarMedJa, headers)
+                HttpEntity(oppdatertVilkårsvarMedJa, headers),
             )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
         assertThat(respons.body?.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_ANDRE_STØNADER_SOM_HAR_BETYDNING }?.resultat).isEqualTo(
-            Vilkårsresultat.IKKE_TATT_STILLING_TIL
+            Vilkårsresultat.IKKE_TATT_STILLING_TIL,
         )
         assertThat(respons.body?.data?.delvilkårsvurderinger?.first { it.vurderinger.first().regelId == RegelId.HAR_TIDLIGERE_MOTTATT_OVERGANSSTØNAD }?.resultat).isEqualTo(
-            Vilkårsresultat.OPPFYLT
+            Vilkårsresultat.OPPFYLT,
         )
         assertThat(respons.body?.data?.id).isEqualTo(oppdatertVilkårsvarMedJa.id)
     }
@@ -225,9 +225,9 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
                 it.copy(
                     vurderinger = it.vurderinger.map { vurderingDto ->
                         vurderingDto.copy(svar = SvarId.JA, begrunnelse = "En begrunnelse")
-                    }
+                    },
                 )
-            }
+            },
         )
 
     private fun opprettVilkår(): ResponseEntity<Ressurs<VilkårDto>> {
@@ -239,7 +239,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         restTemplate.exchange(
             localhost("/api/vurdering/${behandling.id}/vilkar"),
             HttpMethod.GET,
-            HttpEntity<Any>(headers)
+            HttpEntity<Any>(headers),
         )
 
     private fun opprettBehandlingMedGrunnlagsdata(): Behandling {
@@ -247,8 +247,8 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             .setBarn(
                 listOf(
                     TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "14041385481"),
-                    TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050")
-                )
+                    TestsøknadBuilder.Builder().defaultBarn("Navn navnesen", "01012067050"),
+                ),
             )
             .setPersonalia("Navn på forsørger", "01010172272")
             .build().søknadOvergangsstønad
@@ -256,13 +256,13 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
         // val søknad = SøknadMedVedlegg(Testsøknad.søknadOvergangsstønad, emptyList())
         val fagsak = fagsakService.hentEllerOpprettFagsakMedBehandlinger(
             søknad.personalia.verdi.fødselsnummer.verdi.verdi,
-            StønadType.OVERGANGSSTØNAD
+            StønadType.OVERGANGSSTØNAD,
         )
         val behandlingÅrsak = BehandlingÅrsak.SØKNAD
         val behandling = behandlingService.opprettBehandling(
             BehandlingType.FØRSTEGANGSBEHANDLING,
             fagsak.id,
-            behandlingsårsak = behandlingÅrsak
+            behandlingsårsak = behandlingÅrsak,
         )
         søknadService.lagreSøknadForOvergangsstønad(søknad, behandling.id, fagsak.id, "1234")
         val grunnlagsdata = grunnlagsdataService.opprettGrunnlagsdata(behandling.id)
@@ -273,7 +273,7 @@ internal class VurderingControllerTest : OppslagSpringRunnerTest() {
             stønadstype = StønadType.OVERGANGSSTØNAD,
             ustrukturertDokumentasjonType = UstrukturertDokumentasjonType.IKKE_VALGT,
             barnSomSkalFødes = listOf(),
-            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE
+            vilkårsbehandleNyeBarn = VilkårsbehandleNyeBarn.VILKÅRSBEHANDLE,
         )
         return behandling
     }

@@ -34,7 +34,7 @@ object JournalføringHelper {
 
     fun validerJournalføringNyBehandling(
         journalpost: Journalpost,
-        journalføringRequest: JournalføringRequest
+        journalføringRequest: JournalføringRequest,
     ) {
         val ustrukturertDokumentasjonType = journalføringRequest.behandling.ustrukturertDokumentasjonType
         if (journalpost.harStrukturertSøknad()) {
@@ -53,7 +53,7 @@ object JournalføringHelper {
 
     fun plukkUtOriginaldokument(
         journalpost: Journalpost,
-        dokumentBrevkode: DokumentBrevkode
+        dokumentBrevkode: DokumentBrevkode,
     ): no.nav.familie.kontrakter.felles.journalpost.DokumentInfo {
         val dokumenter = journalpost.dokumenter ?: error("Fant ingen dokumenter på journalposten")
         return dokumenter.firstOrNull {
@@ -70,7 +70,7 @@ object JournalføringHelper {
     fun lagOppdaterJournalpostRequest(
         journalpost: Journalpost,
         eksternFagsakId: Long,
-        dokumenttitler: Map<String, String>?
+        dokumenttitler: Map<String, String>?,
     ) = OppdaterJournalpostRequest(
         bruker = journalpost.bruker?.let {
             DokarkivBruker(idType = BrukerIdType.valueOf(it.type.toString()), id = it.id)
@@ -82,7 +82,7 @@ object JournalføringHelper {
         sak = Sak(
             fagsakId = eksternFagsakId.toString(),
             fagsaksystem = Fagsystem.EF,
-            sakstype = "FAGSAK"
+            sakstype = "FAGSAK",
         ),
         dokumenter = dokumenttitler?.let {
             journalpost.dokumenter?.map { dokumentInfo ->
@@ -90,9 +90,9 @@ object JournalføringHelper {
                     dokumentInfoId = dokumentInfo.dokumentInfoId,
                     tittel = dokumenttitler[dokumentInfo.dokumentInfoId]
                         ?: dokumentInfo.tittel,
-                    brevkode = dokumentInfo.brevkode
+                    brevkode = dokumentInfo.brevkode,
                 )
             }
-        }
+        },
     )
 }

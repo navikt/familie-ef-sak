@@ -23,11 +23,11 @@ import java.util.UUID
     maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
     triggerTidVedFeilISekunder = 15 * 60L,
-    beskrivelse = "G-omregning"
+    beskrivelse = "G-omregning",
 )
 class GOmregningTask(
     private val omregningService: OmregningService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 ) : AsyncTaskStep {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)

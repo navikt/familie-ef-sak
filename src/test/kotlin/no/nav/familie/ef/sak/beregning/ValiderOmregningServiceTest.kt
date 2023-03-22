@@ -45,7 +45,7 @@ class ValiderOmregningServiceTest {
         tilkjentYtelseRepository,
         beregningService,
         vedtakHistorikkService,
-        featureToggleService
+        featureToggleService,
     )
 
     @Test
@@ -79,10 +79,10 @@ class ValiderOmregningServiceTest {
                         fraOgMed = LocalDate.of(2022, 4, 1),
                         tilOgMed = LocalDate.of(2022, 8, 30),
                         samordningsfradrag = 5000,
-                        beløp = 0
-                    )
+                        beløp = 0,
+                    ),
                 ),
-                grunnbeløpsmåned = YearMonth.of(2021, 5)
+                grunnbeløpsmåned = YearMonth.of(2021, 5),
             )
 
         validerOmregningService.validerHarGammelGOgKanLagres(saksbehandling)
@@ -145,8 +145,8 @@ class ValiderOmregningServiceTest {
                         til,
                         Månedsperiode(fra, til),
                         AktivitetType.MIGRERING,
-                        VedtaksperiodeType.MIGRERING
-                    )
+                        VedtaksperiodeType.MIGRERING,
+                    ),
                 )
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
@@ -179,8 +179,8 @@ class ValiderOmregningServiceTest {
                         til,
                         Månedsperiode(fra, til),
                         AktivitetType.IKKE_AKTIVITETSPLIKT,
-                        VedtaksperiodeType.MIGRERING
-                    )
+                        VedtaksperiodeType.MIGRERING,
+                    ),
                 )
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
@@ -204,8 +204,8 @@ class ValiderOmregningServiceTest {
                         til,
                         Månedsperiode(fra, til),
                         AktivitetType.MIGRERING,
-                        VedtaksperiodeType.HOVEDPERIODE
-                    )
+                        VedtaksperiodeType.HOVEDPERIODE,
+                    ),
                 )
 
             val vedtak = innvilge(VedtaksperiodeDto(fra, til, Månedsperiode(fra, til), aktivitet, periodeType))
@@ -230,8 +230,8 @@ class ValiderOmregningServiceTest {
                         til,
                         Månedsperiode(fra, til),
                         AktivitetType.MIGRERING,
-                        VedtaksperiodeType.HOVEDPERIODE
-                    )
+                        VedtaksperiodeType.HOVEDPERIODE,
+                    ),
                 )
 
             val vedtak =
@@ -254,8 +254,8 @@ class ValiderOmregningServiceTest {
                         til,
                         Månedsperiode(fra, til),
                         AktivitetType.MIGRERING,
-                        VedtaksperiodeType.HOVEDPERIODE
-                    )
+                        VedtaksperiodeType.HOVEDPERIODE,
+                    ),
                 )
 
             val vedtak = InnvilgelseOvergangsstønad(null, null, listOf())
@@ -295,9 +295,9 @@ class ValiderOmregningServiceTest {
                         fra,
                         Månedsperiode(fra, fra),
                         AktivitetType.IKKE_AKTIVITETSPLIKT,
-                        VedtaksperiodeType.SANKSJON
+                        VedtaksperiodeType.SANKSJON,
                     ),
-                    VedtaksperiodeDto(andrePeriodeFra, til, Månedsperiode(andrePeriodeFra, til), aktivitet, periodeType)
+                    VedtaksperiodeDto(andrePeriodeFra, til, Månedsperiode(andrePeriodeFra, til), aktivitet, periodeType),
                 )
 
             val vedtak =
@@ -320,15 +320,15 @@ class ValiderOmregningServiceTest {
                         fraOgMed = LocalDate.of(2022, 4, 1),
                         tilOgMed = LocalDate.of(2022, 4, 30),
                         samordningsfradrag = 5000,
-                        beløp = 14950
+                        beløp = 14950,
                     ),
                     lagAndelTilkjentYtelse(
                         fraOgMed = LocalDate.of(2022, 5, 1),
                         tilOgMed = LocalDate.of(2022, 8, 30),
                         samordningsfradrag = 5000,
-                        beløp = if (medRiktigBeløp) 15902 else 0
-                    )
-                )
+                        beløp = if (medRiktigBeløp) 15902 else 0,
+                    ),
+                ),
             )
     }
 
