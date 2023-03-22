@@ -15,9 +15,9 @@ import java.util.UUID
 class FremleggsoppgaveController(private val fremleggspppgaveService: FremleggsoppgaveService) {
 
     @GetMapping("/{behandlingid}")
-    fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
+    fun hentFremleggsoppgaveForInntekt(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
         val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
-        val opprettFremleggsoppgave = fremleggsOppgave?.let { it.opprettFremleggsoppgave } ?: null
+        val opprettFremleggsoppgave = fremleggsOppgave?.let { it.inntekt } ?: null
         val kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid)
         return Ressurs.success(
             FremleggsoppgaveDto(

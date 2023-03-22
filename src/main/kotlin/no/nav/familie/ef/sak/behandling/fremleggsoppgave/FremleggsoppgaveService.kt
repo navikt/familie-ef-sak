@@ -20,11 +20,11 @@ class FremleggsoppgaveService(
     fun opprettEllerErstattFremleggsoppgave(behandlingId: UUID, opprettFremleggsoppgave: Boolean) {
         when (fremleggsoppgaveReporitory.existsById(behandlingId)) {
             true -> fremleggsoppgaveReporitory.update(
-                Fremleggsoppgave(behandlingId = behandlingId, opprettFremleggsoppgave = opprettFremleggsoppgave)
+                Fremleggsoppgave(behandlingId = behandlingId, inntekt = opprettFremleggsoppgave)
             )
 
             false -> fremleggsoppgaveReporitory.insert(
-                Fremleggsoppgave(behandlingId = behandlingId, opprettFremleggsoppgave = opprettFremleggsoppgave)
+                Fremleggsoppgave(behandlingId = behandlingId, inntekt = opprettFremleggsoppgave)
             )
         }
     }

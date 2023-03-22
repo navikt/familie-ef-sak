@@ -6,5 +6,5 @@ import java.util.UUID
 data class Fremleggsoppgave(
     @Id
     val behandlingId: UUID,
-    val opprettFremleggsoppgave: Boolean
+    val inntekt: Boolean
 )
