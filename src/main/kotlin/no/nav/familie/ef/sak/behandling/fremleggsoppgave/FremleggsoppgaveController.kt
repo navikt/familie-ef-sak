@@ -14,14 +14,17 @@ import java.util.UUID
 @ProtectedWithClaims(issuer = "azuread")
 class FremleggsoppgaveController(private val fremleggspppgaveService: FremleggsoppgaveService) {
 
-    @GetMapping("{behandlingid}/kan-opprettes")
-    fun kanOppretteFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<Boolean> {
-        return Ressurs.success(fremleggspppgaveService.kanOpprettes(behandlingid))
-    }
-
     @GetMapping("/{behandlingid}")
     fun hentFremleggsoppgave(@PathVariable behandlingid: UUID): Ressurs<FremleggsoppgaveDto?> {
-        return Ressurs.success(fremleggspppgaveService.hentFremleggsoppgave(behandlingid)?.tilDto())
+        val fremleggsOppgave = fremleggspppgaveService.hentFremleggsoppgave(behandlingid)
+        val opprettFremleggsoppgave = fremleggsOppgave?.let { it.opprettFremleggsoppgave } ?: null
+        val kanOppretteFremleggsoppgave = fremleggspppgaveService.kanOpprettes(behandlingid)
+        return Ressurs.success(
+            FremleggsoppgaveDto(
+                skalOpprettFremleggsoppgave = opprettFremleggsoppgave,
+                kanOppretteFremleggsoppgave = kanOppretteFremleggsoppgave
+            )
+        )
     }
 
     @PostMapping("/{behandlingid}/inntekt/{skalopprette}")

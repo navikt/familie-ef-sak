@@ -1,9 +1,6 @@
 package no.nav.familie.ef.sak.behandling.fremleggsoppgave
 
-class FremleggsoppgaveDto(
-    val opprettFremleggsoppgave: Boolean
+data class FremleggsoppgaveDto(
+    val skalOpprettFremleggsoppgave: Boolean?,
+    val kanOppretteFremleggsoppgave: Boolean
 )
-
-fun Fremleggsoppgave.tilDto(): FremleggsoppgaveDto {
-    return FremleggsoppgaveDto(this.opprettFremleggsoppgave)
-}
