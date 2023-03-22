@@ -9,7 +9,7 @@ import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.ef.sak.tilkjentytelse.domain.AndelTilkjentYtelse
 import no.nav.familie.ef.sak.tilkjentytelse.domain.TilkjentYtelse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import org.springframework.stereotype.Component
 
@@ -19,7 +19,7 @@ class PeriodeService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseService: TilkjentYtelseService,
-    private val infotrygdService: InfotrygdService,
+    private val infotrygdService: InfotrygdService
 ) {
 
     fun hentPerioderFraEfOgInfotrygd(personIdent: String): InternePerioder {
@@ -29,16 +29,16 @@ class PeriodeService(
         return InternePerioder(
             overgangsstønad = slåSammenPerioder(
                 hentPerioderFraEf(personIdenter, StønadType.OVERGANGSSTØNAD),
-                perioderFraReplika.overgangsstønad,
+                perioderFraReplika.overgangsstønad
             ),
             barnetilsyn = slåSammenPerioder(
                 hentPerioderFraEf(personIdenter, StønadType.BARNETILSYN),
-                perioderFraReplika.barnetilsyn,
+                perioderFraReplika.barnetilsyn
             ),
             skolepenger = slåSammenPerioder(
                 hentPerioderFraEf(personIdenter, StønadType.SKOLEPENGER),
-                perioderFraReplika.skolepenger,
-            ),
+                perioderFraReplika.skolepenger
+            )
         )
     }
 
@@ -79,7 +79,7 @@ private fun AndelTilkjentYtelse.tilInternPeriode(): InternPeriode = InternPeriod
     stønadFom = this.stønadFom,
     stønadTom = this.stønadTom,
     opphørsdato = null,
-    datakilde = PeriodeOvergangsstønad.Datakilde.EF,
+    datakilde = Datakilde.EF
 )
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
@@ -92,5 +92,5 @@ fun InfotrygdPeriode.tilInternPeriode(): InternPeriode = InternPeriode(
     stønadFom = this.stønadFom,
     stønadTom = this.stønadTom,
     opphørsdato = this.opphørsdato,
-    datakilde = PeriodeOvergangsstønad.Datakilde.INFOTRYGD,
+    datakilde = Datakilde.INFOTRYGD
 )

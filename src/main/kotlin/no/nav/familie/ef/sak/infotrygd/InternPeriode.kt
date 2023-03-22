@@ -1,12 +1,12 @@
 package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.Datakilde
 import java.time.LocalDate
 
 data class InternePerioder(
     val overgangsstønad: List<InternPeriode>,
     val barnetilsyn: List<InternPeriode>,
-    val skolepenger: List<InternPeriode>,
+    val skolepenger: List<InternPeriode>
 )
 
 /**
@@ -14,7 +14,7 @@ data class InternePerioder(
  */
 data class EfInternPerioder(
     val startdato: LocalDate,
-    val internperioder: List<InternPeriode>,
+    val internperioder: List<InternPeriode>
 )
 
 /**
@@ -30,7 +30,7 @@ data class InternPeriode(
     val stønadFom: LocalDate,
     val stønadTom: LocalDate,
     val opphørsdato: LocalDate?,
-    val datakilde: PeriodeOvergangsstønad.Datakilde,
+    val datakilde: Datakilde
 ) {
 
     fun erFullOvergangsstønad(): Boolean = this.inntektsreduksjon == 0 && this.samordningsfradrag == 0
